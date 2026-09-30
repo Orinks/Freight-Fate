@@ -8306,13 +8306,6 @@
             "spoken": "Passing Northfield"
           },
           {
-            "name": "Ben and Jerry's",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 150.0,
-            "spoken": "Billboard: Waterbury is ahead, home to the Ben and Jerry's factory tour. The ice cream is made here, and retired flavors rest in a real graveyard with little headstones. The samples are free, but the tombstones are emotionally complicated."
-          },
-          {
             "name": "The Smallest Capital",
             "category": "highway_marker",
             "kind": "point",
@@ -16280,6 +16273,16 @@
             "spoken": "Entering LaFayette"
           },
           {
+            "name": "Dinosaur Bar-B-Que",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.0,
+            "spoken": "Billboard: Central New York barbecue is ahead. Dinosaurs are extinct, but apparently they left enough sauce behind to open several restaurants.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Nedrow",
             "at_mi": 67.6,
             "off_mi": 0.46,
@@ -17794,6 +17797,16 @@
             "spoken": "Passing North Norwich"
           },
           {
+            "name": "Cooperstown",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.8,
+            "spoken": "Billboard: Turn off for Cooperstown and the Baseball Hall of Fame. This lakeside village is where the game was supposedly born and where its immortals are enshrined in bronze.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "New Berlin",
             "at_mi": 56.0,
             "off_mi": 0.01,
@@ -17817,13 +17830,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158505342, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sherburne"
-          },
-          {
-            "name": "Cooperstown",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 60.0,
-            "spoken": "Billboard: Turn off for Cooperstown and the Baseball Hall of Fame. This lakeside village is where the game was supposedly born and where its immortals are enshrined in bronze."
           },
           {
             "name": "Edmeston",
@@ -17896,13 +17902,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158605826, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Waterville"
-          },
-          {
-            "name": "Dinosaur Bar-B-Que",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 80.0,
-            "spoken": "Billboard: Central New York barbecue is ahead. Dinosaurs are extinct, but apparently they left enough sauce behind to open several restaurants."
           },
           {
             "name": "Marshall",

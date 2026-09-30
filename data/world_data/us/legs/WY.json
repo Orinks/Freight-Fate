@@ -19092,6 +19092,16 @@
             "spoken": "Passing Granger"
           },
           {
+            "name": "Little America (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 306.0,
+            "spoken": "Billboard: Little America, ahead. Ice cream, cheap gas, and a very large sign about it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lyman",
             "at_mi": 320.9,
             "off_mi": 2.74,
@@ -27930,13 +27940,6 @@
             "spoken": "Passing Superior"
           },
           {
-            "name": "Little America",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 100.0,
-            "spoken": "Billboard: Little America is ahead, a vast travel plaza in the middle of nowhere. A man who nearly froze here in a blizzard built it, a giant penguin guards it, and the ice cream cones are famously cheap."
-          },
-          {
             "name": "North Rock Springs",
             "at_mi": 107.0,
             "off_mi": 4.53,
@@ -34945,6 +34948,16 @@
             "spoken": "Entering James Town"
           },
           {
+            "name": "Little America (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: Little America, ahead. Ice cream, cheap gas, and a very large sign about it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Blacks Fork River",
             "category": "river",
             "kind": "point",
@@ -34959,6 +34972,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151498482, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Granger"
+          },
+          {
+            "name": "Little America (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.0,
+            "spoken": "Billboard: Little America, ahead. Ice cream, cheap gas, and a very large sign about it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lyman",

@@ -2209,7 +2209,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Astoria is where they filmed The Goonies and Kindergarten Cop. The oldest American town west of the Rockies climbs a hill toward a tall column you can climb from the inside."
+            "spoken": "Billboard: Astoria is where they filmed The Goonies and Kindergarten Cop. The oldest American town west of the Rockies climbs a hill toward a tall column you can climb from the inside.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "John Day River",
@@ -2217,13 +2220,6 @@
             "kind": "point",
             "at_mi": 12.2,
             "spoken": "Crossing the John Day River"
-          },
-          {
-            "name": "The Longest Beach",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 20.0,
-            "spoken": "Billboard: The Long Beach Peninsula has a ribbon of hard sand you can drive on and one of the longest continuous beaches in the country. It also has a museum of things washed ashore and a giant frying pan, in case the ocean was not enough."
           },
           {
             "name": "Cathlamet",
@@ -22376,6 +22372,16 @@
             "spoken": "Crossing the Williamson River"
           },
           {
+            "name": "Crater Lake",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.0,
+            "spoken": "Billboard: Crater Lake is ahead and uphill. The deepest lake in the country fills the blasted crater of a fallen volcano and glows an impossible blue. There is nothing else like it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Crescent",
             "at_mi": 86.2,
             "off_mi": 7.62,
@@ -26202,13 +26208,6 @@
             "kind": "zone",
             "at_mi": 42.1,
             "spoken": "Entering Fremont-Winema National Forest"
-          },
-          {
-            "name": "Crater Lake",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 55.0,
-            "spoken": "Billboard: Crater Lake is ahead and uphill. The deepest lake in the country fills the blasted crater of a fallen volcano and glows an impossible blue. There is nothing else like it."
           }
         ],
         "speed_limits": [
@@ -27808,7 +27807,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Newport is home to the Oregon Coast Aquarium, where Keiko, the orca from Free Willy, once lived before they set him free for real."
+            "spoken": "Billboard: Newport is home to the Oregon Coast Aquarium, where Keiko, the orca from Free Willy, once lived before they set him free for real.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Yaquina River",

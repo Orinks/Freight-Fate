@@ -9139,13 +9139,6 @@
             "spoken": "Passing Bernard"
           },
           {
-            "name": "Is This Heaven?",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 55.0,
-            "spoken": "Billboard: The Field of Dreams is ahead at Dyersville. The baseball diamond carved from a cornfield for the movie is still here and still mowed. Is this heaven? No, it is Iowa."
-          },
-          {
             "name": "Peosta",
             "at_mi": 59.7,
             "off_mi": 5.58,
@@ -39416,6 +39409,16 @@
             "kind": "point",
             "at_mi": 58.3,
             "spoken": "Crossing the North Fork Maquoketa River"
+          },
+          {
+            "name": "Is This Heaven?",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.9,
+            "spoken": "Billboard: The Field of Dreams is ahead at Dyersville. The baseball diamond carved from a cornfield for the movie is still here and still mowed. Is this heaven? No, it is Iowa.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "New Vienna",

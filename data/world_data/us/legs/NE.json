@@ -5571,7 +5571,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Kearney has a museum built as a giant arch over the entire interstate. It tells the story of wagon trains, the Pony Express, and the railroad, all of which followed this river valley west."
+            "spoken": "Billboard: Kearney has a museum built as a giant arch over the entire interstate. It tells the story of wagon trains, the Pony Express, and the railroad, all of which followed this river valley west.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Platte River",
@@ -27739,8 +27742,11 @@
             "name": "Great Platte River Road Archway",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 180.0,
-            "spoken": "Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it."
+            "at_mi": 171.0,
+            "spoken": "Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Elm Creek",
@@ -27761,6 +27767,16 @@
             "spoken": "Passing Overton"
           },
           {
+            "name": "Pony Express Station",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 236.0,
+            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sod House Museum",
             "category": "museum",
             "kind": "point",
@@ -27777,13 +27793,6 @@
             "spoken": "Passing Gothenburg"
           },
           {
-            "name": "Pony Express Station",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 250.0,
-            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west."
-          },
-          {
             "name": "Maxwell",
             "at_mi": 265.0,
             "off_mi": 1.75,
@@ -27796,8 +27805,11 @@
             "name": "Golden Spike Tower",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 280.0,
-            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch ten thousand rail cars a day being sorted like a giant toy set."
+            "at_mi": 271.0,
+            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Hershey",
@@ -27852,18 +27864,14 @@
             "spoken": "Passing Lodgepole"
           },
           {
-            "name": "Carhenge",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 390.0,
-            "spoken": "Billboard: Carhenge is ahead in western Nebraska. Vintage cars are arranged like Stonehenge and painted gray, yet the result is still easier to understand than most modern roundabouts."
-          },
-          {
             "name": "The Original Cabela's",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 410.0,
-            "spoken": "Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop."
+            "at_mi": 387.0,
+            "spoken": "Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Dix",

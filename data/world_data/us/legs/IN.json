@@ -32425,6 +32425,26 @@
             "spoken": "Passing Martinsville"
           },
           {
+            "name": "World's Largest Rocking Chair (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 105.5,
+            "spoken": "Billboard: World's largest rocking chair. You may not sit in it. Next exit.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "World's Largest Rocking Chair (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 108.5,
+            "spoken": "Billboard: World's largest rocking chair. You may not sit in it. Next exit.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Greenup",
             "at_mi": 118.2,
             "off_mi": 0.47,
@@ -46598,6 +46618,16 @@
             "spoken": "Crossing the North Fork Embarras River"
           },
           {
+            "name": "Big Things in a Small Town",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.1,
+            "spoken": "Billboard: Casey is ahead, a tiny town that decided to build the world's largest things. Its main street holds the largest wind chime, rocking chair, mailbox, golf tee, and wooden shoes, because one record was not enough.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Martinsville",
             "at_mi": 29.7,
             "off_mi": 1.52,
@@ -46616,11 +46646,14 @@
             "spoken": "Passing Westfield"
           },
           {
-            "name": "Big Things in a Small Town",
+            "name": "World's Largest Rocking Chair (eastbound)",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 37.0,
-            "spoken": "Billboard: Casey is ahead, a tiny town that decided to build the world's largest things. Its main street holds the largest wind chime, rocking chair, mailbox, golf tee, and wooden shoes, because one record was not enough."
+            "spoken": "Billboard: World's largest rocking chair. You may not sit in it. Next exit.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Embarras River",

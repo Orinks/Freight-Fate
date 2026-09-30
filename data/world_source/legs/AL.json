@@ -835,6 +835,16 @@
             "spoken": "Passing Gallant"
           },
           {
+            "name": "Noccalula Falls",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.5,
+            "spoken": "Billboard: Gadsden is home to Noccalula Falls, a ninety-foot waterfall in a city park. A bronze Cherokee maiden stands at the brink, recalling an old and sorrowful legend.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Southside",
             "at_mi": 54.7,
             "off_mi": 5.96,
@@ -878,13 +888,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153570577, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Egypt"
-          },
-          {
-            "name": "Noccalula Falls",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 58.0,
-            "spoken": "Billboard: Gadsden is home to Noccalula Falls, a ninety-foot waterfall in a city park. A bronze Cherokee maiden stands at the brink, recalling an old and sorrowful legend."
           },
           {
             "name": "Reece City",
@@ -12801,13 +12804,6 @@
             "spoken": "Passing Vincent"
           },
           {
-            "name": "Talladega",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 40.0,
-            "spoken": "Billboard: Talladega is ahead, home to the biggest and fastest superspeedway in NASCAR. Cars run flat out in a pack around two and a half miles of high banking, and a movie taught the nation that if you ain't first, you're last."
-          },
-          {
             "name": "Coosa River",
             "category": "river",
             "kind": "point",
@@ -21935,7 +21931,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 105.0,
-            "spoken": "Billboard: Tallahassee is ahead, where five old plantation roads run for miles under live oaks that meet overhead. The state does its governing down here in the shade, and the canopy roads are protected by law."
+            "spoken": "Billboard: Tallahassee is ahead, where nine old canopy roads run for miles under live oaks that meet overhead. The state does its governing down here in the shade, and the canopy roads are protected by law.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Woodville",
@@ -33822,7 +33821,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Mobile is the birthplace of American Mardi Gras. It started here, not in New Orleans, back in the early seventeen hundreds. Mobile brought the floats, the moon pies thrown from them, and the whole raucous carnival to America first."
+            "spoken": "Billboard: Mobile is the birthplace of American Mardi Gras. It started here, not in New Orleans, back in the early seventeen hundreds. Mobile brought the floats, the moon pies thrown from them, and the whole raucous carnival to America first.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Chickasaw",
@@ -35661,13 +35663,6 @@
             "spoken": "Passing Daphne"
           },
           {
-            "name": "USS Alabama",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 4.0,
-            "spoken": "Billboard: Mobile Bay is home to the battleship U S S Alabama, a steel giant of the Second World War. You can walk it from bow to gun turret."
-          },
-          {
             "name": "Chickasaw",
             "at_mi": 5.9,
             "off_mi": 1.06,
@@ -35702,6 +35697,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153556569, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Creola"
+          },
+          {
+            "name": "USS Alabama",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Mobile Bay is home to the battleship U S S Alabama, a steel giant of the Second World War. You can walk it from bow to gun turret.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Semmes",
@@ -45596,18 +45601,21 @@
             "spoken": "Passing Pike Road"
           },
           {
+            "name": "Troy",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.0,
+            "spoken": "Billboard: Troy University is ahead, home of the Trojans and a surprisingly world-class art collection out among the pines.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Conecuh River",
             "category": "river",
             "kind": "point",
             "at_mi": 45.5,
             "spoken": "Crossing the Conecuh River"
-          },
-          {
-            "name": "Troy",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 47.0,
-            "spoken": "Billboard: Troy University is ahead, home of the Trojans and a surprisingly world-class art collection out among the pines."
           },
           {
             "name": "Goshen",
@@ -49719,18 +49727,21 @@
             "spoken": "Passing Ariton"
           },
           {
+            "name": "The Boll Weevil Monument",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.5,
+            "spoken": "Billboard: Enterprise, west of here, built a monument to the boll weevil, the bug that ate its cotton. The disaster forced farmers to plant peanuts, peanuts made them rich, and gratitude to a pest became a statue.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fort Novosel",
             "category": "highway_marker",
             "kind": "point",
             "at_mi": 30.75,
             "spoken": "You are passing Ozark beside Fort Novosel, the home of Army Aviation, where every Army helicopter pilot learns to fly."
-          },
-          {
-            "name": "The Boll Weevil Monument",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 32.94,
-            "spoken": "Billboard: Enterprise, west of here, built a monument to the boll weevil, the bug that ate its cotton. The disaster forced farmers to plant peanuts, peanuts made them rich, and gratitude to a pest became a statue."
           },
           {
             "name": "Ozark",
@@ -49776,6 +49787,16 @@
             "spoken": "Passing Pinckard"
           },
           {
+            "name": "Peanut Capital of the World",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.5,
+            "spoken": "Billboard: Dothan is the Peanut Capital of the World. A quarter of the nation's peanuts pass through here, and downtown is decorated with giant painted peanuts wearing hats.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Midland City",
             "at_mi": 46.78,
             "off_mi": 0.71,
@@ -49808,13 +49829,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153790689, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Grimes"
-          },
-          {
-            "name": "Peanut Capital of the World",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 50.51,
-            "spoken": "Billboard: Dothan is the Peanut Capital of the World. A quarter of the nation's peanuts pass through here, and downtown is decorated with giant painted peanuts wearing hats."
           },
           {
             "name": "Headland",

@@ -6,24 +6,32 @@
 //! after leaving Meridian. These drive each direction through the two
 //! countdowns and check every sign is read on the way to its attraction.
 
+use ff_core::data::world_models::Route;
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::vehicle::TruckState;
 
 use crate::sim_support::{route_from_cities, weather, world};
 
-fn trip_through(cities: &[&str]) -> Trip {
-    let world = world();
+fn trip_with(opts: TripOptions, route: Route) -> Trip {
     let mut truck = TruckState::default();
     truck.transmission.automatic = true;
     Trip::new(
-        route_from_cities(world, cities),
+        route,
         truck,
         weather("great_lakes", 1),
         TripOptions {
-            world: Some(world),
-            ..TripOptions::seeded(1)
+            world: Some(world()),
+            ..opts
         },
     )
+}
+
+fn trip_on(route: Route) -> Trip {
+    trip_with(TripOptions::seeded(1), route)
+}
+
+fn trip_through(cities: &[&str]) -> Trip {
+    trip_on(route_from_cities(world(), cities))
 }
 
 /// The placed signs whose name starts with `series`, in the order heard.
@@ -124,4 +132,136 @@ fn test_a_placed_sign_is_not_read_from_the_far_side_of_the_road() {
     let ranch = countdown(&trip, "Cadillac Ranch");
     assert_eq!(ranch.len(), 1, "{ranch:?}");
     assert!(ranch[0].0 < 10.0, "{ranch:?}");
+}
+
+/// Lines that used to be read anywhere in their state, now placed at the one
+/// place they name: heard once each way past it.
+#[test]
+fn test_moved_pool_lines_are_heard_at_their_place_both_ways() {
+    for (series, a, b) in [
+        ("Cabazon Dinosaurs (", "riverside_ca_us", "indio_ca_us"),
+        ("Alien Fresh Jerky (", "barstow_ca_us", "las_vegas_nv_us"),
+        (
+            "Little America (",
+            "rock_springs_wy_us",
+            "salt_lake_city_ut_us",
+        ),
+        ("The Grapevine (", "bakersfield_ca_us", "los_angeles_ca_us"),
+        ("Hope, Arkansas (", "little_rock_ar_us", "texarkana_ar_us"),
+        (
+            "World's Largest Rocking Chair (",
+            "indianapolis_in_us",
+            "st_louis_mo_us",
+        ),
+    ] {
+        for cities in [[a, b], [b, a]] {
+            let heard = countdown(&trip_through(&cities), series);
+            assert_eq!(heard.len(), 1, "{cities:?}: {heard:?}");
+        }
+    }
+}
+
+/// A placed billboard the landmark spacing thins away is authored copy nobody
+/// ever hears. Every one must survive a drive down its own leg in the
+/// direction it faces, and none may stand in the four states that ban
+/// commercial billboards.
+#[test]
+fn test_every_placed_billboard_is_heard_on_its_own_leg() {
+    let codes: std::collections::HashMap<_, _> = world()
+        .cities
+        .values()
+        .map(|c| (c.state.clone(), c.state_code.clone()))
+        .collect();
+    let mut silent = Vec::new();
+    let mut banned = Vec::new();
+    for leg in &world().legs {
+        for forward in [true, false] {
+            let names: Vec<&str> = leg
+                .landmarks()
+                .iter()
+                .filter(|l| l.category == "billboard_sign" && l.applies_to_direction(forward))
+                .map(|l| l.name.as_str())
+                .collect();
+            if names.is_empty() {
+                continue;
+            }
+            let (a, b) = if forward {
+                (&leg.a, &leg.b)
+            } else {
+                (&leg.b, &leg.a)
+            };
+            let trip = trip_on(Route::new(vec![a.clone(), b.clone()], vec![leg.clone()]));
+            for name in names {
+                let suffix = format!(":{name}");
+                match trip.landmarks.iter().find(|c| c.key.ends_with(&suffix)) {
+                    None => silent.push(format!("{a} -> {b}: {name}")),
+                    Some(callout) => {
+                        let state = trip.state_at(Some(callout.at_mi));
+                        let code = codes.get(&state).cloned().unwrap_or(state);
+                        if ["ME", "VT", "AK", "HI"].contains(&code.as_str()) {
+                            banned.push(format!("{a} -> {b}: {name} in {code}"));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    assert!(
+        silent.is_empty(),
+        "{} placed billboards are never heard:\n{}",
+        silent.len(),
+        silent.join("\n")
+    );
+    assert!(
+        banned.is_empty(),
+        "billboards in ban states:\n{}",
+        banned.join("\n")
+    );
+}
+
+/// Bowlin's The Thing counts down from both sides of Exit 322, and a rig with
+/// a trailer can pull in to see it but only a bobtail can fuel there.
+#[test]
+fn test_the_thing_counts_down_both_ways_and_fuels_bobtails_only() {
+    for (cities, series, count) in [
+        (
+            ["las_cruces_nm_us", "tucson_az_us"],
+            "The Thing (countdown",
+            3,
+        ),
+        (["el_paso_tx_us", "tucson_az_us"], "The Thing (countdown", 3),
+        (
+            ["tucson_az_us", "las_cruces_nm_us"],
+            "The Thing (eastbound",
+            2,
+        ),
+        (["tucson_az_us", "el_paso_tx_us"], "The Thing (eastbound", 2),
+    ] {
+        let trip = trip_through(&cities);
+        let visit = trip
+            .stops
+            .iter()
+            .find(|s| s.name == "The Thing")
+            .unwrap_or_else(|| panic!("{cities:?}: no stop at The Thing"));
+        assert!(!visit.actions.iter().any(|a| a == "fuel"), "{cities:?}");
+        let pumps = |trip: &Trip| trip.stops.iter().any(|s| s.name == "Shell at The Thing");
+        assert!(!pumps(&trip), "{cities:?}: a trailer was offered the pumps");
+        let bobtail = trip_with(
+            TripOptions {
+                bobtail: true,
+                ..TripOptions::seeded(1)
+            },
+            route_from_cities(world(), &cities),
+        );
+        assert!(
+            pumps(&bobtail),
+            "{cities:?}: a bobtail was not offered the pumps"
+        );
+
+        let signs = countdown(&trip, series);
+        assert_eq!(signs.len(), count, "{cities:?}: {signs:?}");
+        for (at, _, text) in &signs {
+            assert!(*at < visit.at_mi, "{cities:?}: {text} read after the exit");
+        }
+    }
 }

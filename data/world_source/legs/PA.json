@@ -3247,6 +3247,16 @@
             "spoken": "Entering Mountville"
           },
           {
+            "name": "The Shoe House",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.6,
+            "spoken": "Billboard: The Haines Shoe House is ahead. This five-story house is shaped like a work boot and was built by a shoe salesman who understood that subtlety does not sell footwear. These days you can rent it for the night.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Columbia",
             "at_mi": 76.2,
             "off_mi": 0.55,
@@ -26470,13 +26480,6 @@
             "spoken": "Passing Royalton"
           },
           {
-            "name": "The Shoe House",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 25.0,
-            "spoken": "Billboard: The Haines Shoe House is ahead. This five-story house is shaped like a work boot and was built by a shoe salesman who understood that subtlety does not sell footwear."
-          },
-          {
             "name": "Mount Gretna",
             "at_mi": 25.9,
             "off_mi": 1.3,
@@ -34552,6 +34555,16 @@
             "spoken": "Entering Highspire"
           },
           {
+            "name": "Chocolate Town",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.2,
+            "spoken": "Billboard: Hershey is ahead, the sweetest place on Earth. The chocolate bar built this town, where the streetlights are shaped like Kisses and the air itself can smell like cocoa.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Royalton",
             "at_mi": 11.4,
             "off_mi": 1.56,
@@ -34559,13 +34572,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158392371, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Royalton"
-          },
-          {
-            "name": "Chocolate Town",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 20.0,
-            "spoken": "Billboard: Hershey is ahead, the sweetest place on Earth. The chocolate bar built this town, where the streetlights are shaped like Kisses and the air itself can smell like cocoa."
           },
           {
             "name": "State Game Lands Number 145",

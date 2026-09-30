@@ -6091,13 +6091,6 @@
             "spoken": "Passing Genoa Charter Township"
           },
           {
-            "name": "Hell, Michigan",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 25.0,
-            "spoken": "Billboard: Turn off for Hell, Michigan. You can get married, mail a postcard, buy a souvenir, and announce that Hell froze over when you visit in winter."
-          },
-          {
             "name": "Oceola Township",
             "at_mi": 25.1,
             "off_mi": 4.55,
@@ -6105,6 +6098,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 6268376497, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Oceola Township"
+          },
+          {
+            "name": "Hell, Michigan",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.3,
+            "spoken": "Billboard: Turn off for Hell, Michigan. You can get married, mail a postcard, buy a souvenir, and announce that Hell froze over when you visit in winter.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Fowlerville",
@@ -9738,8 +9741,11 @@
             "name": "The Big House",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 40.0,
-            "spoken": "Billboard: Ann Arbor is home to Michigan and the Big House, the largest stadium in the country. More than a hundred thousand fans wear maize and blue and sing The Victors."
+            "at_mi": 41.5,
+            "spoken": "Billboard: Ann Arbor is home to Michigan and the Big House, the largest stadium in the country. More than a hundred thousand fans wear maize and blue and sing The Victors.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Scio Township",
@@ -19667,7 +19673,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Detroit is the Motor City that put the world on wheels and gave it Motown. From a little house called Hitsville came the Supremes, the Temptations, Stevie Wonder, and the sound of young America."
+            "spoken": "Billboard: Detroit is the Motor City that put the world on wheels and gave it Motown. From a little house called Hitsville came the Supremes, the Temptations, Stevie Wonder, and the sound of young America.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Ecorse River",
@@ -26969,8 +26978,11 @@
             "name": "Bronner's CHRISTmas Wonderland",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 21.08,
-            "spoken": "Billboard: Frankenmuth is ahead, Michigan's Little Bavaria and home to Bronner's, the world's largest Christmas store. It stays open all year, covers several football fields, and glows like the North Pole in July."
+            "at_mi": 18.5,
+            "spoken": "Billboard: Frankenmuth is ahead, Michigan's Little Bavaria and home to Bronner's, the world's largest Christmas store. It stays open all year, covers several football fields, and glows like the North Pole in July.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Birch Run",

@@ -25038,13 +25038,6 @@
             "spoken": "Passing Brownstown"
           },
           {
-            "name": "World's Largest Rocking Chair",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 25.0,
-            "spoken": "Billboard: The world's largest rocking chair is ahead in Casey. It does not rock, because at that size rocking becomes a municipal emergency."
-          },
-          {
             "name": "Lincoln's Vandalia",
             "category": "billboard_sign",
             "kind": "point",

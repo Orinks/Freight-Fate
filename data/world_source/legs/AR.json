@@ -38552,6 +38552,16 @@
             "spoken": "Passing Perrytown"
           },
           {
+            "name": "Hope, Arkansas (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 110.0,
+            "spoken": "Billboard: Hope, Arkansas, next exit. Brennen Leigh wrote a song about running out of it. Fuel up before you do.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Washington",
             "at_mi": 110.7,
             "off_mi": 7.51,
@@ -38559,6 +38569,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151537635, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Washington"
+          },
+          {
+            "name": "Hope, Arkansas (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 113.1,
+            "spoken": "Billboard: Hope, Arkansas, next exit. Brennen Leigh wrote a song about running out of it. Fuel up before you do.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Fulton",

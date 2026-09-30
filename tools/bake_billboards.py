@@ -6,7 +6,7 @@ signs from a human-approved sheet at their attraction's real milepost. Reads a
 sheet (data/spider/signsheets/<corridor>.md): one block per sign --
 
     ### <name>
-    - treatment: billboard | landmark | skip
+    - treatment: billboard | landmark | remove | skip
     - leg: <from_slug> -> <to_slug>   (the direction the driver reads it)
     - at_mi: <float>                   (miles from <from_slug>)
     - spoken: <exact spoken text>
@@ -111,6 +111,22 @@ def merge_into_leg(leg: dict, rec: dict) -> None:
     lms.sort(key=lambda r: r["at_mi"])
 
 
+def remove_from_leg(legs_by_pair: dict, sign: dict) -> None:
+    """Delete a named billboard from a leg (`treatment: remove`): a sign that
+    stood on the wrong leg, or whose attraction has closed."""
+    a, b = (s.strip() for s in sign.get("leg", "").split("->", 1))
+    leg = legs_by_pair.get((a, b)) or legs_by_pair.get((b, a))
+    lms = (leg or {}).get("corridor", {}).get("landmarks", [])
+    kept = [
+        lm
+        for lm in lms
+        if not (lm.get("name") == sign["name"] and lm.get("category") == "billboard_sign")
+    ]
+    if leg is None or len(kept) == len(lms):
+        raise SystemExit(f"ERROR: no billboard {sign['name']!r} on {a} <-> {b} to remove")
+    lms[:] = kept
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--sheet", required=True)
@@ -123,6 +139,10 @@ def main() -> int:
     signs = parse_sheet(Path(a.sheet).read_text(encoding="utf-8"))
     baked = skipped = 0
     for sign in signs:
+        if sign.get("treatment", "").lower() == "remove":
+            remove_from_leg(legs_by_pair, sign)
+            print(f"  {'removed':14} {sign['leg']}  {sign['name']}")
+            continue
         built = sign_record(sign)
         if built is None:
             skipped += 1

@@ -2359,6 +2359,16 @@
             "spoken": "Passing Woodburn"
           },
           {
+            "name": "Kentucky's Giant Fork",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Billboard: A giant fork is ahead. Kentucky already had bourbon barrels and racehorses, so it apparently needed silverware tall enough to threaten low aircraft.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Franklin",
             "at_mi": 21.1,
             "off_mi": 3.02,
@@ -14835,13 +14845,6 @@
             "spoken": "Passing Jamestown"
           },
           {
-            "name": "Kentucky's Giant Fork",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 85.0,
-            "spoken": "Billboard: A giant fork is ahead. Kentucky already had bourbon barrels and racehorses, so it apparently needed silverware tall enough to threaten low aircraft."
-          },
-          {
             "name": "Edmonton",
             "at_mi": 94.0,
             "off_mi": 1.44,
@@ -14926,6 +14929,16 @@
             "spoken": "Crossing the Barren River"
           },
           {
+            "name": "The Corvette Sinkhole",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 136.0,
+            "spoken": "Billboard: Bowling Green is home to the Corvette. A sinkhole once opened under the museum floor and swallowed eight of them whole. They filled most of it in, but kept a window so you can still look down.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Plum Springs",
             "at_mi": 138.4,
             "off_mi": 1.1,
@@ -14933,13 +14946,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153512635, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Plum Springs"
-          },
-          {
-            "name": "The Corvette Sinkhole",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 140.0,
-            "spoken": "Billboard: Bowling Green is home to the Corvette. A sinkhole once opened under the museum floor and swallowed eight of them whole, so naturally they saved the hole."
           },
           {
             "name": "Woodburn",
@@ -16568,7 +16574,10 @@
             "category": "museum",
             "kind": "point",
             "at_mi": 77.9,
-            "spoken": "Norris Museum ahead"
+            "spoken": "Norris Museum ahead",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Norris",
@@ -16587,6 +16596,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154013998, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Clinton"
+          },
+          {
+            "name": "Museum of Appalachia (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.0,
+            "spoken": "Billboard: The Museum of Appalachia, next exit. More than thirty log buildings, rescued from across the mountains. Every one of them older than your truck.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Halls",

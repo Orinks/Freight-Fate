@@ -24597,6 +24597,18 @@
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           }
+        ],
+        "landmarks": [
+          {
+            "name": "Hole N' the Rock",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 152.0,
+            "spoken": "Billboard: Hole N' the Rock is ahead. It is a five-thousand-square-foot home blasted into sandstone, with souvenirs, animals, and punctuation that has survived every editor.",
+            "directions": [
+              "reverse"
+            ]
+          }
         ]
       },
       "stops": []

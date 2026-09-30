@@ -28900,8 +28900,11 @@
             "name": "The Blues Capital of Texas",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 147.0,
-            "spoken": "Billboard: Navasota is ahead, the Blues Capital of Texas. Mance Lipscomb played these porches for sixty years before anybody thought to bring a tape recorder, and the town has been making up for lost time ever since."
+            "at_mi": 133.0,
+            "spoken": "Billboard: Navasota is ahead, the Blues Capital of Texas. Mance Lipscomb played these porches for sixty years before anybody thought to bring a tape recorder, and the town has been making up for lost time ever since.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Millican",
@@ -49477,7 +49480,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: College Station is home to Texas A and M and the Twelfth Man. The Aggies stand for the entire game, bury their mascots near the stadium, and once built bonfires that touched the sky."
+            "spoken": "Billboard: College Station is home to Texas A and M and the Twelfth Man. The Aggies stand for the entire game, bury their mascots near the stadium, and once built bonfires that touched the sky.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kurten",
@@ -75798,15 +75804,11 @@
             "name": "Blue Whale of Catoosa",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 266.91,
-            "spoken": "Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant."
-          },
-          {
-            "name": "World's Largest Totem Pole",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 303.54,
-            "spoken": "Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did."
+            "at_mi": 312.0,
+            "spoken": "Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Arkansas River",
@@ -75814,6 +75816,16 @@
             "kind": "point",
             "at_mi": 318.3,
             "spoken": "Crossing the Arkansas River"
+          },
+          {
+            "name": "World's Largest Totem Pole",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 335.0,
+            "spoken": "Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "The Big Blue Whale's Cousin",
@@ -75835,8 +75847,11 @@
             "name": "Galena",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 366.34,
-            "spoken": "Billboard: Galena is ahead, an old Route sixty-six mining town where three states meet within a few miles. That rusty tow truck out front may look familiar if you have seen a certain cartoon."
+            "at_mi": 400.0,
+            "spoken": "Billboard: Galena is ahead, an old Route sixty-six mining town where three states meet within a few miles. That rusty tow truck out front may look familiar if you have seen a certain cartoon.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Redings Mill",
@@ -75851,22 +75866,11 @@
             "name": "Gay Parita",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 418.67,
-            "spoken": "Billboard: Gay Parita is ahead near Paris Springs. This lovingly rebuilt nineteen-thirties filling station, green dinosaur and all, survives because some folks simply refuse to let the old road die."
-          },
-          {
-            "name": "Lambert's Cafe",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 434.37,
-            "spoken": "Billboard: Lambert's Cafe is ahead near Springfield, home of the throwed rolls. Raise a hand and a waiter will throw a hot dinner roll clear across the room at you. Catch it; those are the rules."
-          },
-          {
-            "name": "Route Sixty-Six Car Museum",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 450.08,
-            "spoken": "Billboard: The Route Sixty-Six Car Museum is ahead near Springfield. It has chrome, fins, muscle, and enough polished paint to make your truck feel underdressed."
+            "at_mi": 456.0,
+            "spoken": "Billboard: Gay Parita is ahead near Paris Springs. This lovingly rebuilt nineteen-thirties filling station, green dinosaur and all, survives because some folks simply refuse to let the old road die.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Halltown",
@@ -75878,11 +75882,14 @@
             "spoken": "Entering Halltown"
           },
           {
-            "name": "Munger Moss Motel",
+            "name": "Route Sixty-Six Car Museum",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 465.78,
-            "spoken": "Billboard: The Munger Moss Motel is ahead in Lebanon, with a Route sixty-six neon sign the size of a house. It still glows every night for travelers who prefer the old way."
+            "at_mi": 477.0,
+            "spoken": "Billboard: The Route Sixty-Six Car Museum is ahead near Springfield. It has chrome, fins, muscle, and enough polished paint to make your truck feel underdressed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Strafford",
@@ -75894,13 +75901,6 @@
             "spoken": "Entering Strafford"
           },
           {
-            "name": "Uranus Fudge Factory",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 502.41,
-            "spoken": "Billboard: The best fudge in the world comes from Uranus. We did not name the town. Bring the kids, bring the jokes, and take the next exit."
-          },
-          {
             "name": "Phillipsburg",
             "at_mi": 525.12,
             "off_mi": 0.42,
@@ -75910,6 +75910,16 @@
             "spoken": "Entering Phillipsburg"
           },
           {
+            "name": "Munger Moss Motel",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 529.0,
+            "spoken": "Billboard: Lebanon is ahead, home of the Munger Moss Motel, a Route sixty-six classic. The town now keeps its house-sized neon sign.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Saint Robert",
             "at_mi": 567.51,
             "off_mi": 0.66,
@@ -75917,6 +75927,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151909089, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Saint Robert"
+          },
+          {
+            "name": "Uranus Fudge Factory",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 569.8,
+            "spoken": "Billboard: The best fudge in the world comes from Uranus. We did not name the town. Bring the kids, bring the jokes, and take the next exit.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Mark Twain National Forest",
@@ -75935,13 +75955,6 @@
             "spoken": "Entering Doolittle"
           },
           {
-            "name": "Meramec Caverns",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 586.14,
-            "spoken": "Billboard: Meramec Caverns is ahead, with five stories of underground rooms where Jesse James is said to have hidden. It has a gift shop now, because of course it does."
-          },
-          {
             "name": "Cuba",
             "at_mi": 613.15,
             "off_mi": 0.66,
@@ -75958,6 +75971,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151363637, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Bourbon"
+          },
+          {
+            "name": "Meramec Caverns",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 626.0,
+            "spoken": "Billboard: Meramec Caverns is ahead, with five stories of underground rooms where Jesse James is said to have hidden. It has a gift shop now, because of course it does.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Oak Grove Village",
@@ -90318,11 +90341,31 @@
             "spoken": "Passing Do\u00f1a Ana"
           },
           {
+            "name": "The Thing (countdown, sign one)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.3,
+            "spoken": "Billboard: What is it? The Thing? Mystery of the desert ahead. Two hundred miles to guess, and whatever you do, do not stop moving.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Stein's Pass",
             "category": "mountain_pass",
             "kind": "point",
             "at_mi": 177.8,
             "spoken": "Approaching Stein's Pass"
+          },
+          {
+            "name": "The Thing (countdown, sign two)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 192.2,
+            "spoken": "Billboard: The Thing. Still ahead, still a mystery, still a few dollars to find out. No officials of any type allowed -- if you're one, turn back now or hide your identity.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "San Simon",
@@ -90334,11 +90377,31 @@
             "spoken": "Entering San Simon"
           },
           {
+            "name": "The Thing (countdown, sign three)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 250.2,
+            "spoken": "Billboard: The Thing, next exit. You have wondered for two hundred miles. Do not drive past now. You made it. Will you survive?",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Dragoon Pass",
             "category": "mountain_pass",
             "kind": "point",
             "at_mi": 253.2,
             "spoken": "Approaching Dragoon Pass"
+          },
+          {
+            "name": "The Thing (eastbound, sign two)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 260.0,
+            "spoken": "Billboard: The Thing, the exit after the rest area. A few dollars, and you will finally know.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "San Pedro River",
@@ -90355,6 +90418,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150934158, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Corona de Tucson"
+          },
+          {
+            "name": "The Thing (eastbound, sign one)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 297.0,
+            "spoken": "Billboard: What is The Thing? Forty-five miles to find out. The people who know are not telling.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pascua Pueblo",
@@ -90931,6 +91004,50 @@
             }
           ],
           "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
+        },
+        {
+          "name": "The Thing",
+          "type": "truck_parking",
+          "at_mi": 252.5,
+          "source": "Bowlin's The Thing, 2631 North Johnson Road, Dragoon, Arizona, on I-10 at Exit 322 (bowlintc.com; NATSO, 'Stop and See The Thing at Bowlin Travel Center'). Read: museum, gift shop, Dairy Queen, Shell fuel with diesel. Assumed: a combination vehicle can pull into the lot to visit. Bowlin's lists no truck parking, so parking is limited and this is a visit stop, not a place to fuel with a trailer (owner, 2026-09-30). Mile marker derived from this leg's Exit 322 interchange record. Curated 2026-09-30.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break"
+          ],
+          "services": [
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 32.0312,
+          "lon": -110.051
+        },
+        {
+          "name": "Shell at The Thing",
+          "type": "fuel_station",
+          "at_mi": 252.5,
+          "source": "Shell fuel at Bowlin's The Thing, I-10 Exit 322 (bowlintc.com: self-serve Shell fuel, diesel sold). Truck access: no verified truck access; Bowlin's lists no truck parking or diesel lanes, so the pumps are bobtail_only per the truck-accessibility policy. Mile marker derived from this leg's Exit 322 interchange record. Curated 2026-09-30.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel"
+          ],
+          "directions": [
+            "both"
+          ],
+          "curation": "curated",
+          "vehicle_access": "bobtail_only",
+          "lat": 32.0312,
+          "lon": -110.051
         }
       ],
       "divided": true,
@@ -202458,15 +202575,21 @@
             "name": "Magnolia",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 3.0,
-            "spoken": "Billboard: Waco is home to Magnolia Market at the Silos. Chip and Joanna turned an old cotton mill into shiplap heaven, and the buses of shoppers have not stopped since."
+            "at_mi": 2.8,
+            "spoken": "Billboard: Waco is home to Magnolia Market at the Silos. Chip and Joanna turned an old cotton mill into shiplap heaven, and the buses of shoppers have not stopped since.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "The Home of Dr Pepper",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 5.0,
-            "spoken": "Billboard: Waco is the birthplace of Dr Pepper, the oldest major soft drink in America. It was mixed at a drugstore soda fountain here before Coke was even a gleam, and the museum occupies the old bottling plant."
+            "spoken": "Billboard: Waco is the birthplace of Dr Pepper, the oldest major soft drink in America. It was mixed at a drugstore soda fountain here before Coke was even a gleam, and the museum occupies the old bottling plant.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lacy Lakeview",

@@ -1008,7 +1008,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Cedar City hosts a Tony-winning Shakespeare festival in the red-rock desert. It is also the gateway to Zion, Bryce, and the pink cliffs of Cedar Breaks."
+            "spoken": "Billboard: Cedar City hosts a Tony-winning Shakespeare festival in the red-rock desert. It is also the gateway to Zion, Bryce, and the pink cliffs of Cedar Breaks.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Brian Head",
@@ -8758,13 +8761,6 @@
             "kind": "point",
             "at_mi": 14.6,
             "spoken": "Crossing the Colorado River"
-          },
-          {
-            "name": "Hole N' the Rock",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 15.0,
-            "spoken": "Billboard: Hole N' the Rock is ahead. It is a five-thousand-square-foot home blasted into sandstone, with souvenirs, animals, and punctuation that has survived every editor."
           },
           {
             "name": "McInnis Canyons National Conservation Area",
@@ -30409,6 +30405,16 @@
             "spoken": "Passing Lyman"
           },
           {
+            "name": "Little America (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 150.0,
+            "spoken": "Billboard: Little America, ahead. Ice cream, cheap gas, and a very large sign about it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Granger",
             "at_mi": 160.1,
             "off_mi": 4.29,
@@ -30416,6 +30422,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151498482, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Granger"
+          },
+          {
+            "name": "Little America (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 176.0,
+            "spoken": "Billboard: Little America, ahead. Ice cream, cheap gas, and a very large sign about it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "James Town",

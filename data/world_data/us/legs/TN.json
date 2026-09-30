@@ -1454,6 +1454,16 @@
             "spoken": "Passing Chickamauga"
           },
           {
+            "name": "Ruby Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.5,
+            "spoken": "Billboard: Ruby Falls, ahead in Chattanooga. A waterfall more than a thousand feet inside Lookout Mountain, named for the finder's wife. Beat that on your anniversary.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Collegedale",
             "at_mi": 14.1,
             "off_mi": 10.42,
@@ -3592,6 +3602,16 @@
             "spoken": "Passing Ringgold"
           },
           {
+            "name": "Ruby Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.2,
+            "spoken": "Billboard: Ruby Falls, ahead in Chattanooga. A waterfall more than a thousand feet inside Lookout Mountain, named for the finder's wife. Beat that on your anniversary.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Harrison",
             "at_mi": 15.2,
             "off_mi": 3.13,
@@ -3680,6 +3700,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154337533, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Niota"
+          },
+          {
+            "name": "The Lost Sea (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.8,
+            "spoken": "Billboard: The Lost Sea, next exit, then seven miles. America's largest underground lake. A boy found it in nineteen oh-five. It still goes by the Lost Sea.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Lost Sea (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.0,
+            "spoken": "Billboard: The Lost Sea, next exit, then seven miles. America's largest underground lake. A boy found it in nineteen oh-five. It still goes by the Lost Sea.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Madisonville",
@@ -6319,6 +6359,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153786419, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lookout Mountain"
+          },
+          {
+            "name": "Ruby Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.9,
+            "spoken": "Billboard: Ruby Falls, next exit. A waterfall more than a thousand feet inside Lookout Mountain, named for the finder's wife. Beat that on your anniversary.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Chickamauga",
@@ -17120,6 +17170,16 @@
             "spoken": "Passing New Johnsonville"
           },
           {
+            "name": "Loretta Lynn's Ranch (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.0,
+            "spoken": "Billboard: Loretta Lynn's Ranch, next exit, seven miles north. She bought the house in nineteen sixty-six and found out the whole town came with it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lobelville",
             "at_mi": 64.0,
             "off_mi": 7.41,
@@ -17148,6 +17208,16 @@
             "kind": "point",
             "at_mi": 66.3,
             "spoken": "Crossing the Duck River"
+          },
+          {
+            "name": "Loretta Lynn's Ranch (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.6,
+            "spoken": "Billboard: Loretta Lynn's Ranch, next exit, seven miles north. She bought the house in nineteen sixty-six and found out the whole town came with it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "McEwen",
@@ -23723,6 +23793,16 @@
             "spoken": "Passing Colonial Heights"
           },
           {
+            "name": "Bristol Motor Speedway (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Bristol Motor Speedway, ahead. A half-mile of steep concrete, five hundred laps, and every single turn is a left. Your route is kinder.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Watauga",
             "at_mi": 8.5,
             "off_mi": 3.48,
@@ -23798,6 +23878,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154078699, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Walnut Hill"
+          },
+          {
+            "name": "Bristol Motor Speedway (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.0,
+            "spoken": "Billboard: Bristol Motor Speedway, ahead. A half-mile of steep concrete, five hundred laps, and every single turn is a left. Your route is kinder.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Damascus",
@@ -27725,6 +27815,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154030564, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Sweetwater"
+          },
+          {
+            "name": "The Lost Sea (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.4,
+            "spoken": "Billboard: The Lost Sea, next exit, then seven miles. America's largest underground lake. A boy found it in nineteen oh-five. It still goes by the Lost Sea.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Lost Sea (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.6,
+            "spoken": "Billboard: The Lost Sea, next exit, then seven miles. America's largest underground lake. A boy found it in nineteen oh-five. It still goes by the Lost Sea.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Niota",
@@ -37957,6 +38067,16 @@
             "spoken": "Passing Vildo"
           },
           {
+            "name": "Tina Turner Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.0,
+            "spoken": "Billboard: The Tina Turner Museum, next exit. Her one-room schoolhouse came here from Nutbush on a tractor-trailer. Free admission. Best load that truck ever hauled.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Saint Peters",
             "at_mi": 55.5,
             "off_mi": 9.33,
@@ -37991,6 +38111,16 @@
             "spoken": "Crossing the Hatchie River"
           },
           {
+            "name": "Tina Turner Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.9,
+            "spoken": "Billboard: The Tina Turner Museum, next exit. Her one-room schoolhouse came here from Nutbush on a tractor-trailer. Free admission. Best load that truck ever hauled.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Denmark",
             "at_mi": 67.7,
             "off_mi": 5.25,
@@ -38007,6 +38137,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153603401, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bells"
+          },
+          {
+            "name": "Casey Jones Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.3,
+            "spoken": "Billboard: Casey Jones Village, ahead in Jackson. The famous train engineer's house and a railroad museum. Trains never have to back into a dock.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Gadsden",
@@ -42734,6 +42874,16 @@
             "spoken": "Passing Eurekaton"
           },
           {
+            "name": "Tina Turner Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.0,
+            "spoken": "Billboard: The Tina Turner Museum, next exit. Her one-room schoolhouse came here from Nutbush on a tractor-trailer. Free admission. Best load that truck ever hauled.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Brownsville",
             "at_mi": 56.9,
             "off_mi": 3.93,
@@ -42741,6 +42891,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153739002, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brownsville"
+          },
+          {
+            "name": "Tina Turner Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.6,
+            "spoken": "Billboard: The Tina Turner Museum, next exit. Her one-room schoolhouse came here from Nutbush on a tractor-trailer. Free admission. Best load that truck ever hauled.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hatchie River",
@@ -42768,6 +42928,16 @@
             "spoken": "Passing Bells"
           },
           {
+            "name": "Casey Jones Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.6,
+            "spoken": "Billboard: Casey Jones Village, ahead in Jackson. The famous train engineer's house and a railroad museum. Trains never have to back into a dock.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Three Way",
             "at_mi": 82.4,
             "off_mi": 7.46,
@@ -42775,6 +42945,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153387621, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Three Way"
+          },
+          {
+            "name": "Casey Jones Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 91.2,
+            "spoken": "Billboard: Casey Jones Village, ahead in Jackson. The famous train engineer's house and a railroad museum. Trains never have to back into a dock.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Rock Springs",
@@ -42811,6 +42991,16 @@
             "spoken": "Crossing the Big Sandy River"
           },
           {
+            "name": "Loretta Lynn's Ranch (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 142.6,
+            "spoken": "Billboard: Loretta Lynn's Ranch, next exit, seven miles north. She bought the house in nineteen sixty-six and found out the whole town came with it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lobelville",
             "at_mi": 144.7,
             "off_mi": 7.41,
@@ -42818,6 +43008,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153708931, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lobelville"
+          },
+          {
+            "name": "Loretta Lynn's Ranch (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 146.2,
+            "spoken": "Billboard: Loretta Lynn's Ranch, next exit, seven miles north. She bought the house in nineteen sixty-six and found out the whole town came with it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Tennessee River",
@@ -51809,6 +52009,16 @@
             "spoken": "Passing Chickamauga"
           },
           {
+            "name": "Ruby Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 93.3,
+            "spoken": "Billboard: Ruby Falls, next exit. A waterfall more than a thousand feet inside Lookout Mountain, named for the finder's wife. Beat that on your anniversary.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lookout Mountain",
             "at_mi": 98.3,
             "off_mi": 1.91,
@@ -57812,6 +58022,16 @@
             "spoken": "Entering Ladds"
           },
           {
+            "name": "Ruby Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 118.3,
+            "spoken": "Billboard: Ruby Falls, next exit. A waterfall more than a thousand feet inside Lookout Mountain, named for the finder's wife. Beat that on your anniversary.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Tennessee River",
             "category": "river",
             "kind": "point",
@@ -57826,6 +58046,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153786419, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lookout Mountain"
+          },
+          {
+            "name": "Ruby Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 132.4,
+            "spoken": "Billboard: Ruby Falls, ahead in Chattanooga. A waterfall more than a thousand feet inside Lookout Mountain, named for the finder's wife. Beat that on your anniversary.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Rossville",

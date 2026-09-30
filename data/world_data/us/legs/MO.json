@@ -7959,13 +7959,6 @@
             "spoken": "Crossing the Gasconade River"
           },
           {
-            "name": "The Best Fudge Comes From Uranus",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 88.0,
-            "spoken": "Billboard: Uranus, Missouri, is ahead, home to the Uranus Fudge Factory and a motto the whole family will regret reading aloud. The fudge, they swear, is excellent."
-          },
-          {
             "name": "Saint James",
             "at_mi": 90.8,
             "off_mi": 8.09,
@@ -21979,8 +21972,11 @@
             "name": "Oz Museum",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 90.0,
-            "spoken": "Billboard: The Oz Museum is ahead in Wamego. Follow the yellow brick road off Interstate seventy, because there is no place like home and apparently no place like Kansas either."
+            "at_mi": 88.5,
+            "spoken": "Billboard: The Oz Museum is ahead in Wamego. Follow the yellow brick road off Interstate seventy, because there is no place like home and apparently no place like Kansas either.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Paxico",
@@ -22052,8 +22048,21 @@
             "name": "World's Largest Czech Egg",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 225.0,
-            "spoken": "Billboard: The world's largest Czech egg is ahead in Wilson, the Czech Capital of Kansas. It stands twenty feet tall and is covered in hand-painted folk art, because every small town deserves one enormous thing."
+            "at_mi": 210.0,
+            "spoken": "Billboard: The world's largest Czech egg is ahead in Wilson, the Czech Capital of Kansas. It stands twenty feet tall and is covered in hand-painted folk art, because every small town deserves one enormous thing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Garden of Eden",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 214.0,
+            "spoken": "Billboard: The Garden of Eden is ahead in Lucas. Its front yard mixes concrete Bible scenes, populist politics, and roadside folk art unlike anything else.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Dorrance",
@@ -22065,11 +22074,14 @@
             "spoken": "Passing Dorrance"
           },
           {
-            "name": "The Garden of Eden",
+            "name": "Cathedral of the Plains",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 235.0,
-            "spoken": "Billboard: The Garden of Eden is ahead in Lucas. Its front yard mixes concrete Bible scenes, populist politics, and roadside folk art unlike anything else."
+            "at_mi": 247.2,
+            "spoken": "Billboard: The Cathedral of the Plains is ahead at Victoria. Twin limestone spires rise over wheat country as though somebody imported Europe and forgot to return it.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Gorham",
@@ -22079,13 +22091,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151892911, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gorham"
-          },
-          {
-            "name": "Cathedral of the Plains",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 270.0,
-            "spoken": "Billboard: The Cathedral of the Plains is ahead at Victoria. Twin limestone spires rise over wheat country as though somebody imported Europe and forgot to return it."
           },
           {
             "name": "Ellis",
@@ -22140,13 +22145,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151698806, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Park"
-          },
-          {
-            "name": "World's Largest Prairie Dog",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 330.0,
-            "spoken": "Billboard: The world's largest prairie dog is ahead near Oakley. Eight thousand pounds of concrete rodent stands beside live rattlesnakes and a genuine five-legged cow. Roadside science is proceeding normally."
           },
           {
             "name": "Grainfield",
@@ -29639,13 +29637,6 @@
             "kind": "point",
             "at_mi": 152.0,
             "spoken": "Crossing the Little Sac River"
-          },
-          {
-            "name": "The Throwed Rolls",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 158.0,
-            "spoken": "Billboard: Lambert's Cafe is ahead, home of the throwed rolls. Waiters hurl hot dinner rolls across the room, and you are expected to catch them. Raise a hand or wear one."
           }
         ],
         "speed_limits": [
@@ -38260,6 +38251,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151906611, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dixon"
+          },
+          {
+            "name": "The Best Fudge Comes From Uranus",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.0,
+            "spoken": "Billboard: Uranus, Missouri, is ahead, home to the Uranus Fudge Factory and a motto the whole family will regret reading aloud. The fudge, they swear, is excellent.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Saint Robert",
@@ -47209,6 +47210,16 @@
             "spoken": "Passing Battlefield"
           },
           {
+            "name": "The Throwed Rolls",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.3,
+            "spoken": "Billboard: Lambert's Cafe is ahead, home of the throwed rolls. Waiters hurl hot dinner rolls across the room, and you are expected to catch them. Raise a hand or wear one.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fremont Hills",
             "at_mi": 13.9,
             "off_mi": 1.13,
@@ -47243,6 +47254,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151916425, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Highlandville"
+          },
+          {
+            "name": "Lambert's Cafe",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.0,
+            "spoken": "Billboard: Lambert's Cafe is ahead near Springfield, home of the throwed rolls. Raise a hand and a waiter will throw a hot dinner roll clear across the room at you. Catch it; those are the rules.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Branson",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.5,
+            "spoken": "Billboard: Branson is ahead, a little Ozark town with more theater seats than Broadway. Country music shows line the strip, and a theme park waits up on the mountain. Bring the grandparents.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Reeds Spring",
@@ -47288,13 +47319,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151602926, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rockaway Beach"
-          },
-          {
-            "name": "Branson",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 40.0,
-            "spoken": "Billboard: Branson is ahead, a little Ozark town with more theater seats than Broadway. Country music shows line the strip, and a theme park waits up on the mountain. Bring the grandparents."
           },
           {
             "name": "Branson West",

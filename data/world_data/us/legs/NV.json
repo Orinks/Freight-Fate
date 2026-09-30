@@ -18560,15 +18560,11 @@
             "name": "World's Tallest Thermometer",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 50.0,
-            "spoken": "Billboard: The world's tallest thermometer is ahead in Baker. More than a hundred feet of neon will tell you exactly how hot the Mojave is, and the answer is always too hot."
-          },
-          {
-            "name": "Alien Fresh Jerky",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 70.0,
-            "spoken": "Billboard: Alien Fresh Jerky is at the next exit in Baker. They will not say who the jerky is made from, and the little green fellow on the sign is not talking."
+            "at_mi": 80.0,
+            "spoken": "Billboard: The world's tallest thermometer is ahead in Baker. More than a hundred and thirty feet of lights will tell you exactly how hot the Mojave is, and the answer is always too hot.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "The Mad Greek",
@@ -18578,11 +18574,54 @@
             "spoken": "Billboard: The Mad Greek is ahead in Baker, serving gyros and baklava in the middle of the desert. Trust the Mojave; it has surprised you before."
           },
           {
+            "name": "Alien Fresh Jerky",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 90.2,
+            "spoken": "Billboard: Alien Fresh Jerky is at the next exit in Baker. They will not say who the jerky is made from, and the little green fellow on the sign is not talking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Alien Fresh Jerky (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 95.2,
+            "spoken": "Billboard: Alien jerky, next exit. They won't say who the jerky's made from.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Zzyzx Road",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 100.0,
-            "spoken": "Billboard: The exit for Zzyzx Road is coming up, with the last word in the dictionary sitting out here in the sand. A strange story and a lake you would never expect wait behind that name."
+            "at_mi": 98.6,
+            "spoken": "Billboard: The exit for Zzyzx Road is coming up, with the last word in the dictionary sitting out here in the sand. A strange story and a lake you would never expect wait behind that name.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Calico Ghost Town",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 139.7,
+            "spoken": "Billboard: Calico Ghost Town is ahead near Barstow. It is a real silver boomtown, half restored and half falling down, and, they will tell you, thoroughly haunted.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Peggy Sue's Fifties Diner",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 142.0,
+            "spoken": "Billboard: Peggy Sue's Fifties Diner is ahead near Yermo. It has chrome, a jukebox, a diner cat, and a park full of metal dinosaurs out back. Rock and roll never checked out.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "EddieWorld",
@@ -18608,13 +18647,6 @@
             "spoken": "Crossing the Mojave River"
           },
           {
-            "name": "Peggy Sue's Fifties Diner",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 155.0,
-            "spoken": "Billboard: Peggy Sue's Fifties Diner is ahead near Yermo. It has chrome, a jukebox, a diner cat, and a pond full of concrete dinosaurs out back. Rock and roll never checked out."
-          },
-          {
             "name": "Lenwood",
             "at_mi": 160.0,
             "off_mi": 1.53,
@@ -18629,13 +18661,6 @@
             "kind": "point",
             "at_mi": 162.0,
             "spoken": "Museum ahead: Desert Discovery Center"
-          },
-          {
-            "name": "Calico Ghost Town",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 165.0,
-            "spoken": "Billboard: Calico Ghost Town is ahead near Barstow. It is a real silver boomtown, half restored and half falling down, and, they will tell you, thoroughly haunted."
           },
           {
             "name": "Oak Hills",

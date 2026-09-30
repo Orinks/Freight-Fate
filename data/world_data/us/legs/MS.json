@@ -2783,7 +2783,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Columbus is the birthplace of Tennessee Williams. The rectory where the playwright of A Streetcar Named Desire was born still stands. Stella is not included."
+            "spoken": "Billboard: Columbus is the birthplace of Tennessee Williams. The rectory where the playwright of A Streetcar Named Desire was born still stands. Stella is not included.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Caledonia",
@@ -2855,8 +2858,11 @@
             "name": "Elvis, again",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 60.0,
-            "spoken": "Billboard: Tupelo is the home of Elvis. He got his first guitar here instead of the bicycle his family could not afford. The rest you know."
+            "at_mi": 58.5,
+            "spoken": "Billboard: Tupelo is the home of Elvis. He got his first guitar here instead of the bicycle his family could not afford. The rest you know.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Verona",
@@ -9739,8 +9745,11 @@
             "name": "The Beach and the Lighthouse",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 2.0,
-            "spoken": "Billboard: Welcome to the Mississippi Coast. It has twenty-six miles of white man-made beach, the tall iron Biloxi Lighthouse standing in the highway median, casinos on the water, and shrimp fresh off the boats."
+            "at_mi": 5.0,
+            "spoken": "Billboard: Welcome to the Mississippi Coast. It has twenty-six miles of white man-made beach, the tall iron Biloxi Lighthouse standing in the highway median, casinos on the water, and shrimp fresh off the boats.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Biloxi River",
@@ -12995,6 +13004,16 @@
             "spoken": "Passing Ocean Springs"
           },
           {
+            "name": "The Shed Barbecue",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.0,
+            "spoken": "Billboard: The Shed Barbecue is ahead. It offers smoke, sauce, blues, and a building assembled from whatever did not run away fast enough.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pascagoula River",
             "category": "river",
             "kind": "point",
@@ -13016,13 +13035,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153560683, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gautier"
-          },
-          {
-            "name": "The Shed Barbecue",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 38.0,
-            "spoken": "Billboard: The Shed Barbecue is ahead. It offers smoke, sauce, blues, and a building assembled from whatever did not run away fast enough."
           },
           {
             "name": "Escatawpa",
@@ -32754,7 +32766,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Meridian is home to Jimmie Rodgers, the father of country music. He was a railroad man who yodeled the blues and helped start it all."
+            "spoken": "Billboard: Meridian is home to Jimmie Rodgers, the father of country music. He was a railroad man who yodeled the blues and helped start it all.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Dentzel Carousel",
@@ -32832,6 +32847,16 @@
             "spoken": "Passing Brooksville"
           },
           {
+            "name": "The Birthplace of the Blues Marker",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 71.0,
+            "spoken": "Billboard: You are in Mississippi music country, where blues, gospel, country, and rock and roll traded notes along roads like this before anyone argued over who invented what.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Crawford",
             "at_mi": 73.4,
             "off_mi": 0.33,
@@ -32839,13 +32864,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153437872, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Crawford"
-          },
-          {
-            "name": "The Birthplace of the Blues Marker",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 75.0,
-            "spoken": "Billboard: You are in Mississippi music country, where blues, gospel, country, and rock and roll traded notes along roads like this before anyone argued over who invented what."
           },
           {
             "name": "Starkville",
@@ -32902,6 +32920,16 @@
             "spoken": "Passing Shannon"
           },
           {
+            "name": "Elvis Presley Birthplace",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 134.5,
+            "spoken": "Billboard: Tupelo is ahead, home to the two-room shotgun shack where Elvis Presley was born. The King started here, poor as dirt, with a guitar from the hardware store.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Verona",
             "at_mi": 136.9,
             "off_mi": 0.74,
@@ -32909,13 +32937,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153440235, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Verona"
-          },
-          {
-            "name": "Elvis Presley Birthplace",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 138.0,
-            "spoken": "Billboard: Tupelo is ahead, home to the two-room shotgun shack where Elvis Presley was born. The King started here, poor as dirt, with a guitar from the hardware store."
           },
           {
             "name": "Saltillo",

@@ -32114,6 +32114,16 @@
             "spoken": "Entering Grove City"
           },
           {
+            "name": "World's Largest Ball of Twine",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: A giant ball of twine is ahead. Thousands of pounds of string were wound together so future generations could ask the correct question: why?",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Darwin",
             "at_mi": 33.5,
             "off_mi": 0.17,

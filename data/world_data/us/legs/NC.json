@@ -34085,7 +34085,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Charlotte is the capital of NASCAR. Nearly every race team is based within an hour, and the Hall of Fame downtown lets you sit in the cars and feel the noise."
+            "spoken": "Billboard: Charlotte is the capital of NASCAR. Nearly every race team is based within an hour, and the Hall of Fame downtown lets you sit in the cars and feel the noise.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mint Hill",
@@ -63796,7 +63799,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Wilmington is where the battleship North Carolina rides at anchor on the Cape Fear. So many movies are filmed here that the city also calls itself Hollywood East."
+            "spoken": "Billboard: Wilmington is where the battleship North Carolina rides at anchor on the Cape Fear. So many movies are filmed here that the city also calls itself Hollywood East.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cape Fear River",

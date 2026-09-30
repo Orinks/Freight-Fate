@@ -31904,6 +31904,50 @@
             }
           ],
           "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
+        },
+        {
+          "name": "The Thing",
+          "type": "truck_parking",
+          "at_mi": 210.3,
+          "source": "Bowlin's The Thing, 2631 North Johnson Road, Dragoon, Arizona, on I-10 at Exit 322 (bowlintc.com; NATSO, 'Stop and See The Thing at Bowlin Travel Center'). Read: museum, gift shop, Dairy Queen, Shell fuel with diesel. Assumed: a combination vehicle can pull into the lot to visit. Bowlin's lists no truck parking, so parking is limited and this is a visit stop, not a place to fuel with a trailer (owner, 2026-09-30). Mile marker derived from this leg's Exit 322 interchange record. Curated 2026-09-30.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break"
+          ],
+          "services": [
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 32.0312,
+          "lon": -110.051
+        },
+        {
+          "name": "Shell at The Thing",
+          "type": "fuel_station",
+          "at_mi": 210.3,
+          "source": "Shell fuel at Bowlin's The Thing, I-10 Exit 322 (bowlintc.com: self-serve Shell fuel, diesel sold). Truck access: no verified truck access; Bowlin's lists no truck parking or diesel lanes, so the pumps are bobtail_only per the truck-accessibility policy. Mile marker derived from this leg's Exit 322 interchange record. Curated 2026-09-30.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel"
+          ],
+          "directions": [
+            "both"
+          ],
+          "curation": "curated",
+          "vehicle_access": "bobtail_only",
+          "lat": 32.0312,
+          "lon": -110.051
         }
       ],
       "corridor": {
@@ -34372,8 +34416,11 @@
             "name": "The Thing (countdown, sign one)",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 60.0,
-            "spoken": "Billboard: What is it? The Thing? Mystery of the desert ahead. Two hundred miles to guess, and whatever you do, do not stop moving."
+            "at_mi": 10.1,
+            "spoken": "Billboard: What is it? The Thing? Mystery of the desert ahead. Two hundred miles to guess, and whatever you do, do not stop moving.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Mimbres River",
@@ -34394,7 +34441,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 150.0,
-            "spoken": "Billboard: The Thing. Still ahead, still a mystery, still a dollar or two to find out. No officials of any type allowed -- if you're one, turn back now or hide your identity."
+            "spoken": "Billboard: The Thing. Still ahead, still a mystery, still a few dollars to find out. No officials of any type allowed -- if you're one, turn back now or hide your identity.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "San Simon",
@@ -34420,6 +34470,16 @@
             "spoken": "Approaching Dragoon Pass"
           },
           {
+            "name": "The Thing (eastbound, sign two)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 218.0,
+            "spoken": "Billboard: The Thing, the exit after the rest area. A few dollars, and you will finally know.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "San Pedro River",
             "category": "river",
             "kind": "point",
@@ -34434,6 +34494,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150934158, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Corona de Tucson"
+          },
+          {
+            "name": "The Thing (eastbound, sign one)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 255.0,
+            "spoken": "Billboard: What is The Thing? Forty-five miles to find out. The people who know are not telling.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pascua Pueblo",
@@ -41916,7 +41986,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: West of Socorro, twenty-seven giant white dish antennas listen to the universe together across the Plains of San Agustin. You have seen them in the movies, aimed at the stars."
+            "spoken": "Billboard: West of Socorro, twenty-seven giant white dish antennas listen to the universe together across the Plains of San Agustin. You have seen them in the movies, aimed at the stars.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Elephant Butte",
@@ -42933,7 +43006,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 6.0,
-            "spoken": "Billboard: Stay in Tucumcari tonight, with two thousand motel rooms and a mile of neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.",
+            "spoken": "Billboard: Stay in Tucumcari tonight, with a mile of motel neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.",
             "directions": [
               "reverse"
             ]

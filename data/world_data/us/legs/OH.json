@@ -1022,7 +1022,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Akron is the Rubber City, where the world's tires were born and the Goodyear blimp still lives. It is also home to the Soap Box Derby and a kid named LeBron."
+            "spoken": "Billboard: Akron is the Rubber City, where the world's tires were born and the Goodyear blimp still lives. It is also home to the Soap Box Derby and a kid named LeBron.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Barberton",
@@ -3594,6 +3597,16 @@
             "spoken": "Crossing the Jerome Fork Mohican River"
           },
           {
+            "name": "Grandpa's Cheesebarn",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.0,
+            "spoken": "Billboard: Grandpa's Cheesebarn is ahead. It offers cheese, fudge, smoked meat, and free samples arranged to defeat every promise you made at breakfast.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Polk",
             "at_mi": 41.0,
             "off_mi": 3.79,
@@ -3619,13 +3632,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154208399, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mifflin"
-          },
-          {
-            "name": "Grandpa's Cheesebarn",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 55.0,
-            "spoken": "Billboard: Grandpa's Cheesebarn is ahead. It offers cheese, fudge, smoked meat, and free samples arranged to defeat every promise you made at breakfast."
           },
           {
             "name": "Lucas",
@@ -17595,7 +17601,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Cleveland rocks. The Rock and Roll Hall of Fame stands in a glass pyramid on the lake, in the city where a disc jockey first shouted the words rock and roll."
+            "spoken": "Billboard: Cleveland rocks. The Rock and Roll Hall of Fame stands in a glass pyramid on the lake, in the city where a disc jockey first shouted the words rock and roll.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cuyahoga Heights",
@@ -19589,7 +19598,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Columbus is home to Ohio State and the Horseshoe. More than a hundred thousand people spell out O H I O while the band marches Script Ohio and a sousaphone player dots the i."
+            "spoken": "Billboard: Columbus is home to Ohio State and the Horseshoe. More than a hundred thousand people spell out O H I O while the band marches Script Ohio and a sousaphone player dots the i.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Urbancrest",
@@ -32798,6 +32810,16 @@
             "spoken": "Passing Uniopolis"
           },
           {
+            "name": "First on the Moon",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.3,
+            "spoken": "Billboard: Wapakoneta is ahead, birthplace of Neil Armstrong, the first human to set foot on the moon. A museum shaped like a moon base waits out here among the Ohio corn.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Buckland",
             "at_mi": 12.3,
             "off_mi": 5.57,
@@ -32814,13 +32836,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154401807, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Moulton"
-          },
-          {
-            "name": "First on the Moon",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 15.0,
-            "spoken": "Billboard: Wapakoneta is ahead, birthplace of Neil Armstrong, the first human to set foot on the moon. A museum shaped like a moon base waits out here among the Ohio corn."
           },
           {
             "name": "New Knoxville",
@@ -40577,8 +40592,11 @@
             "name": "Toledo, Glass and Klinger",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 3.07,
-            "spoken": "Billboard: Toledo is the Glass City, where they build Jeeps and blow glass. Do not leave without a Hungarian hot dog from Tony Packo's, the place Corporal Klinger would not shut up about."
+            "at_mi": 3.1,
+            "spoken": "Billboard: Toledo is the Glass City, where they build Jeeps and blow glass. Do not leave without a Hungarian hot dog from Tony Packo's, the place Corporal Klinger would not shut up about.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Northwood",

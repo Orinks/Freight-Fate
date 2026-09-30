@@ -3723,8 +3723,11 @@
             "name": "The Tallest Capitol",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 3.0,
-            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised."
+            "at_mi": 2.7,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Tiger Stadium",

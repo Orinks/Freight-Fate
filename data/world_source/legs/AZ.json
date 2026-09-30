@@ -10460,18 +10460,21 @@
             "spoken": "Entering Ash Fork"
           },
           {
+            "name": "Grand Canyon Caverns",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.0,
+            "spoken": "Billboard: Grand Canyon Caverns is ahead near Peach Springs. The country's largest dry cavern lies two hundred feet down, with one motel room at the very bottom for the very brave.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Delgadillo's Snow Cap",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 75.0,
             "spoken": "Billboard: Delgadillo's Snow Cap is ahead in Seligman. It serves burgers, shakes, fake mustard, practical jokes, and a menu delivered by people who consider confusion part of the service."
-          },
-          {
-            "name": "Grand Canyon Caverns",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 95.0,
-            "spoken": "Billboard: Grand Canyon Caverns is ahead near Peach Springs. The country's largest dry cavern lies two hundred feet down, with one motel room at the very bottom for the very brave."
           },
           {
             "name": "Pine Lake",
@@ -14743,15 +14746,31 @@
             "name": "Two Guns",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 35.0,
-            "spoken": "Billboard: The ghost town of Two Guns is ahead. It has stone ruins, an old zoo, a canyon, and enough Route sixty-six legends to make every abandoned wall suspicious."
+            "at_mi": 28.0,
+            "spoken": "Billboard: The ghost town of Two Guns is ahead. Its stone ruins, old zoo and canyon are on private land now, posted against visitors, with enough Route sixty-six legends to make every abandoned wall suspicious.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Meteor Crater",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 38.0,
-            "spoken": "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger."
+            "at_mi": 31.5,
+            "spoken": "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Standin' on the Corner",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.0,
+            "spoken": "Billboard: Winslow, Arizona, is ahead. Stand on the corner, and a girl in a flatbed Ford may slow down to look. You know the song.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -17508,13 +17527,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150935954, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Joseph City"
-          },
-          {
-            "name": "Wigwam Motel",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 2.0,
-            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?"
           },
           {
             "name": "Petrified Forest National Park",
@@ -33869,11 +33881,31 @@
             "spoken": "Crossing the San Gorgonio River"
           },
           {
+            "name": "Cabazon Dinosaurs (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 280.0,
+            "spoken": "Billboard: Dinosaurs, next exit. Concrete, enormous, unbothered by extinction.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "San Gorgonio Pass",
             "category": "mountain_pass",
             "kind": "point",
             "at_mi": 282.1,
             "spoken": "Approaching San Gorgonio Pass"
+          },
+          {
+            "name": "Cabazon Dinosaurs (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 284.3,
+            "spoken": "Billboard: Dinosaurs, next exit. Concrete, enormous, unbothered by extinction.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Banning",
@@ -44148,18 +44180,24 @@
             "spoken": "Crossing the Little Colorado River"
           },
           {
-            "name": "Standin' on the Corner",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 5.0,
-            "spoken": "Billboard: Winslow, Arizona, is ahead. Stand on the corner, and a girl in a flatbed Ford may slow down to look. You know the song."
-          },
-          {
             "name": "Jack Rabbit Trading Post",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 17.0,
-            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is."
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Wigwam Motel",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.0,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [

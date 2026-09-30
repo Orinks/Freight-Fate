@@ -2377,7 +2377,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Dodge City was once the wickedest little city in the West. Wyatt Earp and Bat Masterson kept the peace badly, while the losers went up to Boot Hill with their boots on. Get out of Dodge, or stay a while."
+            "spoken": "Billboard: Dodge City was once the wickedest little city in the West. Wyatt Earp and Bat Masterson kept the peace badly, while the losers went up to Boot Hill with their boots on. Get out of Dodge, or stay a while.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wilroads Gardens",

@@ -8900,7 +8900,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Athens is the birthplace of R E M and the B-Fifty-Twos. This college town produced more good bands than it had any right to."
+            "spoken": "Billboard: Athens is the birthplace of R E M and the B-Fifty-Twos. This college town produced more good bands than it had any right to.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hull",
@@ -13158,13 +13161,6 @@
             "spoken": "Passing White"
           },
           {
-            "name": "Goats on the Roof",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 115.0,
-            "spoken": "Billboard: Goats on the Roof is ahead. There are real goats on a real roof, because ground-level goats were failing to stop traffic."
-          },
-          {
             "name": "Adairsville",
             "at_mi": 118.5,
             "off_mi": 1.46,
@@ -13208,6 +13204,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153573354, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Ringgold"
+          },
+          {
+            "name": "Ruby Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 164.5,
+            "spoken": "Billboard: Ruby Falls, ahead in Chattanooga. A waterfall more than a thousand feet inside Lookout Mountain, named for the finder's wife. Beat that on your anniversary.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Rossville",
@@ -19848,7 +19854,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Athens is home to the Tree That Owns Itself, a white oak said to hold the deed to the ground where it grows. That tree owns more property than most people."
+            "spoken": "Billboard: Athens is home to the Tree That Owns Itself, a white oak said to hold the deed to the ground where it grows. That tree owns more property than most people.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bogart",
@@ -19931,8 +19940,11 @@
             "name": "The Town Sherman Spared",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 29.0,
-            "spoken": "Billboard: Madison is ahead, the town said to have been too pretty to burn. Sherman marched past and left the mansions standing, and they stand yet."
+            "at_mi": 24.0,
+            "spoken": "Billboard: Madison is ahead, the town said to have been too pretty to burn. Sherman marched past and left the mansions standing, and they stand yet.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Rutledge",
@@ -19962,18 +19974,21 @@
             "spoken": "Passing Lake Oconee"
           },
           {
+            "name": "Uncle Remus Country",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.5,
+            "spoken": "Billboard: Eatonton is home to Br'er Rabbit. The old Uncle Remus tales were set down here, and a statue of the rabbit himself stands watch at the courthouse.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Bledsoe-Green House Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 51.8,
             "spoken": "Bledsoe-Green House Museum ahead"
-          },
-          {
-            "name": "Uncle Remus Country",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 53.0,
-            "spoken": "Billboard: Eatonton is home to Br'er Rabbit. The old Uncle Remus tales were set down here, and a statue of the rabbit himself stands watch at the courthouse."
           },
           {
             "name": "Crooked Creek",
@@ -22093,6 +22108,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 11115471247, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Riverside"
+          },
+          {
+            "name": "Talladega",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 113.0,
+            "spoken": "Billboard: Talladega is ahead, home to the biggest and fastest superspeedway in NASCAR. Cars run flat out in a pack around more than two and a half miles of high banking, and a movie taught the nation that if you ain't first, you're last.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Moody",
@@ -40412,7 +40437,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Augusta is home to the Masters. Every April, the golf world comes to Augusta National for the green jacket, the azaleas, Amen Corner, and a pimento cheese sandwich that somehow still costs almost nothing."
+            "spoken": "Billboard: Augusta is home to the Masters. Every April, the golf world comes to Augusta National for the green jacket, the azaleas, Amen Corner, and a pimento cheese sandwich that somehow still costs almost nothing.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Clearwater",
@@ -45936,11 +45964,31 @@
             "spoken": "Crossing the Altamaha River"
           },
           {
+            "name": "Peach World",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.0,
+            "spoken": "Billboard: Peach World is ahead. It sells peaches, pecans, preserves, boiled peanuts, and enough peach-flavored merchandise to prove Georgia takes branding personally.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "South Newport River",
             "category": "river",
             "kind": "point",
             "at_mi": 30.4,
             "spoken": "Crossing the South Newport River"
+          },
+          {
+            "name": "The Smallest Church in America",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.6,
+            "spoken": "Billboard: The Smallest Church in America is ahead near South Newport. It has thirteen seats, one tiny steeple, and absolutely no room for a megachurch coffee shop.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Riceboro",
@@ -45959,13 +46007,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153934679, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Midway"
-          },
-          {
-            "name": "Peach World",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 58.0,
-            "spoken": "Billboard: Peach World is ahead. It sells peaches, pecans, preserves, boiled peanuts, and enough peach-flavored merchandise to prove Georgia takes branding personally."
           },
           {
             "name": "Henderson",
@@ -53345,7 +53386,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Cordele calls itself the Watermelon Capital of the world. Arkansas may argue, but the melons here do not care who wins."
+            "spoken": "Billboard: Cordele calls itself the Watermelon Capital of the world. Arkansas may argue, but the melons here do not care who wins.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Arabi",
@@ -68958,15 +69002,21 @@
             "name": "Macon Music",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 3.0,
-            "spoken": "Billboard: Macon is home to Little Richard, Otis Redding, and the Allman Brothers. This red-clay town wrote a shocking share of American music."
+            "at_mi": 2.8,
+            "spoken": "Billboard: Macon is home to Little Richard, Otis Redding, and the Allman Brothers. This red-clay town wrote a shocking share of American music.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cherry Blossom Capital",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 5.0,
-            "spoken": "Billboard: Macon is the Cherry Blossom Capital of the world. About three hundred fifty thousand Yoshino cherry trees bloom pink every March, which is more than Washington and Tokyo have to spare."
+            "spoken": "Billboard: Macon is the Cherry Blossom Capital of the world. About three hundred fifty thousand Yoshino cherry trees bloom pink every March, which is more than Washington and Tokyo have to spare.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Robins Air Force Base",
@@ -71275,18 +71325,21 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
-            "name": "The Capitoline Wolf",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 2.0,
-            "spoken": "Billboard: Rome, Georgia, was built on seven hills and has a bronze she-wolf suckling Romulus and Remus. It was a gift from Rome, Italy. Yes, that Rome."
-          },
-          {
             "name": "Etowah River",
             "category": "river",
             "kind": "point",
             "at_mi": 3.2,
             "spoken": "Crossing the Etowah River"
+          },
+          {
+            "name": "The Capitoline Wolf",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.5,
+            "spoken": "Billboard: Rome, Georgia, was built on seven hills and has a bronze she-wolf suckling Romulus and Remus. It was a gift from Rome, Italy. Yes, that Rome.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Aragon",
@@ -72498,13 +72551,6 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
-            "name": "Berry College",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 5.0,
-            "spoken": "Billboard: Berry College is ahead near Rome. Its twenty-seven thousand acres of forest and fields make it the largest college campus on Earth, and its stone mill wheel is taller than a house."
-          },
-          {
             "name": "Oostanaula River",
             "category": "river",
             "kind": "point",
@@ -72519,6 +72565,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153559588, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Plainville"
+          },
+          {
+            "name": "Berry College",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: Berry College is ahead near Rome. Its twenty-seven thousand acres of forest and fields make it the largest college campus on Earth, and its old mill wheel stands forty-two feet tall.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lyerly",

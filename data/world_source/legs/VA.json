@@ -6808,6 +6808,16 @@
             "spoken": "Approaching Mine Gap"
           },
           {
+            "name": "Dinosaur Land",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.0,
+            "spoken": "Billboard: Dinosaur Land is ahead. Fiberglass monsters have ruled this Virginia roadside since your grandparents were children, and extinction has not slowed ticket sales.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Front Royal",
             "at_mi": 54.5,
             "off_mi": 8.53,
@@ -13488,6 +13498,16 @@
             "spoken": "Crossing the Nansemond River"
           },
           {
+            "name": "Smithfield Ham",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.2,
+            "spoken": "Billboard: Smithfield is ahead, and it calls itself the Ham Capital. A salt-cured Virginia ham must age in this town by law to earn the name. The whole place smells, wonderfully, of hog.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Carrollton",
             "at_mi": 20.5,
             "off_mi": 0.83,
@@ -13513,13 +13533,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158313642, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Isle of Wight"
-          },
-          {
-            "name": "Smithfield Ham",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 28.0,
-            "spoken": "Billboard: Smithfield is ahead, and it calls itself the Ham Capital. A salt-cured Virginia ham must age in this town by law to earn the name. The whole place smells, wonderfully, of hog."
           },
           {
             "name": "Pagan River",
@@ -41954,13 +41967,6 @@
             "spoken": "Passing Oak Ridge"
           },
           {
-            "name": "Mayberry",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 90.0,
-            "spoken": "Billboard: Mount Airy is the real Mayberry. It is Andy Griffith's hometown and the model for his television town, complete with a squad car you can ride and Snappy Lunch serving its famous pork chop sandwich."
-          },
-          {
             "name": "Walnut Cove",
             "at_mi": 91.0,
             "off_mi": 7.11,
@@ -50461,7 +50467,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Wytheville is home to a pencil the size of a telephone pole, leaning against an office building. Outside town, an old lead-shot tower marks where molten metal was dropped until gravity made it round."
+            "spoken": "Billboard: Wytheville is home to a thirty-foot pencil mounted on an office supply store. Outside town, an old lead-shot tower marks where molten metal was dropped until gravity made it round.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Ivanhoe",

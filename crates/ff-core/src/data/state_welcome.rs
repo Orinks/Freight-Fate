@@ -32,7 +32,7 @@ pub const WELCOME_SIGNS: &[(&str, &[&str])] = &[
     (
         "Alabama",
         &[
-            "Welcome to Alabama, the Yellowhammer State. Home of the rockets that carried the first men to the moon, built right here in Huntsville.",
+            "Welcome to Alabama, the Yellowhammer State. Home of the rockets that carried the first men to the moon, designed right here in Huntsville.",
         ],
     ),
     (
@@ -74,7 +74,7 @@ pub const WELCOME_SIGNS: &[(&str, &[&str])] = &[
     (
         "District of Columbia",
         &[
-            "Welcome to the District of Columbia, the nation's capital. Monuments, museums, and traffic circles laid out to confuse an invading army. And you.",
+            "Welcome to the District of Columbia, the nation's capital. Monuments, museums, and traffic circles that confuse everyone who drives them. Including you.",
         ],
     ),
     (
@@ -164,7 +164,7 @@ pub const WELCOME_SIGNS: &[(&str, &[&str])] = &[
     (
         "Mississippi",
         &[
-            "Welcome to Mississippi, the Magnolia State, birthplace of the blues and namesake of the mighty river on your left.",
+            "Welcome to Mississippi, the Magnolia State, birthplace of the blues and namesake of the mighty river on its western border.",
         ],
     ),
     (
@@ -290,7 +290,7 @@ pub const WELCOME_SIGNS: &[(&str, &[&str])] = &[
     (
         "Vermont",
         &[
-            "Welcome to Vermont, the Green Mountain State. Maple syrup, covered bridges, and ice cream with a conscience.",
+            "Welcome to Vermont, the Green Mountain State. Maple syrup, covered bridges, and ice cream from Waterbury.",
         ],
     ),
     (

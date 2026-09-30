@@ -4552,8 +4552,11 @@
             "name": "Wall Drug (countdown, sign three)",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 222.0,
-            "spoken": "Billboard: Wall Drug, next exit. You have read the signs for two hundred miles. You know you are stopping."
+            "at_mi": 220.6,
+            "spoken": "Billboard: Wall Drug, next exit. You have read the signs for two hundred miles. You know you are stopping.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Wall Drug (eastbound countdown, sign three)",
@@ -7178,13 +7181,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151642313, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Lake Preston"
-          },
-          {
-            "name": "World's Largest Ball of Twine",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 95.0,
-            "spoken": "Billboard: A giant ball of twine is ahead. Thousands of pounds of string were wound together so future generations could ask the correct question: why?"
           },
           {
             "name": "Oldham",
@@ -24836,6 +24832,16 @@
             "spoken": "Passing Lyons"
           },
           {
+            "name": "Porter Sculpture Park",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.9,
+            "spoken": "Billboard: A sixty-foot bull's head is staring at you from the prairie. That is Porter Sculpture Park. Pull over. It wants to be looked at.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Humboldt",
             "at_mi": 23.1,
             "off_mi": 0.59,
@@ -24859,13 +24865,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151367776, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Montrose"
-          },
-          {
-            "name": "Porter Sculpture Park",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 32.0,
-            "spoken": "Billboard: A sixty-foot bull's head is staring at you from the prairie. That is Porter Sculpture Park. Pull over. It wants to be looked at."
           },
           {
             "name": "Canistota",
@@ -24920,13 +24919,6 @@
             "spoken": "Passing Emery"
           },
           {
-            "name": "Corn Palace",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 63.0,
-            "spoken": "Billboard: The Corn Palace, next exit. A building decorated entirely in corn. Redecorated every year. In corn. We cannot stress the corn enough."
-          },
-          {
             "name": "Fulton",
             "at_mi": 64.0,
             "off_mi": 3.34,
@@ -24950,6 +24942,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151672156, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Plano"
+          },
+          {
+            "name": "Corn Palace",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.6,
+            "spoken": "Billboard: The Corn Palace, next exit. A building decorated entirely in corn. Redecorated every year. In corn. We cannot stress the corn enough.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Ethan",

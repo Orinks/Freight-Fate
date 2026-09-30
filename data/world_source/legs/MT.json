@@ -36158,7 +36158,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 93.0,
-            "spoken": "Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. Its fossils include a Tyrannosaurus dug from the Montana badlands, and Yellowstone waits beyond."
+            "spoken": "Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. A bronze Tyrannosaurus stands out front, and Yellowstone waits beyond.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "King Arthur Park",

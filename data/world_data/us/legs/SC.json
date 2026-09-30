@@ -4045,7 +4045,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 105.0,
-            "spoken": "Billboard: Savannah is the city of squares, most of which are draped in Spanish Moss. Don't worry, if you're a square, you're welcome too.  Visit Savannah's oldest suarre, famous for Forrest Gump's curious display of his life changing box of chocolates. The cobbled downtown is even one whole historic site. Check it out!"
+            "spoken": "Billboard: Savannah is the city of squares, most of which are draped in Spanish moss. Don't worry, if you're a square, you're welcome too. Forrest Gump sat on his bench in Chippewa Square, and the whole cobbled downtown is one historic district.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Garden City",
@@ -6356,7 +6359,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 113.0,
-            "spoken": "Billboard: Charleston is the Holy City of steeples, where the first shots of the Civil War were fired at Sumter's famous harbor  . Walk the Battery past the pastel mansions of Rainbow Row."
+            "spoken": "Billboard: Charleston is the Holy City of steeples, where the first shots of the Civil War were fired at Sumter's famous harbor. Walk the Battery past the pastel mansions of Rainbow Row.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Sullivan's Island",

@@ -55,7 +55,27 @@ bookmarks usable.
       and their "ahead" lines left the corridor pools, whose state anchor
       cannot tell which side of the attraction the truck is on. The South
       Carolina welcome no longer says every driver has been reading about
-      the sombrero tower for three hundred miles.
+      the sombrero tower for three hundred miles. Seven more pool lines
+      that said "next exit" or "ahead" about one place, and were read
+      anywhere in their state either way, are placed at that place
+      (`signsheets/pool-moves-2026-09-30.md`); the Rockies line rides the
+      Denver approach, and The Thing's duplicate of its own countdown is cut.
+      A sweep now fails any placed billboard the landmark spacing drops.
+      An audit of all 245 placed signs against each attraction's real
+      location moved or flipped 130 and removed 29
+      (`signsheets/audit-fixes-2026-09-30.md`): signs on the wrong leg,
+      after their place, too far out, silenced by spacing, or describing
+      the city just left; Goats on the Roof, Prairie Dog Town and the
+      Buellton Pea Soup Andersen's are closed. The Thing is a pull-in
+      stop at I-10 Exit 322 (its pumps bobtail-only, its truck parking
+      assumed) with countdowns from both sides. The copy was checked
+      against what each place is today and the owner approved the
+      corrections (`signsheets/copy-updates-2026-09-30.md`, the pools and
+      the state welcomes): song credits, prices, closures, and Pea Soup
+      Andersen's moved from closed Buellton to Santa Nella on I-5. Seven
+      Tennessee attractions are signed both ways
+      (`signsheets/tennessee-2026-09-30.md`); the leg's own "Norris Museum
+      ahead" now faces southbound only.
 
 - [x] New installs start on All assists (owner, 2026-09-30): first drives kept
       going wrong at the wheel, city street corners above all, so the truck
@@ -301,6 +321,12 @@ Everything found before 2026-09-25 moved to
       2026-09-30; the other side hears the random pool. Signs standing at
       their attraction could be marked `both`, and the rest need copy
       written from the other side ([1.9 in flight](#19-in-flight-featcareer-19)).
+- [ ] Some legs disagree with their own geometry (billboard audit,
+      2026-09-30): Dallas to St. Louis is routed through Tulsa and Joplin
+      but its exits and stops are Arkansas ones on I-30; five more legs are
+      11 to 29 miles off their dense geometry; the Florida Keys markers and
+      the I-40 Tennessee, Buffalo and Duck River callouts are miles from the
+      real places.
 - [ ] Big Buck's never plays: its twenty-four approach billboards, the
       brisket plate, the gate turn-away lines and the landmark loyalty rate
       are all written, and the world has no Big Buck's stop. Needs a stop,

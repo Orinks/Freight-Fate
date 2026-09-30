@@ -10954,7 +10954,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Fort Myers is where Thomas Edison and Henry Ford kept winter homes side by side on the river. Edison planted a banyan tree that now shades an acre, and his laboratory remains much as he left it."
+            "spoken": "Billboard: Fort Myers is where Thomas Edison and Henry Ford kept winter homes side by side on the river. Edison planted a banyan tree that now shades an acre, and his laboratory remains much as he left it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Tice",
@@ -16012,7 +16015,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Gainesville is home to the Florida Gators and the Swamp. A scientist mixed the first batch of Gatorade here to keep the football team from wilting in the heat, and Tom Petty grew up here too."
+            "spoken": "Billboard: Gainesville is home to the Florida Gators and the Swamp. A scientist mixed the first batch of Gatorade here to keep the football team from wilting in the heat, and Tom Petty grew up here too.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Haile Plantation",
@@ -16879,13 +16885,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154140465, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Woodbine"
-          },
-          {
-            "name": "The Smallest Church in America",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 45.0,
-            "spoken": "Billboard: The Smallest Church in America is ahead near South Newport. It has six seats, one tiny steeple, and absolutely no room for a megachurch coffee shop."
           },
           {
             "name": "Satilla River",
@@ -21451,6 +21450,16 @@
         ],
         "landmarks": [
           {
+            "name": "The Oldest City",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: Saint Augustine is the oldest city in America. The Spanish founded it in fifteen sixty-five, more than forty years before Jamestown. It has a stone fort that never fell, a college inside a palace, and a spring Ponce de Leon called the Fountain of Youth.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Old Town Villages",
             "at_mi": 34.5,
             "off_mi": 0.6,
@@ -21458,13 +21467,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 11028869000, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Old Town Villages"
-          },
-          {
-            "name": "The Oldest City",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 40.0,
-            "spoken": "Billboard: Saint Augustine is the oldest city in America. The Spanish founded it in fifteen sixty-five, more than forty years before Jamestown. It has a stone fort that never fell, a college inside a palace, and a spring Ponce de Leon called the Fountain of Youth."
           },
           {
             "name": "Vermont Heights",
@@ -26070,7 +26072,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Winter Haven is where the old Cypress Gardens taught Florida to water-ski in pyramids while Southern belles posed among the flowers. The gardens are a Lego park now, but the ski shows and the spirit remain."
+            "spoken": "Billboard: Winter Haven is where the old Cypress Gardens taught Florida to water-ski in pyramids while Southern belles posed among the flowers. The gardens are a Lego park now, and the ski team still puts on free shows in town.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Auburndale",
@@ -26949,13 +26954,6 @@
             "spoken": "Passing Key Biscayne"
           },
           {
-            "name": "Robert Is Here",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 4.0,
-            "spoken": "Billboard: Robert Is Here is the famous fruit stand at the edge of the Everglades. It sells key limes and milkshakes beneath a boy's name that outgrew him."
-          },
-          {
             "name": "Virginia Gardens",
             "at_mi": 4.4,
             "off_mi": 6.1,
@@ -27053,11 +27051,14 @@
             "spoken": "Passing Palmetto Bay"
           },
           {
-            "name": "African Queen",
+            "name": "Robert Is Here",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 20.0,
-            "spoken": "Billboard: Key Largo is ahead, where the actual African Queen from the movie still runs canal tours. Bogart is not included."
+            "at_mi": 19.5,
+            "spoken": "Billboard: Robert Is Here is the famous fruit stand at the edge of the Everglades. It sells key limes and milkshakes beneath a boy's name that outgrew him.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cutler Bay",
@@ -27121,20 +27122,6 @@
             "spoken": "Entering Florida City"
           },
           {
-            "name": "Theater of the Sea",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 40.0,
-            "spoken": "Billboard: Theater of the Sea is ahead in Islamorada. Visitors have swum with dolphins in this old coral quarry since the nineteen forties."
-          },
-          {
-            "name": "Robbie's of Islamorada",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 42.0,
-            "spoken": "Billboard: Robbie's is ahead. You can feed giant tarpon by hand from the dock, but mind your fingers and the pelicans, who cheat."
-          },
-          {
             "name": "Florida Keys National Marine Sanctuary",
             "category": "protected_area",
             "kind": "zone",
@@ -27156,6 +27143,46 @@
             "spoken": "Billboard: Betsy the giant lobster is ahead. Forty feet of fiberglass crustacean guards an art village, because the Keys do not believe seafood should remain normal-sized."
           },
           {
+            "name": "African Queen",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.2,
+            "spoken": "Billboard: Key Largo is ahead, where the actual African Queen from the movie still runs canal tours. Bogart is not included.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Theater of the Sea",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.0,
+            "spoken": "Billboard: Theater of the Sea is ahead in Islamorada. Visitors have swum with dolphins in this old coral quarry since the nineteen forties.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Robbie's of Islamorada",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 72.0,
+            "spoken": "Billboard: Robbie's is ahead. You can feed giant tarpon by hand from the dock, but mind your fingers and the pelicans, who cheat.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Seven Mile Bridge",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 106.0,
+            "spoken": "Billboard: Seven Mile Bridge is ahead. For seven miles, you get nothing but water on both sides, while the old bridge runs alongside, open again to walkers and bikes as far as Pigeon Key.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Crane Point Museum",
             "category": "museum",
             "kind": "point",
@@ -27166,8 +27193,11 @@
             "name": "Bahia Honda",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 110.0,
-            "spoken": "Billboard: Bahia Honda is ahead, with one of the best beaches in the Keys beneath the broken back of Flagler's old railroad bridge."
+            "at_mi": 111.5,
+            "spoken": "Billboard: Bahia Honda is ahead, with one of the best beaches in the Keys beneath the broken back of Flagler's old railroad bridge.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "No Name Pub",
@@ -27184,13 +27214,6 @@
             "spoken": "Big Pine Key is home to the Key deer, found nowhere else on Earth. Slow down, because they are small and they do not look both ways."
           },
           {
-            "name": "Seven Mile Bridge",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 118.0,
-            "spoken": "Billboard: Seven Mile Bridge is ahead. For seven miles, you get nothing but water on both sides, while the old bridge runs alongside and goes nowhere beautifully."
-          },
-          {
             "name": "Crossing the Seven Mile Bridge",
             "category": "highway_marker",
             "kind": "point",
@@ -27205,18 +27228,21 @@
             "spoken": "Billboard: Key lime pie on a stick is ahead, dipped in chocolate because ordinary pie was insufficiently portable for island traffic."
           },
           {
+            "name": "Southernmost Point",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 152.5,
+            "spoken": "Billboard: Key West has the Southernmost Point in the continental United States, ninety miles from Cuba and one long line of people waiting to be photographed with it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Reaching Key West, the southernmost point in the continental United States",
             "category": "highway_marker",
             "kind": "point",
             "at_mi": 155.0,
             "spoken": "Reaching Key West, the southernmost point in the continental United States"
-          },
-          {
-            "name": "Southernmost Point",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 156.0,
-            "spoken": "Billboard: Key West has the Southernmost Point in the continental United States, ninety miles from Cuba and one long line of people waiting to be photographed with it."
           },
           {
             "name": "Hemingway House",
@@ -28216,15 +28242,21 @@
             "name": "Skunk Ape Research Headquarters",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 30.0,
-            "spoken": "Billboard: Skunk Ape Research Headquarters is ahead. Florida's swamp cousin of Bigfoot smells like rotten eggs, and he is definitely out there. Probably."
+            "at_mi": 24.0,
+            "spoken": "Billboard: Skunk Ape Research Headquarters is ahead. Florida's swamp cousin of Bigfoot smells like rotten eggs, and he is definitely out there. Probably.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Everglades City Stone Crab",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 30.0,
-            "spoken": "Billboard: Everglades City is the stone crab capital. The claws are harvested, the crabs go back to sea, and the mustard sauce has no intention of being optional."
+            "at_mi": 27.0,
+            "spoken": "Billboard: Everglades City is the stone crab capital. The claws are harvested, the crabs go back to sea, and the mustard sauce has no intention of being optional.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Airboat Everglades",
@@ -28234,25 +28266,11 @@
             "spoken": "Billboard: Airboat tours are ahead. You get a flat boat, a giant fan, and a driver who will find you an alligator whether you want one or not."
           },
           {
-            "name": "Clyde Butcher Gallery",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 42.0,
-            "spoken": "Billboard: Clyde Butcher's swamp gallery is ahead. He wades chest-deep into the Everglades with a giant camera to photograph the wilderness in black and white."
-          },
-          {
             "name": "Big Cypress",
             "category": "highway_marker",
             "kind": "point",
             "at_mi": 45.0,
             "spoken": "You are crossing Big Cypress National Preserve, a wet wilderness of dwarf cypress and orchids that guards the western Everglades."
-          },
-          {
-            "name": "Ochopee Post Office",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 45.0,
-            "spoken": "Billboard: America's smallest post office is ahead at Ochopee. It is one tiny shed with one mail carrier and no room whatsoever for packages marked oversized."
           },
           {
             "name": "Big Cypress National Preserve",
@@ -30851,13 +30869,6 @@
             "kind": "zone",
             "at_mi": 47.6,
             "spoken": "Entering Withlacoochee State Forest"
-          },
-          {
-            "name": "The Mermaids of Weeki Wachee",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 55.0,
-            "spoken": "Billboard: Weeki Wachee is the only city of live mermaids. Since nineteen forty-seven, young women in fish tails have performed underwater ballet in a natural spring, breathing from hidden air hoses for the crowd behind the glass. That could only happen in Florida."
           },
           {
             "name": "Ridge Manor",
@@ -35338,7 +35349,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Orlando is where a mouse built a kingdom out of the swamp. Disney World, Universal, and roller coasters stretch as far as the eye can see, and more people visit here than almost anywhere on Earth."
+            "spoken": "Billboard: Orlando is where a mouse built a kingdom out of the swamp. Disney World, Universal, and roller coasters stretch as far as the eye can see, and more people visit here than almost anywhere on Earth.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Orlo Vista",
@@ -35404,6 +35418,16 @@
             "spoken": "Passing Williamsburg"
           },
           {
+            "name": "The Giant Orange",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: A giant orange is ahead. Florida once sold citrus out of fruit big enough to walk into, because normal oranges were apparently not persuasive enough.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Hunters Creek",
             "at_mi": 12.5,
             "off_mi": 4.43,
@@ -35420,13 +35444,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 11698622823, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Celebration"
-          },
-          {
-            "name": "The Giant Orange",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 20.0,
-            "spoken": "Billboard: A giant orange is ahead. Florida once advertised citrus by building fruit large enough to contain a gift shop, because normal oranges were apparently not persuasive enough."
           },
           {
             "name": "Intercession City",
@@ -49068,6 +49085,16 @@
             "spoken": "Passing Connerton"
           },
           {
+            "name": "The Mermaids of Weeki Wachee",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Weeki Wachee is the only city of live mermaids. Since nineteen forty-seven, young women in fish tails have performed underwater ballet in a natural spring, breathing from hidden air hoses for the crowd behind the glass. That could only happen in Florida.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Brooksville",
             "at_mi": 13.9,
             "off_mi": 1.18,
@@ -59014,6 +59041,16 @@
             "spoken": "Passing University"
           },
           {
+            "name": "The Cigar City",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 2.5,
+            "spoken": "Billboard: Tampa is the Cigar City, where Ybor City once rolled the world's cigars by hand. A pirate ship invades the bay each winter for Gasparilla, while beer, roller coasters, and giraffes coexist at Busch Gardens.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Temple Terrace",
             "at_mi": 3.05,
             "off_mi": 5.82,
@@ -59021,13 +59058,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154363165, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Temple Terrace"
-          },
-          {
-            "name": "The Cigar City",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 3.27,
-            "spoken": "Billboard: Tampa is the Cigar City, where Ybor City once rolled the world's cigars by hand. A pirate ship invades the bay each winter for Gasparilla, while beer, roller coasters, and giraffes coexist at Busch Gardens."
           },
           {
             "name": "East Lake",
@@ -62189,7 +62219,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Palm Beach is where mansions face the ocean and old money spends the winter. Come February, baseball teams arrive for spring training in the Grapefruit League, while the lighthouse at Jupiter keeps guarding the coast as it has since before the Civil War."
+            "spoken": "Billboard: Palm Beach is where mansions face the ocean and old money spends the winter. Come February, baseball teams arrive for spring training in the Grapefruit League, while the lighthouse at Jupiter keeps guarding the coast as it has since before the Civil War.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lake Clarke Shores",

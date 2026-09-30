@@ -855,7 +855,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Bakersfield is home to the Bakersfield Sound. Buck Owens and Merle Haggard built a twangier, harder kind of country music here, a world away from Nashville. The Crystal Palace still swings."
+            "spoken": "Billboard: Bakersfield is home to the Bakersfield Sound. Buck Owens and Merle Haggard built a twangier, harder kind of country music here, a world away from Nashville. The Crystal Palace still swings.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lamont",
@@ -4015,6 +4018,16 @@
             "spoken": "Passing Arvin"
           },
           {
+            "name": "The Grapevine (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.0,
+            "spoken": "Billboard: The Grapevine, dead ahead. Commander Cody raced a Hot Rod Lincoln up this grade. Trucks use low gear.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Gorman",
             "at_mi": 45.4,
             "off_mi": 0.06,
@@ -4022,6 +4035,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 1712162876, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Gorman"
+          },
+          {
+            "name": "The Grapevine (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.0,
+            "spoken": "Billboard: The Grapevine, dead ahead. Commander Cody raced a Hot Rod Lincoln up this grade. Trucks use low gear.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Angeles National Forest",
@@ -5467,11 +5490,31 @@
             "spoken": "Passing Daggett"
           },
           {
+            "name": "Alien Fresh Jerky (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.5,
+            "spoken": "Billboard: Alien jerky, next exit. They won't say who the jerky's made from.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Mojave River",
             "category": "river",
             "kind": "point",
             "at_mi": 65.6,
             "spoken": "Crossing the Mojave River"
+          },
+          {
+            "name": "Alien Fresh Jerky (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.7,
+            "spoken": "Billboard: Alien jerky, next exit. They won't say who the jerky's made from.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Primm",
@@ -34028,6 +34071,16 @@
             "spoken": "Entering Angeles National Forest"
           },
           {
+            "name": "The Grapevine (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.0,
+            "spoken": "Billboard: The Grapevine, dead ahead. Commander Cody raced a Hot Rod Lincoln up this grade. Trucks use low gear.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Gorman",
             "at_mi": 68.4,
             "off_mi": 0.07,
@@ -34035,6 +34088,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 1712162876, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Gorman"
+          },
+          {
+            "name": "The Grapevine (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 88.0,
+            "spoken": "Billboard: The Grapevine, dead ahead. Commander Cody raced a Hot Rod Lincoln up this grade. Trucks use low gear.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Weedpatch",
@@ -36029,13 +36092,6 @@
             "spoken": "Crossing the Santa Ana River"
           },
           {
-            "name": "San Gorgonio Windmills",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 65.0,
-            "spoken": "Billboard: A forest of windmills ahead in the San Gorgonio Pass, turning in the same wind that is currently shoving your trailer around. They will not kill your birds, or your fuzzy dice, but they will spin."
-          },
-          {
             "name": "Yucaipa",
             "at_mi": 70.4,
             "off_mi": 2.21,
@@ -36070,6 +36126,16 @@
             "spoken": "Entering Banning"
           },
           {
+            "name": "Hadley's Date Shakes",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 86.5,
+            "spoken": "Billboard: Date shakes ahead at Hadley's. Yes, a milkshake made of dates. Trust the desert. It knows what it is doing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "San Gorgonio River",
             "category": "river",
             "kind": "point",
@@ -36084,11 +36150,24 @@
             "spoken": "Crossing the Whitewater River"
           },
           {
-            "name": "Hadley's Date Shakes",
+            "name": "Cabazon Dinosaurs (westbound)",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 96.0,
-            "spoken": "Billboard: Date shakes ahead at Hadley's. Yes, a milkshake made of dates. Trust the desert. It knows what it is doing."
+            "at_mi": 92.2,
+            "spoken": "Billboard: Dinosaurs, next exit. Concrete, enormous, unbothered by extinction.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "San Gorgonio Windmills",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 93.0,
+            "spoken": "Billboard: A forest of windmills ahead in the San Gorgonio Pass, turning in the same wind that is currently shoving your trailer around. They will not kill your birds, or your fuzzy dice, but they will spin.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Indian Wells",
@@ -45103,6 +45182,16 @@
             "spoken": "Entering Angeles National Forest"
           },
           {
+            "name": "The Grapevine (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.0,
+            "spoken": "Billboard: The Grapevine, dead ahead. Commander Cody raced a Hot Rod Lincoln up this grade. Trucks use low gear.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Tejon Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -45117,6 +45206,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 1712162876, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Gorman"
+          },
+          {
+            "name": "The Grapevine (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 88.4,
+            "spoken": "Billboard: The Grapevine, dead ahead. Commander Cody raced a Hot Rod Lincoln up this grade. Trucks use low gear.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kern River",
@@ -45162,6 +45261,16 @@
             "spoken": "Passing Huron"
           },
           {
+            "name": "Pea Soup Andersen's (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 262.0,
+            "spoken": "Billboard: Pea Soup Andersen's is ahead in Santa Nella. It has served world-famous split pea soup since your grandparents drove this road. Hap-pea and Pea-wee are waiting, and the soup is all you can eat.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Los Banos",
             "at_mi": 265.2,
             "off_mi": 5.3,
@@ -45169,6 +45278,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150943474, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Los Banos"
+          },
+          {
+            "name": "Pea Soup Andersen's (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 283.0,
+            "spoken": "Billboard: Pea Soup Andersen's is ahead in Santa Nella. It has served world-famous split pea soup since your grandparents drove this road. Hap-pea and Pea-wee are waiting, and the soup is all you can eat.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gustine",
@@ -47200,6 +47319,16 @@
             "spoken": "Crossing the Fresno River"
           },
           {
+            "name": "The Underground Gardens",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.0,
+            "spoken": "Billboard: Fresno has a villa hidden beneath the valley heat. A Sicilian immigrant spent forty years digging its courtyards, cool rooms, and citrus groves out of hardpan by hand.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Kerman",
             "at_mi": 43.6,
             "off_mi": 10.78,
@@ -47214,13 +47343,6 @@
             "kind": "point",
             "at_mi": 49.5,
             "spoken": "Crossing the San Joaquin River"
-          },
-          {
-            "name": "The Underground Gardens",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 52.0,
-            "spoken": "Billboard: Fresno has a villa hidden beneath the valley heat. A Sicilian immigrant spent forty years digging its courtyards, cool rooms, and citrus groves out of hardpan by hand."
           },
           {
             "name": "Clovis",
@@ -47953,7 +48075,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 36.0,
-            "spoken": "Billboard: Merced is the gateway to Yosemite. Turn east and climb into the granite cathedral of the Sierra, where waterfalls and cliffs wait about an hour up the road."
+            "spoken": "Billboard: Merced is the gateway to Yosemite. Turn east and climb into the granite cathedral of the Sierra, where waterfalls and cliffs wait about two hours up the road.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Planada",
@@ -67994,11 +68119,31 @@
             "spoken": "Entering Banning"
           },
           {
+            "name": "Cabazon Dinosaurs (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.6,
+            "spoken": "Billboard: Dinosaurs, next exit. Concrete, enormous, unbothered by extinction.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "San Gorgonio Pass",
             "category": "mountain_pass",
             "kind": "point",
             "at_mi": 40.8,
             "spoken": "Approaching San Gorgonio Pass"
+          },
+          {
+            "name": "Cabazon Dinosaurs (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.0,
+            "spoken": "Billboard: Dinosaurs, next exit. Concrete, enormous, unbothered by extinction.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Morongo Valley",
@@ -95270,6 +95415,26 @@
             "spoken": "Entering San Luis Reservoir State Recreation Area"
           },
           {
+            "name": "Pea Soup Andersen's (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.0,
+            "spoken": "Billboard: Pea Soup Andersen's is ahead in Santa Nella. It has served world-famous split pea soup since your grandparents drove this road. Hap-pea and Pea-wee are waiting, and the soup is all you can eat.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pea Soup Andersen's (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 71.0,
+            "spoken": "Billboard: Pea Soup Andersen's is ahead in Santa Nella. It has served world-famous split pea soup since your grandparents drove this road. Hap-pea and Pea-wee are waiting, and the soup is all you can eat.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Dos Palos Y",
             "at_mi": 82.4,
             "off_mi": 0.11,
@@ -98203,13 +98368,6 @@
             "spoken": "Passing Prunedale"
           },
           {
-            "name": "Giant Artichoke",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 15.0,
-            "spoken": "Billboard: You are entering giant artichoke country. Castroville calls itself the Artichoke Center of the World and has supplied enough thorny vegetables to make dip a regional industry."
-          },
-          {
             "name": "Mission Soledad Museum",
             "category": "museum",
             "kind": "point",
@@ -98329,8 +98487,11 @@
             "name": "The Madonna Inn",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 124.0,
-            "spoken": "Billboard: San Luis Obispo is home to the Madonna Inn, a pink palace where every room is a different fever dream. Even the men's room waterfall is a tourist attraction in its own right."
+            "at_mi": 124.5,
+            "spoken": "Billboard: San Luis Obispo is home to the Madonna Inn, a pink palace where every room is a different fever dream. Even the men's room waterfall is a tourist attraction in its own right.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Los Osos",
@@ -128228,18 +128389,21 @@
             "spoken": "Approaching Leppy Pass"
           },
           {
+            "name": "Tree of Utah",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 632.0,
+            "spoken": "Billboard: The Tree of Utah stands ahead on the salt flats, an eighty-seven-foot concrete tree sprouting from the middle of nowhere. How do you suppose this happened?",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Bonneville Salt Flats",
             "category": "highway_marker",
             "kind": "point",
             "at_mi": 690.0,
             "spoken": "Ahead lie the Bonneville Salt Flats, a blinding white plain of hard-packed salt where drivers chase land-speed records. The land is so flat and empty that you can nearly see the curve of Earth, although the speed limit on this road remains disappointingly enforced."
-          },
-          {
-            "name": "Tree of Utah",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 705.0,
-            "spoken": "Billboard: The Tree of Utah stands ahead on the salt flats, an eighty-foot concrete tree sprouting from the middle of nowhere. How do you suppose this happened?"
           },
           {
             "name": "Stansbury Park",
@@ -135790,6 +135954,16 @@
             "spoken": "Passing Las Lomas"
           },
           {
+            "name": "Giant Artichoke",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.5,
+            "spoken": "Billboard: You are entering giant artichoke country. Castroville calls itself the Artichoke Center of the World and has supplied enough thorny vegetables to make dip a regional industry.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pajaro Dunes",
             "at_mi": 51.1,
             "off_mi": 9.72,
@@ -138995,8 +139169,11 @@
             "name": "Bubblegum Alley",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 2.0,
-            "spoken": "Billboard: San Luis Obispo has an entire downtown alley walled from floor to ceiling in decades of chewed bubblegum. It is a landmark you can smell. Bring a piece, or make the healthier choice and do not."
+            "at_mi": 2.2,
+            "spoken": "Billboard: San Luis Obispo has an entire downtown alley walled from floor to ceiling in decades of chewed bubblegum. It is a landmark you can smell. Bring a piece, or make the healthier choice and do not.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Avila Beach",
@@ -149959,6 +150136,16 @@
             "spoken": "Passing Vandenberg Village"
           },
           {
+            "name": "Solvang",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.5,
+            "spoken": "Billboard: Solvang is ahead. A whole Danish village appears in the California hills, complete with windmills, half-timbered houses, warm aebleskiver, and Hans Christian Andersen watching over it all.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Los Olivos",
             "at_mi": 27.2,
             "off_mi": 2.53,
@@ -149991,20 +150178,6 @@
             "kind": "point",
             "at_mi": 30.0,
             "spoken": "Crossing the Santa Ynez River"
-          },
-          {
-            "name": "Split Pea Soup",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 30.0,
-            "spoken": "Billboard: Pea Soup Andersen's is ahead in Buellton. It has served world-famous split pea soup since your grandparents drove this road. Hap-pea and Pea-wee are waiting, and the soup is all you can eat."
-          },
-          {
-            "name": "Solvang",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 32.0,
-            "spoken": "Billboard: Solvang is ahead. A whole Danish village appears in the California hills, complete with windmills, half-timbered houses, warm aebleskiver, and Hans Christian Andersen watching over it all."
           },
           {
             "name": "Solvang",
@@ -170380,6 +170553,16 @@
             "spoken": "Entering Angeles National Forest"
           },
           {
+            "name": "The Grapevine (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.0,
+            "spoken": "Billboard: The Grapevine, dead ahead. Commander Cody raced a Hot Rod Lincoln up this grade. Trucks use low gear.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Gorman",
             "at_mi": 30.4,
             "off_mi": 0.07,
@@ -170394,6 +170577,16 @@
             "kind": "point",
             "at_mi": 31.7,
             "spoken": "Approaching Tejon Pass"
+          },
+          {
+            "name": "The Grapevine (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.5,
+            "spoken": "Billboard: The Grapevine, dead ahead. Commander Cody raced a Hot Rod Lincoln up this grade. Trucks use low gear.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Arvin",

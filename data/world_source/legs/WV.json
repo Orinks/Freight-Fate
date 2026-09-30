@@ -24603,6 +24603,16 @@
             "spoken": "Passing Summersville"
           },
           {
+            "name": "The New River Gorge Bridge",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 141.0,
+            "spoken": "Billboard: New River Gorge is ahead. Its great steel arch was the longest in the Western Hemisphere when it opened, and once a year they let people leap off it with parachutes.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fayetteville",
             "at_mi": 147.1,
             "off_mi": 0.3,
@@ -24610,13 +24620,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154050828, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Fayetteville"
-          },
-          {
-            "name": "The New River Gorge Bridge",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 150.0,
-            "spoken": "Billboard: New River Gorge is ahead. Its great steel arch was the longest in the Western Hemisphere when it opened, and once a year they let people leap off it with parachutes."
           },
           {
             "name": "Oak Hill",

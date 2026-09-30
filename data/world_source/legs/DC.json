@@ -3854,13 +3854,6 @@
             "spoken": "Entering Brandy Station"
           },
           {
-            "name": "Dinosaur Land",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 75.43,
-            "spoken": "Billboard: Dinosaur Land is ahead. Fiberglass monsters have ruled this Virginia roadside since your grandparents were children, and extinction has not slowed ticket sales."
-          },
-          {
             "name": "Brightwood",
             "at_mi": 92.24,
             "off_mi": 0.07,
@@ -3930,8 +3923,11 @@
             "name": "Monticello",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 120.69,
-            "spoken": "Billboard: Charlottesville is home to Thomas Jefferson's Monticello, the hilltop house he designed and redesigned throughout his life. His university lies below, and both places wound up on the back of the nickel."
+            "at_mi": 120.7,
+            "spoken": "Billboard: Charlottesville is home to Thomas Jefferson's Monticello, the hilltop house he designed and redesigned throughout his life. His university lies below, and the house wound up on the back of the nickel.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
