@@ -708,8 +708,9 @@ impl SettingsCategoryState {
              help; lane changes and speed are yours. Off drifts like a \
              real wheel; bends are yours unless curve assistance is \
              on, and every exit needs its signal and its exit lane. On partial \
-             or off the road sound leans toward where the wheel should \
-             go, and the road edge answers: a stutter clipping the \
+             or off the engine leans toward where the wheel should go, the \
+             road sound sits where you are in your lane, and the road edge \
+             answers: a stutter clipping the \
              rumble strip, a buzz fully on it, gravel off the pavement. \
              Realistic sets this off, Balanced partial, All assists \
              full.",

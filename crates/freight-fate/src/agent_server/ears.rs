@@ -51,8 +51,8 @@ fn pan_text(pan: f64) -> &'static str {
 ///
 /// A one-shot says its side once and is done, but the road bed and the engine
 /// are panned EVERY FRAME, and together they are the whole steering instrument
-/// with lane keeping off: the bed leans toward where the wheel should go, and
-/// the engine sits where the truck is in its lane. Reporting either raw would
+/// with lane keeping off: the engine leans toward where the wheel should go,
+/// and the bed sits where the truck is in its lane. Reporting either raw would
 /// bury the transcript; reporting neither -- which is what this did until
 /// 2026-09-18 -- left an agent deaf to the one channel it was asked to test.
 /// Quantised to quarters, a slewing guide reports about as often as a player
@@ -597,8 +597,8 @@ mod tests {
 
     #[test]
     fn the_steering_guide_reaches_an_agents_ears() {
-        // With lane keeping off the road bed leans toward where the wheel
-        // should go and the engine sits where the truck is in its lane. Those
+        // With lane keeping off the engine leans toward where the wheel
+        // should go and the road bed sits where the truck is in its lane. Those
         // two are the whole instrument, and an agent asked to test steering
         // heard NEITHER until 2026-09-18: one-shots reported their side, but
         // the continuous pans went straight through to the backend.

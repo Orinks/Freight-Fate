@@ -362,6 +362,29 @@ fn test_no_settings_row_carries_a_run_of_spaces() {
 }
 
 #[test]
+fn test_no_settings_help_teaches_steering_by_the_road_sound() {
+    // The engine became the lean on 2026-09-18 and the road sound became
+    // where the truck sits, but the Lane keeping help went on saying the
+    // road sound leans toward the steer -- so a driver who followed it
+    // steered the wrong way out of every corner (forum report, 2026-09-30).
+    let mut app = TestApp::new();
+    let rows = all_settings_rows(&mut app);
+    let wrong: Vec<_> = rows
+        .iter()
+        .filter(|(_, _, help)| help.contains("road sound leans"))
+        .collect();
+    assert!(wrong.is_empty(), "{wrong:?}");
+    let (_, _, lane_help) = rows
+        .iter()
+        .find(|(_, label, _)| label.starts_with("Lane keeping"))
+        .expect("the Lane keeping row");
+    assert!(
+        lane_help.contains("engine leans toward where the wheel should go"),
+        "{lane_help}"
+    );
+}
+
+#[test]
 fn test_every_gameplay_setting_stays_reachable_after_the_split() {
     let mut app = TestApp::new();
     let rows = all_settings_rows(&mut app);

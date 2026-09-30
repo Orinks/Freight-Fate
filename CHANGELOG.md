@@ -177,6 +177,8 @@
 
 ### Fixed
 
+- **The Lane keeping help now teaches the engine lean.** It used to say steer by the road sound, which only tells you where you sit in your lane.
+
 - **The day a CDL suspension clears now matches the calendar you hear.** It never names a day already past, and a year-long one says next year.
 
 - **With JAWS, a held arrow keeps working when you tap another key.** Hold Up and tap Space for your speed, and the truck keeps accelerating.

@@ -99,7 +99,7 @@ pub const TURN_NOW_MI: f64 = 0.05;
 pub const TURN_GUIDE_LEAD_MI: f64 = ff_core::sim::turn_guide::LEAD_MI;
 pub const TURN_GUIDE_DEMAND: f64 = 0.9;
 /// An exit ramp peels right; the lane model already pushes the truck that way,
-/// so the road bed leans with it instead of sitting dead centre.
+/// so the engine leans with it instead of sitting dead centre.
 pub const RAMP_GUIDE_DEMAND: f64 = 0.45;
 
 /// `_is_judged_turn(cue)`: a baked street maneuver with a real side to it.
