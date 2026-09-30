@@ -277,7 +277,27 @@ pub mod live {
         static GATE_STOP_PROMPTED: Cell<bool> = const { Cell::new(false) };
         static ON_RAMP: Cell<bool> = const { Cell::new(false) };
         static RAMP_HOLDING: Cell<bool> = const { Cell::new(false) };
+        static MOVE_LOCKOUT: Cell<u8> = const { Cell::new(0) };
     }
+
+    /// What is stopping the truck moving under its own throttle, if
+    /// anything: 0 nothing, then [`LOCKOUT_ENGINE_OFF`], [`LOCKOUT_AIR`],
+    /// [`LOCKOUT_PARKING_BRAKE`]. The lockout's queued line speaks only
+    /// while its own reason still holds: queued behind other speech, "Parking
+    /// brake set. Press P to release it." spoke after the brake was off and
+    /// the truck rolling, and pressing P there slams the spring brakes on
+    /// (agent drive out of Aberdeen Company Yard, 2026-09-30).
+    pub fn set_move_lockout(value: u8) {
+        MOVE_LOCKOUT.with(|cell| cell.set(value));
+    }
+
+    pub fn move_lockout() -> u8 {
+        MOVE_LOCKOUT.with(|cell| cell.get())
+    }
+
+    pub const LOCKOUT_ENGINE_OFF: u8 = 1;
+    pub const LOCKOUT_AIR: u8 = 2;
+    pub const LOCKOUT_PARKING_BRAKE: u8 = 3;
 
     /// Whether the truck has left the mainline for a ramp. A mainline line
     /// ("Speed limit raised to 75") cut by the take line is about a road

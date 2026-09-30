@@ -699,6 +699,15 @@ impl DrivingState {
         live::set_position_mi(self.trip.position_mi);
         live::set_speed_mph(self.trip.truck.speed_mph());
         live::set_hazard_active(self.hazard_deadline.is_some());
+        live::set_move_lockout(if !self.trip.truck.engine_on {
+            live::LOCKOUT_ENGINE_OFF
+        } else if !self.trip.truck.air_ready() {
+            live::LOCKOUT_AIR
+        } else if self.trip.truck.parking_brake {
+            live::LOCKOUT_PARKING_BRAKE
+        } else {
+            0
+        });
         live::set_arrival_menu_open(self.arrival_menu_open);
         live::set_gate_stop_prompted(self.arrival_full_stop_said);
         live::set_on_ramp(self.ramp_mi.is_some());

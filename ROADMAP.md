@@ -54,13 +54,16 @@ bookmarks usable.
       outlived every key -- a tap left a drift, a hold kept turning, an
       unwind after a corner crossed into the next lane. Lane position stays
       the driver's on lane keeping off.
-- [ ] (Found along the way) The first corner out of Aberdeen Company Yard,
-      right at the gate, was failed as too fast with the speed keeper
-      holding 25 mph at the time (owner's drive, 2026-09-30); on the
-      loop-back the keeper eased for it. Cause not confirmed: the keeper
-      skips a corner the truck has reached but not yet been judged on
-      (`keeper_speed_ahead`), which is one candidate; a drive with speed in
-      the log would settle it.
+- [x] (Found along the way) The first corner out of Aberdeen Company Yard,
+      right at the gate, was failed as too fast (owner's drive, 2026-09-30).
+      Reproduced over the agent MCP: not a keeper fault. Setting the parking
+      brake at the yard cancels speed control, so nothing eased the truck,
+      and reaching the 10 mph corner at 18 on the throttle is a miss by the
+      rule; with the keeper left running it eases and takes the corner at 9.
+      The reproduction found a real fault instead: the lockout's queued
+      "Parking brake set. Press P to release it." was handed back after the
+      brake was released and spoke, interrupting, with the truck rolling.
+      The three lockout lines now speak only while their own reason holds.
 
 - [x] A hold toward a signed turn follows the road (owner, 2026-09-30): a
       held key was about twice the wheel a city corner wants, on top of
@@ -278,9 +281,6 @@ into the release gate. Details stay in the linked dated sections, marked
 Everything found before 2026-09-25 moved to
 [2.0](#found-along-the-way-in-19-moved-to-20) that day.
 
-- [ ] The first corner at a yard gate was failed as too fast with the speed
-      keeper holding the street's limit; cause unconfirmed
-      ([1.9 in flight](#19-in-flight-featcareer-19)).
 - [ ] Interchange connector arcs have no curvature in the lane model; with
       lane keeping and curve assistance both off their lean asks for
       steering the lane cannot answer ([1.9 in flight](#19-in-flight-featcareer-19)).

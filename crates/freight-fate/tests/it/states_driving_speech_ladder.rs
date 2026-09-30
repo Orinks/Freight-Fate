@@ -1211,8 +1211,8 @@ fn call_is_tagged(call: &SayEventCall) -> bool {
         return true;
     }
     // The options are the last argument. When it is a plain binding --
-    // `opts`, or `opts()` for the closure form -- follow it back to where it
-    // was built or assigned inside this function.
+    // `opts`, or `opts()` / `opts(reason)` for the closure form -- follow it
+    // back to where it was built or assigned inside this function.
     // A multi-line call ends with a trailing comma, so the last split piece is
     // whitespace: take the last one that is not.
     let Some(last) = call
@@ -1223,7 +1223,7 @@ fn call_is_tagged(call: &SayEventCall) -> bool {
     else {
         return false;
     };
-    let name = last.trim_end_matches("()").trim();
+    let name = last.split('(').next().unwrap_or(last).trim();
     if name.is_empty() || !name.chars().all(|c| c.is_alphanumeric() || c == '_') {
         return false;
     }
