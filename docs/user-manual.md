@@ -689,6 +689,7 @@ wherever the pad has one.
 | V | Report weather and forecast. |
 | L | Report which lane you are in, whether you are centered, drifting, or at an edge, and whether the lane beside you is open or blocked. |
 | Left / Right arrow | With lane keeping on partial or off, steer; steer across the line to change lanes. With lane keeping on full, tap to change one lane in that direction -- the signal clicks and the change is announced. |
+| Slash, hold | Straighten up. With lane keeping on partial or off, the truck squares itself with the road and stops drifting across the lane, wherever in the lane it is. Steer back to center first, then hold Slash to stay there. |
 | A | Repeat the last route announcement -- the last thing with consequences -- even if other speech came after it. |
 | Alt+C | Repeat the last CB chatter, with the distance as it is now. Once you have passed what the CB called, it says so instead. |
 | U | Report the road ahead that no other key answers: the exit your signal is on for, first, then the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that will demand slowing, with its advisory speed. Four short clauses at the most. It does not report police activity -- enforcement reaches you on the CB. |

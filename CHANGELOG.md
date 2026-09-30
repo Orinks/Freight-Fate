@@ -183,6 +183,8 @@
 
 ### Fixed
 
+- **The manual now lists Slash, Straighten up.** Hold it to stop the truck drifting across the lane.
+
 - **The Lane keeping help now teaches the engine lean.** It used to say steer by the road sound, which only tells you where you sit in your lane.
 
 - **The day a CDL suspension clears now matches the calendar you hear.** It never names a day already past, and a year-long one says next year.
