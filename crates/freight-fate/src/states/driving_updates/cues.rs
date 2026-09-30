@@ -304,7 +304,7 @@ impl DrivingState {
     ///
     /// The lane locator answers "where am I" on demand. This answers it for
     /// the length of a move being made right now, with no key to remember:
-    /// a panned relay-click recording, keeping time from the moment the wheel goes
+    /// a panned turn-signal relay, keeping time from the moment the wheel goes
     /// over until the move is done.
     ///
     /// An exit signal has a steady beat on the right, independent of steering
@@ -339,8 +339,8 @@ impl DrivingState {
             if ctx.audio.cue_held(STEER_CUE_HOLD) {
                 ctx.audio.release_cue(STEER_CUE_HOLD);
                 let volume = 1.0f64.min(STEER_CUE_CANCEL_VOL * self.cue_loudness(ctx));
-                // centred and quieter: the signal off, not the signal on
-                ctx.audio.play_with("vehicle/signal_tone", volume, 0.0);
+                // centred and quieter: the stalk clicking back, not the signal on
+                ctx.audio.play_with("vehicle/turn_signal_off", volume, 0.0);
             }
             return;
         }

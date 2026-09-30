@@ -59,6 +59,8 @@
 
 ### Changed
 
+- **The turn signal ticks and tocks like a real flasher, and clicks off when the move ends.**
+
 - **Downshifting a manual with the clutch held matches revs.** The engine follows the truck's speed down instead of dropping to idle, so letting the clutch out is smooth.
 
 - **A manual no longer stalls while you brake to a stop in a tall gear.** Coming off the brake at a standstill in that gear still stalls it.

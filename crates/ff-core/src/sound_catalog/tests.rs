@@ -229,6 +229,7 @@ fn test_a_folder_glob_excludes_the_whole_folder() {
 // name here in the same change.
 const SETTINGS_GATED_ENTRIES: &[&str] = &[
     "Mechanical blinker",
+    "Blinker off",
     "The engine lean",
     "Where you sit in the lane",
     "Rumble strip, clipped",

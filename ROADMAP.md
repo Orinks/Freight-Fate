@@ -308,6 +308,14 @@ Everything found before 2026-09-25 moved to
       and "Tap Right" on the exit approach, and the one-time "Hours of
       service moved to Alt A, Alt S, and Alt D" notice. All three read the
       bindings now (2026-09-28).
+- [x] The blinker recording was 1.6 s of clicks that the game could only
+      restart on its next 0.9 s beat, so every fourth click landed about
+      0.1 s late. `vehicle/turn_signal` is now one flasher cycle (tick, then
+      tock 0.45 s later, 0.7 s long) rendered with genny from
+      `sound-test/turn_signal.json`, and the steering cue and a canceled
+      exit blinker end on a new stalk click, `vehicle/turn_signal_off`,
+      where the steering cue used to borrow the signal tone (owner's pick by
+      ear, 2026-09-29).
 
 ### Release gate record
 
@@ -2225,8 +2233,8 @@ Deferred out of 1.9 (owner call 2026-08-10) rather than bolting a blinker
 onto exit signalling.
 
 - [ ] **A blinker for surface-street maneuvers.** X signals an announced
-      highway exit and plays one panned `vehicle/signal_tone`; nothing
-      signals a street corner. The map is not the blocker -- baked tier-1
+      highway exit and starts the blinker; nothing signals a street
+      corner. The map is not the blocker -- baked tier-1
       maneuvers already carry direction and distance, which is what feeds
       the `events/turn_left` and `turn_right` earcons. What is missing is
       the turn as a continuous act. `LaneKeeping` has carried a heading
@@ -2236,13 +2244,12 @@ onto exit signalling.
       the surface-intersection work (1.9, `docs/surface-roads-plan.md`
       phase 4) leaves behind. The self-cancel half of that now exists:
       `_update_steering_lane_cue` holds a cue on the audio clock's dead
-      man's switch and ends it with a centred, quieter `vehicle/signal_tone`.
+      man's switch and ends it with a centred, quieter
+      `vehicle/turn_signal_off`, the stalk clicking back (2026-09-29).
       Borrow it rather than building a second one.
-- [ ] **Decide the two orphan sound assets in the same change.**
-      `vehicle/turn_signal` is the repeating tick this feature wants and
-      has never been wired to anything. `vehicle/lane_drift` is dead for a
-      different reason -- the edge ladder took its job -- so it is a
-      deletion, not a wiring job.
+- [ ] **Delete the orphan `vehicle/lane_drift` in the same change.** It is
+      dead because the edge ladder took its job. (`vehicle/turn_signal`, the
+      other asset this bullet once named, has been wired since 2026-09-10.)
 
 
 ### Street traffic controls

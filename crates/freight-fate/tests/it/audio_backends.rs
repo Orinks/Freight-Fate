@@ -246,6 +246,7 @@ fn test_asset_length_matches_a_real_decode_of_the_same_clip() {
         "driver/yawn",
         "events/spike_strip",
         "vehicle/signal_tone",
+        "vehicle/turn_signal_off",
         "vehicle/bar_solid",
     ] {
         let decoded = shipped_duration_s(key).unwrap();

@@ -128,9 +128,15 @@ impl DrivingState {
                 );
                 return;
             }
+            let was_blinking = self.exit_blinker_on();
             self.exit_signal_on = false;
             ctx.audio.release_cue("vehicle/turn_signal");
             ctx.audio.release_cue(STEER_CUE_HOLD);
+            if was_blinking {
+                // The stalk clicking back, as when the steering cue ends.
+                let volume = 1.0f64.min(STEER_CUE_CANCEL_VOL * self.cue_loudness(ctx));
+                ctx.audio.play_with("vehicle/turn_signal_off", volume, 0.0);
+            }
             self.steer_cue_active = false;
             self.steer_cue_hold_s = 0.0;
             self.exit_cancel_armed = false;

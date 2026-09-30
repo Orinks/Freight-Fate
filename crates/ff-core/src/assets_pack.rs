@@ -984,16 +984,21 @@ mod tests {
         // cues from 2026-08-20 regenerated through the ElevenLabs Sound
         // Effects API and merged in, 162 -> 173 entries, the prior 162 kept
         // byte for byte.
-        assert_eq!(pack_bytes.len(), 8_278_280);
+        //
+        // Repacked 2026-09-29 (the blinker): vehicle/turn_signal.ogg replaced
+        // by one synthesized flasher cycle and vehicle/turn_signal_off.ogg
+        // added, both from sound-test/turn_signal.json; 173 -> 174 entries,
+        // the other 172 kept byte for byte.
+        assert_eq!(pack_bytes.len(), 8_263_717);
         assert!(pack_bytes.starts_with(PACK_MAGIC));
         use sha2::{Digest, Sha256};
         let digest = hex::encode(Sha256::digest(&pack_bytes));
         assert_eq!(
             digest,
-            "33e35cab8258f5eccaf5553d698ffcfca24d65e986bd579f24579250a981bae6"
+            "de9e39c951ef69d661fcee9e448579d57596f30585b31a337de312ca2c40c712"
         );
         let pack = SoundPack::open(&path).unwrap();
-        assert_eq!(pack.names().len(), 173);
+        assert_eq!(pack.names().len(), 174);
     }
 
     #[test]

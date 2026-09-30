@@ -118,6 +118,11 @@ def test_pack_is_deterministic(tmp_path):
 def test_committed_pack_has_freight_fate_header():
     assert assets_pack.DEFAULT_PACK_PATH.exists()
     pack_bytes = assets_pack.DEFAULT_PACK_PATH.read_bytes()
+    # Repacked 2026-09-29 (the blinker): vehicle/turn_signal.ogg replaced by
+    # one synthesized flasher cycle and vehicle/turn_signal_off.ogg added,
+    # both from sound-test/turn_signal.json; 173 -> 174 entries, the other
+    # 172 preserved byte for byte.
+    #
     # Repacked 2026-09-11 (traffic cues): the eleven pass and crossing cues
     # added on 2026-08-20 (pickup, motorcycle, bus, tractor passes; car,
     # pickup, box truck, semi, motorcycle, bus, tractor crossings) were
@@ -140,10 +145,10 @@ def test_committed_pack_has_freight_fate_header():
     #
     # Repacked 2026-08-14 (weigh-station warning earcon): added the procedural
     # events/weigh_station_warning.ogg cue, taking the pack 159 -> 160.
-    assert len(pack_bytes) == 8_278_280
+    assert len(pack_bytes) == 8_263_717
     assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
     assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "33e35cab8258f5eccaf5553d698ffcfca24d65e986bd579f24579250a981bae6"
+        "de9e39c951ef69d661fcee9e448579d57596f30585b31a337de312ca2c40c712"
     )
 
 
