@@ -48,6 +48,48 @@ bookmarks usable.
       Lane guide sound rows and says which way the lean points and what
       carries it; it used to teach steering by the road sound.
 
+- [x] Letting go straightens (owner, 2026-09-30): with no steer key held
+      the truck squares itself with the road in every manual mode, the
+      straighten-up key's law built in. The heading a driver cannot see had
+      outlived every key -- a tap left a drift, a hold kept turning, an
+      unwind after a corner crossed into the next lane. Lane position stays
+      the driver's on lane keeping off.
+- [ ] (Found along the way) The first corner out of Aberdeen Company Yard,
+      right at the gate, was failed as too fast with the speed keeper
+      holding 25 mph at the time (owner's drive, 2026-09-30); on the
+      loop-back the keeper eased for it. Cause not confirmed: the keeper
+      skips a corner the truck has reached but not yet been judged on
+      (`keeper_speed_ahead`), which is one candidate; a drive with speed in
+      the log would settle it.
+
+- [x] A hold toward a signed turn follows the road (owner, 2026-09-30): a
+      held key was about twice the wheel a city corner wants, on top of
+      curve assistance's own, so holding into a turn left the road. A hold
+      that starts toward the turn in play now hands over the road's own
+      wheel until it is released; steering away stays literal. The cost,
+      accepted: no cutting to the inside lane mid-turn.
+
+- [x] The engine lean asks for the wheel only where the wheel is the
+      driver's (owner ruling, 2026-09-30, narrowing 2026-09-18): with curve
+      assistance or partial lane keeping steering a bend, ramp curve or
+      corner, it carries drift alone; full lane keeping keeps the road's
+      shape. Street corners bend the lane model's road over their WB-67 arc,
+      so steering into one tracks it instead of crossing the lane (forum
+      report 448).
+- [ ] (Found along the way) Interchange connector arcs still have no
+      curvature in the lane model, so with lane keeping off and curve
+      assistance off their lean asks for steering the lane cannot answer.
+
+- [x] The driver's steer asks for a heading, not a turning rate (owner,
+      2026-09-30): players could not hold the lane centered because every
+      press was a full 0.2 g turn whose heading outlived the key, so a tap
+      left a drift and a two-second hold built eleven degrees and ran
+      through the next lane into the median. A key now asks for the heading
+      that crosses a lane in `LANE_CHANGE_S` (the full-mode tap change's
+      2.5 s), a stick for its share of it, and letting go asks for none. A
+      first try that ramped the key's lateral g over a measured tap time was
+      replaced the same day; the heading limit makes a tap a nudge by itself.
+
 - [x] One-time Driving assistance picker before the main menu (owner,
       2026-09-30): every player, fresh install or existing, answers it once;
       the cursor starts on their current preset, Escape keeps it, and a
@@ -236,6 +278,12 @@ into the release gate. Details stay in the linked dated sections, marked
 Everything found before 2026-09-25 moved to
 [2.0](#found-along-the-way-in-19-moved-to-20) that day.
 
+- [ ] The first corner at a yard gate was failed as too fast with the speed
+      keeper holding the street's limit; cause unconfirmed
+      ([1.9 in flight](#19-in-flight-featcareer-19)).
+- [ ] Interchange connector arcs have no curvature in the lane model; with
+      lane keeping and curve assistance both off their lean asks for
+      steering the lane cannot answer ([1.9 in flight](#19-in-flight-featcareer-19)).
 - [x] Player builds carried the agent server: `freightfate --agent-server
       --online` copied the driver's identity into a session with cloud
       backups on, where `scenario` sets any level, money or credentials. It

@@ -688,8 +688,8 @@ wherever the pad has one.
 | Alt+4 | Report the direction you are travelling, as the shields sign it -- "Eastbound". A city street has no signed direction and it says so. |
 | V | Report weather and forecast. |
 | L | Report which lane you are in, whether you are centered, drifting, or at an edge, and whether the lane beside you is open or blocked. |
-| Left / Right arrow | With lane keeping on partial or off, steer; steer across the line to change lanes. With lane keeping on full, tap to change one lane in that direction -- the signal clicks and the change is announced. |
-| Slash, hold | Straighten up. With lane keeping on partial or off, the truck squares itself with the road and stops drifting across the lane, wherever in the lane it is. Steer back to center first, then hold Slash to stay there. |
+| Left / Right arrow | With lane keeping on partial or off, steer; steer across the line to change lanes. Hold to move across the lane: the truck angles over only as far as a lane change needs, so it crosses a lane in about two and a half seconds however long you hold, and a tap is a nudge. Let go and the truck squares itself with the road and stays where you put it in the lane, so there is no wheel to unwind. Once a bend, ramp curve or street corner has been called, hold the arrow toward the turn and the truck follows the road and keeps its lane -- straight until the turn begins, round with it, straight after -- until you let go; steering away still widens. On a controller the left stick steers as far as you push it, and pushed toward a called turn it follows the road the same way. With lane keeping on full, tap to change one lane in that direction -- the signal clicks and the change is announced. |
+| Slash, hold | Straighten up. With lane keeping on partial or off, the truck squares itself with the road and stops drifting across the lane, wherever in the lane it is. Letting go of the arrows does the same; Slash does it while you keep another key held. |
 | A | Repeat the last route announcement -- the last thing with consequences -- even if other speech came after it. |
 | Alt+C | Repeat the last CB chatter, with the distance as it is now. Once you have passed what the CB called, it says so instead. |
 | U | Report the road ahead that no other key answers: the exit your signal is on for, first, then the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that will demand slowing, with its advisory speed. Four short clauses at the most. It does not report police activity -- enforcement reaches you on the CB. |
@@ -914,10 +914,16 @@ crossing a lane line's markers.
 
 ### Steer toward the lean
 
-The engine leans toward the way to
-steer: into a bend as it arrives and through it, and into a street corner as
-you reach it. Hold the arrow that way and the engine comes back to the middle
-as the truck comes round. This is the one cue you follow rather than avoid --
+The engine leans toward the way to steer, and only when the steering is
+yours. With lane keeping off and curve assistance off, it leans into a bend as
+it arrives and through it, and into a street corner as you reach it. Hold the
+arrow that way and the engine comes back to the middle as the truck comes
+round. With curve assistance on, or lane keeping on partial, the truck takes
+the bends and corners itself, so the engine leans only when you drift; the
+co-driver still names each bend. Holding the arrow into a turn is safe either
+way: the truck follows the road until you let go. On full, the engine leans for the bends and
+corners ahead so you hear the road's shape, but your arrow keys change lanes
+there and never steer. This is the one cue you follow rather than avoid --
 every other panned cue comes from the side you are drifting toward and you
 steer away from it. Small, held corrections. Sawing at the wheel bounces you
 across the lane line, and you will hear the marker thump each time; that

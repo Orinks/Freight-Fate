@@ -125,7 +125,7 @@ pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 12] = [
     (
         "curve_speed_assist",
         "Curve assistance",
-        "Takes mapped bends for you: slows to the advised speed on the service brakes, never the engine brake, and holds the wheel through the bend. On a real downgrade it does raise the jake. Lane keeping is a separate setting and holds you between the lines the rest of the time.",
+        "Takes mapped bends for you: slows to the advised speed on the service brakes, never the engine brake, and holds the wheel through the bend and through street corners. On a real downgrade it does raise the jake. While it steers, the engine leans only when you drift. Lane keeping is a separate setting and holds you between the lines the rest of the time.",
     ),
     (
         "route_transition_assist",

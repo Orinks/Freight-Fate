@@ -22,18 +22,20 @@ use crate::states::driving_updates::{
 impl DrivingState {
     pub fn update_lane(&mut self, ctx: &mut GameContext, dt: f64) {
         let mode = ctx.settings.lane_keeping.clone();
-        let mut steer = 0.0;
+        let mut key_dir = 0i8;
         if ctx.bindings.pressed(&ctx.input, Action::SteerLeft) {
-            steer -= 1.0;
+            key_dir -= 1;
         }
         if ctx.bindings.pressed(&ctx.input, Action::SteerRight) {
-            steer += 1.0;
+            key_dir += 1;
         }
         // The left stick provides analog steering when the keys are idle.
-        if steer == 0.0 && ctx.controller.active() && ctx.controller.steering() != 0.0 {
-            steer = ctx.controller.steering();
-        }
-        self.lane.steering = steer;
+        let stick = if ctx.controller.active() {
+            ctx.controller.steering()
+        } else {
+            0.0
+        };
+        self.lane.steer_input(key_dir, stick);
         self.lane.straighten = ctx.bindings.pressed(&ctx.input, Action::Straighten);
         // The exit ramp is a single lane; the mainline keeps its leg count.
         self.lane_before_narrow = Some(self.lane.lane);
@@ -409,12 +411,18 @@ impl DrivingState {
                 )
             })
             .unwrap_or(0.0);
+        // A street corner bends the lane's road as well, added here and not
+        // above so the bend and ramp speed assists read what they always did
+        // (`street_corner_curvature`).
         let road = RoadConditions {
-            curvature: curve,
+            curvature: curve + self.street_corner_curvature(),
             wind,
             grip,
             bank,
         };
+        // The turn a hold toward follows the road for, from its call on
+        // (`hold_turn_side`, `LaneKeeping::turn_in_play`).
+        self.lane.turn_in_play = self.hold_turn_side();
         let off_road_event = self.lane.update(dt, speed_mps, road, &mode, takes_the_bend);
         if off_road_event {
             // The shoulder costs the truck whether or not anything warns about

@@ -400,7 +400,8 @@ pub const UNLOADING_WAIT_S: f64 = 1.5;
 // on, holding the wheel across the lane line is the lane change; with assist
 // off, a Left/Right arrow tap runs a timed change with signal clicks.
 pub const LANE_MIN_MPH: f64 = 10.0; // below this there is nothing to steer
-pub const LANE_TAP_CHANGE_S: f64 = 2.5; // assist-off timed drift across the line
+                                    // A full-lane-keeping tap change, and the pace a held key crosses a lane at.
+pub const LANE_TAP_CHANGE_S: f64 = ff_core::sim::lane::LANE_CHANGE_S;
 pub const LANE_SIGNAL_CLICK_S: f64 = 0.45; // turn-signal cadence during a tap change
 pub const MERGE_WINDOW_S: f64 = 8.0; // time to vacate a coned-off lane after the warning
 pub const MERGE_BARRELS_DAMAGE: f64 = 0.25; // collision severity for riding into the barrels

@@ -31,7 +31,19 @@ pub const OFF_ROAD_GRACE_S: f64 = 2.0;
 pub const OFF_ROAD_REPEAT_S: f64 = 3.0;
 pub const WANDER_RATE: f64 = 0.05;
 pub const WIND_RATE: f64 = 0.10;
-pub const STEER_RATE: f64 = 0.55;
+/// How long a held steer key takes to carry the truck a whole lane over,
+/// seconds: the full-lane-keeping tap change's own 2.5 (`LANE_TAP_CHANGE_S`
+/// in the game reads this).
+///
+/// A held key asks for a HEADING, never a turning rate (owner, 2026-09-30).
+/// As a rate, a key that stayed down kept turning the truck -- two seconds at
+/// forty built eleven degrees, and letting go at the capped 0.2 g took two
+/// more seconds and another lane to straighten out, into the median. Asked
+/// for as a heading, a hold angles the truck over at most enough to cross a
+/// lane in this long, however long it is held, and letting go takes out a
+/// few degrees in well under a second. A tap never gets near the angle, so it
+/// is a nudge by itself.
+pub const LANE_CHANGE_S: f64 = 2.5;
 
 // -- heading ------------------------------------------------------------------
 //
@@ -118,12 +130,12 @@ pub const FPS_PER_MPH: f64 = 1.466_667;
 pub const G_FPS2: f64 = 32.174;
 
 /// Only the modes where the driver does the lane work have a drift model.
-/// "full" is absent on purpose: it pins the offset to lane centre.
-/// `(drift multiplier, steer multiplier)`.
-pub fn assist_tuning(assist: &str) -> Option<(f64, f64)> {
+/// "full" is absent on purpose: it pins the offset to lane centre. The
+/// multiplier scales the wander.
+pub fn assist_tuning(assist: &str) -> Option<f64> {
     match assist {
-        "partial" => Some((0.45, 1.35)),
-        "off" => Some((1.0, 1.0)),
+        "partial" => Some(0.45),
+        "off" => Some(1.0),
         _ => None,
     }
 }
@@ -218,6 +230,20 @@ pub struct LaneKeeping {
     /// the heading half of partial lane keeping's law. It points the truck
     /// down the road and leaves where it sits in the lane to the driver.
     pub straighten: bool,
+    /// The side of the signed turn in play -- a bend the road warns about,
+    /// a ramp curve, a street corner, from its lead to its end: -1 left,
+    /// 1 right, 0 none. The driving state sets it every frame.
+    ///
+    /// A hold toward it follows the road (owner, 2026-09-30). Holding into
+    /// a turn is every driver's instinct, and a held key is far more wheel
+    /// than a corner wants -- twice it at city speed, on top of curve
+    /// assistance's own when that is on -- so the owner held right into a
+    /// right turn and left the road. A hold that starts toward the turn asks
+    /// for the road's own wheel instead: straight on until the turn begins,
+    /// round with it, straight again after, until the key is let go.
+    pub turn_in_play: f64,
+    /// The side a hold is following the road toward, 0 when it is not.
+    following: f64,
     pub lane: i64, // everyone starts in the right lane
     pub lane_count: i64,
     pub crossed: i64, // last update's lane change: +1 left, -1 right
@@ -259,6 +285,8 @@ impl LaneKeeping {
             yaw_rad: 0.0,
             steering: 0.0,
             straighten: false,
+            turn_in_play: 0.0,
+            following: 0.0,
             lane: 0,
             lane_count: DEFAULT_LANE_COUNT,
             crossed: 0,
@@ -273,6 +301,23 @@ impl LaneKeeping {
             off_road_timer: 0.0,
             event_cooldown: 0.0,
         }
+    }
+
+    /// Whether a hold is following the road through a turn (see
+    /// [`Self::turn_in_play`]).
+    pub fn is_following(&self) -> bool {
+        self.following != 0.0
+    }
+
+    /// The driver's wheel this frame: a steer key is the whole of it, a
+    /// stick as far as it is pushed. Keys win over the stick, and both keys
+    /// at once are no key.
+    pub fn steer_input(&mut self, key_dir: i8, stick: f64) {
+        self.steering = if key_dir != 0 {
+            f64::from(key_dir.signum())
+        } else {
+            stick.clamp(-1.0, 1.0)
+        };
     }
 
     pub fn lane_name(&self) -> &'static str {
@@ -342,7 +387,7 @@ impl LaneKeeping {
         } = road;
         self.crossed = 0;
         self.entered_exit_lane = false;
-        let Some((drift_mult, steer_mult)) = assist_tuning(assist) else {
+        let Some(drift_mult) = assist_tuning(assist) else {
             self.offset = 0.0;
             self.yaw_rad = 0.0;
             self.off_road_timer = 0.0;
@@ -377,21 +422,56 @@ impl LaneKeeping {
         // leaves the lane position alone, on partial as the help promises.
         // Checked after partial's own help, it added nothing there and the
         // truck was still pulled to the centre (2026-09-28).
+        //
+        // And letting go straightens (owner, 2026-09-30). A heading the
+        // driver cannot see outlived every key: a tap left a drift, a hold
+        // into a turn kept turning, and unwinding after a corner crossed into
+        // the next lane -- three drives, three trips off the road. With no
+        // key held the truck squares itself with the road, as the
+        // straighten-up key does; where it sits in the lane stays the
+        // driver's, and on partial the lane keeping's own help does the same
+        // and more.
+        //
+        // A hold toward the turn in play follows the road until it is let go
+        // (see `turn_in_play`); turning the other way is a new input. Following
+        // the road keeps the lane as well, with partial lane keeping's law:
+        // the hold owns the wheel, and at street speed a turn's lead is the
+        // better part of a minute, long enough for the wander to walk an
+        // unanswerable truck off its lane.
+        if self.steering == 0.0 || self.steering * self.following < 0.0 {
+            self.following = 0.0;
+        }
+        if self.following == 0.0 && self.steering * self.turn_in_play > 0.0 {
+            self.following = self.turn_in_play.signum();
+        }
+        // The driver's own steer asks for a heading (see LANE_CHANGE_S): as
+        // far as a stick is pushed, the whole of it for a key, the heading
+        // that crosses a lane in that long at this speed.
+        let lane_change_heading = (LANE_WIDTH * HALF_LANE_FT / LANE_CHANGE_S / fps)
+            .min(1.0)
+            .asin();
         let helper = if self.straighten {
             -self.yaw_rad * ASSIST_YAW_GAIN
+        } else if self.following != 0.0 {
+            -(self.offset * ASSIST_OFFSET_GAIN + self.yaw_rad * ASSIST_YAW_GAIN)
+        } else if self.steering != 0.0 {
+            (self.steering * lane_change_heading - self.yaw_rad) * ASSIST_YAW_GAIN
         } else if assist_steers(assist) {
             -(self.offset * ASSIST_OFFSET_GAIN + self.yaw_rad * ASSIST_YAW_GAIN)
         } else {
-            0.0
+            // Let go: a heading of nothing, squared up.
+            -self.yaw_rad * ASSIST_YAW_GAIN
         };
         // Turn assistance: the wheel the BEND wants, handed over whether or
-        // not anything is helping with the driver's own error.
-        let tracking = if turn_assist {
-            tracking_steer_rad(road_curvature)
+        // not anything is helping with the driver's own error. A following
+        // hold, key or stick, hands it over too; with assistance on it was
+        // already there, so the hold adds nothing on top.
+        let tracking_yaw = if turn_assist || self.following != 0.0 {
+            fps * tracking_steer_rad(road_curvature).tan() / WHEELBASE_FT
         } else {
             0.0
         };
-        let commanded = (self.steering * steer_mult + helper).clamp(-1.0, 1.0) * MAX_STEER_RAD;
+        let commanded = helper.clamp(-1.0, 1.0) * MAX_STEER_RAD;
         let rate_at = |g: f64| {
             if fps > 1.0 {
                 g * G_FPS2 / fps
@@ -403,8 +483,8 @@ impl LaneKeeping {
         // is not, or a bend could not be held at the speed its own advisory
         // names. Both together still stop at the rollover ceiling.
         let driver_cap = rate_at(MAX_STEER_LATERAL_G);
-        let mut yaw_rate = (fps * commanded.tan() / WHEELBASE_FT).clamp(-driver_cap, driver_cap)
-            + fps * tracking.tan() / WHEELBASE_FT;
+        let mut yaw_rate =
+            (fps * commanded.tan() / WHEELBASE_FT).clamp(-driver_cap, driver_cap) + tracking_yaw;
         // The tire limit plus whatever the road's bank carries for the truck.
         let road_cap = rate_at(MAX_ROAD_LATERAL_G + bank.clamp(0.0, MAX_CREDITED_BANK));
         yaw_rate = yaw_rate.clamp(-road_cap, road_cap);
@@ -597,11 +677,16 @@ mod tests {
         // MAX_STEER_LATERAL_G correctly refuses to turn that hard and the
         // truck runs wide however the wheel is held -- the model saying, in
         // its own terms, that the advisory exists for a reason.
+        //
+        // The input is a share of the driver's 0.2 g (2026-09-30), and this
+        // bend at forty wants 0.18 g of it, so the driver answering it holds
+        // nearly the whole wheel: the gains are sized so that hold comes from
+        // a lane error well inside the lines.
         let mut lane = LaneKeeping::new(Some(11));
         let dt = 0.05;
         let forty_mph = 40.0 / MPH_PER_MPS;
         for _ in 0..300 {
-            lane.steering = (-(lane.offset * 0.25 + lane.yaw_rad * 12.0)).clamp(-1.0, 1.0);
+            lane.steering = (-(lane.offset * 2.0 + lane.yaw_rad * 48.0)).clamp(-1.0, 1.0);
             lane.update(
                 dt,
                 forty_mph,
@@ -940,13 +1025,13 @@ mod tests {
     #[test]
     fn test_drift_and_steering_correction() {
         // Ported from the old drift model, which shoved the POSITION. A
-        // heading is what carries the truck off line now, so the drift starts
-        // as one: a few degrees off the road's direction, the way a gust or a
-        // moment's inattention leaves it.
+        // heading is what carries the truck off line now, and since letting go
+        // straightens (2026-09-30) only a key still held keeps one: a light
+        // steer held a moment too long.
         let dt = 0.05;
         let mut lane = LaneKeeping::new(Some(7));
-        lane.yaw_rad = 0.05;
         for _ in 0..40 {
+            lane.steering = 0.3;
             lane.update(
                 dt,
                 29.0,
@@ -966,11 +1051,29 @@ mod tests {
             "the heading should have carried it off line"
         );
 
-        // Answering it with the wheel brings it back. The yaw term has to
-        // dominate: at highway speed the heading is what moves the truck, so
-        // a controller watching position alone chases its own overshoot.
+        // Let go and the truck squares with the road: the drift stops where
+        // it is, and putting it back in the lane is still the driver's.
+        lane.steering = 0.0;
+        for _ in 0..40 {
+            lane.update(dt, 29.0, RoadConditions::default(), "off", false);
+        }
+        assert!(lane.yaw_rad.abs() < 0.002, "still angled: {}", lane.yaw_rad);
+        let settled = lane.offset.abs();
+        for _ in 0..40 {
+            lane.update(dt, 29.0, RoadConditions::default(), "off", false);
+        }
+        assert!(
+            (lane.offset.abs() - settled).abs() < 0.15,
+            "kept drifting after letting go: {settled} to {}",
+            lane.offset.abs()
+        );
+        let wandered = lane.offset.abs();
+
+        // Answering it with the wheel brings it back. The input asks for a
+        // heading now (2026-09-30), so steering back by how far off centre
+        // the truck is does it without chasing its own overshoot.
         for _ in 0..600 {
-            lane.steering = (-(lane.offset * 0.25 + lane.yaw_rad * 12.0)).clamp(-1.0, 1.0);
+            lane.steering = (-lane.offset).clamp(-1.0, 1.0);
             lane.update(
                 dt,
                 29.0,

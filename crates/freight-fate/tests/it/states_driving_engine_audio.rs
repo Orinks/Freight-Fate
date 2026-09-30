@@ -43,7 +43,7 @@ use freight_fate::states::driving_updates::{
 /// through the same recording backend rather than growing a second copy.
 #[derive(Default)]
 pub(super) struct Calls {
-    played: Vec<(String, f64)>,
+    pub(super) played: Vec<(String, f64)>,
     /// `play_bank(base, volume)`, kept apart from `played` the way Python's
     /// two separate stubs did.
     banks: Vec<(String, f64)>,

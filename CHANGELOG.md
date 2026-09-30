@@ -61,6 +61,12 @@
 
 ### Changed
 
+- **Letting go of the steering keys now straightens the truck.** It stops drifting where you leave it, so there is no wheel to unwind after a turn.
+
+- **Holding the arrow toward a bend or street corner now takes the turn.** The truck follows the road until you let go, instead of steering past it.
+
+- **Holding a steering key now moves the truck across at a steady pace.** A lane change takes about two and a half seconds however long you hold, and a tap is a nudge.
+
 - **New installs start on All assists.** The truck steers, street corners included, until you switch to Balanced under Driving assistance.
 
 - **The Lane keeping help describes the lean your Steering guide and Lane guide sound settings give you.**
@@ -182,6 +188,10 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **The engine no longer leans into bends and corners the truck is already taking.** With curve assistance or partial lane keeping, it leans only when you drift.
+
+- **Steering into a street corner no longer pushes the truck across its lane.** The truck turns with the corner, and curve assistance takes it for you.
 
 - **The manual now lists Slash, Straighten up.** Hold it to stop the truck drifting across the lane.
 
