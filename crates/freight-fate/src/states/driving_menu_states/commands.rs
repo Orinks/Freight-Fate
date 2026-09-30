@@ -19,17 +19,6 @@ const COMMANDS_INTRO_HELP: &str =
     "Up and down pick a command, Enter runs it and returns to driving, Escape returns without \
      one.";
 
-/// The controls that act while held, so a menu row cannot run them.
-const HELD: [Action; 7] = [
-    Action::Accelerate,
-    Action::Brake,
-    Action::EmergencyBrake,
-    Action::SteerLeft,
-    Action::SteerRight,
-    Action::Straighten,
-    Action::Horn,
-];
-
 /// A row that is not one of the player's bindable actions.
 #[derive(Clone, Copy)]
 enum Fixed {
@@ -82,7 +71,7 @@ impl Fixed {
 
 /// Whether the list offers this action.
 pub fn offers(action: Action) -> bool {
-    action.on_keyboard() && !HELD.contains(&action)
+    action.on_keyboard() && !action.held()
 }
 
 pub struct DrivingCommandsState {

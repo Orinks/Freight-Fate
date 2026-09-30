@@ -6,12 +6,16 @@
 // off. The standard VoiceOver actions (double tap to activate, swipe up and
 // down on an adjustable element, the two-finger scrub, the magic tap, the
 // three-finger scroll) are answered too, for when direct touch is not
-// active. Every gesture is queued as a small integer code; the Rust side
-// (`touch.rs`) drains the queue each frame and turns the codes into the same
-// key presses the desktop game reads. Speech never comes from here: Prism
-// speaks through VoiceOver's announcement channel.
+// active. Holding the top or bottom half is a pedal, and a second finger
+// tapping, double tapping or swiping while the pedal is held is a gesture of
+// its own (hold the top half to 20, tap with a second finger for cruise).
+// Every gesture is queued as a small integer code; the Rust side
+// (`touch.rs`) drains the queue each frame and hands each gesture to the
+// game. Speech never comes from here: Prism speaks through VoiceOver's
+// announcement channel.
 
 #import <UIKit/UIKit.h>
+#import <UIKit/UIGestureRecognizerSubclass.h>
 #include <os/lock.h>
 #include <stdint.h>
 
@@ -42,6 +46,19 @@ enum {
     FF_THREE_FINGER_SWIPE_LEFT = 22,
     FF_THREE_FINGER_SWIPE_RIGHT = 23,
     FF_THREE_FINGER_TAP = 24,
+    // A second finger while a pedal is held: the hold's base code plus one of
+    // the FF_SECOND_* offsets below.
+    FF_UPPER_HOLD_BASE = 25,
+    FF_LOWER_HOLD_BASE = 31,
+};
+
+enum {
+    FF_SECOND_TAP = 0,
+    FF_SECOND_DOUBLE_TAP = 1,
+    FF_SECOND_SWIPE_UP = 2,
+    FF_SECOND_SWIPE_DOWN = 3,
+    FF_SECOND_SWIPE_LEFT = 4,
+    FF_SECOND_SWIPE_RIGHT = 5,
 };
 
 #define FF_QUEUE_CAPACITY 64
@@ -75,6 +92,164 @@ int32_t ff_touch_next(void) {
     return code;
 }
 
+// The pedal: one finger held still for FF_HOLD_SECONDS on the top or bottom
+// half. While it stays down, a second finger's taps and swipes are read here
+// too, since the recognizer that owns the held touch is the one UIKit keeps
+// feeding new touches to. A second tap waits FF_DOUBLE_TAP_SECONDS for a
+// partner before it counts as a single tap, and a pending tap is sent before
+// the pedal lets go, so "hold, tap, lift" runs the tap with the pedal down.
+
+static const NSTimeInterval FF_HOLD_SECONDS = 0.35;
+static const NSTimeInterval FF_DOUBLE_TAP_SECONDS = 0.28;
+static const NSTimeInterval FF_SECOND_TAP_MAX_SECONDS = 0.4;
+static const CGFloat FF_HOLD_SLOP = 12.0;
+static const CGFloat FF_TAP_SLOP = 16.0;
+static const CGFloat FF_SWIPE_DISTANCE = 36.0;
+
+@interface FFPedalRecognizer : UIGestureRecognizer
+@end
+
+@implementation FFPedalRecognizer {
+    UITouch *_pedal;
+    CGPoint _pedalStart;
+    int32_t _base;
+    NSTimer *_holdTimer;
+    UITouch *_second;
+    CGPoint _secondStart;
+    NSTimeInterval _secondStartTime;
+    NSTimer *_tapTimer;
+}
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    for (UITouch *touch in touches) {
+        if (!_pedal) {
+            _pedal = touch;
+            _pedalStart = [touch locationInView:self.view];
+            _holdTimer = [NSTimer scheduledTimerWithTimeInterval:FF_HOLD_SECONDS
+                                                          target:self
+                                                        selector:@selector(holdElapsed)
+                                                        userInfo:nil
+                                                         repeats:NO];
+        } else if (self.state == UIGestureRecognizerStatePossible) {
+            // Two fingers down together are a two-finger gesture, not a pedal.
+            self.state = UIGestureRecognizerStateFailed;
+            return;
+        } else if (!_second) {
+            _second = touch;
+            _secondStart = [touch locationInView:self.view];
+            _secondStartTime = touch.timestamp;
+        }
+    }
+}
+
+- (void)holdElapsed {
+    _holdTimer = nil;
+    if (self.state != UIGestureRecognizerStatePossible || !_pedal) {
+        return;
+    }
+    BOOL upper = _pedalStart.y < CGRectGetMidY(self.view.bounds);
+    _base = upper ? FF_UPPER_HOLD_BASE : FF_LOWER_HOLD_BASE;
+    ff_push(upper ? FF_HOLD_UPPER_BEGAN : FF_HOLD_LOWER_BEGAN);
+    self.state = UIGestureRecognizerStateBegan;
+}
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    if (self.state == UIGestureRecognizerStatePossible && [touches containsObject:_pedal]) {
+        CGPoint at = [_pedal locationInView:self.view];
+        if (hypot(at.x - _pedalStart.x, at.y - _pedalStart.y) > FF_HOLD_SLOP) {
+            self.state = UIGestureRecognizerStateFailed;
+        }
+    }
+}
+
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    if (_second && [touches containsObject:_second]) {
+        [self secondLifted:_second];
+        _second = nil;
+    }
+    if ([touches containsObject:_pedal]) {
+        [self pedalLifted:UIGestureRecognizerStateEnded];
+    }
+}
+
+- (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    if (_second && [touches containsObject:_second]) {
+        _second = nil;
+    }
+    if ([touches containsObject:_pedal]) {
+        [self pedalLifted:UIGestureRecognizerStateCancelled];
+    }
+}
+
+- (void)pedalLifted:(UIGestureRecognizerState)how {
+    if (self.state == UIGestureRecognizerStatePossible) {
+        self.state = UIGestureRecognizerStateFailed;
+        return;
+    }
+    [self flushPendingTap];
+    ff_push(FF_HOLD_ENDED);
+    self.state = how;
+}
+
+- (void)secondLifted:(UITouch *)touch {
+    if (self.state != UIGestureRecognizerStateBegan && self.state != UIGestureRecognizerStateChanged) {
+        return;
+    }
+    CGPoint at = [touch locationInView:self.view];
+    CGFloat dx = at.x - _secondStart.x;
+    CGFloat dy = at.y - _secondStart.y;
+    CGFloat distance = hypot(dx, dy);
+    if (distance >= FF_SWIPE_DISTANCE) {
+        [self flushPendingTap];
+        int32_t offset;
+        if (fabs(dx) > fabs(dy)) {
+            offset = dx > 0 ? FF_SECOND_SWIPE_RIGHT : FF_SECOND_SWIPE_LEFT;
+        } else {
+            offset = dy > 0 ? FF_SECOND_SWIPE_DOWN : FF_SECOND_SWIPE_UP;
+        }
+        ff_push(_base + offset);
+    } else if (distance <= FF_TAP_SLOP && touch.timestamp - _secondStartTime <= FF_SECOND_TAP_MAX_SECONDS) {
+        if (_tapTimer) {
+            [_tapTimer invalidate];
+            _tapTimer = nil;
+            ff_push(_base + FF_SECOND_DOUBLE_TAP);
+        } else {
+            _tapTimer = [NSTimer scheduledTimerWithTimeInterval:FF_DOUBLE_TAP_SECONDS
+                                                         target:self
+                                                       selector:@selector(tapElapsed)
+                                                       userInfo:nil
+                                                        repeats:NO];
+        }
+    } else {
+        return;
+    }
+    self.state = UIGestureRecognizerStateChanged;
+}
+
+- (void)tapElapsed {
+    _tapTimer = nil;
+    ff_push(_base + FF_SECOND_TAP);
+}
+
+- (void)flushPendingTap {
+    if (_tapTimer) {
+        [_tapTimer invalidate];
+        [self tapElapsed];
+    }
+}
+
+- (void)reset {
+    [super reset];
+    [_holdTimer invalidate];
+    _holdTimer = nil;
+    [_tapTimer invalidate];
+    _tapTimer = nil;
+    _pedal = nil;
+    _second = nil;
+}
+
+@end
+
 @interface FFTouchView : UIView
 @end
 
@@ -93,7 +268,8 @@ int32_t ff_touch_next(void) {
     self.accessibilityHint =
         @"Swipe up or down to move, double tap to choose, scrub to go back. "
         @"Touch and hold the top half to accelerate, the bottom half to brake. "
-        @"While driving, three-finger tap lists every command.";
+        @"While holding, tap with a second finger: cruise on the top half, "
+        @"parking brake on the bottom. Three-finger tap lists every command.";
     self.accessibilityTraits =
         UIAccessibilityTraitAllowsDirectInteraction | UIAccessibilityTraitAdjustable;
     [self installRecognizers];
@@ -139,11 +315,7 @@ int32_t ff_touch_next(void) {
         [self addGestureRecognizer:swipe];
     }
 
-    UILongPressGestureRecognizer *hold =
-        [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(held:)];
-    hold.minimumPressDuration = 0.35;
-    hold.numberOfTouchesRequired = 1;
-    [self addGestureRecognizer:hold];
+    [self addGestureRecognizer:[[FFPedalRecognizer alloc] initWithTarget:nil action:nil]];
 }
 
 - (UITapGestureRecognizer *)tapWithTouches:(NSUInteger)touches taps:(NSUInteger)taps code:(int32_t)code {
@@ -165,23 +337,6 @@ int32_t ff_touch_next(void) {
 - (void)swiped:(UISwipeGestureRecognizer *)swipe {
     if (swipe.state == UIGestureRecognizerStateEnded) {
         ff_push([[swipe valueForKey:@"ffCode"] intValue]);
-    }
-}
-
-- (void)held:(UILongPressGestureRecognizer *)hold {
-    switch (hold.state) {
-    case UIGestureRecognizerStateBegan: {
-        CGPoint at = [hold locationInView:self];
-        ff_push(at.y < CGRectGetMidY(self.bounds) ? FF_HOLD_UPPER_BEGAN : FF_HOLD_LOWER_BEGAN);
-        break;
-    }
-    case UIGestureRecognizerStateEnded:
-    case UIGestureRecognizerStateCancelled:
-    case UIGestureRecognizerStateFailed:
-        ff_push(FF_HOLD_ENDED);
-        break;
-    default:
-        break;
     }
 }
 

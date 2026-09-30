@@ -276,7 +276,7 @@ impl SdlShell {
         Some(events)
     }
 
-    /// Append this frame's gestures, as key presses, to the SDL events. A
+    /// Append this frame's gestures to the SDL events. A
     /// lost focus (the app leaving the foreground) lets go of a held pedal.
     #[cfg(target_os = "ios")]
     fn with_touch(&mut self, mut events: Vec<InputEvent>) -> Vec<InputEvent> {

@@ -31,10 +31,13 @@ use ff_core::settings::Settings;
 use crate::app::held_keys::HeldKeys;
 use crate::controller::ControllerButton;
 use crate::states::base::{Key, Mods};
+use crate::touch::Gesture;
 
 mod names;
+mod touch;
 
 pub use names::{key_saved_name, key_spoken_name, pad_button_short_name, parse_key_name};
+pub use touch::{touch_gesture_name, touch_slots, TouchCommand};
 
 /// One discrete driving control a player can move to another key or button.
 ///
@@ -649,6 +652,21 @@ impl Action {
     pub fn on_pad(self) -> bool {
         !self.default_pad_chords().is_empty()
     }
+
+    /// The controls that act only while held: the pedals, steering, the
+    /// emergency brake and the horn. A menu row or a tap cannot run them.
+    pub fn held(self) -> bool {
+        matches!(
+            self,
+            Action::Accelerate
+                | Action::Brake
+                | Action::EmergencyBrake
+                | Action::SteerLeft
+                | Action::SteerRight
+                | Action::Straighten
+                | Action::Horn
+        )
+    }
 }
 
 /// Why a key cannot be chosen, as the screen says it.
@@ -731,6 +749,7 @@ pub enum Rebind {
 pub struct KeyBindings {
     keys: HashMap<Action, Chord>,
     pad: HashMap<Action, PadChord>,
+    touch: HashMap<Gesture, TouchCommand>,
 }
 
 impl KeyBindings {
@@ -752,6 +771,7 @@ impl KeyBindings {
                 }
             }
         }
+        out.touch = touch::parse_touch(&settings.touch_bindings);
         out
     }
 
@@ -769,16 +789,18 @@ impl KeyBindings {
         }
         settings.key_bindings = keys.join(";");
         settings.pad_bindings = pad.join(";");
+        settings.touch_bindings = touch::saved_touch(&self.touch);
     }
 
     /// True when nothing has been moved from its default.
     pub fn is_default(&self) -> bool {
-        self.keys.is_empty() && self.pad.is_empty()
+        self.keys.is_empty() && self.pad.is_empty() && self.touch.is_empty()
     }
 
     pub fn reset(&mut self) {
         self.keys.clear();
         self.pad.clear();
+        self.touch.clear();
     }
 
     pub fn reset_keys(&mut self) {

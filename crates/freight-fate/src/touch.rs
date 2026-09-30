@@ -1,17 +1,20 @@
-//! Touch gestures as desktop key presses: the iOS game's input surface.
+//! Touch gestures: the iOS game's input surface.
 //!
 //! The iPhone and iPad game is the desktop game, spoken through Prism and
-//! driven by the same states, so a gesture does not get its own meaning: it
-//! becomes the key a keyboard player would press. `ios/ff_touch.m` recognizes
-//! the gestures (with VoiceOver on, through a direct-interaction element) and
-//! queues a code for each; [`TouchInput`] turns the codes into
-//! [`InputEvent`]s. Nothing here touches UIKit, so the whole mapping is tested
-//! on every platform.
+//! driven by the same states. `ios/ff_touch.m` recognizes the gestures (with
+//! VoiceOver on, through a direct-interaction element) and queues a code for
+//! each; [`TouchInput`] turns the codes into [`InputEvent`]s. A held finger
+//! is a held pedal key. Every other gesture arrives as
+//! [`InputEvent::Gesture`]: the driving state runs the command the player's
+//! touch bindings give it, and every other screen, or a gesture with no
+//! binding, gets the key a keyboard player would press ([`Gesture::key`]).
+//! Nothing here touches UIKit, so the whole mapping is tested on every
+//! platform.
 
 use crate::states::base::{InputEvent, Key, Mods};
 
 /// A gesture recognized by the native touch surface.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Gesture {
     Tap,
     DoubleTap,
@@ -46,6 +49,20 @@ pub enum Gesture {
     Increment,
     /// VoiceOver's swipe down on the adjustable element.
     Decrement,
+    /// A second finger's tap while the top-half hold is down.
+    UpperHoldTap,
+    UpperHoldDoubleTap,
+    UpperHoldSwipeUp,
+    UpperHoldSwipeDown,
+    UpperHoldSwipeLeft,
+    UpperHoldSwipeRight,
+    /// A second finger's tap while the bottom-half hold is down.
+    LowerHoldTap,
+    LowerHoldDoubleTap,
+    LowerHoldSwipeUp,
+    LowerHoldSwipeDown,
+    LowerHoldSwipeLeft,
+    LowerHoldSwipeRight,
 }
 
 impl Gesture {
@@ -77,11 +94,24 @@ impl Gesture {
             22 => Gesture::ThreeFingerSwipeLeft,
             23 => Gesture::ThreeFingerSwipeRight,
             24 => Gesture::ThreeFingerTap,
+            25 => Gesture::UpperHoldTap,
+            26 => Gesture::UpperHoldDoubleTap,
+            27 => Gesture::UpperHoldSwipeUp,
+            28 => Gesture::UpperHoldSwipeDown,
+            29 => Gesture::UpperHoldSwipeLeft,
+            30 => Gesture::UpperHoldSwipeRight,
+            31 => Gesture::LowerHoldTap,
+            32 => Gesture::LowerHoldDoubleTap,
+            33 => Gesture::LowerHoldSwipeUp,
+            34 => Gesture::LowerHoldSwipeDown,
+            35 => Gesture::LowerHoldSwipeLeft,
+            36 => Gesture::LowerHoldSwipeRight,
             _ => return None,
         })
     }
 
     /// The key a single press of this gesture stands for, if it is a press.
+    /// A second finger during a hold is a driving command and nothing else.
     pub fn key(self) -> Option<Key> {
         Some(match self {
             Gesture::Tap => Key::Comma,
@@ -104,8 +134,35 @@ impl Gesture {
             Gesture::ThreeFingerDoubleTap
             | Gesture::HoldUpperBegan
             | Gesture::HoldLowerBegan
-            | Gesture::HoldEnded => return None,
+            | Gesture::HoldEnded
+            | Gesture::UpperHoldTap
+            | Gesture::UpperHoldDoubleTap
+            | Gesture::UpperHoldSwipeUp
+            | Gesture::UpperHoldSwipeDown
+            | Gesture::UpperHoldSwipeLeft
+            | Gesture::UpperHoldSwipeRight
+            | Gesture::LowerHoldTap
+            | Gesture::LowerHoldDoubleTap
+            | Gesture::LowerHoldSwipeUp
+            | Gesture::LowerHoldSwipeDown
+            | Gesture::LowerHoldSwipeLeft
+            | Gesture::LowerHoldSwipeRight => return None,
         })
+    }
+
+    /// The press and release of [`Self::key`], for a screen that did not
+    /// take the gesture itself.
+    pub fn key_events(self) -> Vec<InputEvent> {
+        match self.key() {
+            Some(key) => vec![
+                key_down(key),
+                InputEvent::KeyUp {
+                    key,
+                    mods: Mods::NONE,
+                },
+            ],
+            None => Vec::new(),
+        }
     }
 }
 
@@ -117,7 +174,7 @@ pub struct TouchOutput {
     pub toggle_keyboard: bool,
 }
 
-/// The gesture-to-key translator, holding the one key a finger can hold.
+/// The gesture translator, holding the one key a finger can hold.
 #[derive(Debug, Default)]
 pub struct TouchInput {
     held: Option<Key>,
@@ -151,15 +208,7 @@ impl TouchInput {
                 self.held = Some(key);
             }
             Gesture::HoldEnded => self.release_into(&mut out.events),
-            other => {
-                if let Some(key) = other.key() {
-                    out.events.push(key_down(key));
-                    out.events.push(InputEvent::KeyUp {
-                        key,
-                        mods: Mods::NONE,
-                    });
-                }
-            }
+            other => out.events.push(InputEvent::Gesture(other)),
         }
         out
     }
@@ -206,16 +255,32 @@ mod tests {
 
     #[test]
     fn every_native_code_round_trips_and_unknown_codes_are_ignored() {
-        for code in 0..25 {
+        for code in 0..37 {
             assert!(Gesture::from_code(code).is_some(), "code {code}");
         }
-        assert_eq!(Gesture::from_code(25), None);
+        assert_eq!(Gesture::from_code(37), None);
         assert_eq!(Gesture::from_code(-1), None);
     }
 
     #[test]
-    fn menu_gestures_press_and_release_the_menu_keys() {
+    fn discrete_gestures_reach_the_state_as_gestures() {
         let mut touch = TouchInput::new();
+        for gesture in [
+            Gesture::Tap,
+            Gesture::MagicTap,
+            Gesture::ThreeFingerTap,
+            Gesture::UpperHoldTap,
+        ] {
+            assert_eq!(
+                touch.handle(gesture).events,
+                vec![InputEvent::Gesture(gesture)]
+            );
+        }
+        assert_eq!(touch.held(), None);
+    }
+
+    #[test]
+    fn menu_gestures_press_and_release_the_menu_keys() {
         for (gesture, key) in [
             (Gesture::SwipeUp, Key::Up),
             (Gesture::SwipeDown, Key::Down),
@@ -228,9 +293,8 @@ mod tests {
             (Gesture::TwoFingerSwipeUp, Key::F1),
             (Gesture::ThreeFingerTap, Key::F2),
         ] {
-            let out = touch.handle(gesture);
             assert_eq!(
-                out.events,
+                gesture.key_events(),
                 vec![
                     InputEvent::KeyDown {
                         key,
@@ -246,24 +310,26 @@ mod tests {
                 "{gesture:?}"
             );
         }
-        assert_eq!(touch.held(), None);
+    }
+
+    #[test]
+    fn a_second_finger_during_a_hold_presses_no_key() {
+        assert!(Gesture::UpperHoldTap.key_events().is_empty());
+        assert!(Gesture::LowerHoldSwipeRight.key_events().is_empty());
     }
 
     #[test]
     fn review_gestures_carry_the_typed_character() {
-        let mut touch = TouchInput::new();
-        let out = touch.handle(Gesture::TwoFingerSwipeLeft);
         assert!(matches!(
-            out.events.first(),
+            Gesture::TwoFingerSwipeLeft.key_events().first(),
             Some(InputEvent::KeyDown {
                 key: Key::Comma,
                 text: Some(','),
                 ..
             })
         ));
-        let out = touch.handle(Gesture::MagicTap);
         assert!(matches!(
-            out.events.first(),
+            Gesture::MagicTap.key_events().first(),
             Some(InputEvent::KeyDown {
                 key: Key::Space,
                 text: Some(' '),

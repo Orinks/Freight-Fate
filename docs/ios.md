@@ -3,8 +3,9 @@
 The iOS game is the desktop game. The same Rust states and menus run under
 SDL2's UIKit backend, and speech goes through Prism, which talks to VoiceOver
 when it is running and to the system voice (AVSpeech) when it is not. The
-screen is one full-screen touch area; gestures on it become the same key
-presses the desktop game reads, and game controllers work exactly as they do
+screen is one full-screen touch area; in menus its gestures are the same key
+presses the desktop game reads, at the wheel they run driving commands
+directly, and game controllers work exactly as they do
 on the desktop.
 
 ## Gestures
@@ -12,6 +13,8 @@ on the desktop.
 With VoiceOver on, the game screen is a direct-touch area: once VoiceOver
 focus lands on it (it does at launch), your gestures go straight to the game.
 VoiceOver's own standard actions are also answered.
+
+Outside the drive, and for the gestures the drive leaves fixed:
 
 | Gesture | Key |
 |---|---|
@@ -34,12 +37,37 @@ VoiceOver's own standard actions are also answered.
 Because the game screen takes touches directly, VoiceOver's scrub (two-finger
 Z) reads there as a two-finger swipe; use a two-finger swipe down to go back.
 
-While driving, the holds are the pedals, swipes left and right steer (or change
-lanes with lane keeping on full), a two-finger tap opens the status menu, the
-magic tap reads your speed, and three-finger swipes left and right tune the
-radio. Everything else a letter key does is on the driving command list: a
-three-finger tap opens it, swipe to a command, and double tap runs it and puts
-you back on the road.
+## Driving gestures
+
+While driving, the gestures below run their commands directly, with no menu in
+between. Each one can be moved to any other command in Settings, Controls,
+Touch gestures, the way keyboard keys and controller buttons can.
+
+| Gesture | Default command |
+|---|---|
+| Hold the top half, tap with a second finger | Automatic speed control: adaptive cruise, or the speed keeper in low-speed zones |
+| Hold the top half, swipe up / down with a second finger | Shift up / down |
+| Hold the bottom half, tap with a second finger | Parking brake |
+| Hold the bottom half, double tap with a second finger | Engine on or off |
+| Tap | Speed |
+| Swipe up / down | Raise / lower the cruise target |
+| Two-finger tap | Status menu |
+| Magic tap (two-finger double tap) | Pause |
+| Three-finger swipe up | Route and location |
+| Three-finger swipe down | Road ahead |
+
+So to set cruise: hold the top half until you reach 20 miles per hour, tap
+with a second finger, and lift. The other second-finger gestures (double tap
+on the top half, and left, right, up and down swipes on the bottom half) start
+out doing nothing, ready for any command you choose.
+
+These stay fixed: the holds are the pedals, swipes left and right steer (or
+change lanes with lane keeping on full), double tap is Enter, two-finger
+swipe down pauses, two-finger swipe up is help, two-finger swipes left and
+right review messages, and three-finger swipes left and right tune the radio.
+Everything else is on the driving command list: a three-finger tap opens it,
+swipe to a command, and double tap runs it and puts you back on the road.
+Three-finger double tap still opens the on-screen keyboard.
 
 VoiceOver's adjustable swipes (up and down with VoiceOver focus on the game)
 also send Up and Down.
