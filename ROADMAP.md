@@ -35,7 +35,7 @@ what stands between here and 1.9.0, and
 [Found along the way](#found-along-the-way-not-blocking-190), open work
 that does not block it. The [release gate record](#release-gate-record)
 keeps the cutover checklist, the closed blockers and the owner decisions.
-The [2.0 plan](#20-planned-featcareer-20----the-working-week-and-home) follows it.
+The [2.0 progress and plan](#20-in-progress-featcareer-20----the-working-week-and-home) follows it.
 The [detailed roadmap](docs/roadmap-details.md) preserves the implementation
 record and full pending backlog. Section links below keep existing roadmap
 bookmarks usable.
@@ -2034,36 +2034,89 @@ rev ceiling.
       alone hold 50 mph at 76,000 lb and pass 200 C in a mile. Pick one
       line, or show why two are right.
 
-## 2.0 planned (`feat/career-2.0`) -- the working week and home
+<a id="20-planned-featcareer-20----the-working-week-and-home"></a>
+
+## 2.0 in progress (`feat/career-2.0`) -- the working week and home
 
 There is no separate 1.10 release: the working-week-and-home slate that
 was planned under that number is the opening slice of 2.0, on the
-`feat/career-2.0` branch. Design doc: `docs/eld-home-terminal-design.md`.
-The ELD grows from a daily countdown into the system that shapes a
-driver's week, and the home terminal becomes the anchor of that week
-instead of a spawn point.
+`feat/career-2.0` branch. The ELD and home-terminal foundations are built;
+the restart choice, home-time behavior, and local working week are not
+complete. `docs/eld-home-terminal-design.md` remains a design reference,
+but its Python paths, missing-home-field description, and old migration
+proposal predate the current Rust implementation. Use the status below
+for what is actually on this branch.
 
-- [x] **70-hour/8-day cycle with the 34-hour restart (landed 2026-09-21).**
-      A rolling on-duty ledger on `HosClock`, spoken through the ELD status
-      line and the logbook once a day of cycle hours is left; 34 consecutive
-      off-duty hours clear it, a cycle-only violation at a roadside stop is a
-      34-hour out-of-service order, and the ledger rides in the `hos` save
-      payload (old saves start a fresh cycle). The 2.0 centerpiece.
-- [ ] **Restart as a menu action.** No terminal/motel option offers a
-      34-hour restart yet; the ledger only clears when nights add up to 34
-      consecutive off-duty hours.
-- [ ] **Home restarts are free, road restarts cost.** Waits on the
-      persisted home terminal.
-- [ ] **Dispatch lane notes and the logbook per-day recap read the cycle.**
-- [ ] **Home terminal persisted and consequential.** `home_terminal_city`
-      on the profile (old saves default to the current city with a
-      one-time spoken note), ELD readouts in home-terminal time,
-      discounted garage work at your terminal, dispatch "gets you home"
-      lane notes, and paid domicile relocation for owner-operators.
-- [ ] **Local board (short-haul identity).** A second dispatch surface at
-      the home terminal: short home-region runs, home every night, no
-      cycle pressure, lower pay -- weighted toward new hires in the
-      assigned-dispatch levels.
+### September 30 implementation and verification audit
+
+Audited against [`2e8478a1`](https://github.com/Orinks/Freight-Fate/commit/2e8478a11556d510a2e62686806bb70ef135128d),
+the September 27 branch head. Checked items mean implemented on this
+branch, not released in a public 2.0 build. An unchecked item marked
+**partial** has a landed foundation but still lacks the named behavior;
+**in progress** identifies an open change, and other unchecked items
+remain planned or explicitly deferred.
+
+- **Verified automated baseline:** [Rust run 36290733270](https://github.com/Orinks/Freight-Fate/actions/runs/36290733270)
+  passed Format, Clippy (Windows), Test (Windows), and Changelog for this
+  exact commit. The test job passed both Rust crates and the separate agent
+  server tests: 5,757 passed, zero failed, 240 ignored across its test
+  binaries and doc tests. Representative feature tests cited below were checked as passing
+  in that job, rather than merely existing in the source.
+- **Verification limits:** this is the Windows `ci_quick` run; ignored
+  tests and whole-map sweeps are not a full-suite pass. No fresh local
+  Rust run, adversarial battery, agent-server drive, owner listening pass,
+  or 2.0 macOS/Linux packaged check was performed for this audit. The audit
+  environment has no Rust toolchain. Prior historical playtest claims stay
+  in their dated records; they do not certify the current branch.
+- **Release boundary:** the 1.9 gate and its owner decisions above are
+  unchanged. Open PRs below do not count as landed, even when their own CI
+  is green. The external site validator remains unverified.
+
+### Working week and home terminal
+
+- [x] **70-hour/8-day cycle and automatic 34-hour restart.** The rolling
+      on-duty ledger, expiry of old hours, warning thresholds, ELD/logbook
+      cycle summary, cycle-only 34-hour out-of-service order, and save
+      compatibility are implemented. Consecutive off-duty/sleeper time
+      clears the ledger; ordinary 10-hour sleep alone does not clear a
+      working week's hours. Core coverage includes `cycle_accrues_only_on_duty`,
+      `cycle_ages_out_after_eight_days`, `restart_clears_ledger`, and
+      `cycle_round_trips_through_save` in
+      [`sim/hos/tests.rs`](crates/ff-core/src/sim/hos/tests.rs).
+- [ ] **Partial: choose a 34-hour restart.** The clock has a restart
+      helper, but terminal and road-rest menus still offer 10-hour sleep
+      or shorter rest choices, not an explicit 34-hour action. Wire the
+      preview, elapsed game time, duty log, fatigue, cost, deadline, and
+      save/resume together; do not expose the helper alone, because its
+      reset history currently records the ordinary 10-hour reset event.
+- [x] **Home terminal, driver home, and parked location persist.**
+      `home_terminal_city`, separate `home_city`, and `parked_facility`
+      round-trip. New careers keep the picked home city while starting at
+      the hiring carrier's own terminal. Older saves derive the carrier
+      terminal (or the legacy fallback terminal) without moving the truck
+      or inventing a home city;
+      a missing old `home_city` stays blank. The hub names the actual
+      carrier terminal, delivered facility, public lot, or city.
+      Coverage: [`profile/tests.rs`](crates/ff-core/src/models/profile/tests.rs),
+      [`home_base.rs`](crates/ff-core/src/models/home_base.rs), and
+      [`states_city.rs`](crates/freight-fate/tests/it/states_city.rs).
+- [ ] **Planned: home restarts are free, road restarts cost.** Home
+      persistence is available now; eligibility, accommodation pricing,
+      and the rest/fatigue rules still need the restart interaction.
+- [ ] **Partial: cycle-aware dispatch and daily recap.** The ELD and
+      logbook already read the cycle, but dispatch lane notes do not budget
+      it and the logbook still shows today's totals plus recent duty
+      entries, not the planned per-day cycle recap. The deadline planner
+      explicitly excludes the weekly cycle (`models/jobs/deadline.rs`).
+- [ ] **Planned: home-terminal ELD time and terminal benefits.** Read ELD
+      and duty-log times in the home terminal's zone, add home-garage
+      discounts and "gets you home" lane notes, and implement paid
+      owner-operator domicile relocation/company transfer rules. Persisted
+      home fields alone do not implement these benefits.
+- [ ] **Planned: local board (short-haul identity).** A separate dispatch
+      surface at home, short home-region runs, home-every-night behavior,
+      and its own pay/HOS rules are still design work. Local carriers and
+      their shorter distance caps below are not this second board.
 - [ ] **BLOCKER (2.0 tester release): orinks.net profile integrity export.**
       The validator's exact save-field list must be updated from
       `crates/ff-core/tests/profile_integrity_invariants.json` for the new
@@ -2073,16 +2126,30 @@ instead of a spawn point.
       `carrierLabels` by 20 carriers (the regionals, Chatanika Freight Lines,
       and the three locals), and a company driver no carrier near home would
       take saves an empty `carrier_key` and `carrier_name`; the site must
-      accept both.
+      accept both. The game-side export already includes these fields and
+      labels; deployment and acceptance by the site have not been verified
+      by this repository audit. Keep this gate open until that check passes.
 
-### Career carriers (slices 2–4)
+<a id="career-carriers-slices-24"></a>
+
+### Career carriers (slices 1–3 built; slice 4 planned)
 
 Slice 1 landed tiers, `data/carriers.json`, carrier-owned home terminals
 ("{Carrier} {City} terminal"), the hub's "parked at" rule, and the
 offerability and hiring-radius rule (`is_offerable_home_city`; regionals
 home drivers only within their radius). Slice 2 made the new-career picker
 enforce it: region, then offerable home city, then the carriers hiring
-there, with the truck starting at that carrier's terminal.
+there, with the truck starting at that carrier's terminal. Slice 3 is also
+landed: the catalog now has **24 carriers: 3 national, 18 regional, and
+3 local**. `home_time_policy` remains `inert` for all 24.
+
+Automated evidence: [`carrier_slice3.rs`](crates/ff-core/tests/it/carrier_slice3.rs)
+checks the catalog, hiring areas, coverage, terminal cities, and fallback
+rules; [`states_main_menu.rs`](crates/freight-fate/tests/it/states_main_menu.rs),
+[`states_city.rs`](crates/freight-fate/tests/it/states_city.rs), and
+[`states_manage_careers.rs`](crates/freight-fate/tests/it/states_manage_careers.rs)
+cover the spoken start flow, no-carrier state, and resets. These tests pass
+in the audited Windows run.
 
 - [x] **Slice 2: start flow places the truck at the hiring carrier's
       terminal.** Orientation and truck assignment happen at the carrier
@@ -2091,11 +2158,12 @@ there, with the truck starting at that carrier's terminal.
 - [x] **Slice 2: the home-base picker lists only offerable cities.** Only
       cities where `is_offerable_home_city` is true (some carrier hires
       there) appear in the start picker.
-- [ ] **Carrier home-time slice: the driver's home stays the picked home
-      city.** At home time the truck parks at the terminal (or at home if the
-      carrier allows it) and the driver goes to the home city. The terminal
-      city must never silently become the driver's home. The picked city is
-      saved as `home_city` from slice 2 on.
+- [ ] **Partial: carrier home-time behavior.** The picked `home_city`
+      already persists separately from the terminal. The remaining plan is
+      to park the truck at the terminal (or at home if the carrier allows it)
+      while the driver goes to the home city. The terminal
+      city must never silently become the driver's home. Parking permission,
+      going home, and returning to work are not yet implemented.
 
 - [ ] **Run-band minimum is deferred to carrier slice 4.** `run_band_mi.min`
       is stored per carrier but not applied on the board; only the max folds
@@ -2118,10 +2186,16 @@ there, with the truck starting at that carrier's terminal.
 - [x] **Home-base coverage test.** `tests/it/carrier_slice3.rs` pins all
       625 lower-48 map cities as hired into by a regional, every Alaska city
       as served by Alaska carriers only, and BC and YT as closed.
-- [ ] **Loonwater Regional's terminals span 636 air mi (Bismarck to Green
-      Bay).** KEEP: Bismarck stays. Terminal span is not run length; its
-      loads obey the regional 150-600 mi band like every regional's. Slice 3
-      plan, §11.
+- [x] **Firing, reapplication, and reset respect home and hiring area.**
+      Fallback never picks the firing carrier or sends an Alaska driver to
+      a lower-48 carrier. If no carrier can take the driver, the profile
+      remains unassigned with no company truck, the hub offers Apply to a
+      carrier, and truck-only actions disappear. Reset uses an eligible
+      nearby carrier and preserves the old-save blank-home rule.
+- [x] **Loonwater terminal-span decision recorded: keep Bismarck.** Its
+      terminals span 636 air mi to Green Bay; terminal span is not run
+      length. The regional 600 mi maximum is enforced. The stored 150 mi
+      minimum is still deferred to slice 4, as above (slice 3 plan, §11).
 - [x] **Fairbanks terminal: no world pin needed; carrier-owned terminal.**
       Home terminals are carrier-owned yards synthesized from
       `terminal_city_keys` ("Chatanika Freight Lines Fairbanks terminal"),
@@ -2152,10 +2226,62 @@ there, with the truck starting at that carrier's terminal.
       named as a truck repair shop in that city instead.
 
 
+### ALCAN and Alaska (road graph built; international systems partial)
+
+The main roadmap now records the data slices already present on this
+branch. The older Phase A/B plan checklists are not a live completion list.
+
+- [x] **Phase A: bidirectional ALCAN corridor to Fairbanks.** Bellingham
+      through Blaine/Pacific Highway, Surrey, Prince George, Dawson Creek,
+      Fort St. John, Fort Nelson, Watson Lake, Whitehorse, and Tok to
+      Fairbanks. Both border crossings carry metadata in both directions.
+      Canadian towns are pass-through fuel/rest stops; US dispatch still
+      offers US destinations, allowing US-to-US routes through Canada.
+- [x] **Phase B1: Tok Cutoff and Glenn Highway to Anchorage.** Tok to
+      Glennallen, Palmer, and Anchorage is connected in both directions,
+      without a ferry or a detour through Fairbanks.
+- [x] **Phase B2: Parks Highway to Anchorage.** Fairbanks to Nenana,
+      Healy, Wasilla, and Anchorage, plus the Palmer–Wasilla connector,
+      is connected in both directions. This is the defined B1/B2 road
+      scope, not complete Alaska map enrichment.
+- [x] **Public lots are fuel/rest stops, not freight yards.** Curated
+      `travel_center` and `truck_parking` pins have no freight cargo roles;
+      a town with only these lots can have an empty dispatch board.
+      Anchorage has a separate Port/Ship Creek freight terminal; Fairbanks
+      has curated grocery/retail, building-material, and cross-dock pins.
+- [ ] **Partial: cross-border rules and clearance.** Border metadata is
+      not a playable clearance/inspection flow. Canadian HOS, statutory
+      truck-speed caps, CAD/foreign exchange, and spring-breakup axle
+      restrictions remain open; the corridor does not establish Canadian
+      regulatory compliance. Full Canada and Europe remain planned.
+- [ ] **Remaining corridor data work.** Refine the auto-profile
+      Blaine–Surrey geometry for trucks, verify/enrich remaining Parks and
+      Mat-Su lots and Anchorage parking capacity, and reconcile the paid
+      distances noted in the Phase B plan. Further peninsula, Dalton,
+      ferry, and freight-market expansion is outside the completed slices.
+
+Automated evidence: the four `test_alcan_phase_a_*` cases,
+`test_alcan_phase_b1_tok_cutoff_glenn_to_anchorage`,
+`test_alcan_phase_b2_parks_to_anchorage`, both public-lot tests, and
+`test_fairbanks_has_curated_freight_job_endpoints` in
+[`data_world.rs`](crates/ff-core/tests/it/data_world.rs), plus the generated-job
+endpoint test in [`models/jobs/tests.rs`](crates/ff-core/src/models/jobs/tests.rs).
+These pass in the audited Windows run. Remaining data limitations are
+recorded in the [Phase A plan](docs/alcan-corridor-scaffold-plan.md) and
+[Phase B plan](docs/alcan-phase-b-anchorage-plan.md).
+
 ### Twin parcel / STAA doubles (Track A)
 
 STAA twin 28-foot pups (`parcel_doubles`) on the National Network, and
-LCV turnpike doubles on permitted toll roads.
+LCV turnpike doubles on permitted toll roads. The route gates, timing,
+handling, and gross-weight enforcement below are implemented; the listed
+geographic approximations and realism debts remain open. Tests pass in
+[`models/doubles.rs`](crates/ff-core/src/models/doubles.rs),
+[`sim/vehicle/doubles.rs`](crates/ff-core/src/sim/vehicle/doubles.rs), and
+[`twin_parcel_doubles.rs`](crates/freight-fate/tests/it/twin_parcel_doubles.rs),
+including the uncapped-route legacy-save case, reverse refusal, pickup and
+delivery time, sway, and spoken whip warnings. Older PR prose saying the
+turnpike gross caps are only recorded is superseded by this implementation.
 
 - [x] **FIX 1: National Network route gate (landed).** `parcel_doubles` is
       offered and routed only on legs the game treats as National Network or
@@ -2302,10 +2428,19 @@ LCV turnpike doubles on permitted toll roads.
       take bulk fuel drops but never originate freight. Non-blocking for the
       carrier and home-terminal slices.
 
-### Reefer, APU, and fuel-island hotel power (2.0 candidates)
+<a id="reefer-apu-and-fuel-island-hotel-power-20-candidates"></a>
 
-Coarse cargo-temp and hotel-power slice. Optional deferrals stay unchecked
-and unnamed as blockers for the ALCAN corridor.
+### Reefer, APU, and fuel-island hotel power (v1 built)
+
+The coarse cargo-temperature and hotel-power slice is implemented, with
+passing model tests in [`hotel.rs`](crates/ff-core/src/sim/vehicle/hotel.rs)
+and fueling/menu tests in
+[`states_driving_menus_rest.rs`](crates/freight-fate/tests/it/states_driving_menus_rest.rs)
+and [`states_city_shops.rs`](crates/freight-fate/tests/it/states_city_shops.rs).
+Coverage includes cold-load startup, fuel starvation, temperature drift,
+spoilage, old-save defaults, and fueling with the tractor off while reefer
+and APU stay on. Optional deferrals stay unchecked and are not blockers for
+the ALCAN corridor.
 
 - [x] **Reefer TRU on/off diesel burn** with a coarse cargo-temperature /
       spoil model (not multi-temp zones). Alt+R. Burns from the tractor tank.
@@ -2408,7 +2543,8 @@ onto exit signalling.
 
 The street signals and signs baked for 1.9, and road stops' streets, are
 switched off for the 1.9 release (`fix/street-lights-live`,
-`STREET_CONTROLS_IN_PLAY` and `STOP_STREETS_IN_PLAY`); the timing work is
+`STREET_CONTROLS_IN_PLAY` and `STOP_STREETS_IN_PLAY`). Both flags are still
+false on the audited 2.0 head; the timing work is
 parked on `feat/street-lights-2-0`. Detail in
 [September 24](#september-24-realistic-interstate-exit).
 
@@ -2518,6 +2654,24 @@ here 2026-09-25. Details stay in the linked dated sections.
 
 [Read this section in the detailed roadmap](docs/roadmap-details.md#maneuvers-enforcement-and-the-working-day).
 
+- [x] **Suspended and disqualified CDL guidance.** Landed in
+      [PR #259](https://github.com/Orinks/Freight-Fate/pull/259): the terminal
+      points to the status-specific wait-out action and days remaining;
+      lifetime disqualification has no driving objective. Owner-operator
+      bobtail starts are refused, including from an already-open destination
+      menu. Targeted `states_city.rs` tests pass in the audited head's CI.
+- [ ] **In progress: a CDL pulled mid-drive must end the run.**
+      [PR #261](https://github.com/Orinks/Freight-Fate/pull/261) is open,
+      not merged into this branch as of 2026-09-30. It adds the missing
+      fatigue-runoff/work-zone-strike stop path, loaded-departure and
+      saved-trip backstops, and truthful dispatch-trust/relief-driver text.
+      Its own passing CI is not evidence that the audited branch has the fix.
+- [ ] **In progress: remaining location and pickup wording.**
+      [PR #256](https://github.com/Orinks/Freight-Fate/pull/256) is open,
+      not merged as of 2026-09-30. Its follow-ups cover felony-stop location,
+      the article in The Dalles freight-market text, and pickup-manual
+      wording. Do not count the complete PR as landed from its green CI.
+
 - [ ] CDL reinstatement is not automatic. When a suspension or
       disqualification ends, the state DMV wants a reinstatement fee and
       paperwork before the CDL is valid again; the game hands the licence
@@ -2532,6 +2686,14 @@ here 2026-09-25. Details stay in the linked dated sections.
 ### Career, dispatch, and business
 
 [Read this section in the detailed roadmap](docs/roadmap-details.md#career-dispatch-and-business).
+
+- [ ] **Partial: reopen and finish driving school.** The sandboxed
+      practice-road foundation and one Rolling Basics lesson exist, with
+      profile restoration, stage progression, and manual-start tests in
+      [`states_driving_menus_tablet.rs`](crates/freight-fate/tests/it/states_driving_menus_tablet.rs).
+      Those tests pass, but `DRIVING_SCHOOL_ENABLED` is still `false` on
+      this 2.0 head. The terminal entry, remaining curriculum, and broader
+      availability/refresher integration are not complete.
 
 ### Radio
 
