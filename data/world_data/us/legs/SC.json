@@ -14940,6 +14940,16 @@
             "spoken": "Crossing the Great Pee Dee River"
           },
           {
+            "name": "South of the Border (northbound, sign two)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Billboard: The big sombrero tower ahead. Fireworks, tacos, and a lookout. You never sausage a place.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sellers",
             "at_mi": 20.5,
             "off_mi": 5.34,
@@ -14965,6 +14975,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158345162, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fork"
+          },
+          {
+            "name": "South of the Border (northbound, sign three)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.6,
+            "spoken": "Billboard: South of the Border, next exit, right on the state line. Ride the elevator up the sombrero tower.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "South of the Border (southbound, sign three)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.0,
+            "spoken": "Billboard: South of the Border, next exit, right on the state line. Ride the elevator up the sombrero tower.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Rowland",
@@ -15026,6 +15056,16 @@
             "kind": "point",
             "at_mi": 50.8,
             "spoken": "Crossing the Lumber River"
+          },
+          {
+            "name": "South of the Border (southbound, sign two)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.0,
+            "spoken": "Billboard: The big sombrero tower ahead. Fireworks, tacos, and a lookout. You never sausage a place.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "speed_limits": [

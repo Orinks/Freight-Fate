@@ -260,7 +260,7 @@ pub const WELCOME_SIGNS: &[(&str, &[&str])] = &[
     (
         "South Carolina",
         &[
-            "Welcome to South Carolina, the Palmetto State, home of the giant sombrero tower you have been reading about for three hundred miles.",
+            "Welcome to South Carolina, the Palmetto State, home of a giant sombrero tower right on the North Carolina line.",
         ],
     ),
     (

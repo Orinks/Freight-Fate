@@ -38230,13 +38230,6 @@
             "spoken": "Passing Castleberry"
           },
           {
-            "name": "Bates House of Turkey",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 95.0,
-            "spoken": "Billboard: Bates House of Turkey is ahead. It serves turkey sandwiches, turkey plates, turkey pie, and proof that Thanksgiving does not require permission from November."
-          },
-          {
             "name": "Sepulga River",
             "category": "river",
             "kind": "point",
@@ -38258,6 +38251,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153585286, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Georgiana"
+          },
+          {
+            "name": "Bates House of Turkey",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 127.0,
+            "spoken": "Billboard: Bates House of Turkey is ahead. It serves turkey sandwiches, turkey plates, turkey pie, and proof that Thanksgiving does not require permission from November.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Fort Deposit",

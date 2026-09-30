@@ -434,7 +434,9 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // Wall Drug is Wall, South Dakota. Official campaign boards cover
         // SD / WY / western MN (Argus Leader); farthest cited is Greybull WY
         // ~394 mi. Montana stays off -- too far west of the real pool.
-        in_states("Free ice water at Wall Drug. Only three hundred miles. You're basically there.", &["SD", "WY", "MN"]),
+        // Only a line with no distance or "ahead" lives here: a state anchor
+        // cannot tell which side of Wall the truck is on. The countdown is
+        // placed data on the legs through Wall, one set per direction.
         in_states("Wall Drug. Five-cent coffee since your grandfather was your age.", &["SD", "WY", "MN"]),
         // Landmark attraction -- Cleveland's ticketed Rock Hall.
         approaching("Cleveland ahead. The Rock and Roll Hall of Fame sits on the lake. Chuck Berry, Aretha Franklin, and a glass pyramid you can actually visit.", &["cleveland_oh_us"]),
@@ -449,8 +451,9 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         in_states("Minnesota. The Spam Museum is a real place they built for a canned lunch. Samples included. The trailer is not.", &["MN"]),
     ]),
     ("I-95", &[
-        in_states("The big sombrero tower ahead. Fireworks, tacos, and a lookout. You never sausage a place.", &["SC", "NC"]),
-        in_states("South of the Border, coming up. Or is it? Keep driving to find out.", &["SC", "NC"]),
+        // South of the Border's "ahead" signs are a placed countdown on the
+        // legs either side of Dillon, one set per direction, for the same
+        // reason as Wall Drug: a state anchor reads them after the exit.
         // 2026-08-12 owner batch -- Carolinas fireworks-stand country, the
         // genre South of the Border already trades on. "362 days" keeps its
         // numerals verbatim (owner sign-off, see test_billboards.py).
@@ -1285,7 +1288,11 @@ mod tests {
             .iter()
             .filter(|s| s.text.contains("Wall Drug"))
             .collect();
-        assert_eq!(signs.len(), 2, "both Wall Drug lines must remain");
+        assert_eq!(
+            signs.len(),
+            1,
+            "the direction-free Wall Drug line must remain"
+        );
         for sign in signs {
             assert_eq!(
                 sign.anchor,

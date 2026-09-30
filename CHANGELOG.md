@@ -4,6 +4,8 @@
 
 ### Added
 
+- **Wall Drug and South of the Border count down from both directions.** Three signs lead you to the exit whichever way you drive.
+
 - **The game asks how much the truck should do for you before the main menu, once.** Choose All assists, Balanced or Realistic; Escape keeps what you have.
 
 - **Settings, Speech has a JAWS arrow keys row when JAWS is running.** Faster makes menus and held arrows answer at once; Default removes the script.
@@ -188,6 +190,10 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **Billboards for roadside attractions are read only on the way to them.** A sign saying a place is ahead no longer plays after you have passed it.
+
+- **The Cadillac Ranch, Tucumcari and Bates House of Turkey billboards stand near those places.** Some had been read more than a hundred miles away.
 
 - **The truck no longer tells you to release a parking brake that is already off.** A late "Press P to release it" could send you to set the brake while rolling.
 

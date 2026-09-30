@@ -34,6 +34,7 @@ mod data_world;
 mod data_world_overlay;
 mod profile_integrity_export;
 mod sim_bends_hold_their_advisory;
+mod sim_billboard_facing;
 mod sim_billboard_placement;
 mod sim_chain_law;
 mod sim_congestion;

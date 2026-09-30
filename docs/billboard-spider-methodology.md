@@ -138,9 +138,13 @@ as the corridor inventory.
 Project the attraction coordinate onto the nearest leg's polyline (reuse
 `position_on_route`). Place the sign a **lead distance before** the projection
 along the direction of travel — default ~8–15 miles, so it reads as an approach.
-Because legs are driven both directions, resolve the milepost per direction the
-same way `_place_landmarks` already does (`_stop_offset_for_direction`), or place
-one sign and let the existing direction resolution handle it; do not bake two.
+A placed billboard faces one way (owner ruling, 2026-09-30): it is heard only
+in the direction its sheet names, because its copy says "ahead" and from the
+far side of the road that is false. Write the sheet's `leg:` the way the driver
+reads the sign, with `at_mi` counted from that end; `tools/bake_billboards.py`
+mirrors the milepost onto a leg stored the other way round and records
+`directions` on the record. The other direction needs its own sign, placed
+before the attraction from that side.
 
 ### 4.2 Spacing
 
@@ -254,10 +258,10 @@ Lighter than the highway audit, because nothing structural changes:
    the call is explicit.
 4. **Prefix / voice consistency.** The pool path and the placed path must sound
    the same (section 2.4); a mismatch is jarring. Pin it once in the bake tool.
-5. **Direction facing.** A real billboard faces one way; the game speaks a
-   landmark in both directions. Acceptable (you "notice the sign" either way),
-   but flag any sign whose copy only makes sense approaching from one side and
-   place it direction-resolved.
+5. **Direction facing.** Settled 2026-09-30: a placed billboard is heard in one
+   direction only (section 4.1). Speaking every landmark both ways read
+   "Meridian is ahead" just after leaving Meridian and the Wall Drug countdown
+   after the exit.
 6. **Scope creep.** The seed list plus the Overpass filter define the universe;
    an attraction outside both does not exist for the spider until a reviewed
    seed edit adds it.

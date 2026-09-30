@@ -499,6 +499,23 @@ pub fn parse_landmark(
             "{from_city} to {to_city} landmark {rname} has a negative off_mi"
         )));
     }
+    // A billboard faces the traffic it was written for; see `Landmark`.
+    let directions: Vec<String> = if raw.contains_key("directions") {
+        get_str_list(raw, "directions")
+    } else if category == "billboard_sign" {
+        vec!["forward".to_string()]
+    } else {
+        vec!["both".to_string()]
+    };
+    if directions.is_empty()
+        || directions.iter().any(|d| !set_contains(STOP_DIRECTIONS, d))
+        || (directions.iter().any(|d| d == "both") && directions.len() > 1)
+    {
+        return Err(DataError::value(format!(
+            "{from_city} to {to_city} landmark {rname} has invalid directions {}",
+            py_repr_list(&directions)
+        )));
+    }
     Ok(Landmark {
         name,
         at_mi,
@@ -506,6 +523,7 @@ pub fn parse_landmark(
         kind,
         spoken,
         off_mi,
+        directions,
     })
 }
 

@@ -112,7 +112,7 @@ mirror!(BakedHpmsTerrain => HpmsTerrain {
 
 mirror!(BakedLandmark => Landmark {
     name: String, at_mi: f64, category: String, kind: String, spoken: String,
-    off_mi: f64,
+    off_mi: f64, directions: Vec<String>,
 });
 
 mirror!(BakedRouteRestriction => RouteRestriction {

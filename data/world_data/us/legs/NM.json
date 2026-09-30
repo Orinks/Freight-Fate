@@ -42929,11 +42929,14 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
-            "name": "Cadillac Ranch",
+            "name": "Tucumcari Tonite",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 8.0,
-            "spoken": "Billboard: Cadillac Ranch is ahead. Ten Cadillacs are buried nose-down in a field with their tailfins to the sky, and you are invited to spray-paint them. Bring a can."
+            "at_mi": 6.0,
+            "spoken": "Billboard: Stay in Tucumcari tonight, with two thousand motel rooms and a mile of neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "San Jon",
@@ -42979,6 +42982,16 @@
             "spoken": "Entering Wildorado"
           },
           {
+            "name": "Cadillac Ranch",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 106.0,
+            "spoken": "Billboard: Cadillac Ranch is ahead. Ten Cadillacs are buried nose-down in a field with their tailfins to the sky, and you are invited to spray-paint them. Bring a can.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Coulter Acres",
             "at_mi": 107.3,
             "off_mi": 4.39,
@@ -43004,13 +43017,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151713181, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Timbercreek Canyon"
-          },
-          {
-            "name": "Tucumcari Tonite",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 108.0,
-            "spoken": "Billboard: Stay in Tucumcari tonight, with two thousand motel rooms and a mile of neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered."
           },
           {
             "name": "Palisades",

@@ -41,6 +41,22 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Placed billboards face one way (owner, 2026-09-30): every placed
+      attraction sign was heard from both sides of the road, and 128 of the
+      230 say "ahead" or "next exit", so "Meridian is ahead" played just
+      after leaving Meridian and the Wall Drug countdown played after the
+      exit eastbound. A landmark now carries `directions`, and a billboard
+      defaults to the direction its sheet was written for; the other side
+      hears the random roadside pool. The sign-sheet bake mirrors a
+      milepost onto a leg stored the other way round, which it used to skip:
+      Cadillac Ranch, Tucumcari Tonite and Bates House of Turkey stood at
+      the wrong end of their legs. Wall Drug and South of the Border now
+      count down in both directions (`data/spider/signsheets/countdowns-2026-09-30.md`),
+      and their "ahead" lines left the corridor pools, whose state anchor
+      cannot tell which side of the attraction the truck is on. The South
+      Carolina welcome no longer says every driver has been reading about
+      the sombrero tower for three hundred miles.
+
 - [x] New installs start on All assists (owner, 2026-09-30): first drives kept
       going wrong at the wheel, city street corners above all, so the truck
       steers until the driver steps down to Balanced. Saved settings keep
@@ -281,6 +297,14 @@ into the release gate. Details stay in the linked dated sections, marked
 Everything found before 2026-09-25 moved to
 [2.0](#found-along-the-way-in-19-moved-to-20) that day.
 
+- [ ] Placed attraction billboards speak in one direction only since
+      2026-09-30; the other side hears the random pool. Signs standing at
+      their attraction could be marked `both`, and the rest need copy
+      written from the other side ([1.9 in flight](#19-in-flight-featcareer-19)).
+- [ ] Big Buck's never plays: its twenty-four approach billboards, the
+      brisket plate, the gate turn-away lines and the landmark loyalty rate
+      are all written, and the world has no Big Buck's stop. Needs a stop,
+      the bobtail-only gate, and the owner's call on the parody (2026-09-30).
 - [ ] Interchange connector arcs have no curvature in the lane model; with
       lane keeping and curve assistance both off their lean asks for
       steering the lane cannot answer ([1.9 in flight](#19-in-flight-featcareer-19)).

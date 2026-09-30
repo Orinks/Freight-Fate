@@ -4556,6 +4556,16 @@
             "spoken": "Billboard: Wall Drug, next exit. You have read the signs for two hundred miles. You know you are stopping."
           },
           {
+            "name": "Wall Drug (eastbound countdown, sign three)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 224.2,
+            "spoken": "Billboard: Wall Drug, next exit. You made it. The ice water is still free.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Wasta",
             "at_mi": 234.9,
             "off_mi": 0.29,
@@ -4565,6 +4575,16 @@
             "spoken": "Entering Wasta"
           },
           {
+            "name": "Wall Drug (eastbound countdown, sign two)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 242.3,
+            "spoken": "Billboard: Wall Drug, twenty miles. Five-cent coffee and homemade doughnuts, in a store that fills a whole block of Main Street.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "New Underwood",
             "at_mi": 255.1,
             "off_mi": 0.71,
@@ -4572,6 +4592,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151726492, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing New Underwood"
+          },
+          {
+            "name": "Wall Drug (eastbound countdown, sign one)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 267.3,
+            "spoken": "Billboard: Free ice water at Wall Drug, forty-five miles. Free since nineteen thirty-six. Inflation never found it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Black Hawk",
@@ -17759,6 +17789,16 @@
             "spoken": "Passing Piedmont"
           },
           {
+            "name": "Wall Drug (eastbound countdown, sign one)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.7,
+            "spoken": "Billboard: Free ice water at Wall Drug, forty-five miles. Free since nineteen thirty-six. Inflation never found it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "New Underwood",
             "at_mi": 22.7,
             "off_mi": 0.7,
@@ -17766,6 +17806,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151726492, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing New Underwood"
+          },
+          {
+            "name": "Wall Drug (eastbound countdown, sign two)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.7,
+            "spoken": "Billboard: Wall Drug, twenty miles. Five-cent coffee and homemade doughnuts, in a store that fills a whole block of Main Street.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Wasta",
@@ -17777,11 +17827,31 @@
             "spoken": "Entering Wasta"
           },
           {
+            "name": "Wall Drug (eastbound countdown, sign three)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.5,
+            "spoken": "Billboard: Wall Drug, next exit. You made it. The ice water is still free.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Buffalo Gap National Grassland",
             "category": "national_forest",
             "kind": "zone",
             "at_mi": 56.0,
             "spoken": "Entering Buffalo Gap National Grassland"
+          },
+          {
+            "name": "Wall Drug (countdown, sign three)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.6,
+            "spoken": "Billboard: Wall Drug, next exit. You have read the signs for two hundred miles. You know you are stopping.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Interior",
@@ -17791,6 +17861,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151336408, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Interior"
+          },
+          {
+            "name": "Wall Drug (countdown, sign two)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 128.0,
+            "spoken": "Billboard: Wall Drug. Five-cent coffee, an eighty-foot dinosaur, and a jackalope you can sit on. Getting closer.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kennebec",
@@ -17850,6 +17930,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151903496, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing White Lake"
+          },
+          {
+            "name": "Wall Drug (countdown, sign one)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 255.7,
+            "spoken": "Billboard: Free ice water at Wall Drug. Only two hundred miles. You can make it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Stickney",

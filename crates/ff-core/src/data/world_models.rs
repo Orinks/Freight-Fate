@@ -582,6 +582,11 @@ impl Default for TrafficVolumeSample {
 /// the wider set stays available to answer "what is near me" at any distance
 /// (a town eleven miles ahead is the honest answer on an empty interstate).
 /// Zone and point landmarks are on the route by construction and leave it 0.
+///
+/// `directions` is which way along the leg the callout is heard, in the
+/// stops' vocabulary. A billboard faces one way and its copy says "ahead" or
+/// "next exit", so a placed billboard is heard only forward unless the data
+/// says otherwise; everything else is heard both ways. Empty means both.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Landmark {
     pub name: String,
@@ -590,6 +595,13 @@ pub struct Landmark {
     pub kind: String,
     pub spoken: String,
     pub off_mi: f64,
+    pub directions: Vec<String>,
+}
+
+impl Landmark {
+    pub fn applies_to_direction(&self, forward: bool) -> bool {
+        self.directions.is_empty() || applies_to_direction(&self.directions, forward)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]

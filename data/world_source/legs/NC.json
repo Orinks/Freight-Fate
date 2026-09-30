@@ -48759,6 +48759,16 @@
             "spoken": "Passing Parkton"
           },
           {
+            "name": "South of the Border (southbound, sign one)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.0,
+            "spoken": "Billboard: South of the Border, coming up. Or is it? Keep driving to find out.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Rockfish",
             "at_mi": 23.3,
             "off_mi": 8.29,

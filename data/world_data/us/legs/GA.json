@@ -78539,6 +78539,16 @@
             "spoken": "Passing Turbeville"
           },
           {
+            "name": "South of the Border (northbound, sign one)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 150.0,
+            "spoken": "Billboard: South of the Border, coming up. Or is it? Keep driving to find out.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Olanta",
             "at_mi": 154.0,
             "off_mi": 6.14,

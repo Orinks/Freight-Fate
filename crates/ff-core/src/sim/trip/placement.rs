@@ -392,6 +392,9 @@ impl Trip {
         {
             let forward = self.route.cities[i] == leg.a;
             for landmark in leg.landmarks() {
+                if !landmark.applies_to_direction(forward) {
+                    continue;
+                }
                 let offset = stop_offset_for_direction(landmark.at_mi, leg.miles, forward);
                 let mut callout = RoadsideCallout::new(
                     &format!(

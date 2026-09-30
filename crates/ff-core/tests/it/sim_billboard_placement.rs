@@ -553,7 +553,7 @@ fn test_wall_drug_never_reads_in_montana() {
     );
 }
 
-/// The two Wall Drug lines must still speak on the South Dakota I-90 run,
+/// The Wall Drug pool line must still speak on the South Dakota I-90 run,
 /// or pulling Montana has traded a wrong sign for silence.
 #[test]
 fn test_wall_drug_still_reads_in_south_dakota() {
