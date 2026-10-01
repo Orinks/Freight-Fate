@@ -138,6 +138,36 @@ def corridor_geometry(leg: dict[str, Any]) -> list[tuple[float, float, float]] |
     return archived_geometry(leg_id_of(leg), state_code_of(leg), float(leg.get("miles") or 0.0))
 
 
+def route_point_max_off_mi(leg: dict[str, Any], coords: list[list[float]]) -> float | None:
+    """Maximum route-point distance to its nearest archived ``[lon, lat]`` vertex."""
+    route_points = (leg.get("corridor") or {}).get("route_points") or []
+    vertices = [(float(coord[1]), float(coord[0])) for coord in coords if len(coord) >= 2]
+    if not route_points or not vertices:
+        return None
+
+    distances = []
+    for point in route_points:
+        if not isinstance(point, dict):
+            continue
+        lat, lon = point.get("lat"), point.get("lon")
+        if (
+            not isinstance(lat, (int, float))
+            or isinstance(lat, bool)
+            or not isinstance(lon, (int, float))
+            or isinstance(lon, bool)
+        ):
+            continue
+        distances.append(
+            min(
+                scs._haversine_m(float(lat), float(lon), vertex_lat, vertex_lon)
+                for vertex_lat, vertex_lon in vertices
+            )
+        )
+    if not distances:
+        return None
+    return max(distances) / 1609.344
+
+
 def reposition_on_route(
     records: list[dict[str, Any]],
     coords: list[list[float]],
