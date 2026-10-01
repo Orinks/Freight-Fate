@@ -1226,13 +1226,6 @@
             "spoken": "Entering Dupont City"
           },
           {
-            "name": "Kanawha River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 52.4,
-            "spoken": "Crossing the Kanawha River"
-          },
-          {
             "name": "Malden",
             "at_mi": 53.1,
             "off_mi": 0.47,
@@ -1240,6 +1233,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154050810, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Malden"
+          },
+          {
+            "name": "Kanawha River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 53.7,
+            "spoken": "Crossing the Kanawha River",
+            "lat": 38.30964,
+            "lon": -81.56111,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 164023906 (Kanawha River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "State Capitol (from Beckley)",
@@ -3345,20 +3348,22 @@
         "state_miles": [
           {
             "state": "West Virginia",
-            "miles": 52.6
+            "miles": 47.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Virginia",
-            "miles": 71.4
+            "miles": 76.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 52.6,
+            "at_mi": 47.1,
             "from_state": "West Virginia",
             "state": "Virginia",
             "place": "West Virginia-Virginia line on I-77",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -3436,6 +3441,16 @@
             "spoken": "Passing Glade Springs"
           },
           {
+            "name": "Bluestone River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 26.8,
+            "spoken": "Crossing the Bluestone River",
+            "lat": 37.47975,
+            "lon": -81.07367,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 292409200 (Bluestone River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Lashmeet",
             "at_mi": 30.7,
             "off_mi": 7.08,
@@ -3472,20 +3487,6 @@
             "spoken": "Passing New Hope"
           },
           {
-            "name": "Bluestone River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 39.5,
-            "spoken": "Crossing the Bluestone River"
-          },
-          {
-            "name": "New River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 39.5,
-            "spoken": "Crossing the New River"
-          },
-          {
             "name": "Oakvale",
             "at_mi": 41.2,
             "off_mi": 0.45,
@@ -3502,6 +3503,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154319434, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Glen Lyn"
+          },
+          {
+            "name": "New River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 47.6,
+            "spoken": "Crossing the New River",
+            "lat": 37.37254,
+            "lon": -80.86228,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 79109031 (New River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Peterstown",
@@ -3583,13 +3594,6 @@
             "spoken": "Passing Plum Creek"
           },
           {
-            "name": "North Fork Roanoke River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 88.8,
-            "spoken": "Crossing the North Fork Roanoke River"
-          },
-          {
             "name": "Christiansburg",
             "at_mi": 89.1,
             "off_mi": 1.45,
@@ -3606,6 +3610,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153944325, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Riner"
+          },
+          {
+            "name": "North Fork Roanoke River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 102.5,
+            "spoken": "Crossing the North Fork Roanoke River",
+            "lat": 37.23551,
+            "lon": -80.23528,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 39555938 (North Fork Roanoke River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "South Fork Roanoke River",
@@ -5477,6 +5491,16 @@
         ],
         "landmarks": [
           {
+            "name": "Elk River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.4,
+            "spoken": "Crossing the Elk River",
+            "lat": 38.35813,
+            "lon": -81.63175,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 113058180 (Elk River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "State Capitol (from Pittsburgh)",
             "category": "billboard_sign",
             "kind": "point",
@@ -5494,13 +5518,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154066299, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Big Chimney"
-          },
-          {
-            "name": "Elk River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.5,
-            "spoken": "Crossing the Elk River"
           },
           {
             "name": "Flatwoods Monster Museum (northbound)",
@@ -5553,15 +5570,11 @@
             "name": "Little Kanawha River",
             "category": "river",
             "kind": "point",
-            "at_mi": 83.3,
-            "spoken": "Crossing the Little Kanawha River"
-          },
-          {
-            "name": "West Fork River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 83.3,
-            "spoken": "Crossing the West Fork River"
+            "at_mi": 82.2,
+            "spoken": "Crossing the Little Kanawha River",
+            "lat": 38.86119,
+            "lon": -80.65549,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 438079584 (Little Kanawha River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Trans-Allegheny Lunatic Asylum (West Virginia Hospital for the Insane/Weston Sta",
@@ -5569,6 +5582,16 @@
             "kind": "point",
             "at_mi": 96.1,
             "spoken": "Museum ahead: Trans-Allegheny Lunatic Asylum (West Virginia Hospital for the Insane/Weston Sta"
+          },
+          {
+            "name": "West Fork River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 98.7,
+            "spoken": "Crossing the West Fork River",
+            "lat": 39.01426,
+            "lon": -80.47153,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 374623088 (West Fork River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Jane Lew",
@@ -5646,8 +5669,11 @@
             "name": "Tygart Valley River",
             "category": "river",
             "kind": "point",
-            "at_mi": 135.8,
-            "spoken": "Crossing the Tygart Valley River"
+            "at_mi": 135.6,
+            "spoken": "Crossing the Tygart Valley River",
+            "lat": 39.43961,
+            "lon": -80.17482,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 163537194 (Tygart Valley River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pleasant Valley",
@@ -5659,6 +5685,16 @@
             "spoken": "Entering Pleasant Valley"
           },
           {
+            "name": "Monongahela River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 152.2,
+            "spoken": "Crossing the Monongahela River",
+            "lat": 39.58859,
+            "lon": -79.97922,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 163537179 (Monongahela River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Cassville",
             "at_mi": 159.8,
             "off_mi": 1.65,
@@ -5666,13 +5702,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154045067, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Cassville"
-          },
-          {
-            "name": "Monongahela River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 162.5,
-            "spoken": "Crossing the Monongahela River"
           },
           {
             "name": "Mount Morris",
@@ -8408,20 +8437,22 @@
         "state_miles": [
           {
             "state": "West Virginia",
-            "miles": 164.1
+            "miles": 163.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Pennsylvania",
-            "miles": 63.9
+            "miles": 64.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 164.1,
+            "at_mi": 163.1,
             "from_state": "West Virginia",
             "state": "Pennsylvania",
             "place": "West Virginia-Pennsylvania line on I-79",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -14124,6 +14155,16 @@
             ]
           },
           {
+            "name": "Kanawha River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 6.1,
+            "spoken": "Crossing the Kanawha River",
+            "lat": 38.30984,
+            "lon": -81.56116,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 164023906 (Kanawha River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Malden",
             "at_mi": 6.9,
             "off_mi": 0.48,
@@ -14167,13 +14208,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154337430, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Belle"
-          },
-          {
-            "name": "Kanawha River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.0,
-            "spoken": "Crossing the Kanawha River"
           },
           {
             "name": "Chesapeake",
@@ -14253,15 +14287,11 @@
             "name": "New River",
             "category": "river",
             "kind": "point",
-            "at_mi": 68.7,
-            "spoken": "Crossing the New River"
-          },
-          {
-            "name": "Greenbrier River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 96.4,
-            "spoken": "Crossing the Greenbrier River"
+            "at_mi": 79.4,
+            "spoken": "Crossing the New River",
+            "lat": 37.78162,
+            "lon": -80.90149,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 79098400 (New River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lost World Caverns (eastbound)",
@@ -14284,6 +14314,16 @@
             ]
           },
           {
+            "name": "Greenbrier River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 114.2,
+            "spoken": "Crossing the Greenbrier River",
+            "lat": 37.78948,
+            "lon": -80.38441,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 292551061 (Greenbrier River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "The Greenbrier (eastbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -14303,13 +14343,6 @@
             "spoken": "Entering White Sulphur Springs"
           },
           {
-            "name": "Jackson River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 124.8,
-            "spoken": "Crossing the Jackson River"
-          },
-          {
             "name": "Callaghan",
             "at_mi": 134.7,
             "off_mi": 0.17,
@@ -14324,6 +14357,16 @@
             "kind": "zone",
             "at_mi": 139.3,
             "spoken": "Entering George Washington National Forest"
+          },
+          {
+            "name": "Jackson River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 140.5,
+            "spoken": "Crossing the Jackson River",
+            "lat": 37.77233,
+            "lon": -79.98818,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 270916440 (Jackson River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Mallow",
@@ -14374,8 +14417,11 @@
             "name": "Cowpasture River",
             "category": "river",
             "kind": "point",
-            "at_mi": 153.9,
-            "spoken": "Crossing the Cowpasture River"
+            "at_mi": 156.9,
+            "spoken": "Crossing the Cowpasture River",
+            "lat": 37.80759,
+            "lon": -79.74003,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 287885280 (Cowpasture River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Goshen Pass",
@@ -17574,20 +17620,22 @@
         "state_miles": [
           {
             "state": "West Virginia",
-            "miles": 109.2
+            "miles": 103.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Virginia",
-            "miles": 71.8
+            "miles": 77.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 109.2,
+            "at_mi": 103.6,
             "from_state": "West Virginia",
             "state": "Virginia",
             "place": "West Virginia-Virginia line on I-64",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -18528,6 +18576,16 @@
             ]
           },
           {
+            "name": "Kanawha River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 6.1,
+            "spoken": "Crossing the Kanawha River",
+            "lat": 38.30984,
+            "lon": -81.56116,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 164023906 (Kanawha River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Malden",
             "at_mi": 6.9,
             "off_mi": 0.48,
@@ -18571,13 +18629,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154337430, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Belle"
-          },
-          {
-            "name": "Kanawha River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.1,
-            "spoken": "Crossing the Kanawha River"
           },
           {
             "name": "Chesapeake",
@@ -18715,6 +18766,16 @@
             "spoken": "Passing Daniels"
           },
           {
+            "name": "Bluestone River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 83.2,
+            "spoken": "Crossing the Bluestone River",
+            "lat": 37.47975,
+            "lon": -81.07367,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 292409200 (Bluestone River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Athens",
             "at_mi": 88.3,
             "off_mi": 2.68,
@@ -18731,13 +18792,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154098059, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Princeton"
-          },
-          {
-            "name": "Bluestone River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 96.9,
-            "spoken": "Crossing the Bluestone River"
           },
           {
             "name": "Oakvale",
@@ -18785,6 +18839,16 @@
             "spoken": "Entering Narrows"
           },
           {
+            "name": "New River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 118.7,
+            "spoken": "Crossing the New River",
+            "lat": 37.33029,
+            "lon": -80.67798,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 79109031 (New River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Pembroke",
             "at_mi": 121.3,
             "off_mi": 0.07,
@@ -18792,13 +18856,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154049997, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Pembroke"
-          },
-          {
-            "name": "New River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 122.4,
-            "spoken": "Crossing the New River"
           },
           {
             "name": "Prices Fork",
@@ -18819,13 +18876,6 @@
             "spoken": "Passing Merrimac"
           },
           {
-            "name": "North Fork Roanoke River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 145.9,
-            "spoken": "Crossing the North Fork Roanoke River"
-          },
-          {
             "name": "Christiansburg",
             "at_mi": 146.0,
             "off_mi": 1.45,
@@ -18833,6 +18883,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153956879, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Christiansburg"
+          },
+          {
+            "name": "North Fork Roanoke River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 159.3,
+            "spoken": "Crossing the North Fork Roanoke River",
+            "lat": 37.23551,
+            "lon": -80.23528,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 39555938 (North Fork Roanoke River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "South Fork Roanoke River",
@@ -20064,20 +20124,6 @@
             "spoken": "Passing Catlettsburg"
           },
           {
-            "name": "Guyandotte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 5.5,
-            "spoken": "Crossing the Guyandotte River"
-          },
-          {
-            "name": "Mud River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 5.5,
-            "spoken": "Crossing the Mud River"
-          },
-          {
             "name": "Rome",
             "at_mi": 9.2,
             "off_mi": 2.24,
@@ -20096,6 +20142,16 @@
             "spoken": "Passing Athalia"
           },
           {
+            "name": "Guyandotte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 11.7,
+            "spoken": "Crossing the Guyandotte River",
+            "lat": 38.42205,
+            "lon": -82.29885,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 464203844 (Guyandotte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Barboursville",
             "at_mi": 12.3,
             "off_mi": 0.72,
@@ -20103,6 +20159,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154094464, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Barboursville"
+          },
+          {
+            "name": "Mud River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 13.5,
+            "spoken": "Crossing the Mud River",
+            "lat": 38.41565,
+            "lon": -82.26838,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 481593586 (Mud River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "West Hamlin",
@@ -20141,13 +20207,6 @@
             "spoken": "Entering Hurricane"
           },
           {
-            "name": "Kanawha River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 32.5,
-            "spoken": "Crossing the Kanawha River"
-          },
-          {
             "name": "Eleanor",
             "at_mi": 32.6,
             "off_mi": 5.63,
@@ -20182,6 +20241,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153889759, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bancroft"
+          },
+          {
+            "name": "Kanawha River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 38.1,
+            "spoken": "Crossing the Kanawha River",
+            "lat": 38.44509,
+            "lon": -81.84248,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 79095243 (Kanawha River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Poca",
@@ -20238,13 +20307,6 @@
             "spoken": "Passing Jefferson"
           },
           {
-            "name": "Elk River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 46.2,
-            "spoken": "Crossing the Elk River"
-          },
-          {
             "name": "Dunbar",
             "at_mi": 46.6,
             "off_mi": 0.1,
@@ -20262,6 +20324,16 @@
             "directions": [
               "forward"
             ]
+          },
+          {
+            "name": "Elk River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 52.3,
+            "spoken": "Crossing the Elk River",
+            "lat": 38.35796,
+            "lon": -81.64085,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 113058180 (Elk River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Big Chimney",
@@ -22001,13 +22073,6 @@
             "spoken": "Passing Burlington"
           },
           {
-            "name": "Big Sandy River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 6.5,
-            "spoken": "Crossing the Big Sandy River"
-          },
-          {
             "name": "Ceredo",
             "at_mi": 7.5,
             "off_mi": 0.4,
@@ -22042,6 +22107,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154311566, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Catlettsburg"
+          },
+          {
+            "name": "Big Sandy River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 9.6,
+            "spoken": "Crossing the Big Sandy River",
+            "lat": 38.38169,
+            "lon": -82.59376,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 31561223 (Big Sandy River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cannonsburg",
@@ -22174,20 +22249,22 @@
         "state_miles": [
           {
             "state": "West Virginia",
-            "miles": 27.1
+            "miles": 9.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Kentucky",
-            "miles": 34.9
+            "miles": 52.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 27.1,
+            "at_mi": 9.7,
             "from_state": "West Virginia",
             "state": "Kentucky",
             "place": "West Virginia-Kentucky line on US-23",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -24613,6 +24690,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Monongahela River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 5.6,
+            "spoken": "Crossing the Monongahela River",
+            "lat": 39.58858,
+            "lon": -79.97938,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 163537179 (Monongahela River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Rivesville",
             "at_mi": 13.1,
             "off_mi": 2.91,
@@ -24620,20 +24707,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154083696, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rivesville"
-          },
-          {
-            "name": "Monongahela River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 14.1,
-            "spoken": "Crossing the Monongahela River"
-          },
-          {
-            "name": "Tygart Valley River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 14.1,
-            "spoken": "Crossing the Tygart Valley River"
           },
           {
             "name": "Barrackville",
@@ -24670,6 +24743,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153975437, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Monongah"
+          },
+          {
+            "name": "Tygart Valley River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 22.1,
+            "spoken": "Crossing the Tygart Valley River",
+            "lat": 39.43981,
+            "lon": -80.17504,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 163537194 (Tygart Valley River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Spelter",
@@ -24756,15 +24839,11 @@
             "name": "West Fork River",
             "category": "river",
             "kind": "point",
-            "at_mi": 71.9,
-            "spoken": "Crossing the West Fork River"
-          },
-          {
-            "name": "Little Kanawha River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 71.9,
-            "spoken": "Crossing the Little Kanawha River"
+            "at_mi": 58.6,
+            "spoken": "Crossing the West Fork River",
+            "lat": 39.01457,
+            "lon": -80.47171,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 374623088 (West Fork River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Burnsville",
@@ -24774,6 +24853,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153985409, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Burnsville"
+          },
+          {
+            "name": "Little Kanawha River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 75.0,
+            "spoken": "Crossing the Little Kanawha River",
+            "lat": 38.86144,
+            "lon": -80.65549,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 438079584 (Little Kanawha River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Flatwoods",
@@ -24816,15 +24905,21 @@
             "name": "Elk River",
             "category": "river",
             "kind": "point",
-            "at_mi": 98.3,
-            "spoken": "Crossing the Elk River"
+            "at_mi": 92.5,
+            "spoken": "Crossing the Elk River",
+            "lat": 38.65639,
+            "lon": -80.74049,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 392182151 (Elk River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Birch River",
             "category": "river",
             "kind": "point",
-            "at_mi": 98.3,
-            "spoken": "Crossing the Birch River"
+            "at_mi": 106.9,
+            "spoken": "Crossing the Birch River",
+            "lat": 38.50035,
+            "lon": -80.75527,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 450137110 (Birch River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Summersville",
@@ -28220,6 +28315,16 @@
         ],
         "landmarks": [
           {
+            "name": "Monongahela River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 5.6,
+            "spoken": "Crossing the Monongahela River",
+            "lat": 39.58858,
+            "lon": -79.97938,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 163537179 (Monongahela River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Baxter",
             "at_mi": 13.0,
             "off_mi": 4.58,
@@ -28227,20 +28332,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154173651, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Baxter"
-          },
-          {
-            "name": "Monongahela River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.1,
-            "spoken": "Crossing the Monongahela River"
-          },
-          {
-            "name": "Tygart Valley River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.1,
-            "spoken": "Crossing the Tygart Valley River"
           },
           {
             "name": "Rivesville",
@@ -28277,6 +28368,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154104374, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Whitehall"
+          },
+          {
+            "name": "Tygart Valley River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 22.0,
+            "spoken": "Crossing the Tygart Valley River",
+            "lat": 39.43981,
+            "lon": -80.17504,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 163537194 (Tygart Valley River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Monongah",
@@ -28441,6 +28542,16 @@
             "spoken": "Passing Jane Lew"
           },
           {
+            "name": "West Fork River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 58.6,
+            "spoken": "Crossing the West Fork River",
+            "lat": 39.01457,
+            "lon": -80.47171,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 374623088 (West Fork River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Trans-Allegheny Lunatic Asylum (West Virginia Hospital for the Insane/Weston Sta",
             "category": "museum",
             "kind": "point",
@@ -28448,18 +28559,14 @@
             "spoken": "Museum ahead: Trans-Allegheny Lunatic Asylum (West Virginia Hospital for the Insane/Weston Sta"
           },
           {
-            "name": "West Fork River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 68.2,
-            "spoken": "Crossing the West Fork River"
-          },
-          {
             "name": "Little Kanawha River",
             "category": "river",
             "kind": "point",
-            "at_mi": 68.2,
-            "spoken": "Crossing the Little Kanawha River"
+            "at_mi": 74.9,
+            "spoken": "Crossing the Little Kanawha River",
+            "lat": 38.86144,
+            "lon": -80.65549,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 438079584 (Little Kanawha River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Flatwoods",
@@ -28509,13 +28616,6 @@
             "spoken": "Passing Clendenin"
           },
           {
-            "name": "Elk River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 142.7,
-            "spoken": "Crossing the Elk River"
-          },
-          {
             "name": "State Capitol (from Morgantown)",
             "category": "billboard_sign",
             "kind": "point",
@@ -28551,6 +28651,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153956983, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dunbar"
+          },
+          {
+            "name": "Elk River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 155.0,
+            "spoken": "Crossing the Elk River",
+            "lat": 38.35812,
+            "lon": -81.63205,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 113058180 (Elk River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Malden",
@@ -29857,13 +29967,6 @@
             "spoken": "Entering Brandonville"
           },
           {
-            "name": "Youghiogheny River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 26.9,
-            "spoken": "Crossing the Youghiogheny River"
-          },
-          {
             "name": "Markleysburg",
             "at_mi": 29.5,
             "off_mi": 4.95,
@@ -29891,6 +29994,16 @@
             "spoken": "Passing Hoyes"
           },
           {
+            "name": "Youghiogheny River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 34.3,
+            "spoken": "Crossing the Youghiogheny River",
+            "lat": 39.661,
+            "lon": -79.40843,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 162214174 (Youghiogheny River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Accident",
             "at_mi": 37.1,
             "off_mi": 4.35,
@@ -29912,8 +30025,11 @@
             "name": "Casselman River",
             "category": "river",
             "kind": "point",
-            "at_mi": 46.2,
-            "spoken": "Crossing the Casselman River"
+            "at_mi": 50.0,
+            "spoken": "Crossing the Casselman River",
+            "lat": 39.69489,
+            "lon": -79.14016,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 352164707 (Casselman River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Salisbury",
@@ -30499,20 +30615,22 @@
         "state_miles": [
           {
             "state": "West Virginia",
-            "miles": 29.2
+            "miles": 30.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Maryland",
-            "miles": 43.8
+            "miles": 42.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 29.2,
+            "at_mi": 30.4,
             "from_state": "West Virginia",
             "state": "Maryland",
             "place": "West Virginia-Maryland line on I-68",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -31388,6 +31506,16 @@
         ],
         "landmarks": [
           {
+            "name": "Monongahela River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.4,
+            "spoken": "Crossing the Monongahela River",
+            "lat": 39.63079,
+            "lon": -79.96012,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 163537175 (Monongahela River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Cassville",
             "at_mi": 6.9,
             "off_mi": 1.65,
@@ -31404,13 +31532,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154314532, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Mount Morris"
-          },
-          {
-            "name": "Monongahela River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.1,
-            "spoken": "Crossing the Monongahela River"
           },
           {
             "name": "Morrisville",
@@ -32576,20 +32697,22 @@
         "state_miles": [
           {
             "state": "West Virginia",
-            "miles": 11.2
+            "miles": 10.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Pennsylvania",
-            "miles": 63.8
+            "miles": 64.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 11.2,
+            "at_mi": 10.2,
             "from_state": "West Virginia",
             "state": "Pennsylvania",
             "place": "West Virginia-Pennsylvania line on I-79",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -33977,8 +34100,11 @@
             "name": "Little Kanawha River",
             "category": "river",
             "kind": "point",
-            "at_mi": 9.2,
-            "spoken": "Crossing the Little Kanawha River"
+            "at_mi": 6.5,
+            "spoken": "Crossing the Little Kanawha River",
+            "lat": 39.23285,
+            "lon": -81.51094,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 632174669 (Little Kanawha River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Elizabeth",
@@ -34017,6 +34143,16 @@
             "spoken": "Passing Hometown"
           },
           {
+            "name": "Pocatalico River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 63.6,
+            "spoken": "Crossing the Pocatalico River",
+            "lat": 38.51633,
+            "lon": -81.64426,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 449768857 (Pocatalico River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Bancroft",
             "at_mi": 63.7,
             "off_mi": 10.54,
@@ -34051,20 +34187,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154402454, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Nitro"
-          },
-          {
-            "name": "Pocatalico River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 67.4,
-            "spoken": "Crossing the Pocatalico River"
-          },
-          {
-            "name": "Elk River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 67.4,
-            "spoken": "Crossing the Elk River"
           },
           {
             "name": "State Capitol (from Parkersburg)",
@@ -34120,6 +34242,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153976992, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Saint Albans"
+          },
+          {
+            "name": "Elk River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 76.0,
+            "spoken": "Crossing the Elk River",
+            "lat": 38.35812,
+            "lon": -81.63205,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 113058180 (Elk River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Malden",
@@ -36518,13 +36650,6 @@
             "spoken": "Passing West Milford"
           },
           {
-            "name": "West Fork River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 71.8,
-            "spoken": "Crossing the West Fork River"
-          },
-          {
             "name": "Country Club",
             "at_mi": 72.4,
             "off_mi": 2.43,
@@ -36532,6 +36657,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 13663650269, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Country Club"
+          },
+          {
+            "name": "West Fork River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 73.4,
+            "spoken": "Crossing the West Fork River",
+            "lat": 39.28948,
+            "lon": -80.35138,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 465017742 (West Fork River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lumberport",
@@ -36678,6 +36813,16 @@
             "spoken": "Passing Monongah"
           },
           {
+            "name": "Tygart Valley River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 91.7,
+            "spoken": "Crossing the Tygart Valley River",
+            "lat": 39.43961,
+            "lon": -80.17482,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 163537194 (Tygart Valley River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Whitehall",
             "at_mi": 91.8,
             "off_mi": 0.8,
@@ -36703,13 +36848,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153971714, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Barrackville"
-          },
-          {
-            "name": "Tygart Valley River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 99.8,
-            "spoken": "Crossing the Tygart Valley River"
           },
           {
             "name": "Rivesville",
@@ -38012,13 +38150,6 @@
             "spoken": "Passing Thornburg"
           },
           {
-            "name": "Monongahela River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 51.78,
-            "spoken": "Crossing the Monongahela River"
-          },
-          {
             "name": "Carnegie",
             "at_mi": 52.41,
             "off_mi": 0.35,
@@ -38044,6 +38175,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154296122, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing McKees Rocks"
+          },
+          {
+            "name": "Monongahela River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 57.0,
+            "spoken": "Crossing the Monongahela River",
+            "lat": 40.43896,
+            "lon": -80.01111,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 462176621 (Monongahela River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "interchanges": [

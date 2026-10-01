@@ -468,20 +468,22 @@
         "state_miles": [
           {
             "state": "New Mexico",
-            "miles": 67.66
+            "miles": 67.5,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 21.34
+            "miles": 21.5,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 67.66,
+            "at_mi": 67.5,
             "from_state": "New Mexico",
             "state": "Texas",
             "place": "New Mexico-Texas line on US-54",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -7375,13 +7377,6 @@
             "spoken": "Passing Yah-ta-hey"
           },
           {
-            "name": "Puerco River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 138.6,
-            "spoken": "Crossing the Puerco River"
-          },
-          {
             "name": "Red Rock",
             "at_mi": 140.1,
             "off_mi": 4.92,
@@ -7389,6 +7384,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151813300, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Red Rock"
+          },
+          {
+            "name": "Puerco River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 141.4,
+            "spoken": "Crossing the Puerco River",
+            "lat": 35.5135,
+            "lon": -108.80988,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 481826683 (Puerco River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "El Rancho Hotel (from Phoenix)",
@@ -7645,13 +7650,6 @@
             "spoken": "Passing Munds Park"
           },
           {
-            "name": "Verde River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 365.7,
-            "spoken": "Crossing the Verde River"
-          },
-          {
             "name": "Montezuma Castle (from Albuquerque)",
             "category": "billboard_sign",
             "kind": "point",
@@ -7669,6 +7667,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150980291, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Lake Montezuma"
+          },
+          {
+            "name": "Verde River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 375.0,
+            "spoken": "Crossing the Verde River",
+            "lat": 34.58654,
+            "lon": -111.87988,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 502237931 (Verde River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Montezuma Castle (from Phoenix)",
@@ -7691,8 +7699,11 @@
             "name": "Agua Fria River",
             "category": "river",
             "kind": "point",
-            "at_mi": 390.4,
-            "spoken": "Crossing the Agua Fria River"
+            "at_mi": 397.3,
+            "spoken": "Crossing the Agua Fria River",
+            "lat": 34.36576,
+            "lon": -112.11426,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 191504602 (Agua Fria River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Spring Valley",
@@ -7720,6 +7731,16 @@
             "spoken": "Entering State Trust Land"
           },
           {
+            "name": "New River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 431.0,
+            "spoken": "Crossing the New River",
+            "lat": 33.90562,
+            "lon": -112.14616,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 102901200 (New River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Anthem",
             "at_mi": 434.3,
             "off_mi": 1.0,
@@ -7736,13 +7757,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 9237180808, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Desert Hills"
-          },
-          {
-            "name": "New River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 440.8,
-            "spoken": "Crossing the New River"
           }
         ],
         "traffic_aadt": [
@@ -12594,13 +12608,6 @@
             "spoken": "Passing Rancho Viejo"
           },
           {
-            "name": "Santa Fe River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 56.8,
-            "spoken": "Crossing the Santa Fe River"
-          },
-          {
             "name": "Lamy",
             "at_mi": 58.8,
             "off_mi": 11.31,
@@ -12617,6 +12624,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151881272, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Glorieta"
+          },
+          {
+            "name": "Santa Fe River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 62.8,
+            "spoken": "Crossing the Santa Fe River",
+            "lat": 35.68845,
+            "lon": -105.95394,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 435625158 (Santa Fe River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Las Campanas",
@@ -15725,13 +15742,6 @@
             ]
           },
           {
-            "name": "Pecos River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 102.5,
-            "spoken": "Crossing the Pecos River"
-          },
-          {
             "name": "The Blue Hole (from Albuquerque)",
             "category": "billboard_sign",
             "kind": "point",
@@ -15740,6 +15750,16 @@
             "directions": [
               "forward"
             ]
+          },
+          {
+            "name": "Pecos River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 115.7,
+            "spoken": "Crossing the Pecos River",
+            "lat": 34.94538,
+            "lon": -104.70316,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 193424523 (Pecos River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "The Blue Hole (from Tucumcari)",
@@ -17169,6 +17189,16 @@
         ],
         "landmarks": [
           {
+            "name": "Pecos River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.6,
+            "spoken": "Crossing the Pecos River",
+            "lat": 32.41791,
+            "lon": -104.22435,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 191166107 (Pecos River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Loving",
             "at_mi": 3.09,
             "off_mi": 11.44,
@@ -17176,13 +17206,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151744067, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Loving"
-          },
-          {
-            "name": "Pecos River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 8.54,
-            "spoken": "Crossing the Pecos River"
           },
           {
             "name": "Carlsbad Caverns (from Hobbs)",
@@ -18221,6 +18244,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Pecos River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.6,
+            "spoken": "Crossing the Pecos River",
+            "lat": 32.41791,
+            "lon": -104.22435,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 191166107 (Pecos River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Loving",
             "at_mi": 3.0,
             "off_mi": 11.44,
@@ -18238,13 +18271,6 @@
             "directions": [
               "reverse"
             ]
-          },
-          {
-            "name": "Pecos River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.5,
-            "spoken": "Crossing the Pecos River"
           },
           {
             "name": "Buckeye",
@@ -20400,8 +20426,11 @@
             "name": "Pecos River",
             "category": "river",
             "kind": "point",
-            "at_mi": 98.8,
-            "spoken": "Crossing the Pecos River"
+            "at_mi": 94.0,
+            "spoken": "Crossing the Pecos River",
+            "lat": 33.57182,
+            "lon": -104.37378,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 271349097 (Pecos River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Spring River",
@@ -21423,8 +21452,11 @@
             "name": "Animas River",
             "category": "river",
             "kind": "point",
-            "at_mi": 34.3,
-            "spoken": "Crossing the Animas River"
+            "at_mi": 33.0,
+            "spoken": "Crossing the Animas River",
+            "lat": 37.05104,
+            "lon": -107.87516,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 116936770 (Animas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Florida River",
@@ -23043,6 +23075,16 @@
             "spoken": "Entering Hogback"
           },
           {
+            "name": "San Juan River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 28.0,
+            "spoken": "Crossing the San Juan River",
+            "lat": 36.78114,
+            "lon": -108.69228,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 333765006 (San Juan River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Gadii'ahi",
             "at_mi": 28.2,
             "off_mi": 6.9,
@@ -23050,13 +23092,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151338595, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gadii'ahi"
-          },
-          {
-            "name": "San Juan River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.1,
-            "spoken": "Crossing the San Juan River"
           },
           {
             "name": "Chaco River",
@@ -23138,13 +23173,6 @@
             "spoken": "Entering Twin Lakes"
           },
           {
-            "name": "Puerco River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 108.8,
-            "spoken": "Crossing the Puerco River"
-          },
-          {
             "name": "Yah-ta-hey",
             "at_mi": 112.6,
             "off_mi": 0.15,
@@ -23162,6 +23190,16 @@
             "directions": [
               "forward"
             ]
+          },
+          {
+            "name": "Puerco River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 120.7,
+            "spoken": "Crossing the Puerco River",
+            "lat": 35.52965,
+            "lon": -108.74533,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 481826683 (Puerco River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Red Rock",
@@ -26964,20 +27002,22 @@
         "state_miles": [
           {
             "state": "New Mexico",
-            "miles": 25.5
+            "miles": 25.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 19.5
+            "miles": 19.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 25.5,
+            "at_mi": 25.1,
             "from_state": "New Mexico",
             "state": "Texas",
             "place": "New Mexico-Texas line on I-10",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -29695,20 +29735,22 @@
         "state_miles": [
           {
             "state": "New Mexico",
-            "miles": 25.7
+            "miles": 25.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 324.3
+            "miles": 324.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 25.7,
+            "at_mi": 25.3,
             "from_state": "New Mexico",
             "state": "Texas",
             "place": "New Mexico-Texas line on I-10",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -31741,13 +31783,6 @@
             "spoken": "Entering Toyah"
           },
           {
-            "name": "Pecos River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 245.2,
-            "spoken": "Crossing the Pecos River"
-          },
-          {
             "name": "West of the Pecos Museum (eastbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -31766,6 +31801,16 @@
             "directions": [
               "reverse"
             ]
+          },
+          {
+            "name": "Pecos River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 261.7,
+            "spoken": "Crossing the Pecos River",
+            "lat": 31.42679,
+            "lon": -103.38917,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1535291611 (Pecos River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Barstow",
@@ -33794,11 +33839,13 @@
         "state_miles": [
           {
             "state": "New Mexico",
-            "miles": 141.6
+            "miles": 141.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Arizona",
-            "miles": 133.4
+            "miles": 133.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
@@ -33807,7 +33854,7 @@
             "from_state": "New Mexico",
             "state": "Arizona",
             "place": "New Mexico-Arizona line on I-10",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -35103,6 +35150,16 @@
             ]
           },
           {
+            "name": "Mimbres River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 55.9,
+            "spoken": "Crossing the Mimbres River",
+            "lat": 32.27883,
+            "lon": -107.70288,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 769821568 (Mimbres River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Rockhound State Park (from Tucson)",
             "category": "billboard_sign",
             "kind": "point",
@@ -35111,13 +35168,6 @@
             "directions": [
               "reverse"
             ]
-          },
-          {
-            "name": "Mimbres River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 71.6,
-            "spoken": "Crossing the Mimbres River"
           },
           {
             "name": "Stein's Pass",
@@ -35203,8 +35253,11 @@
             "name": "San Pedro River",
             "category": "river",
             "kind": "point",
-            "at_mi": 234.1,
-            "spoken": "Crossing the San Pedro River"
+            "at_mi": 226.5,
+            "spoken": "Crossing the San Pedro River",
+            "lat": 31.96894,
+            "lon": -110.27925,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 173195810 (San Pedro River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Kartchner Caverns (from Tucson)",
@@ -36132,15 +36185,21 @@
             "name": "Mora River",
             "category": "river",
             "kind": "point",
-            "at_mi": 13.8,
-            "spoken": "Crossing the Mora River"
+            "at_mi": 21.3,
+            "spoken": "Crossing the Mora River",
+            "lat": 35.79852,
+            "lon": -104.98357,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 564720237 (Mora River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Vermejo River",
             "category": "river",
             "kind": "point",
-            "at_mi": 67.9,
-            "spoken": "Crossing the Vermejo River"
+            "at_mi": 78.2,
+            "spoken": "Crossing the Vermejo River",
+            "lat": 36.49657,
+            "lon": -104.57104,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1165191804 (Vermejo River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Maxwell",
@@ -36156,7 +36215,10 @@
             "category": "river",
             "kind": "point",
             "at_mi": 95.5,
-            "spoken": "Crossing the Canadian River"
+            "spoken": "Crossing the Canadian River",
+            "lat": 36.72376,
+            "lon": -104.46572,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 599970064 (Canadian River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -39338,18 +39400,21 @@
             ]
           },
           {
-            "name": "Pecos River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 14.6,
-            "spoken": "Crossing the Pecos River"
-          },
-          {
             "name": "Spring River",
             "category": "river",
             "kind": "point",
             "at_mi": 14.6,
             "spoken": "Crossing the Spring River"
+          },
+          {
+            "name": "Pecos River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 16.4,
+            "spoken": "Crossing the Pecos River",
+            "lat": 33.57179,
+            "lon": -104.37364,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 271349097 (Pecos River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Elida",
@@ -39781,11 +39846,13 @@
         "state_miles": [
           {
             "state": "New Mexico",
-            "miles": 118.2
+            "miles": 118.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 90.8
+            "miles": 90.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
@@ -39794,7 +39861,7 @@
             "from_state": "New Mexico",
             "state": "Texas",
             "place": "New Mexico-Texas line on US-380",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -41015,6 +41082,16 @@
             "spoken": "Passing Tesuque Pueblo"
           },
           {
+            "name": "Santa Fe River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.3,
+            "spoken": "Crossing the Santa Fe River",
+            "lat": 35.68468,
+            "lon": -105.93765,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 435625159 (Santa Fe River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Rancho Viejo",
             "at_mi": 4.0,
             "off_mi": 4.87,
@@ -41022,13 +41099,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 4245267324, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rancho Viejo"
-          },
-          {
-            "name": "Santa Fe River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 6.6,
-            "spoken": "Crossing the Santa Fe River"
           },
           {
             "name": "Galisteo",
@@ -41068,8 +41138,11 @@
             "name": "Pecos River",
             "category": "river",
             "kind": "point",
-            "at_mi": 40.1,
-            "spoken": "Crossing the Pecos River"
+            "at_mi": 41.4,
+            "spoken": "Crossing the Pecos River",
+            "lat": 35.40025,
+            "lon": -105.47541,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 192332566 (Pecos River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [

@@ -3434,8 +3434,11 @@
             "name": "Pawtuxet River",
             "category": "river",
             "kind": "point",
-            "at_mi": 29.1,
-            "spoken": "Crossing the Pawtuxet River"
+            "at_mi": 28.0,
+            "spoken": "Crossing the Pawtuxet River",
+            "lat": 41.75933,
+            "lon": -71.43269,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 38656068 (Pawtuxet River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pocasset River",
@@ -4676,13 +4679,6 @@
             "spoken": "Crossing the Pocasset River"
           },
           {
-            "name": "Big River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.1,
-            "spoken": "Crossing the Big River"
-          },
-          {
             "name": "Nooseneck River",
             "category": "river",
             "kind": "point",
@@ -4753,6 +4749,16 @@
             "spoken": "Passing Tiogue"
           },
           {
+            "name": "Big River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 20.4,
+            "spoken": "Crossing the Big River",
+            "lat": 41.64891,
+            "lon": -71.61373,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 421312027 (Big River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "West Greenwich",
             "at_mi": 23.5,
             "off_mi": 0.92,
@@ -4798,6 +4804,16 @@
             "spoken": "Passing Hope Valley"
           },
           {
+            "name": "Wood River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 32.7,
+            "spoken": "Crossing the Wood River",
+            "lat": 41.49527,
+            "lon": -71.71611,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 483501042 (Wood River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Rockville",
             "at_mi": 33.9,
             "off_mi": 2.77,
@@ -4834,20 +4850,6 @@
             "spoken": "Entering Hopkinton"
           },
           {
-            "name": "Wood River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.7,
-            "spoken": "Crossing the Wood River"
-          },
-          {
-            "name": "Shunock River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.7,
-            "spoken": "Crossing the Shunock River"
-          },
-          {
             "name": "Bradford",
             "at_mi": 38.4,
             "off_mi": 3.92,
@@ -4864,6 +4866,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158906816, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Ashaway"
+          },
+          {
+            "name": "Shunock River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 41.7,
+            "spoken": "Crossing the Shunock River",
+            "lat": 41.4173,
+            "lon": -71.84926,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1089592073 (Shunock River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "North Stonington",
@@ -4951,15 +4963,21 @@
             "name": "Poquonock River",
             "category": "river",
             "kind": "point",
-            "at_mi": 54.6,
-            "spoken": "Crossing the Poquonock River"
+            "at_mi": 53.2,
+            "spoken": "Crossing the Poquonock River",
+            "lat": 41.36041,
+            "lon": -72.04144,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 340755805 (Poquonock River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Thames River",
             "category": "river",
             "kind": "point",
-            "at_mi": 54.6,
-            "spoken": "Crossing the Thames River"
+            "at_mi": 55.7,
+            "spoken": "Crossing the Thames River",
+            "lat": 41.36441,
+            "lon": -72.08822,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1219377656 (Thames River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Mystic Seaport (eastbound)",
@@ -5620,20 +5638,22 @@
         "state_miles": [
           {
             "state": "Rhode Island",
-            "miles": 48.4
+            "miles": 38.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Connecticut",
-            "miles": 9.6
+            "miles": 19.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 48.4,
+            "at_mi": 38.4,
             "from_state": "Rhode Island",
             "state": "Connecticut",
             "place": "Rhode Island-Connecticut line on I-95",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -11160,8 +11180,11 @@
             "name": "Woonasquatucket River",
             "category": "river",
             "kind": "point",
-            "at_mi": 4.9,
-            "spoken": "Crossing the Woonasquatucket River"
+            "at_mi": 0.7,
+            "spoken": "Crossing the Woonasquatucket River",
+            "lat": 41.82783,
+            "lon": -71.41814,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 35748737 (Woonasquatucket River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Saylesville",
@@ -11257,8 +11280,11 @@
             "name": "Branch River",
             "category": "river",
             "kind": "point",
-            "at_mi": 14.9,
-            "spoken": "Crossing the Branch River"
+            "at_mi": 15.1,
+            "spoken": "Crossing the Branch River",
+            "lat": 41.99668,
+            "lon": -71.55702,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 711723253 (Branch River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Forestdale",
@@ -11324,6 +11350,16 @@
             "spoken": "Passing Linwood"
           },
           {
+            "name": "Mumford River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 24.3,
+            "spoken": "Crossing the Mumford River",
+            "lat": 42.08306,
+            "lon": -71.68958,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1011155753 (Mumford River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Douglas",
             "at_mi": 24.4,
             "off_mi": 1.41,
@@ -11331,13 +11367,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158843632, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Douglas"
-          },
-          {
-            "name": "Mumford River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 24.6,
-            "spoken": "Crossing the Mumford River"
           },
           {
             "name": "Massachusetts State Police Museum and Learning Center",
@@ -11413,8 +11442,11 @@
             "name": "Blackstone River",
             "category": "river",
             "kind": "point",
-            "at_mi": 34.2,
-            "spoken": "Crossing the Blackstone River"
+            "at_mi": 34.1,
+            "spoken": "Crossing the Blackstone River",
+            "lat": 42.20161,
+            "lon": -71.77566,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1305979546 (Blackstone River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Auburn",

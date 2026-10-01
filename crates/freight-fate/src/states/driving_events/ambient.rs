@@ -4,7 +4,7 @@
 use ff_core::message_log::MessageCategory;
 use ff_core::sim::driving_modes::tuning_for_time_scale;
 use ff_core::sim::trip_models::{TripEvent, TripEventKind};
-use ff_core::speech_pacing::SpeechCategory;
+use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use ff_core::speech_text::SpokenMessage;
 
 use crate::app::{GameContext, SayEvent};
@@ -20,6 +20,7 @@ pub struct Ambient {
     pub log: bool,
     pub category: Option<SpeechCategory>,
     pub key: Option<String>,
+    pub priority: Option<EventPriority>,
     pub render: Option<AmbientRender>,
 }
 
@@ -50,6 +51,11 @@ impl Ambient {
 
     pub fn key(mut self, key: Option<String>) -> Self {
         self.key = key;
+        self
+    }
+
+    pub fn priority(mut self, priority: EventPriority) -> Self {
+        self.priority = Some(priority);
         self
     }
 
@@ -86,7 +92,7 @@ impl DrivingState {
     }
 
     /// `_speak_ambient_event(message, sound=None, *, log=True, category=None,
-    /// key=None, render=None)`.
+    /// key=None, priority=None, render=None)`.
     pub fn speak_ambient_event(
         &mut self,
         ctx: &mut GameContext,
@@ -98,6 +104,7 @@ impl DrivingState {
             log,
             category,
             key,
+            priority,
             render,
         } = opts;
         if log {
@@ -138,6 +145,7 @@ impl DrivingState {
                     waiting.message = text;
                     waiting.sound = sound;
                     waiting.category = category;
+                    waiting.priority = priority;
                     waiting.render = render;
                     return;
                 }
@@ -146,6 +154,7 @@ impl DrivingState {
             pending.sound = sound;
             pending.category = category;
             pending.key = key;
+            pending.priority = priority;
             pending.render = render;
             self.pending_ambient_events.push_back(pending);
             while self.pending_ambient_events.len() > AMBIENT_QUEUE_MAX {
@@ -159,6 +168,7 @@ impl DrivingState {
         let mut opts = SayEvent::queued();
         opts.review = false;
         opts.category = category;
+        opts.priority = priority;
         ctx.say_event_with(message, opts);
         self.ambient_event_cooldown_s =
             tuning_for_time_scale(self.trip.time_scale).ambient_spacing_s;
@@ -205,15 +215,15 @@ impl DrivingState {
         }
         // Already logged the moment it queued; speaking it now must not log
         // it a second time.
-        self.speak_ambient_event(
-            ctx,
-            SpokenMessage::new(message),
-            Ambient::new()
-                .sound(pending.sound.as_deref())
-                .log(false)
-                .category(pending.category)
-                .key(pending.key.clone()),
-        );
+        let mut opts = Ambient::new()
+            .sound(pending.sound.as_deref())
+            .log(false)
+            .category(pending.category)
+            .key(pending.key.clone());
+        if let Some(priority) = pending.priority {
+            opts = opts.priority(priority);
+        }
+        self.speak_ambient_event(ctx, SpokenMessage::new(message), opts);
     }
 
     /// What standing thing this ambient line is about, if any.

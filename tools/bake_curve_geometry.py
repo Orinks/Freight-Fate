@@ -386,7 +386,11 @@ def route_from_router(leg: dict, cities: dict) -> dict[str, Any]:
     used, so this re-states the leg's existing route rather than choosing a
     new one -- every corridor layer keyed to a mile stays valid.
     """
-    fetched = rr.fetch_route(cities[leg["from"]], cities[leg["to"]])
+    fetched = rr.fetch_route(
+        cities[leg["from"]],
+        cities[leg["to"]],
+        via=rr.route_via_points(leg),
+    )
     if fetched is None:
         raise RuntimeError(f"the router returned no route for {lg.leg_id_of(leg)}")
     shape, _miles, _toll = fetched

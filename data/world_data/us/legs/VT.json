@@ -5665,6 +5665,16 @@
             "spoken": "Passing Taft Corners"
           },
           {
+            "name": "Winooski River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 11.5,
+            "spoken": "Crossing the Winooski River",
+            "lat": 44.42281,
+            "lon": -73.01634,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 25302626 (Winooski River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Richmond",
             "at_mi": 14.5,
             "off_mi": 0.18,
@@ -5672,13 +5682,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158861272, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Richmond"
-          },
-          {
-            "name": "Winooski River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 14.6,
-            "spoken": "Crossing the Winooski River"
           },
           {
             "name": "Bolton",
@@ -5774,18 +5777,21 @@
             "spoken": "Passing Bethel"
           },
           {
+            "name": "White River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 68.7,
+            "spoken": "Crossing the White River",
+            "lat": 43.82503,
+            "lon": -72.57784,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 160059306 (White River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Second Branch White River",
             "category": "river",
             "kind": "point",
             "at_mi": 70.2,
             "spoken": "Crossing the Second Branch White River"
-          },
-          {
-            "name": "White River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 70.2,
-            "spoken": "Crossing the White River"
           },
           {
             "name": "Royalton",
@@ -5815,6 +5821,16 @@
             "spoken": "Passing Norwich"
           },
           {
+            "name": "Connecticut River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 90.8,
+            "spoken": "Crossing the Connecticut River",
+            "lat": 43.63475,
+            "lon": -72.32846,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 33492221 (Connecticut River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "White River Junction",
             "at_mi": 91.1,
             "off_mi": 1.1,
@@ -5842,18 +5858,14 @@
             "spoken": "Passing Hanover"
           },
           {
-            "name": "Connecticut River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 96.7,
-            "spoken": "Crossing the Connecticut River"
-          },
-          {
             "name": "Mascoma River",
             "category": "river",
             "kind": "point",
-            "at_mi": 96.7,
-            "spoken": "Crossing the Mascoma River"
+            "at_mi": 97.4,
+            "spoken": "Crossing the Mascoma River",
+            "lat": 43.63697,
+            "lon": -72.21286,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 4432891 (Mascoma River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Enfield",
@@ -7039,8 +7051,11 @@
             "name": "Winooski River",
             "category": "river",
             "kind": "point",
-            "at_mi": 4.92,
-            "spoken": "Crossing the Winooski River"
+            "at_mi": 1.9,
+            "spoken": "Crossing the Winooski River",
+            "lat": 44.25629,
+            "lon": -72.59998,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 47857822 (Winooski River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Middlesex",
@@ -9808,6 +9823,16 @@
             "spoken": "Passing East Montpelier"
           },
           {
+            "name": "Winooski River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.2,
+            "spoken": "Crossing the Winooski River",
+            "lat": 44.25791,
+            "lon": -72.57746,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 47857822 (Winooski River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Middlesex",
             "at_mi": 1.8,
             "off_mi": 4.85,
@@ -9833,13 +9858,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158853411, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Williamstown"
-          },
-          {
-            "name": "Winooski River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 14.0,
-            "spoken": "Crossing the Winooski River"
           },
           {
             "name": "Brookfield",
@@ -9890,8 +9908,11 @@
             "name": "White River",
             "category": "river",
             "kind": "point",
-            "at_mi": 40.9,
-            "spoken": "Crossing the White River"
+            "at_mi": 40.6,
+            "spoken": "Crossing the White River",
+            "lat": 43.78243,
+            "lon": -72.47267,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 160059313 (White River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "First Branch White River",
@@ -9944,6 +9965,16 @@
             "spoken": "Passing White River Junction"
           },
           {
+            "name": "Connecticut River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 55.1,
+            "spoken": "Crossing the Connecticut River",
+            "lat": 43.63475,
+            "lon": -72.32846,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 33492221 (Connecticut River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "West Lebanon",
             "at_mi": 56.5,
             "off_mi": 1.13,
@@ -9962,6 +9993,16 @@
             "spoken": "Passing Hanover"
           },
           {
+            "name": "Mascoma River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 61.7,
+            "spoken": "Crossing the Mascoma River",
+            "lat": 43.63697,
+            "lon": -72.21286,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 4432891 (Mascoma River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Enfield",
             "at_mi": 63.0,
             "off_mi": 3.17,
@@ -9971,27 +10012,6 @@
             "spoken": "Passing Enfield"
           },
           {
-            "name": "Connecticut River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 65.7,
-            "spoken": "Crossing the Connecticut River"
-          },
-          {
-            "name": "Mascoma River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 65.7,
-            "spoken": "Crossing the Mascoma River"
-          },
-          {
-            "name": "North Branch Sugar River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 65.7,
-            "spoken": "Crossing the North Branch Sugar River"
-          },
-          {
             "name": "Grantham",
             "at_mi": 73.5,
             "off_mi": 0.38,
@@ -9999,6 +10019,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158851819, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Grantham"
+          },
+          {
+            "name": "North Branch Sugar River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 74.4,
+            "spoken": "Crossing the North Branch Sugar River",
+            "lat": 43.49003,
+            "lon": -72.11347,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 832398693 (North Branch Sugar River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Springfield",
@@ -11483,6 +11513,16 @@
         ],
         "landmarks": [
           {
+            "name": "Cold River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 2.8,
+            "spoken": "Crossing the Cold River",
+            "lat": 43.57093,
+            "lon": -72.96434,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 914151097 (Cold River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Clarendon",
             "at_mi": 6.56,
             "off_mi": 0.16,
@@ -11490,6 +11530,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158803183, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Clarendon"
+          },
+          {
+            "name": "Mill River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 6.8,
+            "spoken": "Crossing the Mill River",
+            "lat": 43.5144,
+            "lon": -72.96751,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 367005680 (Mill River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Wallingford",
@@ -11508,20 +11558,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158866522, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Tinmouth"
-          },
-          {
-            "name": "Mill River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.96,
-            "spoken": "Crossing the Mill River"
-          },
-          {
-            "name": "Cold River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.96,
-            "spoken": "Crossing the Cold River"
           },
           {
             "name": "Danby",
@@ -11612,6 +11648,16 @@
             "spoken": "Passing Old Bennington"
           },
           {
+            "name": "Walloomsac River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 53.0,
+            "spoken": "Crossing the Walloomsac River",
+            "lat": 42.90501,
+            "lon": -73.22353,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 146990626 (Walloomsac River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "North Bennington",
             "at_mi": 53.89,
             "off_mi": 1.67,
@@ -11619,20 +11665,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158859893, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing North Bennington"
-          },
-          {
-            "name": "Walloomsac River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 57.92,
-            "spoken": "Crossing the Walloomsac River"
-          },
-          {
-            "name": "Hoosic River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 57.92,
-            "spoken": "Crossing the Hoosic River"
           },
           {
             "name": "Hoosick",
@@ -11651,6 +11683,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158856494, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hoosick Falls"
+          },
+          {
+            "name": "Hoosic River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 60.2,
+            "spoken": "Crossing the Hoosic River",
+            "lat": 42.85666,
+            "lon": -73.33979,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1271266734 (Hoosic River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pittstown",
@@ -11716,13 +11758,6 @@
             "spoken": "Entering Brunswick Center"
           },
           {
-            "name": "Hudson River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 79.31,
-            "spoken": "Crossing the Hudson River"
-          },
-          {
             "name": "Mountain View",
             "at_mi": 80.47,
             "off_mi": 2.49,
@@ -11748,6 +11783,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158869894, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Green Island"
+          },
+          {
+            "name": "Hudson River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 81.7,
+            "spoken": "Crossing the Hudson River",
+            "lat": 42.74035,
+            "lon": -73.68872,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 160568672 (Hudson River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cohoes",
@@ -13301,13 +13346,6 @@
             "spoken": "Entering Pittsford"
           },
           {
-            "name": "Neshobe River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 8.25,
-            "spoken": "Crossing the Neshobe River"
-          },
-          {
             "name": "Brandon",
             "at_mi": 15.05,
             "off_mi": 0.01,
@@ -13315,6 +13353,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158860007, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Brandon"
+          },
+          {
+            "name": "Neshobe River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 15.8,
+            "spoken": "Crossing the Neshobe River",
+            "lat": 43.79951,
+            "lon": -73.089,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 987839645 (Neshobe River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Sudbury",
@@ -13365,8 +13413,11 @@
             "name": "Middlebury River",
             "category": "river",
             "kind": "point",
-            "at_mi": 24.94,
-            "spoken": "Crossing the Middlebury River"
+            "at_mi": 27.9,
+            "spoken": "Crossing the Middlebury River",
+            "lat": 43.9663,
+            "lon": -73.11667,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 446157800 (Middlebury River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "East Middlebury",
@@ -13412,6 +13463,16 @@
             "spoken": "Middlebury College Museum of Art ahead"
           },
           {
+            "name": "New Haven River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 35.8,
+            "spoken": "Crossing the New Haven River",
+            "lat": 44.06323,
+            "lon": -73.16854,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 383936376 (New Haven River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Weybridge",
             "at_mi": 36.59,
             "off_mi": 2.11,
@@ -13437,13 +13498,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158893943, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bristol"
-          },
-          {
-            "name": "New Haven River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 41.75,
-            "spoken": "Crossing the New Haven River"
           },
           {
             "name": "Addison",
@@ -13500,13 +13554,6 @@
             "spoken": "Passing Hinesburg"
           },
           {
-            "name": "La Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 58.44,
-            "spoken": "Crossing the La Platte River"
-          },
-          {
             "name": "Shelburne",
             "at_mi": 59.78,
             "off_mi": 0.01,
@@ -13514,6 +13561,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158803172, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Shelburne"
+          },
+          {
+            "name": "La Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 60.4,
+            "spoken": "Crossing the La Platte River",
+            "lat": 44.38685,
+            "lon": -73.22521,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 28435796 (La Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Williston",

@@ -292,6 +292,16 @@
             "spoken": "Passing Coahoma"
           },
           {
+            "name": "Big Sunflower River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.4,
+            "spoken": "Crossing the Big Sunflower River",
+            "lat": 34.19711,
+            "lon": -90.57552,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 515324141 (Big Sunflower River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "The Delta Blues Museum (eastbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -300,13 +310,6 @@
             "directions": [
               "reverse"
             ]
-          },
-          {
-            "name": "Big Sunflower River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 9.68,
-            "spoken": "Crossing the Big Sunflower River"
           },
           {
             "name": "Alligator",
@@ -1237,8 +1240,11 @@
             "name": "Tallahatchie River",
             "category": "river",
             "kind": "point",
-            "at_mi": 28.07,
-            "spoken": "Crossing the Tallahatchie River"
+            "at_mi": 30.1,
+            "spoken": "Crossing the Tallahatchie River",
+            "lat": 33.97562,
+            "lon": -90.22609,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 131197251 (Tallahatchie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Charleston",
@@ -1262,8 +1268,11 @@
             "name": "Yalobusha River",
             "category": "river",
             "kind": "point",
-            "at_mi": 59.96,
-            "spoken": "Crossing the Yalobusha River"
+            "at_mi": 55.7,
+            "spoken": "Crossing the Yalobusha River",
+            "lat": 33.77692,
+            "lon": -89.99995,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 662922303 (Yalobusha River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Duck Hill",
@@ -1775,8 +1784,11 @@
             "name": "Big Sunflower River",
             "category": "river",
             "kind": "point",
-            "at_mi": 9.32,
-            "spoken": "Crossing the Big Sunflower River"
+            "at_mi": 5.2,
+            "spoken": "Crossing the Big Sunflower River",
+            "lat": 34.2484,
+            "lon": -90.52622,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 468617791 (Big Sunflower River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Jonestown",
@@ -2831,8 +2843,11 @@
             "name": "Tombigbee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 7.5,
-            "spoken": "Crossing the Tombigbee River"
+            "at_mi": 8.6,
+            "spoken": "Crossing the Tombigbee River",
+            "lat": 33.58476,
+            "lon": -88.48733,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 163557200 (Tombigbee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Waverley Mansion",
@@ -4010,6 +4025,16 @@
             "spoken": "Passing Carrollton"
           },
           {
+            "name": "Sipsey River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 45.8,
+            "spoken": "Crossing the Sipsey River",
+            "lat": 33.27321,
+            "lon": -87.75442,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 818912755 (Sipsey River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "The Paul W. Bryant Museum (eastbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -4020,25 +4045,21 @@
             ]
           },
           {
-            "name": "Sipsey River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 51.8,
-            "spoken": "Crossing the Sipsey River"
-          },
-          {
-            "name": "Black Warrior River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 51.8,
-            "spoken": "Crossing the Black Warrior River"
-          },
-          {
             "name": "Dreamland Bar-B-Que",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 55.0,
             "spoken": "Billboard: Tuscaloosa is ahead, home to Dreamland ribs, white bread, sauce, and no unnecessary vegetables attempting to supervise the meal."
+          },
+          {
+            "name": "Black Warrior River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 58.4,
+            "spoken": "Crossing the Black Warrior River",
+            "lat": 33.2143,
+            "lon": -87.57368,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 164030660 (Black Warrior River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Holt",
@@ -4184,20 +4205,22 @@
         "state_miles": [
           {
             "state": "Mississippi",
-            "miles": 10.9
+            "miles": 10.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Alabama",
-            "miles": 48.1
+            "miles": 48.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 10.9,
+            "at_mi": 10.7,
             "from_state": "Mississippi",
             "state": "Alabama",
             "place": "Mississippi-Alabama line on US-82",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -5009,6 +5032,16 @@
             "spoken": "Passing Inverness"
           },
           {
+            "name": "Big Sunflower River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Crossing the Big Sunflower River",
+            "lat": 33.46214,
+            "lon": -90.56243,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 488913406 (Big Sunflower River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Sunflower",
             "at_mi": 31.33,
             "off_mi": 5.59,
@@ -5025,13 +5058,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151337940, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Moorhead"
-          },
-          {
-            "name": "Big Sunflower River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 36.14,
-            "spoken": "Crossing the Big Sunflower River"
           },
           {
             "name": "Quiver River",
@@ -5762,20 +5788,22 @@
         "state_miles": [
           {
             "state": "Mississippi",
-            "miles": 9.31
+            "miles": 9.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Arkansas",
-            "miles": 94.69
+            "miles": 94.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 9.31,
+            "at_mi": 9.7,
             "from_state": "Mississippi",
             "state": "Arkansas",
             "place": "Mississippi-Arkansas line on US-65",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "landmarks": [
@@ -5798,18 +5826,21 @@
             "spoken": "Passing Leland"
           },
           {
-            "name": "Mississippi River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 8.54,
-            "spoken": "Crossing the Mississippi River"
-          },
-          {
             "name": "Old River",
             "category": "river",
             "kind": "point",
             "at_mi": 8.54,
             "spoken": "Crossing the Old River"
+          },
+          {
+            "name": "Mississippi River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 10.7,
+            "spoken": "Crossing the Mississippi River",
+            "lat": 33.28738,
+            "lon": -91.1539,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 27736266 (Mississippi River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Eudora",
@@ -5833,8 +5864,11 @@
             "name": "Boeuf River",
             "category": "river",
             "kind": "point",
-            "at_mi": 32.19,
-            "spoken": "Crossing the Boeuf River"
+            "at_mi": 31.1,
+            "spoken": "Crossing the Boeuf River",
+            "lat": 33.46067,
+            "lon": -91.33807,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 190291129 (Boeuf River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Dermott",
@@ -6931,8 +6965,11 @@
             "name": "Yazoo River",
             "category": "river",
             "kind": "point",
-            "at_mi": 83.35,
-            "spoken": "Crossing the Yazoo River"
+            "at_mi": 81.7,
+            "spoken": "Crossing the Yazoo River",
+            "lat": 32.49091,
+            "lon": -90.80876,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 272728123 (Yazoo River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -9832,18 +9869,24 @@
             ]
           },
           {
-            "name": "Biloxi River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 9.0,
-            "spoken": "Crossing the Biloxi River"
-          },
-          {
             "name": "Little Biloxi River",
             "category": "river",
             "kind": "point",
-            "at_mi": 9.0,
-            "spoken": "Crossing the Little Biloxi River"
+            "at_mi": 10.8,
+            "spoken": "Crossing the Little Biloxi River",
+            "lat": 30.5223,
+            "lon": -89.10856,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 32246053 (Little Biloxi River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Biloxi River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 13.5,
+            "spoken": "Crossing the Biloxi River",
+            "lat": 30.55864,
+            "lon": -89.12185,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 25345558 (Biloxi River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "De Soto National Forest",
@@ -12060,8 +12103,11 @@
             "name": "Biloxi River",
             "category": "river",
             "kind": "point",
-            "at_mi": 14.1,
-            "spoken": "Crossing the Biloxi River"
+            "at_mi": 13.5,
+            "spoken": "Crossing the Biloxi River",
+            "lat": 30.55864,
+            "lon": -89.12185,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 25345558 (Biloxi River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Brooklyn",
@@ -12096,6 +12142,16 @@
             "spoken": "Sarah Gillespie Museum ahead"
           },
           {
+            "name": "Bouie River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 81.2,
+            "spoken": "Crossing the Bouie River",
+            "lat": 31.42577,
+            "lon": -89.41414,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 276637277 (Bouie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Sumrall",
             "at_mi": 85.6,
             "off_mi": 6.45,
@@ -12112,13 +12168,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153737947, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Seminary"
-          },
-          {
-            "name": "Bouie River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 94.4,
-            "spoken": "Crossing the Bouie River"
           },
           {
             "name": "Mount Olive",
@@ -12139,13 +12188,6 @@
             "spoken": "Passing Mize"
           },
           {
-            "name": "Strong River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 121.9,
-            "spoken": "Crossing the Strong River"
-          },
-          {
             "name": "Mendenhall",
             "at_mi": 128.2,
             "off_mi": 0.79,
@@ -12164,6 +12206,16 @@
             "spoken": "Passing Puckett"
           },
           {
+            "name": "Strong River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 130.4,
+            "spoken": "Crossing the Strong River",
+            "lat": 31.98799,
+            "lon": -89.88597,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 556976493 (Strong River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "D'Lo",
             "at_mi": 131.0,
             "off_mi": 0.59,
@@ -12180,13 +12232,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153612857, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Braxton"
-          },
-          {
-            "name": "Pearl River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 148.2,
-            "spoken": "Crossing the Pearl River"
           },
           {
             "name": "Terry",
@@ -12214,6 +12259,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 4833566225, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brandon"
+          },
+          {
+            "name": "Pearl River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 158.9,
+            "spoken": "Crossing the Pearl River",
+            "lat": 32.27677,
+            "lon": -90.17921,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 31648171 (Pearl River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ridgeland",
@@ -13047,11 +13102,13 @@
         "state_miles": [
           {
             "state": "Mississippi",
-            "miles": 47.4
+            "miles": 47.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Alabama",
-            "miles": 27.6
+            "miles": 27.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
@@ -13060,7 +13117,7 @@
             "from_state": "Mississippi",
             "state": "Alabama",
             "place": "Mississippi-Alabama line on I-10",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -13094,20 +13151,6 @@
             ]
           },
           {
-            "name": "Pascagoula River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 26.5,
-            "spoken": "Crossing the Pascagoula River"
-          },
-          {
-            "name": "West Pascagoula River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 26.5,
-            "spoken": "Crossing the West Pascagoula River"
-          },
-          {
             "name": "Gautier",
             "at_mi": 34.2,
             "off_mi": 3.58,
@@ -13115,6 +13158,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153560683, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gautier"
+          },
+          {
+            "name": "West Pascagoula River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 34.3,
+            "spoken": "Crossing the West Pascagoula River",
+            "lat": 30.43759,
+            "lon": -88.61189,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 910632515 (West Pascagoula River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "The Shed Barbecue (westbound)",
@@ -13125,6 +13178,16 @@
             "directions": [
               "reverse"
             ]
+          },
+          {
+            "name": "Pascagoula River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 37.5,
+            "spoken": "Crossing the Pascagoula River",
+            "lat": 30.43805,
+            "lon": -88.55774,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 25464925 (Pascagoula River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Escatawpa",
@@ -13139,8 +13202,11 @@
             "name": "Escatawpa River",
             "category": "river",
             "kind": "point",
-            "at_mi": 46.1,
-            "spoken": "Crossing the Escatawpa River"
+            "at_mi": 44.1,
+            "spoken": "Crossing the Escatawpa River",
+            "lat": 30.45871,
+            "lon": -88.4512,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 130166486 (Escatawpa River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Grand Bay",
@@ -13161,6 +13227,16 @@
             "spoken": "Passing Bayou La Batre"
           },
           {
+            "name": "Fowl River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 59.0,
+            "spoken": "Crossing the Fowl River",
+            "lat": 30.54402,
+            "lon": -88.22613,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1304718194 (Fowl River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Bellingrath Gardens (eastbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -13178,13 +13254,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153514704, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Belle Fontaine"
-          },
-          {
-            "name": "Fowl River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 65.6,
-            "spoken": "Crossing the Fowl River"
           },
           {
             "name": "Bellingrath Gardens (westbound)",
@@ -14354,20 +14423,22 @@
         "state_miles": [
           {
             "state": "Mississippi",
-            "miles": 39.8
+            "miles": 39.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Louisiana",
-            "miles": 39.2
+            "miles": 39.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 39.8,
+            "at_mi": 39.3,
             "from_state": "Mississippi",
             "state": "Louisiana",
             "place": "Mississippi-Louisiana line on I-10",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -14861,8 +14932,11 @@
             "name": "Wolf River",
             "category": "river",
             "kind": "point",
-            "at_mi": 8.5,
-            "spoken": "Crossing the Wolf River"
+            "at_mi": 11.8,
+            "spoken": "Crossing the Wolf River",
+            "lat": 30.41501,
+            "lon": -89.20317,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 26442048 (Wolf River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pass Christian",
@@ -14883,6 +14957,16 @@
             "spoken": "Passing Bay Saint Louis"
           },
           {
+            "name": "Jourdan River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 24.3,
+            "spoken": "Crossing the Jourdan River",
+            "lat": 30.36518,
+            "lon": -89.40175,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1374245119 (Jourdan River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Waveland",
             "at_mi": 24.8,
             "off_mi": 5.79,
@@ -14890,20 +14974,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153596661, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Waveland"
-          },
-          {
-            "name": "Jourdan River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 28.0,
-            "spoken": "Crossing the Jourdan River"
-          },
-          {
-            "name": "Pearl River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 28.0,
-            "spoken": "Crossing the Pearl River"
           },
           {
             "name": "The Infinity Science Center (westbound)",
@@ -14932,6 +15002,36 @@
             "spoken": "Entering Pearl River State Wildlife Management Area"
           },
           {
+            "name": "Pearl River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 39.3,
+            "spoken": "Crossing the Pearl River",
+            "lat": 30.30352,
+            "lon": -89.64155,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 164148614 (Pearl River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Middle River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 40.6,
+            "spoken": "Crossing the Middle River",
+            "lat": 30.29847,
+            "lon": -89.66391,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 27145141 (Middle River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "West Pearl River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 43.0,
+            "spoken": "Crossing the West Pearl River",
+            "lat": 30.29793,
+            "lon": -89.70239,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 163641017 (West Pearl River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "The Infinity Science Center (eastbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -14942,25 +15042,11 @@
             ]
           },
           {
-            "name": "Middle River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 48.9,
-            "spoken": "Crossing the Middle River"
-          },
-          {
             "name": "West Middle River",
             "category": "river",
             "kind": "point",
             "at_mi": 48.9,
             "spoken": "Crossing the West Middle River"
-          },
-          {
-            "name": "West Pearl River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 48.9,
-            "spoken": "Crossing the West Pearl River"
           },
           {
             "name": "Lacombe",
@@ -15954,15 +16040,21 @@
             "name": "Pearl River",
             "category": "river",
             "kind": "point",
-            "at_mi": 71.6,
-            "spoken": "Crossing the Pearl River"
+            "at_mi": 69.4,
+            "spoken": "Crossing the Pearl River",
+            "lat": 30.46265,
+            "lon": -89.69491,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 27126323 (Pearl River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "West Pearl River",
             "category": "river",
             "kind": "point",
-            "at_mi": 71.6,
-            "spoken": "Crossing the West Pearl River"
+            "at_mi": 75.4,
+            "spoken": "Crossing the West Pearl River",
+            "lat": 30.38396,
+            "lon": -89.7359,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 163641017 (West Pearl River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pearlington",
@@ -18185,20 +18277,22 @@
         "state_miles": [
           {
             "state": "Mississippi",
-            "miles": 95.2
+            "miles": 94.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Louisiana",
-            "miles": 79.8
+            "miles": 80.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 95.2,
+            "at_mi": 94.9,
             "from_state": "Mississippi",
             "state": "Louisiana",
             "place": "Mississippi-Louisiana line on I-55",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -19225,13 +19319,6 @@
             "spoken": "Passing Summit"
           },
           {
-            "name": "Tangipahoa River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 77.5,
-            "spoken": "Crossing the Tangipahoa River"
-          },
-          {
             "name": "Magnolia",
             "at_mi": 84.6,
             "off_mi": 1.27,
@@ -19239,6 +19326,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151813350, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Magnolia"
+          },
+          {
+            "name": "Tangipahoa River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 86.4,
+            "spoken": "Crossing the Tangipahoa River",
+            "lat": 31.12095,
+            "lon": -90.48405,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1426779214 (Tangipahoa River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Osyka",
@@ -19340,13 +19437,6 @@
             "spoken": "Passing Rome"
           },
           {
-            "name": "Tickfaw River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 135.6,
-            "spoken": "Crossing the Tickfaw River"
-          },
-          {
             "name": "Albany",
             "at_mi": 136.9,
             "off_mi": 1.84,
@@ -19363,6 +19453,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151794027, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Killian"
+          },
+          {
+            "name": "Tickfaw River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 142.5,
+            "spoken": "Crossing the Tickfaw River",
+            "lat": 30.47498,
+            "lon": -90.67423,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 916867629 (Tickfaw River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Livingston",
@@ -20718,6 +20818,16 @@
             "spoken": "Passing Clinton"
           },
           {
+            "name": "Pearl River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 2.8,
+            "spoken": "Crossing the Pearl River",
+            "lat": 32.27613,
+            "lon": -90.17968,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 31648171 (Pearl River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Brandon",
             "at_mi": 4.1,
             "off_mi": 10.12,
@@ -20734,13 +20844,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151883011, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Richland"
-          },
-          {
-            "name": "Pearl River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 10.7,
-            "spoken": "Crossing the Pearl River"
           },
           {
             "name": "Terry",
@@ -20770,6 +20873,16 @@
             "spoken": "Passing D'Lo"
           },
           {
+            "name": "Strong River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 31.0,
+            "spoken": "Crossing the Strong River",
+            "lat": 31.98772,
+            "lon": -89.88601,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 556976493 (Strong River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Puckett",
             "at_mi": 31.7,
             "off_mi": 8.9,
@@ -20777,13 +20890,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153564503, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Puckett"
-          },
-          {
-            "name": "Strong River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 32.8,
-            "spoken": "Crossing the Strong River"
           },
           {
             "name": "Mendenhall",
@@ -20843,8 +20949,11 @@
             "name": "Bouie River",
             "category": "river",
             "kind": "point",
-            "at_mi": 79.5,
-            "spoken": "Crossing the Bouie River"
+            "at_mi": 80.5,
+            "spoken": "Crossing the Bouie River",
+            "lat": 31.42569,
+            "lon": -89.41475,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 276637277 (Bouie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -22264,6 +22373,16 @@
             "spoken": "Passing Hickory"
           },
           {
+            "name": "Chunky River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 75.7,
+            "spoken": "Crossing the Chunky River",
+            "lat": 32.34273,
+            "lon": -88.97512,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1076330338 (Chunky River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Chunky",
             "at_mi": 78.5,
             "off_mi": 1.14,
@@ -22271,13 +22390,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153705997, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Chunky"
-          },
-          {
-            "name": "Chunky River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 81.4,
-            "spoken": "Crossing the Chunky River"
           },
           {
             "name": "Enterprise",
@@ -24754,20 +24866,22 @@
         "state_miles": [
           {
             "state": "Mississippi",
-            "miles": 94.9
+            "miles": 94.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Louisiana",
-            "miles": 91.1
+            "miles": 91.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 94.9,
+            "at_mi": 94.6,
             "from_state": "Mississippi",
             "state": "Louisiana",
             "place": "Mississippi-Louisiana line on I-55",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -25791,6 +25905,16 @@
             "spoken": "Passing Magnolia"
           },
           {
+            "name": "Tangipahoa River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 86.2,
+            "spoken": "Crossing the Tangipahoa River",
+            "lat": 31.12095,
+            "lon": -90.48405,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1426779214 (Tangipahoa River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Osyka",
             "at_mi": 93.6,
             "off_mi": 1.86,
@@ -25798,13 +25922,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151546097, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Osyka"
-          },
-          {
-            "name": "Tangipahoa River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 94.5,
-            "spoken": "Crossing the Tangipahoa River"
           },
           {
             "name": "Kentwood",
@@ -29170,13 +29287,6 @@
             "spoken": "Passing Lake"
           },
           {
-            "name": "Chunky River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 65.4,
-            "spoken": "Crossing the Chunky River"
-          },
-          {
             "name": "Decatur",
             "at_mi": 68.6,
             "off_mi": 6.63,
@@ -29193,6 +29303,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153787065, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hickory"
+          },
+          {
+            "name": "Chunky River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 75.4,
+            "spoken": "Crossing the Chunky River",
+            "lat": 32.34273,
+            "lon": -88.97512,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1076330338 (Chunky River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Chunky",
@@ -29240,13 +29360,6 @@
             "spoken": "Passing York"
           },
           {
-            "name": "Sucarnoochee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 119.4,
-            "spoken": "Crossing the Sucarnoochee River"
-          },
-          {
             "name": "Bellamy",
             "at_mi": 122.6,
             "off_mi": 10.62,
@@ -29265,6 +29378,16 @@
             "spoken": "Passing Livingston"
           },
           {
+            "name": "Sucarnoochee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 127.6,
+            "spoken": "Crossing the Sucarnoochee River",
+            "lat": 32.61563,
+            "lon": -88.2137,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 947304276 (Sucarnoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Epes",
             "at_mi": 135.2,
             "off_mi": 1.21,
@@ -29274,6 +29397,16 @@
             "spoken": "Passing Epes"
           },
           {
+            "name": "Tombigbee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 138.4,
+            "spoken": "Crossing the Tombigbee River",
+            "lat": 32.73718,
+            "lon": -88.09898,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 731755786 (Tombigbee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Boligee",
             "at_mi": 142.3,
             "off_mi": 2.06,
@@ -29281,13 +29414,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153723349, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Boligee"
-          },
-          {
-            "name": "Tombigbee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 146.8,
-            "spoken": "Crossing the Tombigbee River"
           },
           {
             "name": "Eutaw",
@@ -29320,8 +29446,11 @@
             "name": "Black Warrior River",
             "category": "river",
             "kind": "point",
-            "at_mi": 173.4,
-            "spoken": "Crossing the Black Warrior River"
+            "at_mi": 175.6,
+            "spoken": "Crossing the Black Warrior River",
+            "lat": 33.11572,
+            "lon": -87.65365,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 164030661 (Black Warrior River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "The Paul W. Bryant Museum (eastbound)",
@@ -30387,8 +30516,11 @@
             "name": "Chunky River",
             "category": "river",
             "kind": "point",
-            "at_mi": 11.2,
-            "spoken": "Crossing the Chunky River"
+            "at_mi": 14.3,
+            "spoken": "Crossing the Chunky River",
+            "lat": 32.22693,
+            "lon": -88.83279,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1076330689 (Chunky River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Enterprise",
@@ -30490,6 +30622,16 @@
             ]
           },
           {
+            "name": "Leaf River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 74.6,
+            "spoken": "Crossing the Leaf River",
+            "lat": 31.50062,
+            "lon": -89.30868,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 455148026 (Leaf River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Seminary",
             "at_mi": 75.8,
             "off_mi": 11.48,
@@ -30499,18 +30641,14 @@
             "spoken": "Passing Seminary"
           },
           {
-            "name": "Leaf River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 79.9,
-            "spoken": "Crossing the Leaf River"
-          },
-          {
             "name": "Bouie River",
             "category": "river",
             "kind": "point",
-            "at_mi": 79.9,
-            "spoken": "Crossing the Bouie River"
+            "at_mi": 84.5,
+            "spoken": "Crossing the Bouie River",
+            "lat": 31.36774,
+            "lon": -89.33663,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 276637281 (Bouie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "interchanges": [
@@ -32996,6 +33134,16 @@
             "spoken": "Passing Cuba"
           },
           {
+            "name": "Sucarnoochee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 28.8,
+            "spoken": "Crossing the Sucarnoochee River",
+            "lat": 32.69874,
+            "lon": -88.48483,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1360676500 (Sucarnoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "De Kalb",
             "at_mi": 30.4,
             "off_mi": 10.56,
@@ -33005,20 +33153,6 @@
             "spoken": "Passing De Kalb"
           },
           {
-            "name": "Sucarnoochee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 41.4,
-            "spoken": "Crossing the Sucarnoochee River"
-          },
-          {
-            "name": "Noxubee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 41.4,
-            "spoken": "Crossing the Noxubee River"
-          },
-          {
             "name": "Shuqualak",
             "at_mi": 49.9,
             "off_mi": 0.86,
@@ -33026,6 +33160,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153632045, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Shuqualak"
+          },
+          {
+            "name": "Noxubee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 56.5,
+            "spoken": "Crossing the Noxubee River",
+            "lat": 33.07237,
+            "lon": -88.55889,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 483783444 (Noxubee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Brooksville",
@@ -34315,15 +34459,11 @@
             "name": "Sucarnoochee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 35.4,
-            "spoken": "Crossing the Sucarnoochee River"
-          },
-          {
-            "name": "Tombigbee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 35.4,
-            "spoken": "Crossing the Tombigbee River"
+            "at_mi": 36.6,
+            "spoken": "Crossing the Sucarnoochee River",
+            "lat": 32.61563,
+            "lon": -88.2137,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 947304276 (Sucarnoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Epes",
@@ -34333,6 +34473,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153562740, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Epes"
+          },
+          {
+            "name": "Tombigbee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 47.4,
+            "spoken": "Crossing the Tombigbee River",
+            "lat": 32.73718,
+            "lon": -88.09898,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 731755786 (Tombigbee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Boligee",
@@ -34374,8 +34524,11 @@
             "name": "Black Warrior River",
             "category": "river",
             "kind": "point",
-            "at_mi": 83.9,
-            "spoken": "Crossing the Black Warrior River"
+            "at_mi": 84.6,
+            "spoken": "Crossing the Black Warrior River",
+            "lat": 33.11572,
+            "lon": -87.65365,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 164030661 (Black Warrior River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "The Paul W. Bryant Museum (eastbound)",
@@ -36083,15 +36236,21 @@
             "name": "Homochitto River",
             "category": "river",
             "kind": "point",
-            "at_mi": 11.9,
-            "spoken": "Crossing the Homochitto River"
+            "at_mi": 18.4,
+            "spoken": "Crossing the Homochitto River",
+            "lat": 31.33165,
+            "lon": -91.36055,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 27751561 (Homochitto River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Buffalo River",
             "category": "river",
             "kind": "point",
-            "at_mi": 35.5,
-            "spoken": "Crossing the Buffalo River"
+            "at_mi": 27.3,
+            "spoken": "Crossing the Buffalo River",
+            "lat": 31.22687,
+            "lon": -91.29553,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 595173596 (Buffalo River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "New Roads",
@@ -37496,8 +37655,11 @@
             "name": "Big Black River",
             "category": "river",
             "kind": "point",
-            "at_mi": 47.3,
-            "spoken": "Crossing the Big Black River"
+            "at_mi": 52.3,
+            "spoken": "Crossing the Big Black River",
+            "lat": 32.08146,
+            "lon": -90.92626,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 637696778 (Big Black River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Vicksburg National Military Park (northbound)",
@@ -38347,6 +38509,16 @@
             "spoken": "Passing Pope"
           },
           {
+            "name": "Little Tallahatchie River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 32.1,
+            "spoken": "Crossing the Little Tallahatchie River",
+            "lat": 34.29599,
+            "lon": -90.05482,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 197597386 (Little Tallahatchie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Crowder",
             "at_mi": 37.66,
             "off_mi": 7.89,
@@ -38354,13 +38526,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151930146, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Crowder"
-          },
-          {
-            "name": "Little Tallahatchie River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 39.2,
-            "spoken": "Crossing the Little Tallahatchie River"
           },
           {
             "name": "Sledge",
@@ -39430,20 +39595,22 @@
         "state_miles": [
           {
             "state": "Mississippi",
-            "miles": 60.39
+            "miles": 60.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Tennessee",
-            "miles": 15.61
+            "miles": 15.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 60.39,
+            "at_mi": 60.2,
             "from_state": "Mississippi",
             "state": "Tennessee",
             "place": "Mississippi-Tennessee line on MS-7",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "landmarks": [
@@ -39455,13 +39622,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153539821, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Taylor"
-          },
-          {
-            "name": "Little Tallahatchie River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 9.42,
-            "spoken": "Crossing the Little Tallahatchie River"
           },
           {
             "name": "Abbeville",
@@ -39481,6 +39641,16 @@
             "directions": [
               "reverse"
             ]
+          },
+          {
+            "name": "Little Tallahatchie River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 14.2,
+            "spoken": "Crossing the Little Tallahatchie River",
+            "lat": 34.54314,
+            "lon": -89.49182,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 329732166 (Little Tallahatchie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Potts Camp",
@@ -39513,8 +39683,11 @@
             "name": "Coldwater River",
             "category": "river",
             "kind": "point",
-            "at_mi": 46.31,
-            "spoken": "Crossing the Coldwater River"
+            "at_mi": 50.7,
+            "spoken": "Crossing the Coldwater River",
+            "lat": 34.90653,
+            "lon": -89.75447,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 800545816 (Coldwater River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Olive Branch",
@@ -41855,20 +42028,22 @@
         "state_miles": [
           {
             "state": "Mississippi",
-            "miles": 89.5
+            "miles": 89.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Tennessee",
-            "miles": 15.5
+            "miles": 15.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 89.5,
+            "at_mi": 89.3,
             "from_state": "Mississippi",
             "state": "Tennessee",
             "place": "Mississippi-Tennessee line on I-22",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -41937,6 +42112,16 @@
             "spoken": "Passing Ecru"
           },
           {
+            "name": "Little Tallahatchie River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 26.3,
+            "spoken": "Crossing the Little Tallahatchie River",
+            "lat": 34.48455,
+            "lon": -89.02025,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 599953326 (Little Tallahatchie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Myrtle",
             "at_mi": 33.9,
             "off_mi": 0.68,
@@ -41953,20 +42138,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153795185, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Blue Mountain"
-          },
-          {
-            "name": "Little Tallahatchie River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 38.8,
-            "spoken": "Crossing the Little Tallahatchie River"
-          },
-          {
-            "name": "Tippah River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 38.8,
-            "spoken": "Crossing the Tippah River"
           },
           {
             "name": "Hickory Flat",
@@ -41987,6 +42158,16 @@
             "spoken": "Entering Potts Camp"
           },
           {
+            "name": "Tippah River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 48.1,
+            "spoken": "Crossing the Tippah River",
+            "lat": 34.66327,
+            "lon": -89.31166,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 944832811 (Tippah River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Snow Lake Shores",
             "at_mi": 49.3,
             "off_mi": 11.25,
@@ -41996,6 +42177,16 @@
             "spoken": "Passing Snow Lake Shores"
           },
           {
+            "name": "Coldwater River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 79.8,
+            "spoken": "Crossing the Coldwater River",
+            "lat": 34.90653,
+            "lon": -89.75447,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 800545816 (Coldwater River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Olive Branch",
             "at_mi": 85.5,
             "off_mi": 0.91,
@@ -42003,13 +42194,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153709867, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Olive Branch"
-          },
-          {
-            "name": "Coldwater River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 92.0,
-            "spoken": "Crossing the Coldwater River"
           },
           {
             "name": "Germantown",

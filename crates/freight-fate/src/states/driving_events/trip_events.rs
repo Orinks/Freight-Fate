@@ -458,7 +458,14 @@ impl DrivingState {
                 }
             }
         }
-        self.speak_ambient_event(ctx, message, Ambient::new().sound(sound).category(category));
+        self.speak_ambient_event(
+            ctx,
+            message,
+            Ambient::new()
+                .sound(sound)
+                .category(category)
+                .priority(EventPriority::Route),
+        );
         ctx.award_achievement("state_crossing");
     }
 

@@ -423,9 +423,10 @@ impl Trip {
         let mut spaced = Self::thin_villages(villages);
         callouts.sort_by(|a, b| a.at_mi.partial_cmp(&b.at_mi).expect("finite mileposts"));
         for callout in callouts {
-            if spaced
-                .iter()
-                .any(|kept| (callout.at_mi - kept.at_mi).abs() < LANDMARK_MIN_SPACING_MI)
+            if callout.category != "billboard_sign"
+                && spaced
+                    .iter()
+                    .any(|kept| (callout.at_mi - kept.at_mi).abs() < LANDMARK_MIN_SPACING_MI)
             {
                 continue;
             }
