@@ -60,6 +60,12 @@ fn delay_load_prism_backends() {
     for dll in dlls.split(';').filter(|dll| !dll.is_empty()) {
         println!("cargo:rustc-link-arg=/DELAYLOAD:{dll}");
     }
+    // Prism's failure hook (its delayimp.cpp) stubs out a reader DLL that is
+    // missing, but delayimp.lib defines a null default of the same symbol,
+    // and link.exe takes that one unless the symbol is already wanted when it
+    // searches prism.lib (rust-lld happens to take Prism's). Without the hook
+    // the first missing DLL (PC-Talker's) is an unhandled 0xC06D007E at startup.
+    println!("cargo:rustc-link-arg=/INCLUDE:__pfnDliFailureHook2");
 }
 
 /// Link what Prism's macOS and Linux backends import.
