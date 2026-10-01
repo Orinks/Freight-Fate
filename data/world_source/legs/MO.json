@@ -888,6 +888,16 @@
             "spoken": "Passing Metropolis"
           },
           {
+            "name": "National Quilt Museum (from Cape Girardeau)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 65.0,
+            "spoken": "Billboard: The National Quilt Museum, ahead in Paducah. More than seven hundred quilts made since nineteen eighty, hung like paintings. Leave your pillow in the truck.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lone Oak",
             "at_mi": 67.6,
             "off_mi": 3.04,
@@ -2520,6 +2530,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153787035, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Oak Ridge"
+          },
+          {
+            "name": "Ste. Genevieve (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.3,
+            "spoken": "Billboard: Sainte Genevieve, next exit, the first permanent European settlement in Missouri, founded by the French around seventeen fifty. Some houses predate Missouri being American.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Ste. Genevieve (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.5,
+            "spoken": "Billboard: Sainte Genevieve, next exit, the first permanent European settlement in Missouri, founded by the French around seventeen fifty. Some houses predate Missouri being American.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bloomsdale",
@@ -5159,6 +5189,16 @@
             "spoken": "Entering Grain Valley"
           },
           {
+            "name": "Truman Library (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 106.7,
+            "spoken": "Billboard: The Harry Truman Presidential Library, ahead in Independence. The buck stops here, his desk sign said, and he and Bess rest in the courtyard.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lake Tapawingo",
             "at_mi": 109.8,
             "off_mi": 0.93,
@@ -5182,6 +5222,16 @@
             "spoken": "Crossing the Blue River"
           },
           {
+            "name": "Truman Library (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 116.8,
+            "spoken": "Billboard: The Harry Truman Presidential Library, next exit in Independence. The buck stops here, his desk sign said, and he and Bess rest in the courtyard.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Raytown",
             "at_mi": 117.9,
             "off_mi": 2.7,
@@ -5198,6 +5248,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151494267, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sugar Creek"
+          },
+          {
+            "name": "Arabia Steamboat (from Columbia)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 120.0,
+            "spoken": "Billboard: The Arabia Steamboat Museum, ahead in Kansas City. It sank in eighteen fifty-six and was dug out of a Kansas cornfield. The pickles were still edible.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Mission Hills",
@@ -7959,6 +8019,16 @@
             "spoken": "Crossing the Gasconade River"
           },
           {
+            "name": "Rolla Stonehenge (from Columbia)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 86.5,
+            "spoken": "Billboard: Rolla, ahead. Missouri S and T built a half-size Stonehenge on campus in nineteen eighty-four, cutting the granite with water jets. The original took longer.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Saint James",
             "at_mi": 90.8,
             "off_mi": 8.09,
@@ -9536,6 +9606,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Churchill Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.1,
+            "spoken": "Billboard: The National Churchill Museum, next exit, south to Fulton. Churchill gave his Iron Curtain speech here, and a London church came over afterward, stone by stone.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Kingdom City",
             "at_mi": 22.6,
             "off_mi": 0.1,
@@ -9543,6 +9623,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151732869, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Kingdom City"
+          },
+          {
+            "name": "Churchill Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.1,
+            "spoken": "Billboard: The National Churchill Museum, next exit, south to Fulton. Churchill gave his Iron Curtain speech here, and a London church came over afterward, stone by stone.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Loutre River",
@@ -12004,6 +12094,16 @@
             "spoken": "Passing Miller"
           },
           {
+            "name": "Gay Parita (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.4,
+            "spoken": "Billboard: Gay Parita is ahead near Paris Springs. This lovingly rebuilt nineteen-thirties filling station, green dinosaur and all, survives because some folks simply refuse to let the old road die.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Halltown",
             "at_mi": 55.7,
             "off_mi": 0.42,
@@ -12040,6 +12140,26 @@
             "spoken": "Passing Republic"
           },
           {
+            "name": "Gay Parita (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.4,
+            "spoken": "Billboard: Gay Parita is ahead near Paris Springs. This lovingly rebuilt nineteen-thirties filling station, green dinosaur and all, survives because some folks simply refuse to let the old road die.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Wonders of Wildlife (from Joplin)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.6,
+            "spoken": "Billboard: Wonders of Wildlife, ahead in Springfield, a wildlife museum and aquarium beside the Bass Pro Shops flagship. The fish in the tanks are just for looking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Brookline",
             "at_mi": 66.8,
             "off_mi": 2.54,
@@ -12065,6 +12185,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151602788, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Willard"
+          },
+          {
+            "name": "Route Sixty-Six Car Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.6,
+            "spoken": "Billboard: The Route Sixty-Six Car Museum is ahead near Springfield. It has chrome, fins, muscle, and enough polished paint to make your truck feel underdressed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "NRA National Sporting Arms Museum",
@@ -13681,6 +13811,16 @@
             "spoken": "Crossing the Spring River"
           },
           {
+            "name": "Coleman Theatre (from Joplin)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.1,
+            "spoken": "Billboard: The Coleman Theatre, ahead in Miami, Oklahoma, a nineteen twenty-nine movie palace on Route sixty-six. Its Wurlitzer organ is a year older than the building.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Quapaw",
             "at_mi": 20.1,
             "off_mi": 2.74,
@@ -13724,6 +13864,16 @@
             "spoken": "Passing Fairland"
           },
           {
+            "name": "Coleman Theatre (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.1,
+            "spoken": "Billboard: The Coleman Theatre, ahead in Miami, Oklahoma, a nineteen twenty-nine movie palace on Route sixty-six. Its Wurlitzer organ is a year older than the building.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Bernice",
             "at_mi": 39.3,
             "off_mi": 7.12,
@@ -13758,6 +13908,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151350450, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Big Cabin"
+          },
+          {
+            "name": "World's Largest Totem Pole (from Joplin)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.7,
+            "spoken": "Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Adair",
@@ -13796,6 +13956,46 @@
             "spoken": "Passing Foyil"
           },
           {
+            "name": "Will Rogers Memorial Museum (from Joplin)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 77.3,
+            "spoken": "Billboard: The Will Rogers Memorial Museum, ahead in Claremore. He never met a man he didn't like, he said. He never met your dispatcher.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "World's Largest Totem Pole (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.7,
+            "spoken": "Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Blue Whale of Catoosa (from Joplin)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 86.7,
+            "spoken": "Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Will Rogers Memorial Museum (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 90.4,
+            "spoken": "Billboard: The Will Rogers Memorial Museum, ahead in Claremore. He never met a man he didn't like, he said. He never met your dispatcher.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Verdigris",
             "at_mi": 92.7,
             "off_mi": 0.89,
@@ -13830,6 +14030,16 @@
             "spoken": "Passing Broken Arrow"
           },
           {
+            "name": "Golden Driller (from Joplin)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 102.0,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Owasso",
             "at_mi": 104.4,
             "off_mi": 6.89,
@@ -13837,6 +14047,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151355358, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Owasso"
+          },
+          {
+            "name": "Blue Whale of Catoosa (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 104.7,
+            "spoken": "Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Turley",
@@ -24727,6 +24947,16 @@
             "spoken": "Passing Prairie Village"
           },
           {
+            "name": "Arabia Steamboat (from Joplin)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: The Arabia Steamboat Museum, ahead in Kansas City. It sank in eighteen fifty-six and was dug out of a Kansas cornfield. The pickles were still edible.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Leawood",
             "at_mi": 8.6,
             "off_mi": 3.74,
@@ -27161,6 +27391,16 @@
             "spoken": "Passing Weatherby Lake"
           },
           {
+            "name": "Arabia Steamboat (from St. Joseph)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.0,
+            "spoken": "Billboard: The Arabia Steamboat Museum, ahead in Kansas City. It sank in eighteen fifty-six and was dug out of a Kansas cornfield. The pickles were still edible.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Ferrelview",
             "at_mi": 17.2,
             "off_mi": 1.15,
@@ -27245,6 +27485,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151928712, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Agency"
+          },
+          {
+            "name": "Pony Express Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.0,
+            "spoken": "Billboard: The Pony Express National Museum, ahead in Saint Joseph, in the stables where the riders set out in eighteen sixty. Ten days to Sacramento, with fresh horses.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Wathena",
@@ -29566,6 +29816,16 @@
             "spoken": "Passing Prairie Village"
           },
           {
+            "name": "Arabia Steamboat (from Springfield)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: The Arabia Steamboat Museum, ahead in Kansas City. It sank in eighteen fifty-six and was dug out of a Kansas cornfield. The pickles were still edible.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Leawood",
             "at_mi": 8.6,
             "off_mi": 3.74,
@@ -29797,6 +30057,16 @@
             "kind": "point",
             "at_mi": 152.0,
             "spoken": "Crossing the Little Sac River"
+          },
+          {
+            "name": "Wonders of Wildlife (from Kansas City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 158.0,
+            "spoken": "Billboard: Wonders of Wildlife, ahead in Springfield, a wildlife museum and aquarium beside the Bass Pro Shops flagship. The fish in the tanks are just for looking.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -36714,6 +36984,16 @@
             "spoken": "Passing Battlefield"
           },
           {
+            "name": "Wonders of Wildlife (from Poplar Bluff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 179.9,
+            "spoken": "Billboard: Wonders of Wildlife, ahead in Springfield, a wildlife museum and aquarium beside the Bass Pro Shops flagship. The fish in the tanks are just for looking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Strafford",
             "at_mi": 184.11,
             "off_mi": 7.22,
@@ -38408,6 +38688,16 @@
             "spoken": "Passing Saint James"
           },
           {
+            "name": "Rolla Stonehenge (from Springfield)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Rolla, ahead. Missouri S and T built a half-size Stonehenge on campus in nineteen eighty-four, cutting the granite with water jets. The original took longer.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Newburg",
             "at_mi": 8.1,
             "off_mi": 2.15,
@@ -38468,6 +38758,16 @@
             "spoken": "Passing Crocker"
           },
           {
+            "name": "The Best Fudge Comes From Uranus (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.2,
+            "spoken": "Billboard: Uranus, Missouri, is ahead, home to the Uranus Fudge Factory and a motto the whole family will regret reading aloud. The fudge, they swear, is excellent.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Richland",
             "at_mi": 39.9,
             "off_mi": 6.04,
@@ -38482,6 +38782,26 @@
             "kind": "point",
             "at_mi": 40.8,
             "spoken": "Crossing the Gasconade River"
+          },
+          {
+            "name": "Munger Moss Motel (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.4,
+            "spoken": "Billboard: Lebanon is ahead, home of the Munger Moss Motel, a Route sixty-six classic. The town now keeps its house-sized neon sign.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Munger Moss Motel (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 65.4,
+            "spoken": "Billboard: Lebanon is ahead, home of the Munger Moss Motel, a Route sixty-six classic. The town now keeps its house-sized neon sign.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Phillipsburg",
@@ -38561,6 +38881,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151793802, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fair Grove"
+          },
+          {
+            "name": "Wonders of Wildlife (from Rolla)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 103.0,
+            "spoken": "Billboard: Wonders of Wildlife, ahead in Springfield, a wildlife museum and aquarium beside the Bass Pro Shops flagship. The fish in the tanks are just for looking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Route Sixty-Six Car Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 107.0,
+            "spoken": "Billboard: The Route Sixty-Six Car Museum is ahead near Springfield. It has chrome, fins, muscle, and enough polished paint to make your truck feel underdressed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Willard",
@@ -40518,6 +40858,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Rolla Stonehenge (from St. Louis)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Rolla, ahead. Missouri S and T built a half-size Stonehenge on campus in nineteen eighty-four, cutting the granite with water jets. The original took longer.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Cuba",
             "at_mi": 22.3,
             "off_mi": 0.66,
@@ -40552,6 +40902,16 @@
             "spoken": "Entering Bourbon"
           },
           {
+            "name": "Meramec Caverns (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.5,
+            "spoken": "Billboard: Meramec Caverns is ahead, with five stories of underground rooms where Jesse James is said to have hidden. It has a gift shop now, because of course it does.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Oak Grove Village",
             "at_mi": 40.3,
             "off_mi": 0.12,
@@ -40559,6 +40919,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151680217, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Oak Grove Village"
+          },
+          {
+            "name": "Meramec Caverns (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.5,
+            "spoken": "Billboard: Meramec Caverns is ahead, with five stories of underground rooms where Jesse James is said to have hidden. It has a gift shop now, because of course it does.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Parkway",
@@ -42811,6 +43181,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151791447, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wathena"
+          },
+          {
+            "name": "Pony Express Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: The Pony Express National Museum, ahead in Saint Joseph, in the stables where the riders set out in eighteen sixty. Ten days to Sacramento, with fresh horses.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Savannah",
@@ -46099,6 +46479,16 @@
             "spoken": "Passing Sugar Creek"
           },
           {
+            "name": "Arabia Steamboat (from Sedalia)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.0,
+            "spoken": "Billboard: The Arabia Steamboat Museum, ahead in Kansas City. It sank in eighteen fifty-six and was dug out of a Kansas cornfield. The pickles were still edible.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Mission Hills",
             "at_mi": 85.1,
             "off_mi": 3.51,
@@ -47400,6 +47790,16 @@
             ]
           },
           {
+            "name": "Wonders of Wildlife (from Branson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.5,
+            "spoken": "Billboard: Wonders of Wildlife, ahead in Springfield, a wildlife museum and aquarium beside the Bass Pro Shops flagship. The fish in the tanks are just for looking.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Fremont Hills",
             "at_mi": 13.9,
             "off_mi": 1.13,
@@ -47567,6 +47967,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151932151, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Coney Island"
+          },
+          {
+            "name": "Branson (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.2,
+            "spoken": "Billboard: Branson is ahead, a little Ozark town with more theater seats than Broadway. Country music shows line the strip, and a theme park waits up on the mountain. Bring the grandparents.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Blue Eye",
@@ -51413,6 +51823,26 @@
         ],
         "landmarks": [
           {
+            "name": "Route Sixty-Six Car Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Billboard: The Route Sixty-Six Car Museum is ahead near Springfield. It has chrome, fins, muscle, and enough polished paint to make your truck feel underdressed.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Wonders of Wildlife (from St. Louis)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Wonders of Wildlife, ahead in Springfield, a wildlife museum and aquarium beside the Bass Pro Shops flagship. The fish in the tanks are just for looking.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Pomme de Terre River",
             "category": "river",
             "kind": "point",
@@ -51447,11 +51877,41 @@
             "spoken": "Entering Phillipsburg"
           },
           {
+            "name": "Munger Moss Motel (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.0,
+            "spoken": "Billboard: Lebanon is ahead, home of the Munger Moss Motel, a Route sixty-six classic. The town now keeps its house-sized neon sign.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Munger Moss Motel (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.0,
+            "spoken": "Billboard: Lebanon is ahead, home of the Munger Moss Motel, a Route sixty-six classic. The town now keeps its house-sized neon sign.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Gasconade River",
             "category": "river",
             "kind": "point",
             "at_mi": 66.4,
             "spoken": "Crossing the Gasconade River"
+          },
+          {
+            "name": "The Best Fudge Comes From Uranus (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 76.0,
+            "spoken": "Billboard: Uranus, Missouri, is ahead, home to the Uranus Fudge Factory and a motto the whole family will regret reading aloud. The fudge, they swear, is excellent.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Mark Twain National Forest",
@@ -51470,11 +51930,31 @@
             "spoken": "Passing Saint Robert"
           },
           {
+            "name": "The Best Fudge Comes From Uranus (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 90.0,
+            "spoken": "Billboard: Uranus, Missouri, is ahead, home to the Uranus Fudge Factory and a motto the whole family will regret reading aloud. The fudge, they swear, is excellent.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Big Piney River",
             "category": "river",
             "kind": "point",
             "at_mi": 93.0,
             "spoken": "Crossing the Big Piney River"
+          },
+          {
+            "name": "Rolla Stonehenge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 102.9,
+            "spoken": "Billboard: Rolla, ahead. Missouri S and T built a half-size Stonehenge on campus in nineteen eighty-four, cutting the granite with water jets. The original took longer.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Newburg",
@@ -51484,6 +51964,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151428398, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Newburg"
+          },
+          {
+            "name": "Rolla Stonehenge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 118.9,
+            "spoken": "Billboard: Rolla, ahead. Missouri S and T built a half-size Stonehenge on campus in nineteen eighty-four, cutting the granite with water jets. The original took longer.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Crawford County Historical",
@@ -51511,6 +52001,16 @@
             "spoken": "Entering Bourbon"
           },
           {
+            "name": "Meramec Caverns (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 146.7,
+            "spoken": "Billboard: Meramec Caverns is ahead, with five stories of underground rooms where Jesse James is said to have hidden. It has a gift shop now, because of course it does.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Oak Grove Village",
             "at_mi": 150.9,
             "off_mi": 0.12,
@@ -51518,6 +52018,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151680217, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Oak Grove Village"
+          },
+          {
+            "name": "Meramec Caverns (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 160.7,
+            "spoken": "Billboard: Meramec Caverns is ahead, with five stories of underground rooms where Jesse James is said to have hidden. It has a gift shop now, because of course it does.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Parkway",
@@ -54295,6 +54805,16 @@
         ],
         "landmarks": [
           {
+            "name": "Wonders of Wildlife (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.6,
+            "spoken": "Billboard: Wonders of Wildlife, ahead in Springfield, a wildlife museum and aquarium beside the Bass Pro Shops flagship. The fish in the tanks are just for looking.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Brookline",
             "at_mi": 8.7,
             "off_mi": 2.55,
@@ -54302,6 +54822,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151514624, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brookline"
+          },
+          {
+            "name": "Gay Parita (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.4,
+            "spoken": "Billboard: Gay Parita is ahead near Paris Springs. This lovingly rebuilt nineteen-thirties filling station, green dinosaur and all, survives because some folks simply refuse to let the old road die.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Republic",
@@ -54457,6 +54987,16 @@
             "spoken": "Passing Baxter Springs"
           },
           {
+            "name": "Coleman Theatre (from Springfield)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 85.4,
+            "spoken": "Billboard: The Coleman Theatre, ahead in Miami, Oklahoma, a nineteen twenty-nine movie palace on Route sixty-six. Its Wurlitzer organ is a year older than the building.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Quapaw",
             "at_mi": 88.5,
             "off_mi": 2.74,
@@ -54507,6 +55047,16 @@
             "spoken": "Passing Fairland"
           },
           {
+            "name": "Coleman Theatre (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 103.4,
+            "spoken": "Billboard: The Coleman Theatre, ahead in Miami, Oklahoma, a nineteen twenty-nine movie palace on Route sixty-six. Its Wurlitzer organ is a year older than the building.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Afton",
             "at_mi": 107.7,
             "off_mi": 1.19,
@@ -54525,6 +55075,16 @@
             "spoken": "Passing Big Cabin"
           },
           {
+            "name": "World's Largest Totem Pole (from Springfield)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 131.8,
+            "spoken": "Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Adair",
             "at_mi": 133.1,
             "off_mi": 3.92,
@@ -54541,6 +55101,46 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151672199, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bushyhead"
+          },
+          {
+            "name": "Will Rogers Memorial Museum (from Springfield)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.4,
+            "spoken": "Billboard: The Will Rogers Memorial Museum, ahead in Claremore. He never met a man he didn't like, he said. He never met your dispatcher.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "World's Largest Totem Pole (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 149.8,
+            "spoken": "Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Blue Whale of Catoosa (from Springfield)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 154.8,
+            "spoken": "Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Will Rogers Memorial Museum (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 158.4,
+            "spoken": "Billboard: The Will Rogers Memorial Museum, ahead in Claremore. He never met a man he didn't like, he said. He never met your dispatcher.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Verdigris",
@@ -54566,6 +55166,26 @@
             "kind": "point",
             "at_mi": 169.1,
             "spoken": "Crossing the Verdigris River"
+          },
+          {
+            "name": "Golden Driller (from Springfield)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 171.4,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Blue Whale of Catoosa (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 172.8,
+            "spoken": "Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Turley",
@@ -59944,6 +60564,16 @@
             "spoken": "Entering High Hill"
           },
           {
+            "name": "Churchill Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 99.7,
+            "spoken": "Billboard: The National Churchill Museum, next exit, south to Fulton. Churchill gave his Iron Curtain speech here, and a London church came over afterward, stone by stone.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Kingdom City",
             "at_mi": 102.2,
             "off_mi": 0.12,
@@ -59951,6 +60581,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151732869, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Kingdom City"
+          },
+          {
+            "name": "Churchill Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 104.7,
+            "spoken": "Billboard: The National Churchill Museum, next exit, south to Fulton. Churchill gave his Iron Curtain speech here, and a London church came over afterward, stone by stone.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Rocheport",
@@ -60037,6 +60677,16 @@
             "spoken": "Entering Grain Valley"
           },
           {
+            "name": "Truman Library (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 228.5,
+            "spoken": "Billboard: The Harry Truman Presidential Library, ahead in Independence. The buck stops here, his desk sign said, and he and Bess rest in the courtyard.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lake Tapawingo",
             "at_mi": 231.7,
             "off_mi": 0.93,
@@ -60051,6 +60701,26 @@
             "kind": "point",
             "at_mi": 234.4,
             "spoken": "Crossing the Blue River"
+          },
+          {
+            "name": "Truman Library (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 239.0,
+            "spoken": "Billboard: The Harry Truman Presidential Library, next exit in Independence. The buck stops here, his desk sign said, and he and Bess rest in the courtyard.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Arabia Steamboat (from St. Louis)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 242.0,
+            "spoken": "Billboard: The Arabia Steamboat Museum, ahead in Kansas City. It sank in eighteen fifty-six and was dug out of a Kansas cornfield. The pickles were still edible.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "restrictions": [],
@@ -64564,6 +65234,16 @@
             "spoken": "Crossing the Ohio River"
           },
           {
+            "name": "Metropolis Superman (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 163.3,
+            "spoken": "Billboard: Metropolis, Illinois, next exit. Superman's official hometown keeps a fifteen-foot statue of him on the courthouse square. Mild-mannered drivers welcome.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Metropolis",
             "at_mi": 165.6,
             "off_mi": 2.7,
@@ -64571,6 +65251,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153490026, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Metropolis"
+          },
+          {
+            "name": "Metropolis Superman (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 166.5,
+            "spoken": "Billboard: Metropolis, Illinois, next exit. Superman's official hometown keeps a fifteen-foot statue of him on the courthouse square. Mild-mannered drivers welcome.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "National Quilt Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 166.8,
+            "spoken": "Billboard: The National Quilt Museum, ahead in Paducah. More than seven hundred quilts made since nineteen eighty, hung like paintings. Leave your pillow in the truck.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Lone Oak",
@@ -64598,6 +65298,16 @@
             "spoken": "Crossing the Tennessee River"
           },
           {
+            "name": "National Quilt Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 184.8,
+            "spoken": "Billboard: The National Quilt Museum, ahead in Paducah. More than seven hundred quilts made since nineteen eighty, hung like paintings. Leave your pillow in the truck.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Calvert City",
             "at_mi": 193.6,
             "off_mi": 2.4,
@@ -64605,6 +65315,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153630089, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Calvert City"
+          },
+          {
+            "name": "Land Between the Lakes (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 195.5,
+            "spoken": "Billboard: Land Between the Lakes, next exit. A hundred seventy thousand acres between two lakes, with elk and bison on the prairie. The bison have the right of way.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Land Between the Lakes (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 198.7,
+            "spoken": "Billboard: Land Between the Lakes, next exit. A hundred seventy thousand acres between two lakes, with elk and bison on the prairie. The bison have the right of way.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kuttawa",

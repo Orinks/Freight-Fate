@@ -101,7 +101,16 @@ bookmarks usable.
       roadside landmark callouts now, same copy, and two of the four on
       Alligator Alley stand west of its toll plaza while the others are gone
       (`signsheets/keys-alligator-alley-2026-09-30.md`). Sheet landmarks
-      face the way the sheet reads unless marked `facing: both`.
+      face the way the sheet reads unless marked `facing: both`. The last
+      27 thin states followed on 2026-10-01 (owner: agents' recommendations
+      taken without a review file): about 1,700 more signs for 336
+      attractions, every state's billboard and scenic-byway law applied
+      (Oregon's permit cap, California's designated scenic highways, US 191's
+      Dinosaur Diamond, Kentucky's Country Music Highway, the Great River
+      Road), older one-way signs given their other side, and older signs on
+      newly found byways turned into landmark callouts
+      (`signsheets/*-2026-10-01.md`, `owner-decisions-2026-10-01.md`). The
+      map carries 3,237 placed signs.
 
 - [x] New installs start on All assists (owner, 2026-09-30): first drives kept
       going wrong at the wheel, city street corners above all, so the truck
@@ -361,7 +370,16 @@ Everything found before 2026-09-25 moved to
       but its exits and stops are Arkansas ones on I-30; five more legs are
       11 to 29 miles off their dense geometry; the Florida Keys markers and
       the I-40 Tennessee, Buffalo and Duck River callouts are miles from the
-      real places.
+      real places. The 2026-10-01 billboard passes added more: the Buffalo
+      and Rochester to New York City Thruway legs announce Pennsylvania and
+      New Jersey (with about 110 phantom Pennsylvania miles each); I-24 and
+      the southern Indiana I-65 legs call the Ohio River early; several
+      Mississippi crossings are misplaced; Minneapolis to Des Moines puts the
+      Iowa line about 40 miles south; Indianapolis to Nashville lists its
+      Kentucky exits out of order (REVIEW-east-south, REVIEW-midwest).
+- [ ] Two approved signs could also stand on the roads that pass their
+      places: the USS Alabama on I-10 and Madison, Georgia on I-20
+      (REVIEW-east-south, 2026-10-01).
 - [ ] Scenic-highway billboard bans are honored only by the 2026-09-30
       Colorado and Washington sheets. Washington bans billboards visible
       from its scenic system (RCW 47.42.040: I-90 Issaquah to Thorp, US 101

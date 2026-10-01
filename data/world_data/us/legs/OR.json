@@ -599,6 +599,16 @@
             "spoken": "Passing Tangent"
           },
           {
+            "name": "Albany Historic Carousel (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The Albany Historic Carousel, ahead. Volunteers carved every animal by hand. It goes in circles on purpose, unlike your last detour.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lebanon",
             "at_mi": 9.3,
             "off_mi": 7.62,
@@ -2206,10 +2216,10 @@
           },
           {
             "name": "The Goonies",
-            "category": "billboard_sign",
+            "category": "highway_marker",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Astoria is where they filmed The Goonies and Kindergarten Cop. The oldest American town west of the Rockies climbs a hill toward a tall column you can climb from the inside.",
+            "spoken": "Astoria is where they filmed The Goonies and Kindergarten Cop. The oldest American town west of the Rockies climbs a hill toward a tall column you can climb from the inside.",
             "directions": [
               "reverse"
             ]
@@ -11408,6 +11418,16 @@
             "spoken": "Crossing the Coast Fork Willamette River"
           },
           {
+            "name": "Cottage Grove (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.1,
+            "spoken": "Billboard: Cottage Grove, ahead. Buster Keaton filmed The General here in nineteen twenty-six. Six covered bridges survived the production.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lowell",
             "at_mi": 11.6,
             "off_mi": 11.34,
@@ -11440,6 +11460,16 @@
             "kind": "point",
             "at_mi": 21.3,
             "spoken": "Bohemia Gold Mining Museum ahead"
+          },
+          {
+            "name": "Cottage Grove (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.3,
+            "spoken": "Billboard: Cottage Grove, ahead. Buster Keaton filmed The General here in nineteen twenty-six. Six covered bridges survived the production.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Drain",
@@ -17559,6 +17589,16 @@
             "spoken": "Approaching Fairbanks Gap"
           },
           {
+            "name": "Maryhill Stonehenge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 209.8,
+            "spoken": "Billboard: Maryhill Stonehenge, next exit, across the river from Biggs. A full-size concrete copy built as a First World War memorial. It still catches the solstice sunrise.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Maryhill",
             "at_mi": 212.6,
             "off_mi": 0.7,
@@ -17575,6 +17615,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150962593, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Rufus"
+          },
+          {
+            "name": "Maryhill Stonehenge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 221.5,
+            "spoken": "Billboard: Maryhill Stonehenge, ahead, across the river from Biggs. A full-size concrete copy built as a First World War memorial. It still catches the solstice sunrise.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Roosevelt",
@@ -18632,6 +18682,16 @@
             "spoken": "Passing Rogue River"
           },
           {
+            "name": "Wolf Creek Inn (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.3,
+            "spoken": "Billboard: The Wolf Creek Inn, ahead, taking guests since eighteen eighty-three. Jack London finished a novel here. You only need a nap.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sexton Mountain Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -18644,6 +18704,16 @@
             "kind": "point",
             "at_mi": 19.3,
             "spoken": "Approaching Smith Hill Summit"
+          },
+          {
+            "name": "Wolf Creek Inn (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.7,
+            "spoken": "Billboard: The Wolf Creek Inn, next exit, taking guests since eighteen eighty-three. Jack London finished a novel here. You only need a nap.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Stage Road Pass",
@@ -18712,6 +18782,16 @@
             "spoken": "Entering Myrtle Creek"
           },
           {
+            "name": "Wildlife Safari (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.3,
+            "spoken": "Billboard: Wildlife Safari, ahead in Winston. Six hundred acres you drive through while the animals roam loose. Keep the windows up and the snacks to yourself.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Winston",
             "at_mi": 61.5,
             "off_mi": 2.5,
@@ -18728,6 +18808,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150941151, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Green"
+          },
+          {
+            "name": "Wildlife Safari (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.0,
+            "spoken": "Billboard: Wildlife Safari, ahead in Winston. Six hundred acres you drive through while the animals roam loose. Keep the windows up and the snacks to yourself.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Winchester",
@@ -20336,6 +20426,46 @@
             "spoken": "Crossing the Williamson River"
           },
           {
+            "name": "Crater Lake (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.7,
+            "spoken": "Billboard: Crater Lake is ahead and uphill. The deepest lake in the country fills the blasted crater of a fallen volcano and glows an impossible blue. There is nothing else like it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Collier Memorial State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.6,
+            "spoken": "Billboard: Collier Memorial State Park, ahead. One of the largest collections of old logging equipment anywhere, outdoors and free. None of it is in a hurry.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Crater Lake (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.7,
+            "spoken": "Billboard: Crater Lake is ahead and uphill. The deepest lake in the country fills the blasted crater of a fallen volcano and glows an impossible blue. There is nothing else like it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Collier Memorial State Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.6,
+            "spoken": "Billboard: Collier Memorial State Park, ahead. One of the largest collections of old logging equipment anywhere, outdoors and free. None of it is in a hurry.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Deschutes National Forest",
             "category": "national_forest",
             "kind": "zone",
@@ -20361,6 +20491,26 @@
             "spoken": "Entering La Pine"
           },
           {
+            "name": "Lava Butte (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 117.2,
+            "spoken": "Billboard: Lava Butte, ahead. The cinder cone erupted about seven thousand years ago and poured out the lava fields beside this road. It has been quiet since.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "High Desert Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 122.2,
+            "spoken": "Billboard: The High Desert Museum, ahead. River otters, birds of prey and a porcupine, all living in the high desert. The otters did not read the brochure.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sunriver",
             "at_mi": 122.6,
             "off_mi": 2.04,
@@ -20375,6 +20525,26 @@
             "kind": "point",
             "at_mi": 124.5,
             "spoken": "Crossing the Deschutes River"
+          },
+          {
+            "name": "Lava Butte (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 134.7,
+            "spoken": "Billboard: Lava Butte, ahead. The cinder cone erupted about seven thousand years ago and poured out the lava fields beside this road. It has been quiet since.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "High Desert Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 137.0,
+            "spoken": "Billboard: The High Desert Museum, ahead. River otters, birds of prey and a porcupine, all living in the high desert. The otters did not read the brochure.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Tumalo",
@@ -22382,6 +22552,36 @@
             ]
           },
           {
+            "name": "Collier Memorial State Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.6,
+            "spoken": "Billboard: Collier Memorial State Park, ahead. One of the largest collections of old logging equipment anywhere, outdoors and free. None of it is in a hurry.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Crater Lake (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.7,
+            "spoken": "Billboard: Crater Lake is ahead and uphill. The deepest lake in the country fills the blasted crater of a fallen volcano and glows an impossible blue. There is nothing else like it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Collier Memorial State Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.6,
+            "spoken": "Billboard: Collier Memorial State Park, ahead. One of the largest collections of old logging equipment anywhere, outdoors and free. None of it is in a hurry.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Crescent",
             "at_mi": 86.2,
             "off_mi": 7.62,
@@ -22389,6 +22589,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150938833, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Crescent"
+          },
+          {
+            "name": "Salt Creek Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.6,
+            "spoken": "Billboard: Salt Creek Falls, ahead near Willamette Pass. Two hundred eighty-six feet straight down, one of the tallest in Oregon. It has never once slowed down.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Deschutes National Forest",
@@ -22410,6 +22620,16 @@
             "kind": "point",
             "at_mi": 107.5,
             "spoken": "Approaching Pengra Pass"
+          },
+          {
+            "name": "Salt Creek Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 119.5,
+            "spoken": "Billboard: Salt Creek Falls, ahead near Willamette Pass. Two hundred eighty-six feet straight down, one of the tallest in Oregon. It has never once slowed down.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "North Fork Middle Fork Willamette River",
@@ -23239,6 +23459,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150947985, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Haines"
+          },
+          {
+            "name": "Oregon Trail Interpretive Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.5,
+            "spoken": "Billboard: The Oregon Trail Interpretive Center, next exit at Baker City. Pioneers crossed two thousand miles of this by wagon. You have a heater.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Oregon Trail Interpretive Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.5,
+            "spoken": "Billboard: The Oregon Trail Interpretive Center, next exit at Baker City. Pioneers crossed two thousand miles of this by wagon. You have a heater.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "speed_limits": [
@@ -24803,6 +25043,16 @@
             "spoken": "Passing Jacksonville"
           },
           {
+            "name": "Rogue Creamery (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Rogue Creamery, next exit in Central Point. Rogue River Blue was the first American cheese crowned world champion. Samples in the shop. Pace yourself.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "White City",
             "at_mi": 4.8,
             "off_mi": 4.96,
@@ -24819,6 +25069,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150956451, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Eagle Point"
+          },
+          {
+            "name": "Rogue Creamery (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.0,
+            "spoken": "Billboard: Rogue Creamery, next exit in Central Point. Rogue River Blue was the first American cheese crowned world champion. Samples in the shop. Pace yourself.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Harry and David (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Harry and David, ahead in Medford. The pear company closed every other store and kept this one. Pears by the box, not the trailer.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gold Hill",
@@ -26708,6 +26978,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150934652, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Tualatin"
+          },
+          {
+            "name": "North American Aerospace Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.1,
+            "spoken": "Billboard: The North American Aerospace Museum, ahead in McMinnville, home of the Spruce Goose. Howard Hughes flew it once, for about a mile. It has rested since.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Saint Paul",
@@ -31833,6 +32113,16 @@
             "spoken": "Passing Siletz"
           },
           {
+            "name": "Free Willy Lived Here (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.1,
+            "spoken": "Billboard: Newport is home to the Oregon Coast Aquarium, where Keiko, the orca from Free Willy, once lived before they set him free for real.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Yaquina River",
             "category": "river",
             "kind": "point",
@@ -32781,6 +33071,16 @@
             "spoken": "Passing Wilder"
           },
           {
+            "name": "Warhawk Air Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.7,
+            "spoken": "Billboard: The Warhawk Air Museum, ahead in Nampa. Warhawks, Mustangs and Sabres, a hangar full of fighters. Any one of them could beat you home.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Orma J. Smith Museum of Natural History",
             "category": "museum",
             "kind": "point",
@@ -32829,6 +33129,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150943772, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kuna"
+          },
+          {
+            "name": "Old Idaho Penitentiary (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.0,
+            "spoken": "Billboard: The Old Idaho Penitentiary, ahead in Boise. A working prison for a hundred and one years, now a museum. Visitors leave the same day.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Warhawk Air Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.5,
+            "spoken": "Billboard: The Warhawk Air Museum, ahead in Nampa. Warhawks, Mustangs and Sabres, a hangar full of fighters. Any one of them could beat you home.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Eagle",
@@ -34003,6 +34323,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150958712, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Adams"
+          },
+          {
+            "name": "Pendleton (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Pendleton is ahead, with a woolen mill since nineteen oh-nine and the Round-Up rodeo since nineteen ten. Blankets for you. Bulls for them.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pilot Rock",
@@ -35209,6 +35539,16 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
+          {
+            "name": "Pendleton (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.4,
+            "spoken": "Billboard: Pendleton is ahead, with a woolen mill since nineteen oh-nine and the Round-Up rodeo since nineteen ten. Blankets for you. Bulls for them.",
+            "directions": [
+              "reverse"
+            ]
+          },
           {
             "name": "Umatilla River",
             "category": "river",
@@ -47503,6 +47843,16 @@
             "spoken": "Passing Wishram"
           },
           {
+            "name": "Maryhill Stonehenge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 100.6,
+            "spoken": "Billboard: Maryhill Stonehenge, next exit, across the river from Biggs. A full-size concrete copy built as a First World War memorial. It still catches the solstice sunrise.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Maryhill",
             "at_mi": 104.1,
             "off_mi": 0.7,
@@ -47528,11 +47878,41 @@
             "spoken": "Entering Rufus"
           },
           {
+            "name": "Maryhill Stonehenge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 114.6,
+            "spoken": "Billboard: Maryhill Stonehenge, ahead, across the river from Biggs. A full-size concrete copy built as a First World War memorial. It still catches the solstice sunrise.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Umatilla River",
             "category": "river",
             "kind": "point",
             "at_mi": 174.8,
             "spoken": "Crossing the Umatilla River"
+          },
+          {
+            "name": "Pendleton (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 201.2,
+            "spoken": "Billboard: Pendleton is ahead, with a woolen mill since nineteen oh-nine and the Round-Up rodeo since nineteen ten. Blankets for you. Bulls for them.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pendleton (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 219.2,
+            "spoken": "Billboard: Pendleton is ahead, with a woolen mill since nineteen oh-nine and the Round-Up rodeo since nineteen ten. Blankets for you. Bulls for them.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Deadman Pass",
@@ -47549,6 +47929,86 @@
             "spoken": "Approaching Red Saddle"
           },
           {
+            "name": "Oregon Trail Interpretive Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 293.3,
+            "spoken": "Billboard: The Oregon Trail Interpretive Center, ahead at Baker City. Pioneers crossed two thousand miles of this by wagon. You have a heater.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Oregon Trail Interpretive Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 313.3,
+            "spoken": "Billboard: The Oregon Trail Interpretive Center, ahead at Baker City. Pioneers crossed two thousand miles of this by wagon. You have a heater.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Warhawk Air Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 403.9,
+            "spoken": "Billboard: The Warhawk Air Museum, ahead in Nampa. Warhawks, Mustangs and Sabres, a hangar full of fighters. Any one of them could beat you home.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Old Idaho Penitentiary (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 421.6,
+            "spoken": "Billboard: The Old Idaho Penitentiary, ahead in Boise. A working prison for a hundred and one years, now a museum. Visitors leave the same day.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Warhawk Air Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 421.9,
+            "spoken": "Billboard: The Warhawk Air Museum, ahead in Nampa. Warhawks, Mustangs and Sabres, a hangar full of fighters. Any one of them could beat you home.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "World Center for Birds of Prey (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 424.4,
+            "spoken": "Billboard: The World Center for Birds of Prey, ahead at Boise. Live falcons, eagles and owls, from the people who saved the peregrine. Keep your sandwich covered.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "World Center for Birds of Prey (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 439.3,
+            "spoken": "Billboard: The World Center for Birds of Prey, ahead at Boise. Live falcons, eagles and owls, from the people who saved the peregrine. Keep your sandwich covered.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Old Idaho Penitentiary (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 441.6,
+            "spoken": "Billboard: The Old Idaho Penitentiary, ahead in Boise. A working prison for a hundred and one years, now a museum. Visitors leave the same day.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Hammett",
             "at_mi": 487.4,
             "off_mi": 0.88,
@@ -47558,6 +48018,46 @@
             "spoken": "Passing Hammett"
           },
           {
+            "name": "Three Island Crossing (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 496.6,
+            "spoken": "Billboard: Three Island Crossing State Park, next exit at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Three Island Crossing (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 499.6,
+            "spoken": "Billboard: Three Island Crossing State Park, next exit at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Hagerman Fossil Beds (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 508.4,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Hagerman Fossil Beds (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 526.4,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Wendell",
             "at_mi": 532.0,
             "off_mi": 0.65,
@@ -47565,6 +48065,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150970161, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wendell"
+          },
+          {
+            "name": "Shoshone Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 544.4,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Shoshone Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 562.4,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sweetzer Summit",
@@ -47592,6 +48112,16 @@
             "spoken": "Passing Elwood"
           },
           {
+            "name": "Golden Spike (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 701.3,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Willard",
             "at_mi": 715.8,
             "off_mi": 0.59,
@@ -47601,6 +48131,16 @@
             "spoken": "Passing Willard"
           },
           {
+            "name": "Golden Spike (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 719.3,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Farr West",
             "at_mi": 723.9,
             "off_mi": 0.06,
@@ -47608,6 +48148,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150943236, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Farr West"
+          },
+          {
+            "name": "Hill Aerospace Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 726.2,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Roy",
@@ -47635,6 +48185,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150932122, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Uintah"
+          },
+          {
+            "name": "Hill Aerospace Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 743.9,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Fruit Heights",
@@ -58387,6 +58947,16 @@
             "spoken": "Passing Winchester"
           },
           {
+            "name": "Wildlife Safari (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 1.0,
+            "spoken": "Billboard: Wildlife Safari, ahead in Winston. Six hundred acres you drive through while the animals roam loose. Keep the windows up and the snacks to yourself.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Green",
             "at_mi": 5.4,
             "off_mi": 0.23,
@@ -58430,6 +59000,16 @@
             "spoken": "Entering Tri City"
           },
           {
+            "name": "Wildlife Safari (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.9,
+            "spoken": "Billboard: Wildlife Safari, ahead in Winston. Six hundred acres you drive through while the animals roam loose. Keep the windows up and the snacks to yourself.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Riddle",
             "at_mi": 23.3,
             "off_mi": 1.69,
@@ -58446,6 +59026,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150942927, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Canyonville"
+          },
+          {
+            "name": "Wolf Creek Inn (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.0,
+            "spoken": "Billboard: The Wolf Creek Inn, ahead, taking guests since eighteen eighty-three. Jack London finished a novel here. You only need a nap.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Stage Road Pass",
@@ -58469,6 +59059,16 @@
             "kind": "point",
             "at_mi": 48.7,
             "spoken": "Approaching Smith Hill Summit"
+          },
+          {
+            "name": "Wolf Creek Inn (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.0,
+            "spoken": "Billboard: The Wolf Creek Inn, next exit, taking guests since eighteen eighty-three. Jack London finished a novel here. You only need a nap.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sexton Mountain Pass",
@@ -58499,6 +59099,26 @@
             "spoken": "Crossing the Rogue River"
           },
           {
+            "name": "Harry and David (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 88.0,
+            "spoken": "Billboard: Harry and David, ahead in Medford. The pear company closed every other store and kept this one. Pears by the box, not the trailer.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Rogue Creamery (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 91.0,
+            "spoken": "Billboard: Rogue Creamery, next exit in Central Point. Rogue River Blue was the first American cheese crowned world champion. Samples in the shop. Pace yourself.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "White City",
             "at_mi": 92.2,
             "off_mi": 4.98,
@@ -58515,6 +59135,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150956451, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Eagle Point"
+          },
+          {
+            "name": "Rogue Creamery (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 94.0,
+            "spoken": "Billboard: Rogue Creamery, next exit in Central Point. Rogue River Blue was the first American cheese crowned world champion. Samples in the shop. Pace yourself.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Jacksonville",
@@ -59674,6 +60304,16 @@
             "spoken": "Passing Monmouth"
           },
           {
+            "name": "Albany Historic Carousel (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.0,
+            "spoken": "Billboard: The Albany Historic Carousel, ahead. Volunteers carved every animal by hand. It goes in circles on purpose, unlike your last detour.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Jefferson",
             "at_mi": 17.6,
             "off_mi": 2.3,
@@ -59681,6 +60321,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150978451, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Jefferson"
+          },
+          {
+            "name": "The Enchanted Forest (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.7,
+            "spoken": "Billboard: Enchanted Forest is ahead. One family built its storybook castles, crooked houses, and rides into the Oregon woods over a suspicious number of productive weekends.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Scio",
@@ -64141,6 +64791,16 @@
             "spoken": "Passing Wishram"
           },
           {
+            "name": "Maryhill Stonehenge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.5,
+            "spoken": "Billboard: Maryhill Stonehenge, next exit, across the river from Biggs. A full-size concrete copy built as a First World War memorial. It still catches the solstice sunrise.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Davies Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -64182,6 +64842,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150962593, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Rufus"
+          },
+          {
+            "name": "Maryhill Stonehenge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.5,
+            "spoken": "Billboard: Maryhill Stonehenge, ahead, across the river from Biggs. A full-size concrete copy built as a First World War memorial. It still catches the solstice sunrise.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "John Day River",
@@ -64275,6 +64945,16 @@
             "kind": "point",
             "at_mi": 113.6,
             "spoken": "Crossing the Umatilla River"
+          },
+          {
+            "name": "Pendleton (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 117.0,
+            "spoken": "Billboard: Pendleton is ahead, with a woolen mill since nineteen oh-nine and the Round-Up rodeo since nineteen ten. Blankets for you. Bulls for them.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "interchanges": [

@@ -25319,6 +25319,16 @@
             "spoken": "Passing Statenville"
           },
           {
+            "name": "Wild Adventures (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.2,
+            "spoken": "Billboard: Wild Adventures, ahead, south of Valdosta. Six roller coasters and a zoo in one park. The animals have chosen not to ride.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lake Park",
             "at_mi": 48.7,
             "off_mi": 2.16,
@@ -25344,6 +25354,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154376926, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dasher"
+          },
+          {
+            "name": "Wild Adventures (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.0,
+            "spoken": "Billboard: Wild Adventures, ahead, south of Valdosta. Six roller coasters and a zoo in one park. The animals have chosen not to ride.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "speed_limits": [

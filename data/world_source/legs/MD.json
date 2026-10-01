@@ -5598,6 +5598,16 @@
             "spoken": "Entering Breezewood"
           },
           {
+            "name": "The Bedford Coffee Pot (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 131.3,
+            "spoken": "Billboard: The Bedford Coffee Pot, ahead. A coffee pot building from nineteen twenty-seven. It has been a bar and a bus stop, never a coffee shop.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Earlston",
             "at_mi": 133.5,
             "off_mi": 0.26,
@@ -5641,6 +5651,16 @@
             "spoken": "Passing Manns Choice"
           },
           {
+            "name": "The Bedford Coffee Pot (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 153.1,
+            "spoken": "Billboard: The Bedford Coffee Pot, ahead. A coffee pot building from nineteen twenty-seven. It has been a bar and a bus stop, never a coffee shop.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "New Baltimore",
             "at_mi": 159.4,
             "off_mi": 0.15,
@@ -5650,6 +5670,26 @@
             "spoken": "Entering New Baltimore"
           },
           {
+            "name": "Flight Ninety-Three National Memorial",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 178.8,
+            "spoken": "You are passing near Shanksville, where the Flight Ninety-Three National Memorial honors the forty passengers and crew of September eleventh, two thousand one.",
+            "directions": [
+              "both"
+            ]
+          },
+          {
+            "name": "Fallingwater (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 188.5,
+            "spoken": "Billboard: Fallingwater, ahead, south of the Donegal exit. Frank Lloyd Wright built the house right over a waterfall. The waterfall was not consulted.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Donegal",
             "at_mi": 198.4,
             "off_mi": 0.16,
@@ -5657,6 +5697,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158642358, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Donegal"
+          },
+          {
+            "name": "Fallingwater (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 200.6,
+            "spoken": "Billboard: Fallingwater, next exit, nineteen miles south. Frank Lloyd Wright built the house right over a waterfall. The waterfall was not consulted.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "New Stanton",
@@ -9864,6 +9914,16 @@
             "spoken": "Entering Lorton"
           },
           {
+            "name": "The National Museum of the Marine Corps (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.8,
+            "spoken": "Billboard: The National Museum of the Marine Corps, ahead at Triangle. Free admission, every day but Thanksgiving and Christmas. Stand up straight on the way in.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Potomac Mills",
             "at_mi": 70.7,
             "off_mi": 0.27,
@@ -9923,6 +9983,16 @@
             "kind": "point",
             "at_mi": 87.6,
             "spoken": "Crossing the Rappahannock River"
+          },
+          {
+            "name": "The National Museum of the Marine Corps (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 89.8,
+            "spoken": "Billboard: The National Museum of the Marine Corps, ahead at Triangle. Free admission, every day but Thanksgiving and Christmas. Stand up straight on the way in.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Southern Gateway",
@@ -18056,6 +18126,16 @@
             "spoken": "Passing Dickinson"
           },
           {
+            "name": "The Army Heritage and Education Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.8,
+            "spoken": "Billboard: The Army Heritage and Education Center, ahead in Carlisle. Free admission, and an outdoor trail of real tanks and trenches. Those tanks are parked for good.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Plainfield",
             "at_mi": 49.2,
             "off_mi": 2.52,
@@ -18099,6 +18179,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 25716549, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mechanicsburg"
+          },
+          {
+            "name": "The Army Heritage and Education Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.8,
+            "spoken": "Billboard: The Army Heritage and Education Center, ahead in Carlisle. Free admission, and an outdoor trail of real tanks and trenches. Those tanks are parked for good.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cove",

@@ -21765,6 +21765,26 @@
             "spoken": "Passing Echo"
           },
           {
+            "name": "Pendleton (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 190.9,
+            "spoken": "Billboard: Pendleton is ahead, with a woolen mill since nineteen oh-nine and the Round-Up rodeo since nineteen ten. Blankets for you. Bulls for them.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pendleton (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 208.9,
+            "spoken": "Billboard: Pendleton is ahead, with a woolen mill since nineteen oh-nine and the Round-Up rodeo since nineteen ten. Blankets for you. Bulls for them.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Umatilla River",
             "category": "river",
             "kind": "point",
@@ -21825,6 +21845,26 @@
             "spoken": "Passing Haines"
           },
           {
+            "name": "Oregon Trail Interpretive Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 290.0,
+            "spoken": "Billboard: The Oregon Trail Interpretive Center, next exit at Baker City. Pioneers crossed two thousand miles of this by wagon. You have a heater.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Oregon Trail Interpretive Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 293.0,
+            "spoken": "Billboard: The Oregon Trail Interpretive Center, next exit at Baker City. Pioneers crossed two thousand miles of this by wagon. You have a heater.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Nyssa",
             "at_mi": 370.8,
             "off_mi": 7.4,
@@ -21841,6 +21881,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150980848, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing New Plymouth"
+          },
+          {
+            "name": "Warhawk Air Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 393.4,
+            "spoken": "Billboard: The Warhawk Air Museum, ahead in Nampa. Warhawks, Mustangs and Sabres, a hangar full of fighters. Any one of them could beat you home.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Middleton",
@@ -21868,6 +21918,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150943772, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kuna"
+          },
+          {
+            "name": "Old Idaho Penitentiary (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 411.0,
+            "spoken": "Billboard: The Old Idaho Penitentiary, ahead in Boise. A working prison for a hundred and one years, now a museum. Visitors leave the same day.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Warhawk Air Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 411.4,
+            "spoken": "Billboard: The Warhawk Air Museum, ahead in Nampa. Warhawks, Mustangs and Sabres, a hangar full of fighters. Any one of them could beat you home.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Eagle",
@@ -24631,6 +24701,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150977999, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rathdrum"
+          },
+          {
+            "name": "The Floating Green (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.5,
+            "spoken": "Billboard: Coeur d'Alene has a golf green that floats on the lake, and a boat ferries you out to your ball. Miss the island and you feed the fish.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Hayden",
@@ -43163,6 +43243,16 @@
             "spoken": "Crossing the John Day River"
           },
           {
+            "name": "Maryhill Stonehenge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 105.6,
+            "spoken": "Billboard: Maryhill Stonehenge, ahead, across the river from Biggs. A full-size concrete copy built as a First World War memorial. It still catches the solstice sunrise.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Davies Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -43195,6 +43285,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150968228, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Maryhill"
+          },
+          {
+            "name": "Maryhill Stonehenge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 119.6,
+            "spoken": "Billboard: Maryhill Stonehenge, next exit, across the river from Biggs. A full-size concrete copy built as a First World War memorial. It still catches the solstice sunrise.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wishram",
@@ -49741,6 +49841,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150958712, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Adams"
+          },
+          {
+            "name": "Pendleton (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.0,
+            "spoken": "Billboard: Pendleton is ahead, with a woolen mill since nineteen oh-nine and the Round-Up rodeo since nineteen ten. Blankets for you. Bulls for them.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Umatilla River",

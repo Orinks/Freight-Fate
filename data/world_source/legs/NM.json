@@ -637,6 +637,16 @@
             "spoken": "Passing Boles Acres"
           },
           {
+            "name": "Museum of Space History (from El Paso)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.7,
+            "spoken": "Billboard: The New Mexico Museum of Space History, ahead in Alamogordo. Ham, the first chimpanzee in space, is buried on the grounds. He went first.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Chaparral",
             "at_mi": 70.8,
             "off_mi": 4.39,
@@ -2200,6 +2210,16 @@
             "spoken": "Passing La Luz"
           },
           {
+            "name": "Museum of Space History (from Roswell)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The New Mexico Museum of Space History, ahead in Alamogordo. Ham, the first chimpanzee in space, is buried on the grounds. He went first.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mescalero",
             "at_mi": 30.42,
             "off_mi": 0.13,
@@ -2257,6 +2277,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151540455, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Capitan"
+          },
+          {
+            "name": "Roswell (from Alamogordo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 108.0,
+            "spoken": "Billboard: Roswell is ahead, where something crashed in the desert in nineteen forty-seven and the Air Force has been explaining it ever since. Even the streetlights and the McDonald's are shaped like aliens.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -3564,6 +3594,16 @@
             "spoken": "Passing Mesita"
           },
           {
+            "name": "Acoma Sky City (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.4,
+            "spoken": "Billboard: Acoma Sky City, ahead, a pueblo atop a mesa three hundred sixty-five feet high, home for centuries. Tours begin at the cultural center.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Paguate",
             "at_mi": 45.4,
             "off_mi": 6.95,
@@ -3625,6 +3665,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151917544, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Encinal"
+          },
+          {
+            "name": "Acoma Sky City (from Gallup)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.8,
+            "spoken": "Billboard: Acoma Sky City, ahead, a pueblo atop a mesa three hundred sixty-five feet high, home for centuries. Tours begin at the cultural center.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "San Rafael",
@@ -3711,6 +3761,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151850458, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Pinedale"
+          },
+          {
+            "name": "El Rancho Hotel (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 127.2,
+            "spoken": "Billboard: The El Rancho Hotel, ahead in Gallup, built in nineteen thirty-seven for movie crews. Its rooms are named for the stars who stayed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Church Rock",
@@ -7213,6 +7273,16 @@
             "spoken": "Passing Paguate"
           },
           {
+            "name": "Acoma Sky City (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.9,
+            "spoken": "Billboard: Acoma Sky City, ahead, a pueblo atop a mesa three hundred sixty-five feet high, home for centuries. Tours begin at the cultural center.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "New Laguna",
             "at_mi": 48.2,
             "off_mi": 0.99,
@@ -7249,6 +7319,16 @@
             "spoken": "Passing Encinal"
           },
           {
+            "name": "Acoma Sky City (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.2,
+            "spoken": "Billboard: Acoma Sky City, ahead, a pueblo atop a mesa three hundred sixty-five feet high, home for centuries. Tours begin at the cultural center.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "San Rafael",
             "at_mi": 75.0,
             "off_mi": 2.73,
@@ -7276,6 +7356,16 @@
             "spoken": "Passing Iyanbito"
           },
           {
+            "name": "El Rancho Hotel (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 127.5,
+            "spoken": "Billboard: The El Rancho Hotel, ahead in Gallup, built in nineteen thirty-seven for movie crews. Its rooms are named for the stars who stayed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Yah-ta-hey",
             "at_mi": 138.3,
             "off_mi": 7.05,
@@ -7299,6 +7389,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151813300, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Red Rock"
+          },
+          {
+            "name": "El Rancho Hotel (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.5,
+            "spoken": "Billboard: The El Rancho Hotel, ahead in Gallup, built in nineteen thirty-seven for movie crews. Its rooms are named for the stars who stayed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Manuelito",
@@ -7337,6 +7437,56 @@
             "spoken": "Entering Chambers"
           },
           {
+            "name": "Petrified Forest National Park (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 205.5,
+            "spoken": "Billboard: Petrified Forest National Park, next exit, with trees turned to stone two hundred twenty-five million years ago. Thieves keep mailing pieces back.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Petrified Forest National Park (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 208.9,
+            "spoken": "Billboard: Petrified Forest National Park, next exit, with trees turned to stone two hundred twenty-five million years ago. Thieves keep mailing pieces back.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Wigwam Motel (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 223.3,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Jack Rabbit Trading Post (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 240.9,
+            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Wigwam Motel (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 240.9,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Joseph City",
             "at_mi": 243.2,
             "off_mi": 0.09,
@@ -7346,11 +7496,71 @@
             "spoken": "Entering Joseph City"
           },
           {
+            "name": "Jack Rabbit Trading Post (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 261.1,
+            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Meteor Crater (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 275.5,
+            "spoken": "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Two Guns (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 279.7,
+            "spoken": "Billboard: The ghost town of Two Guns is ahead. Its stone ruins, old zoo and canyon are on private land now, posted against visitors, with enough Route sixty-six legends to make every abandoned wall suspicious.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Meteor Crater (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 293.5,
+            "spoken": "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Two Guns (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 297.7,
+            "spoken": "Billboard: The ghost town of Two Guns is ahead. Its stone ruins, old zoo and canyon are on private land now, posted against visitors, with enough Route sixty-six legends to make every abandoned wall suspicious.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Coconino National Forest",
             "category": "national_forest",
             "kind": "zone",
             "at_mi": 305.8,
             "spoken": "Entering Coconino National Forest"
+          },
+          {
+            "name": "Lowell Observatory (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 308.1,
+            "spoken": "Billboard: Lowell Observatory, ahead in Flagstaff. Pluto was found here in nineteen thirty. It has since been demoted, and the observatory took it well.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Mountain View Ranches",
@@ -7360,6 +7570,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 11709590971, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Mountain View Ranches"
+          },
+          {
+            "name": "Walnut Canyon (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 312.5,
+            "spoken": "Billboard: Walnut Canyon National Monument, next exit. Twenty-five cliff dwelling rooms down a trail that drops a hundred eighty-five feet. The climb back is included.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Walnut Canyon (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 315.7,
+            "spoken": "Billboard: Walnut Canyon National Monument, next exit. Twenty-five cliff dwelling rooms down a trail that drops a hundred eighty-five feet. The climb back is included.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Doney Park",
@@ -7396,6 +7626,16 @@
             "spoken": "Passing Mountainaire"
           },
           {
+            "name": "Lowell Observatory (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 331.8,
+            "spoken": "Billboard: Lowell Observatory, ahead in Flagstaff. Pluto was found here in nineteen thirty. It has since been demoted, and the observatory took it well.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Munds Park",
             "at_mi": 340.8,
             "off_mi": 0.75,
@@ -7412,6 +7652,16 @@
             "spoken": "Crossing the Verde River"
           },
           {
+            "name": "Montezuma Castle (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 368.0,
+            "spoken": "Billboard: Montezuma Castle National Monument, ahead near Camp Verde. A five-story cliff dwelling ninety feet up. Montezuma never lived there, and it is not a castle.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lake Montezuma",
             "at_mi": 368.5,
             "off_mi": 1.77,
@@ -7419,6 +7669,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150980291, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Lake Montezuma"
+          },
+          {
+            "name": "Montezuma Castle (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 376.1,
+            "spoken": "Billboard: Montezuma Castle National Monument, ahead near Camp Verde. A five-story cliff dwelling ninety feet up. Montezuma never lived there, and it is not a castle.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Prescott National Forest",
@@ -12225,6 +12485,16 @@
             "spoken": "Passing South Valley"
           },
           {
+            "name": "Sandia Peak Tramway (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.5,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Paradise Hills",
             "at_mi": 4.1,
             "off_mi": 7.04,
@@ -12261,6 +12531,16 @@
             "spoken": "Entering Pueblo of Sandia Village"
           },
           {
+            "name": "Sandia Peak Tramway (from Santa Fe)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.9,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "San Felipe Pueblo",
             "at_mi": 27.1,
             "off_mi": 2.3,
@@ -12286,6 +12566,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151915928, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cochiti"
+          },
+          {
+            "name": "Meow Wolf (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.1,
+            "spoken": "Billboard: Meow Wolf, ahead in Santa Fe. A bowling alley became a house with doors to other worlds. A fantasy novelist footed the bill.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "El Rancho de las Golondrinas",
@@ -13551,6 +13841,16 @@
             "kind": "zone",
             "at_mi": 57.1,
             "spoken": "Entering Sevilleta National Wildlife Refuge"
+          },
+          {
+            "name": "The Very Large Array (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.0,
+            "spoken": "Billboard: West of Socorro, twenty-seven giant white dish antennas listen to the universe together across the Plains of San Agustin. You have seen them in the movies, aimed at the stars.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "interchanges": [
@@ -15345,6 +15645,16 @@
             "spoken": "Passing Pueblo of Sandia Village"
           },
           {
+            "name": "Sandia Peak Tramway (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.5,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Tijeras",
             "at_mi": 17.2,
             "off_mi": 0.1,
@@ -15361,6 +15671,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 10703399671, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cedar Crest"
+          },
+          {
+            "name": "Sandia Peak Tramway (from Tucumcari)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.2,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Edgewood",
@@ -15395,11 +15715,51 @@
             "spoken": "Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young."
           },
           {
+            "name": "Cline's Corners (from Tucumcari)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.7,
+            "spoken": "Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Pecos River",
             "category": "river",
             "kind": "point",
             "at_mi": 102.5,
             "spoken": "Crossing the Pecos River"
+          },
+          {
+            "name": "The Blue Hole (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 108.7,
+            "spoken": "Billboard: The Blue Hole, ahead in Santa Rosa. A desert spring over eighty feet deep, sixty-two degrees year round. Divers love it; toes are less sure.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Blue Hole (from Tucumcari)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 126.7,
+            "spoken": "Billboard: The Blue Hole, ahead in Santa Rosa. A desert spring over eighty feet deep, sixty-two degrees year round. Divers love it; toes are less sure.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Tucumcari Tonite (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 167.0,
+            "spoken": "Billboard: Stay in Tucumcari tonight, with a mile of motel neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -16825,6 +17185,16 @@
             "spoken": "Crossing the Pecos River"
           },
           {
+            "name": "Carlsbad Caverns (from Hobbs)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.8,
+            "spoken": "Billboard: Carlsbad Caverns National Park, southwest of Carlsbad. The Big Room is the largest cave chamber in North America. Your whole fleet would fit.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Buckeye",
             "at_mi": 52.5,
             "off_mi": 9.84,
@@ -17858,6 +18228,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151744067, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Loving"
+          },
+          {
+            "name": "Carlsbad Caverns (from Odessa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.1,
+            "spoken": "Billboard: Carlsbad Caverns National Park, southwest of Carlsbad. The Big Room is the largest cave chamber in North America. Your whole fleet would fit.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pecos River",
@@ -22774,6 +23154,16 @@
             "spoken": "Entering Yah-ta-hey"
           },
           {
+            "name": "El Rancho Hotel (from Farmington)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 114.9,
+            "spoken": "Billboard: The El Rancho Hotel, ahead in Gallup, built in nineteen thirty-seven for movie crews. Its rooms are named for the stars who stayed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Red Rock",
             "at_mi": 120.9,
             "off_mi": 5.11,
@@ -25883,6 +26273,16 @@
             "spoken": "Passing Do\u00f1a Ana"
           },
           {
+            "name": "Mesilla (from Alamogordo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.9,
+            "spoken": "Billboard: Mesilla, ahead by Las Cruces. The railroad bypassed it in eighteen eighty-one over land prices, which kept the old plaza old. Thank the haggling.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Butterfield Park",
             "at_mi": 11.2,
             "off_mi": 0.23,
@@ -25910,6 +26310,16 @@
             "spoken": "Passing White Sands"
           },
           {
+            "name": "White Sands National Park (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.9,
+            "spoken": "Billboard: White Sands National Park, ahead. The largest gypsum dunefield on Earth, and you may sled it. This road closes now and then for missile tests.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "White Sands National Park",
             "category": "national_park",
             "kind": "zone",
@@ -25924,6 +26334,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 13666182006, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Holloman"
+          },
+          {
+            "name": "White Sands National Park (from Alamogordo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.9,
+            "spoken": "Billboard: White Sands National Park, ahead. The largest gypsum dunefield on Earth, and you may sled it. This road closes now and then for missile tests.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Museum of Space History (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.9,
+            "spoken": "Billboard: The New Mexico Museum of Space History, ahead in Alamogordo. Ham, the first chimpanzee in space, is buried on the grounds. He went first.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Boles Acres",
@@ -26592,6 +27022,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151400185, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing San Miguel"
+          },
+          {
+            "name": "Mesilla (from El Paso)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.3,
+            "spoken": "Billboard: Mesilla, ahead by Las Cruces. The railroad bypassed it in eighteen eighty-one over land prices, which kept the old plaza old. Thank the haggling.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mesquite",
@@ -31082,6 +31522,16 @@
             "spoken": "Passing San Miguel"
           },
           {
+            "name": "Mesilla (from Midland)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.3,
+            "spoken": "Billboard: Mesilla, ahead by Las Cruces. The railroad bypassed it in eighteen eighty-one over land prices, which kept the old plaza old. Thank the haggling.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mesquite",
             "at_mi": 12.0,
             "off_mi": 1.66,
@@ -34633,6 +35083,36 @@
             ]
           },
           {
+            "name": "Mesilla (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.7,
+            "spoken": "Billboard: Mesilla, ahead by Las Cruces. The railroad bypassed it in eighteen eighty-one over land prices, which kept the old plaza old. Thank the haggling.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Rockhound State Park (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.3,
+            "spoken": "Billboard: Rockhound State Park, ahead near Deming, the first park in the country to let you take the rocks home. Your suspension gets a vote.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Rockhound State Park (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.3,
+            "spoken": "Billboard: Rockhound State Park, ahead near Deming, the first park in the country to let you take the rocks home. Your suspension gets a vote.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mimbres River",
             "category": "river",
             "kind": "point",
@@ -34666,6 +35146,26 @@
             "spoken": "Entering San Simon"
           },
           {
+            "name": "Rex Allen Museum (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 183.6,
+            "spoken": "Billboard: The Rex Allen Arizona Cowboy Museum, ahead in Willcox. He sang, rode Koko through nineteen Westerns, and narrated for Disney. Koko gets a memorial too.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Rex Allen Museum (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 201.6,
+            "spoken": "Billboard: The Rex Allen Arizona Cowboy Museum, ahead in Willcox. He sang, rode Koko through nineteen Westerns, and narrated for Disney. Koko gets a memorial too.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "The Thing (countdown, sign three)",
             "category": "billboard_sign",
             "kind": "point",
@@ -34690,11 +35190,31 @@
             ]
           },
           {
+            "name": "Kartchner Caverns (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 219.0,
+            "spoken": "Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "San Pedro River",
             "category": "river",
             "kind": "point",
             "at_mi": 234.1,
             "spoken": "Crossing the San Pedro River"
+          },
+          {
+            "name": "Kartchner Caverns (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 237.0,
+            "spoken": "Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Corona de Tucson",
@@ -34711,6 +35231,26 @@
             "kind": "point",
             "at_mi": 255.0,
             "spoken": "Billboard: What is The Thing? Forty-five miles to find out. The people who know are not telling.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Pima Air and Space Museum (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 255.0,
+            "spoken": "Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pima Air and Space Museum (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 270.0,
+            "spoken": "Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.",
             "directions": [
               "reverse"
             ]
@@ -37437,6 +37977,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Roswell (from Carlsbad)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Roswell is ahead, where something crashed in the desert in nineteen forty-seven and the Air Force has been explaining it ever since. Even the streetlights and the McDonald's are shaped like aliens.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Dexter",
             "at_mi": 15.7,
             "off_mi": 4.67,
@@ -37469,6 +38019,16 @@
             "kind": "point",
             "at_mi": 41.0,
             "spoken": "Artesia Historical Museum and Art Centre ahead"
+          },
+          {
+            "name": "Carlsbad Caverns (from Roswell)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.9,
+            "spoken": "Billboard: Carlsbad Caverns National Park, southwest of Carlsbad. The Big Room is the largest cave chamber in North America. Your whole fleet would fit.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pecos River",
@@ -38767,6 +39327,16 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
+          {
+            "name": "Roswell (from Lubbock)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Roswell is ahead, where something crashed in the desert in nineteen forty-seven and the Air Force has been explaining it ever since. Even the streetlights and the McDonald's are shaped like aliens.",
+            "directions": [
+              "reverse"
+            ]
+          },
           {
             "name": "Pecos River",
             "category": "river",
@@ -42212,6 +42782,36 @@
             ]
           },
           {
+            "name": "Bosque del Apache (from Socorro)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Billboard: Bosque del Apache National Wildlife Refuge, ahead at San Antonio. Thousands of sandhill cranes winter here with the snow geese. They are louder than you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Bosque del Apache (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.8,
+            "spoken": "Billboard: Bosque del Apache National Wildlife Refuge, ahead at San Antonio. Thousands of sandhill cranes winter here with the snow geese. They are louder than you.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Truth or Consequences (from Socorro)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.0,
+            "spoken": "Billboard: Truth or Consequences, ahead. In nineteen fifty, Hot Springs renamed itself after a radio quiz show for one broadcast. The name stuck; the show moved on.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Elephant Butte",
             "at_mi": 67.3,
             "off_mi": 1.7,
@@ -42230,6 +42830,36 @@
             "spoken": "Entering Williamsburg"
           },
           {
+            "name": "Truth or Consequences (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.4,
+            "spoken": "Billboard: Truth or Consequences, ahead. In nineteen fifty, Hot Springs renamed itself after a radio quiz show for one broadcast. The name stuck; the show moved on.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Hatch chile (from Socorro)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 106.2,
+            "spoken": "Billboard: Hatch, next exit, the chile capital of the world, by its own count. Its Labor Day festival draws thousands. Mild is a matter of opinion.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Hatch chile (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 109.6,
+            "spoken": "Billboard: Hatch, next exit, the chile capital of the world, by its own count. Its Labor Day festival draws thousands. Mild is a matter of opinion.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Rincon",
             "at_mi": 113.1,
             "off_mi": 0.24,
@@ -42246,6 +42876,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151340775, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fort Selden"
+          },
+          {
+            "name": "Mesilla (from Socorro)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 136.9,
+            "spoken": "Billboard: Mesilla, ahead by Las Cruces. The railroad bypassed it in eighteen eighty-one over land prices, which kept the old plaza old. Thank the haggling.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Do\u00f1a Ana",

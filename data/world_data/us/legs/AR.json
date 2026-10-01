@@ -2687,6 +2687,16 @@
             "spoken": "Passing Neosho"
           },
           {
+            "name": "Carver National Monument (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.0,
+            "spoken": "Billboard: The George Washington Carver National Monument, next exit, then east, the farm where the scientist was born. It was the first national monument honoring an African American.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Diamond",
             "at_mi": 52.9,
             "off_mi": 6.33,
@@ -2694,6 +2704,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151797551, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Diamond"
+          },
+          {
+            "name": "Carver National Monument (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.2,
+            "spoken": "Billboard: The George Washington Carver National Monument, next exit, then east, the farm where the scientist was born. It was the first national monument honoring an African American.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Duenweg",
@@ -34921,6 +34941,16 @@
             ]
           },
           {
+            "name": "Sequoyah's Cabin (from Little Rock)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 171.1,
+            "spoken": "Billboard: Sequoyah's Cabin, ahead near Sallisaw. Sequoyah lived here from eighteen twenty-nine; he gave the Cherokee their written language. Now a Cherokee Nation museum.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Gans",
             "at_mi": 173.4,
             "off_mi": 1.47,
@@ -34928,6 +34958,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151566954, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gans"
+          },
+          {
+            "name": "Sequoyah's Cabin (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 189.8,
+            "spoken": "Billboard: Sequoyah's Cabin, ahead near Sallisaw. Sequoyah lived here from eighteen twenty-nine; he gave the Cherokee their written language. Now a Cherokee Nation museum.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Tahlonteeskee Museum",
@@ -35021,6 +35061,16 @@
             "kind": "point",
             "at_mi": 324.8,
             "spoken": "Crossing the Oklahoma River"
+          },
+          {
+            "name": "National Cowboy Museum (from Little Rock)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 328.5,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Midwest City",

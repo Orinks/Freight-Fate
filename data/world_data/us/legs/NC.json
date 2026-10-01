@@ -959,6 +959,16 @@
             "spoken": "Passing Mills River"
           },
           {
+            "name": "The Carl Sandburg Home (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.8,
+            "spoken": "Billboard: The Carl Sandburg Home, ahead in Flat Rock. The poet wrote here while his wife raised prize dairy goats. The goats still outnumber the poets.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Mountain Home",
             "at_mi": 20.0,
             "off_mi": 0.9,
@@ -1043,6 +1053,16 @@
             "spoken": "Crossing the North Saluda River"
           },
           {
+            "name": "The Carl Sandburg Home (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 41.1,
+            "spoken": "Billboard: The Carl Sandburg Home, ahead in Flat Rock. The poet wrote here while his wife raised prize dairy goats. The goats still outnumber the poets.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Slater-Marietta",
             "at_mi": 48.0,
             "off_mi": 3.88,
@@ -1050,6 +1070,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 12288360385, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Slater-Marietta"
+          },
+          {
+            "name": "Falls Park on the Reedy (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.6,
+            "spoken": "Billboard: Falls Park, ahead in Greenville. A waterfall downtown, and a footbridge that curves over it, hung from cables on one side only. It holds.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Enoree River",
@@ -7185,6 +7215,16 @@
             "spoken": "Passing Mills River"
           },
           {
+            "name": "The Carl Sandburg Home (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.8,
+            "spoken": "Billboard: The Carl Sandburg Home, ahead in Flat Rock. The poet wrote here while his wife raised prize dairy goats. The goats still outnumber the poets.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Mountain Home",
             "at_mi": 20.0,
             "off_mi": 0.9,
@@ -7242,6 +7282,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154068516, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Saluda"
+          },
+          {
+            "name": "The Carl Sandburg Home (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.2,
+            "spoken": "Billboard: The Carl Sandburg Home, ahead in Flat Rock. The poet wrote here while his wife raised prize dairy goats. The goats still outnumber the poets.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Columbus",
@@ -9824,6 +9874,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154110062, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bermuda Run"
+          },
+          {
+            "name": "Old Salem (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 135.0,
+            "spoken": "Billboard: Old Salem, ahead in Winston-Salem. A Moravian town from seventeen sixty-six, and its bakery still bakes in a wood-fired oven. Arrive hungry.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Lewisville",
@@ -15354,6 +15414,16 @@
             "spoken": "Passing Blacksburg"
           },
           {
+            "name": "The Peachoid (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.1,
+            "spoken": "Billboard: The Peachoid, ahead in Gaffney. A water tower shaped like a peach, a hundred thirty-five feet tall. It holds a million gallons and no peaches.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "East Gaffney",
             "at_mi": 50.9,
             "off_mi": 1.55,
@@ -15370,6 +15440,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154368400, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cowpens"
+          },
+          {
+            "name": "The Peachoid (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.1,
+            "spoken": "Billboard: The Peachoid, ahead in Gaffney. A water tower shaped like a peach, a hundred thirty-five feet tall. It holds a million gallons and no peaches.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pacolet River",
@@ -18000,6 +18080,16 @@
             "spoken": "Passing China Grove"
           },
           {
+            "name": "The North Carolina Transportation Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.4,
+            "spoken": "Billboard: The North Carolina Transportation Museum, ahead in Spencer. The old railroad shops keep the largest roundhouse left in North America. Trucks get a parking lot.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Faith",
             "at_mi": 36.7,
             "off_mi": 3.37,
@@ -18043,6 +18133,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154152460, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Spencer"
+          },
+          {
+            "name": "The North Carolina Transportation Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.7,
+            "spoken": "Billboard: The North Carolina Transportation Museum, next exit. The old railroad shops keep the largest roundhouse left in North America. Trucks get a parking lot.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cooleemee",
@@ -18093,6 +18193,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154380480, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Welcome"
+          },
+          {
+            "name": "The Big Chair (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.7,
+            "spoken": "Billboard: Thomasville, ahead, the Chair City. A thirty-foot armchair has stood downtown since nineteen fifty-one. It is still waiting on a matching table.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Midway",
@@ -18147,6 +18257,16 @@
             "spoken": "Passing Archdale"
           },
           {
+            "name": "The Big Chair (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 76.5,
+            "spoken": "Billboard: Thomasville, ahead, the Chair City. A thirty-foot armchair has stood downtown since nineteen fifty-one. It is still waiting on a matching table.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Deep River",
             "category": "river",
             "kind": "point",
@@ -18161,6 +18281,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158615504, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Jamestown"
+          },
+          {
+            "name": "World's Largest Chest of Drawers (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.3,
+            "spoken": "Billboard: High Point is ahead, the furniture capital of the world and home to a giant chest of drawers with socks hanging out. Subtle advertising was not selected.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pleasant Garden",
@@ -28319,6 +28449,16 @@
         ],
         "landmarks": [
           {
+            "name": "Carowinds (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 2.0,
+            "spoken": "Billboard: Carowinds, ahead, right on the state line. The line is painted across the front gate. Ride in one Carolina, eat lunch in the other.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pineville",
             "at_mi": 11.8,
             "off_mi": 2.65,
@@ -28369,6 +28509,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154024054, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Riverview"
+          },
+          {
+            "name": "Carowinds (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.3,
+            "spoken": "Billboard: Carowinds, ahead, right on the state line. The line is painted across the front gate. Ride in one Carolina, eat lunch in the other.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Fort Lawn",
@@ -28529,6 +28679,16 @@
             "spoken": "Passing Reevesville"
           },
           {
+            "name": "The South Carolina Artisans Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 175.0,
+            "spoken": "Billboard: The South Carolina Artisans Center, ahead in Walterboro. Two hundred artists from forty-one of the state's forty-six counties. The other five are still practicing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Walterboro",
             "at_mi": 185.1,
             "off_mi": 2.0,
@@ -28543,6 +28703,16 @@
             "kind": "point",
             "at_mi": 187.9,
             "spoken": "Crossing the Combahee River"
+          },
+          {
+            "name": "The South Carolina Artisans Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 195.0,
+            "spoken": "Billboard: The South Carolina Artisans Center, ahead in Walterboro. Two hundred artists from forty-one of the state's forty-six counties. The other five are still practicing.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Yemassee",
@@ -32093,6 +32263,16 @@
             "spoken": "Passing Blacksburg"
           },
           {
+            "name": "The Peachoid (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.0,
+            "spoken": "Billboard: The Peachoid, ahead in Gaffney. A water tower shaped like a peach, a hundred thirty-five feet tall. It holds a million gallons and no peaches.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Broad River",
             "category": "river",
             "kind": "point",
@@ -32123,6 +32303,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154181606, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Chesnee"
+          },
+          {
+            "name": "The Peachoid (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.0,
+            "spoken": "Billboard: The Peachoid, ahead in Gaffney. A water tower shaped like a peach, a hundred thirty-five feet tall. It holds a million gallons and no peaches.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cowpens",
@@ -34168,6 +34358,16 @@
             "spoken": "Passing China Grove"
           },
           {
+            "name": "The North Carolina Transportation Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.5,
+            "spoken": "Billboard: The North Carolina Transportation Museum, ahead in Spencer. The old railroad shops keep the largest roundhouse left in North America. Trucks get a parking lot.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Faith",
             "at_mi": 36.8,
             "off_mi": 3.37,
@@ -34238,6 +34438,16 @@
             "spoken": "Passing Tyro"
           },
           {
+            "name": "The North Carolina Transportation Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.7,
+            "spoken": "Billboard: The North Carolina Transportation Museum, ahead in Spencer. The old railroad shops keep the largest roundhouse left in North America. Trucks get a parking lot.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lexington",
             "at_mi": 56.3,
             "off_mi": 1.7,
@@ -34272,6 +34482,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154017975, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Midway"
+          },
+          {
+            "name": "Old Salem (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.3,
+            "spoken": "Billboard: Old Salem, ahead in Winston-Salem. A Moravian town from seventeen sixty-six, and its bakery still bakes in a wood-fired oven. Arrive hungry.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Bermuda Run",
@@ -38895,6 +39115,16 @@
             "spoken": "Passing Spring Lake"
           },
           {
+            "name": "The Airborne and Special Operations Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Airborne and Special Operations Museum, ahead in Fayetteville. Free admission. Everyone it honors once jumped out of a perfectly good airplane.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Parkton",
             "at_mi": 10.1,
             "off_mi": 8.79,
@@ -40300,6 +40530,16 @@
             "spoken": "Passing Autryville"
           },
           {
+            "name": "The Airborne and Special Operations Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.8,
+            "spoken": "Billboard: The Airborne and Special Operations Museum, ahead in Fayetteville. Free admission. Everyone it honors once jumped out of a perfectly good airplane.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Wade",
             "at_mi": 12.07,
             "off_mi": 1.03,
@@ -40377,6 +40617,16 @@
             "spoken": "Passing Benson"
           },
           {
+            "name": "The Ava Gardner Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.5,
+            "spoken": "Billboard: The Ava Gardner Museum, ahead in Smithfield. The movie star was born nearby, in a place called Grabtown. It still has the better name.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Neuse River",
             "category": "river",
             "kind": "point",
@@ -40445,6 +40695,16 @@
             "spoken": "Passing Micro"
           },
           {
+            "name": "The Ava Gardner Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.3,
+            "spoken": "Billboard: The Ava Gardner Museum, ahead in Smithfield. The movie star was born nearby, in a place called Grabtown. It still has the better name.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Fremont",
             "at_mi": 58.99,
             "off_mi": 9.49,
@@ -40461,6 +40721,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158504140, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Kenly"
+          },
+          {
+            "name": "The Whirligig Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.8,
+            "spoken": "Billboard: The Vollis Simpson Whirligig Park, ahead in Wilson. Giant whirligigs he built from scrap metal spin in the wind downtown. The wind works for free.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Little River",
@@ -40522,6 +40792,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157642888, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Spring Hope"
+          },
+          {
+            "name": "The Whirligig Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.8,
+            "spoken": "Billboard: The Vollis Simpson Whirligig Park, ahead in Wilson. Giant whirligigs he built from scrap metal spin in the wind downtown. The wind works for free.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Momeyer",
@@ -42501,6 +42781,16 @@
             "spoken": "Passing Vass"
           },
           {
+            "name": "The Airborne and Special Operations Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 82.7,
+            "spoken": "Billboard: The Airborne and Special Operations Museum, ahead in Fayetteville. Free admission. Everyone it honors once jumped out of a perfectly good airplane.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Spring Lake",
             "at_mi": 84.9,
             "off_mi": 0.02,
@@ -42514,7 +42804,10 @@
             "category": "highway_marker",
             "kind": "point",
             "at_mi": 90.0,
-            "spoken": "You are nearing Fayetteville and Fort Liberty, home of the Eighty-Second Airborne and the Green Berets. It is one of the largest military bases on Earth."
+            "spoken": "You are nearing Fayetteville and Fort Bragg, home of the Eighty-Second Airborne and the Green Berets. It is one of the largest military bases on Earth.",
+            "directions": [
+              "both"
+            ]
           },
           {
             "name": "Rockfish",
@@ -45605,6 +45898,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157619010, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Vanceboro"
+          },
+          {
+            "name": "The birthplace of Pepsi (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.0,
+            "spoken": "Billboard: New Bern, ahead, where Pepsi was born. A druggist mixed it here in eighteen ninety-three and called it Brad's Drink. The name needed work.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Neuse River",
@@ -48772,6 +49075,16 @@
             ]
           },
           {
+            "name": "The Airborne and Special Operations Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.0,
+            "spoken": "Billboard: The Airborne and Special Operations Museum, ahead in Fayetteville. Free admission. Everyone it honors once jumped out of a perfectly good airplane.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Rockfish",
             "at_mi": 23.3,
             "off_mi": 8.29,
@@ -49244,6 +49557,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157619010, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Vanceboro"
+          },
+          {
+            "name": "The birthplace of Pepsi (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: New Bern, ahead, where Pepsi was born. A druggist mixed it here in eighteen ninety-three and called it Brad's Drink. The name needed work.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "River Bend",
@@ -51207,6 +51530,16 @@
             "spoken": "Passing Pleasant Garden"
           },
           {
+            "name": "World's Largest Chest of Drawers (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 83.2,
+            "spoken": "Billboard: High Point is ahead, the furniture capital of the world and home to a giant chest of drawers with socks hanging out. Subtle advertising was not selected.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Deep River",
             "category": "river",
             "kind": "point",
@@ -51237,6 +51570,16 @@
             "spoken": "Passing Jamestown"
           },
           {
+            "name": "The Big Chair (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 91.7,
+            "spoken": "Billboard: Thomasville, ahead, the Chair City. A thirty-foot armchair has stood downtown since nineteen fifty-one. It is still waiting on a matching table.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Archdale",
             "at_mi": 93.9,
             "off_mi": 1.22,
@@ -51264,6 +51607,26 @@
             "spoken": "Passing Thomasville"
           },
           {
+            "name": "World's Largest Chest of Drawers (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 103.2,
+            "spoken": "Billboard: High Point is ahead, the furniture capital of the world and home to a giant chest of drawers with socks hanging out. Subtle advertising was not selected.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Big Chair (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 110.5,
+            "spoken": "Billboard: Thomasville, ahead, the Chair City. A thirty-foot armchair has stood downtown since nineteen fifty-one. It is still waiting on a matching table.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Yadkin River",
             "category": "river",
             "kind": "point",
@@ -51287,6 +51650,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154383419, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Tyro"
+          },
+          {
+            "name": "The North Carolina Transportation Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 124.4,
+            "spoken": "Billboard: The North Carolina Transportation Museum, next exit. The old railroad shops keep the largest roundhouse left in North America. Trucks get a parking lot.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Spencer",
@@ -51323,6 +51696,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153841825, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Faith"
+          },
+          {
+            "name": "The North Carolina Transportation Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 135.9,
+            "spoken": "Billboard: The North Carolina Transportation Museum, ahead in Spencer. The old railroad shops keep the largest roundhouse left in North America. Trucks get a parking lot.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "China Grove",
@@ -54877,6 +55260,16 @@
             "spoken": "Passing Linden"
           },
           {
+            "name": "The Airborne and Special Operations Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.0,
+            "spoken": "Billboard: The Airborne and Special Operations Museum, ahead in Fayetteville. Free admission. Everyone it honors once jumped out of a perfectly good airplane.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Wade",
             "at_mi": 51.2,
             "off_mi": 1.03,
@@ -56067,6 +56460,16 @@
             "spoken": "Passing Sims"
           },
           {
+            "name": "The Whirligig Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.5,
+            "spoken": "Billboard: The Vollis Simpson Whirligig Park, ahead in Wilson. Giant whirligigs he built from scrap metal spin in the wind downtown. The wind works for free.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Kenly",
             "at_mi": 43.3,
             "off_mi": 10.56,
@@ -56155,6 +56558,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158459722, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Macclesfield"
+          },
+          {
+            "name": "The Whirligig Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.9,
+            "spoken": "Billboard: The Vollis Simpson Whirligig Park, ahead in Wilson. Giant whirligigs he built from scrap metal spin in the wind downtown. The wind works for free.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Walstonburg",
@@ -63238,6 +63651,16 @@
             "spoken": "Passing Parkton"
           },
           {
+            "name": "The Airborne and Special Operations Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.0,
+            "spoken": "Billboard: The Airborne and Special Operations Museum, ahead in Fayetteville. Free admission. Everyone it honors once jumped out of a perfectly good airplane.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Autryville",
             "at_mi": 82.4,
             "off_mi": 11.75,
@@ -65806,6 +66229,16 @@
             "spoken": "Passing Kenansville"
           },
           {
+            "name": "The Mount Olive pickle (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.3,
+            "spoken": "Billboard: Mount Olive, ahead, east of the interstate. Its pickle company drops a glowing pickle every New Year's Eve at seven. Everyone is in bed by eight.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Warsaw",
             "at_mi": 62.8,
             "off_mi": 2.22,
@@ -65858,6 +66291,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158509659, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mount Olive"
+          },
+          {
+            "name": "The Mount Olive pickle (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 82.3,
+            "spoken": "Billboard: Mount Olive, ahead, east of the interstate. Its pickle company drops a glowing pickle every New Year's Eve at seven. Everyone is in bed by eight.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Newton Grove",
@@ -66644,6 +67087,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154020683, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Walkertown"
+          },
+          {
+            "name": "Old Salem (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Old Salem, ahead in Winston-Salem. A Moravian town from seventeen sixty-six, and its bakery still bakes in a wood-fired oven. Arrive hungry.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Stokesdale",

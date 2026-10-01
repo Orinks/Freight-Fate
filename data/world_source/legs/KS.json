@@ -32937,6 +32937,16 @@
             "spoken": "Entering Westport"
           },
           {
+            "name": "Golden Driller (from Wichita)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 165.9,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sapulpa",
             "at_mi": 167.9,
             "off_mi": 9.42,

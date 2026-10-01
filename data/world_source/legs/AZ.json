@@ -1780,6 +1780,16 @@
             "spoken": "Needles Regional Museum ahead"
           },
           {
+            "name": "Oatman burros (from Bullhead City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.4,
+            "spoken": "Billboard: Oatman, north of Topock on old Route sixty-six. Wild burros run the main street and expect to be fed. They outrank the cars.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Golden Shores",
             "at_mi": 35.69,
             "off_mi": 4.31,
@@ -1794,6 +1804,26 @@
             "kind": "point",
             "at_mi": 42.43,
             "spoken": "Crossing the Colorado River"
+          },
+          {
+            "name": "Oatman burros (from Lake Havasu City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.7,
+            "spoken": "Billboard: Oatman, north of Topock on old Route sixty-six. Wild burros run the main street and expect to be fed. They outrank the cars.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "London Bridge (from Bullhead City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.2,
+            "spoken": "Billboard: London Bridge, ahead in Lake Havasu City, bought in nineteen sixty-eight and rebuilt in Arizona. The buyer swore it was the bridge he wanted.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Desert Hills",
@@ -3730,6 +3760,16 @@
             "spoken": "Passing Lake Montezuma"
           },
           {
+            "name": "Montezuma Castle (from Flagstaff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Montezuma Castle National Monument, ahead near Camp Verde. A five-story cliff dwelling ninety feet up. Montezuma never lived there, and it is not a castle.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Coconino National Forest",
             "category": "national_forest",
             "kind": "zone",
@@ -3762,6 +3802,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150959063, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Kachina Village"
+          },
+          {
+            "name": "Lowell Observatory (from Camp Verde)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.6,
+            "spoken": "Billboard: Lowell Observatory, ahead in Flagstaff. Pluto was found here in nineteen thirty. It has since been demoted, and the observatory took it well.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Bellemont",
@@ -4658,6 +4708,16 @@
             "spoken": "Entering Coconino National Forest"
           },
           {
+            "name": "Tonto Natural Bridge (from Camp Verde)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.9,
+            "spoken": "Billboard: Tonto Natural Bridge State Park, ahead, probably the world's largest travertine bridge, a hundred eighty-three feet high. It is rated for hikers only.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Strawberry",
             "at_mi": 39.2,
             "off_mi": 0.12,
@@ -4697,6 +4757,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150940072, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Beaver Valley Estates"
+          },
+          {
+            "name": "Tonto Natural Bridge (from Payson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.0,
+            "spoken": "Billboard: Tonto Natural Bridge State Park, ahead, probably the world's largest travertine bridge, a hundred eighty-three feet high. It is rated for hikers only.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mesa Del Caballo",
@@ -5730,6 +5800,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150939207, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Arizona City"
+          },
+          {
+            "name": "Rooster Cogburn Ostrich Ranch (from Casa Grande)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.1,
+            "spoken": "Billboard: Rooster Cogburn Ostrich Ranch, next exit at Picacho Peak. Feed ostriches, goats, deer and even stingrays. The ostriches do not wait their turn.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Rooster Cogburn Ostrich Ranch (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.5,
+            "spoken": "Billboard: Rooster Cogburn Ostrich Ranch, next exit at Picacho Peak. Feed ostriches, goats, deer and even stingrays. The ostriches do not wait their turn.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Red Rock",
@@ -8402,6 +8492,16 @@
             "spoken": "Entering Whetstone"
           },
           {
+            "name": "Kartchner Caverns (from Douglas)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.6,
+            "spoken": "Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lone Pine Saddle",
             "category": "mountain_pass",
             "kind": "point",
@@ -8425,6 +8525,16 @@
             "spoken": "Passing Benson"
           },
           {
+            "name": "Kartchner Caverns (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.2,
+            "spoken": "Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Corona de Tucson",
             "at_mi": 101.93,
             "off_mi": 5.81,
@@ -8441,6 +8551,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150937823, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Vail"
+          },
+          {
+            "name": "Pima Air and Space Museum (from Douglas)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 105.6,
+            "spoken": "Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pima Air and Space Museum (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 119.0,
+            "spoken": "Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pascua Pueblo",
@@ -10390,6 +10520,16 @@
             "spoken": "Passing Kachina Village"
           },
           {
+            "name": "Lowell Observatory (from Kingman)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Lowell Observatory, ahead in Flagstaff. Pluto was found here in nineteen thirty. It has since been demoted, and the observatory took it well.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Fort Valley",
             "at_mi": 11.7,
             "off_mi": 4.64,
@@ -10424,6 +10564,16 @@
             "spoken": "Entering Parks"
           },
           {
+            "name": "Bearizona (from Flagstaff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.0,
+            "spoken": "Billboard: Bearizona, ahead in Williams. Drive through a pine forest past black bears, wolves and bison. Windows up; the bears have no manners.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Red Lake",
             "at_mi": 34.9,
             "off_mi": 6.95,
@@ -10440,6 +10590,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 1402601531, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Williams"
+          },
+          {
+            "name": "Bearizona (from Kingman)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.0,
+            "spoken": "Billboard: Bearizona, ahead in Williams. Drive through a pine forest past black bears, wolves and bison. Windows up; the bears have no manners.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kaibab Estates West",
@@ -10475,6 +10635,16 @@
             "kind": "point",
             "at_mi": 75.0,
             "spoken": "Billboard: Delgadillo's Snow Cap is ahead in Seligman. It serves burgers, shakes, fake mustard, practical jokes, and a menu delivered by people who consider confusion part of the service."
+          },
+          {
+            "name": "Delgadillo's Snow Cap (from Kingman)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 87.0,
+            "spoken": "Billboard: Delgadillo's Snow Cap is ahead in Seligman. It serves burgers, shakes, fake mustard, practical jokes, and a menu delivered by people who consider confusion part of the service.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pine Lake",
@@ -13161,6 +13331,26 @@
             "spoken": "Passing Mountainaire"
           },
           {
+            "name": "Lowell Observatory (from Page)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.1,
+            "spoken": "Billboard: Lowell Observatory, ahead in Flagstaff. Pluto was found here in nineteen thirty. It has since been demoted, and the observatory took it well.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Sunset Crater (from Flagstaff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.1,
+            "spoken": "Billboard: Sunset Crater Volcano National Monument, ahead. It last erupted around the year ten eighty-five and has been quiet since. Keep it that way.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Doney Park",
             "at_mi": 7.4,
             "off_mi": 0.01,
@@ -13195,6 +13385,16 @@
             "spoken": "Entering Timberline-Fernwood"
           },
           {
+            "name": "Sunset Crater (from Page)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.0,
+            "spoken": "Billboard: Sunset Crater Volcano National Monument, ahead. It last erupted around the year ten eighty-five and has been quiet since. Keep it that way.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Coconino National Forest",
             "category": "national_forest",
             "kind": "zone",
@@ -13209,11 +13409,31 @@
             "spoken": "Crossing the Little Colorado River"
           },
           {
+            "name": "Cameron Trading Post (from Flagstaff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.5,
+            "spoken": "Billboard: Cameron Trading Post, ahead, trading since nineteen sixteen beside the Little Colorado River gorge. The Navajo taco covers the whole plate.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "old Cameron Trading Post",
             "category": "museum",
             "kind": "point",
             "at_mi": 52.0,
             "spoken": "Museum ahead: old Cameron Trading Post"
+          },
+          {
+            "name": "Cameron Trading Post (from Page)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.5,
+            "spoken": "Billboard: Cameron Trading Post, ahead, trading since nineteen sixteen beside the Little Colorado River gorge. The Navajo taco covers the whole plate.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Moenkopi",
@@ -13248,6 +13468,16 @@
             "kind": "point",
             "at_mi": 113.9,
             "spoken": "Approaching Antelope Pass"
+          },
+          {
+            "name": "Horseshoe Bend (from Flagstaff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 120.8,
+            "spoken": "Billboard: Horseshoe Bend, ahead before Page. A short trail ends a thousand feet above a hairpin loop of the Colorado River. Your hairpin turns are smaller.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Greenehaven",
@@ -14727,6 +14957,16 @@
             "spoken": "Passing Timberline-Fernwood"
           },
           {
+            "name": "Walnut Canyon (from Flagstaff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.9,
+            "spoken": "Billboard: Walnut Canyon National Monument, next exit. Twenty-five cliff dwelling rooms down a trail that drops a hundred eighty-five feet. The climb back is included.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Mountain View Ranches",
             "at_mi": 10.3,
             "off_mi": 2.45,
@@ -14736,11 +14976,31 @@
             "spoken": "Passing Mountain View Ranches"
           },
           {
+            "name": "Walnut Canyon (from Winslow)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.3,
+            "spoken": "Billboard: Walnut Canyon National Monument, next exit. Twenty-five cliff dwelling rooms down a trail that drops a hundred eighty-five feet. The climb back is included.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Coconino National Forest",
             "category": "national_forest",
             "kind": "zone",
             "at_mi": 13.9,
             "spoken": "Entering Coconino National Forest"
+          },
+          {
+            "name": "Lowell Observatory (from Winslow)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.2,
+            "spoken": "Billboard: Lowell Observatory, ahead in Flagstaff. Pluto was found here in nineteen thirty. It has since been demoted, and the observatory took it well.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Two Guns",
@@ -14763,11 +15023,31 @@
             ]
           },
           {
+            "name": "Two Guns (from Winslow)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.0,
+            "spoken": "Billboard: The ghost town of Two Guns is ahead. Its stone ruins, old zoo and canyon are on private land now, posted against visitors, with enough Route sixty-six legends to make every abandoned wall suspicious.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Meteor Crater (from Winslow)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.2,
+            "spoken": "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Standin' on the Corner",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 50.0,
-            "spoken": "Billboard: Winslow, Arizona, is ahead. Stand on the corner, and a girl in a flatbed Ford may slow down to look. You know the song.",
+            "spoken": "Billboard: Winslow, Arizona, is ahead. You know the song.",
             "directions": [
               "forward"
             ]
@@ -17529,11 +17809,41 @@
             "spoken": "Passing Joseph City"
           },
           {
+            "name": "Wigwam Motel (from Gallup)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Petrified Forest National Park (from Holbrook)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.3,
+            "spoken": "Billboard: Petrified Forest National Park, next exit, with trees turned to stone two hundred twenty-five million years ago. Thieves keep mailing pieces back.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Petrified Forest National Park",
             "category": "national_park",
             "kind": "zone",
             "at_mi": 24.6,
             "spoken": "Entering Petrified Forest National Park"
+          },
+          {
+            "name": "Petrified Forest National Park (from Gallup)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.9,
+            "spoken": "Billboard: Petrified Forest National Park, next exit, with trees turned to stone two hundred twenty-five million years ago. Thieves keep mailing pieces back.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Puerco River",
@@ -17613,6 +17923,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151351290, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hunters Point"
+          },
+          {
+            "name": "El Rancho Hotel (from Holbrook)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 86.0,
+            "spoken": "Billboard: The El Rancho Hotel, ahead in Gallup, built in nineteen thirty-seven for movie crews. Its rooms are named for the stars who stayed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Entering the Navajo Nation",
@@ -19093,6 +19413,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150946626, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Yucca"
+          },
+          {
+            "name": "Oatman burros (from Kingman)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.3,
+            "spoken": "Billboard: Oatman, north of Topock on old Route sixty-six. Wild burros run the main street and expect to be fed. They outrank the cars.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Colorado River",
@@ -21226,6 +21556,16 @@
             "spoken": "Passing Golden Shores"
           },
           {
+            "name": "London Bridge (from Kingman)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.2,
+            "spoken": "Billboard: London Bridge, ahead in Lake Havasu City, bought in nineteen sixty-eight and rebuilt in Arizona. The buyer swore it was the bridge he wanted.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Desert Hills",
             "at_mi": 53.7,
             "off_mi": 0.64,
@@ -22419,6 +22759,16 @@
             "kind": "point",
             "at_mi": 86.3,
             "spoken": "Approaching Railroad Pass"
+          },
+          {
+            "name": "The Neon Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 95.2,
+            "spoken": "Billboard: The Neon Museum, ahead in Las Vegas. Old casino signs come here to retire in the boneyard. Some of them still light up.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Whitney",
@@ -23933,6 +24283,16 @@
             "spoken": "Passing Desert Hills"
           },
           {
+            "name": "London Bridge (from Yuma)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.8,
+            "spoken": "Billboard: London Bridge, ahead in Lake Havasu City, bought in nineteen sixty-eight and rebuilt in Arizona. The buyer swore it was the bridge he wanted.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Colorado River",
             "category": "river",
             "kind": "point",
@@ -23985,6 +24345,16 @@
             "spoken": "Entering Parker"
           },
           {
+            "name": "Hi Jolly's tomb (from Lake Havasu City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.2,
+            "spoken": "Billboard: Hi Jolly's tomb, ahead in Quartzsite. A stone pyramid topped with a copper camel, for the Army's camel driver. The Army did try camels.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "La Paz Valley",
             "at_mi": 79.41,
             "off_mi": 1.43,
@@ -23994,6 +24364,16 @@
             "spoken": "Passing La Paz Valley"
           },
           {
+            "name": "Hi Jolly's tomb (from Yuma)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 82.2,
+            "spoken": "Billboard: Hi Jolly's tomb, ahead in Quartzsite. A stone pyramid topped with a copper camel, for the Army's camel driver. The Army did try camels.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Fortuna Foothills",
             "at_mi": 143.62,
             "off_mi": 3.41,
@@ -24001,6 +24381,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150959809, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fortuna Foothills"
+          },
+          {
+            "name": "Yuma Territorial Prison (from Lake Havasu City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 146.1,
+            "spoken": "Billboard: Yuma Territorial Prison State Historic Park, ahead. More than three thousand inmates from eighteen seventy-six to nineteen oh-nine. Then the high school moved in.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Somerton",
@@ -26074,11 +26464,41 @@
             "spoken": "Entering Taylor"
           },
           {
+            "name": "Wigwam Motel (from Payson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 110.7,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Little Colorado River",
             "category": "river",
             "kind": "point",
             "at_mi": 113.0,
             "spoken": "Crossing the Little Colorado River"
+          },
+          {
+            "name": "Jack Rabbit Trading Post (from Payson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 129.1,
+            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Wigwam Motel (from Winslow)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 129.1,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Joseph City",
@@ -26088,6 +26508,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150935954, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Joseph City"
+          },
+          {
+            "name": "Jack Rabbit Trading Post (from Winslow)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 149.2,
+            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "speed_limits": [
@@ -28294,6 +28724,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 9564960302, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dewey-Humboldt"
+          },
+          {
+            "name": "Montezuma Castle (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.0,
+            "spoken": "Billboard: Montezuma Castle National Monument, ahead near Camp Verde. A five-story cliff dwelling ninety feet up. Montezuma never lived there, and it is not a castle.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cornville",
@@ -33810,6 +34250,26 @@
             "spoken": "Passing Brenda"
           },
           {
+            "name": "Hi Jolly's tomb (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 118.1,
+            "spoken": "Billboard: Hi Jolly's tomb, ahead in Quartzsite. A stone pyramid topped with a copper camel, for the Army's camel driver. The Army did try camels.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Hi Jolly's tomb (from Los Angeles)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 136.1,
+            "spoken": "Billboard: Hi Jolly's tomb, ahead in Quartzsite. A stone pyramid topped with a copper camel, for the Army's camel driver. The Army did try camels.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Ehrenberg",
             "at_mi": 145.2,
             "off_mi": 0.36,
@@ -33840,6 +34300,46 @@
             "spoken": "Entering Chuckwalla National Monument"
           },
           {
+            "name": "General Patton Memorial Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 206.0,
+            "spoken": "Billboard: The General Patton Memorial Museum, ahead at Chiriaco Summit. A million soldiers trained in this desert for the Second World War. The tanks out front are not going anywhere.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Joshua Tree National Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 208.8,
+            "spoken": "Billboard: Joshua Tree National Park, ahead at Cottonwood Spring Road. The trees are really yuccas. Nobody has told them, and nobody should.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Joshua Tree National Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 220.3,
+            "spoken": "Billboard: Joshua Tree National Park, next exit, seven miles north. The trees are really yuccas. Nobody has told them, and nobody should.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "General Patton Memorial Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 226.0,
+            "spoken": "Billboard: The General Patton Memorial Museum, ahead at Chiriaco Summit. A million soldiers trained in this desert for the Second World War. The tanks out front are not going anywhere.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Bermuda Dunes",
             "at_mi": 249.7,
             "off_mi": 0.86,
@@ -33867,6 +34367,26 @@
             "spoken": "Passing Thousand Palms"
           },
           {
+            "name": "Palm Springs Aerial Tramway (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 260.1,
+            "spoken": "Billboard: The Palm Springs Aerial Tramway, ahead. Its cars rotate all the way up the cliffs, almost six thousand feet. The view comes around to you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "San Gorgonio Windmills (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 265.1,
+            "spoken": "Billboard: A forest of windmills ahead in the San Gorgonio Pass, turning in the same wind that is currently shoving your trailer around. They will not kill your birds, or your fuzzy dice, but they will spin.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Whitewater River",
             "category": "river",
             "kind": "point",
@@ -33879,6 +34399,26 @@
             "kind": "point",
             "at_mi": 274.3,
             "spoken": "Crossing the San Gorgonio River"
+          },
+          {
+            "name": "Hadley's Date Shakes (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 276.6,
+            "spoken": "Billboard: Date shakes ahead at Hadley's. Yes, a milkshake made of dates. Trust the desert. It knows what it is doing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "San Gorgonio Windmills (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 279.8,
+            "spoken": "Billboard: A forest of windmills ahead in the San Gorgonio Pass, turning in the same wind that is currently shoving your trailer around. They will not kill your birds, or your fuzzy dice, but they will spin.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cabazon Dinosaurs (westbound)",
@@ -33915,6 +34455,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150960179, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Banning"
+          },
+          {
+            "name": "Palm Springs Aerial Tramway (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 290.1,
+            "spoken": "Billboard: The Palm Springs Aerial Tramway, ahead. Its cars rotate all the way up the cliffs, almost six thousand feet. The view comes around to you.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Hadley's Date Shakes (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 292.7,
+            "spoken": "Billboard: Date shakes ahead at Hadley's. Yes, a milkshake made of dates. Trust the desert. It knows what it is doing.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Calimesa",
@@ -39931,6 +40491,16 @@
             "spoken": "Entering Snowflake"
           },
           {
+            "name": "Wigwam Motel (from Show Low)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.0,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Little Colorado River",
             "category": "river",
             "kind": "point",
@@ -41910,6 +42480,16 @@
         ],
         "landmarks": [
           {
+            "name": "Mission San Xavier del Bac (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "Billboard: Mission San Xavier del Bac, ahead. Built between seventeen eighty-three and seventeen ninety-seven, the White Dove of the Desert still serves its parish.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Santa Cruz River",
             "category": "river",
             "kind": "point",
@@ -41926,6 +42506,16 @@
             "spoken": "Passing Pascua Pueblo"
           },
           {
+            "name": "Mission San Xavier del Bac (from Nogales)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.0,
+            "spoken": "Billboard: Mission San Xavier del Bac, ahead. Built between seventeen eighty-three and seventeen ninety-seven, the White Dove of the Desert still serves its parish.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Sahuarita",
             "at_mi": 19.19,
             "off_mi": 1.88,
@@ -41933,6 +42523,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150963861, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sahuarita"
+          },
+          {
+            "name": "Titan Missile Museum (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.9,
+            "spoken": "Billboard: The Titan Missile Museum, next exit at Sahuarita. An inert Titan Two stands in its silo, with a hole cut in the nose to prove it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Titan Missile Museum (from Nogales)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.9,
+            "spoken": "Billboard: The Titan Missile Museum, next exit at Sahuarita. An inert Titan Two stands in its silo, with a hole cut in the nose to prove it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Green Valley",
@@ -43380,6 +43990,26 @@
             "spoken": "Passing Pascua Pueblo"
           },
           {
+            "name": "Pima Air and Space Museum (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pima Air and Space Museum (from Sierra Vista)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.8,
+            "spoken": "Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Vail",
             "at_mi": 21.06,
             "off_mi": 1.45,
@@ -43396,6 +44026,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150934158, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Corona de Tucson"
+          },
+          {
+            "name": "Kartchner Caverns (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.0,
+            "spoken": "Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Benson",
@@ -43426,6 +44066,16 @@
             "kind": "point",
             "at_mi": 51.57,
             "spoken": "Approaching Lone Pine Saddle"
+          },
+          {
+            "name": "Kartchner Caverns (from Sierra Vista)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.7,
+            "spoken": "Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Whetstone",
@@ -44187,6 +44837,16 @@
             "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.",
             "directions": [
               "forward"
+            ]
+          },
+          {
+            "name": "Jack Rabbit Trading Post (from Holbrook)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.9,
+            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.",
+            "directions": [
+              "reverse"
             ]
           },
           {
@@ -44980,6 +45640,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150967494, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Somerton"
+          },
+          {
+            "name": "Yuma Territorial Prison (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.9,
+            "spoken": "Billboard: Yuma Territorial Prison State Historic Park, ahead. More than three thousand inmates from eighteen seventy-six to nineteen oh-nine. Then the high school moved in.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Telegraph Pass",

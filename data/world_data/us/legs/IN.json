@@ -1677,6 +1677,16 @@
             "spoken": "Passing Chandler"
           },
           {
+            "name": "LST three twenty-five (from Bloomington)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 110.0,
+            "spoken": "Billboard: The landing ship L S T three twenty-five, ahead in Evansville, the last from World War Two that still sails. Most museums just sit there.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Newburgh",
             "at_mi": 112.9,
             "off_mi": 3.48,
@@ -2612,6 +2622,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153710150, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Prince's Lakes"
+          },
+          {
+            "name": "Columbus Architecture (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.9,
+            "spoken": "Billboard: Columbus, Indiana, ahead. Famous architects designed its churches, its library and even a firehouse. Only five big cities rank higher for architecture.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hope",
@@ -3721,6 +3741,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153573326, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Osceola"
+          },
+          {
+            "name": "Studebaker Museum (from Elkhart)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.4,
+            "spoken": "Billboard: The Studebaker National Museum, ahead in South Bend. The family built covered wagons here, then cars and trucks for over a hundred years. The wagons got better mileage.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Mishawaka Sports Museum",
@@ -5683,6 +5713,16 @@
             "spoken": "Passing Newburgh"
           },
           {
+            "name": "LST three twenty-five (from Louisville)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The landing ship L S T three twenty-five, ahead in Evansville, the last from World War Two that still sails. Most museums just sit there.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Chandler",
             "at_mi": 10.4,
             "off_mi": 5.73,
@@ -5728,6 +5768,16 @@
             "spoken": "Passing Holland"
           },
           {
+            "name": "Lincoln Boyhood Memorial (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.5,
+            "spoken": "Billboard: The Lincoln Boyhood National Memorial, next exit, then south. He grew up here from seven to twenty-one, and his mother rests on the hill.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Dale",
             "at_mi": 47.1,
             "off_mi": 1.78,
@@ -5737,6 +5787,16 @@
             "spoken": "Passing Dale"
           },
           {
+            "name": "Lincoln Boyhood Memorial (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.4,
+            "spoken": "Billboard: The Lincoln Boyhood National Memorial, next exit, then south. He grew up here from seven to twenty-one, and his mother rests on the hill.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Santa Claus",
             "at_mi": 49.3,
             "off_mi": 5.48,
@@ -5744,6 +5804,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 9261321874, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Santa Claus"
+          },
+          {
+            "name": "Santa Claus, Indiana (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.2,
+            "spoken": "Billboard: Santa Claus, Indiana, next exit. Townspeople have answered letters to Santa since nineteen fourteen. His post office box is number one.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Santa Claus, Indiana (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.4,
+            "spoken": "Billboard: Santa Claus, Indiana, next exit. Townspeople have answered letters to Santa since nineteen fourteen. His post office box is number one.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Saint Croix",
@@ -10070,6 +10150,16 @@
             "spoken": "Crossing the St. Mary's River"
           },
           {
+            "name": "Auburn Cord Duesenberg Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.3,
+            "spoken": "Billboard: The Auburn Cord Duesenberg Museum, next exit. Classic cars in the company's art deco showroom, and a truck museum next door. Your rig can meet its ancestors.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Garrett",
             "at_mi": 20.7,
             "off_mi": 2.48,
@@ -10086,6 +10176,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153797641, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Altona"
+          },
+          {
+            "name": "Auburn Cord Duesenberg Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.5,
+            "spoken": "Billboard: The Auburn Cord Duesenberg Museum, next exit. Classic cars in the company's art deco showroom, and a truck museum next door. Your rig can meet its ancestors.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Waterloo",
@@ -10323,6 +10423,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154328919, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dimondale"
+          },
+          {
+            "name": "Olds Museum (from Fort Wayne)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 123.6,
+            "spoken": "Billboard: The R E Olds Transportation Museum, ahead in Lansing, home of the R E O Speed Wagon. A rock band took the truck's name. The truck kept working.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Grand Ledge",
@@ -13802,6 +13912,26 @@
             "spoken": "Crossing the Kankakee River"
           },
           {
+            "name": "Fair Oaks Farms (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.6,
+            "spoken": "Billboard: Fair Oaks Farms, next exit. Watch a calf being born, then watch the cows get milked on a giant merry-go-round. The ice cream comes from them too.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Fair Oaks Farms (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.8,
+            "spoken": "Billboard: Fair Oaks Farms, next exit. Watch a calf being born, then watch the cows get milked on a giant merry-go-round. The ice cream comes from them too.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mount Ayr",
             "at_mi": 44.9,
             "off_mi": 3.06,
@@ -15016,6 +15146,16 @@
             "spoken": "Passing Burns Harbor"
           },
           {
+            "name": "Indiana Dunes (Toll Road eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.9,
+            "spoken": "Billboard: Indiana Dunes National Park, next exit. Dunes almost two hundred feet tall on Lake Michigan, where the sand sings under your feet. It knows one note.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Dune Acres",
             "at_mi": 16.0,
             "off_mi": 4.84,
@@ -15041,6 +15181,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153742114, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Chesterton"
+          },
+          {
+            "name": "Indiana Dunes (Toll Road westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.1,
+            "spoken": "Billboard: Indiana Dunes National Park, next exit. Dunes almost two hundred feet tall on Lake Michigan, where the sand sings under your feet. It knows one note.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Town of Pines",
@@ -15167,6 +15317,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153645846, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Buchanan"
+          },
+          {
+            "name": "Studebaker Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.6,
+            "spoken": "Billboard: The Studebaker National Museum, ahead in South Bend. The family built covered wagons here, then cars and trucks for over a hundred years. The wagons got better mileage.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Bertrand",
@@ -20988,6 +21148,16 @@
             "spoken": "Passing Sharpsville"
           },
           {
+            "name": "Old Ben (from Indianapolis)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.0,
+            "spoken": "Billboard: Kokomo, ahead. Old Ben, a steer who weighed over two tons, stands stuffed in Highland Park beside a giant sycamore stump. Neither one has moved since.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Russiaville",
             "at_mi": 53.65,
             "off_mi": 7.58,
@@ -24997,6 +25167,16 @@
             "spoken": "Passing Edinburgh"
           },
           {
+            "name": "Columbus Architecture (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.0,
+            "spoken": "Billboard: Columbus, Indiana, ahead. Famous architects designed its churches, its library and even a firehouse. Only five big cities rank higher for architecture.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Taylorsville",
             "at_mi": 37.6,
             "off_mi": 0.84,
@@ -25025,6 +25205,16 @@
             "kind": "point",
             "at_mi": 43.2,
             "spoken": "Crossing the East Fork White River"
+          },
+          {
+            "name": "Columbus Architecture (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.5,
+            "spoken": "Billboard: Columbus, Indiana, next exit. Famous architects designed its churches, its library and even a firehouse. Only five big cities rank higher for architecture.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Jonesville",
@@ -25084,6 +25274,36 @@
             "kind": "point",
             "at_mi": 101.0,
             "spoken": "Crossing the Ohio River"
+          },
+          {
+            "name": "Falls of the Ohio (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 109.4,
+            "spoken": "Billboard: Falls of the Ohio State Park, next exit. Walk on a fossil reef three hundred ninety million years old. The dinosaurs came later and never saw it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Kentucky Derby Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 116.0,
+            "spoken": "Billboard: The Kentucky Derby Museum, ahead at Churchill Downs. Tour the track where the Derby has run every year since eighteen seventy-five. Your truck is not eligible.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Kentucky Derby Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 117.2,
+            "spoken": "Billboard: The Kentucky Derby Museum, ahead at Churchill Downs. Tour the track where the Derby has run every year since eighteen seventy-five. Your truck is not eligible.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lynnview",
@@ -25174,6 +25394,26 @@
             "spoken": "Passing Shepherdsville"
           },
           {
+            "name": "Bernheim Forest (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 136.1,
+            "spoken": "Billboard: Bernheim Forest, next exit in Clermont. A whiskey maker gave sixteen thousand acres of woods to Kentucky in nineteen twenty-nine. Forty miles of trails, no tasting required.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Bernheim Forest (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 139.3,
+            "spoken": "Billboard: Bernheim Forest, next exit in Clermont. A whiskey maker gave sixteen thousand acres of woods to Kentucky in nineteen twenty-nine. Forty miles of trails, no tasting required.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lebanon Junction",
             "at_mi": 144.3,
             "off_mi": 0.74,
@@ -25181,6 +25421,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153705633, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lebanon Junction"
+          },
+          {
+            "name": "Lincoln Birthplace (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 151.5,
+            "spoken": "Billboard: Abraham Lincoln's birthplace, ahead near Hodgenville. Fifty-six steps lead up to the memorial, one for each year of his life.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Nolin River",
@@ -25197,6 +25447,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153597739, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Sonora"
+          },
+          {
+            "name": "Lincoln Birthplace (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 172.8,
+            "spoken": "Billboard: Abraham Lincoln's birthplace, ahead near Hodgenville. Fifty-six steps lead up to the memorial, one for each year of his life.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bonnieville",
@@ -25217,6 +25477,36 @@
             "spoken": "Passing Munfordville"
           },
           {
+            "name": "Mammoth Cave (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 188.5,
+            "spoken": "Billboard: Mammoth Cave National Park, ahead. Four hundred twenty-six miles of mapped passages, the longest known cave in the world, and the map is not finished.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Dinosaur World (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 196.1,
+            "spoken": "Billboard: Dinosaur World, next exit in Cave City. Hundreds of life-size dinosaurs stand in the woods out here. None of them has chased a truck yet.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Dinosaur World (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 199.3,
+            "spoken": "Billboard: Dinosaur World, next exit in Cave City. Hundreds of life-size dinosaurs stand in the woods out here. None of them has chased a truck yet.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Park City",
             "at_mi": 201.8,
             "off_mi": 0.52,
@@ -25224,6 +25514,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153352394, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Park City"
+          },
+          {
+            "name": "Mammoth Cave (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 207.0,
+            "spoken": "Billboard: Mammoth Cave National Park, ahead. Four hundred twenty-six miles of mapped passages, the longest known cave in the world, and the map is not finished.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Oakland",
@@ -25242,6 +25542,16 @@
             "spoken": "Crossing the Barren River"
           },
           {
+            "name": "The Corvette Sinkhole (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 218.3,
+            "spoken": "Billboard: Bowling Green is home to the Corvette. A sinkhole once opened under the museum floor and swallowed eight of them whole. They filled most of it in, but kept a window so you can still look down.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Plum Springs",
             "at_mi": 221.2,
             "off_mi": 1.1,
@@ -25249,6 +25559,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153512635, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Plum Springs"
+          },
+          {
+            "name": "The Corvette Sinkhole (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 227.6,
+            "spoken": "Billboard: Bowling Green is home to the Corvette. A sinkhole once opened under the museum floor and swallowed eight of them whole. They filled most of it in, but kept a window so you can still look down.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mitchellville",
@@ -26785,6 +27105,16 @@
             "spoken": "Passing Wilkinson"
           },
           {
+            "name": "Hoosier Gym (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.0,
+            "spoken": "Billboard: The Hoosier Gym, next exit in Knightstown, home court in the movie Hoosiers. Walk in free and shoot a few free throws.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Knightstown",
             "at_mi": 35.64,
             "off_mi": 3.38,
@@ -26792,6 +27122,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153717538, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Knightstown"
+          },
+          {
+            "name": "Hoosier Gym (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.2,
+            "spoken": "Billboard: The Hoosier Gym, next exit in Knightstown, home court in the movie Hoosiers. Walk in free and shoot a few free throws.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kennard",
@@ -28813,6 +29153,16 @@
             "spoken": "Passing Kempton"
           },
           {
+            "name": "Old Ben (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.3,
+            "spoken": "Billboard: Kokomo, ahead. Old Ben, a steer who weighed over two tons, stands stuffed in Highland Park beside a giant sycamore stump. Neither one has moved since.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sharpsville",
             "at_mi": 51.2,
             "off_mi": 2.03,
@@ -28829,6 +29179,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153430753, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Center"
+          },
+          {
+            "name": "Old Ben (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.3,
+            "spoken": "Billboard: Kokomo, ahead. Old Ben, a steer who weighed over two tons, stands stuffed in Highland Park beside a giant sycamore stump. Neither one has moved since.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Galveston",
@@ -28969,6 +29329,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153691059, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lakeville"
+          },
+          {
+            "name": "Studebaker Museum (from Indianapolis)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 139.0,
+            "spoken": "Billboard: The Studebaker National Museum, ahead in South Bend. The family built covered wagons here, then cars and trucks for over a hundred years. The wagons got better mileage.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -32323,6 +32693,16 @@
             "spoken": "Passing Speedway"
           },
           {
+            "name": "Speedway Museum (from St. Louis)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.0,
+            "spoken": "Billboard: The Indianapolis Motor Speedway Museum, ahead. Thirty winning race cars and a trophy with every winner's face on it. They left room for more.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Plainfield",
             "at_mi": 15.0,
             "off_mi": 2.89,
@@ -32640,6 +33020,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151393125, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Caseyville"
+          },
+          {
+            "name": "Cahokia Mounds (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 232.6,
+            "spoken": "Billboard: Cahokia Mounds, next exit. A thousand years ago a city bigger than London stood here, and its great mound rose one basket of earth at a time.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Cahokia Mounds (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 235.5,
+            "spoken": "Billboard: Cahokia Mounds, next exit. A thousand years ago a city bigger than London stood here, and its great mound rose one basket of earth at a time.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Washington Park",
@@ -34044,6 +34444,16 @@
             "spoken": "Crossing the White River"
           },
           {
+            "name": "Speedway Museum (from Terre Haute)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.0,
+            "spoken": "Billboard: The Indianapolis Motor Speedway Museum, ahead. Thirty winning race cars and a trophy with every winner's face on it. They left room for more.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Avon",
             "at_mi": 13.1,
             "off_mi": 6.51,
@@ -35361,6 +35771,16 @@
             "spoken": "Passing Russiaville"
           },
           {
+            "name": "Old Ben (from Lafayette)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Kokomo, ahead. Old Ben, a steer who weighed over two tons, stands stuffed in Highland Park beside a giant sycamore stump. Neither one has moved since.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Forest",
             "at_mi": 10.48,
             "off_mi": 7.97,
@@ -36593,6 +37013,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153722348, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Zionsville"
+          },
+          {
+            "name": "Speedway Museum (from Lafayette)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.7,
+            "spoken": "Billboard: The Indianapolis Motor Speedway Museum, ahead. Thirty winning race cars and a trophy with every winner's face on it. They left room for more.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Brownsburg",
@@ -41910,6 +42340,16 @@
             "spoken": "Passing Bertrand"
           },
           {
+            "name": "Studebaker Museum (from Chicago)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.6,
+            "spoken": "Billboard: The Studebaker National Museum, ahead in South Bend. The family built covered wagons here, then cars and trucks for over a hundred years. The wagons got better mileage.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Buchanan",
             "at_mi": 11.3,
             "off_mi": 6.04,
@@ -42000,6 +42440,16 @@
             "spoken": "Passing Westville"
           },
           {
+            "name": "Indiana Dunes (Toll Road westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.7,
+            "spoken": "Billboard: Indiana Dunes National Park, next exit. Dunes almost two hundred feet tall on Lake Michigan, where the sand sings under your feet. It knows one note.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Chesterton",
             "at_mi": 49.8,
             "off_mi": 2.38,
@@ -42025,6 +42475,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153636883, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dune Acres"
+          },
+          {
+            "name": "Indiana Dunes (Toll Road eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.9,
+            "spoken": "Billboard: Indiana Dunes National Park, next exit. Dunes almost two hundred feet tall on Lake Michigan, where the sand sings under your feet. It knows one note.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Burns Harbor",
@@ -45632,6 +46092,16 @@
             "spoken": "Passing Olive"
           },
           {
+            "name": "Studebaker Museum (from Grand Rapids)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: The Studebaker National Museum, ahead in South Bend. The family built covered wagons here, then cars and trucks for over a hundred years. The wagons got better mileage.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Bertrand",
             "at_mi": 11.2,
             "off_mi": 2.89,
@@ -45920,6 +46390,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153631246, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hudsonville"
+          },
+          {
+            "name": "Ford Presidential Museum (from South Bend)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 104.8,
+            "spoken": "Billboard: The Gerald Ford Presidential Museum, ahead in Grand Rapids. He was vice president and president without winning an election for either. The interview went well.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Grandville",
@@ -46646,11 +47126,31 @@
             "spoken": "Passing Westfield"
           },
           {
+            "name": "World's Largest Rocking Chair (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.8,
+            "spoken": "Billboard: World's largest rocking chair. You may not sit in it. Next exit.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "World's Largest Rocking Chair (eastbound)",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 37.0,
             "spoken": "Billboard: World's largest rocking chair. You may not sit in it. Next exit.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Big Things in a Small Town (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.0,
+            "spoken": "Billboard: Casey is ahead, a tiny town that decided to build the world's largest things. Its main street holds the largest wind chime, rocking chair, mailbox, golf tee, and wooden shoes, because one record was not enough.",
             "directions": [
               "reverse"
             ]
@@ -47960,6 +48460,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153539769, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mackey"
+          },
+          {
+            "name": "LST three twenty-five (from Vincennes)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.0,
+            "spoken": "Billboard: The landing ship L S T three twenty-five, ahead in Evansville, the last from World War Two that still sails. Most museums just sit there.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Armstrong",

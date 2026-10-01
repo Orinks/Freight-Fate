@@ -292,6 +292,16 @@
             "spoken": "Passing Coahoma"
           },
           {
+            "name": "The Delta Blues Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.4,
+            "spoken": "Billboard: The Delta Blues Museum, ahead in Clarksdale. The old depot holds the cabin Muddy Waters reportedly lived in. The blues never needed much room.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Big Sunflower River",
             "category": "river",
             "kind": "point",
@@ -1178,6 +1188,16 @@
             "spoken": "Passing Alligator"
           },
           {
+            "name": "The Delta Blues Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Delta Blues Museum, ahead in Clarksdale. The old depot holds the cabin Muddy Waters reportedly lived in. The blues never needed much room.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Tutwiler",
             "at_mi": 15.58,
             "off_mi": 0.24,
@@ -1766,6 +1786,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151409056, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Jonestown"
+          },
+          {
+            "name": "The Delta Blues Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.6,
+            "spoken": "Billboard: The Delta Blues Museum, ahead in Clarksdale. The old depot holds the cabin Muddy Waters reportedly lived in. The blues never needed much room.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Friars Point",
@@ -2819,6 +2849,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153492079, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing New Hamilton"
+          },
+          {
+            "name": "Waverley Mansion (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.7,
+            "spoken": "Billboard: Waverley Mansion is ahead. This antebellum house has a soaring octagonal cupola and was lost to the woods for fifty years before being found again.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "The Prairie",
@@ -3970,6 +4010,16 @@
             "spoken": "Passing Carrollton"
           },
           {
+            "name": "The Paul W. Bryant Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.0,
+            "spoken": "Billboard: The Paul W. Bryant Museum, ahead in Tuscaloosa. Alabama football history, and a houndstooth hat made of Waterford crystal. Nobody has ever worn it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sipsey River",
             "category": "river",
             "kind": "point",
@@ -4922,6 +4972,16 @@
             "spoken": "Entering Leland"
           },
           {
+            "name": "The B B King Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.1,
+            "spoken": "Billboard: The B B King Museum, ahead in Indianola. It stands in the cotton gin where he worked in the nineteen forties. He called every guitar Lucille.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Shaw",
             "at_mi": 20.89,
             "off_mi": 11.37,
@@ -4979,6 +5039,16 @@
             "kind": "point",
             "at_mi": 36.14,
             "spoken": "Crossing the Quiver River"
+          },
+          {
+            "name": "The B B King Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.4,
+            "spoken": "Billboard: The B B King Museum, ahead in Indianola. It stands in the cotton gin where he worked in the nineteen forties. He called every guitar Lucille.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Morgan City",
@@ -6846,6 +6916,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151740360, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Cary"
+          },
+          {
+            "name": "Vicksburg National Military Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.1,
+            "spoken": "Billboard: Vicksburg National Military Park, ahead. A sixteen-mile road around the siege lines of eighteen sixty-three, and a Union gunboat raised from the river.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Yazoo River",
@@ -13037,6 +13117,16 @@
             "spoken": "Passing Gautier"
           },
           {
+            "name": "The Shed Barbecue (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.2,
+            "spoken": "Billboard: The Shed Barbecue is ahead. It offers smoke, sauce, blues, and a building assembled from whatever did not run away fast enough.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Escatawpa",
             "at_mi": 38.4,
             "off_mi": 0.09,
@@ -13071,6 +13161,16 @@
             "spoken": "Passing Bayou La Batre"
           },
           {
+            "name": "Bellingrath Gardens (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.5,
+            "spoken": "Billboard: Bellingrath Gardens, next exit, south on the Fowl River. A Coca-Cola bottler's sixty-five acres and a quarter million azaleas. Worth the detour.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Belle Fontaine",
             "at_mi": 63.4,
             "off_mi": 7.22,
@@ -13085,6 +13185,16 @@
             "kind": "point",
             "at_mi": 65.6,
             "spoken": "Crossing the Fowl River"
+          },
+          {
+            "name": "Bellingrath Gardens (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 73.0,
+            "spoken": "Billboard: Bellingrath Gardens, ahead, south of Theodore. A Coca-Cola bottler's sixty-five acres and a quarter million azaleas. Worth the detour.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Daphne",
@@ -14796,6 +14906,16 @@
             "spoken": "Crossing the Pearl River"
           },
           {
+            "name": "The Infinity Science Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.9,
+            "spoken": "Billboard: The Infinity Science Center, next exit, at the welcome center. NASA tests its biggest rocket engines just up the road. Yours is quieter.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pearlington",
             "at_mi": 38.7,
             "off_mi": 4.09,
@@ -14810,6 +14930,16 @@
             "kind": "zone",
             "at_mi": 39.0,
             "spoken": "Entering Pearl River State Wildlife Management Area"
+          },
+          {
+            "name": "The Infinity Science Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.4,
+            "spoken": "Billboard: The Infinity Science Center, ahead at the welcome center. NASA tests its biggest rocket engines just up the road. Yours is quieter.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Middle River",
@@ -29194,6 +29324,16 @@
             "spoken": "Crossing the Black Warrior River"
           },
           {
+            "name": "The Paul W. Bryant Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 176.0,
+            "spoken": "Billboard: The Paul W. Bryant Museum, ahead in Tuscaloosa. Alabama football history, and a houndstooth hat made of Waterford crystal. Nobody has ever worn it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Cottondale",
             "at_mi": 182.8,
             "off_mi": 5.91,
@@ -30296,6 +30436,16 @@
             "spoken": "Passing Heidelberg"
           },
           {
+            "name": "Laurel (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.3,
+            "spoken": "Billboard: Laurel, ahead, the town from the television show Home Town. Downtown is real, and so is Mississippi's oldest art museum. Somebody even fixed the sign.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sandersville",
             "at_mi": 48.5,
             "off_mi": 1.35,
@@ -30328,6 +30478,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153745510, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ellisville"
+          },
+          {
+            "name": "Laurel (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.1,
+            "spoken": "Billboard: Laurel, ahead, the town from the television show Home Town. Downtown is real, and so is Mississippi's oldest art museum. Somebody even fixed the sign.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Seminary",
@@ -32887,6 +33047,16 @@
             ]
           },
           {
+            "name": "The Birthplace of the Blues Marker (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 71.0,
+            "spoken": "Billboard: You are in Mississippi music country, where blues, gospel, country, and rock and roll traded notes along roads like this before anyone argued over who invented what.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Crawford",
             "at_mi": 73.4,
             "off_mi": 0.33,
@@ -34206,6 +34376,16 @@
             "kind": "point",
             "at_mi": 83.9,
             "spoken": "Crossing the Black Warrior River"
+          },
+          {
+            "name": "The Paul W. Bryant Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 86.1,
+            "spoken": "Billboard: The Paul W. Bryant Museum, ahead in Tuscaloosa. Alabama football history, and a houndstooth hat made of Waterford crystal. Nobody has ever worn it.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cottondale",
@@ -35890,6 +36070,16 @@
             "spoken": "Passing Ferriday"
           },
           {
+            "name": "Natchez (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.7,
+            "spoken": "Billboard: Natchez, ahead, founded in seventeen sixteen. That is two years before New Orleans, and Natchez will mention it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Homochitto River",
             "category": "river",
             "kind": "point",
@@ -37277,6 +37467,16 @@
             "spoken": "Passing Ferriday"
           },
           {
+            "name": "Natchez (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Natchez, ahead, founded in seventeen sixteen. That is two years before New Orleans, and Natchez will mention it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Roxie",
             "at_mi": 17.8,
             "off_mi": 10.91,
@@ -37298,6 +37498,16 @@
             "kind": "point",
             "at_mi": 47.3,
             "spoken": "Crossing the Big Black River"
+          },
+          {
+            "name": "Vicksburg National Military Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.0,
+            "spoken": "Billboard: Vicksburg National Military Park, ahead. A sixteen-mile road around the siege lines of eighteen sixty-three, and a Union gunboat raised from the river.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "state_miles": [
@@ -38091,6 +38301,16 @@
             "spoken": "Passing Taylor"
           },
           {
+            "name": "Rowan Oak (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Rowan Oak, ahead in Oxford, William Faulkner's home. He wrote the outline of a novel on his office wall. Guests are asked to use paper.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Sardis",
             "at_mi": 20.3,
             "off_mi": 8.7,
@@ -38177,6 +38397,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151345529, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lambert"
+          },
+          {
+            "name": "The Delta Blues Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.0,
+            "spoken": "Billboard: The Delta Blues Museum, ahead in Clarksdale. The old depot holds the cabin Muddy Waters reportedly lived in. The blues never needed much room.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Jonestown",
@@ -39241,6 +39471,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153752234, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Abbeville"
+          },
+          {
+            "name": "Rowan Oak (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.2,
+            "spoken": "Billboard: Rowan Oak, ahead in Oxford, William Faulkner's home. He wrote the outline of a novel on his office wall. Guests are asked to use paper.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Potts Camp",
@@ -40338,6 +40578,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153539821, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Taylor"
+          },
+          {
+            "name": "Rowan Oak (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Rowan Oak, ahead in Oxford, William Faulkner's home. He wrote the outline of a novel on his office wall. Guests are asked to use paper.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Toccopola",
@@ -43009,6 +43259,16 @@
             "kind": "point",
             "at_mi": 0.8,
             "spoken": "USS Cairo Museum ahead"
+          },
+          {
+            "name": "Vicksburg National Military Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.2,
+            "spoken": "Billboard: Vicksburg National Military Park, next exit. A sixteen-mile road around the siege lines of eighteen sixty-three, and a Union gunboat raised from the river.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bolton",

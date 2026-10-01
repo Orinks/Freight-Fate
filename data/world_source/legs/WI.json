@@ -14632,6 +14632,26 @@
             "spoken": "Passing Chesterton"
           },
           {
+            "name": "Indiana Dunes (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 253.5,
+            "spoken": "Billboard: Indiana Dunes National Park, next exit. Dunes almost two hundred feet tall on Lake Michigan, where the sand sings under your feet. It knows one note.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Indiana Dunes (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 256.3,
+            "spoken": "Billboard: Indiana Dunes National Park, next exit. Dunes almost two hundred feet tall on Lake Michigan, where the sand sings under your feet. It knows one note.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Bridgman",
             "at_mi": 288.2,
             "off_mi": 0.47,
@@ -14675,6 +14695,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153603369, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Saugatuck"
+          },
+          {
+            "name": "Ford Presidential Museum (from Green Bay)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 371.4,
+            "spoken": "Billboard: The Gerald Ford Presidential Museum, ahead in Grand Rapids. He was vice president and president without winning an election for either. The interview went well.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Grandville",
@@ -38035,6 +38065,16 @@
             "kind": "point",
             "at_mi": 85.1,
             "spoken": "Crossing the Rock River"
+          },
+          {
+            "name": "Burpee Museum (from Milwaukee)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 88.0,
+            "spoken": "Billboard: The Burpee Museum, ahead in Rockford, home of Jane, a tyrannosaur dug out of Montana. Scientists still debate what kind she is. Everyone agrees on the teeth.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Machesney Park",

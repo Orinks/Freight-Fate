@@ -3559,6 +3559,16 @@
             ]
           },
           {
+            "name": "The Crayola Experience (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.1,
+            "spoken": "Billboard: The Crayola Experience, ahead in Easton. Twenty-five rooms of crayons, and you can melt one into a new shape. Coloring outside the lines is encouraged.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Bloomsbury",
             "at_mi": 52.3,
             "off_mi": 0.64,
@@ -3650,6 +3660,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158630741, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lower Saucon"
+          },
+          {
+            "name": "The Crayola Experience (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.3,
+            "spoken": "Billboard: The Crayola Experience, ahead in Easton. Twenty-five rooms of crayons, and you can melt one into a new shape. Coloring outside the lines is encouraged.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Freemansburg",

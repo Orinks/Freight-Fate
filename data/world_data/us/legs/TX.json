@@ -7708,11 +7708,41 @@
             "spoken": "Entering Bard"
           },
           {
+            "name": "Tucumcari Tonite (from Amarillo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 104.1,
+            "spoken": "Billboard: Stay in Tucumcari tonight, with a mile of motel neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Tucumcari Tonite (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 122.1,
+            "spoken": "Billboard: Stay in Tucumcari tonight, with a mile of motel neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Pecos River",
             "category": "river",
             "kind": "point",
             "at_mi": 159.4,
             "spoken": "Crossing the Pecos River"
+          },
+          {
+            "name": "The Blue Hole (from Amarillo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 161.7,
+            "spoken": "Billboard: The Blue Hole, ahead in Santa Rosa. A desert spring over eighty feet deep, sixty-two degrees year round. Divers love it; toes are less sure.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Santa Rosa",
@@ -7722,6 +7752,46 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151904883, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Santa Rosa"
+          },
+          {
+            "name": "The Blue Hole (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 179.1,
+            "spoken": "Billboard: The Blue Hole, ahead in Santa Rosa. A desert spring over eighty feet deep, sixty-two degrees year round. Divers love it; toes are less sure.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Cline's Corners (from Amarillo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 218.1,
+            "spoken": "Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Cline's Corners (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 236.1,
+            "spoken": "Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Sandia Peak Tramway (from Amarillo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 266.7,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cedar Crest",
@@ -7740,6 +7810,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 5526587023, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Tijeras"
+          },
+          {
+            "name": "Sandia Peak Tramway (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 284.5,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pueblo of Sandia Village",
@@ -64325,11 +64405,71 @@
             "spoken": "Entering San Jon"
           },
           {
+            "name": "Tucumcari Tonite (from Dallas)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 464.8,
+            "spoken": "Billboard: Stay in Tucumcari tonight, with a mile of motel neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Tucumcari Tonite (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 482.8,
+            "spoken": "Billboard: Stay in Tucumcari tonight, with a mile of motel neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Blue Hole (from Dallas)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 520.9,
+            "spoken": "Billboard: The Blue Hole, ahead in Santa Rosa. A desert spring over eighty feet deep, sixty-two degrees year round. Divers love it; toes are less sure.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Blue Hole (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 538.9,
+            "spoken": "Billboard: The Blue Hole, ahead in Santa Rosa. A desert spring over eighty feet deep, sixty-two degrees year round. Divers love it; toes are less sure.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Pecos River",
             "category": "river",
             "kind": "point",
             "at_mi": 544.1,
             "spoken": "Crossing the Pecos River"
+          },
+          {
+            "name": "Cline's Corners (from Dallas)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 577.1,
+            "spoken": "Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Cline's Corners (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 595.1,
+            "spoken": "Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Moriarty",
@@ -64357,6 +64497,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 5526587023, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Tijeras"
+          },
+          {
+            "name": "Sandia Peak Tramway (from Dallas)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 631.0,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Sandia Peak Tramway (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 642.5,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Los Ranchos de Albuquerque",
@@ -77092,6 +77252,26 @@
             "spoken": "Entering Halltown"
           },
           {
+            "name": "Gay Parita (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 472.2,
+            "spoken": "Billboard: Gay Parita is ahead near Paris Springs. This lovingly rebuilt nineteen-thirties filling station, green dinosaur and all, survives because some folks simply refuse to let the old road die.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Wonders of Wildlife (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 473.5,
+            "spoken": "Billboard: Wonders of Wildlife, ahead in Springfield, a wildlife museum and aquarium beside the Bass Pro Shops flagship. The fish in the tanks are just for looking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Route Sixty-Six Car Museum",
             "category": "billboard_sign",
             "kind": "point",
@@ -77099,6 +77279,26 @@
             "spoken": "Billboard: The Route Sixty-Six Car Museum is ahead near Springfield. It has chrome, fins, muscle, and enough polished paint to make your truck feel underdressed.",
             "directions": [
               "forward"
+            ]
+          },
+          {
+            "name": "Route Sixty-Six Car Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 487.5,
+            "spoken": "Billboard: The Route Sixty-Six Car Museum is ahead near Springfield. It has chrome, fins, muscle, and enough polished paint to make your truck feel underdressed.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Wonders of Wildlife (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 491.5,
+            "spoken": "Billboard: Wonders of Wildlife, ahead in Springfield, a wildlife museum and aquarium beside the Bass Pro Shops flagship. The fish in the tanks are just for looking.",
+            "directions": [
+              "reverse"
             ]
           },
           {
@@ -77130,6 +77330,16 @@
             ]
           },
           {
+            "name": "Munger Moss Motel (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 544.0,
+            "spoken": "Billboard: Lebanon is ahead, home of the Munger Moss Motel, a Route sixty-six classic. The town now keeps its house-sized neon sign.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Saint Robert",
             "at_mi": 567.51,
             "off_mi": 0.66,
@@ -77149,11 +77359,31 @@
             ]
           },
           {
+            "name": "The Best Fudge Comes From Uranus (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 570.7,
+            "spoken": "Billboard: Uranus, Missouri, is ahead, home to the Uranus Fudge Factory and a motto the whole family will regret reading aloud. The fudge, they swear, is excellent.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mark Twain National Forest",
             "category": "national_forest",
             "kind": "zone",
             "at_mi": 576.31,
             "spoken": "Entering Mark Twain National Forest"
+          },
+          {
+            "name": "Rolla Stonehenge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 582.6,
+            "spoken": "Billboard: Rolla, ahead. Missouri S and T built a half-size Stonehenge on campus in nineteen eighty-four, cutting the granite with water jets. The original took longer.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Doolittle",
@@ -77163,6 +77393,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151327943, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Doolittle"
+          },
+          {
+            "name": "Rolla Stonehenge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 598.6,
+            "spoken": "Billboard: Rolla, ahead. Missouri S and T built a half-size Stonehenge on campus in nineteen eighty-four, cutting the granite with water jets. The original took longer.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cuba",
@@ -77200,6 +77440,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151680217, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Oak Grove Village"
+          },
+          {
+            "name": "Meramec Caverns (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 640.9,
+            "spoken": "Billboard: Meramec Caverns is ahead, with five stories of underground rooms where Jesse James is said to have hidden. It has a gift shop now, because of course it does.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Saint Clair",
@@ -88026,6 +88276,36 @@
             "spoken": "Entering Rincon"
           },
           {
+            "name": "Hatch chile (from El Paso)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.1,
+            "spoken": "Billboard: Hatch, next exit, the chile capital of the world, by its own count. Its Labor Day festival draws thousands. Mild is a matter of opinion.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Hatch chile (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 83.5,
+            "spoken": "Billboard: Hatch, next exit, the chile capital of the world, by its own count. Its Labor Day festival draws thousands. Mild is a matter of opinion.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Truth or Consequences (from El Paso)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 109.3,
+            "spoken": "Billboard: Truth or Consequences, ahead. In nineteen fifty, Hot Springs renamed itself after a radio quiz show for one broadcast. The name stuck; the show moved on.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Geronimo Springs Museum",
             "category": "museum",
             "kind": "point",
@@ -88049,6 +88329,56 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151733987, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Elephant Butte"
+          },
+          {
+            "name": "Truth or Consequences (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 134.0,
+            "spoken": "Billboard: Truth or Consequences, ahead. In nineteen fifty, Hot Springs renamed itself after a radio quiz show for one broadcast. The name stuck; the show moved on.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Bosque del Apache (from El Paso)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 171.0,
+            "spoken": "Billboard: Bosque del Apache National Wildlife Refuge, ahead at San Antonio. Thousands of sandhill cranes winter here with the snow geese. They are louder than you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Very Large Array (from El Paso)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 180.7,
+            "spoken": "Billboard: West of Socorro, twenty-seven giant white dish antennas listen to the universe together across the Plains of San Agustin. You have seen them in the movies, aimed at the stars.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Bosque del Apache (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 186.0,
+            "spoken": "Billboard: Bosque del Apache National Wildlife Refuge, ahead at San Antonio. Thousands of sandhill cranes winter here with the snow geese. They are louder than you.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Very Large Array (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 197.7,
+            "spoken": "Billboard: West of Socorro, twenty-seven giant white dish antennas listen to the universe together across the Plains of San Agustin. You have seen them in the movies, aimed at the stars.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sevilleta National Wildlife Refuge",
@@ -91683,6 +92013,16 @@
             "spoken": "Passing San Miguel"
           },
           {
+            "name": "Mesilla (from El Paso)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.6,
+            "spoken": "Billboard: Mesilla, ahead by Las Cruces. The railroad bypassed it in eighteen eighty-one over land prices, which kept the old plaza old. Thank the haggling.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Butterfield Park",
             "at_mi": 40.8,
             "off_mi": 11.08,
@@ -91708,6 +92048,36 @@
             "spoken": "Billboard: What is it? The Thing? Mystery of the desert ahead. Two hundred miles to guess, and whatever you do, do not stop moving.",
             "directions": [
               "forward"
+            ]
+          },
+          {
+            "name": "Mesilla (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.6,
+            "spoken": "Billboard: Mesilla, ahead by Las Cruces. The railroad bypassed it in eighteen eighty-one over land prices, which kept the old plaza old. Thank the haggling.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Rockhound State Park (from El Paso)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 92.7,
+            "spoken": "Billboard: Rockhound State Park, ahead near Deming, the first park in the country to let you take the rocks home. Your suspension gets a vote.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Rockhound State Park (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 110.7,
+            "spoken": "Billboard: Rockhound State Park, ahead near Deming, the first park in the country to let you take the rocks home. Your suspension gets a vote.",
+            "directions": [
+              "reverse"
             ]
           },
           {
@@ -91737,6 +92107,26 @@
             "spoken": "Entering San Simon"
           },
           {
+            "name": "Rex Allen Museum (from El Paso)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 225.7,
+            "spoken": "Billboard: The Rex Allen Arizona Cowboy Museum, ahead in Willcox. He sang, rode Koko through nineteen Westerns, and narrated for Disney. Koko gets a memorial too.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Rex Allen Museum (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 243.7,
+            "spoken": "Billboard: The Rex Allen Arizona Cowboy Museum, ahead in Willcox. He sang, rode Koko through nineteen Westerns, and narrated for Disney. Koko gets a memorial too.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "The Thing (countdown, sign three)",
             "category": "billboard_sign",
             "kind": "point",
@@ -91764,11 +92154,31 @@
             ]
           },
           {
+            "name": "Kartchner Caverns (from El Paso)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 261.0,
+            "spoken": "Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "San Pedro River",
             "category": "river",
             "kind": "point",
             "at_mi": 274.2,
             "spoken": "Crossing the San Pedro River"
+          },
+          {
+            "name": "Kartchner Caverns (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 279.0,
+            "spoken": "Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Corona de Tucson",
@@ -91785,6 +92195,26 @@
             "kind": "point",
             "at_mi": 297.0,
             "spoken": "Billboard: What is The Thing? Forty-five miles to find out. The people who know are not telling.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Pima Air and Space Museum (from El Paso)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 297.0,
+            "spoken": "Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pima Air and Space Museum (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 312.0,
+            "spoken": "Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.",
             "directions": [
               "reverse"
             ]
@@ -103903,6 +104333,16 @@
             "spoken": "Passing Thackerville"
           },
           {
+            "name": "WinStar World Casino (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 82.1,
+            "spoken": "Billboard: WinStar World Casino, ahead at Thackerville, the biggest casino floor in the country, one exit before Texas. Leave the trailer keys in the truck.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Marietta",
             "at_mi": 86.1,
             "off_mi": 1.04,
@@ -103910,6 +104350,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151534230, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Marietta"
+          },
+          {
+            "name": "Turner Falls Park (from Fort Worth)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 110.5,
+            "spoken": "Billboard: Turner Falls Park, ahead near Davis, a seventy-seven-foot waterfall in the Arbuckle Mountains, and a stone castle a professor built for his summers.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Springer",
@@ -103935,6 +104385,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151376685, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Davis"
+          },
+          {
+            "name": "Turner Falls Park (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 129.3,
+            "spoken": "Billboard: Turner Falls Park, ahead near Davis, a seventy-seven-foot waterfall in the Arbuckle Mountains, and a stone castle a professor built for his summers.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wynnewood",
@@ -104055,6 +104515,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151826808, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Moore"
+          },
+          {
+            "name": "National Cowboy Museum (from Fort Worth)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 191.7,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Valley Brook",
@@ -187900,6 +188370,16 @@
             "kind": "point",
             "at_mi": 24.0,
             "spoken": "Crossing the Beaver River"
+          },
+          {
+            "name": "Boise City Bomb Memorial (from Stratford)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.0,
+            "spoken": "Billboard: Boise City, ahead. In nineteen forty-three a lost bomber crew dropped practice bombs on the town square. Nobody was hurt. The crew skipped the reunion.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -213722,6 +214202,16 @@
             "spoken": "Passing Walters"
           },
           {
+            "name": "Wichita Mountains Wildlife Refuge (from Wichita Falls)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.6,
+            "spoken": "Billboard: Wichita Mountains Wildlife Refuge, ahead near Lawton. The bison herd began with fifteen from the Bronx Zoo in nineteen oh-seven. None of them miss New York.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "U.S. Army Artillery Museum",
             "category": "museum",
             "kind": "point",
@@ -213745,6 +214235,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151516477, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Apache"
+          },
+          {
+            "name": "Wichita Mountains Wildlife Refuge (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.3,
+            "spoken": "Billboard: Wichita Mountains Wildlife Refuge, ahead near Lawton. The bison herd began with fifteen from the Bronx Zoo in nineteen oh-seven. None of them miss New York.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Fletcher",
@@ -213860,6 +214360,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151826808, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Moore"
+          },
+          {
+            "name": "National Cowboy Museum (from Wichita Falls)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 130.0,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Warr Acres",

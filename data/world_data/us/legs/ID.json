@@ -6139,6 +6139,26 @@
         ],
         "landmarks": [
           {
+            "name": "Warhawk Air Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.5,
+            "spoken": "Billboard: The Warhawk Air Museum, ahead in Nampa. Warhawks, Mustangs and Sabres, a hangar full of fighters. Any one of them could beat you home.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Old Idaho Penitentiary (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.1,
+            "spoken": "Billboard: The Old Idaho Penitentiary, ahead in Boise. A working prison for a hundred and one years, now a museum. Visitors leave the same day.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Boise River",
             "category": "river",
             "kind": "point",
@@ -6162,6 +6182,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150942540, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Middleton"
+          },
+          {
+            "name": "Warhawk Air Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.5,
+            "spoken": "Billboard: The Warhawk Air Museum, ahead in Nampa. Warhawks, Mustangs and Sabres, a hangar full of fighters. Any one of them could beat you home.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Snake River",
@@ -6194,11 +6224,31 @@
             "spoken": "Crossing the Burnt River"
           },
           {
+            "name": "Oregon Trail Interpretive Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 117.9,
+            "spoken": "Billboard: The Oregon Trail Interpretive Center, ahead at Baker City. Pioneers crossed two thousand miles of this by wagon. You have a heater.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Powder River",
             "category": "river",
             "kind": "point",
             "at_mi": 130.4,
             "spoken": "Crossing the Powder River"
+          },
+          {
+            "name": "Oregon Trail Interpretive Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 137.9,
+            "spoken": "Billboard: The Oregon Trail Interpretive Center, ahead at Baker City. Pioneers crossed two thousand miles of this by wagon. You have a heater.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Haines",
@@ -6233,6 +6283,26 @@
             "spoken": "Approaching Deadman Pass"
           },
           {
+            "name": "Pendleton (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 211.3,
+            "spoken": "Billboard: Pendleton is ahead, with a woolen mill since nineteen oh-nine and the Round-Up rodeo since nineteen ten. Blankets for you. Bulls for them.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pendleton (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 229.3,
+            "spoken": "Billboard: Pendleton is ahead, with a woolen mill since nineteen oh-nine and the Round-Up rodeo since nineteen ten. Blankets for you. Bulls for them.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Echo",
             "at_mi": 242.0,
             "off_mi": 1.33,
@@ -6260,6 +6330,16 @@
             "spoken": "Passing Roosevelt"
           },
           {
+            "name": "Maryhill Stonehenge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 316.7,
+            "spoken": "Billboard: Maryhill Stonehenge, ahead, across the river from Biggs. A full-size concrete copy built as a First World War memorial. It still catches the solstice sunrise.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Rufus",
             "at_mi": 321.7,
             "off_mi": 0.11,
@@ -6276,6 +6356,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150968228, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Maryhill"
+          },
+          {
+            "name": "Maryhill Stonehenge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 330.7,
+            "spoken": "Billboard: Maryhill Stonehenge, next exit, across the river from Biggs. A full-size concrete copy built as a First World War memorial. It still catches the solstice sunrise.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wishram",
@@ -11842,11 +11932,41 @@
         ],
         "landmarks": [
           {
+            "name": "Old Idaho Penitentiary (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.2,
+            "spoken": "Billboard: The Old Idaho Penitentiary, ahead in Boise. A working prison for a hundred and one years, now a museum. Visitors leave the same day.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Boise River",
             "category": "river",
             "kind": "point",
             "at_mi": 14.2,
             "spoken": "Crossing the Boise River"
+          },
+          {
+            "name": "World Center for Birds of Prey (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.5,
+            "spoken": "Billboard: The World Center for Birds of Prey, ahead at Boise. Live falcons, eagles and owls, from the people who saved the peregrine. Keep your sandwich covered.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Three Island Crossing (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.0,
+            "spoken": "Billboard: Three Island Crossing State Park, ahead at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Hammett",
@@ -11856,6 +11976,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150963420, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hammett"
+          },
+          {
+            "name": "Three Island Crossing (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.4,
+            "spoken": "Billboard: Three Island Crossing State Park, ahead at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Hagerman Fossil Beds (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.0,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Hagerman Fossil Beds (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 97.6,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Malad River",
@@ -11879,6 +12029,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150970161, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wendell"
+          },
+          {
+            "name": "Shoshone Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 117.3,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Shoshone Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 135.3,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Eden",
@@ -11974,6 +12144,16 @@
             "spoken": "Passing Bear River City"
           },
           {
+            "name": "Golden Spike (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 276.1,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Corinne",
             "at_mi": 279.3,
             "off_mi": 2.19,
@@ -12010,6 +12190,16 @@
             "spoken": "Passing Willard"
           },
           {
+            "name": "Golden Spike (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 292.9,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Pleasant View",
             "at_mi": 296.2,
             "off_mi": 1.95,
@@ -12042,6 +12232,16 @@
             "kind": "point",
             "at_mi": 300.2,
             "spoken": "Crossing the Ogden River"
+          },
+          {
+            "name": "Hill Aerospace Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 302.5,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "West Haven",
@@ -12087,6 +12287,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150932122, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Uintah"
+          },
+          {
+            "name": "Hill Aerospace Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 317.9,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kaysville",
@@ -13948,6 +14158,26 @@
             "spoken": "Passing Rathdrum"
           },
           {
+            "name": "The Floating Green (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.4,
+            "spoken": "Billboard: Coeur d'Alene has a golf green that floats on the lake, and a boat ferries you out to your ball. Miss the island and you feed the fish.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Cataldo Mission (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.4,
+            "spoken": "Billboard: The Cataldo Mission, ahead. The oldest building in Idaho, raised in the eighteen fifties without one nail. It has outlasted plenty that used them.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fourth of July Summit",
             "category": "mountain_pass",
             "kind": "point",
@@ -13967,6 +14197,16 @@
             "kind": "point",
             "at_mi": 22.4,
             "spoken": "Crossing the Coeur d'Alene River"
+          },
+          {
+            "name": "Cataldo Mission (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.0,
+            "spoken": "Billboard: The Cataldo Mission, next exit. The oldest building in Idaho, raised in the eighteen fifties without one nail. It has outlasted plenty that used them.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pinehurst",
@@ -14571,6 +14811,16 @@
             "spoken": "Passing Hauser"
           },
           {
+            "name": "Silverwood Theme Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.5,
+            "spoken": "Billboard: Silverwood Theme Park, ahead at Athol. The largest theme park in the Northwest, with two wooden roller coasters. They have more curves than this highway.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Rathdrum",
             "at_mi": 9.5,
             "off_mi": 5.06,
@@ -14596,6 +14846,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150978919, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bayview"
+          },
+          {
+            "name": "Silverwood Theme Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.5,
+            "spoken": "Billboard: Silverwood Theme Park, ahead at Athol. The largest theme park in the Northwest, with two wooden roller coasters. They have more curves than this highway.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sagle",
@@ -18649,6 +18909,16 @@
             "spoken": "Passing Firth"
           },
           {
+            "name": "Idaho Potato Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.4,
+            "spoken": "Billboard: The Idaho Potato Museum, ahead in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Groveland",
             "at_mi": 25.4,
             "off_mi": 1.16,
@@ -18665,6 +18935,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150947214, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Moreland"
+          },
+          {
+            "name": "Idaho Potato Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.7,
+            "spoken": "Billboard: The Idaho Potato Museum, next exit in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Riverside",
@@ -18789,6 +19069,16 @@
             "spoken": "Passing Eden"
           },
           {
+            "name": "Shoshone Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.3,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Hansen",
             "at_mi": 148.7,
             "off_mi": 3.19,
@@ -18816,6 +19106,16 @@
             "spoken": "Passing Filer"
           },
           {
+            "name": "Shoshone Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 161.5,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Jerome County Historical Museum",
             "category": "museum",
             "kind": "point",
@@ -18830,6 +19130,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150970161, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wendell"
+          },
+          {
+            "name": "Hagerman Fossil Beds (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 180.1,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Malad River",
@@ -18857,6 +19167,36 @@
             "spoken": "Passing Hagerman"
           },
           {
+            "name": "Hagerman Fossil Beds (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 199.2,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Three Island Crossing (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 208.0,
+            "spoken": "Billboard: Three Island Crossing State Park, next exit at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Three Island Crossing (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 211.0,
+            "spoken": "Billboard: Three Island Crossing State Park, next exit at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Hammett",
             "at_mi": 219.0,
             "off_mi": 0.9,
@@ -18871,6 +19211,26 @@
             "kind": "zone",
             "at_mi": 223.0,
             "spoken": "Entering Morley Nelson Snake River Birds of Prey National Conservation Area"
+          },
+          {
+            "name": "World Center for Birds of Prey (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 265.6,
+            "spoken": "Billboard: The World Center for Birds of Prey, ahead at Boise. Live falcons, eagles and owls, from the people who saved the peregrine. Keep your sandwich covered.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Old Idaho Penitentiary (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 267.9,
+            "spoken": "Billboard: The Old Idaho Penitentiary, ahead in Boise. A working prison for a hundred and one years, now a museum. Visitors leave the same day.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Robie Creek",
@@ -19461,6 +19821,16 @@
             "spoken": "Passing Firth"
           },
           {
+            "name": "Idaho Potato Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.4,
+            "spoken": "Billboard: The Idaho Potato Museum, ahead in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Groveland",
             "at_mi": 25.6,
             "off_mi": 1.16,
@@ -19500,6 +19870,16 @@
             "kind": "point",
             "at_mi": 32.33,
             "spoken": "Crossing the Blackfoot River"
+          },
+          {
+            "name": "Idaho Potato Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.4,
+            "spoken": "Billboard: The Idaho Potato Museum, ahead in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Tyhee",
@@ -23058,6 +23438,16 @@
             "spoken": "Crossing the Snake River"
           },
           {
+            "name": "Idaho Potato Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.1,
+            "spoken": "Billboard: The Idaho Potato Museum, ahead in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Groveland",
             "at_mi": 25.3,
             "off_mi": 1.16,
@@ -23065,6 +23455,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150976119, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Groveland"
+          },
+          {
+            "name": "Idaho Potato Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.6,
+            "spoken": "Billboard: The Idaho Potato Museum, next exit in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Fort Hall",
@@ -23183,6 +23583,16 @@
             "spoken": "Crossing the Bear River"
           },
           {
+            "name": "Golden Spike (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 151.5,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Corinne",
             "at_mi": 152.4,
             "off_mi": 2.19,
@@ -23217,6 +23627,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150943620, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Willard"
+          },
+          {
+            "name": "Golden Spike (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 165.2,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Hill Aerospace Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 168.7,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pleasant View",
@@ -23303,6 +23733,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150932122, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Uintah"
+          },
+          {
+            "name": "Hill Aerospace Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 189.3,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kaysville",
@@ -25509,6 +25949,16 @@
             "spoken": "Passing Firth"
           },
           {
+            "name": "Idaho Potato Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.8,
+            "spoken": "Billboard: The Idaho Potato Museum, ahead in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Groveland",
             "at_mi": 25.4,
             "off_mi": 1.16,
@@ -25525,6 +25975,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150947214, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Moreland"
+          },
+          {
+            "name": "Idaho Potato Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.7,
+            "spoken": "Billboard: The Idaho Potato Museum, next exit in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Riverside",
@@ -25656,6 +26116,16 @@
             "spoken": "Passing Eden"
           },
           {
+            "name": "Shoshone Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.3,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Hansen",
             "at_mi": 148.7,
             "off_mi": 3.19,
@@ -25672,6 +26142,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150959451, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kimberly"
+          },
+          {
+            "name": "Evel Knievel's Canyon (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 156.0,
+            "spoken": "Billboard: Twin Falls is where Evel Knievel tried to rocket across the Snake River Canyon on a steam-powered cycle. He came up short but alive, while today's base jumpers leap from the bridge for fun.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Jerome",
@@ -27348,6 +27828,16 @@
             "spoken": "Passing Pinehurst"
           },
           {
+            "name": "Wallace (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 1.5,
+            "spoken": "Billboard: Wallace, ahead. The mayor declared a manhole cover here the center of the universe. The town also had the last stoplight on Interstate Ninety.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Osburn",
             "at_mi": 6.5,
             "off_mi": 0.2,
@@ -27371,6 +27861,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150944758, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Silverton"
+          },
+          {
+            "name": "Wallace (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.0,
+            "spoken": "Billboard: Wallace, next exit. The mayor declared a manhole cover here the center of the universe. The town also had the last stoplight on Interstate Ninety.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Captain John Mullan Museum",
@@ -27408,6 +27908,26 @@
             "kind": "zone",
             "at_mi": 34.7,
             "spoken": "Entering Lolo National Forest"
+          },
+          {
+            "name": "Silver Dollar Bar (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 37.5,
+            "spoken": "Billboard: Lincoln's Fifty Thousand Silver Dollar Bar, next exit in Haugan. The walls hold more than fifty thousand donated dollars. Making change here is frowned upon.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Silver Dollar Bar (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 41.6,
+            "spoken": "Billboard: Lincoln's Fifty Thousand Silver Dollar Bar, next exit in Haugan. The walls hold more than fifty thousand donated dollars. Making change here is frowned upon.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Saint Regis",
@@ -29031,6 +29551,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150937785, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Liberty Lake"
+          },
+          {
+            "name": "The Floating Green (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 107.7,
+            "spoken": "Billboard: Coeur d'Alene has a golf green that floats on the lake, and a boat ferries you out to your ball. Miss the island and you feed the fish.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Stateline",
@@ -38372,6 +38902,16 @@
             "spoken": "Passing Bear River City"
           },
           {
+            "name": "Golden Spike (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 100.6,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Bear River",
             "category": "river",
             "kind": "point",
@@ -38397,6 +38937,16 @@
             "spoken": "Passing Willard"
           },
           {
+            "name": "Golden Spike (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 116.7,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Farr West",
             "at_mi": 122.5,
             "off_mi": 0.06,
@@ -38404,6 +38954,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150943236, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Farr West"
+          },
+          {
+            "name": "Hill Aerospace Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 124.8,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Roy",
@@ -38445,6 +39005,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150932122, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Uintah"
+          },
+          {
+            "name": "Hill Aerospace Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 140.8,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kaysville",
@@ -38546,6 +39116,16 @@
             "spoken": "Passing White City"
           },
           {
+            "name": "Museum of Ancient Life (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 178.7,
+            "spoken": "Billboard: The Museum of Ancient Life, ahead in Lehi, with one of the world's largest collections of mounted dinosaur skeletons. Extinction was never this tidy.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Draper",
             "at_mi": 181.0,
             "off_mi": 1.5,
@@ -38553,6 +39133,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150933314, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Draper"
+          },
+          {
+            "name": "Museum of Ancient Life (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 192.0,
+            "spoken": "Billboard: The Museum of Ancient Life, ahead in Lehi, with one of the world's largest collections of mounted dinosaur skeletons. Extinction was never this tidy.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "American Fork",
@@ -41744,6 +42334,16 @@
             "spoken": "Passing Bear River City"
           },
           {
+            "name": "Golden Spike (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 100.2,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Corinne",
             "at_mi": 103.5,
             "off_mi": 2.19,
@@ -41778,6 +42378,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150943620, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Willard"
+          },
+          {
+            "name": "Golden Spike (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 116.2,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Hill Aerospace Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 119.7,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pleasant View",
@@ -41873,6 +42493,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150932122, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Uintah"
+          },
+          {
+            "name": "Hill Aerospace Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 140.3,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kaysville",
@@ -43721,6 +44351,16 @@
             "spoken": "Passing Eden"
           },
           {
+            "name": "Shoshone Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.3,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Hansen",
             "at_mi": 104.7,
             "off_mi": 3.19,
@@ -43737,6 +44377,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150959451, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kimberly"
+          },
+          {
+            "name": "Evel Knievel's Canyon (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 112.0,
+            "spoken": "Billboard: Twin Falls is where Evel Knievel tried to rocket across the Snake River Canyon on a steam-powered cycle. He came up short but alive, while today's base jumpers leap from the bridge for fun.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Jerome",
@@ -44592,6 +45242,16 @@
             "spoken": "Passing Bayview"
           },
           {
+            "name": "Silverwood Theme Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.7,
+            "spoken": "Billboard: Silverwood Theme Park, ahead at Athol. The largest theme park in the Northwest, with two wooden roller coasters. They have more curves than this highway.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Spirit Lake",
             "at_mi": 24.7,
             "off_mi": 7.84,
@@ -44617,6 +45277,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150977999, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rathdrum"
+          },
+          {
+            "name": "Silverwood Theme Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 37.6,
+            "spoken": "Billboard: Silverwood Theme Park, ahead at Athol. The largest theme park in the Northwest, with two wooden roller coasters. They have more curves than this highway.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hayden",
@@ -47274,6 +47944,26 @@
             "spoken": "Passing Hansen"
           },
           {
+            "name": "Evel Knievel's Canyon (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Twin Falls is where Evel Knievel tried to rocket across the Snake River Canyon on a steam-powered cycle. He came up short but alive, while today's base jumpers leap from the bridge for fun.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Shoshone Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Buhl",
             "at_mi": 22.2,
             "off_mi": 11.89,
@@ -47290,6 +47980,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150970161, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wendell"
+          },
+          {
+            "name": "Hagerman Fossil Beds (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.4,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Gooding",
@@ -47324,6 +48024,36 @@
             "spoken": "Crossing the Snake River"
           },
           {
+            "name": "Hagerman Fossil Beds (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.4,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Three Island Crossing (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.6,
+            "spoken": "Billboard: Three Island Crossing State Park, next exit at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Three Island Crossing (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.6,
+            "spoken": "Billboard: Three Island Crossing State Park, next exit at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Hammett",
             "at_mi": 67.2,
             "off_mi": 0.9,
@@ -47338,6 +48068,26 @@
             "kind": "zone",
             "at_mi": 74.6,
             "spoken": "Entering Morley Nelson Snake River Birds of Prey National Conservation Area"
+          },
+          {
+            "name": "World Center for Birds of Prey (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 113.6,
+            "spoken": "Billboard: The World Center for Birds of Prey, ahead at Boise. Live falcons, eagles and owls, from the people who saved the peregrine. Keep your sandwich covered.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Old Idaho Penitentiary (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 115.9,
+            "spoken": "Billboard: The Old Idaho Penitentiary, ahead in Boise. A working prison for a hundred and one years, now a museum. Visitors leave the same day.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Robie Creek",
@@ -50947,6 +51697,16 @@
             "spoken": "Entering Twin Falls Original Townsite Residential Historic District"
           },
           {
+            "name": "Evel Knievel's Canyon (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Twin Falls is where Evel Knievel tried to rocket across the Snake River Canyon on a steam-powered cycle. He came up short but alive, while today's base jumpers leap from the bridge for fun.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Snake River",
             "category": "river",
             "kind": "point",
@@ -50970,6 +51730,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150955594, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hansen"
+          },
+          {
+            "name": "Shoshone Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.7,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Eden",
@@ -51117,6 +51887,16 @@
             "spoken": "Passing Bear River City"
           },
           {
+            "name": "Golden Spike (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 159.0,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Corinne",
             "at_mi": 162.3,
             "off_mi": 2.19,
@@ -51158,6 +51938,16 @@
             "kind": "point",
             "at_mi": 174.8,
             "spoken": "Crossing the Ogden River"
+          },
+          {
+            "name": "Golden Spike (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 177.1,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pleasant View",
@@ -53737,6 +54527,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150939893, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Buhl"
+          },
+          {
+            "name": "Jackpot (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.7,
+            "spoken": "Billboard: Jackpot is ahead, on the Idaho line. Idaho banned casinos in nineteen fifty-four, so the casinos moved a mile south. The slot machines did not mind.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Jackpot (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.7,
+            "spoken": "Billboard: Jackpot is ahead, on the Idaho line. Idaho banned casinos in nineteen fifty-four, so the casinos moved a mile south. The slot machines did not mind.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "HD Summit",

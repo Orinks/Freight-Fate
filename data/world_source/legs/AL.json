@@ -711,6 +711,16 @@
             "spoken": "Passing Irondale"
           },
           {
+            "name": "Vulcan (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Vulcan, ahead in Birmingham. The largest cast iron statue in the world stands on Red Mountain. His bare backside has faced Homewood since nineteen thirty-nine.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Leeds",
             "at_mi": 12.8,
             "off_mi": 7.31,
@@ -4665,6 +4675,16 @@
             "spoken": "Passing Mount Olive"
           },
           {
+            "name": "Vulcan (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.3,
+            "spoken": "Billboard: Vulcan, ahead in Birmingham. The largest cast iron statue in the world stands on Red Mountain. His bare backside has faced Homewood since nineteen thirty-nine.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Morris",
             "at_mi": 17.7,
             "off_mi": 1.05,
@@ -4710,6 +4730,16 @@
             "spoken": "Passing Hayden"
           },
           {
+            "name": "The Ave Maria Grotto (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.7,
+            "spoken": "Billboard: The Ave Maria Grotto, ahead in Cullman. A monk built a hundred twenty-five tiny landmarks from marbles, shells and cold cream jars. Save your jars.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Dodge City",
             "at_mi": 38.9,
             "off_mi": 0.92,
@@ -4733,6 +4763,16 @@
             "kind": "point",
             "at_mi": 47.7,
             "spoken": "Cullman County Museum ahead"
+          },
+          {
+            "name": "The Ave Maria Grotto (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.9,
+            "spoken": "Billboard: The Ave Maria Grotto, next exit. A monk built a hundred twenty-five tiny landmarks from marbles, shells and cold cream jars. Save your jars.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "South Vinemont",
@@ -10298,6 +10338,16 @@
         ],
         "landmarks": [
           {
+            "name": "Vulcan (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.0,
+            "spoken": "Billboard: Vulcan, ahead in Birmingham. The largest cast iron statue in the world stands on Red Mountain. His bare backside has faced Homewood since nineteen thirty-nine.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "McDonald Chapel",
             "at_mi": 6.8,
             "off_mi": 2.15,
@@ -10542,6 +10592,16 @@
             "spoken": "Passing Heidelberg"
           },
           {
+            "name": "Laurel (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 190.9,
+            "spoken": "Billboard: Laurel, ahead, the town from the television show Home Town. Downtown is real, and so is Mississippi's oldest art museum. Somebody even fixed the sign.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sandersville",
             "at_mi": 193.1,
             "off_mi": 1.35,
@@ -10558,6 +10618,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153745510, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ellisville"
+          },
+          {
+            "name": "Laurel (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 211.7,
+            "spoken": "Billboard: Laurel, ahead, the town from the television show Home Town. Downtown is real, and so is Mississippi's oldest art museum. Somebody even fixed the sign.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Leaf River",
@@ -12680,6 +12750,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153666221, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Irondale"
+          },
+          {
+            "name": "Vulcan (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.9,
+            "spoken": "Billboard: Vulcan, ahead in Birmingham. The largest cast iron statue in the world stands on Red Mountain. His bare backside has faced Homewood since nineteen thirty-nine.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Vestavia Hills",
@@ -14900,6 +14980,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153716194, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fairfield"
+          },
+          {
+            "name": "Vulcan (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.9,
+            "spoken": "Billboard: Vulcan, ahead in Birmingham. The largest cast iron statue in the world stands on Red Mountain. His bare backside has faced Homewood since nineteen thirty-nine.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pleasant Grove",
@@ -17189,6 +17279,16 @@
             "spoken": "Passing Lipscomb"
           },
           {
+            "name": "Vulcan (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.2,
+            "spoken": "Billboard: Vulcan, ahead in Birmingham. The largest cast iron statue in the world stands on Red Mountain. His bare backside has faced Homewood since nineteen thirty-nine.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "McCalla",
             "at_mi": 18.8,
             "off_mi": 0.26,
@@ -17257,6 +17357,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153339209, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brookwood"
+          },
+          {
+            "name": "The Paul W. Bryant Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.1,
+            "spoken": "Billboard: The Paul W. Bryant Museum, ahead in Tuscaloosa. Alabama football history, and a houndstooth hat made of Waterford crystal. Nobody has ever worn it.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cottondale",
@@ -18986,6 +19096,16 @@
             "spoken": "Passing Dodge City"
           },
           {
+            "name": "The Ave Maria Grotto (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.7,
+            "spoken": "Billboard: The Ave Maria Grotto, ahead in Cullman. A monk built a hundred twenty-five tiny landmarks from marbles, shells and cold cream jars. Save your jars.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Garden City",
             "at_mi": 14.1,
             "off_mi": 6.48,
@@ -19047,6 +19167,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153711602, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Morris"
+          },
+          {
+            "name": "Vulcan (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.5,
+            "spoken": "Billboard: Vulcan, ahead in Birmingham. The largest cast iron statue in the world stands on Red Mountain. His bare backside has faced Homewood since nineteen thirty-nine.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pinson",
@@ -20297,6 +20427,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153922621, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Leary"
+          },
+          {
+            "name": "Ray Charles Plaza (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 74.0,
+            "spoken": "Billboard: Albany, ahead, where Ray Charles was born. A bronze of him at the piano turns slowly in the plaza downtown. He has not missed a show.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Baconton",
@@ -23363,6 +23503,16 @@
             "spoken": "Passing Madison"
           },
           {
+            "name": "The Space and Rocket Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.9,
+            "spoken": "Billboard: The United States Space and Rocket Center, ahead in Huntsville. A whole Saturn Five rocket rests indoors on its side. Your cab has fewer buttons.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Harvest",
             "at_mi": 66.8,
             "off_mi": 11.17,
@@ -24885,6 +25035,16 @@
             "spoken": "Entering Littleville"
           },
           {
+            "name": "The Alabama Music Hall of Fame (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.5,
+            "spoken": "Billboard: The Alabama Music Hall of Fame, ahead in Tuscumbia. Nat King Cole, Hank Williams, Lionel Richie and the band Alabama, all one state's doing.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Spruce Pine",
             "at_mi": 23.3,
             "off_mi": 6.86,
@@ -26310,6 +26470,16 @@
             "spoken": "Passing Sardis City"
           },
           {
+            "name": "Noccalula Falls (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.8,
+            "spoken": "Billboard: Gadsden is home to Noccalula Falls, a ninety-foot waterfall in a city park. A bronze Cherokee maiden stands at the brink, recalling an old and sorrowful legend.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Crossville",
             "at_mi": 19.9,
             "off_mi": 5.73,
@@ -26410,6 +26580,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153635259, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Henagar"
+          },
+          {
+            "name": "Home of the Band Alabama (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.3,
+            "spoken": "Billboard: Fort Payne is the Sock Capital of the world and the hometown of the band Alabama. This town once wove one American sock in eight, then raised the best-selling country group of all time. Mountain music, indeed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Valley Head",
@@ -28340,6 +28520,16 @@
             "spoken": "Passing Moores Mill"
           },
           {
+            "name": "The Space and Rocket Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.7,
+            "spoken": "Billboard: The United States Space and Rocket Center, ahead in Huntsville. A whole Saturn Five rocket rests indoors on its side. Your cab has fewer buttons.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "New Market",
             "at_mi": 7.1,
             "off_mi": 10.42,
@@ -28426,6 +28616,16 @@
             "spoken": "Passing Grant"
           },
           {
+            "name": "Unclaimed Baggage (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.3,
+            "spoken": "Billboard: Unclaimed Baggage, ahead in Scottsboro. A city block of things the airlines lost, all for sale. Your missing suitcase might be on aisle four.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Aspel",
             "at_mi": 31.5,
             "off_mi": 0.04,
@@ -28469,6 +28669,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153478472, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hollywood"
+          },
+          {
+            "name": "Unclaimed Baggage (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.7,
+            "spoken": "Billboard: Unclaimed Baggage, ahead in Scottsboro. A city block of things the airlines lost, all for sale. Your missing suitcase might be on aisle four.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Tennessee River",
@@ -29508,6 +29718,16 @@
             "spoken": "Passing Harvest"
           },
           {
+            "name": "The Space and Rocket Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.3,
+            "spoken": "Billboard: The United States Space and Rocket Center, ahead in Huntsville. A whole Saturn Five rocket rests indoors on its side. Your cab has fewer buttons.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Madison",
             "at_mi": 10.56,
             "off_mi": 1.16,
@@ -29594,6 +29814,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153477847, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Eva"
+          },
+          {
+            "name": "The Ave Maria Grotto (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.0,
+            "spoken": "Billboard: The Ave Maria Grotto, ahead in Cullman. A monk built a hundred twenty-five tiny landmarks from marbles, shells and cold cream jars. Save your jars.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "West Point",
@@ -30983,6 +31213,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153341924, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Madison"
+          },
+          {
+            "name": "The Space and Rocket Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The United States Space and Rocket Center, ahead in Huntsville. A whole Saturn Five rocket rests indoors on its side. Your cab has fewer buttons.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Meridianville",
@@ -38278,6 +38518,16 @@
             "spoken": "Passing Georgiana"
           },
           {
+            "name": "Bates House of Turkey (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 115.7,
+            "spoken": "Billboard: Bates House of Turkey is ahead. It serves turkey sandwiches, turkey plates, turkey pie, and proof that Thanksgiving does not require permission from November.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Bates House of Turkey",
             "category": "billboard_sign",
             "kind": "point",
@@ -40160,6 +40410,26 @@
             "spoken": "Passing Belle Fontaine"
           },
           {
+            "name": "Bellingrath Gardens (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.9,
+            "spoken": "Billboard: Bellingrath Gardens, next exit, south on the Fowl River. A Coca-Cola bottler's sixty-five acres and a quarter million azaleas. Worth the detour.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Bellingrath Gardens (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.9,
+            "spoken": "Billboard: Bellingrath Gardens, next exit, south on the Fowl River. A Coca-Cola bottler's sixty-five acres and a quarter million azaleas. Worth the detour.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Bayou La Batre",
             "at_mi": 21.3,
             "off_mi": 7.74,
@@ -40185,6 +40455,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153811759, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Escatawpa"
+          },
+          {
+            "name": "The Shed Barbecue (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.5,
+            "spoken": "Billboard: The Shed Barbecue is ahead. It offers smoke, sauce, blues, and a building assembled from whatever did not run away fast enough.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Gautier",
@@ -40217,6 +40497,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153584541, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ocean Springs"
+          },
+          {
+            "name": "The Shed Barbecue (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.4,
+            "spoken": "Billboard: The Shed Barbecue is ahead. It offers smoke, sauce, blues, and a building assembled from whatever did not run away fast enough.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Tchoutacabouffa River",
@@ -40267,6 +40557,16 @@
             "spoken": "Passing Waveland"
           },
           {
+            "name": "The Infinity Science Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 100.0,
+            "spoken": "Billboard: The Infinity Science Center, next exit, at the welcome center. NASA tests its biggest rocket engines just up the road. Yours is quieter.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Jourdan River",
             "category": "river",
             "kind": "point",
@@ -40304,6 +40604,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 4415541372, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Pearl River"
+          },
+          {
+            "name": "The Infinity Science Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 111.5,
+            "spoken": "Billboard: The Infinity Science Center, ahead at the welcome center. NASA tests its biggest rocket engines just up the road. Yours is quieter.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lacombe",
@@ -42382,6 +42692,16 @@
             "spoken": "Passing Marbury"
           },
           {
+            "name": "The Clanton peach (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.8,
+            "spoken": "Billboard: Clanton, ahead. This county grows most of Alabama's peaches, and its water tower is shaped like one. Gaffney's is bigger. Clanton is fine with that.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Clanton",
             "at_mi": 38.8,
             "off_mi": 2.08,
@@ -42398,6 +42718,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153610832, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Thorsby"
+          },
+          {
+            "name": "The Clanton peach (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.8,
+            "spoken": "Billboard: Clanton, ahead. This county grows most of Alabama's peaches, and its water tower is shaped like one. Gaffney's is bigger. Clanton is fine with that.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Jemison",
@@ -42504,6 +42834,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153424705, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brook Highland"
+          },
+          {
+            "name": "Vulcan (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 82.6,
+            "spoken": "Billboard: Vulcan, ahead in Birmingham. The largest cast iron statue in the world stands on Red Mountain. His bare backside has faced Homewood since nineteen thirty-nine.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Lipscomb",
@@ -46291,6 +46631,16 @@
             "spoken": "Passing Crawford"
           },
           {
+            "name": "The National Infantry Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.0,
+            "spoken": "Billboard: The National Infantry Museum, ahead in Columbus. Free admission, from the Revolution to today. The infantry walked here. You get to drive.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Ladonia",
             "at_mi": 26.1,
             "off_mi": 2.88,
@@ -49722,6 +50072,16 @@
             "spoken": "Passing Goshen"
           },
           {
+            "name": "Troy (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.2,
+            "spoken": "Billboard: Troy University is ahead, home of the Trojans and a surprisingly world-class art collection out among the pines.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Brundidge",
             "at_mi": 11.42,
             "off_mi": 0.8,
@@ -49754,6 +50114,16 @@
             "spoken": "Billboard: Enterprise, west of here, built a monument to the boll weevil, the bug that ate its cotton. The disaster forced farmers to plant peanuts, peanuts made them rich, and gratitude to a pest became a statue.",
             "directions": [
               "forward"
+            ]
+          },
+          {
+            "name": "The Boll Weevil Monument (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.5,
+            "spoken": "Billboard: Enterprise, west of here, built a monument to the boll weevil, the bug that ate its cotton. The disaster forced farmers to plant peanuts, peanuts made them rich, and gratitude to a pest became a statue.",
+            "directions": [
+              "reverse"
             ]
           },
           {
@@ -53529,6 +53899,16 @@
             "spoken": "Passing Cottondale"
           },
           {
+            "name": "The Paul W. Bryant Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.4,
+            "spoken": "Billboard: The Paul W. Bryant Museum, ahead in Tuscaloosa. Alabama football history, and a houndstooth hat made of Waterford crystal. Nobody has ever worn it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Brookwood",
             "at_mi": 17.1,
             "off_mi": 4.5,
@@ -53727,6 +54107,16 @@
             "spoken": "Passing Warrior"
           },
           {
+            "name": "The Ave Maria Grotto (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 92.0,
+            "spoken": "Billboard: The Ave Maria Grotto, ahead in Cullman. A monk built a hundred twenty-five tiny landmarks from marbles, shells and cold cream jars. Save your jars.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Dodge City",
             "at_mi": 94.2,
             "off_mi": 0.92,
@@ -53770,6 +54160,16 @@
             "spoken": "Passing West Point"
           },
           {
+            "name": "The Ave Maria Grotto (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 113.5,
+            "spoken": "Billboard: The Ave Maria Grotto, ahead in Cullman. A monk built a hundred twenty-five tiny landmarks from marbles, shells and cold cream jars. Save your jars.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Falkville",
             "at_mi": 118.0,
             "off_mi": 0.99,
@@ -53793,6 +54193,16 @@
             "kind": "point",
             "at_mi": 143.9,
             "spoken": "Crossing the Tennessee River"
+          },
+          {
+            "name": "The Space and Rocket Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 146.1,
+            "spoken": "Billboard: The United States Space and Rocket Center, ahead in Huntsville. A whole Saturn Five rocket rests indoors on its side. Your cab has fewer buttons.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "restrictions": [],
@@ -55653,6 +56063,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153655160, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Holt"
+          },
+          {
+            "name": "The Paul W. Bryant Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Paul W. Bryant Museum, ahead in Tuscaloosa. Alabama football history, and a houndstooth hat made of Waterford crystal. Nobody has ever worn it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Moundville",

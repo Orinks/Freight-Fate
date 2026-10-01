@@ -1003,6 +1003,16 @@
             "spoken": "Crossing the Flint River"
           },
           {
+            "name": "Ray Charles Plaza (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.4,
+            "spoken": "Billboard: Albany, ahead, where Ray Charles was born. A bronze of him at the piano turns slowly in the plaza downtown. He has not missed a show.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Baconton",
             "at_mi": 17.1,
             "off_mi": 0.59,
@@ -2131,6 +2141,16 @@
             "kind": "point",
             "at_mi": 5.1,
             "spoken": "Crossing the Flint River"
+          },
+          {
+            "name": "Ray Charles Plaza (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Albany, ahead, where Ray Charles was born. A bronze of him at the piano turns slowly in the plaza downtown. He has not missed a show.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Poulan",
@@ -3494,6 +3514,16 @@
             "spoken": "Passing Baconton"
           },
           {
+            "name": "Ray Charles Plaza (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.2,
+            "spoken": "Billboard: Albany, ahead, where Ray Charles was born. A bronze of him at the piano turns slowly in the plaza downtown. He has not missed a show.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Sylvester",
             "at_mi": 18.6,
             "off_mi": 9.83,
@@ -3630,6 +3660,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154016797, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Quitman"
+          },
+          {
+            "name": "Wild Adventures (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.3,
+            "spoken": "Billboard: Wild Adventures, ahead, south of Valdosta. Six roller coasters and a zoo in one park. The animals have chosen not to ride.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Little River",
@@ -4656,6 +4696,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154170504, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Leesburg"
+          },
+          {
+            "name": "Ray Charles Plaza (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.1,
+            "spoken": "Billboard: Albany, ahead, where Ray Charles was born. A bronze of him at the piano turns slowly in the plaza downtown. He has not missed a show.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Putney",
@@ -5812,6 +5862,16 @@
             "spoken": "Passing Ellaville"
           },
           {
+            "name": "Jimmy Carter National Historical Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 2.0,
+            "spoken": "Billboard: Plains, ahead, home of President Jimmy Carter. The old train depot, the oldest building in town, ran his nineteen seventy-six campaign. Open daily.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Smithville",
             "at_mi": 3.26,
             "off_mi": 10.88,
@@ -5839,6 +5899,16 @@
             "spoken": "Entering Preston"
           },
           {
+            "name": "Jimmy Carter National Historical Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.6,
+            "spoken": "Billboard: Plains, ahead, home of President Jimmy Carter. The old train depot, the oldest building in town, ran his nineteen seventy-six campaign. Open daily.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Richland",
             "at_mi": 28.16,
             "off_mi": 0.01,
@@ -5864,6 +5934,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153895486, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cusseta"
+          },
+          {
+            "name": "The National Infantry Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.0,
+            "spoken": "Billboard: The National Infantry Museum, ahead in Columbus. Free admission, from the Revolution to today. The infantry walked here. You get to drive.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Ladonia",
@@ -13148,6 +13228,16 @@
             "spoken": "Passing Kennesaw"
           },
           {
+            "name": "The Big Chicken (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 85.6,
+            "spoken": "Billboard: The Big Chicken is ahead near Marietta. This fifty-six-foot chicken-shaped restaurant rolls its eyes, moves its beak, and has confused Atlanta families giving directions for generations.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Rosenwald School",
             "category": "museum",
             "kind": "point",
@@ -13162,6 +13252,16 @@
             "spoken": "Crossing the Etowah River"
           },
           {
+            "name": "Tellus Science Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 104.6,
+            "spoken": "Billboard: Tellus Science Museum, next exit. A dinosaur skeleton stands in the lobby, and the planetarium has the rest of the universe. Allow an afternoon.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "White",
             "at_mi": 105.7,
             "off_mi": 3.03,
@@ -13169,6 +13269,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153872087, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing White"
+          },
+          {
+            "name": "Tellus Science Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 107.6,
+            "spoken": "Billboard: Tellus Science Museum, next exit. A dinosaur skeleton stands in the lobby, and the planetarium has the rest of the universe. Allow an afternoon.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Adairsville",
@@ -14600,6 +14710,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153872437, projected onto the leg's checked-in route geometry",
             "spoken": "Passing South Congaree"
+          },
+          {
+            "name": "Riverbanks Zoo and Garden (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 152.2,
+            "spoken": "Billboard: Riverbanks Zoo and Garden, ahead in Columbia. Three thousand animals beside the Saluda River. None of them has ever had to merge.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pine Ridge",
@@ -18234,6 +18354,16 @@
             "spoken": "Passing Piedmont"
           },
           {
+            "name": "Falls Park on the Reedy (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 91.0,
+            "spoken": "Billboard: Falls Park, ahead in Greenville. A waterfall downtown, and a footbridge that curves over it, hung from cables on one side only. It holds.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Easley",
             "at_mi": 93.5,
             "off_mi": 7.53,
@@ -19966,6 +20096,16 @@
             "spoken": "Passing Rutledge"
           },
           {
+            "name": "The Town Sherman Spared (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.2,
+            "spoken": "Billboard: Madison is ahead, the town said to have been too pretty to burn. Sherman marched past and left the mansions standing, and they stand yet.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Shady Dale",
             "at_mi": 39.9,
             "off_mi": 10.5,
@@ -20015,6 +20155,16 @@
             "kind": "point",
             "at_mi": 57.9,
             "spoken": "Crossing the Little River"
+          },
+          {
+            "name": "Uncle Remus Country (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.3,
+            "spoken": "Billboard: Eatonton is home to Br'er Rabbit. The old Uncle Remus tales were set down here, and a statue of the rabbit himself stands watch at the courthouse.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gray",
@@ -22086,6 +22236,16 @@
             "spoken": "Passing Hobson City"
           },
           {
+            "name": "Talladega (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 90.5,
+            "spoken": "Billboard: Talladega is ahead, home to the biggest and fastest superspeedway in NASCAR. Cars run flat out in a pack around more than two and a half miles of high banking, and a movie taught the nation that if you ain't first, you're last.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Munford",
             "at_mi": 93.8,
             "off_mi": 3.56,
@@ -22157,6 +22317,16 @@
             "spoken": "Passing Trussville"
           },
           {
+            "name": "The Barber Motorsports Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 131.0,
+            "spoken": "Billboard: The Barber Vintage Motorsports Museum, next exit. Nine hundred motorcycles on display, the world's largest motorcycle museum. Every one of them gets better mileage.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Dunnavant",
             "at_mi": 131.3,
             "off_mi": 4.37,
@@ -22164,6 +22334,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153543387, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dunnavant"
+          },
+          {
+            "name": "The Barber Motorsports Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 133.2,
+            "spoken": "Billboard: The Barber Vintage Motorsports Museum, next exit. Nine hundred motorcycles on display, the world's largest motorcycle museum. Every one of them gets better mileage.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Vulcan (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 136.0,
+            "spoken": "Billboard: Vulcan, ahead in Birmingham. The largest cast iron statue in the world stands on Red Mountain. His bare backside has faced Homewood since nineteen thirty-nine.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Irondale",
@@ -33583,6 +33773,16 @@
             "spoken": "Passing Hobson City"
           },
           {
+            "name": "Talladega (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 94.4,
+            "spoken": "Billboard: Talladega is ahead, home to the biggest and fastest superspeedway in NASCAR. Cars run flat out in a pack around more than two and a half miles of high banking, and a movie taught the nation that if you ain't first, you're last.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Riverside",
             "at_mi": 109.0,
             "off_mi": 0.39,
@@ -33590,6 +33790,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 11115471247, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Riverside"
+          },
+          {
+            "name": "Talladega (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 112.8,
+            "spoken": "Billboard: Talladega is ahead, home to the biggest and fastest superspeedway in NASCAR. Cars run flat out in a pack around more than two and a half miles of high banking, and a movie taught the nation that if you ain't first, you're last.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Coosa River",
@@ -33615,6 +33825,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153415208, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Leeds"
+          },
+          {
+            "name": "The Barber Motorsports Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 134.0,
+            "spoken": "Billboard: The Barber Vintage Motorsports Museum, next exit. Nine hundred motorcycles on display, the world's largest motorcycle museum. Every one of them gets better mileage.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Barber Motorsports Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 137.0,
+            "spoken": "Billboard: The Barber Vintage Motorsports Museum, next exit. Nine hundred motorcycles on display, the world's largest motorcycle museum. Every one of them gets better mileage.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cahaba River",
@@ -33740,6 +33970,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151413678, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Edwards"
+          },
+          {
+            "name": "Vicksburg National Military Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 421.2,
+            "spoken": "Billboard: Vicksburg National Military Park, next exit. A sixteen-mile road around the siege lines of eighteen sixty-three, and a Union gunboat raised from the river.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Vicksburg National Military Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 424.2,
+            "spoken": "Billboard: Vicksburg National Military Park, next exit. A sixteen-mile road around the siege lines of eighteen sixty-three, and a Union gunboat raised from the river.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mississippi River",
@@ -40675,6 +40925,16 @@
             "spoken": "Passing Red Bank"
           },
           {
+            "name": "Riverbanks Zoo and Garden (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.5,
+            "spoken": "Billboard: Riverbanks Zoo and Garden, ahead in Columbia. Three thousand animals beside the Saluda River. None of them has ever had to merge.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Saluda River",
             "category": "river",
             "kind": "point",
@@ -46079,6 +46339,16 @@
             "spoken": "Passing Midway"
           },
           {
+            "name": "The Smallest Church in America (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.9,
+            "spoken": "Billboard: The Smallest Church in America is ahead near South Newport. It has thirteen seats, one tiny steeple, and absolutely no room for a megachurch coffee shop.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Henderson",
             "at_mi": 63.5,
             "off_mi": 0.76,
@@ -47591,6 +47861,16 @@
             "spoken": "Passing Holly Springs"
           },
           {
+            "name": "The Big Chicken (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.4,
+            "spoken": "Billboard: The Big Chicken is ahead near Marietta. This fifty-six-foot chicken-shaped restaurant rolls its eyes, moves its beak, and has confused Atlanta families giving directions for generations.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Woodstock",
             "at_mi": 18.3,
             "off_mi": 5.29,
@@ -47677,6 +47957,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153945719, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Doraville"
+          },
+          {
+            "name": "The Big Chicken (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.3,
+            "spoken": "Billboard: The Big Chicken is ahead near Marietta. This fifty-six-foot chicken-shaped restaurant rolls its eyes, moves its beak, and has confused Atlanta families giving directions for generations.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Chattahoochee River",
@@ -49652,6 +49942,16 @@
             "spoken": "Passing Crawford"
           },
           {
+            "name": "The National Infantry Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The National Infantry Museum, ahead in Columbus. Free admission, from the Revolution to today. The infantry walked here. You get to drive.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lumpkin",
             "at_mi": 38.5,
             "off_mi": 7.13,
@@ -49695,6 +49995,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154345461, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Shellman"
+          },
+          {
+            "name": "Ray Charles Plaza (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 76.0,
+            "spoken": "Billboard: Albany, ahead, where Ray Charles was born. A bronze of him at the piano turns slowly in the plaza downtown. He has not missed a show.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Leesburg",
@@ -51273,6 +51583,16 @@
             "spoken": "Passing Crawford"
           },
           {
+            "name": "The National Infantry Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.5,
+            "spoken": "Billboard: The National Infantry Museum, ahead in Columbus. Free admission, from the Revolution to today. The infantry walked here. You get to drive.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Chattahoochee River",
             "category": "river",
             "kind": "point",
@@ -51312,6 +51632,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153746968, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Georgetown"
+          },
+          {
+            "name": "Lake Eufaula (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.5,
+            "spoken": "Billboard: Eufaula is ahead, the Big Bass Capital. The lake is full of largemouth bass, and the town is full of columned antebellum mansions.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Newville",
@@ -52599,6 +52929,16 @@
         ],
         "landmarks": [
           {
+            "name": "The National Infantry Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.5,
+            "spoken": "Billboard: The National Infantry Museum, ahead in Columbus. Free admission, from the Revolution to today. The infantry walked here. You get to drive.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Ladonia",
             "at_mi": 6.7,
             "off_mi": 0.02,
@@ -53469,6 +53809,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154141862, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Arabi"
+          },
+          {
+            "name": "Ray Charles Plaza (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.0,
+            "spoken": "Billboard: Albany, ahead, where Ray Charles was born. A bronze of him at the piano turns slowly in the plaza downtown. He has not missed a show.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Flint River",
@@ -54891,6 +55241,16 @@
             "spoken": "Passing Marshallville"
           },
           {
+            "name": "The Museum of Aviation (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.3,
+            "spoken": "Billboard: The Museum of Aviation, ahead at Warner Robins. Free admission and more than eighty aircraft, among them the fastest jet ever flown. It is on a long break.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Bonaire",
             "at_mi": 42.3,
             "off_mi": 8.6,
@@ -54925,6 +55285,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154169724, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Centerville"
+          },
+          {
+            "name": "The Museum of Aviation (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.3,
+            "spoken": "Billboard: The Museum of Aviation, ahead at Warner Robins. Free admission and more than eighty aircraft, among them the fastest jet ever flown. It is on a long break.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bolingbroke",
@@ -55987,6 +56357,16 @@
             "spoken": "Passing Kingston"
           },
           {
+            "name": "Tellus Science Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.0,
+            "spoken": "Billboard: Tellus Science Museum, next exit. A dinosaur skeleton stands in the lobby, and the planetarium has the rest of the universe. Allow an afternoon.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "White",
             "at_mi": 41.7,
             "off_mi": 3.05,
@@ -55994,6 +56374,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153872087, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing White"
+          },
+          {
+            "name": "Tellus Science Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.0,
+            "spoken": "Billboard: Tellus Science Museum, next exit. A dinosaur skeleton stands in the lobby, and the planetarium has the rest of the universe. Allow an afternoon.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Acworth",
@@ -61111,7 +61501,19 @@
           "name": "rolling",
           "sections": 408,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "landmarks": [
+          {
+            "name": "Falls Park on the Reedy (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 76.0,
+            "spoken": "Billboard: Falls Park, ahead in Greenville. A waterfall downtown, and a footbridge that curves over it, hung from cables on one side only. It holds.",
+            "directions": [
+              "forward"
+            ]
+          }
+        ]
       },
       "lanes": 3
     },
@@ -65603,6 +66005,16 @@
             "spoken": "Passing Hogansville"
           },
           {
+            "name": "Callaway Gardens (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 2.0,
+            "spoken": "Billboard: Callaway Gardens, ahead at Pine Mountain. About a thousand butterflies live in its glass conservatory all year. Not one of them keeps a schedule.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pine Mountain",
             "at_mi": 12.0,
             "off_mi": 6.02,
@@ -65639,6 +66051,16 @@
             "spoken": "Passing Valley"
           },
           {
+            "name": "Callaway Gardens (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.0,
+            "spoken": "Billboard: Callaway Gardens, ahead at Pine Mountain. About a thousand butterflies live in its glass conservatory all year. Not one of them keeps a schedule.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Hamilton",
             "at_mi": 23.4,
             "off_mi": 8.22,
@@ -65646,6 +66068,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154037335, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hamilton"
+          },
+          {
+            "name": "The National Infantry Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.0,
+            "spoken": "Billboard: The National Infantry Museum, ahead in Columbus. Free admission, from the Revolution to today. The infantry walked here. You get to drive.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Smiths Station",
@@ -69186,6 +69618,16 @@
             "spoken": "Passing Waverly Hall"
           },
           {
+            "name": "The National Infantry Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 89.0,
+            "spoken": "Billboard: The National Infantry Museum, ahead in Columbus. Free admission, from the Revolution to today. The infantry walked here. You get to drive.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Coca-Cola's Inventor",
             "category": "billboard_sign",
             "kind": "point",
@@ -71446,6 +71888,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154323110, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Stilesboro"
+          },
+          {
+            "name": "Tellus Science Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.0,
+            "spoken": "Billboard: Tellus Science Museum, ahead at Cartersville. A dinosaur skeleton stands in the lobby, and the planetarium has the rest of the universe. Allow an afternoon.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Adairsville",
@@ -78527,6 +78979,16 @@
             "spoken": "Passing Yemassee"
           },
           {
+            "name": "The South Carolina Artisans Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.8,
+            "spoken": "Billboard: The South Carolina Artisans Center, ahead in Walterboro. Two hundred artists from forty-one of the state's forty-six counties. The other five are still practicing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Combahee River",
             "category": "river",
             "kind": "point",
@@ -78541,6 +79003,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153939795, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Smoaks"
+          },
+          {
+            "name": "The South Carolina Artisans Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 76.8,
+            "spoken": "Billboard: The South Carolina Artisans Center, ahead in Walterboro. Two hundred artists from forty-one of the state's forty-six counties. The other five are still practicing.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Reevesville",
@@ -83182,6 +83654,16 @@
             "spoken": "Crossing the New River"
           },
           {
+            "name": "Ashburn's peanut (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.5,
+            "spoken": "Billboard: Ashburn, ahead. Its giant crowned peanut is a state monument. A hurricane knocked it down in two thousand eighteen, and it got back up.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sycamore",
             "at_mi": 18.4,
             "off_mi": 1.11,
@@ -83198,6 +83680,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154401082, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rebecca"
+          },
+          {
+            "name": "Ashburn's peanut (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.0,
+            "spoken": "Billboard: Ashburn, next exit. Its giant crowned peanut is a state monument. A hurricane knocked it down in two thousand eighteen, and it got back up.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Arabi",
@@ -85081,6 +85573,16 @@
             "spoken": "Passing Lake Park"
           },
           {
+            "name": "Wild Adventures (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Wild Adventures, ahead, south of Valdosta. Six roller coasters and a zoo in one park. The animals have chosen not to ride.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Morven",
             "at_mi": 12.3,
             "off_mi": 10.45,
@@ -85095,6 +85597,16 @@
             "kind": "point",
             "at_mi": 14.2,
             "spoken": "Crossing the Withlacoochee River"
+          },
+          {
+            "name": "The Big Oak (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.1,
+            "spoken": "Billboard: Thomasville, ahead, the City of Roses. The Big Oak downtown has been growing since about sixteen eighty. It was here before the roses.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Metcalfe",
@@ -85138,6 +85650,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154340495, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ochlocknee"
+          },
+          {
+            "name": "The Big Oak (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.1,
+            "spoken": "Billboard: Thomasville, ahead, the City of Roses. The Big Oak downtown has been growing since about sixteen eighty. It was here before the roses.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Whigham",
@@ -86747,6 +87269,16 @@
             "spoken": "Passing Lake Park"
           },
           {
+            "name": "Wild Adventures (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.7,
+            "spoken": "Billboard: Wild Adventures, ahead, south of Valdosta. Six roller coasters and a zoo in one park. The animals have chosen not to ride.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Withlacoochee River",
             "category": "river",
             "kind": "point",
@@ -87670,6 +88202,16 @@
             "kind": "point",
             "at_mi": 5.2,
             "spoken": "Crossing the Withlacoochee River"
+          },
+          {
+            "name": "Wild Adventures (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Wild Adventures, ahead, south of Valdosta. Six roller coasters and a zoo in one park. The animals have chosen not to ride.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Morven",

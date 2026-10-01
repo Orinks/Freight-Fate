@@ -4,7 +4,7 @@
 
 ### Added
 
-- **Before a stable release, the billboards grow: about twelve hundred new ones, from Ocean City's boardwalk to Big Bend.** Big Jim notices your driving.
+- **Before a stable release, the billboards grow: about three thousand new ones, from Ocean City's boardwalk to Big Bend.** Big Jim notices your driving.
 
 - **You can pull in at The Thing, on Interstate 10 in Arizona.** Only a tractor without a trailer can fuel there.
 

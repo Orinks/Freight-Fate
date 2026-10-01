@@ -14260,6 +14260,16 @@
             "spoken": "Entering Chenango Bridge"
           },
           {
+            "name": "The Binghamton carousels (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Binghamton, ahead, the Carousel Capital of the World. Six antique merry-go-rounds, free all summer. The fare is one piece of litter.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Harpursville",
             "at_mi": 19.7,
             "off_mi": 0.42,
@@ -14371,6 +14381,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158805605, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Richmondville"
+          },
+          {
+            "name": "Howe Caverns (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 96.4,
+            "spoken": "Billboard: Howe Caverns, next exit. An elevator drops a hundred fifty-six feet to a boat ride on an underground lake. It has never seen daylight.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Howe Caverns (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 99.4,
+            "spoken": "Billboard: Howe Caverns, next exit. An elevator drops a hundred fifty-six feet to a boat ride on an underground lake. It has never seen daylight.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Central Bridge",
@@ -16207,6 +16237,16 @@
             "spoken": "Passing Chenango Bridge"
           },
           {
+            "name": "The Binghamton carousels (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Binghamton, ahead, the Carousel Capital of the World. Six antique merry-go-rounds, free all summer. The fare is one piece of litter.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Triangle",
             "at_mi": 14.3,
             "off_mi": 3.82,
@@ -17920,6 +17960,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158505342, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sherburne"
+          },
+          {
+            "name": "Cooperstown (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.5,
+            "spoken": "Billboard: Turn off for Cooperstown and the Baseball Hall of Fame. This lakeside village is where the game was supposedly born and where its immortals are enshrined in bronze.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Edmeston",
@@ -20984,6 +21034,16 @@
             "spoken": "Passing Blasdell"
           },
           {
+            "name": "Niagara Falls State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.8,
+            "spoken": "Billboard: Niagara Falls State Park, twenty miles north of Buffalo. The oldest state park in America, since eighteen eighty-five. The falls have not paused once.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Buffalo River",
             "category": "river",
             "kind": "point",
@@ -20998,6 +21058,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158348600, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wanakah"
+          },
+          {
+            "name": "The Anchor Bar (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.2,
+            "spoken": "Billboard: The Anchor Bar, ahead in Buffalo, where Buffalo wings were invented in nineteen sixty-four. Before that, wings went into the soup pot.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Angola",
@@ -21036,6 +21106,16 @@
             "spoken": "Entering Sheridan"
           },
           {
+            "name": "Lily Dale (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 41.3,
+            "spoken": "Billboard: Lily Dale, next exit, nine miles south. A whole town of mediums since eighteen seventy-nine. They already know you are not stopping.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fredonia",
             "at_mi": 44.2,
             "off_mi": 1.32,
@@ -21061,6 +21141,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158252287, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Portland"
+          },
+          {
+            "name": "Lily Dale (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.7,
+            "spoken": "Billboard: Lily Dale, ahead, south of Dunkirk. A whole town of mediums since eighteen seventy-nine. They already know you are not stopping.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Westfield",
@@ -21131,6 +21221,16 @@
             "spoken": "Passing Kingsville"
           },
           {
+            "name": "Ashtabula Covered Bridges (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 128.3,
+            "spoken": "Billboard: Ashtabula County, ahead. Seventeen covered bridges, including the longest in the country and the shortest one you can drive through. Nobody here does medium.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Plymouth",
             "at_mi": 131.4,
             "off_mi": 0.29,
@@ -21165,6 +21265,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153891817, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Harpersfield"
+          },
+          {
+            "name": "Ashtabula Covered Bridges (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.9,
+            "spoken": "Billboard: Ashtabula County, ahead. Seventeen covered bridges, including the longest in the country and the shortest one you can drive through. Nobody here does medium.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Grand River",
@@ -28940,6 +29050,26 @@
         ],
         "landmarks": [
           {
+            "name": "Niagara Falls State Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Niagara Falls State Park, twenty miles north of Buffalo. The oldest state park in America, since eighteen eighty-five. The falls have not paused once.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Anchor Bar (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.2,
+            "spoken": "Billboard: The Anchor Bar, ahead in Buffalo, where Buffalo wings were invented in nineteen sixty-four. Before that, wings went into the soup pot.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Pembroke",
             "at_mi": 26.38,
             "off_mi": 0.36,
@@ -28954,6 +29084,36 @@
             "kind": "point",
             "at_mi": 49.33,
             "spoken": "Crossing the Genesee River"
+          },
+          {
+            "name": "The Strong Museum of Play (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.4,
+            "spoken": "Billboard: The Strong Museum of Play, ahead in Rochester. Its Toy Hall of Fame inducted a stick and a cardboard box. Your trailer has a chance.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Strong Museum of Play (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.4,
+            "spoken": "Billboard: The Strong Museum of Play, ahead in Rochester. Its Toy Hall of Fame inducted a stick and a cardboard box. Your trailer has a chance.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Women's Rights National Historical Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 107.0,
+            "spoken": "Billboard: Women's Rights National Historical Park, ahead in Seneca Falls. The first women's rights convention met there in eighteen forty-eight. Two days, one long list.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Montezuma",
@@ -28977,6 +29137,16 @@
             "kind": "point",
             "at_mi": 118.51,
             "spoken": "Crossing the Owasco River"
+          },
+          {
+            "name": "Women's Rights National Historical Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 127.0,
+            "spoken": "Billboard: Women's Rights National Historical Park, ahead in Seneca Falls. The first women's rights convention met there in eighteen forty-eight. Two days, one long list.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lakeland",
@@ -29234,6 +29404,16 @@
             "spoken": "Entering Haverstraw"
           },
           {
+            "name": "Sleepy Hollow (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 409.9,
+            "spoken": "Billboard: Sleepy Hollow, next exit. Washington Irving is buried in the old cemetery there. The Headless Horseman is not, which is the worry.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Nyack",
             "at_mi": 412.17,
             "off_mi": 0.44,
@@ -29250,6 +29430,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158843537, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Ardsley"
+          },
+          {
+            "name": "Sleepy Hollow (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 423.4,
+            "spoken": "Billboard: Sleepy Hollow, ahead by the bridge. Washington Irving is buried in the old cemetery there. The Headless Horseman is not, which is the worry.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "restrictions": [],
@@ -31565,6 +31755,16 @@
             "spoken": "Passing Eggertsville"
           },
           {
+            "name": "The Anchor Bar (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.3,
+            "spoken": "Billboard: The Anchor Bar, ahead in Buffalo, where Buffalo wings were invented in nineteen sixty-four. Before that, wings went into the soup pot.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Sloan",
             "at_mi": 6.5,
             "off_mi": 2.57,
@@ -31581,6 +31781,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158496881, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cheektowaga"
+          },
+          {
+            "name": "Niagara Falls State Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.5,
+            "spoken": "Billboard: Niagara Falls State Park, twenty miles north of Buffalo. The oldest state park in America, since eighteen eighty-five. The falls have not paused once.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Amherst",
@@ -31777,6 +31987,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158379941, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Scottsville"
+          },
+          {
+            "name": "The Strong Museum of Play (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.6,
+            "spoken": "Billboard: The Strong Museum of Play, ahead in Rochester. Its Toy Hall of Fame inducted a stick and a cardboard box. Your trailer has a chance.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Genesee River",
@@ -32922,6 +33142,26 @@
             "spoken": "Entering Gerry"
           },
           {
+            "name": "Lily Dale (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.5,
+            "spoken": "Billboard: Lily Dale, ahead, just off Route Sixty. A whole town of mediums since eighteen seventy-nine. They already know you are not stopping.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The National Comedy Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.7,
+            "spoken": "Billboard: The National Comedy Center, ahead in Jamestown, Lucille Ball's hometown. A whole museum about comedy. This sign did not make the cut.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Village of Sinclairville",
             "at_mi": 11.93,
             "off_mi": 0.77,
@@ -32956,6 +33196,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158280928, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fredonia"
+          },
+          {
+            "name": "Lily Dale (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.2,
+            "spoken": "Billboard: Lily Dale, ahead, just off Route Sixty. A whole town of mediums since eighteen seventy-nine. They already know you are not stopping.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sheridan",
@@ -33082,6 +33332,16 @@
             "spoken": "Passing North Boston"
           },
           {
+            "name": "The Anchor Bar (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.0,
+            "spoken": "Billboard: The Anchor Bar, ahead in Buffalo, where Buffalo wings were invented in nineteen sixty-four. Before that, wings went into the soup pot.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Orchard Park",
             "at_mi": 61.2,
             "off_mi": 3.71,
@@ -33089,6 +33349,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 3986930465, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Orchard Park"
+          },
+          {
+            "name": "Niagara Falls State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.2,
+            "spoken": "Billboard: Niagara Falls State Park, twenty miles north of Buffalo. The oldest state park in America, since eighteen eighty-five. The falls have not paused once.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "West Seneca",
@@ -34238,6 +34508,16 @@
             "spoken": "Passing Ashville"
           },
           {
+            "name": "The National Comedy Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.1,
+            "spoken": "Billboard: The National Comedy Center, ahead in Jamestown, Lucille Ball's hometown. A whole museum about comedy. This sign did not make the cut.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Village of Sinclairville",
             "at_mi": 9.1,
             "off_mi": 9.51,
@@ -34371,6 +34651,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 7703153928, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing North East"
+          },
+          {
+            "name": "Presque Isle State Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.0,
+            "spoken": "Billboard: Presque Isle State Park, ahead in Erie. Seven miles of sand beach on Lake Erie. Pennsylvania has a seashore, and this is the whole of it.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Harborcreek",
@@ -36823,6 +37113,16 @@
             "spoken": "Entering Tuxedo"
           },
           {
+            "name": "Storm King Art Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.4,
+            "spoken": "Billboard: Storm King Art Center, ahead near Mountainville. Five hundred acres of giant sculpture on open hills. Some of the pieces weigh more than your load.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Harriman",
             "at_mi": 44.5,
             "off_mi": 0.74,
@@ -36848,6 +37148,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158899021, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Highland Mills"
+          },
+          {
+            "name": "Storm King Art Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.0,
+            "spoken": "Billboard: Storm King Art Center, ahead near Mountainville. Five hundred acres of giant sculpture on open hills. Some of the pieces weigh more than your load.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Vails Gate",
@@ -36945,6 +37255,16 @@
             "spoken": "Entering Mount Marion"
           },
           {
+            "name": "Thomas Cole National Historic Site (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 104.2,
+            "spoken": "Billboard: The Thomas Cole National Historic Site, ahead in Catskill. He founded the Hudson River School of painting, which never had a classroom.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Jefferson Heights",
             "at_mi": 113.4,
             "off_mi": 0.83,
@@ -36952,6 +37272,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158867475, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Jefferson Heights"
+          },
+          {
+            "name": "Thomas Cole National Historic Site (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 115.7,
+            "spoken": "Billboard: The Thomas Cole National Historic Site, next exit, in Catskill. He founded the Hudson River School of painting, which never had a classroom.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Ravena",
@@ -53350,6 +53680,36 @@
         ],
         "landmarks": [
           {
+            "name": "The Strong Museum of Play (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Strong Museum of Play, ahead in Rochester. Its Toy Hall of Fame inducted a stick and a cardboard box. Your trailer has a chance.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Women's Rights National Historical Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.3,
+            "spoken": "Billboard: Women's Rights National Historical Park, next exit, in Seneca Falls. The first women's rights convention met there in eighteen forty-eight. Two days, one long list.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Women's Rights National Historical Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.1,
+            "spoken": "Billboard: Women's Rights National Historical Park, next exit, in Seneca Falls. The first women's rights convention met there in eighteen forty-eight. Two days, one long list.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Seneca River",
             "category": "river",
             "kind": "point",
@@ -53389,6 +53749,46 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158599770, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Lakeland"
+          },
+          {
+            "name": "The Oneida Community Mansion House (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 100.2,
+            "spoken": "Billboard: The Oneida Community Mansion House, ahead in Oneida. A commune shared everything here in the eighteen hundreds. The commune ended. Its spoon business did not.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Oneida Community Mansion House (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 120.2,
+            "spoken": "Billboard: The Oneida Community Mansion House, ahead in Oneida. A commune shared everything here in the eighteen hundreds. The commune ended. Its spoon business did not.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Herkimer Diamond Mines (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 144.7,
+            "spoken": "Billboard: Herkimer Diamond Mines, next exit, nine miles north. Dig your own diamonds. They are quartz, but the people back home do not need to know.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Herkimer Diamond Mines (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 147.7,
+            "spoken": "Billboard: Herkimer Diamond Mines, next exit, nine miles north. Dig your own diamonds. They are quartz, but the people back home do not need to know.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mohawk",
@@ -53466,6 +53866,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158851858, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Rotterdam Junction"
+          },
+          {
+            "name": "Thomas Cole National Historic Site (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 250.1,
+            "spoken": "Billboard: The Thomas Cole National Historic Site, next exit, in Catskill. He founded the Hudson River School of painting, which never had a classroom.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Thomas Cole National Historic Site (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 253.1,
+            "spoken": "Billboard: The Thomas Cole National Historic Site, next exit, in Catskill. He founded the Hudson River School of painting, which never had a classroom.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mount Marion",
@@ -56496,6 +56916,16 @@
             "spoken": "Passing Minoa"
           },
           {
+            "name": "The Oneida Community Mansion House (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.2,
+            "spoken": "Billboard: The Oneida Community Mansion House, ahead in Oneida. A commune shared everything here in the eighteen hundreds. The commune ended. Its spoon business did not.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Canastota",
             "at_mi": 24.0,
             "off_mi": 0.79,
@@ -56523,6 +56953,16 @@
             "spoken": "Passing Verona"
           },
           {
+            "name": "The Oneida Community Mansion House (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.2,
+            "spoken": "Billboard: The Oneida Community Mansion House, ahead in Oneida. A commune shared everything here in the eighteen hundreds. The commune ended. Its spoon business did not.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mohawk River",
             "category": "river",
             "kind": "point",
@@ -56537,6 +56977,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158620331, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Oriskany"
+          },
+          {
+            "name": "Herkimer Diamond Mines (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.3,
+            "spoken": "Billboard: Herkimer Diamond Mines, ahead, north of Herkimer. Dig your own diamonds. They are quartz, but the people back home do not need to know.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Schuyler",
@@ -56591,6 +57041,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158804740, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing East Herkimer"
+          },
+          {
+            "name": "Herkimer Diamond Mines (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.3,
+            "spoken": "Billboard: Herkimer Diamond Mines, ahead, north of Herkimer. Dig your own diamonds. They are quartz, but the people back home do not need to know.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Saint Johnsville",
@@ -59291,6 +59751,16 @@
             "spoken": "Passing Tyre"
           },
           {
+            "name": "Women's Rights National Historical Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.7,
+            "spoken": "Billboard: Women's Rights National Historical Park, next exit, in Seneca Falls. The first women's rights convention met there in eighteen forty-eight. Two days, one long list.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Clyde River",
             "category": "river",
             "kind": "point",
@@ -59303,6 +59773,16 @@
             "kind": "point",
             "at_mi": 42.8,
             "spoken": "Crossing the Seneca River"
+          },
+          {
+            "name": "Women's Rights National Historical Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.7,
+            "spoken": "Billboard: Women's Rights National Historical Park, ahead in Seneca Falls. The first women's rights convention met there in eighteen forty-eight. Two days, one long list.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Phelps",
@@ -59350,6 +59830,16 @@
             "spoken": "Passing Victor"
           },
           {
+            "name": "The Strong Museum of Play (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 71.3,
+            "spoken": "Billboard: The Strong Museum of Play, ahead in Rochester. Its Toy Hall of Fame inducted a stick and a cardboard box. Your trailer has a chance.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Genesee River",
             "category": "river",
             "kind": "point",
@@ -59380,6 +59870,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158379941, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Scottsville"
+          },
+          {
+            "name": "The Strong Museum of Play (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 89.7,
+            "spoken": "Billboard: The Strong Museum of Play, ahead in Rochester. Its Toy Hall of Fame inducted a stick and a cardboard box. Your trailer has a chance.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "East Pembroke",
@@ -59418,6 +59918,16 @@
             "spoken": "Passing Clarence"
           },
           {
+            "name": "The Anchor Bar (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 136.5,
+            "spoken": "Billboard: The Anchor Bar, ahead in Buffalo, where Buffalo wings were invented in nineteen sixty-four. Before that, wings went into the soup pot.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Williamsville",
             "at_mi": 138.7,
             "off_mi": 0.85,
@@ -59425,6 +59935,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158307739, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Williamsville"
+          },
+          {
+            "name": "Niagara Falls State Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 140.9,
+            "spoken": "Billboard: Niagara Falls State Park, twenty miles north of Buffalo. The oldest state park in America, since eighteen eighty-five. The falls have not paused once.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cheektowaga",
@@ -61325,6 +61845,26 @@
             "spoken": "Passing Tyre"
           },
           {
+            "name": "Women's Rights National Historical Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.6,
+            "spoken": "Billboard: Women's Rights National Historical Park, next exit, in Seneca Falls. The first women's rights convention met there in eighteen forty-eight. Two days, one long list.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Women's Rights National Historical Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.0,
+            "spoken": "Billboard: Women's Rights National Historical Park, next exit, in Seneca Falls. The first women's rights convention met there in eighteen forty-eight. Two days, one long list.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Phelps",
             "at_mi": 50.9,
             "off_mi": 0.68,
@@ -61384,6 +61924,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158589566, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mendon"
+          },
+          {
+            "name": "The Strong Museum of Play (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.4,
+            "spoken": "Billboard: The Strong Museum of Play, ahead in Rochester. Its Toy Hall of Fame inducted a stick and a cardboard box. Your trailer has a chance.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Fairport",
@@ -62110,6 +62660,16 @@
             "spoken": "Passing Sullivan"
           },
           {
+            "name": "The Oneida Community Mansion House (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.1,
+            "spoken": "Billboard: The Oneida Community Mansion House, ahead in Oneida. A commune shared everything here in the eighteen hundreds. The commune ended. Its spoon business did not.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Perryville",
             "at_mi": 22.1,
             "off_mi": 5.94,
@@ -62196,6 +62756,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158376128, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Vernon Center"
+          },
+          {
+            "name": "The Oneida Community Mansion House (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.1,
+            "spoken": "Billboard: The Oneida Community Mansion House, ahead in Oneida. A commune shared everything here in the eighteen hundreds. The commune ended. Its spoon business did not.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Clinton",
@@ -63749,6 +64319,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Herkimer Diamond Mines (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.8,
+            "spoken": "Billboard: Herkimer Diamond Mines, ahead, north of Herkimer. Dig your own diamonds. They are quartz, but the people back home do not need to know.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Schuyler",
             "at_mi": 7.0,
             "off_mi": 1.3,
@@ -63817,6 +64397,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 9573131676, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Manheim"
+          },
+          {
+            "name": "Herkimer Diamond Mines (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: Herkimer Diamond Mines, ahead, north of Herkimer. Dig your own diamonds. They are quartz, but the people back home do not need to know.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Saint Johnsville",
@@ -65280,6 +65870,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157630789, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dexter"
+          },
+          {
+            "name": "Boldt Castle (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.6,
+            "spoken": "Billboard: Boldt Castle, north of Watertown in the Thousand Islands. A hotel man reshaped the island into a heart for his wife. Most of us bring flowers.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Adams Center",
@@ -67295,6 +67895,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158606283, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Adams Center"
+          },
+          {
+            "name": "Boldt Castle (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.5,
+            "spoken": "Billboard: Boldt Castle, north of Watertown in the Thousand Islands. A hotel man reshaped the island into a heart for his wife. Most of us bring flowers.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Deer River",

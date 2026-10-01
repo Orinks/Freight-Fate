@@ -2658,6 +2658,16 @@
             "spoken": "Passing Wood River"
           },
           {
+            "name": "Stuhr Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.0,
+            "spoken": "Billboard: The Stuhr Museum, ahead in Grand Island. An eighteen-nineties railroad town of sixty buildings, many moved here. Somebody hauled a lot of oversize loads.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Prosser",
             "at_mi": 23.7,
             "off_mi": 4.7,
@@ -2694,6 +2704,16 @@
             "spoken": "Passing Shelton"
           },
           {
+            "name": "Great Platte River Road Archway (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.5,
+            "spoken": "Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Gibbon",
             "at_mi": 34.6,
             "off_mi": 3.0,
@@ -2717,6 +2737,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151506714, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Heartwell"
+          },
+          {
+            "name": "Pioneer Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.6,
+            "spoken": "Billboard: Harold Warp Pioneer Village, next exit, then twelve miles south in Minden. Fifty thousand old things on twenty acres. Nobody here ever threw anything away.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pioneer Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.4,
+            "spoken": "Billboard: Harold Warp Pioneer Village, next exit, then twelve miles south in Minden. Fifty thousand old things on twenty acres. Nobody here ever threw anything away.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Riverdale",
@@ -3583,6 +3623,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151403693, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Phillips"
+          },
+          {
+            "name": "Stuhr Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.5,
+            "spoken": "Billboard: The Stuhr Museum, ahead in Grand Island. An eighteen-nineties railroad town of sixty buildings, many moved here. Somebody hauled a lot of oversize loads.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Giltner",
@@ -6480,6 +6530,16 @@
             "spoken": "Passing Riverdale"
           },
           {
+            "name": "Great Platte River Road Archway (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Platte River",
             "category": "river",
             "kind": "point",
@@ -6530,6 +6590,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151328996, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Smithfield"
+          },
+          {
+            "name": "Heartland Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.2,
+            "spoken": "Billboard: The Heartland Museum of Military Vehicles, next exit. About a hundred tanks, jeeps and helicopters, many still running. Every one of them wins a merge.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -7180,6 +7250,16 @@
             "spoken": "Passing Riverdale"
           },
           {
+            "name": "Great Platte River Road Archway (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Amherst",
             "at_mi": 15.3,
             "off_mi": 10.82,
@@ -7225,6 +7305,16 @@
             "spoken": "Passing Smithfield"
           },
           {
+            "name": "Heartland Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.8,
+            "spoken": "Billboard: The Heartland Museum of Military Vehicles, next exit. About a hundred tanks, jeeps and helicopters, many still running. Every one of them wins a merge.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Elwood",
             "at_mi": 39.6,
             "off_mi": 11.92,
@@ -7234,11 +7324,51 @@
             "spoken": "Passing Elwood"
           },
           {
+            "name": "Heartland Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.6,
+            "spoken": "Billboard: The Heartland Museum of Military Vehicles, next exit. About a hundred tanks, jeeps and helicopters, many still running. Every one of them wins a merge.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Robert Henri Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.6,
+            "spoken": "Billboard: The Robert Henri Museum, next exit in Cozad. The painter grew up here as Robert Cozad, then left town in a hurry under a new name.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "One Hundredth Meridian Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 52.0,
             "spoken": "One Hundredth Meridian Museum ahead"
+          },
+          {
+            "name": "Robert Henri Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.5,
+            "spoken": "Billboard: The Robert Henri Museum, next exit in Cozad. The painter grew up here as Robert Cozad, then left town in a hurry under a new name.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Pony Express Station (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.0,
+            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Platte River",
@@ -7248,6 +7378,16 @@
             "spoken": "Crossing the Platte River"
           },
           {
+            "name": "Pony Express Station (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 72.0,
+            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Brady",
             "at_mi": 76.3,
             "off_mi": 1.47,
@@ -7255,6 +7395,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151891715, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brady"
+          },
+          {
+            "name": "Golden Spike Tower (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.0,
+            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Maxwell",
@@ -7271,6 +7421,16 @@
             "kind": "point",
             "at_mi": 86.7,
             "spoken": "Crossing the South Platte River"
+          },
+          {
+            "name": "Fort Cody Trading Post (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 90.0,
+            "spoken": "Billboard: Fort Cody Trading Post, ahead in North Platte, where Buffalo Bill's Wild West Show runs in twenty thousand hand-carved figures. Tiny horses, no cleanup.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "interchanges": [
@@ -8023,6 +8183,46 @@
             "spoken": "Passing Elwood"
           },
           {
+            "name": "Heartland Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.8,
+            "spoken": "Billboard: The Heartland Museum of Military Vehicles, next exit. About a hundred tanks, jeeps and helicopters, many still running. Every one of them wins a merge.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Robert Henri Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.6,
+            "spoken": "Billboard: The Robert Henri Museum, next exit in Cozad. The painter grew up here as Robert Cozad, then left town in a hurry under a new name.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Robert Henri Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.4,
+            "spoken": "Billboard: The Robert Henri Museum, next exit in Cozad. The painter grew up here as Robert Cozad, then left town in a hurry under a new name.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Pony Express Station (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.0,
+            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Platte River",
             "category": "river",
             "kind": "point",
@@ -8046,6 +8246,26 @@
             "spoken": "Passing Gothenburg"
           },
           {
+            "name": "Pony Express Station (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 37.0,
+            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Golden Spike Tower (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.0,
+            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Maxwell",
             "at_mi": 49.8,
             "off_mi": 1.75,
@@ -8053,6 +8273,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151702691, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Maxwell"
+          },
+          {
+            "name": "Fort Cody Trading Post (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.0,
+            "spoken": "Billboard: Fort Cody Trading Post, ahead in North Platte, where Buffalo Bill's Wild West Show runs in twenty thousand hand-carved figures. Tiny horses, no cleanup.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "South Platte River",
@@ -11644,6 +11874,16 @@
             "spoken": "Passing Ashland"
           },
           {
+            "name": "Strategic Air Command Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.6,
+            "spoken": "Billboard: The Strategic Air Command Museum, next exit. Thirty aircraft indoors, including the Blackbird, the fastest jet ever flown. Parked, it is slower than you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "South Bend",
             "at_mi": 30.1,
             "off_mi": 3.19,
@@ -11651,6 +11891,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151797412, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing South Bend"
+          },
+          {
+            "name": "Strategic Air Command Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.4,
+            "spoken": "Billboard: The Strategic Air Command Museum, next exit. Thirty aircraft indoors, including the Blackbird, the fastest jet ever flown. Parked, it is slower than you.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Platte River",
@@ -11685,6 +11935,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151803955, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Papillion"
+          },
+          {
+            "name": "Henry Doorly Zoo (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.0,
+            "spoken": "Billboard: The Henry Doorly Zoo, ahead in Omaha, with an indoor rainforest and a desert under a glass dome. Nebraska weather is optional inside.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Ralston",
@@ -11778,6 +12038,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151712554, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Marne"
+          },
+          {
+            "name": "Danish Windmill (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 110.6,
+            "spoken": "Billboard: The Danish Windmill, next exit, north to Elk Horn. Built in Denmark in eighteen forty-eight, shipped over in pieces, and still turning. Some assembly was required.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Danish Windmill (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 113.8,
+            "spoken": "Billboard: The Danish Windmill, next exit, north to Elk Horn. Built in Denmark in eighteen forty-eight, shipped over in pieces, and still turning. Some assembly was required.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "East Nishnabotna River",
@@ -14282,6 +14562,16 @@
             "spoken": "Passing Clatonia"
           },
           {
+            "name": "Homestead National Historical Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.0,
+            "spoken": "Billboard: Homestead National Historical Park, ahead at Beatrice, on the first homestead claim, filed ten minutes after midnight on New Year's Day. Some people cannot wait.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "De Witt",
             "at_mi": 33.0,
             "off_mi": 9.48,
@@ -14305,6 +14595,16 @@
             "kind": "point",
             "at_mi": 42.1,
             "spoken": "Crossing the Big Blue River"
+          },
+          {
+            "name": "Homestead National Historical Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.0,
+            "spoken": "Billboard: Homestead National Historical Park, ahead at Beatrice, on the first homestead claim, filed ten minutes after midnight on New Year's Day. Some people cannot wait.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Odell",
@@ -16134,6 +16434,16 @@
             "spoken": "Passing Ashland"
           },
           {
+            "name": "Strategic Air Command Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.5,
+            "spoken": "Billboard: The Strategic Air Command Museum, next exit. Thirty aircraft indoors, including the Blackbird, the fastest jet ever flown. Parked, it is slower than you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Murdock",
             "at_mi": 27.4,
             "off_mi": 5.75,
@@ -16168,6 +16478,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151404035, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Louisville"
+          },
+          {
+            "name": "Strategic Air Command Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.3,
+            "spoken": "Billboard: The Strategic Air Command Museum, next exit. Thirty aircraft indoors, including the Blackbird, the fastest jet ever flown. Parked, it is slower than you.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Memphis",
@@ -16220,6 +16540,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151803955, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Papillion"
+          },
+          {
+            "name": "Henry Doorly Zoo (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.0,
+            "spoken": "Billboard: The Henry Doorly Zoo, ahead in Omaha, with an indoor rainforest and a desert under a glass dome. Nebraska weather is optional inside.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Waterloo",
@@ -18789,6 +19119,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151948423, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bennington"
+          },
+          {
+            "name": "Henry Doorly Zoo (from Norfolk)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 103.0,
+            "spoken": "Billboard: The Henry Doorly Zoo, ahead in Omaha, with an indoor rainforest and a desert under a glass dome. Nebraska weather is optional inside.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Papillion",
@@ -21714,6 +22054,26 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Golden Spike Tower (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.5,
+            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Fort Cody Trading Post (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: Fort Cody Trading Post, ahead in North Platte, where Buffalo Bill's Wild West Show runs in twenty thousand hand-carved figures. Tiny horses, no cleanup.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "South Platte River",
             "category": "river",
             "kind": "point",
@@ -22249,6 +22609,16 @@
             "spoken": "Crossing the South Platte River"
           },
           {
+            "name": "Fort Cody Trading Post (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.5,
+            "spoken": "Billboard: Fort Cody Trading Post, ahead in North Platte, where Buffalo Bill's Wild West Show runs in twenty thousand hand-carved figures. Tiny horses, no cleanup.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Hershey",
             "at_mi": 13.5,
             "off_mi": 1.47,
@@ -22258,6 +22628,26 @@
             "spoken": "Passing Hershey"
           },
           {
+            "name": "Golden Spike Tower (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.5,
+            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Ole's Big Game Steakhouse (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.5,
+            "spoken": "Billboard: Ole's Big Game Steakhouse, next exit in Paxton. More than two hundred trophy mounts and a polar bear in the bar. He never buys a round.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Paxton",
             "at_mi": 32.1,
             "off_mi": 0.89,
@@ -22265,6 +22655,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151492099, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Paxton"
+          },
+          {
+            "name": "Ole's Big Game Steakhouse (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.5,
+            "spoken": "Billboard: Ole's Big Game Steakhouse, next exit in Paxton. More than two hundred trophy mounts and a polar bear in the bar. He never buys a round.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Front Street (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.0,
+            "spoken": "Billboard: Front Street, ahead in Ogallala. A rebuilt cattle-trail main street with a cowboy museum and a jail cell. Visit the museum. Skip the cell.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Brule",
@@ -23062,6 +23472,16 @@
             "spoken": "Passing Brule"
           },
           {
+            "name": "Front Street (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.0,
+            "spoken": "Billboard: Front Street, ahead in Ogallala. A rebuilt cattle-trail main street with a cowboy museum and a jail cell. Visit the museum. Skip the cell.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Julesburg",
             "at_mi": 29.7,
             "off_mi": 3.79,
@@ -23103,6 +23523,16 @@
             "kind": "point",
             "at_mi": 52.4,
             "spoken": "Lodgepole Depot Museum ahead"
+          },
+          {
+            "name": "The Original Cabela's (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.5,
+            "spoken": "Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -27614,6 +28044,16 @@
             "spoken": "Passing La Vista"
           },
           {
+            "name": "Henry Doorly Zoo (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Henry Doorly Zoo, ahead in Omaha, with an indoor rainforest and a desert under a glass dome. Nebraska weather is optional inside.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Papillion",
             "at_mi": 12.1,
             "off_mi": 3.94,
@@ -27639,6 +28079,16 @@
             "spoken": "Passing Gretna"
           },
           {
+            "name": "Strategic Air Command Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.8,
+            "spoken": "Billboard: The Strategic Air Command Museum, next exit. Thirty aircraft indoors, including the Blackbird, the fastest jet ever flown. Parked, it is slower than you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "South Bend",
             "at_mi": 28.3,
             "off_mi": 3.21,
@@ -27646,6 +28096,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151797412, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing South Bend"
+          },
+          {
+            "name": "Strategic Air Command Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.6,
+            "spoken": "Billboard: The Strategic Air Command Museum, next exit. Thirty aircraft indoors, including the Blackbird, the fastest jet ever flown. Parked, it is slower than you.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Ashland",
@@ -27752,6 +28212,16 @@
             "spoken": "Passing Giltner"
           },
           {
+            "name": "Stuhr Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 134.0,
+            "spoken": "Billboard: The Stuhr Museum, ahead in Grand Island. An eighteen-nineties railroad town of sixty buildings, many moved here. Somebody hauled a lot of oversize loads.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Doniphan",
             "at_mi": 143.6,
             "off_mi": 3.34,
@@ -27759,6 +28229,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151696121, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Doniphan"
+          },
+          {
+            "name": "Stuhr Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 153.0,
+            "spoken": "Billboard: The Stuhr Museum, ahead in Grand Island. An eighteen-nineties railroad town of sixty buildings, many moved here. Somebody hauled a lot of oversize loads.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Denman",
@@ -27789,6 +28269,36 @@
             ]
           },
           {
+            "name": "Pioneer Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 173.6,
+            "spoken": "Billboard: Harold Warp Pioneer Village, next exit, then twelve miles south in Minden. Fifty thousand old things on twenty acres. Nobody here ever threw anything away.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pioneer Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 177.4,
+            "spoken": "Billboard: Harold Warp Pioneer Village, next exit, then twelve miles south in Minden. Fifty thousand old things on twenty acres. Nobody here ever threw anything away.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Great Platte River Road Archway (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 191.0,
+            "spoken": "Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Elm Creek",
             "at_mi": 197.9,
             "off_mi": 1.87,
@@ -27805,6 +28315,46 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151433257, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Overton"
+          },
+          {
+            "name": "Heartland Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 216.5,
+            "spoken": "Billboard: The Heartland Museum of Military Vehicles, next exit. About a hundred tanks, jeeps and helicopters, many still running. Every one of them wins a merge.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Heartland Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 220.3,
+            "spoken": "Billboard: The Heartland Museum of Military Vehicles, next exit. About a hundred tanks, jeeps and helicopters, many still running. Every one of them wins a merge.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Robert Henri Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 230.8,
+            "spoken": "Billboard: The Robert Henri Museum, next exit in Cozad. The painter grew up here as Robert Cozad, then left town in a hurry under a new name.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Robert Henri Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 234.6,
+            "spoken": "Billboard: The Robert Henri Museum, next exit in Cozad. The painter grew up here as Robert Cozad, then left town in a hurry under a new name.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pony Express Station",
@@ -27833,6 +28383,16 @@
             "spoken": "Passing Gothenburg"
           },
           {
+            "name": "Pony Express Station (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 252.0,
+            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Maxwell",
             "at_mi": 265.0,
             "off_mi": 1.75,
@@ -27840,6 +28400,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151702691, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Maxwell"
+          },
+          {
+            "name": "Fort Cody Trading Post (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 267.5,
+            "spoken": "Billboard: Fort Cody Trading Post, ahead in North Platte, where Buffalo Bill's Wild West Show runs in twenty thousand hand-carved figures. Tiny horses, no cleanup.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Golden Spike Tower",
@@ -27852,6 +28422,16 @@
             ]
           },
           {
+            "name": "Fort Cody Trading Post (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 287.0,
+            "spoken": "Billboard: Fort Cody Trading Post, ahead in North Platte, where Buffalo Bill's Wild West Show runs in twenty thousand hand-carved figures. Tiny horses, no cleanup.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Hershey",
             "at_mi": 290.6,
             "off_mi": 1.47,
@@ -27859,6 +28439,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151327669, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hershey"
+          },
+          {
+            "name": "Golden Spike Tower (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 293.5,
+            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Ole's Big Game Steakhouse (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 305.0,
+            "spoken": "Billboard: Ole's Big Game Steakhouse, next exit in Paxton. More than two hundred trophy mounts and a polar bear in the bar. He never buys a round.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "South Platte River",
@@ -27877,6 +28477,26 @@
             "spoken": "Passing Paxton"
           },
           {
+            "name": "Ole's Big Game Steakhouse (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 312.0,
+            "spoken": "Billboard: Ole's Big Game Steakhouse, next exit in Paxton. More than two hundred trophy mounts and a polar bear in the bar. He never buys a round.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Front Street (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 319.0,
+            "spoken": "Billboard: Front Street, ahead in Ogallala. A rebuilt cattle-trail main street with a cowboy museum and a jail cell. Visit the museum. Skip the cell.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Brule",
             "at_mi": 337.5,
             "off_mi": 0.97,
@@ -27884,6 +28504,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151351519, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brule"
+          },
+          {
+            "name": "Front Street (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 340.5,
+            "spoken": "Billboard: Front Street, ahead in Ogallala. A rebuilt cattle-trail main street with a cowboy museum and a jail cell. Visit the museum. Skip the cell.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Julesburg",
@@ -27914,6 +28544,16 @@
             ]
           },
           {
+            "name": "The Original Cabela's (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 404.0,
+            "spoken": "Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Dix",
             "at_mi": 424.8,
             "off_mi": 0.98,
@@ -27939,6 +28579,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151328691, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Burns"
+          },
+          {
+            "name": "Old West Museum (from Omaha)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 488.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "restrictions": [],
@@ -29954,6 +30604,16 @@
             "spoken": "Passing Burns"
           },
           {
+            "name": "Old West Museum (from Scottsbluff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 106.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Ranchettes",
             "at_mi": 114.9,
             "off_mi": 5.38,
@@ -31791,6 +32451,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "The Original Cabela's (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.0,
+            "spoken": "Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Dix",
             "at_mi": 29.8,
             "off_mi": 0.98,
@@ -31816,6 +32486,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151328691, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Burns"
+          },
+          {
+            "name": "Old West Museum (from Sidney)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 93.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Ranchettes",

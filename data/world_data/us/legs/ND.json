@@ -17307,6 +17307,16 @@
             "kind": "point",
             "at_mi": 86.3,
             "spoken": "Crossing the Yellowstone River"
+          },
+          {
+            "name": "Makoshika State Park (from Williston)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 90.0,
+            "spoken": "Billboard: Makoshika State Park, ahead at Glendive. Eleven thousand acres of badlands, and a triceratops skull in the visitor center. It has waited longer than you.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "state_miles": [

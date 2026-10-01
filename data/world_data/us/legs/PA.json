@@ -3338,6 +3338,16 @@
             "spoken": "Passing Loganville"
           },
           {
+            "name": "The Shoe House (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 98.9,
+            "spoken": "Billboard: The Haines Shoe House is ahead. This five-story house is shaped like a work boot and was built by a shoe salesman who understood that subtlety does not sell footwear. These days you can rent it for the night.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Parkton",
             "at_mi": 112.8,
             "off_mi": 0.5,
@@ -7151,6 +7161,16 @@
             "spoken": "Passing Hanover Township"
           },
           {
+            "name": "The Crayola Experience (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.9,
+            "spoken": "Billboard: The Crayola Experience, ahead in Easton. Twenty-five rooms of crayons, and you can melt one into a new shape. Coloring outside the lines is encouraged.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Delaware River",
             "category": "river",
             "kind": "point",
@@ -7181,6 +7201,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158621304, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bloomsbury"
+          },
+          {
+            "name": "The Crayola Experience (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.4,
+            "spoken": "Billboard: The Crayola Experience, ahead in Easton. Twenty-five rooms of crayons, and you can melt one into a new shape. Coloring outside the lines is encouraged.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Red Mill Museum Village (eastbound)",
@@ -10110,6 +10140,16 @@
             "spoken": "Passing Hanover Township"
           },
           {
+            "name": "The Crayola Experience (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.9,
+            "spoken": "Billboard: The Crayola Experience, ahead in Easton. Twenty-five rooms of crayons, and you can melt one into a new shape. Coloring outside the lines is encouraged.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lehigh River",
             "category": "river",
             "kind": "point",
@@ -10176,6 +10216,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158621304, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bloomsbury"
+          },
+          {
+            "name": "The Crayola Experience (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.7,
+            "spoken": "Billboard: The Crayola Experience, ahead in Easton. Twenty-five rooms of crayons, and you can melt one into a new shape. Coloring outside the lines is encouraged.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Red Mill Museum Village (eastbound)",
@@ -13087,6 +13137,16 @@
             "spoken": "Passing Bellwood"
           },
           {
+            "name": "Horseshoe Curve (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.8,
+            "spoken": "Billboard: Horseshoe Curve, ahead outside Altoona. The main line climbs the Alleghenies by bending back on itself. The trains do the hard part. You watch.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Tyrone Historical Society",
             "category": "museum",
             "kind": "point",
@@ -13191,6 +13251,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158336733, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Chester Hill"
+          },
+          {
+            "name": "The Berkey Creamery (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.0,
+            "spoken": "Billboard: Penn State's Berkey Creamery, ahead in State College. Ben and Jerry learned ice cream here by mail, in a course they split for five dollars.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Unionville",
@@ -14314,6 +14384,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158525889, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Plainfield"
+          },
+          {
+            "name": "The Army Heritage and Education Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.2,
+            "spoken": "Billboard: The Army Heritage and Education Center, ahead in Carlisle. Free admission, and an outdoor trail of real tanks and trenches. Those tanks are parked for good.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Dickinson",
@@ -16239,6 +16319,16 @@
             "spoken": "Passing Harborcreek"
           },
           {
+            "name": "Presque Isle State Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Presque Isle State Park, ahead in Erie. Seven miles of sand beach on Lake Erie. Pennsylvania has a seashore, and this is the whole of it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Findley Lake",
             "at_mi": 15.26,
             "off_mi": 6.88,
@@ -16273,6 +16363,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158383984, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mayville"
+          },
+          {
+            "name": "Lily Dale (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.5,
+            "spoken": "Billboard: Lily Dale, ahead, south of Dunkirk. A whole town of mediums since eighteen seventy-nine. They already know you are not stopping.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Portland",
@@ -16343,6 +16443,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158342662, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Silver Creek"
+          },
+          {
+            "name": "Lily Dale (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.5,
+            "spoken": "Billboard: Lily Dale, ahead, south of Dunkirk. A whole town of mediums since eighteen seventy-nine. They already know you are not stopping.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sunset Bay",
@@ -16417,6 +16527,16 @@
             "spoken": "Passing Wanakah"
           },
           {
+            "name": "The Anchor Bar (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.8,
+            "spoken": "Billboard: The Anchor Bar, ahead in Buffalo, where Buffalo wings were invented in nineteen sixty-four. Before that, wings went into the soup pot.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "North Boston",
             "at_mi": 80.66,
             "off_mi": 5.14,
@@ -16424,6 +16544,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157547586, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing North Boston"
+          },
+          {
+            "name": "Niagara Falls State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 82.0,
+            "spoken": "Billboard: Niagara Falls State Park, twenty miles north of Buffalo. The oldest state park in America, since eighteen eighty-five. The falls have not paused once.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Orchard Park",
@@ -18253,6 +18383,16 @@
             "spoken": "Passing McKean"
           },
           {
+            "name": "Presque Isle State Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Presque Isle State Park, ahead in Erie. Seven miles of sand beach on Lake Erie. Pennsylvania has a seashore, and this is the whole of it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Fairview",
             "at_mi": 14.6,
             "off_mi": 2.02,
@@ -18303,6 +18443,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153832528, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kingsville"
+          },
+          {
+            "name": "Ashtabula Covered Bridges (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 41.3,
+            "spoken": "Billboard: Ashtabula County, ahead. Seventeen covered bridges, including the longest in the country and the shortest one you can drive through. Nobody here does medium.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Plymouth",
@@ -18373,6 +18523,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154291048, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing North Madison"
+          },
+          {
+            "name": "Ashtabula Covered Bridges (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.9,
+            "spoken": "Billboard: Ashtabula County, ahead. Seventeen covered bridges, including the longest in the country and the shortest one you can drive through. Nobody here does medium.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Grand River",
@@ -19566,6 +19726,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 8330711687, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Harborcreek"
+          },
+          {
+            "name": "Presque Isle State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.1,
+            "spoken": "Billboard: Presque Isle State Park, ahead in Erie. Seven miles of sand beach on Lake Erie. Pennsylvania has a seashore, and this is the whole of it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Waterford",
@@ -21436,6 +21606,16 @@
             "spoken": "Passing Strausstown"
           },
           {
+            "name": "Hawk Mountain Sanctuary (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.3,
+            "spoken": "Billboard: Hawk Mountain Sanctuary, ahead, north of Hamburg. Each fall about eighteen thousand hawks pass its lookout. Not one of them stops for fuel.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Shartlesville",
             "at_mi": 46.5,
             "off_mi": 0.27,
@@ -21504,6 +21684,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158524877, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kempton"
+          },
+          {
+            "name": "Hawk Mountain Sanctuary (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.2,
+            "spoken": "Billboard: Hawk Mountain Sanctuary, ahead, north of Hamburg. Each fall about eighteen thousand hawks pass its lookout. Not one of them stops for fuel.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kutztown",
@@ -24425,6 +24615,16 @@
             "spoken": "Passing Duncannon"
           },
           {
+            "name": "The Army Heritage and Education Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.2,
+            "spoken": "Billboard: The Army Heritage and Education Center, ahead in Carlisle. Free admission, and an outdoor trail of real tanks and trenches. Those tanks are parked for good.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Mechanicsburg",
             "at_mi": 11.7,
             "off_mi": 4.41,
@@ -26662,6 +26862,16 @@
             "spoken": "Passing West Pikeland"
           },
           {
+            "name": "Valley Forge National Historical Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 78.0,
+            "spoken": "Billboard: Valley Forge National Historical Park, ahead. Washington's army spent the winter of seventeen seventy-seven here. Your heater works. Be grateful.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Charlestown",
             "at_mi": 79.5,
             "off_mi": 1.51,
@@ -26768,6 +26978,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158398044, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bala Cynwyd"
+          },
+          {
+            "name": "Valley Forge National Historical Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.5,
+            "spoken": "Billboard: Valley Forge National Historical Park, ahead. Washington's army spent the winter of seventeen seventy-seven here. Your heater works. Be grateful.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "toll_events": [
@@ -29893,6 +30113,16 @@
             "spoken": "Passing Marysville"
           },
           {
+            "name": "The Army Heritage and Education Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.7,
+            "spoken": "Billboard: The Army Heritage and Education Center, ahead in Carlisle. Free admission, and an outdoor trail of real tanks and trenches. Those tanks are parked for good.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "New Kingstown",
             "at_mi": 15.5,
             "off_mi": 0.91,
@@ -29909,6 +30139,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158525889, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Plainfield"
+          },
+          {
+            "name": "The Army Heritage and Education Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.7,
+            "spoken": "Billboard: The Army Heritage and Education Center, ahead in Carlisle. Free admission, and an outdoor trail of real tanks and trenches. Those tanks are parked for good.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Raystown Branch Juniata River",
@@ -29945,6 +30185,16 @@
             "spoken": "Passing Everett"
           },
           {
+            "name": "The Bedford Coffee Pot (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 94.1,
+            "spoken": "Billboard: The Bedford Coffee Pot, ahead. A coffee pot building from nineteen twenty-seven. It has been a bar and a bus stop, never a coffee shop.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Napier",
             "at_mi": 103.7,
             "off_mi": 0.41,
@@ -29963,6 +30213,16 @@
             "spoken": "Passing Manns Choice"
           },
           {
+            "name": "The Bedford Coffee Pot (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 114.1,
+            "spoken": "Billboard: The Bedford Coffee Pot, ahead. A coffee pot building from nineteen twenty-seven. It has been a bar and a bus stop, never a coffee shop.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "New Baltimore",
             "at_mi": 117.4,
             "off_mi": 0.15,
@@ -29979,6 +30239,26 @@
             "spoken": "Crossing the Stonycreek River"
           },
           {
+            "name": "Flight Ninety-Three National Memorial",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 138.2,
+            "spoken": "You are passing near Shanksville, where the Flight Ninety-Three National Memorial honors the forty passengers and crew of September eleventh, two thousand one.",
+            "directions": [
+              "both"
+            ]
+          },
+          {
+            "name": "Fallingwater (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 146.0,
+            "spoken": "Billboard: Fallingwater, ahead, south of the Donegal exit. Frank Lloyd Wright built the house right over a waterfall. The waterfall was not consulted.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Powder Mill Nature Reserve",
             "category": "museum",
             "kind": "point",
@@ -29993,6 +30273,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158642358, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Donegal"
+          },
+          {
+            "name": "Fallingwater (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 166.0,
+            "spoken": "Billboard: Fallingwater, ahead, south of the Donegal exit. Frank Lloyd Wright built the house right over a waterfall. The waterfall was not consulted.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hunker",
@@ -32993,6 +33283,16 @@
             "spoken": "Passing Tremont"
           },
           {
+            "name": "Pioneer Tunnel Coal Mine (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.8,
+            "spoken": "Billboard: Pioneer Tunnel Coal Mine, ahead in Ashland. Ride an open mine car eighteen hundred feet into a real coal mine. Your cab has more legroom.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Gordon",
             "at_mi": 52.5,
             "off_mi": 1.74,
@@ -33043,6 +33343,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157600502, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Delano"
+          },
+          {
+            "name": "Pioneer Tunnel Coal Mine (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 71.1,
+            "spoken": "Billboard: Pioneer Tunnel Coal Mine, ahead in Ashland. Ride an open mine car eighteen hundred feet into a real coal mine. Your cab has more legroom.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "McAdoo",
@@ -33203,6 +33513,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158386314, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Old Forge"
+          },
+          {
+            "name": "Steamtown National Historic Site (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 116.7,
+            "spoken": "Billboard: Steamtown National Historic Site, ahead in Scranton. Real steam locomotives in a working roundhouse, and admission is free. The paper company is a different show.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "restrictions": [],
@@ -46009,6 +46329,16 @@
         ],
         "landmarks": [
           {
+            "name": "Valley Forge National Historical Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.3,
+            "spoken": "Billboard: Valley Forge National Historical Park, ahead. Washington's army spent the winter of seventeen seventy-seven here. Your heater works. Be grateful.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Spring Mill",
             "at_mi": 12.1,
             "off_mi": 0.34,
@@ -46052,6 +46382,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158612026, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Chesterbrook"
+          },
+          {
+            "name": "Valley Forge National Historical Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.3,
+            "spoken": "Billboard: Valley Forge National Historical Park, ahead. Washington's army spent the winter of seventeen seventy-seven here. Your heater works. Be grateful.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Eagleview",
@@ -46124,6 +46464,16 @@
             "spoken": "Entering Highspire"
           },
           {
+            "name": "The Army Heritage and Education Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 107.7,
+            "spoken": "Billboard: The Army Heritage and Education Center, ahead in Carlisle. Free admission, and an outdoor trail of real tanks and trenches. Those tanks are parked for good.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "The Oakes Museum of Natural History",
             "category": "museum",
             "kind": "point",
@@ -46138,6 +46488,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158525889, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Plainfield"
+          },
+          {
+            "name": "The Army Heritage and Education Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 129.0,
+            "spoken": "Billboard: The Army Heritage and Education Center, ahead in Carlisle. Free admission, and an outdoor trail of real tanks and trenches. Those tanks are parked for good.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Breezewood",
@@ -46174,6 +46534,16 @@
             "spoken": "Passing Everett"
           },
           {
+            "name": "The Bedford Coffee Pot (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 199.5,
+            "spoken": "Billboard: The Bedford Coffee Pot, next exit. A coffee pot building from nineteen twenty-seven. It has been a bar and a bus stop, never a coffee shop.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Napier",
             "at_mi": 203.7,
             "off_mi": 0.41,
@@ -46192,6 +46562,16 @@
             "spoken": "Passing Manns Choice"
           },
           {
+            "name": "The Bedford Coffee Pot (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 211.0,
+            "spoken": "Billboard: The Bedford Coffee Pot, ahead. A coffee pot building from nineteen twenty-seven. It has been a bar and a bus stop, never a coffee shop.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "New Baltimore",
             "at_mi": 217.3,
             "off_mi": 0.15,
@@ -46201,11 +46581,31 @@
             "spoken": "Entering New Baltimore"
           },
           {
+            "name": "Flight Ninety-Three National Memorial",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 237.5,
+            "spoken": "You are passing near Shanksville, where the Flight Ninety-Three National Memorial honors the forty passengers and crew of September eleventh, two thousand one.",
+            "directions": [
+              "both"
+            ]
+          },
+          {
             "name": "Stonycreek River",
             "category": "river",
             "kind": "point",
             "at_mi": 240.3,
             "spoken": "Crossing the Stonycreek River"
+          },
+          {
+            "name": "Fallingwater (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 246.4,
+            "spoken": "Billboard: Fallingwater, ahead, south of the Donegal exit. Frank Lloyd Wright built the house right over a waterfall. The waterfall was not consulted.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Donegal",
@@ -46215,6 +46615,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158642358, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Donegal"
+          },
+          {
+            "name": "Fallingwater (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 258.5,
+            "spoken": "Billboard: Fallingwater, next exit, nineteen miles south. Frank Lloyd Wright built the house right over a waterfall. The waterfall was not consulted.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "New Stanton",
@@ -48505,6 +48915,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158420725, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Tunnelhill"
+          },
+          {
+            "name": "Horseshoe Curve (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 87.6,
+            "spoken": "Billboard: Horseshoe Curve, ahead outside Altoona. The main line climbs the Alleghenies by bending back on itself. The trains do the hard part. You watch.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Duncansville",
@@ -51199,6 +51619,16 @@
             "spoken": "Passing Hunker"
           },
           {
+            "name": "Fallingwater (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.6,
+            "spoken": "Billboard: Fallingwater, next exit, nineteen miles south. Frank Lloyd Wright built the house right over a waterfall. The waterfall was not consulted.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Donegal",
             "at_mi": 48.8,
             "off_mi": 0.17,
@@ -51208,6 +51638,26 @@
             "spoken": "Entering Donegal"
           },
           {
+            "name": "Fallingwater (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.0,
+            "spoken": "Billboard: Fallingwater, next exit, nineteen miles south. Frank Lloyd Wright built the house right over a waterfall. The waterfall was not consulted.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Flight Ninety-Three National Memorial",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 68.8,
+            "spoken": "You are passing near Shanksville, where the Flight Ninety-Three National Memorial honors the forty passengers and crew of September eleventh, two thousand one.",
+            "directions": [
+              "both"
+            ]
+          },
+          {
             "name": "New Baltimore",
             "at_mi": 87.7,
             "off_mi": 0.16,
@@ -51215,6 +51665,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158340467, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering New Baltimore"
+          },
+          {
+            "name": "The Bedford Coffee Pot (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 92.3,
+            "spoken": "Billboard: The Bedford Coffee Pot, ahead. A coffee pot building from nineteen twenty-seven. It has been a bar and a bus stop, never a coffee shop.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Raystown Branch Juniata River",
@@ -51267,6 +51727,16 @@
             "spoken": "Entering Earlston"
           },
           {
+            "name": "The Bedford Coffee Pot (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 115.9,
+            "spoken": "Billboard: The Bedford Coffee Pot, ahead. A coffee pot building from nineteen twenty-seven. It has been a bar and a bus stop, never a coffee shop.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Breezewood",
             "at_mi": 121.9,
             "off_mi": 0.85,
@@ -51283,6 +51753,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 33126191, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Newville"
+          },
+          {
+            "name": "The Army Heritage and Education Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 175.9,
+            "spoken": "Billboard: The Army Heritage and Education Center, ahead in Carlisle. Free admission, and an outdoor trail of real tanks and trenches. Those tanks are parked for good.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Plainfield",
@@ -57387,6 +57867,16 @@
             "spoken": "Passing Hunker"
           },
           {
+            "name": "Fallingwater (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.7,
+            "spoken": "Billboard: Fallingwater, next exit, nineteen miles south. Frank Lloyd Wright built the house right over a waterfall. The waterfall was not consulted.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Donegal",
             "at_mi": 48.9,
             "off_mi": 0.17,
@@ -57396,11 +57886,31 @@
             "spoken": "Entering Donegal"
           },
           {
+            "name": "Fallingwater (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.1,
+            "spoken": "Billboard: Fallingwater, next exit, nineteen miles south. Frank Lloyd Wright built the house right over a waterfall. The waterfall was not consulted.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Powder Mill Nature Reserve",
             "category": "museum",
             "kind": "point",
             "at_mi": 53.9,
             "spoken": "Museum ahead: Powder Mill Nature Reserve"
+          },
+          {
+            "name": "Flight Ninety-Three National Memorial",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 67.4,
+            "spoken": "You are passing near Shanksville, where the Flight Ninety-Three National Memorial honors the forty passengers and crew of September eleventh, two thousand one.",
+            "directions": [
+              "both"
+            ]
           },
           {
             "name": "Somerset",
@@ -57426,6 +57936,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158340467, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering New Baltimore"
+          },
+          {
+            "name": "The Bedford Coffee Pot (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 94.4,
+            "spoken": "Billboard: The Bedford Coffee Pot, ahead. A coffee pot building from nineteen twenty-seven. It has been a bar and a bus stop, never a coffee shop.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Manns Choice",
@@ -57478,6 +57998,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158255253, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Earlston"
+          },
+          {
+            "name": "The Bedford Coffee Pot (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 116.1,
+            "spoken": "Billboard: The Bedford Coffee Pot, ahead. A coffee pot building from nineteen twenty-seven. It has been a bar and a bus stop, never a coffee shop.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Breezewood",
@@ -59887,6 +60417,16 @@
             "spoken": "Passing Wyoming"
           },
           {
+            "name": "Steamtown National Historic Site (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.2,
+            "spoken": "Billboard: Steamtown National Historic Site, ahead in Scranton. Real steam locomotives in a working roundhouse, and admission is free. The paper company is a different show.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Laflin",
             "at_mi": 14.4,
             "off_mi": 1.98,
@@ -59971,6 +60511,16 @@
             "kind": "zone",
             "at_mi": 40.7,
             "spoken": "Entering Hickory Run State Park"
+          },
+          {
+            "name": "Jim Thorpe (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.5,
+            "spoken": "Billboard: Jim Thorpe, next exit. The Olympic champion never set foot in this town. It took his name in nineteen fifty-four, and he rests there now.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Weissport",
@@ -61580,6 +62130,16 @@
             "spoken": "Passing Waverly"
           },
           {
+            "name": "Steamtown National Historic Site (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Steamtown National Historic Site, ahead in Scranton. Real steam locomotives in a working roundhouse, and admission is free. The paper company is a different show.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Jermyn",
             "at_mi": 10.9,
             "off_mi": 5.48,
@@ -61729,6 +62289,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158367823, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Kirkwood"
+          },
+          {
+            "name": "The Binghamton carousels (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.5,
+            "spoken": "Billboard: Binghamton, ahead, the Carousel Capital of the World. Six antique merry-go-rounds, free all summer. The fare is one piece of litter.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Chenango River",
@@ -64756,6 +65326,16 @@
         ],
         "landmarks": [
           {
+            "name": "The World of Little League Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The World of Little League Museum, ahead in South Williamsport. Every August the world watches twelve-year-olds play baseball here. Some throw harder than you.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Muncy",
             "at_mi": 11.88,
             "off_mi": 2.52,
@@ -65029,6 +65609,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158619641, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Endwell"
+          },
+          {
+            "name": "The Binghamton carousels (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 119.5,
+            "spoken": "Billboard: Binghamton, ahead, the Carousel Capital of the World. Six antique merry-go-rounds, free all summer. The fare is one piece of litter.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Chenango Bridge",
@@ -66303,6 +66893,16 @@
           }
         ],
         "landmarks": [
+          {
+            "name": "The World of Little League Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.2,
+            "spoken": "Billboard: The World of Little League Museum, ahead in South Williamsport. Every August the world watches twelve-year-olds play baseball here. Some throw harder than you.",
+            "directions": [
+              "reverse"
+            ]
+          },
           {
             "name": "West Branch Susquehanna River",
             "category": "river",
@@ -67729,6 +68329,16 @@
             "spoken": "Passing Bastress"
           },
           {
+            "name": "The World of Little League Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.5,
+            "spoken": "Billboard: The World of Little League Museum, ahead in South Williamsport. Every August the world watches twelve-year-olds play baseball here. Some throw harder than you.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Salladasburg",
             "at_mi": 12.49,
             "off_mi": 4.0,
@@ -67853,6 +68463,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 107452459, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bellefonte"
+          },
+          {
+            "name": "The Berkey Creamery (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.9,
+            "spoken": "Billboard: Penn State's Berkey Creamery, ahead in State College. Ben and Jerry learned ice cream here by mail, in a course they split for five dollars.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Centre Hall",

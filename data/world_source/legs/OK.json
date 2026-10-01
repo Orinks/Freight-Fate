@@ -6599,6 +6599,16 @@
             "spoken": "Passing Lone Grove"
           },
           {
+            "name": "WinStar World Casino (from Ardmore)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.3,
+            "spoken": "Billboard: WinStar World Casino, ahead at Thackerville, the biggest casino floor in the country, one exit before Texas. Leave the trailer keys in the truck.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Frank Buck Zoo (southbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -10979,6 +10989,16 @@
             "spoken": "Crossing the Caney River"
           },
           {
+            "name": "Woolaroc (from Coffeyville)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Woolaroc, ahead near Bartlesville, an oilman's ranch with bison and longhorns, and the plane that won the nineteen twenty-seven air race to Hawaii.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Copan",
             "at_mi": 12.2,
             "off_mi": 0.59,
@@ -11886,6 +11906,16 @@
           }
         ],
         "landmarks": [
+          {
+            "name": "Boise City Bomb Memorial (from Lamar)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.1,
+            "spoken": "Billboard: Boise City, ahead. In nineteen forty-three a lost bomber crew dropped practice bombs on the town square. Nobody was hurt. The crew skipped the reunion.",
+            "directions": [
+              "reverse"
+            ]
+          },
           {
             "name": "Cimmaron River",
             "category": "river",
@@ -16877,6 +16907,16 @@
             "spoken": "Passing Geronimo"
           },
           {
+            "name": "Wichita Mountains Wildlife Refuge (from Lawton)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Wichita Mountains Wildlife Refuge, ahead near Lawton. The bison herd began with fifteen from the Bronx Zoo in nineteen oh-seven. None of them miss New York.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Medicine Park",
             "at_mi": 8.3,
             "off_mi": 5.74,
@@ -16893,6 +16933,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151516477, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Apache"
+          },
+          {
+            "name": "Wichita Mountains Wildlife Refuge (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.3,
+            "spoken": "Billboard: Wichita Mountains Wildlife Refuge, ahead near Lawton. The bison herd began with fifteen from the Bronx Zoo in nineteen oh-seven. None of them miss New York.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Fletcher",
@@ -17067,6 +17117,16 @@
             "kind": "point",
             "at_mi": 76.6,
             "spoken": "Crossing the Oklahoma River"
+          },
+          {
+            "name": "National Cowboy Museum (from Lawton)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 78.9,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Yukon",
@@ -21068,6 +21128,16 @@
             "spoken": "Passing Paradise Hill"
           },
           {
+            "name": "Sequoyah's Cabin (from Muskogee)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.8,
+            "spoken": "Billboard: Sequoyah's Cabin, ahead near Sallisaw. Sequoyah lived here from eighteen twenty-nine; he gave the Cherokee their written language. Now a Cherokee Nation museum.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Tamaha",
             "at_mi": 38.0,
             "off_mi": 5.54,
@@ -21102,6 +21172,16 @@
             "spoken": "Billboard: The United States Marshals Museum, ahead in Fort Smith. The building is shaped like a marshal's badge. Drive like somebody is watching.",
             "directions": [
               "forward"
+            ]
+          },
+          {
+            "name": "Sequoyah's Cabin (from Fort Smith)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.7,
+            "spoken": "Billboard: Sequoyah's Cabin, ahead near Sallisaw. Sequoyah lived here from eighteen twenty-nine; he gave the Cherokee their written language. Now a Cherokee Nation museum.",
+            "directions": [
+              "reverse"
             ]
           },
           {
@@ -25061,6 +25141,16 @@
             "spoken": "Passing Bethany"
           },
           {
+            "name": "National Cowboy Museum (from Amarillo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mustang",
             "at_mi": 11.4,
             "off_mi": 5.39,
@@ -25124,6 +25214,16 @@
             "spoken": "Passing Bridgeport"
           },
           {
+            "name": "Stafford Air and Space Museum (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.9,
+            "spoken": "Billboard: The Stafford Air and Space Museum, ahead in Weatherford. The town's own astronaut flew four missions, one around the Moon. His Gemini capsule retired here.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Hydro",
             "at_mi": 62.2,
             "off_mi": 0.86,
@@ -25138,6 +25238,26 @@
             "kind": "point",
             "at_mi": 72.9,
             "spoken": "Crossing the Washita River"
+          },
+          {
+            "name": "Oklahoma Route 66 Museum (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 76.5,
+            "spoken": "Billboard: The Oklahoma Route sixty-six Museum, ahead in Clinton. It covers Chicago to Santa Monica in a single building. Much quicker than driving it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Stafford Air and Space Museum (from Amarillo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 78.8,
+            "spoken": "Billboard: The Stafford Air and Space Museum, ahead in Weatherford. The town's own astronaut flew four missions, one around the Moon. His Gemini capsule retired here.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Arapaho",
@@ -25165,6 +25285,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151341515, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bessie"
+          },
+          {
+            "name": "Oklahoma Route 66 Museum (from Amarillo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 94.5,
+            "spoken": "Billboard: The Oklahoma Route sixty-six Museum, ahead in Clinton. It covers Chicago to Santa Monica in a single building. Much quicker than driving it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Foss",
@@ -27086,6 +27216,16 @@
             "spoken": "Passing Valley Brook"
           },
           {
+            "name": "National Cowboy Museum (from Ardmore)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Oklahoma River",
             "category": "river",
             "kind": "point",
@@ -27233,6 +27373,16 @@
             "spoken": "Passing Katie"
           },
           {
+            "name": "Turner Falls Park (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.7,
+            "spoken": "Billboard: Turner Falls Park, ahead near Davis, a seventy-seven-foot waterfall in the Arbuckle Mountains, and a stone castle a professor built for his summers.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Davis",
             "at_mi": 74.7,
             "off_mi": 2.65,
@@ -27283,6 +27433,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151951992, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gene Autry"
+          },
+          {
+            "name": "Turner Falls Park (from Ardmore)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 89.5,
+            "spoken": "Billboard: Turner Falls Park, ahead near Davis, a seventy-seven-foot waterfall in the Arbuckle Mountains, and a stone castle a professor built for his summers.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lone Grove",
@@ -29920,6 +30080,16 @@
             "spoken": "Crossing the North Canadian River"
           },
           {
+            "name": "National Cowboy Museum (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.0,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Arcadia",
             "at_mi": 19.7,
             "off_mi": 3.26,
@@ -29983,6 +30153,16 @@
             "spoken": "Passing Carney"
           },
           {
+            "name": "Rock Cafe (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.2,
+            "spoken": "Billboard: The Rock Cafe, ahead in Stroud, built of leftover Route sixty-six sandstone and open since nineteen thirty-nine. Its owner inspired Sally, the Porsche in Cars.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Davenport",
             "at_mi": 50.9,
             "off_mi": 2.41,
@@ -29999,6 +30179,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 5150687917, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Stroud"
+          },
+          {
+            "name": "Rock Cafe (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.3,
+            "spoken": "Billboard: The Rock Cafe, ahead in Stroud, built of leftover Route sixty-six sandstone and open since nineteen thirty-nine. Its owner inspired Sally, the Porsche in Cars.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Depew",
@@ -30051,6 +30241,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151536096, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Glenpool"
+          },
+          {
+            "name": "Golden Driller (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 96.9,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Jenks",
@@ -32401,6 +32601,16 @@
             "spoken": "Passing Jones"
           },
           {
+            "name": "National Cowboy Museum (from Wichita)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.0,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Arcadia",
             "at_mi": 18.5,
             "off_mi": 5.14,
@@ -33684,6 +33894,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151731482, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Jenks"
+          },
+          {
+            "name": "Golden Driller (from Okmulgee)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.9,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Arkansas River",
@@ -35692,6 +35912,16 @@
             "kind": "point",
             "at_mi": 5.16,
             "spoken": "Crossing the Salt Fork Arkansas River"
+          },
+          {
+            "name": "Marland Mansion (from Stillwater)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The Marland Mansion, ahead in Ponca City. An oilman built fifty-five rooms, lost his company to Wall Street, and moved out. Easy come.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Marland",
@@ -37729,6 +37959,16 @@
             "spoken": "Passing Spencer"
           },
           {
+            "name": "National Cowboy Museum (from Stillwater)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.8,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "The Village",
             "at_mi": 60.57,
             "off_mi": 1.99,
@@ -38851,6 +39091,16 @@
             "spoken": "Entering Westport"
           },
           {
+            "name": "Golden Driller (from Stillwater)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.0,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sapulpa",
             "at_mi": 63.91,
             "off_mi": 9.42,
@@ -39816,6 +40066,16 @@
             "spoken": "Passing Owasso"
           },
           {
+            "name": "Golden Driller (from Bartlesville)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.9,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Sperry",
             "at_mi": 11.6,
             "off_mi": 3.75,
@@ -39877,6 +40137,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151869296, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ochelata"
+          },
+          {
+            "name": "Woolaroc (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 37.0,
+            "spoken": "Billboard: Woolaroc, ahead near Bartlesville, an oilman's ranch with bison and longhorns, and the plane that won the nineteen twenty-seven air race to Hawaii.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Caney River",
@@ -40922,6 +41192,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151638360, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sapulpa"
+          },
+          {
+            "name": "Golden Driller (from Enid)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Arkansas River",
@@ -42753,6 +43033,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151327029, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Broken Arrow"
+          },
+          {
+            "name": "Golden Driller (from Fayetteville)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.4,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Verdigris River",
@@ -45777,6 +46067,26 @@
         ],
         "landmarks": [
           {
+            "name": "Blue Whale of Catoosa (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.9,
+            "spoken": "Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Golden Driller (from Kansas City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.4,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Verdigris River",
             "category": "river",
             "kind": "point",
@@ -45800,6 +46110,56 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151687536, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Verdigris"
+          },
+          {
+            "name": "Will Rogers Memorial Museum (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.3,
+            "spoken": "Billboard: The Will Rogers Memorial Museum, ahead in Claremore. He never met a man he didn't like, he said. He never met your dispatcher.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Blue Whale of Catoosa (from Kansas City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.9,
+            "spoken": "Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "World's Largest Totem Pole (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.7,
+            "spoken": "Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Will Rogers Memorial Museum (from Kansas City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.6,
+            "spoken": "Billboard: The Will Rogers Memorial Museum, ahead in Claremore. He never met a man he didn't like, he said. He never met your dispatcher.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "World's Largest Totem Pole (from Kansas City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.7,
+            "spoken": "Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Big Cabin",
@@ -45827,6 +46187,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151400520, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fairland"
+          },
+          {
+            "name": "Coleman Theatre (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.9,
+            "spoken": "Billboard: The Coleman Theatre, ahead in Miami, Oklahoma, a nineteen twenty-nine movie palace on Route sixty-six. Its Wurlitzer organ is a year older than the building.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "North Miami",
@@ -47124,6 +47494,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151906252, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bixby"
+          },
+          {
+            "name": "Golden Driller (from Muskogee)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.5,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Coweta",

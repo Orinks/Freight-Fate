@@ -14048,6 +14048,16 @@
             "spoken": "Crossing the Little Bighorn River"
           },
           {
+            "name": "Little Bighorn Battlefield (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 254.5,
+            "spoken": "Billboard: Little Bighorn Battlefield National Monument, ahead at Crow Agency. Where the Lakota, Northern Cheyenne and Arapaho defeated Custer's Seventh Cavalry in June of eighteen seventy-six.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Crow Agency",
             "at_mi": 262.3,
             "off_mi": 0.08,
@@ -14055,6 +14065,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151422867, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Crow Agency"
+          },
+          {
+            "name": "Little Bighorn Battlefield (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 270.5,
+            "spoken": "Billboard: Little Bighorn Battlefield National Monument, ahead at Crow Agency. Where the Lakota, Northern Cheyenne and Arapaho defeated Custer's Seventh Cavalry in June of eighteen seventy-six.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bighorn River",
@@ -27157,6 +27177,16 @@
             "kind": "point",
             "at_mi": 86.1,
             "spoken": "Sioux City Public Museum ahead"
+          },
+          {
+            "name": "Sergeant Floyd Monument (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 89.3,
+            "spoken": "Billboard: The Sergeant Floyd Monument, ahead, the first National Historic Landmark. The only man Lewis and Clark lost on their journey is buried under it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Dakota City",

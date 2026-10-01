@@ -5991,6 +5991,16 @@
             "spoken": "Crossing the Bighorn River"
           },
           {
+            "name": "Little Bighorn Battlefield (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.5,
+            "spoken": "Billboard: Little Bighorn Battlefield National Monument, ahead at Crow Agency. Where the Lakota, Northern Cheyenne and Arapaho defeated Custer's Seventh Cavalry in June of eighteen seventy-six.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Crow Agency",
             "at_mi": 58.7,
             "off_mi": 0.09,
@@ -5998,6 +6008,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151422867, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Crow Agency"
+          },
+          {
+            "name": "Little Bighorn Battlefield (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.0,
+            "spoken": "Billboard: Little Bighorn Battlefield National Monument, ahead at Crow Agency. Where the Lakota, Northern Cheyenne and Arapaho defeated Custer's Seventh Cavalry in June of eighteen seventy-six.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Little Bighorn River",
@@ -6016,11 +6036,31 @@
             "spoken": "Passing Dayton"
           },
           {
+            "name": "King's Saddlery (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 119.0,
+            "spoken": "Billboard: King's Saddlery, ahead in Sheridan. Ropes made on site and a museum of nearly six hundred saddles. Your seat has never felt so plain.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Tongue River",
             "category": "river",
             "kind": "point",
             "at_mi": 126.1,
             "spoken": "Crossing the Tongue River"
+          },
+          {
+            "name": "King's Saddlery (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 137.0,
+            "spoken": "Billboard: King's Saddlery, ahead in Sheridan. Ropes made on site and a museum of nearly six hundred saddles. Your seat has never felt so plain.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Story",
@@ -6030,6 +6070,46 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151907521, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Story"
+          },
+          {
+            "name": "Fort Phil Kearny (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 148.3,
+            "spoken": "Billboard: Fort Phil Kearny State Historic Site, next exit. The Bozeman Trail fort Red Cloud's alliance fought to close. In eighteen sixty-eight, the army left.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Fort Phil Kearny (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 152.0,
+            "spoken": "Billboard: Fort Phil Kearny State Historic Site, next exit. The Bozeman Trail fort Red Cloud's alliance fought to close. In eighteen sixty-eight, the army left.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Occidental Hotel (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 155.0,
+            "spoken": "Billboard: The Occidental Hotel, ahead in Buffalo. Owen Wister found characters for The Virginian in its lobby. The saloon kept its bullet holes, for the atmosphere.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Occidental Hotel (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 173.0,
+            "spoken": "Billboard: The Occidental Hotel, ahead in Buffalo. Owen Wister found characters for The Virginian in its lobby. The saloon kept its bullet holes, for the atmosphere.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "North Fork Powder River",
@@ -6062,6 +6142,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151756821, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Midwest"
+          },
+          {
+            "name": "Trails Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 264.5,
+            "spoken": "Billboard: The National Historic Trails Interpretive Center, ahead in Casper. Half a million emigrants followed the river through here on the way west. Most of them walked.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "North Platte River",
@@ -6098,6 +6188,16 @@
             "spoken": "Passing Casper Mountain"
           },
           {
+            "name": "Trails Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 284.0,
+            "spoken": "Billboard: The National Historic Trails Interpretive Center, ahead in Casper. Half a million emigrants followed the river through here on the way west. Most of them walked.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Rolling Hills",
             "at_mi": 299.2,
             "off_mi": 4.82,
@@ -6107,6 +6207,26 @@
             "spoken": "Passing Rolling Hills"
           },
           {
+            "name": "Douglas jackalope (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 313.5,
+            "spoken": "Billboard: Douglas, ahead, home of the jackalope, the antlered rabbit a local taxidermist dreamed up. Several statues in town. Wild sightings remain unconfirmed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Douglas jackalope (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 336.0,
+            "spoken": "Billboard: Douglas, ahead, home of the jackalope, the antlered rabbit a local taxidermist dreamed up. Several statues in town. Wild sightings remain unconfirmed.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Glendo",
             "at_mi": 351.6,
             "off_mi": 0.22,
@@ -6114,6 +6234,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151385011, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Glendo"
+          },
+          {
+            "name": "Oregon Trail Ruts (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 369.3,
+            "spoken": "Billboard: The Oregon Trail Ruts, east of the next exit at Guernsey. Wagon wheels wore them five feet deep into sandstone. Your tires lack ambition.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Oregon Trail Ruts (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 372.7,
+            "spoken": "Billboard: The Oregon Trail Ruts, east of the next exit at Guernsey. Wagon wheels wore them five feet deep into sandstone. Your tires lack ambition.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "North Laramie River",
@@ -6130,6 +6270,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151884194, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Chugwater"
+          },
+          {
+            "name": "Old West Museum (from Billings)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 443.5,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Ranchettes",
@@ -12961,6 +13111,16 @@
             "spoken": "Crossing the Bighorn River"
           },
           {
+            "name": "Little Bighorn Battlefield (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.5,
+            "spoken": "Billboard: Little Bighorn Battlefield National Monument, ahead at Crow Agency. Where the Lakota, Northern Cheyenne and Arapaho defeated Custer's Seventh Cavalry in June of eighteen seventy-six.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Crow Agency",
             "at_mi": 58.6,
             "off_mi": 0.09,
@@ -12968,6 +13128,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151422867, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Crow Agency"
+          },
+          {
+            "name": "Little Bighorn Battlefield (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.0,
+            "spoken": "Billboard: Little Bighorn Battlefield National Monument, ahead at Crow Agency. Where the Lakota, Northern Cheyenne and Arapaho defeated Custer's Seventh Cavalry in June of eighteen seventy-six.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Little Bighorn River",
@@ -12986,11 +13156,31 @@
             "spoken": "Passing Dayton"
           },
           {
+            "name": "King's Saddlery (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 118.8,
+            "spoken": "Billboard: King's Saddlery, ahead in Sheridan. Ropes made on site and a museum of nearly six hundred saddles. Your seat has never felt so plain.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Tongue River",
             "category": "river",
             "kind": "point",
             "at_mi": 128.8,
             "spoken": "Crossing the Tongue River"
+          },
+          {
+            "name": "King's Saddlery (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 137.0,
+            "spoken": "Billboard: King's Saddlery, ahead in Sheridan. Ropes made on site and a museum of nearly six hundred saddles. Your seat has never felt so plain.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Story",
@@ -13000,6 +13190,46 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151907521, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Story"
+          },
+          {
+            "name": "Fort Phil Kearny (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 148.2,
+            "spoken": "Billboard: Fort Phil Kearny State Historic Site, next exit. The Bozeman Trail fort Red Cloud's alliance fought to close. In eighteen sixty-eight, the army left.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Fort Phil Kearny (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 152.0,
+            "spoken": "Billboard: Fort Phil Kearny State Historic Site, next exit. The Bozeman Trail fort Red Cloud's alliance fought to close. In eighteen sixty-eight, the army left.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Occidental Hotel (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 154.8,
+            "spoken": "Billboard: The Occidental Hotel, ahead in Buffalo. Owen Wister found characters for The Virginian in its lobby. The saloon kept its bullet holes, for the atmosphere.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Occidental Hotel (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 173.0,
+            "spoken": "Billboard: The Occidental Hotel, ahead in Buffalo. Owen Wister found characters for The Virginian in its lobby. The saloon kept its bullet holes, for the atmosphere.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "North Fork Powder River",
@@ -13041,6 +13271,16 @@
             "spoken": "Passing Midwest"
           },
           {
+            "name": "Trails Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 264.3,
+            "spoken": "Billboard: The National Historic Trails Interpretive Center, ahead in Casper. Half a million emigrants followed the river through here on the way west. Most of them walked.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Vista West",
             "at_mi": 273.5,
             "off_mi": 4.53,
@@ -13075,6 +13315,16 @@
             "spoken": "Crossing the North Platte River"
           },
           {
+            "name": "Trails Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 284.0,
+            "spoken": "Billboard: The National Historic Trails Interpretive Center, ahead in Casper. Half a million emigrants followed the river through here on the way west. Most of them walked.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Rolling Hills",
             "at_mi": 298.8,
             "off_mi": 4.82,
@@ -13082,6 +13332,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151910230, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rolling Hills"
+          },
+          {
+            "name": "Douglas jackalope (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 313.3,
+            "spoken": "Billboard: Douglas, ahead, home of the jackalope, the antlered rabbit a local taxidermist dreamed up. Several statues in town. Wild sightings remain unconfirmed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Douglas jackalope (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 336.0,
+            "spoken": "Billboard: Douglas, ahead, home of the jackalope, the antlered rabbit a local taxidermist dreamed up. Several statues in town. Wild sightings remain unconfirmed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Glendo",
@@ -13100,6 +13370,26 @@
             "spoken": "Crossing the North Laramie River"
           },
           {
+            "name": "Oregon Trail Ruts (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 369.0,
+            "spoken": "Billboard: The Oregon Trail Ruts, east of the next exit at Guernsey. Wagon wheels wore them five feet deep into sandstone. Your tires lack ambition.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Oregon Trail Ruts (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 372.5,
+            "spoken": "Billboard: The Oregon Trail Ruts, east of the next exit at Guernsey. Wagon wheels wore them five feet deep into sandstone. Your tires lack ambition.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Chugwater",
             "at_mi": 407.5,
             "off_mi": 0.45,
@@ -13109,6 +13399,16 @@
             "spoken": "Entering Chugwater"
           },
           {
+            "name": "Old West Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 442.5,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Ranchettes",
             "at_mi": 446.5,
             "off_mi": 0.53,
@@ -13116,6 +13416,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151965788, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ranchettes"
+          },
+          {
+            "name": "Old West Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 459.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Nunn",
@@ -14717,6 +15027,26 @@
             "kind": "point",
             "at_mi": 14.8,
             "spoken": "Crossing the Yellowstone River"
+          },
+          {
+            "name": "Pompeys Pillar (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.0,
+            "spoken": "Billboard: Pompeys Pillar, next exit. William Clark carved his name here in eighteen oh-six, the expedition's only trace left on the trail. Do not add yours.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pompeys Pillar (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.0,
+            "spoken": "Billboard: Pompeys Pillar, next exit. William Clark carved his name here in eighteen oh-six, the expedition's only trace left on the trail. Do not add yours.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bighorn River",
@@ -17773,6 +18103,26 @@
             "spoken": "Entering Reed Point"
           },
           {
+            "name": "Greycliff Prairie Dog Town (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.0,
+            "spoken": "Billboard: Greycliff Prairie Dog Town State Park, next exit. A whole town of black-tailed prairie dogs beside the interstate. Please do not feed the residents.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Greycliff Prairie Dog Town (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.0,
+            "spoken": "Billboard: Greycliff Prairie Dog Town State Park, next exit. A whole town of black-tailed prairie dogs beside the interstate. Please do not feed the residents.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Big Timber",
             "at_mi": 86.6,
             "off_mi": 0.6,
@@ -17787,6 +18137,16 @@
             "kind": "point",
             "at_mi": 130.3,
             "spoken": "Approaching Bozeman Pass"
+          },
+          {
+            "name": "Museum of the Rockies (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 134.0,
+            "spoken": "Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. A bronze Tyrannosaurus stands out front, and Yellowstone waits beyond.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "King Arthur Park",
@@ -17805,6 +18165,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 8226859332, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Four Corners"
+          },
+          {
+            "name": "Museum of the Rockies (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 157.0,
+            "spoken": "Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. A bronze Tyrannosaurus stands out front, and Yellowstone waits beyond.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gallatin Gateway",
@@ -17830,6 +18200,16 @@
             "spoken": "Crossing the Gallatin River"
           },
           {
+            "name": "Grizzly and Wolf Discovery Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 227.0,
+            "spoken": "Billboard: The Grizzly and Wolf Discovery Center, ahead in West Yellowstone. Grizzlies and gray wolves that cannot live in the wild. These bears skip hibernation.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "West Yellowstone",
             "at_mi": 236.2,
             "off_mi": 0.07,
@@ -17844,6 +18224,16 @@
             "kind": "zone",
             "at_mi": 236.9,
             "spoken": "Entering Caribou-Targhee National Forest"
+          },
+          {
+            "name": "Grizzly and Wolf Discovery Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 244.5,
+            "spoken": "Billboard: The Grizzly and Wolf Discovery Center, ahead in West Yellowstone. Grizzlies and gray wolves that cannot live in the wild. These bears skip hibernation.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Henrys Fork Snake River",
@@ -17921,6 +18311,26 @@
             "spoken": "Entering Ucon"
           },
           {
+            "name": "Idaho Potato Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 368.6,
+            "spoken": "Billboard: The Idaho Potato Museum, next exit in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Idaho Potato Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 371.6,
+            "spoken": "Billboard: The Idaho Potato Museum, next exit in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Inkom",
             "at_mi": 405.3,
             "off_mi": 0.14,
@@ -17966,6 +18376,16 @@
             "spoken": "Passing Elwood"
           },
           {
+            "name": "Golden Spike (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 491.1,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Willard",
             "at_mi": 507.0,
             "off_mi": 0.59,
@@ -17975,6 +18395,16 @@
             "spoken": "Passing Willard"
           },
           {
+            "name": "Golden Spike (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 509.3,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Farr West",
             "at_mi": 515.1,
             "off_mi": 0.05,
@@ -17982,6 +18412,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150943236, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Farr West"
+          },
+          {
+            "name": "Hill Aerospace Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 517.4,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Roy",
@@ -18009,6 +18449,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150962470, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Clearfield"
+          },
+          {
+            "name": "Hill Aerospace Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 532.8,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kaysville",
@@ -22305,6 +22755,16 @@
             "spoken": "Big Horn County Historical Museum ahead"
           },
           {
+            "name": "Little Bighorn Battlefield (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.5,
+            "spoken": "Billboard: Little Bighorn Battlefield National Monument, ahead at Crow Agency. Where the Lakota, Northern Cheyenne and Arapaho defeated Custer's Seventh Cavalry in June of eighteen seventy-six.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Crow Agency",
             "at_mi": 58.8,
             "off_mi": 0.09,
@@ -22321,6 +22781,16 @@
             "spoken": "Crossing the Little Bighorn River"
           },
           {
+            "name": "Little Bighorn Battlefield (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.0,
+            "spoken": "Billboard: Little Bighorn Battlefield National Monument, ahead at Crow Agency. Where the Lakota, Northern Cheyenne and Arapaho defeated Custer's Seventh Cavalry in June of eighteen seventy-six.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Dayton",
             "at_mi": 110.3,
             "off_mi": 5.26,
@@ -22335,6 +22805,16 @@
             "kind": "point",
             "at_mi": 117.0,
             "spoken": "Crossing the Tongue River"
+          },
+          {
+            "name": "King's Saddlery (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 121.5,
+            "spoken": "Billboard: King's Saddlery, ahead in Sheridan. Ropes made on site and a museum of nearly six hundred saddles. Your seat has never felt so plain.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -24019,6 +24499,16 @@
             "spoken": "Passing Belgrade"
           },
           {
+            "name": "Museum of the Rockies (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.5,
+            "spoken": "Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. A bronze Tyrannosaurus stands out front, and Yellowstone waits beyond.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Yellowstone River",
             "category": "river",
             "kind": "point",
@@ -24033,11 +24523,31 @@
             "spoken": "Victorian Village Museum ahead"
           },
           {
+            "name": "Greycliff Prairie Dog Town (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.5,
+            "spoken": "Billboard: Greycliff Prairie Dog Town State Park, next exit. A whole town of black-tailed prairie dogs beside the interstate. Please do not feed the residents.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Boulder River",
             "category": "river",
             "kind": "point",
             "at_mi": 69.9,
             "spoken": "Crossing the Boulder River"
+          },
+          {
+            "name": "Greycliff Prairie Dog Town (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 72.3,
+            "spoken": "Billboard: Greycliff Prairie Dog Town State Park, next exit. A whole town of black-tailed prairie dogs beside the interstate. Please do not feed the residents.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Reed Point",
@@ -25798,6 +26308,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "World Museum of Mining (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The World Museum of Mining, ahead in Butte, on top of the old Orphan Girl mine. Fifty buildings up here. Nobody counts what is down there.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Jefferson Valley Museum",
             "category": "museum",
             "kind": "point",
@@ -25810,6 +26330,16 @@
             "kind": "point",
             "at_mi": 31.3,
             "spoken": "Crossing the Boulder River"
+          },
+          {
+            "name": "Missouri Headwaters (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.0,
+            "spoken": "Billboard: Missouri Headwaters State Park, ahead at Three Forks. Three rivers meet to make the Missouri. Lewis and Clark named all three after their bosses.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Wheatland",
@@ -25835,6 +26365,16 @@
             "spoken": "Crossing the Madison River"
           },
           {
+            "name": "Missouri Headwaters (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.5,
+            "spoken": "Billboard: Missouri Headwaters State Park, ahead at Three Forks. Three rivers meet to make the Missouri. Lewis and Clark named all three after their bosses.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Manhattan",
             "at_mi": 65.4,
             "off_mi": 0.44,
@@ -25849,6 +26389,16 @@
             "kind": "point",
             "at_mi": 74.2,
             "spoken": "Crossing the Gallatin River"
+          },
+          {
+            "name": "Museum of the Rockies (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 77.0,
+            "spoken": "Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. A bronze Tyrannosaurus stands out front, and Yellowstone waits beyond.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Four Corners",
@@ -26990,6 +27540,16 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
+          {
+            "name": "World Museum of Mining (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The World Museum of Mining, ahead in Butte, on top of the old Orphan Girl mine. Fifty buildings up here. Nobody counts what is down there.",
+            "directions": [
+              "reverse"
+            ]
+          },
           {
             "name": "Basin",
             "at_mi": 30.2,
@@ -28709,6 +29269,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "World Museum of Mining (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The World Museum of Mining, ahead in Butte, on top of the old Orphan Girl mine. Fifty buildings up here. Nobody counts what is down there.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Big Hole River",
             "category": "river",
             "kind": "point",
@@ -28721,6 +29291,26 @@
             "kind": "point",
             "at_mi": 63.2,
             "spoken": "Crossing the Beaverhead River"
+          },
+          {
+            "name": "Bannack State Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 65.5,
+            "spoken": "Billboard: Bannack State Park, west of the next exit. Montana's first territorial capital, now a ghost town of more than fifty buildings. The government left first.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Bannack State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.0,
+            "spoken": "Billboard: Bannack State Park, west of the next exit. Montana's first territorial capital, now a ghost town of more than fifty buildings. The government left first.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Red Rock River",
@@ -28744,6 +29334,26 @@
             "kind": "point",
             "at_mi": 125.7,
             "spoken": "Approaching Monida Pass"
+          },
+          {
+            "name": "Spencer (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 141.0,
+            "spoken": "Billboard: Spencer, next exit, the self-styled opal capital of America. The mine is a few miles up the road. The opals outnumber the residents.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Spencer (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 144.0,
+            "spoken": "Billboard: Spencer, next exit, the self-styled opal capital of America. The mine is a few miles up the road. The opals outnumber the residents.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Menan",
@@ -31551,6 +32161,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Makoshika State Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Makoshika State Park, ahead at Glendive. Eleven thousand acres of badlands, and a triceratops skull in the visitor center. It has waited longer than you.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Gateway Museum",
             "category": "museum",
             "kind": "point",
@@ -33012,6 +33632,16 @@
             "spoken": "You are leaving Great Falls, where Lewis and Clark hauled their boats a brutal eighteen miles around the falls of the Missouri. It was the hardest portage of their entire journey west."
           },
           {
+            "name": "Giant Springs (from Havre)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Giant Springs, ahead in Great Falls, feeds the Roe River, once the world's shortest at two hundred feet. Your trailer is a quarter of it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Missouri River",
             "category": "river",
             "kind": "point",
@@ -33736,6 +34366,16 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
+          {
+            "name": "Giant Springs (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.0,
+            "spoken": "Billboard: Giant Springs, ahead in Great Falls, feeds the Roe River, once the world's shortest at two hundred feet. Your trailer is a quarter of it.",
+            "directions": [
+              "reverse"
+            ]
+          },
           {
             "name": "Missouri River",
             "category": "river",
@@ -35046,6 +35686,16 @@
             "spoken": "Passing Beaver Creek"
           },
           {
+            "name": "Havre Beneath the Streets (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Havre is ahead. After a fire, the town rebuilt underground and ran its shops, along with several vices, in tunnels beneath the sidewalks. You can still tour them.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Milk River",
             "category": "river",
             "kind": "point",
@@ -36146,6 +36796,16 @@
             "spoken": "Passing Radersburg"
           },
           {
+            "name": "Missouri Headwaters (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.5,
+            "spoken": "Billboard: Missouri Headwaters State Park, ahead at Three Forks. Three rivers meet to make the Missouri. Lewis and Clark named all three after their bosses.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Missouri River",
             "category": "river",
             "kind": "point",
@@ -36167,6 +36827,16 @@
             "kind": "point",
             "at_mi": 77.0,
             "spoken": "Manhattan Area Museum ahead"
+          },
+          {
+            "name": "Missouri Headwaters (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.0,
+            "spoken": "Billboard: Missouri Headwaters State Park, ahead at Three Forks. Three rivers meet to make the Missouri. Lewis and Clark named all three after their bosses.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gallatin River",
@@ -37408,6 +38078,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150960334, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Vaughn"
+          },
+          {
+            "name": "Giant Springs (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 83.0,
+            "spoken": "Billboard: Giant Springs, ahead in Great Falls, feeds the Roe River, once the world's shortest at two hundred feet. Your trailer is a quarter of it.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Sun Prairie",
@@ -40592,6 +41272,26 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Kootenai Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Billboard: Kootenai Falls, ahead between Libby and Troy, the largest undammed falls in Montana, with a swinging bridge below. It swings. That is the point.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Kootenai Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.0,
+            "spoken": "Billboard: Kootenai Falls, ahead between Libby and Troy, the largest undammed falls in Montana, with a swinging bridge below. It swings. That is the point.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Kootenai River",
             "category": "river",
             "kind": "point",
@@ -41672,6 +42372,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 3416644958, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Fallon"
+          },
+          {
+            "name": "Makoshika State Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 65.0,
+            "spoken": "Billboard: Makoshika State Park, ahead at Glendive. Eleven thousand acres of badlands, and a triceratops skull in the visitor center. It has waited longer than you.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Yellowstone River",
@@ -45877,6 +46587,26 @@
             "spoken": "Passing Lolo"
           },
           {
+            "name": "Old Montana Prison (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 77.0,
+            "spoken": "Billboard: The Old Montana Prison, next exit in Deer Lodge. It held inmates for over a century and now holds five museums. Friendlier guests now.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Old Montana Prison (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.5,
+            "spoken": "Billboard: The Old Montana Prison, next exit in Deer Lodge. It held inmates for over a century and now holds five museums. Friendlier guests now.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Anaconda",
             "at_mi": 100.5,
             "off_mi": 7.38,
@@ -45884,6 +46614,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150938709, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Anaconda"
+          },
+          {
+            "name": "World Museum of Mining (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 107.0,
+            "spoken": "Billboard: The World Museum of Mining, ahead in Butte, on top of the old Orphan Girl mine. Fifty buildings up here. Nobody counts what is down there.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "World Museum of Mining (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 124.0,
+            "spoken": "Billboard: The World Museum of Mining, ahead in Butte, on top of the old Orphan Girl mine. Fifty buildings up here. Nobody counts what is down there.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Boulder River",
@@ -45900,6 +46650,16 @@
             "spoken": "Crossing the Jefferson River"
           },
           {
+            "name": "Missouri Headwaters (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 162.5,
+            "spoken": "Billboard: Missouri Headwaters State Park, ahead at Three Forks. Three rivers meet to make the Missouri. Lewis and Clark named all three after their bosses.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Headwaters Railroad & Trident Heritage Center",
             "category": "museum",
             "kind": "point",
@@ -45914,6 +46674,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 13613172076, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wheatland"
+          },
+          {
+            "name": "Missouri Headwaters (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 179.0,
+            "spoken": "Billboard: Missouri Headwaters State Park, ahead at Three Forks. Three rivers meet to make the Missouri. Lewis and Clark named all three after their bosses.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Madison River",
@@ -45948,6 +46718,16 @@
             "spoken": "Passing Belgrade"
           },
           {
+            "name": "Museum of the Rockies (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 195.0,
+            "spoken": "Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. A bronze Tyrannosaurus stands out front, and Yellowstone waits beyond.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Four Corners",
             "at_mi": 195.6,
             "off_mi": 6.0,
@@ -45975,11 +46755,41 @@
             "spoken": "Passing Gallatin Gateway"
           },
           {
+            "name": "Museum of the Rockies (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 209.5,
+            "spoken": "Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. A bronze Tyrannosaurus stands out front, and Yellowstone waits beyond.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Yellowstone River",
             "category": "river",
             "kind": "point",
             "at_mi": 212.2,
             "spoken": "Crossing the Yellowstone River"
+          },
+          {
+            "name": "Greycliff Prairie Dog Town (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 267.5,
+            "spoken": "Billboard: Greycliff Prairie Dog Town State Park, next exit. A whole town of black-tailed prairie dogs beside the interstate. Please do not feed the residents.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Greycliff Prairie Dog Town (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 272.0,
+            "spoken": "Billboard: Greycliff Prairie Dog Town State Park, next exit. A whole town of black-tailed prairie dogs beside the interstate. Please do not feed the residents.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Reed Point",
@@ -47206,11 +48016,31 @@
             "spoken": "Crossing the Little Blackfoot River"
           },
           {
+            "name": "Old Montana Prison (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 77.0,
+            "spoken": "Billboard: The Old Montana Prison, next exit in Deer Lodge. It held inmates for over a century and now holds five museums. Friendlier guests now.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Yesterdays Playthings Doll and Toy Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 82.2,
             "spoken": "Yesterdays Playthings Doll and Toy Museum ahead"
+          },
+          {
+            "name": "Old Montana Prison (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.5,
+            "spoken": "Billboard: The Old Montana Prison, next exit in Deer Lodge. It held inmates for over a century and now holds five museums. Friendlier guests now.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Anaconda",
@@ -47220,6 +48050,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150938709, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Anaconda"
+          },
+          {
+            "name": "World Museum of Mining (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 109.0,
+            "spoken": "Billboard: The World Museum of Mining, ahead in Butte, on top of the old Orphan Girl mine. Fifty buildings up here. Nobody counts what is down there.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -51975,6 +52815,16 @@
             "spoken": "Entering Hingham"
           },
           {
+            "name": "Havre Beneath the Streets (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 94.0,
+            "spoken": "Billboard: Havre is ahead. After a fire, the town rebuilt underground and ran its shops, along with several vices, in tunnels beneath the sidewalks. You can still tour them.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Beaver Creek",
             "at_mi": 97.5,
             "off_mi": 0.02,
@@ -53667,6 +54517,16 @@
             "spoken": "Entering Flathead National Forest"
           },
           {
+            "name": "Glacier National Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 115.0,
+            "spoken": "Billboard: Glacier National Park, ahead at West Glacier. Going-to-the-Sun Road takes nothing longer than twenty-one feet over Logan Pass. Your rig is not invited.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "West Glacier",
             "at_mi": 125.5,
             "off_mi": 0.11,
@@ -53674,6 +54534,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 4694000719, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering West Glacier"
+          },
+          {
+            "name": "Glacier National Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 133.0,
+            "spoken": "Billboard: Glacier National Park, ahead at West Glacier. Going-to-the-Sun Road takes nothing longer than twenty-one feet over Logan Pass. Your rig is not invited.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hungry Horse",
@@ -56248,6 +57118,16 @@
             "kind": "point",
             "at_mi": 91.8,
             "spoken": "Crossing the Yellowstone River"
+          },
+          {
+            "name": "Makoshika State Park (from Wolf Point)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 97.0,
+            "spoken": "Billboard: Makoshika State Park, ahead at Glendive. Eleven thousand acres of badlands, and a triceratops skull in the visitor center. It has waited longer than you.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [

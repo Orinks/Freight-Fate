@@ -8620,6 +8620,16 @@
             "spoken": "Passing Galisteo"
           },
           {
+            "name": "Meow Wolf (from Colorado Springs)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 312.2,
+            "spoken": "Billboard: Meow Wolf, ahead in Santa Fe. A bowling alley became a house with doors to other worlds. A fantasy novelist footed the bill.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Tesuque Pueblo",
             "at_mi": 318.9,
             "off_mi": 11.54,
@@ -8647,6 +8657,16 @@
             "spoken": "Passing Rancho Viejo"
           },
           {
+            "name": "Meow Wolf (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 330.2,
+            "spoken": "Billboard: Meow Wolf, ahead in Santa Fe. A bowling alley became a house with doors to other worlds. A fantasy novelist footed the bill.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Cochiti",
             "at_mi": 338.2,
             "off_mi": 9.07,
@@ -8672,6 +8692,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151568336, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing San Felipe Pueblo"
+          },
+          {
+            "name": "Sandia Peak Tramway (from Colorado Springs)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 359.2,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pueblo of Sandia Village",
@@ -8708,6 +8738,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151467089, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Paradise Hills"
+          },
+          {
+            "name": "Sandia Peak Tramway (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 374.5,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "South Valley",
@@ -18545,6 +18585,16 @@
             "spoken": "Passing Rancho Viejo"
           },
           {
+            "name": "Meow Wolf (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 370.2,
+            "spoken": "Billboard: Meow Wolf, ahead in Santa Fe. A bowling alley became a house with doors to other worlds. A fantasy novelist footed the bill.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "San Felipe Pueblo",
             "at_mi": 392.94,
             "off_mi": 2.29,
@@ -18552,6 +18602,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151568336, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing San Felipe Pueblo"
+          },
+          {
+            "name": "Sandia Peak Tramway (from Denver)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 401.2,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pueblo of Sandia Village",
@@ -18579,6 +18639,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151337040, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Los Ranchos de Albuquerque"
+          },
+          {
+            "name": "Sandia Peak Tramway (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 416.5,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "restrictions": [],
@@ -21430,6 +21500,16 @@
             "spoken": "Entering Myton"
           },
           {
+            "name": "Heber Valley Railroad (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 435.3,
+            "spoken": "Billboard: The Heber Valley Railroad, ahead in Heber City. A ninety-minute round trip into Provo Canyon. Locals called it the Heber Creeper, and it never argued.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Uinta-Wasatch-Cache National Forest",
             "category": "national_forest",
             "kind": "zone",
@@ -21473,6 +21553,16 @@
             "spoken": "Passing Hideout"
           },
           {
+            "name": "Heber Valley Railroad (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 453.9,
+            "spoken": "Billboard: The Heber Valley Railroad, ahead in Heber City. A ninety-minute round trip into Provo Canyon. Locals called it the Heber Creeper, and it never argued.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Park City",
             "at_mi": 455.6,
             "off_mi": 2.23,
@@ -21482,6 +21572,16 @@
             "spoken": "Passing Park City"
           },
           {
+            "name": "Utah Olympic Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 462.8,
+            "spoken": "Billboard: Utah Olympic Park, next exit. The ski jumps and bobsled track from the two thousand two Winter Games, still in use. Mind your own downhill.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Snyderville",
             "at_mi": 463.5,
             "off_mi": 2.12,
@@ -21489,6 +21589,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150943108, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Snyderville"
+          },
+          {
+            "name": "Utah Olympic Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 466.2,
+            "spoken": "Billboard: Utah Olympic Park, next exit. The ski jumps and bobsled track from the two thousand two Winter Games, still in use. Mind your own downhill.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Holladay",
@@ -24911,10 +25021,10 @@
         "landmarks": [
           {
             "name": "Hole N' the Rock",
-            "category": "billboard_sign",
+            "category": "highway_marker",
             "kind": "point",
             "at_mi": 152.0,
-            "spoken": "Billboard: Hole N' the Rock is ahead. It is a five-thousand-square-foot home blasted into sandstone, with souvenirs, animals, and punctuation that has survived every editor.",
+            "spoken": "Hole N' the Rock is ahead. It is a five-thousand-square-foot home blasted into sandstone, with souvenirs, animals, and punctuation that has survived every editor.",
             "directions": [
               "reverse"
             ]
@@ -29824,6 +29934,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151457192, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Nunn"
+          },
+          {
+            "name": "Old West Museum (from Fort Collins)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cheyenne Children's Museum",
@@ -39245,6 +39365,16 @@
             "kind": "point",
             "at_mi": 89.3,
             "spoken": "Crossing the Green River"
+          },
+          {
+            "name": "Powell River History Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 92.3,
+            "spoken": "Billboard: The John Wesley Powell River History Museum, ahead in Green River. In eighteen sixty-nine, a one-armed major boated these unmapped canyons. Then he mapped them.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -48747,6 +48877,16 @@
             "kind": "point",
             "at_mi": 175.3,
             "spoken": "Crossing the Cache la Poudre River"
+          },
+          {
+            "name": "Old West Museum (from Pueblo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 207.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "restrictions": [],

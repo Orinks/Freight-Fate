@@ -855,7 +855,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Bakersfield is home to the Bakersfield Sound. Buck Owens and Merle Haggard built a twangier, harder kind of country music here, a world away from Nashville. The Crystal Palace still swings.",
+            "spoken": "Billboard: Bakersfield is home to the Bakersfield Sound. Buck Owens and Merle Haggard built a twangier, harder kind of country music here, a world away from Nashville. Buck Owens' Crystal Palace closed its doors in twenty twenty-five, but the Bakersfield Sound still plays.",
             "directions": [
               "reverse"
             ]
@@ -918,6 +918,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150942068, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing California City"
+          },
+          {
+            "name": "Borax Visitor Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.7,
+            "spoken": "Billboard: The Borax Visitor Center, ahead in Boron, looks into California's largest open-pit mine. Borax used to leave the desert behind twenty mules. Now it takes trucks.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Borax Visitor Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 97.7,
+            "spoken": "Billboard: The Borax Visitor Center, ahead in Boron, looks into California's largest open-pit mine. Borax used to leave the desert behind twenty mules. Now it takes trucks.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mojave River",
@@ -1749,6 +1769,16 @@
             "spoken": "Entering Goshen"
           },
           {
+            "name": "Kingsburg Coffeepot (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.2,
+            "spoken": "Billboard: Kingsburg is ahead, where the Swedish town turned its water tower into a giant coffeepot. Sixty thousand gallons, and nobody has offered cream.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "London",
             "at_mi": 83.1,
             "off_mi": 2.99,
@@ -1844,6 +1874,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150980998, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Caruthers"
+          },
+          {
+            "name": "Kingsburg Coffeepot (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.1,
+            "spoken": "Billboard: Kingsburg is ahead, where the Swedish town turned its water tower into a giant coffeepot. Sixty thousand gallons, and nobody has offered cream.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Underground Gardens (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.1,
+            "spoken": "Billboard: Fresno has a villa hidden beneath the valley heat. A Sicilian immigrant spent forty years digging its courtyards, cool rooms, and citrus groves out of hardpan by hand.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Clovis",
@@ -5481,6 +5531,36 @@
             "spoken": "Passing Lenwood"
           },
           {
+            "name": "Calico Ghost Town (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 1.0,
+            "spoken": "Billboard: Calico Ghost Town is ahead near Barstow. It is a real silver boomtown, half restored and half falling down, and, they will tell you, thoroughly haunted.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Peggy Sue's Fifties Diner (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.3,
+            "spoken": "Billboard: Peggy Sue's Fifties Diner is ahead near Yermo. It has chrome, a jukebox, a diner cat, and a park full of metal dinosaurs out back. Rock and roll never checked out.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "EddieWorld (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.6,
+            "spoken": "Billboard: EddieWorld is ahead near Yermo. It offers fuel, pizza, candy, ice cream, and a giant sundae declaring that this is no ordinary gas stop.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Daggett",
             "at_mi": 7.7,
             "off_mi": 2.65,
@@ -5490,6 +5570,66 @@
             "spoken": "Passing Daggett"
           },
           {
+            "name": "Peggy Sue's Fifties Diner (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.4,
+            "spoken": "Billboard: Peggy Sue's Fifties Diner is ahead near Yermo. It has chrome, a jukebox, a diner cat, and a park full of metal dinosaurs out back. Rock and roll never checked out.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Calico Ghost Town (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.7,
+            "spoken": "Billboard: Calico Ghost Town is ahead near Barstow. It is a real silver boomtown, half restored and half falling down, and, they will tell you, thoroughly haunted.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "EddieWorld (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.8,
+            "spoken": "Billboard: EddieWorld is ahead near Yermo. It offers fuel, pizza, candy, ice cream, and a giant sundae declaring that this is no ordinary gas stop.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Zzyzx Road (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.3,
+            "spoken": "Billboard: The exit for Zzyzx Road is coming up, with the last word in the dictionary sitting out here in the sand. A strange story and a lake you would never expect wait behind that name.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "World's Tallest Thermometer (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.2,
+            "spoken": "Billboard: The world's tallest thermometer is ahead in Baker. More than a hundred and thirty feet of lights will tell you exactly how hot the Mojave is, and the answer is always too hot.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Mad Greek (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.2,
+            "spoken": "Billboard: The Mad Greek is ahead in Baker, serving gyros and baklava in the middle of the desert. Trust the Mojave; it has surprised you before.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Alien Fresh Jerky (northbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -5497,6 +5637,16 @@
             "spoken": "Billboard: Alien jerky, next exit. They won't say who the jerky's made from.",
             "directions": [
               "forward"
+            ]
+          },
+          {
+            "name": "Zzyzx Road (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.3,
+            "spoken": "Billboard: The exit for Zzyzx Road is coming up, with the last word in the dictionary sitting out here in the sand. A strange story and a lake you would never expect wait behind that name.",
+            "directions": [
+              "reverse"
             ]
           },
           {
@@ -5517,6 +5667,26 @@
             ]
           },
           {
+            "name": "The Mad Greek (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.2,
+            "spoken": "Billboard: The Mad Greek is ahead in Baker, serving gyros and baklava in the middle of the desert. Trust the Mojave; it has surprised you before.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "World's Tallest Thermometer (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.2,
+            "spoken": "Billboard: The world's tallest thermometer is ahead in Baker. More than a hundred and thirty feet of lights will tell you exactly how hot the Mojave is, and the answer is always too hot.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Primm",
             "at_mi": 112.9,
             "off_mi": 0.13,
@@ -5526,6 +5696,26 @@
             "spoken": "Entering Primm"
           },
           {
+            "name": "Seven Magic Mountains (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 122.3,
+            "spoken": "Billboard: Seven Magic Mountains is ahead, where fluorescent boulders are stacked into towers in the desert. Las Vegas apparently ran out of indoor places to put bright colors.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Seven Magic Mountains (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 138.3,
+            "spoken": "Billboard: Seven Magic Mountains is ahead, where fluorescent boulders are stacked into towers in the desert. Las Vegas apparently ran out of indoor places to put bright colors.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Enterprise",
             "at_mi": 145.9,
             "off_mi": 0.53,
@@ -5533,6 +5723,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150960745, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Enterprise"
+          },
+          {
+            "name": "The Neon Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 148.2,
+            "spoken": "Billboard: The Neon Museum, ahead in Las Vegas. Old casino signs come here to retire in the boneyard. Some of them still light up.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Paradise",
@@ -7187,6 +7387,16 @@
             "spoken": "Passing Lenwood"
           },
           {
+            "name": "Elmer's Bottle Tree Ranch (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.0,
+            "spoken": "Billboard: Elmer's Bottle Tree Ranch, ahead on old Route Sixty-Six in Oro Grande. Two hundred trees grown from pipe and bottles. Free, and no watering needed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Helendale",
             "at_mi": 18.7,
             "off_mi": 7.57,
@@ -8288,6 +8498,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150971458, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Chalfant"
+          },
+          {
+            "name": "Erick Schat's Bakkery (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.1,
+            "spoken": "Billboard: Erick Schat's Bakkery is ahead in Bishop, baking sheepherder bread by hand. The line goes out the door. The sheep are not in it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Museum of Western Film History (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.0,
+            "spoken": "Billboard: The Museum of Western Film History, ahead in Lone Pine. Four hundred movies were shot in these hills. The scenery has more credits than most actors.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "lane_segments": [
@@ -9658,6 +9888,16 @@
             "spoken": "Crossing the Colorado River"
           },
           {
+            "name": "Hi Jolly's tomb (from Blythe)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.7,
+            "spoken": "Billboard: Hi Jolly's tomb, ahead in Quartzsite. A stone pyramid topped with a copper camel, for the Army's camel driver. The Army did try camels.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "La Paz Valley",
             "at_mi": 20.4,
             "off_mi": 5.62,
@@ -9665,6 +9905,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150962547, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing La Paz Valley"
+          },
+          {
+            "name": "Hi Jolly's tomb (from Buckeye)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.8,
+            "spoken": "Billboard: Hi Jolly's tomb, ahead in Quartzsite. A stone pyramid topped with a copper camel, for the Army's camel driver. The Army did try camels.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Brenda",
@@ -10789,6 +11039,16 @@
             "spoken": "Passing Knights Landing"
           },
           {
+            "name": "California State Railroad Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.2,
+            "spoken": "Billboard: The California State Railroad Museum, ahead in Old Sacramento. More than twenty restored locomotives, some from the eighteen sixties. Retirement suits them.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Rio Linda",
             "at_mi": 78.2,
             "off_mi": 4.95,
@@ -10812,6 +11072,16 @@
             "kind": "point",
             "at_mi": 88.9,
             "spoken": "Crossing the Sacramento River"
+          },
+          {
+            "name": "California State Railroad Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 95.2,
+            "spoken": "Billboard: The California State Railroad Museum, ahead in Old Sacramento. More than twenty restored locomotives, some from the eighteen sixties. Retirement suits them.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Woodland",
@@ -10839,6 +11109,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150971395, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Winters"
+          },
+          {
+            "name": "Jelly Belly (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 114.1,
+            "spoken": "Billboard: The Jelly Belly factory, ahead in Fairfield. Watch the beans get made from a catwalk, then order a burger shaped like one. It tastes like a burger.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cordelia",
@@ -11899,6 +12179,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141030288, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Cottonwood"
+          },
+          {
+            "name": "The Sundial Bridge (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.6,
+            "spoken": "Billboard: Redding's Sundial Bridge is ahead, a glass footbridge built as a giant sundial. It tells time from eleven to three, then takes the afternoon off.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Millville",
@@ -13760,6 +14050,26 @@
             "spoken": "Approaching Hazel View Summit"
           },
           {
+            "name": "Oregon Caves (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.2,
+            "spoken": "Billboard: Oregon Caves National Monument, twenty miles up from Cave Junction. A cave carved through marble, forty-four degrees all year. Bring a jacket in August.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Oregon Caves (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.2,
+            "spoken": "Billboard: Oregon Caves National Monument, twenty miles up from Cave Junction. A cave carved through marble, forty-four degrees all year. Bring a jacket in August.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Hayes Hill Summit",
             "category": "mountain_pass",
             "kind": "point",
@@ -14483,11 +14793,31 @@
             "spoken": "Passing Holtville"
           },
           {
+            "name": "Imperial Sand Dunes (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.5,
+            "spoken": "Billboard: The Imperial Sand Dunes, ahead. Forty miles of sand, where Return of the Jedi filmed its desert battle. Stay on the pavement. The sand is hungry.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Imperial Sand Dunes Recreation Area",
             "category": "national_park",
             "kind": "zone",
             "at_mi": 44.6,
             "spoken": "Entering Imperial Sand Dunes Recreation Area"
+          },
+          {
+            "name": "Center of the World (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.2,
+            "spoken": "Billboard: The official Center of the World, next exit in Felicity. A pink granite pyramid marks the spot. The town said so, and nobody has proved otherwise.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cocopah",
@@ -14513,6 +14843,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150967494, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Somerton"
+          },
+          {
+            "name": "Imperial Sand Dunes (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.1,
+            "spoken": "Billboard: The Imperial Sand Dunes, ahead. Forty miles of sand, where Return of the Jedi filmed its desert battle. Stay on the pavement. The sand is hungry.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Center of the World (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.0,
+            "spoken": "Billboard: The official Center of the World, ahead in Felicity. A pink granite pyramid marks the spot. The town said so, and nobody has proved otherwise.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "speed_limits": [
@@ -15925,11 +16275,31 @@
             "spoken": "Entering Orick"
           },
           {
+            "name": "Trees of Mystery (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.3,
+            "spoken": "Billboard: Trees of Mystery, ahead in Klamath. A forty-nine-foot Paul Bunyan stands out front with his blue ox. He talks, too. Say hello.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Klamath River",
             "category": "river",
             "kind": "point",
             "at_mi": 63.1,
             "spoken": "Crossing the Klamath River"
+          },
+          {
+            "name": "Trees of Mystery (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.3,
+            "spoken": "Billboard: Trees of Mystery, ahead in Klamath. A forty-nine-foot Paul Bunyan stands out front with his blue ox. He talks, too. Say hello.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gasquet",
@@ -18231,6 +18601,16 @@
             "kind": "point",
             "at_mi": 119.6,
             "spoken": "Approaching Buckhorn Summit"
+          },
+          {
+            "name": "The Sundial Bridge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 136.0,
+            "spoken": "Billboard: Redding's Sundial Bridge is ahead, a glass footbridge built as a giant sundial. It tells time from eleven to three, then takes the afternoon off.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Shasta Lake",
@@ -21255,6 +21635,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150972019, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Aromas"
+          },
+          {
+            "name": "National Steinbeck Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 125.0,
+            "spoken": "Billboard: The National Steinbeck Center, ahead in Salinas. His hometown, and the valley where East of Eden is set. The book takes longer than the valley.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Elkhorn",
@@ -25016,6 +25406,16 @@
             "spoken": "Passing Clovis"
           },
           {
+            "name": "The Underground Gardens (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Fresno has a villa hidden beneath the valley heat. A Sicilian immigrant spent forty years digging its courtyards, cool rooms, and citrus groves out of hardpan by hand.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Kerman",
             "at_mi": 12.4,
             "off_mi": 10.79,
@@ -25050,6 +25450,26 @@
             "spoken": "Passing Planada"
           },
           {
+            "name": "Gateway to Yosemite (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.9,
+            "spoken": "Billboard: Merced is the gateway to Yosemite. Turn east and climb into the granite cathedral of the Sierra, where waterfalls and cliffs wait about two hours up the road.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Castle Air Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.0,
+            "spoken": "Billboard: Castle Air Museum, ahead near Atwater. Bombers, fighters, and a Blackbird that flew three times the speed of sound. The limit here is lower.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Atwater",
             "at_mi": 63.6,
             "off_mi": 0.29,
@@ -25066,6 +25486,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150964588, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Winton"
+          },
+          {
+            "name": "Gateway to Yosemite (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 65.9,
+            "spoken": "Billboard: Merced is the gateway to Yosemite. Turn east and climb into the granite cathedral of the Sierra, where waterfalls and cliffs wait about two hours up the road.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Castle Air Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.3,
+            "spoken": "Billboard: Castle Air Museum, ahead near Atwater. Bombers, fighters, and a Blackbird that flew three times the speed of sound. The limit here is lower.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Merced River",
@@ -25120,6 +25560,16 @@
             "spoken": "Passing Waterford"
           },
           {
+            "name": "American Graffiti (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 86.3,
+            "spoken": "Billboard: Modesto is the hometown of George Lucas. Before the spaceships, he made American Graffiti about cruising these streets on a summer night. The town motto promises water, wealth, contentment, and health, apparently in that order.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Hughson",
             "at_mi": 87.0,
             "off_mi": 3.93,
@@ -25166,6 +25616,16 @@
             "kind": "point",
             "at_mi": 98.6,
             "spoken": "Crossing the Stanislaus River"
+          },
+          {
+            "name": "American Graffiti (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 102.1,
+            "spoken": "Billboard: Modesto is the hometown of George Lucas. Before the spaceships, he made American Graffiti about cruising these streets on a summer night. The town motto promises water, wealth, contentment, and health, apparently in that order.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Escalon",
@@ -25225,6 +25685,16 @@
             "kind": "point",
             "at_mi": 155.2,
             "spoken": "Crossing the Cosumnes River"
+          },
+          {
+            "name": "California State Railroad Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 159.0,
+            "spoken": "Billboard: The California State Railroad Museum, ahead in Old Sacramento. More than twenty restored locomotives, some from the eighteen sixties. Retirement suits them.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Rancho Cordova",
@@ -25939,6 +26409,26 @@
             "spoken": "Passing Clovis"
           },
           {
+            "name": "Kingsburg Coffeepot (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.9,
+            "spoken": "Billboard: Kingsburg is ahead, where the Swedish town turned its water tower into a giant coffeepot. Sixty thousand gallons, and nobody has offered cream.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Underground Gardens (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.9,
+            "spoken": "Billboard: Fresno has a villa hidden beneath the valley heat. A Sicilian immigrant spent forty years digging its courtyards, cool rooms, and citrus groves out of hardpan by hand.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Caruthers",
             "at_mi": 9.1,
             "off_mi": 9.97,
@@ -26048,6 +26538,16 @@
             "kind": "point",
             "at_mi": 28.4,
             "spoken": "Crossing the Kings River"
+          },
+          {
+            "name": "Kingsburg Coffeepot (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.7,
+            "spoken": "Billboard: Kingsburg is ahead, where the Swedish town turned its water tower into a giant coffeepot. Sixty thousand gallons, and nobody has offered cream.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Tulare",
@@ -26707,11 +27207,51 @@
             "spoken": "Passing Mecca"
           },
           {
+            "name": "Joshua Tree National Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.5,
+            "spoken": "Billboard: Joshua Tree National Park, ahead at Cottonwood Spring Road. The trees are really yuccas. Nobody has told them, and nobody should.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Chuckwalla National Monument",
             "category": "protected_area",
             "kind": "zone",
             "at_mi": 24.3,
             "spoken": "Entering Chuckwalla National Monument"
+          },
+          {
+            "name": "Joshua Tree National Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.0,
+            "spoken": "Billboard: Joshua Tree National Park, next exit, seven miles north. The trees are really yuccas. Nobody has told them, and nobody should.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "General Patton Memorial Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.5,
+            "spoken": "Billboard: The General Patton Memorial Museum, next exit. A million soldiers trained in this desert for the Second World War. The tanks out front are not going anywhere.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "General Patton Memorial Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.5,
+            "spoken": "Billboard: The General Patton Memorial Museum, next exit. A million soldiers trained in this desert for the Second World War. The tanks out front are not going anywhere.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Ehrenberg",
@@ -29857,6 +30397,16 @@
             "spoken": "Passing California City"
           },
           {
+            "name": "Borax Visitor Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.8,
+            "spoken": "Billboard: The Borax Visitor Center, ahead in Boron, looks into California's largest open-pit mine. Borax used to leave the desert behind twenty mules. Now it takes trucks.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Rio Tinto Borax Mine Visitor Center",
             "category": "museum",
             "kind": "point",
@@ -29871,6 +30421,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 12507300063, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Boron"
+          },
+          {
+            "name": "Borax Visitor Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.8,
+            "spoken": "Billboard: The Borax Visitor Center, ahead in Boron, looks into California's largest open-pit mine. Borax used to leave the desert behind twenty mules. Now it takes trucks.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mojave River",
@@ -32417,6 +32977,16 @@
         "restrictions": [],
         "landmarks": [
           {
+            "name": "Museum of Western Film History (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.2,
+            "spoken": "Billboard: The Museum of Western Film History, ahead in Lone Pine. Four hundred movies were shot in these hills. The scenery has more credits than most actors.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "China Lake Acres",
             "at_mi": 67.3,
             "off_mi": 6.36,
@@ -32433,6 +33003,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150976586, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Inyokern"
+          },
+          {
+            "name": "Red Rock Canyon State Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.0,
+            "spoken": "Billboard: Red Rock Canyon State Park, ahead. The striped cliffs played the fossil dig in Jurassic Park. The dinosaurs were added later.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Red Rock Canyon State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 98.0,
+            "spoken": "Billboard: Red Rock Canyon State Park, ahead. The striped cliffs played the fossil dig in Jurassic Park. The dinosaurs were added later.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "California City",
@@ -34227,6 +34817,16 @@
             "spoken": "Entering Goshen"
           },
           {
+            "name": "Kingsburg Coffeepot (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 190.4,
+            "spoken": "Billboard: Kingsburg is ahead, where the Swedish town turned its water tower into a giant coffeepot. Sixty thousand gallons, and nobody has offered cream.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "London",
             "at_mi": 194.1,
             "off_mi": 2.99,
@@ -34277,6 +34877,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150953106, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Fowler"
+          },
+          {
+            "name": "Kingsburg Coffeepot (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 212.1,
+            "spoken": "Billboard: Kingsburg is ahead, where the Swedish town turned its water tower into a giant coffeepot. Sixty thousand gallons, and nobody has offered cream.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Underground Gardens (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 212.1,
+            "spoken": "Billboard: Fresno has a villa hidden beneath the valley heat. A Sicilian immigrant spent forty years digging its courtyards, cool rooms, and citrus groves out of hardpan by hand.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "restrictions": [],
@@ -36110,6 +36730,16 @@
             "spoken": "Entering Calimesa"
           },
           {
+            "name": "Palm Springs Aerial Tramway (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.7,
+            "spoken": "Billboard: The Palm Springs Aerial Tramway, ahead. Its cars rotate all the way up the cliffs, almost six thousand feet. The view comes around to you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Cabazon Dinosaurs",
             "category": "billboard_sign",
             "kind": "point",
@@ -36167,6 +36797,36 @@
             "spoken": "Billboard: A forest of windmills ahead in the San Gorgonio Pass, turning in the same wind that is currently shoving your trailer around. They will not kill your birds, or your fuzzy dice, but they will spin.",
             "directions": [
               "forward"
+            ]
+          },
+          {
+            "name": "Hadley's Date Shakes (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 97.4,
+            "spoken": "Billboard: Date shakes ahead at Hadley's. Yes, a milkshake made of dates. Trust the desert. It knows what it is doing.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "San Gorgonio Windmills (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 107.0,
+            "spoken": "Billboard: A forest of windmills ahead in the San Gorgonio Pass, turning in the same wind that is currently shoving your trailer around. They will not kill your birds, or your fuzzy dice, but they will spin.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Palm Springs Aerial Tramway (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 113.9,
+            "spoken": "Billboard: The Palm Springs Aerial Tramway, ahead. Its cars rotate all the way up the cliffs, almost six thousand feet. The view comes around to you.",
+            "directions": [
+              "reverse"
             ]
           },
           {
@@ -45252,6 +45912,16 @@
             "spoken": "Passing Avenal"
           },
           {
+            "name": "Harris Ranch (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 189.2,
+            "spoken": "Billboard: Harris Ranch, ahead at Coalinga. A steakhouse and inn halfway between Los Angeles and San Francisco, with its own airstrip. Please arrive by road.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Huron",
             "at_mi": 193.0,
             "off_mi": 5.18,
@@ -45259,6 +45929,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150933900, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Huron"
+          },
+          {
+            "name": "Harris Ranch (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 200.7,
+            "spoken": "Billboard: Harris Ranch, next exit. A steakhouse and inn halfway between Los Angeles and San Francisco, with its own airstrip. Please arrive by road.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pea Soup Andersen's (northbound)",
@@ -45278,16 +45958,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150943474, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Los Banos"
-          },
-          {
-            "name": "Pea Soup Andersen's (southbound)",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 283.0,
-            "spoken": "Billboard: Pea Soup Andersen's is ahead in Santa Nella. It has served world-famous split pea soup since your grandparents drove this road. Hap-pea and Pea-wee are waiting, and the soup is all you can eat.",
-            "directions": [
-              "reverse"
-            ]
           },
           {
             "name": "Gustine",
@@ -46837,6 +47507,16 @@
             "spoken": "Approaching Sherwin Summit"
           },
           {
+            "name": "Erick Schat's Bakkery (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.0,
+            "spoken": "Billboard: Erick Schat's Bakkery is ahead in Bishop, baking sheepherder bread by hand. The line goes out the door. The sheep are not in it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Chalfant",
             "at_mi": 41.1,
             "off_mi": 10.69,
@@ -47292,6 +47972,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150964588, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Winton"
+          },
+          {
+            "name": "Gateway to Yosemite (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Merced is the gateway to Yosemite. Turn east and climb into the granite cathedral of the Sierra, where waterfalls and cliffs wait about two hours up the road.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Planada",
@@ -48010,6 +48700,16 @@
             "spoken": "Passing Hughson"
           },
           {
+            "name": "American Graffiti (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Modesto is the hometown of George Lucas. Before the spaceships, he made American Graffiti about cruising these streets on a summer night. The town motto promises water, wealth, contentment, and health, apparently in that order.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Waterford",
             "at_mi": 9.4,
             "off_mi": 10.18,
@@ -48062,6 +48762,16 @@
             "spoken": "Crossing the Merced River"
           },
           {
+            "name": "Castle Air Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.7,
+            "spoken": "Billboard: Castle Air Museum, ahead near Atwater. Bombers, fighters, and a Blackbird that flew three times the speed of sound. The limit here is lower.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Winton",
             "at_mi": 29.7,
             "off_mi": 2.62,
@@ -48078,6 +48788,16 @@
             "spoken": "Billboard: Merced is the gateway to Yosemite. Turn east and climb into the granite cathedral of the Sierra, where waterfalls and cliffs wait about two hours up the road.",
             "directions": [
               "forward"
+            ]
+          },
+          {
+            "name": "Castle Air Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.0,
+            "spoken": "Billboard: Castle Air Museum, ahead near Atwater. Bombers, fighters, and a Blackbird that flew three times the speed of sound. The limit here is lower.",
+            "directions": [
+              "reverse"
             ]
           },
           {
@@ -49189,6 +49909,16 @@
             "kind": "point",
             "at_mi": 4.4,
             "spoken": "Approaching Black Butte Summit"
+          },
+          {
+            "name": "Mount Shasta (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.4,
+            "spoken": "Billboard: Mount Shasta is ahead, where the first Black Bear Diner opened in nineteen ninety-five. The mountain got there a little earlier.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Weed Museum",
@@ -54289,6 +55019,16 @@
             "spoken": "Passing Pala"
           },
           {
+            "name": "Temecula Wine Country (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.3,
+            "spoken": "Billboard: Temecula wine country, ahead. Dozens of wineries line Rancho California Road. The driver gets the grape juice.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fallbrook",
             "at_mi": 21.7,
             "off_mi": 4.45,
@@ -54359,6 +55099,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 1833757334, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing French Valley"
+          },
+          {
+            "name": "Temecula Wine Country (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.3,
+            "spoken": "Billboard: Temecula wine country, ahead. Dozens of wineries line Rancho California Road. The driver gets the grape juice.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Winchester",
@@ -56206,11 +56956,31 @@
             "spoken": "Passing San Fernando"
           },
           {
+            "name": "Vasquez Rocks (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.1,
+            "spoken": "Billboard: Vasquez Rocks, ahead at Agua Dulce. These tilted slabs have played a dozen alien planets on Star Trek. They have never once left Los Angeles County.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "South Fork Santa Clara River",
             "category": "river",
             "kind": "point",
             "at_mi": 67.3,
             "spoken": "Crossing the South Fork Santa Clara River"
+          },
+          {
+            "name": "Vasquez Rocks (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.1,
+            "spoken": "Billboard: Vasquez Rocks, ahead at Agua Dulce. These tilted slabs have played a dozen alien planets on Star Trek. They have never once left Los Angeles County.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Littlerock",
@@ -63019,11 +63789,31 @@
             "spoken": "Passing Bella Vista"
           },
           {
+            "name": "Lake Shasta Caverns (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.9,
+            "spoken": "Billboard: Lake Shasta Caverns, ahead at O'Brien. A boat across the lake, a bus up the cliff, then six hundred steps underground. The truck waits on shore.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sacramento River",
             "category": "river",
             "kind": "point",
             "at_mi": 11.4,
             "spoken": "Crossing the Sacramento River"
+          },
+          {
+            "name": "The Sundial Bridge (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.7,
+            "spoken": "Billboard: Redding's Sundial Bridge is ahead, a glass footbridge built as a giant sundial. It tells time from eleven to three, then takes the afternoon off.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Shasta-Trinity National Forest",
@@ -63038,6 +63828,26 @@
             "kind": "zone",
             "at_mi": 22.8,
             "spoken": "Entering Whiskeytown-Shasta-Trinity National Recreation Area - Shasta Unit"
+          },
+          {
+            "name": "Lake Shasta Caverns (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.9,
+            "spoken": "Billboard: Lake Shasta Caverns, ahead at O'Brien. A boat across the lake, a bus up the cliff, then six hundred steps underground. The truck waits on shore.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Mount Shasta (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.3,
+            "spoken": "Billboard: Mount Shasta is ahead, where the first Black Bear Diner opened in nineteen ninety-five. The mountain got there a little earlier.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Dunsmuir",
@@ -63079,6 +63889,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 147132496, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Weed"
+          },
+          {
+            "name": "Mount Shasta (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 72.4,
+            "spoken": "Billboard: Mount Shasta is ahead, where the first Black Bear Diner opened in nineteen ninety-five. The mountain got there a little earlier.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Klamath National Forest",
@@ -64297,6 +65117,16 @@
             "spoken": "Passing Millville"
           },
           {
+            "name": "Lake Shasta Caverns (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.6,
+            "spoken": "Billboard: Lake Shasta Caverns, ahead at O'Brien. A boat across the lake, a bus up the cliff, then six hundred steps underground. The truck waits on shore.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Bella Vista",
             "at_mi": 7.4,
             "off_mi": 6.6,
@@ -64313,11 +65143,41 @@
             "spoken": "Crossing the Sacramento River"
           },
           {
+            "name": "The Sundial Bridge (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.9,
+            "spoken": "Billboard: Redding's Sundial Bridge is ahead, a glass footbridge built as a giant sundial. It tells time from eleven to three, then takes the afternoon off.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Shasta-Trinity National Forest",
             "category": "national_forest",
             "kind": "zone",
             "at_mi": 15.7,
             "spoken": "Entering Shasta-Trinity National Forest"
+          },
+          {
+            "name": "Lake Shasta Caverns (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.7,
+            "spoken": "Billboard: Lake Shasta Caverns, ahead at O'Brien. A boat across the lake, a bus up the cliff, then six hundred steps underground. The truck waits on shore.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Mount Shasta (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.0,
+            "spoken": "Billboard: Mount Shasta is ahead, where the first Black Bear Diner opened in nineteen ninety-five. The mountain got there a little earlier.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "McCloud",
@@ -66278,6 +67138,26 @@
             "spoken": "Passing Inyokern"
           },
           {
+            "name": "Museum of Western Film History (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.4,
+            "spoken": "Billboard: The Museum of Western Film History, ahead in Lone Pine. Four hundred movies were shot in these hills. The scenery has more credits than most actors.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Museum of Western Film History (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 88.4,
+            "spoken": "Billboard: The Museum of Western Film History, ahead in Lone Pine. Four hundred movies were shot in these hills. The scenery has more credits than most actors.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Independence",
             "at_mi": 94.69,
             "off_mi": 0.0,
@@ -66285,6 +67165,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150963645, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Independence"
+          },
+          {
+            "name": "Erick Schat's Bakkery (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 128.0,
+            "spoken": "Billboard: Erick Schat's Bakkery is ahead in Bishop, baking sheepherder bread by hand. The line goes out the door. The sheep are not in it.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Chalfant",
@@ -67205,6 +68095,26 @@
             "spoken": "Entering Inyokern"
           },
           {
+            "name": "Red Rock Canyon State Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: Red Rock Canyon State Park, ahead. The striped cliffs played the fossil dig in Jurassic Park. The dinosaurs were added later.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Red Rock Canyon State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.0,
+            "spoken": "Billboard: Red Rock Canyon State Park, ahead. The striped cliffs played the fossil dig in Jurassic Park. The dinosaurs were added later.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "California City",
             "at_mi": 48.48,
             "off_mi": 7.8,
@@ -68101,6 +69011,16 @@
             "spoken": "Edward Dean Museum of Decorative Arts ahead"
           },
           {
+            "name": "Hadley's Date Shakes (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.2,
+            "spoken": "Billboard: Date shakes ahead at Hadley's. Yes, a milkshake made of dates. Trust the desert. It knows what it is doing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "San Jacinto",
             "at_mi": 29.3,
             "off_mi": 9.88,
@@ -68117,6 +69037,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150960179, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Banning"
+          },
+          {
+            "name": "Palm Springs Aerial Tramway (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.3,
+            "spoken": "Billboard: The Palm Springs Aerial Tramway, ahead. Its cars rotate all the way up the cliffs, almost six thousand feet. The view comes around to you.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cabazon Dinosaurs (eastbound)",
@@ -68141,6 +69071,26 @@
             "kind": "point",
             "at_mi": 43.0,
             "spoken": "Billboard: Dinosaurs, next exit. Concrete, enormous, unbothered by extinction.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "San Gorgonio Windmills (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.1,
+            "spoken": "Billboard: A forest of windmills ahead in the San Gorgonio Pass, turning in the same wind that is currently shoving your trailer around. They will not kill your birds, or your fuzzy dice, but they will spin.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Hadley's Date Shakes (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.6,
+            "spoken": "Billboard: Date shakes ahead at Hadley's. Yes, a milkshake made of dates. Trust the desert. It knows what it is doing.",
             "directions": [
               "reverse"
             ]
@@ -68178,6 +69128,16 @@
             "spoken": "Passing Desert Hot Springs"
           },
           {
+            "name": "San Gorgonio Windmills (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.8,
+            "spoken": "Billboard: A forest of windmills ahead in the San Gorgonio Pass, turning in the same wind that is currently shoving your trailer around. They will not kill your birds, or your fuzzy dice, but they will spin.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Desert Edge",
             "at_mi": 57.1,
             "off_mi": 4.72,
@@ -68185,6 +69145,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 12408374290, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Desert Edge"
+          },
+          {
+            "name": "Palm Springs Aerial Tramway (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.0,
+            "spoken": "Billboard: The Palm Springs Aerial Tramway, ahead. Its cars rotate all the way up the cliffs, almost six thousand feet. The view comes around to you.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sky Valley",
@@ -72313,6 +73283,16 @@
             "spoken": "Passing Winchester"
           },
           {
+            "name": "Temecula Wine Country (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.4,
+            "spoken": "Billboard: Temecula wine country, ahead. Dozens of wineries line Rancho California Road. The driver gets the grape juice.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "French Valley",
             "at_mi": 31.0,
             "off_mi": 3.73,
@@ -72424,6 +73404,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150940148, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fallbrook"
+          },
+          {
+            "name": "Temecula Wine Country (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.4,
+            "spoken": "Billboard: Temecula wine country, ahead. Dozens of wineries line Rancho California Road. The driver gets the grape juice.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pala",
@@ -84140,6 +85130,26 @@
         ],
         "landmarks": [
           {
+            "name": "California State Railroad Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: The California State Railroad Museum, ahead in Old Sacramento. More than twenty restored locomotives, some from the eighteen sixties. Retirement suits them.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Granzella's (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.6,
+            "spoken": "Billboard: Granzella's, next exit in Williams. An Italian deli since nineteen seventy-six, famous for its muffuletta. The napkins are free. Take several.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Maxwell",
             "at_mi": 67.0,
             "off_mi": 0.54,
@@ -84149,6 +85159,26 @@
             "spoken": "Passing Maxwell"
           },
           {
+            "name": "Granzella's (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.3,
+            "spoken": "Billboard: Granzella's, ahead in Williams. An Italian deli since nineteen seventy-six, famous for its muffuletta. The napkins are free. Take several.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Olive Pit (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 102.5,
+            "spoken": "Billboard: The Olive Pit, ahead in Corning. Free olive tasting since nineteen sixty-seven. Try the garlic ones, then roll the windows down.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Corning",
             "at_mi": 111.9,
             "off_mi": 1.11,
@@ -84156,6 +85186,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 141046022, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Corning"
+          },
+          {
+            "name": "The Olive Pit (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 114.2,
+            "spoken": "Billboard: The Olive Pit, next exit in Corning. Free olive tasting since nineteen sixty-seven. Try the garlic ones, then roll the windows down.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cottonwood",
@@ -84176,6 +85216,16 @@
             "spoken": "Entering Anderson"
           },
           {
+            "name": "The Sundial Bridge (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 150.8,
+            "spoken": "Billboard: Redding's Sundial Bridge is ahead, a glass footbridge built as a giant sundial. It tells time from eleven to three, then takes the afternoon off.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Shasta Lake",
             "at_mi": 165.1,
             "off_mi": 0.73,
@@ -84183,6 +85233,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 141038095, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Shasta Lake"
+          },
+          {
+            "name": "The Sundial Bridge (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 169.7,
+            "spoken": "Billboard: Redding's Sundial Bridge is ahead, a glass footbridge built as a giant sundial. It tells time from eleven to three, then takes the afternoon off.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Lake Shasta Caverns (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 174.5,
+            "spoken": "Billboard: Lake Shasta Caverns, next exit. A boat across the lake, a bus up the cliff, then six hundred steps underground. The truck waits on shore.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Lake Shasta Caverns (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 177.5,
+            "spoken": "Billboard: Lake Shasta Caverns, next exit. A boat across the lake, a bus up the cliff, then six hundred steps underground. The truck waits on shore.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Shasta-Trinity National Forest",
@@ -84201,6 +85281,16 @@
             "spoken": "Entering Dunsmuir"
           },
           {
+            "name": "Mount Shasta (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 211.9,
+            "spoken": "Billboard: Mount Shasta is ahead, where the first Black Bear Diner opened in nineteen ninety-five. The mountain got there a little earlier.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Weed",
             "at_mi": 226.9,
             "off_mi": 0.21,
@@ -84215,6 +85305,16 @@
             "kind": "point",
             "at_mi": 228.3,
             "spoken": "Approaching Black Butte Summit"
+          },
+          {
+            "name": "Mount Shasta (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 230.6,
+            "spoken": "Billboard: Mount Shasta is ahead, where the first Black Bear Diner opened in nineteen ninety-five. The mountain got there a little earlier.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Anderson Grade Summit",
@@ -84277,6 +85377,16 @@
             "spoken": "Entering Phoenix"
           },
           {
+            "name": "Crater Lake (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 312.3,
+            "spoken": "Billboard: Crater Lake is ahead and uphill. The deepest lake in the country fills the blasted crater of a fallen volcano and glows an impossible blue. There is nothing else like it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Gold Hill",
             "at_mi": 319.2,
             "off_mi": 0.24,
@@ -84286,6 +85396,16 @@
             "spoken": "Entering Gold Hill"
           },
           {
+            "name": "Collier Memorial State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 321.5,
+            "spoken": "Billboard: Collier Memorial State Park, ahead. One of the largest collections of old logging equipment anywhere, outdoors and free. None of it is in a hurry.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Rogue River",
             "at_mi": 326.6,
             "off_mi": 0.11,
@@ -84293,6 +85413,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150937661, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Rogue River"
+          },
+          {
+            "name": "Crater Lake (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 332.3,
+            "spoken": "Billboard: Crater Lake is ahead and uphill. The deepest lake in the country fills the blasted crater of a fallen volcano and glows an impossible blue. There is nothing else like it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Collier Memorial State Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 339.2,
+            "spoken": "Billboard: Collier Memorial State Park, ahead. One of the largest collections of old logging equipment anywhere, outdoors and free. None of it is in a hurry.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Canyonville",
@@ -84340,6 +85480,16 @@
             "spoken": "Entering Green"
           },
           {
+            "name": "Salt Creek Falls (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 400.1,
+            "spoken": "Billboard: Salt Creek Falls, ahead near Willamette Pass. Two hundred eighty-six feet straight down, one of the tallest in Oregon. It has never once slowed down.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Winchester",
             "at_mi": 407.1,
             "off_mi": 0.08,
@@ -84356,6 +85506,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150964126, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Oakland"
+          },
+          {
+            "name": "Salt Creek Falls (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 420.0,
+            "spoken": "Billboard: Salt Creek Falls, ahead near Willamette Pass. Two hundred eighty-six feet straight down, one of the tallest in Oregon. It has never once slowed down.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Creswell",
@@ -84385,6 +85545,16 @@
             "spoken": "Passing Halsey"
           },
           {
+            "name": "Albany Historic Carousel (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 501.6,
+            "spoken": "Billboard: The Albany Historic Carousel, ahead. Volunteers carved every animal by hand. It goes in circles on purpose, unlike your last detour.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Tangent",
             "at_mi": 504.8,
             "off_mi": 2.35,
@@ -84394,6 +85564,16 @@
             "spoken": "Passing Tangent"
           },
           {
+            "name": "The Enchanted Forest (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 516.6,
+            "spoken": "Billboard: Enchanted Forest is ahead. One family built its storybook castles, crooked houses, and rides into the Oregon woods over a suspicious number of productive weekends.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Jefferson",
             "at_mi": 517.2,
             "off_mi": 2.28,
@@ -84401,6 +85581,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150978451, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Jefferson"
+          },
+          {
+            "name": "Albany Historic Carousel (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 519.6,
+            "spoken": "Billboard: The Albany Historic Carousel, ahead. Volunteers carved every animal by hand. It goes in circles on purpose, unlike your last detour.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Enchanted Forest (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 532.6,
+            "spoken": "Billboard: Enchanted Forest is ahead. One family built its storybook castles, crooked houses, and rides into the Oregon woods over a suspicious number of productive weekends.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Brooks",
@@ -86262,6 +87462,16 @@
             "spoken": "Passing Rio Linda"
           },
           {
+            "name": "California State Railroad Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.9,
+            "spoken": "Billboard: The California State Railroad Museum, ahead in Old Sacramento. More than twenty restored locomotives, some from the eighteen sixties. Retirement suits them.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Sacramento River",
             "category": "river",
             "kind": "point",
@@ -86287,6 +87497,16 @@
             "spoken": "Passing Esparto"
           },
           {
+            "name": "Granzella's (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.9,
+            "spoken": "Billboard: Granzella's, next exit in Williams. An Italian deli since nineteen seventy-six, famous for its muffuletta. The napkins are free. Take several.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Colusa",
             "at_mi": 59.1,
             "off_mi": 8.21,
@@ -86303,6 +87523,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141033004, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Maxwell"
+          },
+          {
+            "name": "Granzella's (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.8,
+            "spoken": "Billboard: Granzella's, ahead in Williams. An Italian deli since nineteen seventy-six, famous for its muffuletta. The napkins are free. Take several.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Princeton",
@@ -86348,6 +87578,16 @@
             "spoken": "Entering Orland"
           },
           {
+            "name": "The Olive Pit (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 111.3,
+            "spoken": "Billboard: The Olive Pit, next exit in Corning. Free olive tasting since nineteen sixty-seven. Try the garlic ones, then roll the windows down.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Vina",
             "at_mi": 113.1,
             "off_mi": 7.75,
@@ -86355,6 +87595,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141042925, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Vina"
+          },
+          {
+            "name": "The Olive Pit (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 114.3,
+            "spoken": "Billboard: The Olive Pit, next exit in Corning. Free olive tasting since nineteen sixty-seven. Try the garlic ones, then roll the windows down.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Los Molinos",
@@ -86391,6 +87641,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141030288, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Cottonwood"
+          },
+          {
+            "name": "The Sundial Bridge (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 147.5,
+            "spoken": "Billboard: Redding's Sundial Bridge is ahead, a glass footbridge built as a giant sundial. It tells time from eleven to three, then takes the afternoon off.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Anderson",
@@ -90609,6 +91869,16 @@
             "spoken": "Passing Rancho Cordova"
           },
           {
+            "name": "California State Railroad Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: The California State Railroad Museum, ahead in Old Sacramento. More than twenty restored locomotives, some from the eighteen sixties. Retirement suits them.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Citrus Heights",
             "at_mi": 15.4,
             "off_mi": 1.17,
@@ -90806,6 +92076,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150954484, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cold Springs"
+          },
+          {
+            "name": "National Automobile Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 123.0,
+            "spoken": "Billboard: The National Automobile Museum, ahead in Reno. More than two hundred cars from Bill Harrah's collection. Look all you like. The keys stay in the office.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Sun Valley",
@@ -92967,6 +94247,16 @@
             "spoken": "Passing Rio Linda"
           },
           {
+            "name": "California State Railroad Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.2,
+            "spoken": "Billboard: The California State Railroad Museum, ahead in Old Sacramento. More than twenty restored locomotives, some from the eighteen sixties. Retirement suits them.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Sacramento River",
             "category": "river",
             "kind": "point",
@@ -92992,6 +94282,16 @@
             "spoken": "Passing Winters"
           },
           {
+            "name": "Jelly Belly (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.6,
+            "spoken": "Billboard: The Jelly Belly factory, ahead in Fairfield. Watch the beans get made from a catwalk, then order a burger shaped like one. It tastes like a burger.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pena Adobe Park",
             "category": "museum",
             "kind": "point",
@@ -93015,6 +94315,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150958884, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing American Canyon"
+          },
+          {
+            "name": "Jelly Belly (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.6,
+            "spoken": "Billboard: The Jelly Belly factory, ahead in Fairfield. Watch the beans get made from a catwalk, then order a burger shaped like one. It tastes like a burger.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Benicia",
@@ -93830,6 +95140,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150933796, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rio Linda"
+          },
+          {
+            "name": "California State Railroad Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: The California State Railroad Museum, ahead in Old Sacramento. More than twenty restored locomotives, some from the eighteen sixties. Retirement suits them.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Knights Landing",
@@ -95315,6 +96635,26 @@
             "spoken": "Passing Pajaro Dunes"
           },
           {
+            "name": "Mission San Juan Bautista (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.9,
+            "spoken": "Billboard: Mission San Juan Bautista, ahead. Hitchcock filmed Vertigo here and painted in a bell tower the mission does not have. Visitors still look up for it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "National Steinbeck Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.9,
+            "spoken": "Billboard: The National Steinbeck Center, ahead in Salinas. His hometown, and the valley where East of Eden is set. The book takes longer than the valley.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "San Benito River",
             "category": "river",
             "kind": "point",
@@ -95401,6 +96741,36 @@
             "spoken": "Passing Hollister"
           },
           {
+            "name": "Mission San Juan Bautista (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.0,
+            "spoken": "Billboard: Mission San Juan Bautista, ahead. Hitchcock filmed Vertigo here and painted in a bell tower the mission does not have. Visitors still look up for it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Casa de Fruta (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.1,
+            "spoken": "Billboard: Casa de Fruta, ahead on Pacheco Pass. A fruit stand that kept growing until it had a restaurant, a carousel, and its own little train.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Casa de Fruta (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.2,
+            "spoken": "Billboard: Casa de Fruta, ahead on Pacheco Pass. A fruit stand that kept growing until it had a restaurant, a carousel, and its own little train.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Pacheco Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -95413,16 +96783,6 @@
             "kind": "zone",
             "at_mi": 48.4,
             "spoken": "Entering San Luis Reservoir State Recreation Area"
-          },
-          {
-            "name": "Pea Soup Andersen's (eastbound)",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 51.0,
-            "spoken": "Billboard: Pea Soup Andersen's is ahead in Santa Nella. It has served world-famous split pea soup since your grandparents drove this road. Hap-pea and Pea-wee are waiting, and the soup is all you can eat.",
-            "directions": [
-              "forward"
-            ]
           },
           {
             "name": "Pea Soup Andersen's (westbound)",
@@ -96720,6 +98080,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150972031, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Moss Landing"
+          },
+          {
+            "name": "National Steinbeck Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The National Steinbeck Center, ahead in Salinas. His hometown, and the valley where East of Eden is set. The book takes longer than the valley.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Elkhorn",
@@ -98368,6 +99738,16 @@
             "spoken": "Passing Prunedale"
           },
           {
+            "name": "National Steinbeck Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The National Steinbeck Center, ahead in Salinas. His hometown, and the valley where East of Eden is set. The book takes longer than the valley.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mission Soledad Museum",
             "category": "museum",
             "kind": "point",
@@ -98475,6 +99855,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150947072, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Creston"
+          },
+          {
+            "name": "Bubblegum Alley (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 119.0,
+            "spoken": "Billboard: San Luis Obispo has an entire downtown alley walled from floor to ceiling in decades of chewed bubblegum. It is a landmark you can smell. Bring a piece, or make the healthier choice and do not.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cuesta Pass",
@@ -100652,6 +102042,16 @@
             "spoken": "Passing Moss Landing"
           },
           {
+            "name": "National Steinbeck Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.7,
+            "spoken": "Billboard: The National Steinbeck Center, ahead in Salinas. His hometown, and the valley where East of Eden is set. The book takes longer than the valley.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Elkhorn",
             "at_mi": 8.9,
             "off_mi": 4.55,
@@ -100675,6 +102075,16 @@
             "kind": "point",
             "at_mi": 11.0,
             "spoken": "Crossing the San Benito River"
+          },
+          {
+            "name": "Mission San Juan Bautista (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.3,
+            "spoken": "Billboard: Mission San Juan Bautista, ahead. Hitchcock filmed Vertigo here and painted in a bell tower the mission does not have. Visitors still look up for it.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Las Lomas",
@@ -100754,6 +102164,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150965723, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hollister"
+          },
+          {
+            "name": "Mission San Juan Bautista (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.0,
+            "spoken": "Billboard: Mission San Juan Bautista, ahead. Hitchcock filmed Vertigo here and painted in a bell tower the mission does not have. Visitors still look up for it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Casa de Fruta (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.2,
+            "spoken": "Billboard: Casa de Fruta, ahead on Pacheco Pass. A fruit stand that kept growing until it had a restaurant, a carousel, and its own little train.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Casa de Fruta (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.6,
+            "spoken": "Billboard: Casa de Fruta, ahead on Pacheco Pass. A fruit stand that kept growing until it had a restaurant, a carousel, and its own little train.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pacheco Pass",
@@ -102255,6 +103695,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 13069923601, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Milguatay"
+          },
+          {
+            "name": "Desert View Tower (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 73.1,
+            "spoken": "Billboard: Desert View Tower, next exit. A stone lookout from the nineteen twenties, and boulders carved into a turtle, a bison and a skull. Pick a favorite.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Desert View Tower (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 76.1,
+            "spoken": "Billboard: Desert View Tower, next exit. A stone lookout from the nineteen twenties, and boulders carved into a turtle, a bison and a skull. Pick a favorite.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "New River",
@@ -106737,6 +108197,26 @@
             "spoken": "Passing Milguatay"
           },
           {
+            "name": "Desert View Tower (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.0,
+            "spoken": "Billboard: Desert View Tower, ahead. A stone lookout from the nineteen twenties, and boulders carved into a turtle, a bison and a skull. Pick a favorite.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Desert View Tower (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.0,
+            "spoken": "Billboard: Desert View Tower, ahead. A stone lookout from the nineteen twenties, and boulders carved into a turtle, a bison and a skull. Pick a favorite.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "New River",
             "category": "river",
             "kind": "point",
@@ -106787,6 +108267,16 @@
             "spoken": "Crossing the Alamo River"
           },
           {
+            "name": "Imperial Sand Dunes (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 139.2,
+            "spoken": "Billboard: The Imperial Sand Dunes, ahead. Forty miles of sand, where Return of the Jedi filmed its desert battle. Stay on the pavement. The sand is hungry.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Imperial Sand Dunes Recreation Area",
             "category": "national_park",
             "kind": "zone",
@@ -106794,11 +108284,51 @@
             "spoken": "Entering Imperial Sand Dunes Recreation Area"
           },
           {
+            "name": "Center of the World (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 151.3,
+            "spoken": "Billboard: The official Center of the World, ahead in Felicity. A pink granite pyramid marks the spot. The town said so, and nobody has proved otherwise.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Imperial Sand Dunes (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 160.5,
+            "spoken": "Billboard: The Imperial Sand Dunes, ahead. Forty miles of sand, where Return of the Jedi filmed its desert battle. Stay on the pavement. The sand is hungry.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Center of the World (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 162.8,
+            "spoken": "Billboard: The official Center of the World, next exit in Felicity. A pink granite pyramid marks the spot. The town said so, and nobody has proved otherwise.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Yuma Territory Live Steamers",
             "category": "museum",
             "kind": "point",
             "at_mi": 165.7,
             "spoken": "Museum ahead: Yuma Territory Live Steamers"
+          },
+          {
+            "name": "Yuma Territorial Prison (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 177.7,
+            "spoken": "Billboard: Yuma Territorial Prison State Historic Park, ahead. More than three thousand inmates from eighteen seventy-six to nineteen oh-nine. Then the high school moved in.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Telegraph Pass",
@@ -108638,6 +110168,16 @@
             "spoken": "Passing Pala"
           },
           {
+            "name": "Temecula Wine Country (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.6,
+            "spoken": "Billboard: Temecula wine country, ahead. Dozens of wineries line Rancho California Road. The driver gets the grape juice.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fallbrook",
             "at_mi": 51.9,
             "off_mi": 4.45,
@@ -108715,6 +110255,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 1833757334, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing French Valley"
+          },
+          {
+            "name": "Temecula Wine Country (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.8,
+            "spoken": "Billboard: Temecula wine country, ahead. Dozens of wineries line Rancho California Road. The driver gets the grape juice.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Winchester",
@@ -118227,6 +119777,16 @@
             "spoken": "Entering Cordelia"
           },
           {
+            "name": "Granzella's (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 112.5,
+            "spoken": "Billboard: Granzella's, next exit in Williams. An Italian deli since nineteen seventy-six, famous for its muffuletta. The napkins are free. Take several.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Maxwell",
             "at_mi": 121.4,
             "off_mi": 0.54,
@@ -118234,6 +119794,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141033004, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Maxwell"
+          },
+          {
+            "name": "Granzella's (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 124.0,
+            "spoken": "Billboard: Granzella's, ahead in Williams. An Italian deli since nineteen seventy-six, famous for its muffuletta. The napkins are free. Take several.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Olive Pit (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 165.9,
+            "spoken": "Billboard: The Olive Pit, next exit in Corning. Free olive tasting since nineteen sixty-seven. Try the garlic ones, then roll the windows down.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Olive Pit (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 168.9,
+            "spoken": "Billboard: The Olive Pit, next exit in Corning. Free olive tasting since nineteen sixty-seven. Try the garlic ones, then roll the windows down.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Anderson",
@@ -118245,6 +119835,16 @@
             "spoken": "Entering Anderson"
           },
           {
+            "name": "The Sundial Bridge (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 205.3,
+            "spoken": "Billboard: Redding's Sundial Bridge is ahead, a glass footbridge built as a giant sundial. It tells time from eleven to three, then takes the afternoon off.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Shasta Lake",
             "at_mi": 219.6,
             "off_mi": 0.73,
@@ -118252,6 +119852,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 141038095, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Shasta Lake"
+          },
+          {
+            "name": "The Sundial Bridge (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 224.9,
+            "spoken": "Billboard: Redding's Sundial Bridge is ahead, a glass footbridge built as a giant sundial. It tells time from eleven to three, then takes the afternoon off.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Lake Shasta Caverns (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 229.4,
+            "spoken": "Billboard: Lake Shasta Caverns, next exit. A boat across the lake, a bus up the cliff, then six hundred steps underground. The truck waits on shore.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Lake Shasta Caverns (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 232.4,
+            "spoken": "Billboard: Lake Shasta Caverns, next exit. A boat across the lake, a bus up the cliff, then six hundred steps underground. The truck waits on shore.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Shasta-Trinity National Forest",
@@ -118270,6 +119900,16 @@
             "spoken": "Entering Dunsmuir"
           },
           {
+            "name": "Mount Shasta (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 266.5,
+            "spoken": "Billboard: Mount Shasta is ahead, where the first Black Bear Diner opened in nineteen ninety-five. The mountain got there a little earlier.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Weed",
             "at_mi": 281.5,
             "off_mi": 0.21,
@@ -118277,6 +119917,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 147132496, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Weed"
+          },
+          {
+            "name": "Mount Shasta (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 284.1,
+            "spoken": "Billboard: Mount Shasta is ahead, where the first Black Bear Diner opened in nineteen ninety-five. The mountain got there a little earlier.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Anderson Grade Summit",
@@ -118346,6 +119996,16 @@
             "spoken": "Entering Phoenix"
           },
           {
+            "name": "Crater Lake (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 367.4,
+            "spoken": "Billboard: Crater Lake is ahead and uphill. The deepest lake in the country fills the blasted crater of a fallen volcano and glows an impossible blue. There is nothing else like it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Gold Hill",
             "at_mi": 373.9,
             "off_mi": 0.24,
@@ -118355,6 +120015,16 @@
             "spoken": "Entering Gold Hill"
           },
           {
+            "name": "Collier Memorial State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 376.3,
+            "spoken": "Billboard: Collier Memorial State Park, ahead. One of the largest collections of old logging equipment anywhere, outdoors and free. None of it is in a hurry.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Rogue River",
             "at_mi": 381.3,
             "off_mi": 0.11,
@@ -118362,6 +120032,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150937661, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Rogue River"
+          },
+          {
+            "name": "Crater Lake (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 387.4,
+            "spoken": "Billboard: Crater Lake is ahead and uphill. The deepest lake in the country fills the blasted crater of a fallen volcano and glows an impossible blue. There is nothing else like it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Collier Memorial State Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 394.3,
+            "spoken": "Billboard: Collier Memorial State Park, ahead. One of the largest collections of old logging equipment anywhere, outdoors and free. None of it is in a hurry.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Canyonville",
@@ -118400,6 +120090,16 @@
             "spoken": "Entering Green"
           },
           {
+            "name": "Salt Creek Falls (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 455.2,
+            "spoken": "Billboard: Salt Creek Falls, ahead near Willamette Pass. Two hundred eighty-six feet straight down, one of the tallest in Oregon. It has never once slowed down.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Winchester",
             "at_mi": 461.9,
             "off_mi": 0.08,
@@ -118407,6 +120107,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150981732, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Winchester"
+          },
+          {
+            "name": "Salt Creek Falls (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 473.2,
+            "spoken": "Billboard: Salt Creek Falls, ahead near Willamette Pass. Two hundred eighty-six feet straight down, one of the tallest in Oregon. It has never once slowed down.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Creswell",
@@ -118425,6 +120135,46 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150942365, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Coburg"
+          },
+          {
+            "name": "Albany Historic Carousel (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 556.6,
+            "spoken": "Billboard: The Albany Historic Carousel, ahead. Volunteers carved every animal by hand. It goes in circles on purpose, unlike your last detour.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Enchanted Forest (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 571.7,
+            "spoken": "Billboard: Enchanted Forest is ahead. One family built its storybook castles, crooked houses, and rides into the Oregon woods over a suspicious number of productive weekends.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Albany Historic Carousel (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 574.6,
+            "spoken": "Billboard: The Albany Historic Carousel, ahead. Volunteers carved every animal by hand. It goes in circles on purpose, unlike your last detour.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Enchanted Forest (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 587.7,
+            "spoken": "Billboard: Enchanted Forest is ahead. One family built its storybook castles, crooked houses, and rides into the Oregon woods over a suspicious number of productive weekends.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Brooks",
@@ -128191,6 +129941,16 @@
             "spoken": "Entering Crockett"
           },
           {
+            "name": "Jelly Belly (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.7,
+            "spoken": "Billboard: The Jelly Belly factory, ahead in Fairfield. Watch the beans get made from a catwalk, then order a burger shaped like one. It tastes like a burger.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "American Canyon",
             "at_mi": 34.9,
             "off_mi": 2.72,
@@ -128209,6 +129969,16 @@
             "spoken": "Entering Cordelia"
           },
           {
+            "name": "Jelly Belly (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.2,
+            "spoken": "Billboard: The Jelly Belly factory, next exit. Watch the beans get made from a catwalk, then order a burger shaped like one. It tastes like a burger.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Dixon",
             "at_mi": 64.8,
             "off_mi": 1.36,
@@ -128216,6 +129986,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150979479, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dixon"
+          },
+          {
+            "name": "California State Railroad Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 72.9,
+            "spoken": "Billboard: The California State Railroad Museum, ahead in Old Sacramento. More than twenty restored locomotives, some from the eighteen sixties. Retirement suits them.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Sacramento River",
@@ -128232,6 +130012,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150933796, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rio Linda"
+          },
+          {
+            "name": "California State Railroad Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 95.0,
+            "spoken": "Billboard: The California State Railroad Museum, ahead in Old Sacramento. More than twenty restored locomotives, some from the eighteen sixties. Retirement suits them.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Citrus Heights",
@@ -128316,6 +130106,16 @@
             "spoken": "Ahead, the highway climbs Donner Pass high in the Sierra Nevada. A wagon party bound for California was trapped here by deep snow in the winter of eighteen forty-six and survived only by the grimmest of means. It is beautiful country with a hard history."
           },
           {
+            "name": "National Automobile Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 209.5,
+            "spoken": "Billboard: The National Automobile Museum, ahead in Reno. More than two hundred cars from Bill Harrah's collection. Look all you like. The keys stay in the office.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lockwood",
             "at_mi": 227.5,
             "off_mi": 0.35,
@@ -128323,6 +130123,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150962841, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Lockwood"
+          },
+          {
+            "name": "National Automobile Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 229.8,
+            "spoken": "Billboard: The National Automobile Museum, ahead in Reno. More than two hundred cars from Bill Harrah's collection. Look all you like. The keys stay in the office.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Lovers Lock Plaza (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 302.0,
+            "spoken": "Billboard: Lovelock is ahead, where couples hang padlocks on an endless chain behind the round courthouse. The town had the name first.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Lovers Lock Plaza (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 320.0,
+            "spoken": "Billboard: Lovelock is ahead, where couples hang padlocks on an endless chain behind the round courthouse. The town had the name first.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Humboldt River Ranch",
@@ -128359,6 +130189,26 @@
             "spoken": "Passing Golconda"
           },
           {
+            "name": "California Trail Interpretive Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 496.1,
+            "spoken": "Billboard: The California Trail Interpretive Center, next exit. Wagon trains walked this way to the gold fields. Admission is free. Walking is optional.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "California Trail Interpretive Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 499.1,
+            "spoken": "Billboard: The California Trail Interpretive Center, next exit. Wagon trains walked this way to the gold fields. Admission is free. Walking is optional.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Ryndon",
             "at_mi": 519.8,
             "off_mi": 0.05,
@@ -128389,6 +130239,36 @@
             "spoken": "Approaching Leppy Pass"
           },
           {
+            "name": "Bonneville Salt Flats (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 618.3,
+            "spoken": "Billboard: The Bonneville Salt Flats, next exit. A wheel-driven car hit four hundred forty-nine miles an hour out there. Dispatch would still call you late.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Wendover Will (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 619.0,
+            "spoken": "Billboard: Wendover Will welcomes you ahead. This giant neon cowboy waves from the desert with the confidence of a man who has never paid an electric bill.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Bonneville Salt Flats (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 621.8,
+            "spoken": "Billboard: The Bonneville Salt Flats, next exit. A wheel-driven car hit four hundred forty-nine miles an hour out there. Dispatch would still call you late.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Tree of Utah",
             "category": "billboard_sign",
             "kind": "point",
@@ -128396,6 +130276,16 @@
             "spoken": "Billboard: The Tree of Utah stands ahead on the salt flats, an eighty-seven-foot concrete tree sprouting from the middle of nowhere. How do you suppose this happened?",
             "directions": [
               "forward"
+            ]
+          },
+          {
+            "name": "Tree of Utah (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 651.1,
+            "spoken": "Billboard: The Tree of Utah stands ahead on the salt flats, an eighty-seven-foot concrete tree sprouting from the middle of nowhere. How do you suppose this happened?",
+            "directions": [
+              "reverse"
             ]
           },
           {
@@ -130504,6 +132394,16 @@
             "spoken": "Passing Fetters Hot Springs"
           },
           {
+            "name": "Charles M. Schulz Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 41.0,
+            "spoken": "Billboard: The Charles M. Schulz Museum, ahead in Santa Rosa. The largest collection of original Peanuts art anywhere. The kite-eating tree is not on display.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Penngrove",
             "at_mi": 43.3,
             "off_mi": 1.48,
@@ -132096,6 +133996,16 @@
             "spoken": "Passing Interlaken"
           },
           {
+            "name": "Casa de Fruta (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.9,
+            "spoken": "Billboard: Casa de Fruta, ahead on Pacheco Pass. A fruit stand that kept growing until it had a restaurant, a carousel, and its own little train.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "San Juan Bautista",
             "at_mi": 37.5,
             "off_mi": 10.14,
@@ -132112,6 +134022,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150965723, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hollister"
+          },
+          {
+            "name": "Casa de Fruta (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.8,
+            "spoken": "Billboard: Casa de Fruta, ahead on Pacheco Pass. A fruit stand that kept growing until it had a restaurant, a carousel, and its own little train.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pacheco Pass",
@@ -134770,6 +136690,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150979479, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dixon"
+          },
+          {
+            "name": "California State Railroad Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 106.6,
+            "spoken": "Billboard: The California State Railroad Museum, ahead in Old Sacramento. More than twenty restored locomotives, some from the eighteen sixties. Retirement suits them.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "restrictions": [],
@@ -135959,6 +137889,16 @@
             "kind": "point",
             "at_mi": 48.5,
             "spoken": "Billboard: You are entering giant artichoke country. Castroville calls itself the Artichoke Center of the World and has supplied enough thorny vegetables to make dip a regional industry.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "National Steinbeck Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.0,
+            "spoken": "Billboard: The National Steinbeck Center, ahead in Salinas. His hometown, and the valley where East of Eden is set. The book takes longer than the valley.",
             "directions": [
               "forward"
             ]
@@ -139176,6 +141116,26 @@
             ]
           },
           {
+            "name": "Pismo Beach (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.1,
+            "spoken": "Billboard: Pismo Beach, ahead. The self-declared clam capital of the world dresses its giant clam statue for every holiday. The clams have no say in it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Madonna Inn (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: San Luis Obispo is home to the Madonna Inn, a pink palace where every room is a different fever dream. Even the men's room waterfall is a tourist attraction in its own right.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Avila Beach",
             "at_mi": 8.3,
             "off_mi": 1.73,
@@ -139226,6 +141186,16 @@
             "kind": "point",
             "at_mi": 16.6,
             "spoken": "Santa Manuela School Museum ahead"
+          },
+          {
+            "name": "Pismo Beach (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.1,
+            "spoken": "Billboard: Pismo Beach, ahead. The self-declared clam capital of the world dresses its giant clam statue for every holiday. The clams have no say in it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Guadalupe",
@@ -141882,6 +143852,16 @@
             "spoken": "Passing San Fernando"
           },
           {
+            "name": "Vasquez Rocks (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.2,
+            "spoken": "Billboard: Vasquez Rocks, ahead at Agua Dulce. These tilted slabs have played a dozen alien planets on Star Trek. They have never once left Los Angeles County.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Bear Divide",
             "category": "mountain_pass",
             "kind": "point",
@@ -141901,6 +143881,16 @@
             "kind": "point",
             "at_mi": 74.28,
             "spoken": "Approaching Mendenhall Gap"
+          },
+          {
+            "name": "Vasquez Rocks (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 77.7,
+            "spoken": "Billboard: Vasquez Rocks, next exit. These tilted slabs have played a dozen alien planets on Star Trek. They have never once left Los Angeles County.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Quartz Hill",
@@ -150189,6 +152179,16 @@
             "spoken": "Passing Solvang"
           },
           {
+            "name": "Solvang (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.2,
+            "spoken": "Billboard: Solvang is ahead. A whole Danish village appears in the California hills, complete with windmills, half-timbered houses, warm aebleskiver, and Hans Christian Andersen watching over it all.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Gaviota Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -153940,6 +155940,26 @@
             "spoken": "Entering Cordelia"
           },
           {
+            "name": "Jelly Belly (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.5,
+            "spoken": "Billboard: The Jelly Belly factory, next exit. Watch the beans get made from a catwalk, then order a burger shaped like one. It tastes like a burger.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Jelly Belly (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.0,
+            "spoken": "Billboard: The Jelly Belly factory, ahead in Fairfield. Watch the beans get made from a catwalk, then order a burger shaped like one. It tastes like a burger.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Winters",
             "at_mi": 70.7,
             "off_mi": 8.16,
@@ -153965,6 +155985,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 2584100971, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Woodland"
+          },
+          {
+            "name": "California State Railroad Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.6,
+            "spoken": "Billboard: The California State Railroad Museum, ahead in Old Sacramento. More than twenty restored locomotives, some from the eighteen sixties. Retirement suits them.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Rio Linda",
@@ -158044,6 +160074,16 @@
             "spoken": "Passing Yountville"
           },
           {
+            "name": "Jelly Belly (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.8,
+            "spoken": "Billboard: The Jelly Belly factory, ahead in Fairfield. Watch the beans get made from a catwalk, then order a burger shaped like one. It tastes like a burger.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "American Canyon",
             "at_mi": 42.2,
             "off_mi": 3.0,
@@ -158078,6 +160118,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150979822, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Cordelia"
+          },
+          {
+            "name": "Jelly Belly (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.8,
+            "spoken": "Billboard: The Jelly Belly factory, ahead in Fairfield. Watch the beans get made from a catwalk, then order a burger shaped like one. It tastes like a burger.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sacramento River",
@@ -159256,6 +161306,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150961709, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Forestville"
+          },
+          {
+            "name": "Charles M. Schulz Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: The Charles M. Schulz Museum, ahead in Santa Rosa. The largest collection of original Peanuts art anywhere. The kite-eating tree is not on display.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Guerneville",
@@ -160698,6 +162758,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150958978, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Walnut Grove"
+          },
+          {
+            "name": "California State Railroad Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.5,
+            "spoken": "Billboard: The California State Railroad Museum, ahead in Old Sacramento. More than twenty restored locomotives, some from the eighteen sixties. Retirement suits them.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Rio Linda",
@@ -164242,6 +166312,16 @@
             "spoken": "Entering Lassen National Forest"
           },
           {
+            "name": "Lassen Volcanic National Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.7,
+            "spoken": "Billboard: Lassen Volcanic National Park, ahead. Lassen Peak blew its top in nineteen fifteen and still steams in places. Consider it napping.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Old Station",
             "at_mi": 52.05,
             "off_mi": 0.01,
@@ -164249,6 +166329,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141033784, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Old Station"
+          },
+          {
+            "name": "Lassen Volcanic National Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 74.1,
+            "spoken": "Billboard: Lassen Volcanic National Park, ahead. Lassen Peak blew its top in nineteen fifteen and still steams in places. Consider it napping.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Shingletown",
@@ -164310,6 +166400,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141046044, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bella Vista"
+          },
+          {
+            "name": "The Sundial Bridge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 105.7,
+            "spoken": "Billboard: Redding's Sundial Bridge is ahead, a glass footbridge built as a giant sundial. It tells time from eleven to three, then takes the afternoon off.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Anderson",
@@ -165527,6 +167627,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150939930, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Verdi"
+          },
+          {
+            "name": "National Automobile Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 76.4,
+            "spoken": "Billboard: The National Automobile Museum, ahead in Reno. More than two hundred cars from Bill Harrah's collection. Look all you like. The keys stay in the office.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Lemmon Valley",
@@ -167814,6 +169924,16 @@
             "spoken": "Passing Redwood Valley"
           },
           {
+            "name": "The Skunk Train (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.6,
+            "spoken": "Billboard: The Skunk Train runs out of Willits, ahead, into the redwoods. Its early motorcars smelled so bad the name stuck. The smell did not.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Ridgewood Summit",
             "category": "mountain_pass",
             "kind": "point",
@@ -167821,11 +169941,31 @@
             "spoken": "Approaching Ridgewood Summit"
           },
           {
+            "name": "The Skunk Train (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.6,
+            "spoken": "Billboard: The Skunk Train runs out of Willits, ahead, into the redwoods. Its early motorcars smelled so bad the name stuck. The smell did not.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Rattlesnake Summit",
             "category": "mountain_pass",
             "kind": "point",
             "at_mi": 57.9,
             "spoken": "Approaching Rattlesnake Summit"
+          },
+          {
+            "name": "Chandelier Drive-Thru Tree (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.2,
+            "spoken": "Billboard: The Chandelier Drive-Thru Tree, ahead in Leggett. A living redwood with a tunnel six feet wide. Cars fit. Your truck can wave from the road.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Leggett",
@@ -167844,6 +169984,26 @@
             "spoken": "Crossing the South Fork Eel River"
           },
           {
+            "name": "Confusion Hill (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 71.4,
+            "spoken": "Billboard: Confusion Hill, ahead near Piercy. Since nineteen forty-nine its gravity house has made visitors lean the wrong way. Your load is not invited.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Chandelier Drive-Thru Tree (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 76.4,
+            "spoken": "Billboard: The Chandelier Drive-Thru Tree, ahead in Leggett. A living redwood with a tunnel six feet wide. Cars fit. Your truck can wave from the road.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Piercy",
             "at_mi": 78.7,
             "off_mi": 0.05,
@@ -167851,6 +170011,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141036606, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Piercy"
+          },
+          {
+            "name": "Confusion Hill (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.9,
+            "spoken": "Billboard: Confusion Hill, ahead near Piercy. Since nineteen forty-nine its gravity house has made visitors lean the wrong way. Your load is not invited.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Avenue of the Giants (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 88.5,
+            "spoken": "Billboard: The Avenue of the Giants, ahead. Thirty-one miles of the old highway under some of the tallest trees on earth. Look up later.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Garberville",
@@ -167910,6 +170090,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141042584, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Rio Dell"
+          },
+          {
+            "name": "Avenue of the Giants (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 134.4,
+            "spoken": "Billboard: The Avenue of the Giants, ahead. Thirty-one miles of the old highway under some of the tallest trees on earth. Look up later.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Ferndale",
@@ -169113,6 +171303,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141047544, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Potter Valley"
+          },
+          {
+            "name": "The Skunk Train (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.0,
+            "spoken": "Billboard: The Skunk Train runs out of Willits, ahead, into the redwoods. Its early motorcars smelled so bad the name stuck. The smell did not.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Ridgewood Summit",
@@ -172087,6 +174287,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150958995, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing San Fernando"
+          },
+          {
+            "name": "Vasquez Rocks (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.7,
+            "spoken": "Billboard: Vasquez Rocks, next exit. These tilted slabs have played a dozen alien planets on Star Trek. They have never once left Los Angeles County.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Vasquez Rocks (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.7,
+            "spoken": "Billboard: Vasquez Rocks, next exit. These tilted slabs have played a dozen alien planets on Star Trek. They have never once left Los Angeles County.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Quartz Hill",
@@ -178874,11 +181094,31 @@
             "spoken": "Passing Creston"
           },
           {
+            "name": "Bubblegum Alley (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 124.5,
+            "spoken": "Billboard: San Luis Obispo has an entire downtown alley walled from floor to ceiling in decades of chewed bubblegum. It is a landmark you can smell. Bring a piece, or make the healthier choice and do not.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Salinas River",
             "category": "river",
             "kind": "point",
             "at_mi": 126.8,
             "spoken": "Crossing the Salinas River"
+          },
+          {
+            "name": "The Madonna Inn (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 129.2,
+            "spoken": "Billboard: San Luis Obispo is home to the Madonna Inn, a pink palace where every room is a different fever dream. Even the men's room waterfall is a tourist attraction in its own right.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cuesta Pass",
@@ -178922,6 +181162,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150952956, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Los Osos"
+          },
+          {
+            "name": "Pismo Beach (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 140.2,
+            "spoken": "Billboard: Pismo Beach, ahead. The self-declared clam capital of the world dresses its giant clam statue for every holiday. The clams have no say in it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Bubblegum Alley (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 140.9,
+            "spoken": "Billboard: San Luis Obispo has an entire downtown alley walled from floor to ceiling in decades of chewed bubblegum. It is a landmark you can smell. Bring a piece, or make the healthier choice and do not.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Madonna Inn (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 143.2,
+            "spoken": "Billboard: San Luis Obispo is home to the Madonna Inn, a pink palace where every room is a different fever dream. Even the men's room waterfall is a tourist attraction in its own right.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Avila Beach",
@@ -178974,6 +181244,16 @@
             "kind": "point",
             "at_mi": 153.4,
             "spoken": "Crossing the Santa Maria River"
+          },
+          {
+            "name": "Pismo Beach (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 156.2,
+            "spoken": "Billboard: Pismo Beach, ahead. The self-declared clam capital of the world dresses its giant clam statue for every holiday. The clams have no say in it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Nipomo",
@@ -180951,6 +183231,16 @@
         ],
         "landmarks": [
           {
+            "name": "The Skunk Train (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The Skunk Train runs out of Willits, ahead, into the redwoods. Its early motorcars smelled so bad the name stuck. The smell did not.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Laytonville",
             "at_mi": 22.5,
             "off_mi": 0.02,
@@ -180967,6 +183257,16 @@
             "spoken": "Approaching Rattlesnake Summit"
           },
           {
+            "name": "Chandelier Drive-Thru Tree (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 37.1,
+            "spoken": "Billboard: The Chandelier Drive-Thru Tree, ahead in Leggett. A living redwood with a tunnel six feet wide. Cars fit. Your truck can wave from the road.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Leggett",
             "at_mi": 44.5,
             "off_mi": 0.07,
@@ -180976,6 +183276,26 @@
             "spoken": "Entering Leggett"
           },
           {
+            "name": "Confusion Hill (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.8,
+            "spoken": "Billboard: Confusion Hill, ahead near Piercy. Since nineteen forty-nine its gravity house has made visitors lean the wrong way. Your load is not invited.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Chandelier Drive-Thru Tree (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.2,
+            "spoken": "Billboard: The Chandelier Drive-Thru Tree, ahead in Leggett. A living redwood with a tunnel six feet wide. Cars fit. Your truck can wave from the road.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Piercy",
             "at_mi": 55.5,
             "off_mi": 0.05,
@@ -180983,6 +183303,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141036606, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Piercy"
+          },
+          {
+            "name": "Confusion Hill (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.6,
+            "spoken": "Billboard: Confusion Hill, ahead near Piercy. Since nineteen forty-nine its gravity house has made visitors lean the wrong way. Your load is not invited.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Avenue of the Giants (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.0,
+            "spoken": "Billboard: The Avenue of the Giants, ahead. Thirty-one miles of the old highway under some of the tallest trees on earth. Look up later.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "South Fork Eel River",
@@ -181038,6 +183378,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141029612, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Scotia"
+          },
+          {
+            "name": "Avenue of the Giants (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 109.8,
+            "spoken": "Billboard: The Avenue of the Giants, ahead. Thirty-one miles of the old highway under some of the tallest trees on earth. Look up later.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Ferndale",
@@ -182053,6 +184403,16 @@
             "spoken": "Approaching Siskiyou Summit"
           },
           {
+            "name": "Oregon Shakespeare Festival (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.9,
+            "spoken": "Billboard: The Oregon Shakespeare Festival, ahead in Ashland. Plays since nineteen thirty-five, some under the open sky. To stop, or not to stop. Stop.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Talent",
             "at_mi": 43.2,
             "off_mi": 0.7,
@@ -182069,6 +184429,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 1700447857, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Phoenix"
+          },
+          {
+            "name": "Oregon Shakespeare Festival (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.7,
+            "spoken": "Billboard: The Oregon Shakespeare Festival, ahead in Ashland. Plays since nineteen thirty-five, some under the open sky. To stop, or not to stop. Stop.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Harry and David (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.7,
+            "spoken": "Billboard: Harry and David, next exit in Medford. The pear company closed every other store and kept this one. Pears by the box, not the trailer.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Jacksonville",

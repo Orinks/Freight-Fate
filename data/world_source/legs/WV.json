@@ -981,6 +981,16 @@
             "spoken": "Passing Sophia"
           },
           {
+            "name": "Tamarack (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 1.4,
+            "spoken": "Billboard: Tamarack, next exit in Beckley. Quilts, pottery, glass and food from every corner of West Virginia, made by hand and sold under one roof.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lanark",
             "at_mi": 2.8,
             "off_mi": 2.33,
@@ -1024,6 +1034,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154367423, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Glen Jean"
+          },
+          {
+            "name": "Tamarack (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.6,
+            "spoken": "Billboard: Tamarack, ahead in Beckley. Quilts, pottery, glass and food from every corner of West Virginia, made by hand and sold under one roof.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pax",
@@ -1220,6 +1240,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154050810, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Malden"
+          },
+          {
+            "name": "State Capitol (from Beckley)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.4,
+            "spoken": "Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Locals bring this up often.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Big Chimney",
@@ -3594,6 +3624,16 @@
             "spoken": "Passing Catawba"
           },
           {
+            "name": "The Mill Mountain Star (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 114.0,
+            "spoken": "Billboard: Roanoke, ahead, the Star City. The Mill Mountain Star is eighty-eight feet of neon, lit since nineteen forty-nine. It was meant to be temporary.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Mason Cove",
             "at_mi": 115.9,
             "off_mi": 3.6,
@@ -5437,6 +5477,16 @@
         ],
         "landmarks": [
           {
+            "name": "State Capitol (from Pittsburgh)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.3,
+            "spoken": "Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Locals bring this up often.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Big Chimney",
             "at_mi": 8.6,
             "off_mi": 0.94,
@@ -5453,6 +5503,16 @@
             "spoken": "Crossing the Elk River"
           },
           {
+            "name": "Flatwoods Monster Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.0,
+            "spoken": "Billboard: The Flatwoods Monster Museum, next exit in Sutton. In nineteen fifty-two, kids reported a ten-foot creature with a glowing face. The county built it giant chairs.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sutton",
             "at_mi": 66.1,
             "off_mi": 0.82,
@@ -5460,6 +5520,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154083026, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Sutton"
+          },
+          {
+            "name": "Flatwoods Monster Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.7,
+            "spoken": "Billboard: The Flatwoods Monster Museum, ahead in Sutton. In nineteen fifty-two, kids reported a ten-foot creature with a glowing face. The county built it giant chairs.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Flatwoods",
@@ -5623,6 +5693,16 @@
             "spoken": "Passing Morrisville"
           },
           {
+            "name": "The Pennsylvania Trolley Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 193.9,
+            "spoken": "Billboard: The Pennsylvania Trolley Museum, ahead near Washington. Almost fifty trolleys, and admission includes a four-mile ride. The motorman never once has to steer.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "East Washington",
             "at_mi": 198.9,
             "off_mi": 0.84,
@@ -5675,6 +5755,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153926867, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Muse"
+          },
+          {
+            "name": "The Pennsylvania Trolley Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 213.3,
+            "spoken": "Billboard: The Pennsylvania Trolley Museum, ahead near Washington. Almost fifty trolleys, and admission includes a four-mile ride. The motorman never once has to steer.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bridgeville",
@@ -14024,6 +14114,16 @@
         ],
         "landmarks": [
           {
+            "name": "State Capitol (from Richmond)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.6,
+            "spoken": "Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Locals bring this up often.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Malden",
             "at_mi": 6.9,
             "off_mi": 0.48,
@@ -14112,6 +14212,16 @@
             "spoken": "Entering Pax"
           },
           {
+            "name": "Tamarack (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.2,
+            "spoken": "Billboard: Tamarack, ahead in Beckley. Quilts, pottery, glass and food from every corner of West Virginia, made by hand and sold under one roof.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Prosperity",
             "at_mi": 53.5,
             "off_mi": 0.72,
@@ -14119,6 +14229,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154181697, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Prosperity"
+          },
+          {
+            "name": "Tamarack (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.1,
+            "spoken": "Billboard: Tamarack, ahead in Beckley. Quilts, pottery, glass and food from every corner of West Virginia, made by hand and sold under one roof.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Daniels",
@@ -14142,6 +14262,36 @@
             "kind": "point",
             "at_mi": 96.4,
             "spoken": "Crossing the Greenbrier River"
+          },
+          {
+            "name": "Lost World Caverns (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 109.4,
+            "spoken": "Billboard: Lost World Caverns, next exit in Lewisburg. A man once sat on top of its twenty-eight-foot stalagmite for almost sixteen days. Your cab looks roomy now.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Lost World Caverns (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 112.6,
+            "spoken": "Billboard: Lost World Caverns, next exit in Lewisburg. A man once sat on top of its twenty-eight-foot stalagmite for almost sixteen days. Your cab looks roomy now.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Greenbrier (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 114.8,
+            "spoken": "Billboard: The Greenbrier, ahead. Under the resort is a Cold War bunker built for Congress and kept secret for thirty years. Congress never showed up.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "White Sulphur Springs",
@@ -14235,6 +14385,16 @@
             "spoken": "Approaching Goshen Pass"
           },
           {
+            "name": "The Frontier Culture Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 200.3,
+            "spoken": "Billboard: The Frontier Culture Museum, ahead at Staunton. Farms from England, Ireland, Germany and West Africa, rebuilt in one Virginia valley. The cows came separately.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Greenville",
             "at_mi": 202.5,
             "off_mi": 0.6,
@@ -14258,6 +14418,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158626290, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fishersville"
+          },
+          {
+            "name": "The Frontier Culture Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 222.6,
+            "spoken": "Billboard: The Frontier Culture Museum, ahead at Staunton. Farms from England, Ireland, Germany and West Africa, rebuilt in one Virginia valley. The cows came separately.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Afton",
@@ -18348,6 +18518,16 @@
         ],
         "landmarks": [
           {
+            "name": "State Capitol (from Roanoke)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.6,
+            "spoken": "Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Locals bring this up often.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Malden",
             "at_mi": 6.9,
             "off_mi": 0.48,
@@ -18472,6 +18652,16 @@
             "spoken": "Entering Pax"
           },
           {
+            "name": "Tamarack (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.2,
+            "spoken": "Billboard: Tamarack, ahead in Beckley. Quilts, pottery, glass and food from every corner of West Virginia, made by hand and sold under one roof.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Bradley",
             "at_mi": 53.2,
             "off_mi": 2.36,
@@ -18488,6 +18678,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154181697, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Prosperity"
+          },
+          {
+            "name": "Tamarack (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.1,
+            "spoken": "Billboard: Tamarack, ahead in Beckley. Quilts, pottery, glass and food from every corner of West Virginia, made by hand and sold under one roof.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sophia",
@@ -18647,6 +18847,16 @@
             "kind": "point",
             "at_mi": 168.4,
             "spoken": "Crossing the Roanoke River"
+          },
+          {
+            "name": "The Mill Mountain Star (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 171.0,
+            "spoken": "Billboard: Roanoke, ahead, the Star City. The Mill Mountain Star is eighty-eight feet of neon, lit since nineteen forty-nine. It was meant to be temporary.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Mason Cove",
@@ -20042,6 +20252,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153956983, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Dunbar"
+          },
+          {
+            "name": "State Capitol (from Huntington)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.9,
+            "spoken": "Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Locals bring this up often.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Big Chimney",
@@ -21906,10 +22126,13 @@
           },
           {
             "name": "Butcher Hollow",
-            "category": "billboard_sign",
+            "category": "highway_marker",
             "kind": "point",
             "at_mi": 48.0,
-            "spoken": "Billboard: Van Lear is ahead near Paintsville. Loretta Lynn grew up here in Butcher Hollow, a coal miner's daughter for real, in the cabin that named the song."
+            "spoken": "Van Lear is ahead near Paintsville. Loretta Lynn grew up here in Butcher Hollow, a coal miner's daughter for real, in the cabin that named the song.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Blaine",
@@ -24560,6 +24783,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153844911, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Flatwoods"
+          },
+          {
+            "name": "Flatwoods Monster Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 87.7,
+            "spoken": "Billboard: The Flatwoods Monster Museum, ahead in Sutton. In nineteen fifty-two, kids reported a ten-foot creature with a glowing face. The county built it giant chairs.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Sutton",
@@ -28238,6 +28471,16 @@
             "spoken": "Passing Flatwoods"
           },
           {
+            "name": "Flatwoods Monster Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 90.1,
+            "spoken": "Billboard: The Flatwoods Monster Museum, next exit in Sutton. In nineteen fifty-two, kids reported a ten-foot creature with a glowing face. The county built it giant chairs.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Gassaway",
             "at_mi": 91.8,
             "off_mi": 2.16,
@@ -28245,6 +28488,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154013202, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gassaway"
+          },
+          {
+            "name": "Flatwoods Monster Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 93.3,
+            "spoken": "Billboard: The Flatwoods Monster Museum, next exit in Sutton. In nineteen fifty-two, kids reported a ten-foot creature with a glowing face. The county built it giant chairs.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Clendenin",
@@ -28261,6 +28514,16 @@
             "kind": "point",
             "at_mi": 142.7,
             "spoken": "Crossing the Elk River"
+          },
+          {
+            "name": "State Capitol (from Morgantown)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.6,
+            "spoken": "Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Locals bring this up often.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pinch",
@@ -29554,6 +29817,26 @@
             "kind": "point",
             "at_mi": 8.7,
             "spoken": "Crossing the Cheat River"
+          },
+          {
+            "name": "Coopers Rock (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: Coopers Rock State Forest, next exit. An overlook straight down into the Cheat River canyon, with stone shelters the Civilian Conservation Corps built in the thirties.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Coopers Rock (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.2,
+            "spoken": "Billboard: Coopers Rock State Forest, next exit. An overlook straight down into the Cheat River canyon, with stone shelters the Civilian Conservation Corps built in the thirties.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bruceton Mills",
@@ -31155,6 +31438,16 @@
             "spoken": "Paul R Stewart Museum ahead"
           },
           {
+            "name": "The Pennsylvania Trolley Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.9,
+            "spoken": "Billboard: The Pennsylvania Trolley Museum, ahead near Washington. Almost fifty trolleys, and admission includes a four-mile ride. The motorman never once has to steer.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "South Strabane",
             "at_mi": 43.6,
             "off_mi": 2.13,
@@ -31252,6 +31545,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154146067, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Cecil"
+          },
+          {
+            "name": "The Pennsylvania Trolley Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.3,
+            "spoken": "Billboard: The Pennsylvania Trolley Museum, ahead near Washington. Almost fifty trolleys, and admission includes a four-mile ride. The motorman never once has to steer.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "South Fayette Township",
@@ -33762,6 +34065,16 @@
             "kind": "point",
             "at_mi": 67.4,
             "spoken": "Crossing the Elk River"
+          },
+          {
+            "name": "State Capitol (from Parkersburg)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.5,
+            "spoken": "Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Locals bring this up often.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Big Chimney",
@@ -37419,6 +37732,16 @@
         ],
         "landmarks": [
           {
+            "name": "Wheeling Suspension Bridge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.6,
+            "spoken": "Billboard: Wheeling, ahead. Its suspension bridge was the longest in the world in eighteen forty-nine, and now it carries walkers only. The weight limit was two tons.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Triadelphia",
             "at_mi": 5.91,
             "off_mi": 0.55,
@@ -37453,6 +37776,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153866850, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Claysville"
+          },
+          {
+            "name": "The Pennsylvania Trolley Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.0,
+            "spoken": "Billboard: The Pennsylvania Trolley Museum, ahead near Washington. Almost fifty trolleys, and admission includes a four-mile ride. The motorman never once has to steer.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Wolfdale",
@@ -37541,6 +37874,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154146067, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cecil"
+          },
+          {
+            "name": "The Pennsylvania Trolley Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.4,
+            "spoken": "Billboard: The Pennsylvania Trolley Museum, ahead near Washington. Almost fifty trolleys, and admission includes a four-mile ride. The motorman never once has to steer.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "South Fayette Township",

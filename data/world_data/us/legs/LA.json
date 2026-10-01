@@ -4003,6 +4003,16 @@
             "spoken": "Passing Slidell"
           },
           {
+            "name": "The Infinity Science Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 89.8,
+            "spoken": "Billboard: The Infinity Science Center, ahead at the welcome center. NASA tests its biggest rocket engines just up the road. Yours is quieter.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pearl River",
             "at_mi": 90.2,
             "off_mi": 4.59,
@@ -4026,6 +4036,16 @@
             "kind": "point",
             "at_mi": 99.7,
             "spoken": "Crossing the West Pearl River"
+          },
+          {
+            "name": "The Infinity Science Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 109.8,
+            "spoken": "Billboard: The Infinity Science Center, ahead at the welcome center. NASA tests its biggest rocket engines just up the road. Yours is quieter.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Waveland",
@@ -20739,6 +20759,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151676210, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Afton"
+          },
+          {
+            "name": "Vicksburg National Military Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.0,
+            "spoken": "Billboard: Vicksburg National Military Park, ahead. A sixteen-mile road around the siege lines of eighteen sixty-three, and a Union gunboat raised from the river.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Mississippi River",

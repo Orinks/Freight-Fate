@@ -19039,6 +19039,26 @@
             "spoken": "Crossing the Winnebago River"
           },
           {
+            "name": "Surf Ballroom (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 129.3,
+            "spoken": "Billboard: The Surf Ballroom, next exit in Clear Lake, where Buddy Holly played his last show in nineteen fifty-nine. Bands still sign the green room wall.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Surf Ballroom (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 132.5,
+            "spoken": "Billboard: The Surf Ballroom, next exit in Clear Lake, where Buddy Holly played his last show in nineteen fifty-nine. Bands still sign the green room wall.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Swaledale",
             "at_mi": 142.2,
             "off_mi": 1.39,

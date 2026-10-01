@@ -873,6 +873,16 @@
             "spoken": "Passing Rockwell"
           },
           {
+            "name": "Surf Ballroom (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 77.1,
+            "spoken": "Billboard: The Surf Ballroom, ahead in Clear Lake, where Buddy Holly played his last show in nineteen fifty-nine. Bands still sign the green room wall.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Ventura",
             "at_mi": 79.97,
             "off_mi": 7.09,
@@ -2353,6 +2363,16 @@
             "spoken": "Passing Gladstone"
           },
           {
+            "name": "Snake Alley (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.4,
+            "spoken": "Billboard: Burlington, ahead, home of Snake Alley, which Ripley called the crookedest street in the world. It runs downhill only. The horses could not make it up.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Middletown",
             "at_mi": 9.08,
             "off_mi": 0.34,
@@ -2531,6 +2551,16 @@
             "spoken": "Passing Conesville"
           },
           {
+            "name": "Riverside (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.4,
+            "spoken": "Billboard: Riverside, Iowa, ahead, the future birthplace of Captain Kirk of Star Trek. He is due in twenty-two twenty-eight. The town put up the marker early.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Riverside",
             "at_mi": 64.95,
             "off_mi": 1.58,
@@ -2579,6 +2609,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151347182, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Hills"
+          },
+          {
+            "name": "Riverside (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 72.4,
+            "spoken": "Billboard: Riverside, Iowa, ahead, the future birthplace of Captain Kirk of Star Trek. He is due in twenty-two twenty-eight. The town put up the marker early.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Tiffin",
@@ -3590,6 +3630,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151355760, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gladstone"
+          },
+          {
+            "name": "Snake Alley (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.4,
+            "spoken": "Billboard: Burlington, ahead, home of Snake Alley, which Ripley called the crookedest street in the world. It runs downhill only. The horses could not make it up.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Middletown",
@@ -5522,6 +5572,16 @@
             "spoken": "Passing Tiffin"
           },
           {
+            "name": "Hoover Library (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.7,
+            "spoken": "Billboard: The Herbert Hoover Presidential Library, next exit in West Branch. He was born here in a two-room cottage, the first president from west of the Mississippi.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "West Branch Heritage Museum",
             "category": "museum",
             "kind": "point",
@@ -5536,6 +5596,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151399795, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing West Branch"
+          },
+          {
+            "name": "Hoover Library (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 41.8,
+            "spoken": "Billboard: The Herbert Hoover Presidential Library, next exit in West Branch. He was born here in a two-room cottage, the first president from west of the Mississippi.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "West Liberty",
@@ -9157,6 +9227,16 @@
             "spoken": "Passing Centralia"
           },
           {
+            "name": "River Museum (from Cedar Rapids)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.6,
+            "spoken": "Billboard: The National Mississippi River Museum and Aquarium, ahead in Dubuque. River fish by the tank, and a steamboat you can walk aboard. The river is free.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "La Motte",
             "at_mi": 63.7,
             "off_mi": 9.35,
@@ -9924,6 +10004,16 @@
             "kind": "point",
             "at_mi": 3.9,
             "spoken": "Crossing the Cedar River"
+          },
+          {
+            "name": "American Gothic (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.5,
+            "spoken": "Billboard: Cedar Rapids is home to Grant Wood, who painted American Gothic, the stern farm couple with the pitchfork that the whole world has parodied.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Fairfax",
@@ -11206,6 +11296,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151356367, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing West Liberty"
+          },
+          {
+            "name": "Hoover Library (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.3,
+            "spoken": "Billboard: The Herbert Hoover Presidential Library, next exit in West Branch. He was born here in a two-room cottage, the first president from west of the Mississippi.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Hoover Library (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.5,
+            "spoken": "Billboard: The Herbert Hoover Presidential Library, next exit in West Branch. He was born here in a two-room cottage, the first president from west of the Mississippi.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Solon",
@@ -13129,6 +13239,26 @@
             "spoken": "Passing Harmon"
           },
           {
+            "name": "Reagan Boyhood Home (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 71.1,
+            "spoken": "Billboard: Ronald Reagan's boyhood home, next exit in Dixon. As a lifeguard on the Rock River he saved seventy-seven swimmers, and once dove for a man's false teeth.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Reagan Boyhood Home (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 74.0,
+            "spoken": "Billboard: Ronald Reagan's boyhood home, next exit in Dixon. As a lifeguard on the Rock River he saved seventy-seven swimmers, and once dove for a man's false teeth.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Grand Detour",
             "at_mi": 75.5,
             "off_mi": 5.22,
@@ -13172,6 +13302,16 @@
             "spoken": "Passing Ashton"
           },
           {
+            "name": "Rochelle Railroad Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 93.4,
+            "spoken": "Billboard: Rochelle Railroad Park, next exit. Two railroads cross here, and dozens of trains a day pass a free viewing area. Watch somebody else haul for once.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Steward",
             "at_mi": 95.5,
             "off_mi": 4.32,
@@ -13179,6 +13319,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153802958, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Steward"
+          },
+          {
+            "name": "Rochelle Railroad Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 96.6,
+            "spoken": "Billboard: Rochelle Railroad Park, next exit. Two railroads cross here, and dozens of trains a day pass a free viewing area. Watch somebody else haul for once.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hillcrest",
@@ -13215,6 +13365,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153355142, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Davis Junction"
+          },
+          {
+            "name": "Burpee Museum (from Davenport)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 114.0,
+            "spoken": "Billboard: The Burpee Museum, ahead in Rockford, home of Jane, a tyrannosaur dug out of Montana. Scientists still debate what kind she is. Everyone agrees on the teeth.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "New Milford",
@@ -18438,6 +18598,26 @@
             "spoken": "Passing Oakland Acres"
           },
           {
+            "name": "Amana Colonies (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 91.5,
+            "spoken": "Billboard: The Amana Colonies, next exit, then north. Seven villages settled in eighteen fifty-five, with family-style German dinners. The refrigerator company started here too.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Amana Colonies (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 94.7,
+            "spoken": "Billboard: The Amana Colonies, next exit, then north. Seven villages settled in eighteen fifty-five, with family-style German dinners. The refrigerator company started here too.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Tiffin",
             "at_mi": 106.0,
             "off_mi": 0.83,
@@ -18447,6 +18627,16 @@
             "spoken": "Passing Tiffin"
           },
           {
+            "name": "Hoover Library (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 120.3,
+            "spoken": "Billboard: The Herbert Hoover Presidential Library, next exit in West Branch. He was born here in a two-room cottage, the first president from west of the Mississippi.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "West Branch",
             "at_mi": 122.9,
             "off_mi": 0.56,
@@ -18454,6 +18644,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151399795, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing West Branch"
+          },
+          {
+            "name": "Hoover Library (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 125.3,
+            "spoken": "Billboard: The Herbert Hoover Presidential Library, next exit in West Branch. He was born here in a two-room cottage, the first president from west of the Mississippi.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Iowa River",
@@ -18470,6 +18670,16 @@
             "spoken": "Crossing the Cedar River"
           },
           {
+            "name": "Buffalo Bill Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 172.6,
+            "spoken": "Billboard: The Buffalo Bill Museum, next exit in Le Claire. William Cody was born near here in eighteen forty-six, long before the Wild West had a show.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Rapids City",
             "at_mi": 175.3,
             "off_mi": 1.06,
@@ -18477,6 +18687,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151408756, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rapids City"
+          },
+          {
+            "name": "Buffalo Bill Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 179.5,
+            "spoken": "Billboard: The Buffalo Bill Museum, ahead in Le Claire. William Cody was born near here in eighteen forty-six, long before the Wild West had a show.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mississippi River",
@@ -18511,6 +18731,26 @@
             "spoken": "Crossing the Rock River"
           },
           {
+            "name": "Reagan Boyhood Home (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 231.4,
+            "spoken": "Billboard: Ronald Reagan's boyhood home, next exit in Dixon. As a lifeguard on the Rock River he saved seventy-seven swimmers, and once dove for a man's false teeth.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Reagan Boyhood Home (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 234.3,
+            "spoken": "Billboard: Ronald Reagan's boyhood home, next exit in Dixon. As a lifeguard on the Rock River he saved seventy-seven swimmers, and once dove for a man's false teeth.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Nachusa",
             "at_mi": 237.1,
             "off_mi": 0.6,
@@ -18536,6 +18776,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153667822, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ashton"
+          },
+          {
+            "name": "Rochelle Railroad Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 253.2,
+            "spoken": "Billboard: Rochelle Railroad Park, next exit. Two railroads cross here, and dozens of trains a day pass a free viewing area. Watch somebody else haul for once.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Rochelle Railroad Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 256.1,
+            "spoken": "Billboard: Rochelle Railroad Park, next exit. Two railroads cross here, and dozens of trains a day pass a free viewing area. Watch somebody else haul for once.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cortland",
@@ -21555,6 +21815,16 @@
             "spoken": "Passing Cumming"
           },
           {
+            "name": "John Wayne Birthplace (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.6,
+            "spoken": "Billboard: The John Wayne Birthplace, next exit, then west to Winterset. He was born here in nineteen oh-seven as Marion Morrison. Hollywood fixed the name.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Martensdale",
             "at_mi": 21.5,
             "off_mi": 2.16,
@@ -21571,6 +21841,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151408766, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bevington"
+          },
+          {
+            "name": "John Wayne Birthplace (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.6,
+            "spoken": "Billboard: The John Wayne Birthplace, next exit, then west to Winterset. He was born here in nineteen oh-seven as Marion Morrison. Hollywood fixed the name.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Saint Marys",
@@ -21763,6 +22043,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 5421775922, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Claycomo"
+          },
+          {
+            "name": "Arabia Steamboat (from Des Moines)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 183.3,
+            "spoken": "Billboard: The Arabia Steamboat Museum, ahead in Kansas City. It sank in eighteen fifty-six and was dug out of a Kansas cornfield. The pickles were still edible.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Oaks",
@@ -24629,6 +24919,26 @@
             "spoken": "Crossing the East Nishnabotna River"
           },
           {
+            "name": "Danish Windmill (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.0,
+            "spoken": "Billboard: The Danish Windmill, next exit, north to Elk Horn. Built in Denmark in eighteen forty-eight, shipped over in pieces, and still turning. Some assembly was required.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Danish Windmill (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 78.2,
+            "spoken": "Billboard: The Danish Windmill, next exit, north to Elk Horn. Built in Denmark in eighteen forty-eight, shipped over in pieces, and still turning. Some assembly was required.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Marne",
             "at_mi": 79.3,
             "off_mi": 3.31,
@@ -26316,10 +26626,13 @@
           },
           {
             "name": "Grant's Galena",
-            "category": "billboard_sign",
+            "category": "highway_marker",
             "kind": "point",
             "at_mi": 16.0,
-            "spoken": "Billboard: Galena is ahead, the town Ulysses Grant called home. Its brick main street and steep hills remain beautifully preserved from the days before the Civil War general saved the Union."
+            "spoken": "Galena is ahead, the town Ulysses Grant called home. Its brick main street and steep hills remain beautifully preserved from the days before the Civil War general saved the Union.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Rice",
@@ -26347,6 +26660,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151461404, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Scales Mound"
+          },
+          {
+            "name": "Grant's Galena (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.5,
+            "spoken": "Billboard: Galena is ahead, the town Ulysses Grant called home. Its brick main street and steep hills remain beautifully preserved from the days before the Civil War general saved the Union.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hanover",
@@ -26498,6 +26821,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153484584, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Pecatonica"
+          },
+          {
+            "name": "Burpee Museum (from Dubuque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.0,
+            "spoken": "Billboard: The Burpee Museum, ahead in Rockford, home of Jane, a tyrannosaur dug out of Montana. Scientists still debate what kind she is. Everyone agrees on the teeth.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Winnebago",
@@ -30295,6 +30628,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151328321, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Oxford"
+          },
+          {
+            "name": "Amana Colonies (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.8,
+            "spoken": "Billboard: The Amana Colonies, next exit, then north. Seven villages settled in eighteen fifty-five, with family-style German dinners. The refrigerator company started here too.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Amana Colonies (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.0,
+            "spoken": "Billboard: The Amana Colonies, next exit, then north. Seven villages settled in eighteen fifty-five, with family-style German dinners. The refrigerator company started here too.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Parnell",
@@ -35275,6 +35628,16 @@
             "spoken": "Passing Jackson"
           },
           {
+            "name": "Sergeant Floyd Monument (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 1.7,
+            "spoken": "Billboard: The Sergeant Floyd Monument, ahead, the first National Historic Landmark. The only man Lewis and Clark lost on their journey is buried under it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Dakota City",
             "at_mi": 5.4,
             "off_mi": 2.55,
@@ -35282,6 +35645,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151329530, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dakota City"
+          },
+          {
+            "name": "Sergeant Floyd Monument (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.5,
+            "spoken": "Billboard: The Sergeant Floyd Monument, ahead, the first National Historic Landmark. The only man Lewis and Clark lost on their journey is buried under it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Homer",
@@ -39507,6 +39880,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151848248, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bernard"
+          },
+          {
+            "name": "Is This Heaven? (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.4,
+            "spoken": "Billboard: The Field of Dreams is ahead at Dyersville. The baseball diamond carved from a cornfield for the movie is still here and still mowed. Is this heaven? No, it is Iowa.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "River Museum (from Waterloo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 82.6,
+            "spoken": "Billboard: The National Mississippi River Museum and Aquarium, ahead in Dubuque. River fish by the tank, and a steamboat you can walk aboard. The river is free.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Asbury",

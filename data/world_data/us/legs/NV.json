@@ -21,6 +21,16 @@
         ],
         "landmarks": [
           {
+            "name": "Extraterrestrial Highway (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.1,
+            "spoken": "Billboard: The Extraterrestrial Highway turns off ahead at Crystal Springs. Ninety-eight miles past Area Fifty-One, about two hundred cars a day. Nobody counts the saucers.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Crystal Springs",
             "at_mi": 13.1,
             "off_mi": 0.11,
@@ -1364,6 +1374,36 @@
             "spoken": "Approaching New Pass Summit"
           },
           {
+            "name": "Sand Mountain (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.8,
+            "spoken": "Billboard: Sand Mountain, ahead. Six hundred feet of sand left by an ancient lake. When the sand slides, the dune sings. It only knows one note.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Sand Mountain (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 93.8,
+            "spoken": "Billboard: Sand Mountain, ahead. Six hundred feet of sand left by an ancient lake. When the sand slides, the dune sings. It only knows one note.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Topgun (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.0,
+            "spoken": "Billboard: Fallon is the Oasis of Nevada and home to the Navy's Top Gun fighter school. If a jet just shook your windows, that is the sound of freedom practicing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fallon Station",
             "at_mi": 102.4,
             "off_mi": 3.31,
@@ -2496,6 +2536,26 @@
             "kind": "point",
             "at_mi": 38.7,
             "spoken": "Approaching Emigrant Pass"
+          },
+          {
+            "name": "California Trail Interpretive Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.1,
+            "spoken": "Billboard: The California Trail Interpretive Center, next exit. Wagon trains walked this way to the gold fields. Admission is free. Walking is optional.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "California Trail Interpretive Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.1,
+            "spoken": "Billboard: The California Trail Interpretive Center, next exit. Wagon trains walked this way to the gold fields. Admission is free. Walking is optional.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Spring Creek",
@@ -4713,6 +4773,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150959159, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Johnson Lane"
+          },
+          {
+            "name": "Nevada State Railroad Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.9,
+            "spoken": "Billboard: The Nevada State Railroad Museum, ahead in Carson City. Virginia and Truckee engines, several of them retired movie stars. They still give rides.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Zephyr Cove",
@@ -9120,6 +9190,16 @@
             "spoken": "Crossing the Marys River"
           },
           {
+            "name": "Shoshone Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 157.3,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Snake River",
             "category": "river",
             "kind": "point",
@@ -9161,6 +9241,16 @@
             "spoken": "Passing Hansen"
           },
           {
+            "name": "Shoshone Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 177.0,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Malad River",
             "category": "river",
             "kind": "point",
@@ -9175,6 +9265,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150970161, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wendell"
+          },
+          {
+            "name": "Hagerman Fossil Beds (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 194.3,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Gooding",
@@ -9195,6 +9295,36 @@
             "spoken": "Passing Hagerman"
           },
           {
+            "name": "Hagerman Fossil Beds (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 212.3,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Three Island Crossing (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 221.3,
+            "spoken": "Billboard: Three Island Crossing State Park, next exit at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Three Island Crossing (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 224.3,
+            "spoken": "Billboard: Three Island Crossing State Park, next exit at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Morley Nelson Snake River Birds of Prey National Conservation Area",
             "category": "protected_area",
             "kind": "zone",
@@ -9209,6 +9339,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150963420, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hammett"
+          },
+          {
+            "name": "World Center for Birds of Prey (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 278.6,
+            "spoken": "Billboard: The World Center for Birds of Prey, ahead at Boise. Live falcons, eagles and owls, from the people who saved the peregrine. Keep your sandwich covered.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Old Idaho Penitentiary (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 280.9,
+            "spoken": "Billboard: The Old Idaho Penitentiary, ahead in Boise. A working prison for a hundred and one years, now a museum. Visitors leave the same day.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Robie Creek",
@@ -10267,6 +10417,16 @@
             "spoken": "Passing Ruth"
           },
           {
+            "name": "The Nevada Northern Railway (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Ely is ahead, where the old Nevada Northern Railway still fires up its steam locomotives. This copper-country railroad is frozen in time and will even let you drive the train.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Robinson Summit",
             "category": "mountain_pass",
             "kind": "point",
@@ -11167,6 +11327,16 @@
             "spoken": "Passing Ruth"
           },
           {
+            "name": "The Nevada Northern Railway (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Ely is ahead, where the old Nevada Northern Railway still fires up its steam locomotives. This copper-country railroad is frozen in time and will even let you drive the train.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lund",
             "at_mi": 30.9,
             "off_mi": 9.98,
@@ -11195,6 +11365,16 @@
             "kind": "zone",
             "at_mi": 139.4,
             "spoken": "Entering Humboldt\u2013Toiyabe National Forest"
+          },
+          {
+            "name": "The Clown Motel (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 159.0,
+            "spoken": "Billboard: The Clown Motel, ahead in Tonopah, next to the old cemetery. More than four thousand clowns inside. Sleep well.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "tollway_detected": false,
@@ -12345,6 +12525,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150948702, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ruth"
+          },
+          {
+            "name": "The Nevada Northern Railway (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Ely is ahead, where the old Nevada Northern Railway still fires up its steam locomotives. This copper-country railroad is frozen in time and will even let you drive the train.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "tollway_detected": false,
@@ -13696,6 +13886,16 @@
             "kind": "point",
             "at_mi": 3.5,
             "spoken": "Crossing the Carson River"
+          },
+          {
+            "name": "Topgun (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Fallon is the Oasis of Nevada and home to the Navy's Top Gun fighter school. If a jet just shook your windows, that is the sound of freedom practicing.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "tollway_detected": false,
@@ -14660,11 +14860,31 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Lovers Lock Plaza (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.3,
+            "spoken": "Billboard: Lovelock is ahead, where couples hang padlocks on an endless chain behind the round courthouse. The town had the name first.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Humboldt River",
             "category": "river",
             "kind": "point",
             "at_mi": 66.6,
             "spoken": "Crossing the Humboldt River"
+          },
+          {
+            "name": "Lovers Lock Plaza (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.9,
+            "spoken": "Billboard: Lovelock is ahead, where couples hang padlocks on an endless chain behind the round courthouse. The town had the name first.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Humboldt River Ranch",
@@ -15497,6 +15717,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 13148502466, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Nellis Air Force Base"
+          },
+          {
+            "name": "The Neon Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.6,
+            "spoken": "Billboard: The Neon Museum, ahead in Las Vegas. Old casino signs come here to retire in the boneyard. Some of them still light up.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Apex Summit",
@@ -18541,11 +18771,31 @@
             "spoken": "Passing Enterprise"
           },
           {
+            "name": "The Neon Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.6,
+            "spoken": "Billboard: The Neon Museum, ahead in Las Vegas. Old casino signs come here to retire in the boneyard. Some of them still light up.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Seven Magic Mountains",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 20.0,
             "spoken": "Billboard: Seven Magic Mountains is ahead, where fluorescent boulders are stacked into towers in the desert. Las Vegas apparently ran out of indoor places to put bright colors."
+          },
+          {
+            "name": "Seven Magic Mountains (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.6,
+            "spoken": "Billboard: Seven Magic Mountains is ahead, where fluorescent boulders are stacked into towers in the desert. Las Vegas apparently ran out of indoor places to put bright colors.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Primm",
@@ -18594,6 +18844,16 @@
             ]
           },
           {
+            "name": "The Mad Greek (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 97.5,
+            "spoken": "Billboard: The Mad Greek is ahead in Baker, serving gyros and baklava in the middle of the desert. Trust the Mojave; it has surprised you before.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Zzyzx Road",
             "category": "billboard_sign",
             "kind": "point",
@@ -18601,6 +18861,26 @@
             "spoken": "Billboard: The exit for Zzyzx Road is coming up, with the last word in the dictionary sitting out here in the sand. A strange story and a lake you would never expect wait behind that name.",
             "directions": [
               "forward"
+            ]
+          },
+          {
+            "name": "World's Tallest Thermometer (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.5,
+            "spoken": "Billboard: The world's tallest thermometer is ahead in Baker. More than a hundred and thirty feet of lights will tell you exactly how hot the Mojave is, and the answer is always too hot.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Zzyzx Road (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 104.4,
+            "spoken": "Billboard: The exit for Zzyzx Road is coming up, with the last word in the dictionary sitting out here in the sand. A strange story and a lake you would never expect wait behind that name.",
+            "directions": [
+              "reverse"
             ]
           },
           {
@@ -18640,11 +18920,41 @@
             "spoken": "Passing Daggett"
           },
           {
+            "name": "EddieWorld (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 151.9,
+            "spoken": "Billboard: EddieWorld is ahead near Yermo. It offers fuel, pizza, candy, ice cream, and a giant sundae declaring that this is no ordinary gas stop.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mojave River",
             "category": "river",
             "kind": "point",
             "at_mi": 154.2,
             "spoken": "Crossing the Mojave River"
+          },
+          {
+            "name": "Calico Ghost Town (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 156.8,
+            "spoken": "Billboard: Calico Ghost Town is ahead near Barstow. It is a real silver boomtown, half restored and half falling down, and, they will tell you, thoroughly haunted.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Peggy Sue's Fifties Diner (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 159.1,
+            "spoken": "Billboard: Peggy Sue's Fifties Diner is ahead near Yermo. It has chrome, a jukebox, a diner cat, and a park full of metal dinosaurs out back. Rock and roll never checked out.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lenwood",
@@ -18661,6 +18971,26 @@
             "kind": "point",
             "at_mi": 162.0,
             "spoken": "Museum ahead: Desert Discovery Center"
+          },
+          {
+            "name": "Elmer's Bottle Tree Ranch (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 172.8,
+            "spoken": "Billboard: Elmer's Bottle Tree Ranch, ahead on old Route Sixty-Six in Oro Grande. Two hundred trees grown from pipe and bottles. Free, and no watering needed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Elmer's Bottle Tree Ranch (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 192.8,
+            "spoken": "Billboard: Elmer's Bottle Tree Ranch, ahead on old Route Sixty-Six in Oro Grande. Two hundred trees grown from pipe and bottles. Free, and no watering needed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Oak Hills",
@@ -22260,6 +22590,16 @@
             "spoken": "Passing Whitney"
           },
           {
+            "name": "The Neon Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: The Neon Museum, ahead in Las Vegas. Old casino signs come here to retire in the boneyard. Some of them still light up.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Railroad Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -23591,6 +23931,16 @@
             "spoken": "Passing Lemmon Valley"
           },
           {
+            "name": "Virginia City (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 1.2,
+            "spoken": "Billboard: Virginia City, ahead up the Geiger Grade. Mark Twain first signed his pen name here in eighteen sixty-three. The saloons have kept the story going.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sun Valley",
             "at_mi": 1.6,
             "off_mi": 3.9,
@@ -23625,6 +23975,16 @@
             "spoken": "Passing Lockwood"
           },
           {
+            "name": "National Automobile Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The National Automobile Museum, ahead in Reno. More than two hundred cars from Bill Harrah's collection. Look all you like. The keys stay in the office.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Virginia City",
             "at_mi": 14.4,
             "off_mi": 7.05,
@@ -23632,6 +23992,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150960509, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Virginia City"
+          },
+          {
+            "name": "Virginia City (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.2,
+            "spoken": "Billboard: Virginia City, ahead up the Geiger Grade. Mark Twain first signed his pen name here in eighteen sixty-three. The saloons have kept the story going.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "New Washoe City",
@@ -23650,6 +24020,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150974118, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Incline Village"
+          },
+          {
+            "name": "Nevada State Railroad Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.0,
+            "spoken": "Billboard: The Nevada State Railroad Museum, ahead in Carson City. Virginia and Truckee engines, several of them retired movie stars. They still give rides.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Kings Beach",
@@ -24342,6 +24722,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 11015011858, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Spanish Springs"
+          },
+          {
+            "name": "National Automobile Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.4,
+            "spoken": "Billboard: The National Automobile Museum, ahead in Reno. More than two hundred cars from Bill Harrah's collection. Look all you like. The keys stay in the office.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lockwood",
@@ -27931,6 +28321,16 @@
             "spoken": "Passing Spanish Springs"
           },
           {
+            "name": "National Automobile Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.5,
+            "spoken": "Billboard: The National Automobile Museum, ahead in Reno. More than two hundred cars from Bill Harrah's collection. Look all you like. The keys stay in the office.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lockwood",
             "at_mi": 9.8,
             "off_mi": 0.35,
@@ -27997,11 +28397,41 @@
             "spoken": "Entering Mina"
           },
           {
+            "name": "The Clown Motel (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 223.7,
+            "spoken": "Billboard: The Clown Motel, ahead in Tonopah, next to the old cemetery. More than four thousand clowns inside. Sleep well.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Clown Motel (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 241.7,
+            "spoken": "Billboard: The Clown Motel, ahead in Tonopah, next to the old cemetery. More than four thousand clowns inside. Sleep well.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Amargosa River",
             "category": "river",
             "kind": "point",
             "at_mi": 303.8,
             "spoken": "Crossing the Amargosa River"
+          },
+          {
+            "name": "Rhyolite (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 315.7,
+            "spoken": "Billboard: Rhyolite ghost town, ahead at Beatty. It had an opera house in nineteen oh-seven and fourteen people by nineteen twenty. The bottle house stayed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Beatty Museum & Historical Society",
@@ -28018,6 +28448,16 @@
             "spoken": "Approaching Secret Pass"
           },
           {
+            "name": "Rhyolite (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 335.4,
+            "spoken": "Billboard: Rhyolite ghost town, ahead at Beatty. It had an opera house in nineteen oh-seven and fourteen people by nineteen twenty. The bottle house stayed.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Amargosa Valley",
             "at_mi": 354.3,
             "off_mi": 5.93,
@@ -28025,6 +28465,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 1396600295, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Amargosa Valley"
+          },
+          {
+            "name": "The Neon Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 433.5,
+            "spoken": "Billboard: The Neon Museum, ahead in Las Vegas. Old casino signs come here to retire in the boneyard. Some of them still light up.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Summerlin South",
@@ -30365,6 +30815,16 @@
             "spoken": "Passing Spanish Springs"
           },
           {
+            "name": "National Automobile Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.5,
+            "spoken": "Billboard: The National Automobile Museum, ahead in Reno. More than two hundred cars from Bill Harrah's collection. Look all you like. The keys stay in the office.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lockwood",
             "at_mi": 9.8,
             "off_mi": 0.35,
@@ -30415,6 +30875,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150939239, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Mina"
+          },
+          {
+            "name": "The Clown Motel (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 223.8,
+            "spoken": "Billboard: The Clown Motel, ahead in Tonopah, next to the old cemetery. More than four thousand clowns inside. Sleep well.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -31885,6 +32355,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "The Clown Motel (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The Clown Motel, ahead in Tonopah, next to the old cemetery. More than four thousand clowns inside. Sleep well.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Stonewall Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -31892,11 +32372,31 @@
             "spoken": "Approaching Stonewall Pass"
           },
           {
+            "name": "Rhyolite (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.6,
+            "spoken": "Billboard: Rhyolite ghost town, ahead at Beatty. It had an opera house in nineteen oh-seven and fourteen people by nineteen twenty. The bottle house stayed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Amargosa River",
             "category": "river",
             "kind": "point",
             "at_mi": 95.5,
             "spoken": "Crossing the Amargosa River"
+          },
+          {
+            "name": "Rhyolite (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 102.6,
+            "spoken": "Billboard: Rhyolite ghost town, ahead at Beatty. It had an opera house in nineteen oh-seven and fourteen people by nineteen twenty. The bottle house stayed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Amargosa Valley",
@@ -31913,6 +32413,16 @@
             "kind": "point",
             "at_mi": 167.6,
             "spoken": "Approaching Indian Springs Pass"
+          },
+          {
+            "name": "The Neon Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 200.6,
+            "spoken": "Billboard: The Neon Museum, ahead in Las Vegas. Old casino signs come here to retire in the boneyard. Some of them still light up.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Summerlin South",
@@ -34536,6 +35046,56 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
+          {
+            "name": "Bonneville Salt Flats (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Billboard: The Bonneville Salt Flats, next exit. A wheel-driven car hit four hundred forty-nine miles an hour out there. Dispatch would still call you late.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Wendover Will (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "Billboard: Wendover Will welcomes you ahead. This giant neon cowboy waves from the desert with the confidence of a man who has never paid an electric bill.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Bonneville Salt Flats (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.4,
+            "spoken": "Billboard: The Bonneville Salt Flats, next exit. A wheel-driven car hit four hundred forty-nine miles an hour out there. Dispatch would still call you late.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Tree of Utah (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.2,
+            "spoken": "Billboard: The Tree of Utah stands ahead on the salt flats, an eighty-seven-foot concrete tree sprouting from the middle of nowhere. How do you suppose this happened?",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Tree of Utah (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 37.2,
+            "spoken": "Billboard: The Tree of Utah stands ahead on the salt flats, an eighty-seven-foot concrete tree sprouting from the middle of nowhere. How do you suppose this happened?",
+            "directions": [
+              "reverse"
+            ]
+          },
           {
             "name": "Grantsville",
             "at_mi": 90.3,

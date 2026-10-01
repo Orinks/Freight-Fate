@@ -23890,6 +23890,16 @@
             ]
           },
           {
+            "name": "Barter Theatre (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.9,
+            "spoken": "Billboard: Barter Theatre, ahead in Abingdon. In nineteen thirty-three a ticket was forty cents or the same in vegetables. Ham for Hamlet, they called it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Damascus",
             "at_mi": 46.9,
             "off_mi": 9.23,
@@ -23897,6 +23907,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154132739, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Damascus"
+          },
+          {
+            "name": "Barter Theatre (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.5,
+            "spoken": "Billboard: Barter Theatre, ahead in Abingdon. In nineteen thirty-three a ticket was forty cents or the same in vegetables. Ham for Hamlet, they called it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Meadowview",
@@ -27975,6 +27995,16 @@
             "spoken": "Passing Adairsville"
           },
           {
+            "name": "Tellus Science Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 165.4,
+            "spoken": "Billboard: Tellus Science Museum, next exit. A dinosaur skeleton stands in the lobby, and the planetarium has the rest of the universe. Allow an afternoon.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "White",
             "at_mi": 167.1,
             "off_mi": 3.05,
@@ -27982,6 +28012,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153872087, projected onto the leg's checked-in route geometry",
             "spoken": "Passing White"
+          },
+          {
+            "name": "Tellus Science Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 168.4,
+            "spoken": "Billboard: Tellus Science Museum, next exit. A dinosaur skeleton stands in the lobby, and the planetarium has the rest of the universe. Allow an afternoon.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Etowah River",
@@ -27998,6 +28038,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154169703, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Acworth"
+          },
+          {
+            "name": "The Big Chicken (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 186.9,
+            "spoken": "Billboard: The Big Chicken is ahead near Marietta. This fifty-six-foot chicken-shaped restaurant rolls its eyes, moves its beak, and has confused Atlanta families giving directions for generations.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Woodstock",
@@ -28034,6 +28084,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154361589, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Vinings"
+          },
+          {
+            "name": "The Big Chicken (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 206.9,
+            "spoken": "Billboard: The Big Chicken is ahead near Marietta. This fifty-six-foot chicken-shaped restaurant rolls its eyes, moves its beak, and has confused Atlanta families giving directions for generations.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mableton",
@@ -47984,6 +48044,26 @@
             "spoken": "Passing New Madrid"
           },
           {
+            "name": "The Throwed Rolls (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 136.5,
+            "spoken": "Billboard: Lambert's Cafe is ahead, home of the throwed rolls. Waiters hurl hot dinner rolls across the room, and you are expected to catch them. Raise a hand or wear one.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Throwed Rolls (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 143.5,
+            "spoken": "Billboard: Lambert's Cafe is ahead, home of the throwed rolls. Waiters hurl hot dinner rolls across the room, and you are expected to catch them. Raise a hand or wear one.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Blodgett",
             "at_mi": 149.8,
             "off_mi": 0.43,
@@ -48027,6 +48107,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153787035, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Oak Ridge"
+          },
+          {
+            "name": "Ste. Genevieve (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 223.9,
+            "spoken": "Billboard: Sainte Genevieve, next exit, the first permanent European settlement in Missouri, founded by the French around seventeen fifty. Some houses predate Missouri being American.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Ste. Genevieve (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 227.1,
+            "spoken": "Billboard: Sainte Genevieve, next exit, the first permanent European settlement in Missouri, founded by the French around seventeen fifty. Some houses predate Missouri being American.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Crystal City",
@@ -53503,6 +53603,16 @@
             "spoken": "Passing Moores Mill"
           },
           {
+            "name": "The Space and Rocket Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 74.7,
+            "spoken": "Billboard: The United States Space and Rocket Center, ahead in Huntsville. A whole Saturn Five rocket rests indoors on its side. Your cab has fewer buttons.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Maysville",
             "at_mi": 77.3,
             "off_mi": 8.44,
@@ -58129,6 +58239,16 @@
             "spoken": "Crossing the Oostanaula River"
           },
           {
+            "name": "Tellus Science Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 180.3,
+            "spoken": "Billboard: Tellus Science Museum, ahead at Cartersville. A dinosaur skeleton stands in the lobby, and the planetarium has the rest of the universe. Allow an afternoon.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Adairsville",
             "at_mi": 188.0,
             "off_mi": 1.45,
@@ -58136,6 +58256,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154062277, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Adairsville"
+          },
+          {
+            "name": "Tellus Science Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 191.8,
+            "spoken": "Billboard: Tellus Science Museum, next exit. A dinosaur skeleton stands in the lobby, and the planetarium has the rest of the universe. Allow an afternoon.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "White",
@@ -58152,6 +58282,16 @@
             "kind": "point",
             "at_mi": 205.6,
             "spoken": "Crossing the Etowah River"
+          },
+          {
+            "name": "The Big Chicken (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 208.6,
+            "spoken": "Billboard: The Big Chicken is ahead near Marietta. This fifty-six-foot chicken-shaped restaurant rolls its eyes, moves its beak, and has confused Atlanta families giving directions for generations.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Acworth",
@@ -58179,6 +58319,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153852508, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kennesaw"
+          },
+          {
+            "name": "The Big Chicken (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 228.6,
+            "spoken": "Billboard: The Big Chicken is ahead near Marietta. This fifty-six-foot chicken-shaped restaurant rolls its eyes, moves its beak, and has confused Atlanta families giving directions for generations.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Fair Oaks",

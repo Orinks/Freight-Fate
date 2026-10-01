@@ -2312,6 +2312,16 @@
             "spoken": "Passing McClellanville"
           },
           {
+            "name": "The Original Hammock Shop (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.0,
+            "spoken": "Billboard: The Original Hammock Shop, ahead on Pawleys Island. Rope hammocks woven by hand since nineteen thirty-eight. Lie down in one and the drive is over.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Great Pee Dee River",
             "category": "river",
             "kind": "point",
@@ -2333,6 +2343,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158424786, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing DeBordieu Colony"
+          },
+          {
+            "name": "Brookgreen Gardens (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.4,
+            "spoken": "Billboard: Brookgreen Gardens, ahead at Murrells Inlet. America's first public sculpture garden, more than fourteen hundred pieces. Every one of them holds still.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pawleys Island",
@@ -2369,6 +2389,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158283515, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering North Litchfield Beach"
+          },
+          {
+            "name": "The Original Hammock Shop (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.7,
+            "spoken": "Billboard: The Original Hammock Shop, ahead on Pawleys Island. Rope hammocks woven by hand since nineteen thirty-eight. Lie down in one and the drive is over.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Murrells Inlet",
@@ -2414,6 +2444,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158510197, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Surfside Beach"
+          },
+          {
+            "name": "The Grand Strand (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 88.0,
+            "spoken": "Billboard: Myrtle Beach, ahead, the middle of the Grand Strand. Sixty miles of beach from Little River to Winyah Bay. The sand will find your cab.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Brookgreen Gardens (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 88.4,
+            "spoken": "Billboard: Brookgreen Gardens, ahead at Murrells Inlet. America's first public sculpture garden, more than fourteen hundred pieces. Every one of them holds still.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Socastee",
@@ -6170,6 +6220,16 @@
             "spoken": "Passing Pine Ridge"
           },
           {
+            "name": "Riverbanks Zoo and Garden (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.5,
+            "spoken": "Billboard: Riverbanks Zoo and Garden, ahead in Columbia. Three thousand animals beside the Saluda River. None of them has ever had to merge.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Congaree River",
             "category": "river",
             "kind": "point",
@@ -8475,6 +8535,16 @@
             "spoken": "Passing Arcadia Lakes"
           },
           {
+            "name": "Riverbanks Zoo and Garden (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.7,
+            "spoken": "Billboard: Riverbanks Zoo and Garden, ahead in Columbia. Three thousand animals beside the Saluda River. None of them has ever had to merge.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Elgin",
             "at_mi": 13.6,
             "off_mi": 9.74,
@@ -8608,6 +8678,16 @@
             "spoken": "Passing Tega Cay"
           },
           {
+            "name": "Carowinds (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.6,
+            "spoken": "Billboard: Carowinds, next exit, right on the state line. The line is painted across the front gate. Ride in one Carolina, eat lunch in the other.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Weddington",
             "at_mi": 80.8,
             "off_mi": 10.87,
@@ -8676,6 +8756,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154144229, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mount Holly"
+          },
+          {
+            "name": "Carowinds (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 91.0,
+            "spoken": "Billboard: Carowinds, ahead, right on the state line. The line is painted across the front gate. Ride in one Carolina, eat lunch in the other.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mint Hill",
@@ -10424,6 +10514,16 @@
             "spoken": "Passing Pine Ridge"
           },
           {
+            "name": "Riverbanks Zoo and Garden (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.4,
+            "spoken": "Billboard: Riverbanks Zoo and Garden, ahead in Columbia. Three thousand animals beside the Saluda River. None of them has ever had to merge.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Gaston",
             "at_mi": 17.7,
             "off_mi": 0.01,
@@ -11873,6 +11973,16 @@
             "kind": "point",
             "at_mi": 11.8,
             "spoken": "Crossing the Broad River"
+          },
+          {
+            "name": "Riverbanks Zoo and Garden (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.0,
+            "spoken": "Billboard: Riverbanks Zoo and Garden, ahead in Columbia. Three thousand animals beside the Saluda River. None of them has ever had to merge.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Little Mountain",
@@ -13778,6 +13888,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154365311, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Elgin"
+          },
+          {
+            "name": "Riverbanks Zoo and Garden (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.3,
+            "spoken": "Billboard: Riverbanks Zoo and Garden, ahead in Columbia. Three thousand animals beside the Saluda River. None of them has ever had to merge.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Blythewood",
@@ -18337,6 +18457,16 @@
             "spoken": "Passing Powdersville"
           },
           {
+            "name": "Falls Park on the Reedy (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Falls Park, ahead in Greenville. A waterfall downtown, and a footbridge that curves over it, hung from cables on one side only. It holds.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Piedmont",
             "at_mi": 11.9,
             "off_mi": 2.06,
@@ -21209,6 +21339,16 @@
             "spoken": "Passing Mauldin"
           },
           {
+            "name": "Falls Park on the Reedy (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Falls Park, ahead in Greenville. A waterfall downtown, and a footbridge that curves over it, hung from cables on one side only. It holds.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Conestee",
             "at_mi": 12.4,
             "off_mi": 3.72,
@@ -21365,6 +21505,16 @@
             "kind": "point",
             "at_mi": 90.0,
             "spoken": "Crossing the Broad River"
+          },
+          {
+            "name": "Riverbanks Zoo and Garden (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 92.2,
+            "spoken": "Billboard: Riverbanks Zoo and Garden, ahead in Columbia. Three thousand animals beside the Saluda River. None of them has ever had to merge.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Red Bank",
@@ -22304,6 +22454,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158382487, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Red Hill"
+          },
+          {
+            "name": "The Grand Strand (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Billboard: Myrtle Beach, ahead, the middle of the Grand Strand. Sixty miles of beach from Little River to Winyah Bay. The sand will find your cab.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Brittons Neck",
@@ -23476,6 +23636,26 @@
             "spoken": "Passing Red Hill"
           },
           {
+            "name": "The Grand Strand (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Myrtle Beach, ahead, the middle of the Grand Strand. Sixty miles of beach from Little River to Winyah Bay. The sand will find your cab.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Calabash (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.5,
+            "spoken": "Billboard: Calabash, ahead at the state line. The Seafood Capital of the World, frying its catch the same way since the nineteen thirties. Bring napkins.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Briarcliffe Acres",
             "at_mi": 12.74,
             "off_mi": 0.66,
@@ -23596,6 +23776,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158613341, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sunset Beach"
+          },
+          {
+            "name": "Calabash (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.5,
+            "spoken": "Billboard: Calabash, ahead at the state line. The Seafood Capital of the World, frying its catch the same way since the nineteen thirties. Bring napkins.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Ocean Isle Beach",
@@ -24654,6 +24844,16 @@
             "kind": "point",
             "at_mi": 20.4,
             "spoken": "Crossing the Enoree River"
+          },
+          {
+            "name": "Falls Park on the Reedy (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.0,
+            "spoken": "Billboard: Falls Park, ahead in Greenville. A waterfall downtown, and a footbridge that curves over it, hung from cables on one side only. It holds.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Taylors",
@@ -25882,6 +26082,16 @@
             "spoken": "Passing Rembert"
           },
           {
+            "name": "Swan Lake Iris Gardens (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Swan Lake Iris Gardens, ahead in Sumter. The only public park in America with all eight kinds of swan. They set the right of way.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Wedgefield",
             "at_mi": 12.3,
             "off_mi": 3.63,
@@ -25905,6 +26115,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154100234, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Eastover"
+          },
+          {
+            "name": "Riverbanks Zoo and Garden (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.0,
+            "spoken": "Billboard: Riverbanks Zoo and Garden, ahead in Columbia. Three thousand animals beside the Saluda River. None of them has ever had to merge.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Arcadia Lakes",
@@ -26458,6 +26678,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153925948, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mayesville"
+          },
+          {
+            "name": "Swan Lake Iris Gardens (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Swan Lake Iris Gardens, ahead in Sumter. The only public park in America with all eight kinds of swan. They set the right of way.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Turbeville",

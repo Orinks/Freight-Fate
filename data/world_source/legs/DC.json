@@ -12044,6 +12044,16 @@
             "spoken": "Crossing the Rappahannock River"
           },
           {
+            "name": "The National Museum of the Marine Corps (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.7,
+            "spoken": "Billboard: The National Museum of the Marine Corps, ahead at Triangle. Free admission, every day but Thanksgiving and Christmas. Stand up straight on the way in.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Southern Gateway",
             "at_mi": 49.5,
             "off_mi": 0.32,

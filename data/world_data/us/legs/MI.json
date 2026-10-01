@@ -3637,6 +3637,16 @@
             "spoken": "Passing Waterloo"
           },
           {
+            "name": "Auburn Cord Duesenberg Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 123.2,
+            "spoken": "Billboard: The Auburn Cord Duesenberg Museum, next exit. Classic cars in the company's art deco showroom, and a truck museum next door. Your rig can meet its ancestors.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Altona",
             "at_mi": 126.0,
             "off_mi": 3.47,
@@ -3653,6 +3663,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153649019, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Garrett"
+          },
+          {
+            "name": "Auburn Cord Duesenberg Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 126.4,
+            "spoken": "Billboard: The Auburn Cord Duesenberg Museum, next exit. Classic cars in the company's art deco showroom, and a truck museum next door. Your rig can meet its ancestors.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Leo-Cedarville",
@@ -6100,6 +6120,16 @@
             "spoken": "Passing Oceola Township"
           },
           {
+            "name": "Hell, Michigan (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.0,
+            "spoken": "Billboard: Turn off for Hell, Michigan. You can get married, mail a postcard, buy a souvenir, and announce that Hell froze over when you visit in winter.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Hell, Michigan",
             "category": "billboard_sign",
             "kind": "point",
@@ -6151,6 +6181,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153929644, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Haslett"
+          },
+          {
+            "name": "Olds Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.3,
+            "spoken": "Billboard: The R E Olds Transportation Museum, ahead in Lansing, home of the R E O Speed Wagon. A rock band took the truck's name. The truck kept working.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Meridian Charter Township",
@@ -6217,6 +6257,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153973859, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Potterville"
+          },
+          {
+            "name": "Olds Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 73.3,
+            "spoken": "Billboard: The R E Olds Transportation Museum, ahead in Lansing, home of the R E O Speed Wagon. A rock band took the truck's name. The truck kept working.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Grand Ledge",
@@ -6287,6 +6337,16 @@
             "kind": "point",
             "at_mi": 119.9,
             "spoken": "Crossing the Thornapple River"
+          },
+          {
+            "name": "Ford Presidential Museum (from Ann Arbor)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 124.4,
+            "spoken": "Billboard: The Gerald Ford Presidential Museum, ahead in Grand Rapids. He was vice president and president without winning an election for either. The interview went well.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Kentwood",
@@ -7923,6 +7983,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153929644, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Haslett"
+          },
+          {
+            "name": "Olds Museum (from Ann Arbor)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.5,
+            "spoken": "Billboard: The R E Olds Transportation Museum, ahead in Lansing, home of the R E O Speed Wagon. A rock band took the truck's name. The truck kept working.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Meridian Charter Township",
@@ -15121,6 +15191,16 @@
         ],
         "landmarks": [
           {
+            "name": "Uniroyal Giant Tire (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.3,
+            "spoken": "Billboard: The world's largest tire is coming up in Allen Park, eighty feet tall. It was a Ferris wheel at the nineteen sixty-four World's Fair. Yours just rotates.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Redford Charter Township",
             "at_mi": 15.7,
             "off_mi": 0.65,
@@ -15232,11 +15312,31 @@
             "spoken": "Passing Marshall"
           },
           {
+            "name": "Air Zoo (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 136.1,
+            "spoken": "Billboard: The Air Zoo, next exit in Portage. An S R seventy-one Blackbird, plus planes nicknamed Wildcat, Bearcat and Warhawk. That explains the zoo.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Kalamazoo Valley Community College Center for New Media Art Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 140.6,
             "spoken": "Kalamazoo Valley Community College Center for New Media Art Museum ahead"
+          },
+          {
+            "name": "Air Zoo (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 144.0,
+            "spoken": "Billboard: The Air Zoo, ahead in Portage. An S R seventy-one Blackbird, plus planes nicknamed Wildcat, Bearcat and Warhawk. That explains the zoo.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mattawan",
@@ -15352,6 +15452,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153542994, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Town of Pines"
+          },
+          {
+            "name": "Indiana Dunes (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 231.7,
+            "spoken": "Billboard: Indiana Dunes National Park, next exit. Dunes almost two hundred feet tall on Lake Michigan, where the sand sings under your feet. It knows one note.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Chesterton",
@@ -17896,6 +18006,16 @@
             "spoken": "Passing Berlin Charter Township"
           },
           {
+            "name": "River Raisin Battlefield (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.5,
+            "spoken": "Billboard: River Raisin National Battlefield Park, ahead in Monroe. A War of Eighteen Twelve battle here in eighteen thirteen gave Kentucky its battle cry: Remember the Raisin.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Frenchtown Charter Township",
             "at_mi": 33.9,
             "off_mi": 0.23,
@@ -17912,6 +18032,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154343998, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Detroit Beach"
+          },
+          {
+            "name": "River Raisin Battlefield (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.3,
+            "spoken": "Billboard: River Raisin National Battlefield Park, ahead in Monroe. A War of Eighteen Twelve battle here in eighteen thirteen gave Kentucky its battle cry: Remember the Raisin.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "South Monroe",
@@ -18016,6 +18146,26 @@
             "spoken": "Passing Lindsey"
           },
           {
+            "name": "Hayes Presidential Library (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 85.7,
+            "spoken": "Billboard: The Rutherford Hayes Presidential Library, next exit in Fremont, the first presidential library, opened in nineteen sixteen. Its front gates came from the White House.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Hayes Presidential Library (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 88.9,
+            "spoken": "Billboard: The Rutherford Hayes Presidential Library, next exit in Fremont, the first presidential library, opened in nineteen sixteen. Its front gates came from the White House.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Sandusky River",
             "category": "river",
             "kind": "point",
@@ -18030,6 +18180,46 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153968758, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering York"
+          },
+          {
+            "name": "Roller Coaster Capital (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 102.8,
+            "spoken": "Billboard: Sandusky is home to Cedar Point, the Roller Coaster Capital of the world. Some of the tallest and fastest coasters ever built stand in a row over Lake Erie, and you can hear the screaming from the highway.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Roller Coaster Capital (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 110.8,
+            "spoken": "Billboard: Sandusky is home to Cedar Point, the Roller Coaster Capital of the world. Some of the tallest and fastest coasters ever built stand in a row over Lake Erie, and you can hear the screaming from the highway.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Edison Birthplace (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 112.3,
+            "spoken": "Billboard: Thomas Edison's birthplace, next exit in Milan. The house where he was born in eighteen forty-seven is a museum now. Somebody remembered to turn the lights on.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Edison Birthplace (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 115.5,
+            "spoken": "Billboard: Thomas Edison's birthplace, next exit in Milan. The house where he was born in eighteen forty-seven is a museum now. Somebody remembered to turn the lights on.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Berlin Heights",
@@ -19862,6 +20052,16 @@
             "spoken": "Passing Berlin Charter Township"
           },
           {
+            "name": "River Raisin Battlefield (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.8,
+            "spoken": "Billboard: River Raisin National Battlefield Park, ahead in Monroe. A War of Eighteen Twelve battle here in eighteen thirteen gave Kentucky its battle cry: Remember the Raisin.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Frenchtown Charter Township",
             "at_mi": 34.3,
             "off_mi": 0.23,
@@ -19905,6 +20105,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153929023, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing South Monroe"
+          },
+          {
+            "name": "River Raisin Battlefield (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.4,
+            "spoken": "Billboard: River Raisin National Battlefield Park, ahead in Monroe. A War of Eighteen Twelve battle here in eighteen thirteen gave Kentucky its battle cry: Remember the Raisin.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Monroe Charter Township",
@@ -26198,6 +26408,16 @@
             "spoken": "Passing Williamston"
           },
           {
+            "name": "Olds Museum (from Flint)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.6,
+            "spoken": "Billboard: The R E Olds Transportation Museum, ahead in Lansing, home of the R E O Speed Wagon. A rock band took the truck's name. The truck kept working.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Meridian Charter Township",
             "at_mi": 44.4,
             "off_mi": 2.34,
@@ -27027,6 +27247,16 @@
             "kind": "point",
             "at_mi": 25.61,
             "spoken": "Crossing the Cass River"
+          },
+          {
+            "name": "Bronner's CHRISTmas Wonderland (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.7,
+            "spoken": "Billboard: Frankenmuth is ahead, Michigan's Little Bavaria and home to Bronner's, the world's largest Christmas store. It stays open all year, covers several football fields, and glows like the North Pole in July.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Reese",
@@ -29618,6 +29848,16 @@
             "spoken": "Entering Grandville"
           },
           {
+            "name": "Ford Presidential Museum (from Chicago)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.2,
+            "spoken": "Billboard: The Gerald Ford Presidential Museum, ahead in Grand Rapids. He was vice president and president without winning an election for either. The interview went well.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Macatawa River",
             "category": "river",
             "kind": "point",
@@ -29852,6 +30092,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153688853, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Beverly Shores"
+          },
+          {
+            "name": "Indiana Dunes (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 128.4,
+            "spoken": "Billboard: Indiana Dunes National Park, next exit. Dunes almost two hundred feet tall on Lake Michigan, where the sand sings under your feet. It knows one note.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Chesterton",
@@ -32809,6 +33059,16 @@
         ],
         "landmarks": [
           {
+            "name": "Ford Presidential Museum (from Detroit)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.6,
+            "spoken": "Billboard: The Gerald Ford Presidential Museum, ahead in Grand Rapids. He was vice president and president without winning an election for either. The interview went well.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Thornapple River",
             "category": "river",
             "kind": "point",
@@ -32859,6 +33119,16 @@
             "spoken": "Passing Grand Ledge"
           },
           {
+            "name": "Olds Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.5,
+            "spoken": "Billboard: The R E Olds Transportation Museum, ahead in Lansing, home of the R E O Speed Wagon. A rock band took the truck's name. The truck kept working.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Dimondale",
             "at_mi": 65.5,
             "off_mi": 1.49,
@@ -32882,6 +33152,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 10805208984, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Delhi Charter Township"
+          },
+          {
+            "name": "Olds Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 72.5,
+            "spoken": "Billboard: The R E Olds Transportation Museum, ahead in Lansing, home of the R E O Speed Wagon. A rock band took the truck's name. The truck kept working.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Meridian Historical Village",
@@ -34711,6 +34991,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153566876, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Walker"
+          },
+          {
+            "name": "Ford Presidential Museum (from Saginaw)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.2,
+            "spoken": "Billboard: The Gerald Ford Presidential Museum, ahead in Grand Rapids. He was vice president and president without winning an election for either. The interview went well.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wright",
@@ -41222,7 +41512,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 33.0,
-            "spoken": "Billboard: Battle Creek is the Cereal City. The Kellogg brothers invented corn flakes here by accident, and some mornings the whole town smells like toasting grain. Tony the Tiger says it is grreat."
+            "spoken": "Billboard: Battle Creek is the Cereal City. The Kellogg brothers invented corn flakes here by accident, and some mornings the whole town smells like toasting grain.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Bellevue",
@@ -41273,6 +41566,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153668714, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Springfield"
+          },
+          {
+            "name": "Cereal City (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.3,
+            "spoken": "Billboard: Battle Creek is the Cereal City. The Kellogg brothers invented corn flakes here by accident, and some mornings the whole town smells like toasting grain.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Climax",
@@ -42224,6 +42527,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 10805208984, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Delhi Charter Township"
+          },
+          {
+            "name": "Olds Museum (from Jackson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.6,
+            "spoken": "Billboard: The R E Olds Transportation Museum, ahead in Lansing, home of the R E O Speed Wagon. A rock band took the truck's name. The truck kept working.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Williamston",
@@ -44649,6 +44962,16 @@
             "spoken": "Passing Dearborn Heights"
           },
           {
+            "name": "Uniroyal Giant Tire (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 128.7,
+            "spoken": "Billboard: The world's largest tire is coming up in Allen Park, eighty feet tall. It was a Ferris wheel at the nineteen sixty-four World's Fair. Yours just rotates.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Highland Park",
             "at_mi": 132.4,
             "off_mi": 3.07,
@@ -46927,6 +47250,16 @@
             "spoken": "Passing Jamestown"
           },
           {
+            "name": "Ford Presidential Museum (from Kalamazoo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 41.4,
+            "spoken": "Billboard: The Gerald Ford Presidential Museum, ahead in Grand Rapids. He was vice president and president without winning an election for either. The interview went well.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Hudsonville",
             "at_mi": 43.8,
             "off_mi": 9.29,
@@ -47902,6 +48235,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153594596, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Edwardsburg"
+          },
+          {
+            "name": "Studebaker Museum (from Kalamazoo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.0,
+            "spoken": "Billboard: The Studebaker National Museum, ahead in South Bend. The family built covered wagons here, then cars and trucks for over a hundred years. The wagons got better mileage.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Bertrand",
@@ -49705,6 +50048,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154197415, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Holt"
+          },
+          {
+            "name": "Olds Museum (from Detroit)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.5,
+            "spoken": "Billboard: The R E Olds Transportation Museum, ahead in Lansing, home of the R E O Speed Wagon. A rock band took the truck's name. The truck kept working.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Okemos",
@@ -51572,6 +51925,16 @@
             "spoken": "Passing Potterville"
           },
           {
+            "name": "Olds Museum (from Grand Rapids)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: The R E Olds Transportation Museum, ahead in Lansing, home of the R E O Speed Wagon. A rock band took the truck's name. The truck kept working.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "DeWitt",
             "at_mi": 10.9,
             "off_mi": 6.48,
@@ -51739,6 +52102,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153628108, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Caledonia"
+          },
+          {
+            "name": "Ford Presidential Museum (from Lansing)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.4,
+            "spoken": "Billboard: The Gerald Ford Presidential Museum, ahead in Grand Rapids. He was vice president and president without winning an election for either. The interview went well.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Kentwood",
@@ -52607,6 +52980,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154212022, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Okemos"
+          },
+          {
+            "name": "Olds Museum (from Kalamazoo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.0,
+            "spoken": "Billboard: The R E Olds Transportation Museum, ahead in Lansing, home of the R E O Speed Wagon. A rock band took the truck's name. The truck kept working.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Grand Ledge",
@@ -56201,6 +56584,16 @@
             "spoken": "Passing Skandia"
           },
           {
+            "name": "Lakenenland (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.5,
+            "spoken": "Billboard: Lakenenland, ahead on Route twenty-eight. One man's junkyard sculptures, more than eighty of them, in a free park that never closes. Scrap metal has never had it better.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Laughing Whitefish River",
             "category": "river",
             "kind": "point",
@@ -56213,6 +56606,16 @@
             "kind": "point",
             "at_mi": 13.4,
             "spoken": "Crossing the Rock River"
+          },
+          {
+            "name": "Lakenenland (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.5,
+            "spoken": "Billboard: Lakenenland, ahead on Route twenty-eight. One man's junkyard sculptures, more than eighty of them, in a free park that never closes. Scrap metal has never had it better.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Chatham",
@@ -56233,6 +56636,16 @@
             "spoken": "Entering Au Train"
           },
           {
+            "name": "Pictured Rocks (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.5,
+            "spoken": "Billboard: Pictured Rocks National Lakeshore, ahead at Munising. Sandstone cliffs two hundred feet tall over Lake Superior, stained by iron and copper. The lake did the painting.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Christmas",
             "at_mi": 37.9,
             "off_mi": 0.02,
@@ -56240,6 +56653,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153513031, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Christmas"
+          },
+          {
+            "name": "Pictured Rocks (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.5,
+            "spoken": "Billboard: Pictured Rocks National Lakeshore, ahead at Munising. Sandstone cliffs two hundred feet tall over Lake Superior, stained by iron and copper. The lake did the painting.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Shingleton",
@@ -56408,6 +56831,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154305286, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dafter"
+          },
+          {
+            "name": "Soo Locks (from Marquette)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 157.4,
+            "spoken": "Billboard: The Soo Locks, ahead in Sault Sainte Marie. Watch thousand-foot freighters ride an elevator of water twenty-one feet up to Lake Superior, free.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -57611,6 +58044,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153343059, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wright"
+          },
+          {
+            "name": "Ford Presidential Museum (from Muskegon)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.2,
+            "spoken": "Billboard: The Gerald Ford Presidential Museum, ahead in Grand Rapids. He was vice president and president without winning an election for either. The interview went well.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Hudsonville",
@@ -64546,6 +64989,16 @@
             "spoken": "Passing Williamston"
           },
           {
+            "name": "Olds Museum (from Saginaw)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.6,
+            "spoken": "Billboard: The R E Olds Transportation Museum, ahead in Lansing, home of the R E O Speed Wagon. A rock band took the truck's name. The truck kept working.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Meridian Charter Township",
             "at_mi": 77.42,
             "off_mi": 2.34,
@@ -65337,6 +65790,16 @@
         ],
         "restrictions": [],
         "landmarks": [
+          {
+            "name": "Soo Locks (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.6,
+            "spoken": "Billboard: The Soo Locks, ahead in Sault Sainte Marie. Watch thousand-foot freighters ride an elevator of water twenty-one feet up to Lake Superior, free.",
+            "directions": [
+              "reverse"
+            ]
+          },
           {
             "name": "Brimley",
             "at_mi": 9.6,
@@ -68386,6 +68849,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153355040, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sparta"
+          },
+          {
+            "name": "Ford Presidential Museum (from Traverse City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 131.4,
+            "spoken": "Billboard: The Gerald Ford Presidential Museum, ahead in Grand Rapids. He was vice president and president without winning an election for either. The interview went well.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Walker",

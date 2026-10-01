@@ -3625,6 +3625,16 @@
             "spoken": "Passing Ashland"
           },
           {
+            "name": "Grandpa's Cheesebarn (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.6,
+            "spoken": "Billboard: Grandpa's Cheesebarn is ahead. It offers cheese, fudge, smoked meat, and free samples arranged to defeat every promise you made at breakfast.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mifflin",
             "at_mi": 54.3,
             "off_mi": 2.26,
@@ -3632,6 +3642,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154208399, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mifflin"
+          },
+          {
+            "name": "Ohio State Reformatory (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.6,
+            "spoken": "Billboard: The Ohio State Reformatory, next exit in Mansfield, the prison from The Shawshank Redemption. Take the tour, then leave by the front door like everybody else.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Ohio State Reformatory (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.8,
+            "spoken": "Billboard: The Ohio State Reformatory, next exit in Mansfield, the prison from The Shawshank Redemption. Take the tour, then leave by the front door like everybody else.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lucas",
@@ -6623,6 +6653,16 @@
         ],
         "landmarks": [
           {
+            "name": "Hopewell Culture Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.6,
+            "spoken": "Billboard: Hopewell Culture National Historical Park, ahead at Chillicothe. Twenty-five earthen mounds raised two thousand years ago, now a world heritage site.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Frankfort",
             "at_mi": 12.37,
             "off_mi": 1.98,
@@ -7672,6 +7712,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154152616, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Frankfort"
+          },
+          {
+            "name": "Hopewell Culture Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.5,
+            "spoken": "Billboard: Hopewell Culture National Historical Park, ahead at Chillicothe. Twenty-five earthen mounds raised two thousand years ago, now a world heritage site.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kingston",
@@ -10078,6 +10128,26 @@
             "spoken": "Entering New Point"
           },
           {
+            "name": "Greensburg Courthouse Tree (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.2,
+            "spoken": "Billboard: Greensburg, next exit. Trees have grown out of the courthouse tower roof since the eighteen seventies, and the county has never once asked them to leave.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Greensburg Courthouse Tree (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.4,
+            "spoken": "Billboard: Greensburg, next exit. Trees have grown out of the courthouse tower roof since the eighteen seventies, and the county has never once asked them to leave.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Milford",
             "at_mi": 65.1,
             "off_mi": 4.73,
@@ -12122,6 +12192,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154349961, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Walton"
+          },
+          {
+            "name": "Florence Y'all (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.6,
+            "spoken": "Billboard: Florence, ahead. The water tower said Florence Mall before the mall existed. The state ruled it an illegal sign, so the town made it Florence Y'all.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kentucky River",
@@ -15874,6 +15954,46 @@
             "spoken": "Entering Berlin Heights"
           },
           {
+            "name": "Edison Birthplace (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.4,
+            "spoken": "Billboard: Thomas Edison's birthplace, next exit in Milan. The house where he was born in eighteen forty-seven is a museum now. Somebody remembered to turn the lights on.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Edison Birthplace (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.6,
+            "spoken": "Billboard: Thomas Edison's birthplace, next exit in Milan. The house where he was born in eighteen forty-seven is a museum now. Somebody remembered to turn the lights on.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Roller Coaster Capital (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.3,
+            "spoken": "Billboard: Sandusky is home to Cedar Point, the Roller Coaster Capital of the world. Some of the tallest and fastest coasters ever built stand in a row over Lake Erie, and you can hear the screaming from the highway.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Roller Coaster Capital (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 65.3,
+            "spoken": "Billboard: Sandusky is home to Cedar Point, the Roller Coaster Capital of the world. Some of the tallest and fastest coasters ever built stand in a row over Lake Erie, and you can hear the screaming from the highway.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "York",
             "at_mi": 68.7,
             "off_mi": 0.13,
@@ -15888,6 +16008,26 @@
             "kind": "point",
             "at_mi": 71.5,
             "spoken": "Crossing the Sandusky River"
+          },
+          {
+            "name": "Hayes Presidential Library (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.4,
+            "spoken": "Billboard: The Rutherford Hayes Presidential Library, next exit in Fremont, the first presidential library, opened in nineteen sixteen. Its front gates came from the White House.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Hayes Presidential Library (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 82.6,
+            "spoken": "Billboard: The Rutherford Hayes Presidential Library, next exit in Fremont, the first presidential library, opened in nineteen sixteen. Its front gates came from the White House.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lindsey",
@@ -16042,6 +16182,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153769939, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rolling Prairie"
+          },
+          {
+            "name": "Indiana Dunes (Toll Road westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 297.8,
+            "spoken": "Billboard: Indiana Dunes National Park, next exit. Dunes almost two hundred feet tall on Lake Michigan, where the sand sings under your feet. It knows one note.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Indiana Dunes (Toll Road eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 301.0,
+            "spoken": "Billboard: Indiana Dunes National Park, next exit. Dunes almost two hundred feet tall on Lake Michigan, where the sand sings under your feet. It knows one note.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "South Haven",
@@ -17806,11 +17966,31 @@
             "spoken": "Entering Berlin Heights"
           },
           {
+            "name": "Edison Birthplace (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.5,
+            "spoken": "Billboard: Thomas Edison's birthplace, next exit in Milan. The house where he was born in eighteen forty-seven is a museum now. Somebody remembered to turn the lights on.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Roller Coaster Capital",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 55.0,
             "spoken": "Billboard: Sandusky is home to Cedar Point, the Roller Coaster Capital of the world. Some of the tallest and fastest coasters ever built stand in a row over Lake Erie, and you can hear the screaming from the highway."
+          },
+          {
+            "name": "Edison Birthplace (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.7,
+            "spoken": "Billboard: Thomas Edison's birthplace, next exit in Milan. The house where he was born in eighteen forty-seven is a museum now. Somebody remembered to turn the lights on.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Castalia",
@@ -17820,6 +18000,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154079292, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Castalia"
+          },
+          {
+            "name": "Roller Coaster Capital (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 65.0,
+            "spoken": "Billboard: Sandusky is home to Cedar Point, the Roller Coaster Capital of the world. Some of the tallest and fastest coasters ever built stand in a row over Lake Erie, and you can hear the screaming from the highway.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "York",
@@ -17845,6 +18035,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154317253, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fremont"
+          },
+          {
+            "name": "Hayes Presidential Library (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.5,
+            "spoken": "Billboard: The Rutherford Hayes Presidential Library, next exit in Fremont, the first presidential library, opened in nineteen sixteen. Its front gates came from the White House.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Hayes Presidential Library (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 82.7,
+            "spoken": "Billboard: The Rutherford Hayes Presidential Library, next exit in Fremont, the first presidential library, opened in nineteen sixteen. Its front gates came from the White House.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lindsey",
@@ -19724,6 +19934,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153964868, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing South Lebanon"
+          },
+          {
+            "name": "Kings Island (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.1,
+            "spoken": "Billboard: Kings Island, next exit in Mason. Roller coasters and a three-hundred-foot copy of the Eiffel Tower. Paris has the original and worse parking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Kings Island (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 82.9,
+            "spoken": "Billboard: Kings Island, next exit in Mason. Roller coasters and a three-hundred-foot copy of the Eiffel Tower. Paris has the original and worse parking.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mason",
@@ -22724,6 +22954,26 @@
             "spoken": "Passing Knightstown"
           },
           {
+            "name": "Hoosier Gym (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 139.3,
+            "spoken": "Billboard: The Hoosier Gym, next exit in Knightstown, home court in the movie Hoosiers. Walk in free and shoot a few free throws.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Hoosier Gym (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 142.5,
+            "spoken": "Billboard: The Hoosier Gym, next exit in Knightstown, home court in the movie Hoosiers. Walk in free and shoot a few free throws.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Charlottesville",
             "at_mi": 144.1,
             "off_mi": 2.36,
@@ -24309,6 +24559,16 @@
             "spoken": "Passing Lexington"
           },
           {
+            "name": "Ohio State Reformatory (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.2,
+            "spoken": "Billboard: The Ohio State Reformatory, ahead in Mansfield, the prison from The Shawshank Redemption. Take the tour, then leave by the front door like everybody else.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lucas",
             "at_mi": 63.6,
             "off_mi": 4.5,
@@ -25685,6 +25945,16 @@
             "spoken": "Passing Baltimore"
           },
           {
+            "name": "Newark Earthworks (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.0,
+            "spoken": "Billboard: The Newark Earthworks, ahead off Route seventy-nine. Two thousand years ago the Hopewell built an octagon here that tracks the moon.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Thurston",
             "at_mi": 26.1,
             "off_mi": 7.06,
@@ -25739,6 +26009,16 @@
             "spoken": "Passing Heath"
           },
           {
+            "name": "Newark Earthworks (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.3,
+            "spoken": "Billboard: The Newark Earthworks, next exit, north on Route seventy-nine. Two thousand years ago the Hopewell built an octagon here that tracks the moon.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Thornville",
             "at_mi": 32.9,
             "off_mi": 3.31,
@@ -25762,6 +26042,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154378016, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Glenford"
+          },
+          {
+            "name": "Y-Bridge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.0,
+            "spoken": "Billboard: Zanesville, ahead. The Y-Bridge splits in the middle of the river, so you can drive across and come off on the side you started from.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Hopewell",
@@ -32838,6 +33128,16 @@
             "spoken": "Passing Moulton"
           },
           {
+            "name": "First on the Moon (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.9,
+            "spoken": "Billboard: Wapakoneta is ahead, birthplace of Neil Armstrong, the first human to set foot on the moon. A museum shaped like a moon base waits out here among the Ohio corn.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "New Knoxville",
             "at_mi": 19.5,
             "off_mi": 7.63,
@@ -34506,6 +34806,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Ohio State Reformatory (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.4,
+            "spoken": "Billboard: The Ohio State Reformatory, ahead in Mansfield, the prison from The Shawshank Redemption. Take the tour, then leave by the front door like everybody else.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mifflin",
             "at_mi": 8.7,
             "off_mi": 2.21,
@@ -34540,6 +34850,16 @@
             "spoken": "Passing Ashland"
           },
           {
+            "name": "Grandpa's Cheesebarn (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.3,
+            "spoken": "Billboard: Grandpa's Cheesebarn is ahead. It offers cheese, fudge, smoked meat, and free samples arranged to defeat every promise you made at breakfast.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Jeromesville",
             "at_mi": 15.9,
             "off_mi": 4.84,
@@ -34556,6 +34876,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154190229, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Polk"
+          },
+          {
+            "name": "Grandpa's Cheesebarn (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.3,
+            "spoken": "Billboard: Grandpa's Cheesebarn is ahead. It offers cheese, fudge, smoked meat, and free samples arranged to defeat every promise you made at breakfast.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "West Salem",
@@ -36159,6 +36489,16 @@
             "spoken": "Passing Claridon"
           },
           {
+            "name": "Harding Home (from Columbus)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Warren Harding's home, ahead in Marion. In nineteen twenty he ran for president from his front porch, and the crowds came to him by the trainload.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Waldo",
             "at_mi": 12.15,
             "off_mi": 0.04,
@@ -37025,6 +37365,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154142171, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Caledonia"
+          },
+          {
+            "name": "Harding Home (from Findlay)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Warren Harding's home, ahead in Marion. In nineteen twenty he ran for president from his front porch, and the crowds came to him by the trainload.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Morral",
@@ -38199,6 +38549,16 @@
             "spoken": "Passing Morral"
           },
           {
+            "name": "Harding Home (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 86.6,
+            "spoken": "Billboard: Warren Harding's home, ahead in Marion. In nineteen twenty he ran for president from his front porch, and the crowds came to him by the trainload.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Claridon",
             "at_mi": 96.4,
             "off_mi": 4.1,
@@ -38206,6 +38566,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154027922, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Claridon"
+          },
+          {
+            "name": "Harding Home (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 100.6,
+            "spoken": "Billboard: Warren Harding's home, ahead in Marion. In nineteen twenty he ran for president from his front porch, and the crowds came to him by the trainload.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Olentangy River",
@@ -45155,6 +45525,16 @@
             "spoken": "Passing Philo"
           },
           {
+            "name": "Y-Bridge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Zanesville, ahead. The Y-Bridge splits in the middle of the river, so you can drive across and come off on the side you started from.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Adamsville",
             "at_mi": 9.8,
             "off_mi": 6.78,
@@ -45162,6 +45542,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153916931, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Adamsville"
+          },
+          {
+            "name": "Glenn Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.8,
+            "spoken": "Billboard: The John and Annie Glenn Museum, ahead in New Concord. The first American to orbit the Earth grew up here, and flew again at seventy-seven.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Norwich",
@@ -45180,6 +45570,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154402362, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing New Concord"
+          },
+          {
+            "name": "Glenn Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.3,
+            "spoken": "Billboard: The John and Annie Glenn Museum, next exit in New Concord. The first American to orbit the Earth grew up here, and flew again at seventy-seven.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cambridge",
@@ -45356,6 +45756,16 @@
             "kind": "point",
             "at_mi": 65.8,
             "spoken": "Crossing the Ohio River"
+          },
+          {
+            "name": "Wheeling Suspension Bridge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.6,
+            "spoken": "Billboard: Wheeling, ahead. Its suspension bridge was the longest in the world in eighteen forty-nine, and now it carries walkers only. The weight limit was two tons.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Colerain",

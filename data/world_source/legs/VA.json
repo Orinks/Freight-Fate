@@ -531,6 +531,16 @@
             "spoken": "Passing Damascus"
           },
           {
+            "name": "Barter Theatre (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Barter Theatre, ahead in Abingdon. In nineteen thirty-three a ticket was forty cents or the same in vegetables. Ham for Hamlet, they called it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Walnut Hill",
             "at_mi": 15.9,
             "off_mi": 4.12,
@@ -1353,6 +1363,16 @@
             "spoken": "Passing Parksley"
           },
           {
+            "name": "Chincoteague Island (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.7,
+            "spoken": "Billboard: Chincoteague Island, ahead, east of here on the coast. Every July its wild ponies swim the channel from Assateague. They never wait for the bridge.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Eastern Shore Railway Museum",
             "category": "museum",
             "kind": "point",
@@ -1482,6 +1502,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158298522, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Girdletree"
+          },
+          {
+            "name": "Chincoteague Island (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.5,
+            "spoken": "Billboard: Chincoteague Island, ahead, east of here on the coast. Every July its wild ponies swim the channel from Assateague. They never wait for the bridge.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Ocean City boardwalk (northbound)",
@@ -2558,6 +2588,16 @@
             "spoken": "Passing Sherando"
           },
           {
+            "name": "The Frontier Culture Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.5,
+            "spoken": "Billboard: The Frontier Culture Museum, ahead at Staunton. Farms from England, Ireland, Germany and West Africa, rebuilt in one Virginia valley. The cows came separately.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lyndhurst",
             "at_mi": 28.2,
             "off_mi": 2.13,
@@ -2606,6 +2646,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158276195, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Verona"
+          },
+          {
+            "name": "The Frontier Culture Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.5,
+            "spoken": "Billboard: The Frontier Culture Museum, ahead at Staunton. Farms from England, Ireland, Germany and West Africa, rebuilt in one Virginia valley. The cows came separately.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "New Hope",
@@ -6750,11 +6800,31 @@
             "spoken": "Passing Timberville"
           },
           {
+            "name": "Luray Caverns (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.8,
+            "spoken": "Billboard: Luray Caverns, next exit, east of New Market. An organ inside taps thirty-seven stalactites, the largest instrument in the world. Nobody has to carry it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "New Market Gap",
             "category": "mountain_pass",
             "kind": "point",
             "at_mi": 21.1,
             "spoken": "Approaching New Market Gap"
+          },
+          {
+            "name": "Luray Caverns (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.8,
+            "spoken": "Billboard: Luray Caverns, ahead, east of New Market. An organ inside taps thirty-seven stalactites, the largest instrument in the world. Nobody has to carry it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "North Fork Shenandoah River",
@@ -6883,6 +6953,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158370737, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Shenandoah Shores"
+          },
+          {
+            "name": "The Patsy Cline Historic House (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.0,
+            "spoken": "Billboard: The Patsy Cline Historic House, ahead in Winchester. She lived there from sixteen to twenty-one, longer than anywhere else. The town still claims her.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Shenandoah Farms",
@@ -11766,6 +11846,16 @@
             "spoken": "Passing Glade Spring"
           },
           {
+            "name": "Barter Theatre (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.5,
+            "spoken": "Billboard: Barter Theatre, ahead in Abingdon. In nineteen thirty-three a ticket was forty cents or the same in vegetables. Ham for Hamlet, they called it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Meadowview",
             "at_mi": 21.7,
             "off_mi": 0.29,
@@ -12421,6 +12511,16 @@
           }
         ],
         "landmarks": [
+          {
+            "name": "Battleship Wisconsin (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.3,
+            "spoken": "Billboard: The Battleship Wisconsin, ahead in Norfolk. Nearly nine hundred feet of battleship, open daily at Nauticus. Your trailer is fifty-three feet.",
+            "directions": [
+              "reverse"
+            ]
+          },
           {
             "name": "Entering the Chesapeake Bay Bridge-Tunnel",
             "category": "highway_marker",
@@ -13516,6 +13616,16 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
+          {
+            "name": "Battleship Wisconsin (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.0,
+            "spoken": "Billboard: The Battleship Wisconsin, ahead in Norfolk. Nearly nine hundred feet of battleship, open daily at Nauticus. Your trailer is fifty-three feet.",
+            "directions": [
+              "reverse"
+            ]
+          },
           {
             "name": "Elizabeth River",
             "category": "river",
@@ -16820,6 +16930,16 @@
         ],
         "landmarks": [
           {
+            "name": "Battleship Wisconsin (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Battleship Wisconsin, ahead in Norfolk. Nearly nine hundred feet of battleship, open daily at Nauticus. Your trailer is fifty-three feet.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Windsor",
             "at_mi": 21.0,
             "off_mi": 8.17,
@@ -18303,6 +18423,16 @@
         ],
         "landmarks": [
           {
+            "name": "Battleship Wisconsin (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.8,
+            "spoken": "Billboard: The Battleship Wisconsin, ahead in Norfolk. Nearly nine hundred feet of battleship, open daily at Nauticus. Your trailer is fifty-three feet.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lafayette River",
             "category": "river",
             "kind": "point",
@@ -18367,6 +18497,26 @@
             "kind": "point",
             "at_mi": 35.4,
             "spoken": "Crossing the Warwick River"
+          },
+          {
+            "name": "Colonial Williamsburg (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.9,
+            "spoken": "Billboard: Colonial Williamsburg, next exit. Eighteenth-century Virginia, open every day of the year. The people in three-cornered hats are on the clock.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Colonial Williamsburg (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.9,
+            "spoken": "Billboard: Colonial Williamsburg, next exit. Eighteenth-century Virginia, open every day of the year. The people in three-cornered hats are on the clock.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lightfoot",
@@ -19962,6 +20112,26 @@
             "kind": "point",
             "at_mi": 0.0,
             "spoken": "Hunter House Victorian Museum ahead"
+          },
+          {
+            "name": "King Neptune (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Virginia Beach, ahead. A thirty-four-foot bronze King Neptune stands on the boardwalk at Thirty-First Street. Twenty years, and he has never gone in.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Battleship Wisconsin (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Battleship Wisconsin, ahead in Norfolk. Nearly nine hundred feet of battleship, open daily at Nauticus. Your trailer is fifty-three feet.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "restrictions": [],
@@ -30896,6 +31066,26 @@
             "spoken": "Passing Lightfoot"
           },
           {
+            "name": "Colonial Williamsburg (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.8,
+            "spoken": "Billboard: Colonial Williamsburg, next exit. Eighteenth-century Virginia, open every day of the year. The people in three-cornered hats are on the clock.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Colonial Williamsburg (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.8,
+            "spoken": "Billboard: Colonial Williamsburg, next exit. Eighteenth-century Virginia, open every day of the year. The people in three-cornered hats are on the clock.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Gloucester Point",
             "at_mi": 57.7,
             "off_mi": 5.45,
@@ -30974,6 +31164,16 @@
             "kind": "point",
             "at_mi": 95.8,
             "spoken": "Crossing the Western Branch Lynnhaven River"
+          },
+          {
+            "name": "King Neptune (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 98.0,
+            "spoken": "Billboard: Virginia Beach, ahead. A thirty-four-foot bronze King Neptune stands on the boardwalk at Thirty-First Street. Twenty years, and he has never gone in.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "restrictions": [],
@@ -33296,6 +33496,16 @@
             "spoken": "Passing Cave Spring"
           },
           {
+            "name": "The Mill Mountain Star (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Roanoke, ahead, the Star City. The Mill Mountain Star is eighty-eight feet of neon, lit since nineteen forty-nine. It was meant to be temporary.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Roanoke River",
             "category": "river",
             "kind": "point",
@@ -33360,6 +33570,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154089196, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ferrum"
+          },
+          {
+            "name": "Moonshine Capital (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.7,
+            "spoken": "Billboard: Franklin County is the Moonshine Capital of the world. They ran white liquor out of these hills by the trunkload, and the fast driving used to outrun the law helped give birth to stock car racing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Moonshine Capital (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.7,
+            "spoken": "Billboard: Franklin County is the Moonshine Capital of the world. They ran white liquor out of these hills by the trunkload, and the fast driving used to outrun the law helped give birth to stock car racing.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Smith River",
@@ -34622,6 +34852,16 @@
             "spoken": "Passing Daleville"
           },
           {
+            "name": "The Mill Mountain Star (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Roanoke, ahead, the Star City. The Mill Mountain Star is eighty-eight feet of neon, lit since nineteen forty-nine. It was meant to be temporary.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Troutville",
             "at_mi": 11.2,
             "off_mi": 4.63,
@@ -34672,6 +34912,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158279711, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Moneta"
+          },
+          {
+            "name": "The National D-Day Memorial",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 28.9,
+            "spoken": "You are passing Bedford, home of the National D-Day Memorial. This small town lost more of its sons per capita on D-Day than any other in America.",
+            "directions": [
+              "both"
+            ]
           },
           {
             "name": "Little Otter River",
@@ -37881,6 +38131,16 @@
             "spoken": "Passing Cave Spring"
           },
           {
+            "name": "The Mill Mountain Star (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Roanoke, ahead, the Star City. The Mill Mountain Star is eighty-eight feet of neon, lit since nineteen forty-nine. It was meant to be temporary.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Blackwater River",
             "category": "river",
             "kind": "point",
@@ -37947,6 +38207,16 @@
             "spoken": "Passing Stanleytown"
           },
           {
+            "name": "Martinsville Speedway (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.5,
+            "spoken": "Billboard: Martinsville Speedway, ahead in Ridgeway. NASCAR has raced this half-mile paperclip every year since nineteen forty-nine. Your trailer would not make the turns.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fieldale",
             "at_mi": 49.09,
             "off_mi": 0.76,
@@ -37999,6 +38269,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158537588, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Ridgeway"
+          },
+          {
+            "name": "Martinsville Speedway (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.3,
+            "spoken": "Billboard: Martinsville Speedway, ahead in Ridgeway. NASCAR has raced this half-mile paperclip every year since nineteen forty-nine. Your trailer would not make the turns.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wentworth",
@@ -39572,6 +39852,16 @@
             "spoken": "Passing Hollins"
           },
           {
+            "name": "The Mill Mountain Star (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Roanoke, ahead, the Star City. The Mill Mountain Star is eighty-eight feet of neon, lit since nineteen forty-nine. It was meant to be temporary.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mason Cove",
             "at_mi": 11.2,
             "off_mi": 9.12,
@@ -39649,6 +39939,26 @@
             "spoken": "Crossing the James River"
           },
           {
+            "name": "Natural Bridge State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.6,
+            "spoken": "Billboard: Natural Bridge State Park, next exit. Thomas Jefferson bought it from King George the Third for twenty shillings. Nobody has topped that deal.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Natural Bridge State Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.6,
+            "spoken": "Billboard: Natural Bridge State Park, next exit. Thomas Jefferson bought it from King George the Third for twenty shillings. Nobody has topped that deal.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Natural Bridge Station",
             "at_mi": 40.7,
             "off_mi": 3.13,
@@ -39697,6 +40007,16 @@
             "kind": "point",
             "at_mi": 55.0,
             "spoken": "Crossing the Maury River"
+          },
+          {
+            "name": "The Frontier Culture Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 74.6,
+            "spoken": "Billboard: The Frontier Culture Museum, ahead at Staunton. Farms from England, Ireland, Germany and West Africa, rebuilt in one Virginia valley. The cows came separately.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Stuarts Draft",
@@ -41769,6 +42089,16 @@
             "spoken": "Passing Cave Spring"
           },
           {
+            "name": "The Mill Mountain Star (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Roanoke, ahead, the Star City. The Mill Mountain Star is eighty-eight feet of neon, lit since nineteen forty-nine. It was meant to be temporary.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Roanoke River",
             "category": "river",
             "kind": "point",
@@ -41824,6 +42154,16 @@
             "spoken": "Billboard: Franklin County is the Moonshine Capital of the world. They ran white liquor out of these hills by the trunkload, and the fast driving used to outrun the law helped give birth to stock car racing."
           },
           {
+            "name": "Moonshine Capital (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: Franklin County is the Moonshine Capital of the world. They ran white liquor out of these hills by the trunkload, and the fast driving used to outrun the law helped give birth to stock car racing.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Smith River",
             "category": "river",
             "kind": "point",
@@ -41865,6 +42205,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158222736, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Collinsville"
+          },
+          {
+            "name": "Martinsville Speedway (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.0,
+            "spoken": "Billboard: Martinsville Speedway, ahead in Ridgeway. NASCAR has raced this half-mile paperclip every year since nineteen forty-nine. Your trailer would not make the turns.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Fieldale",
@@ -41944,6 +42294,16 @@
             "spoken": "Crossing the Dan River"
           },
           {
+            "name": "Martinsville Speedway (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.7,
+            "spoken": "Billboard: Martinsville Speedway, ahead in Ridgeway. NASCAR has raced this half-mile paperclip every year since nineteen forty-nine. Your trailer would not make the turns.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Stoneville",
             "at_mi": 69.1,
             "off_mi": 1.09,
@@ -42014,6 +42374,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154015551, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Walnut Cove"
+          },
+          {
+            "name": "Old Salem (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 94.1,
+            "spoken": "Billboard: Old Salem, ahead in Winston-Salem. A Moravian town from seventeen sixty-six, and its bakery still bakes in a wood-fired oven. Arrive hungry.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Walkertown",
@@ -42996,6 +43366,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157548083, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lyndhurst"
+          },
+          {
+            "name": "The Frontier Culture Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.2,
+            "spoken": "Billboard: The Frontier Culture Museum, ahead at Staunton. Farms from England, Ireland, Germany and West Africa, rebuilt in one Virginia valley. The cows came separately.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sherando",
@@ -44296,6 +44676,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158479810, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Harriston"
+          },
+          {
+            "name": "The Frontier Culture Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.3,
+            "spoken": "Billboard: The Frontier Culture Museum, ahead at Staunton. Farms from England, Ireland, Germany and West Africa, rebuilt in one Virginia valley. The cows came separately.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Grottoes",
@@ -46418,6 +46808,16 @@
         ],
         "landmarks": [
           {
+            "name": "King Neptune (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Virginia Beach, ahead. A thirty-four-foot bronze King Neptune stands on the boardwalk at Thirty-First Street. Twenty years, and he has never gone in.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Southern Branch Elizabeth River",
             "category": "river",
             "kind": "point",
@@ -47749,6 +48149,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158638583, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Summit Point"
+          },
+          {
+            "name": "The Patsy Cline Historic House (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Patsy Cline Historic House, ahead in Winchester. She lived there from sixteen to twenty-one, longer than anywhere else. The town still claims her.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Middleway",
@@ -50631,6 +51041,16 @@
             "kind": "point",
             "at_mi": 51.1,
             "spoken": "Crossing the North Fork Roanoke River"
+          },
+          {
+            "name": "The Mill Mountain Star (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.6,
+            "spoken": "Billboard: Roanoke, ahead, the Star City. The Mill Mountain Star is eighty-eight feet of neon, lit since nineteen forty-nine. It was meant to be temporary.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Catawba",

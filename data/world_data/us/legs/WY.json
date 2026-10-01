@@ -739,6 +739,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "The Occidental Hotel (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The Occidental Hotel, ahead in Buffalo. Owen Wister found characters for The Virginian in its lobby. The saloon kept its bullet holes, for the atmosphere.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Powder River",
             "category": "river",
             "kind": "point",
@@ -3562,6 +3572,16 @@
             "spoken": "Passing Red Butte"
           },
           {
+            "name": "Trails Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The National Historic Trails Interpretive Center, ahead in Casper. Half a million emigrants followed the river through here on the way west. Most of them walked.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Midwest",
             "at_mi": 41.3,
             "off_mi": 5.28,
@@ -3594,6 +3614,46 @@
             "spoken": "Crossing the Middle Fork Powder River"
           },
           {
+            "name": "The Occidental Hotel (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 103.0,
+            "spoken": "Billboard: The Occidental Hotel, ahead in Buffalo. Owen Wister found characters for The Virginian in its lobby. The saloon kept its bullet holes, for the atmosphere.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Occidental Hotel (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 121.5,
+            "spoken": "Billboard: The Occidental Hotel, ahead in Buffalo. Owen Wister found characters for The Virginian in its lobby. The saloon kept its bullet holes, for the atmosphere.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Fort Phil Kearny (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 124.5,
+            "spoken": "Billboard: Fort Phil Kearny State Historic Site, next exit. The Bozeman Trail fort Red Cloud's alliance fought to close. In eighteen sixty-eight, the army left.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Fort Phil Kearny (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 128.5,
+            "spoken": "Billboard: Fort Phil Kearny State Historic Site, next exit. The Bozeman Trail fort Red Cloud's alliance fought to close. In eighteen sixty-eight, the army left.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Story",
             "at_mi": 132.6,
             "off_mi": 2.72,
@@ -3601,6 +3661,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151907521, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Story"
+          },
+          {
+            "name": "King's Saddlery (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 140.0,
+            "spoken": "Billboard: King's Saddlery, ahead in Sheridan. Ropes made on site and a museum of nearly six hundred saddles. Your seat has never felt so plain.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "King's Saddlery (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 156.0,
+            "spoken": "Billboard: King's Saddlery, ahead in Sheridan. Ropes made on site and a museum of nearly six hundred saddles. Your seat has never felt so plain.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Dayton",
@@ -3626,6 +3706,16 @@
             "spoken": "Crossing the Little Bighorn River"
           },
           {
+            "name": "Little Bighorn Battlefield (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 207.5,
+            "spoken": "Billboard: Little Bighorn Battlefield National Monument, ahead at Crow Agency. Where the Lakota, Northern Cheyenne and Arapaho defeated Custer's Seventh Cavalry in June of eighteen seventy-six.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Crow Agency",
             "at_mi": 218.1,
             "off_mi": 0.08,
@@ -3633,6 +3723,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151422867, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Crow Agency"
+          },
+          {
+            "name": "Little Bighorn Battlefield (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 226.0,
+            "spoken": "Billboard: Little Bighorn Battlefield National Monument, ahead at Crow Agency. Where the Lakota, Northern Cheyenne and Arapaho defeated Custer's Seventh Cavalry in June of eighteen seventy-six.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bighorn River",
@@ -5243,6 +5343,16 @@
             "spoken": "Passing Red Butte"
           },
           {
+            "name": "Trails Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The National Historic Trails Interpretive Center, ahead in Casper. Half a million emigrants followed the river through here on the way west. Most of them walked.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Midwest",
             "at_mi": 41.2,
             "off_mi": 5.28,
@@ -5280,6 +5390,16 @@
             "kind": "point",
             "at_mi": 70.1,
             "spoken": "Crossing the Middle Fork Powder River"
+          },
+          {
+            "name": "The Occidental Hotel (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 103.0,
+            "spoken": "Billboard: The Occidental Hotel, ahead in Buffalo. Owen Wister found characters for The Virginian in its lobby. The saloon kept its bullet holes, for the atmosphere.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "interchanges": [
@@ -7149,6 +7269,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151375953, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Red Butte"
+          },
+          {
+            "name": "Trails Center (from Gillette)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The National Historic Trails Interpretive Center, ahead in Casper. Half a million emigrants followed the river through here on the way west. Most of them walked.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Edgerton",
@@ -9038,6 +9168,16 @@
             "spoken": "Passing Ranchettes"
           },
           {
+            "name": "Old West Museum (from Casper)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Chugwater",
             "at_mi": 44.9,
             "off_mi": 0.44,
@@ -9045,6 +9185,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151884194, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Chugwater"
+          },
+          {
+            "name": "Oregon Trail Ruts (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.0,
+            "spoken": "Billboard: The Oregon Trail Ruts, east of the next exit at Guernsey. Wagon wheels wore them five feet deep into sandstone. Your tires lack ambition.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Oregon Trail Ruts (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 83.6,
+            "spoken": "Billboard: The Oregon Trail Ruts, east of the next exit at Guernsey. Wagon wheels wore them five feet deep into sandstone. Your tires lack ambition.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "North Laramie River",
@@ -9070,11 +9230,31 @@
             "spoken": "Entering Glendo"
           },
           {
+            "name": "Douglas jackalope (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 118.0,
+            "spoken": "Billboard: Douglas, ahead, home of the jackalope, the antlered rabbit a local taxidermist dreamed up. Several statues in town. Wild sightings remain unconfirmed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "North Platte River",
             "category": "river",
             "kind": "point",
             "at_mi": 124.4,
             "spoken": "Crossing the North Platte River"
+          },
+          {
+            "name": "Douglas jackalope (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 139.0,
+            "spoken": "Billboard: Douglas, ahead, home of the jackalope, the antlered rabbit a local taxidermist dreamed up. Several statues in town. Wild sightings remain unconfirmed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Rolling Hills",
@@ -9084,6 +9264,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151910230, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rolling Hills"
+          },
+          {
+            "name": "Trails Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 168.0,
+            "spoken": "Billboard: The National Historic Trails Interpretive Center, ahead in Casper. Half a million emigrants followed the river through here on the way west. Most of them walked.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Casper Mountain",
@@ -11810,6 +12000,16 @@
             "spoken": "Passing Ranchettes"
           },
           {
+            "name": "Old West Museum (from Denver)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Cache la Poudre River",
             "category": "river",
             "kind": "point",
@@ -13060,6 +13260,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151965788, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ranchettes"
+          },
+          {
+            "name": "Old West Museum (from Laramie)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Medicine Bow-Routt National Forest",
@@ -18962,6 +19172,16 @@
             "spoken": "Passing Ranchettes"
           },
           {
+            "name": "Old West Museum (from Salt Lake City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Tree in the Rock",
             "category": "highway_marker",
             "kind": "point",
@@ -19008,6 +19228,16 @@
             "spoken": "Crossing the North Platte River"
           },
           {
+            "name": "Wyoming Frontier Prison (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 138.0,
+            "spoken": "Billboard: The Wyoming Frontier Prison, ahead in Rawlins. The penitentiary opened in nineteen oh-one; guided tours take you inside. They also let you out.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sinclair",
             "at_mi": 142.6,
             "off_mi": 0.3,
@@ -19015,6 +19245,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151335232, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Sinclair"
+          },
+          {
+            "name": "Wyoming Frontier Prison (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 159.0,
+            "spoken": "Billboard: The Wyoming Frontier Prison, ahead in Rawlins. The penitentiary opened in nineteen oh-one; guided tours take you inside. They also let you out.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Superior",
@@ -19102,6 +19342,16 @@
             ]
           },
           {
+            "name": "Fort Bridger (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 319.0,
+            "spoken": "Billboard: Historic Fort Bridger, ahead. Jim Bridger opened a trading post here in eighteen forty-three to supply the wagon trains. Business has slowed since.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lyman",
             "at_mi": 320.9,
             "off_mi": 2.74,
@@ -19118,6 +19368,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150947193, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mountain View"
+          },
+          {
+            "name": "Fort Bridger (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 336.0,
+            "spoken": "Billboard: Historic Fort Bridger, ahead. Jim Bridger opened a trading post here in eighteen forty-three to supply the wagon trains. Business has slowed since.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Bear River State Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 347.0,
+            "spoken": "Billboard: Bear River State Park, ahead in Evanston. A small bison herd and a few bull elk, right by the trail. The elk are bachelors by policy.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Bear River State Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 364.0,
+            "spoken": "Billboard: Bear River State Park, ahead in Evanston. A small bison herd and a few bull elk, right by the trail. The elk are bachelors by policy.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bear River",
@@ -19170,6 +19450,16 @@
             "spoken": "Passing Hideout"
           },
           {
+            "name": "Utah Olympic Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 413.7,
+            "spoken": "Billboard: Utah Olympic Park, next exit. The ski jumps and bobsled track from the two thousand two Winter Games, still in use. Mind your own downhill.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Park City",
             "at_mi": 413.9,
             "off_mi": 5.36,
@@ -19195,6 +19485,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150968168, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brighton"
+          },
+          {
+            "name": "Utah Olympic Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 417.1,
+            "spoken": "Billboard: Utah Olympic Park, next exit. The ski jumps and bobsled track from the two thousand two Winter Games, still in use. Mind your own downhill.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Holladay",
@@ -21106,6 +21406,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151965788, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ranchettes"
+          },
+          {
+            "name": "Old West Museum (from Wheatland)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Chugwater",
@@ -23615,6 +23925,16 @@
             "spoken": "Passing Rozet"
           },
           {
+            "name": "Devils Tower (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.0,
+            "spoken": "Billboard: Devils Tower, next exit, then about thirty miles north. Proclaimed the nation's first national monument in nineteen oh-six, and sacred to many Plains tribes.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pine Haven",
             "at_mi": 36.1,
             "off_mi": 5.7,
@@ -23629,6 +23949,16 @@
             "kind": "point",
             "at_mi": 37.2,
             "spoken": "Crossing the Belle Fourche River"
+          },
+          {
+            "name": "Devils Tower (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.3,
+            "spoken": "Billboard: Devils Tower, next exit, then about thirty miles north. Proclaimed the nation's first national monument in nineteen oh-six, and sacred to many Plains tribes.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Crook County Museum and Art Gallery",
@@ -25031,6 +25361,16 @@
             "kind": "point",
             "at_mi": 86.3,
             "spoken": "Crossing the North Platte River"
+          },
+          {
+            "name": "Wyoming Frontier Prison (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 90.0,
+            "spoken": "Billboard: The Wyoming Frontier Prison, ahead in Rawlins. The penitentiary opened in nineteen oh-one; guided tours take you inside. They also let you out.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "interchanges": [
@@ -27929,6 +28269,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151335232, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sinclair"
+          },
+          {
+            "name": "Wyoming Frontier Prison (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Wyoming Frontier Prison, ahead in Rawlins. The penitentiary opened in nineteen oh-one; guided tours take you inside. They also let you out.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Superior",
@@ -31400,6 +31750,16 @@
             "spoken": "Passing Superior"
           },
           {
+            "name": "Wyoming Frontier Prison (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 98.0,
+            "spoken": "Billboard: The Wyoming Frontier Prison, ahead in Rawlins. The penitentiary opened in nineteen oh-one; guided tours take you inside. They also let you out.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sinclair",
             "at_mi": 114.7,
             "off_mi": 0.31,
@@ -31407,6 +31767,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151335232, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Sinclair"
+          },
+          {
+            "name": "Wyoming Frontier Prison (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 119.0,
+            "spoken": "Billboard: The Wyoming Frontier Prison, ahead in Rawlins. The penitentiary opened in nineteen oh-one; guided tours take you inside. They also let you out.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "North Platte River",
@@ -31460,6 +31830,16 @@
             "kind": "point",
             "at_mi": 217.6,
             "spoken": "Crossing the Laramie River"
+          },
+          {
+            "name": "Old West Museum (from Rock Springs)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 249.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Ranchettes",
@@ -34993,6 +35373,16 @@
             "spoken": "Passing Lyman"
           },
           {
+            "name": "Fort Bridger (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.5,
+            "spoken": "Billboard: Historic Fort Bridger, ahead. Jim Bridger opened a trading post here in eighteen forty-three to supply the wagon trains. Business has slowed since.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Mountain View",
             "at_mi": 66.7,
             "off_mi": 5.71,
@@ -35002,11 +35392,41 @@
             "spoken": "Passing Mountain View"
           },
           {
+            "name": "Fort Bridger (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.5,
+            "spoken": "Billboard: Historic Fort Bridger, ahead. Jim Bridger opened a trading post here in eighteen forty-three to supply the wagon trains. Business has slowed since.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Bear River State Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 92.0,
+            "spoken": "Billboard: Bear River State Park, ahead in Evanston. A small bison herd and a few bull elk, right by the trail. The elk are bachelors by policy.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Bear River",
             "category": "river",
             "kind": "point",
             "at_mi": 98.2,
             "spoken": "Crossing the Bear River"
+          },
+          {
+            "name": "Bear River State Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 109.0,
+            "spoken": "Billboard: Bear River State Park, ahead in Evanston. A small bison herd and a few bull elk, right by the trail. The elk are bachelors by policy.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Henefer",
@@ -36375,6 +36795,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "King's Saddlery (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: King's Saddlery, ahead in Sheridan. Ropes made on site and a museum of nearly six hundred saddles. Your seat has never felt so plain.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Story",
             "at_mi": 15.6,
             "off_mi": 2.71,
@@ -36382,6 +36812,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151907521, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Story"
+          },
+          {
+            "name": "Fort Phil Kearny (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.5,
+            "spoken": "Billboard: Fort Phil Kearny State Historic Site, next exit. The Bozeman Trail fort Red Cloud's alliance fought to close. In eighteen sixty-eight, the army left.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Fort Phil Kearny (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.5,
+            "spoken": "Billboard: Fort Phil Kearny State Historic Site, next exit. The Bozeman Trail fort Red Cloud's alliance fought to close. In eighteen sixty-eight, the army left.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Occidental Hotel (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.0,
+            "spoken": "Billboard: The Occidental Hotel, ahead in Buffalo. Owen Wister found characters for The Virginian in its lobby. The saloon kept its bullet holes, for the atmosphere.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -37577,6 +38037,16 @@
         ],
         "landmarks": [
           {
+            "name": "Oregon Trail Ruts (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.5,
+            "spoken": "Billboard: The Oregon Trail Ruts, east of the next exit at Guernsey. Wagon wheels wore them five feet deep into sandstone. Your tires lack ambition.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "North Laramie River",
             "category": "river",
             "kind": "point",
@@ -37589,6 +38059,16 @@
             "kind": "point",
             "at_mi": 12.0,
             "spoken": "Crossing the Laramie River"
+          },
+          {
+            "name": "Oregon Trail Ruts (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.8,
+            "spoken": "Billboard: The Oregon Trail Ruts, east of the next exit at Guernsey. Wagon wheels wore them five feet deep into sandstone. Your tires lack ambition.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Glendo",
