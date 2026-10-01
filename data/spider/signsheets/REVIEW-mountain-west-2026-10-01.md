@@ -141,11 +141,11 @@ Wyoming Frontier Prison
 
 Cheyenne Frontier Days Old West Museum
 
-14. Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred and sixty strong. Every one turns tighter than you.
+14. Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.
 
 Oregon Trail Ruts State Historic Site
 
-15. Billboard: The Oregon Trail Ruts, east of the next exit at Guernsey. Wagon wheels wore them five feet deep into sandstone. Mind your own tread.
+15. Billboard: The Oregon Trail Ruts, east of the next exit at Guernsey. Wagon wheels wore them five feet deep into sandstone. Your tires lack ambition.
 
 Douglas, home of the jackalope
 
@@ -175,11 +175,11 @@ Devils Tower National Monument
 
 Lincoln's 50,000 Silver Dollar Bar
 
-22. Billboard: Lincoln's Fifty Thousand Silver Dollar Bar, next exit in Haugan. The walls hold more than fifty thousand donated dollars. Please do not ask for change.
+22. Billboard: Lincoln's Fifty Thousand Silver Dollar Bar, next exit in Haugan. The walls hold more than fifty thousand donated dollars. Making change here is frowned upon.
 
 Old Montana Prison
 
-23. Billboard: The Old Montana Prison, next exit in Deer Lodge. It held inmates for over a century and now holds five museums. Visitors may leave.
+23. Billboard: The Old Montana Prison, next exit in Deer Lodge. It held inmates for over a century and now holds five museums. Friendlier guests now.
 
 World Museum of Mining
 
@@ -335,7 +335,7 @@ Mission San Xavier del Bac
 
 Hi Jolly's tomb
 
-61. Billboard: Hi Jolly's tomb, ahead in Quartzsite. A stone pyramid topped with a copper camel, for the Army's camel driver. The Army really tried camels.
+61. Billboard: Hi Jolly's tomb, ahead in Quartzsite. A stone pyramid topped with a copper camel, for the Army's camel driver. The Army did try camels.
 
 Yuma Territorial Prison State Historic Park
 
@@ -361,7 +361,7 @@ The Blue Hole
 
 Sandia Peak Tramway
 
-67. Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Your grades are gentler.
+67. Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.
 
 Acoma Sky City
 

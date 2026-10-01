@@ -91,73 +91,73 @@ before their tram exit.
 - treatment: billboard
 - leg: albuquerque_nm_us -> tucumcari_nm_us
 - at_mi: 3.5
-- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Your grades are gentler.
+- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.
 
 ### Sandia Peak Tramway (from Tucumcari)
 - treatment: billboard
 - leg: tucumcari_nm_us -> albuquerque_nm_us
 - at_mi: 154.8
-- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Your grades are gentler.
+- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.
 
 ### Sandia Peak Tramway (from Amarillo)
 - treatment: billboard
 - leg: amarillo_tx_us -> albuquerque_nm_us
 - at_mi: 266.7
-- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Your grades are gentler.
+- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.
 
 ### Sandia Peak Tramway (from Albuquerque)
 - treatment: billboard
 - leg: albuquerque_nm_us -> amarillo_tx_us
 - at_mi: 3.5
-- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Your grades are gentler.
+- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.
 
 ### Sandia Peak Tramway (from Dallas)
 - treatment: billboard
 - leg: dallas_tx_us -> albuquerque_nm_us
 - at_mi: 631.0
-- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Your grades are gentler.
+- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.
 
 ### Sandia Peak Tramway (from Albuquerque)
 - treatment: billboard
 - leg: albuquerque_nm_us -> dallas_tx_us
 - at_mi: 3.5
-- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Your grades are gentler.
+- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.
 
 ### Sandia Peak Tramway (from Colorado Springs)
 - treatment: billboard
 - leg: colorado_springs_co_us -> albuquerque_nm_us
 - at_mi: 359.2
-- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Your grades are gentler.
+- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.
 
 ### Sandia Peak Tramway (from Albuquerque)
 - treatment: billboard
 - leg: albuquerque_nm_us -> colorado_springs_co_us
 - at_mi: 3.5
-- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Your grades are gentler.
+- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.
 
 ### Sandia Peak Tramway (from Denver)
 - treatment: billboard
 - leg: denver_co_us -> albuquerque_nm_us
 - at_mi: 401.2
-- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Your grades are gentler.
+- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.
 
 ### Sandia Peak Tramway (from Albuquerque)
 - treatment: billboard
 - leg: albuquerque_nm_us -> denver_co_us
 - at_mi: 3.5
-- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Your grades are gentler.
+- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.
 
 ### Sandia Peak Tramway (from Albuquerque)
 - treatment: billboard
 - leg: albuquerque_nm_us -> santa_fe_nm_us
 - at_mi: 3.5
-- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Your grades are gentler.
+- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.
 
 ### Sandia Peak Tramway (from Santa Fe)
 - treatment: billboard
 - leg: santa_fe_nm_us -> albuquerque_nm_us
 - at_mi: 45.1
-- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Your grades are gentler.
+- spoken: Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.
 
 ## Acoma Sky City (I-40 Exits 102 and 108)
 
