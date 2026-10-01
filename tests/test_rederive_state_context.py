@@ -98,6 +98,19 @@ def test_sequence_equal_state_context_updates_only_above_minimum_shift(monkeypat
     )
 
 
+def test_existing_state_pair_keeps_its_curated_crossing_place(monkeypatch):
+    leg = _leg()
+    leg["corridor"]["state_crossings"][0]["place"] = "the Colorado River near Blythe"
+    data = _data(leg)
+    _install_geometry(monkeypatch)
+    monkeypatch.setattr(rsc, "derive_state_context", lambda *_args: _context(at_mi=13.0))
+
+    report = rsc.process_world(data, [], min_shift=1.0)
+
+    assert len(report["changed"]) == 1
+    assert leg["corridor"]["state_crossings"][0]["place"] == "the Colorado River near Blythe"
+
+
 def test_sequence_equal_boundary_below_minimum_shift_is_not_updated(monkeypatch):
     leg = _leg()
     before = copy.deepcopy(leg["corridor"])
@@ -290,3 +303,7 @@ def test_shared_vertex_hits_are_grouped_into_one_event():
 
     assert len(events) == 1
     assert events[0]["states"] == {"Texas", "Oklahoma"}
+
+
+def test_first_road_ref_uses_the_first_osm_ref():
+    assert rsc._first_road_ref("I 94; I 80") == "I-94"

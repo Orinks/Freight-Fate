@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
@@ -28,10 +29,25 @@ from world_source import load_world, save_world  # noqa: E402
 
 ROUTE_POINT_AGREEMENT_MI = 5.0
 BOUNDARIES_CACHE = ROOT / ".route-cache" / "osm_state_boundaries.json"
+DEFAULT_PBF = Path.home() / "osm" / "us-latest.osm.pbf"
 GRID_CELL_DEG = 0.05
 EVENT_MERGE_MI = 20.0 / 1609.344
 INTERSECTION_EPSILON = 1e-10
 PARALLEL_EPSILON = 1e-16
+ROAD_CLASSES = {"motorway", "trunk", "primary"}
+ROAD_MATCH_M = 150.0
+ROAD_GRID_CELL_DEG = 0.01
+REROUTED_LEGS = {
+    "buffalo_ny_us:new_york_ny_us",
+    "rochester_ny_us:new_york_ny_us",
+    "dallas_tx_us:st_louis_mo_us",
+    "washington_dc_us:charlottesville_va_us",
+    "norfolk_va_us:petersburg_va_us",
+    "binghamton_ny_us:utica_ny_us",
+    "green_bay_wi_us:grand_rapids_mi_us",
+    "harrisburg_pa_us:wilmington_de_us",
+    "indianapolis_in_us:nashville_tn_us",
+}
 STALE_PUBLICAMUNDI_SOURCE = (
     "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. "
     "state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, "
@@ -285,6 +301,125 @@ def _boundary_events(
     return events
 
 
+def _coordinate_at_geometry_mile(geometry: list[list[float]], target_mi: float) -> list[float]:
+    cumulative_mi = [0.0]
+    for first, second in zip(geometry, geometry[1:], strict=False):
+        length_mi = (
+            scs._haversine_m(float(first[1]), float(first[0]), float(second[1]), float(second[0]))
+            / 1609.344
+        )
+        cumulative_mi.append(cumulative_mi[-1] + length_mi)
+    if target_mi <= 0.0:
+        return [float(geometry[0][0]), float(geometry[0][1])]
+    for index, (first, second) in enumerate(zip(geometry, geometry[1:], strict=False)):
+        start_mi, end_mi = cumulative_mi[index : index + 2]
+        if target_mi > end_mi:
+            continue
+        ratio = (target_mi - start_mi) / (end_mi - start_mi) if end_mi > start_mi else 0.0
+        lon1, lat1 = float(first[0]), float(first[1])
+        lon2 = _unwrap_near(float(second[0]), lon1)
+        return [lon1 + (lon2 - lon1) * ratio, lat1 + (float(second[1]) - lat1) * ratio]
+    return [float(geometry[-1][0]), float(geometry[-1][1])]
+
+
+def _first_road_ref(value: str) -> str:
+    ref = re.split(r"[;/]", value, maxsplit=1)[0].strip()
+    return re.sub(r"^([A-Za-z]{1,3})\s+(?=\d)", r"\1-", ref)
+
+
+def nearest_osm_highway_refs(
+    pbf_path: Path, points: list[list[float]]
+) -> dict[int, tuple[int, str, float]]:
+    """Find the nearest motorway, trunk, or primary way to each [lon, lat] point."""
+    import osmium
+
+    if not points:
+        return {}
+
+    point_grid: dict[tuple[int, int], list[int]] = defaultdict(list)
+    for point_id, (longitude, latitude) in enumerate(points):
+        point_grid[
+            (
+                math.floor(float(longitude) / ROAD_GRID_CELL_DEG),
+                math.floor(float(latitude) / ROAD_GRID_CELL_DEG),
+            )
+        ].append(point_id)
+
+    best: dict[int, tuple[float, int, str]] = {}
+    processor = (
+        osmium.FileProcessor(
+            str(pbf_path),
+            entities=osmium.osm.osm_entity_bits.NODE | osmium.osm.osm_entity_bits.WAY,
+        )
+        .with_locations("sparse_file_array")
+        .with_filter(osmium.filter.KeyFilter("highway"))
+    )
+    for way in processor:
+        if way.tags.get("highway") not in ROAD_CLASSES:
+            continue
+        coordinates = []
+        for node in way.nodes:
+            location = node.location
+            if not location.valid():
+                coordinates = []
+                break
+            coordinates.append((float(location.lon), float(location.lat)))
+        if len(coordinates) < 2:
+            continue
+
+        way_id = int(way.id)
+        ref = _first_road_ref(str(way.tags.get("ref", "") or ""))
+        for (lon1, lat1), (lon2, lat2) in zip(coordinates, coordinates[1:], strict=False):
+            max_abs_lat = max(abs(lat1), abs(lat2))
+            lon_padding = ROAD_MATCH_M / (111_320.0 * max(0.1, math.cos(math.radians(max_abs_lat))))
+            lat_padding = ROAD_MATCH_M / 110_574.0
+            x_min = math.floor((min(lon1, lon2) - lon_padding) / ROAD_GRID_CELL_DEG)
+            x_max = math.floor((max(lon1, lon2) + lon_padding) / ROAD_GRID_CELL_DEG)
+            y_min = math.floor((min(lat1, lat2) - lat_padding) / ROAD_GRID_CELL_DEG)
+            y_max = math.floor((max(lat1, lat2) + lat_padding) / ROAD_GRID_CELL_DEG)
+            candidates = {
+                point_id
+                for cell_x in range(x_min, x_max + 1)
+                for cell_y in range(y_min, y_max + 1)
+                for point_id in point_grid.get((cell_x, cell_y), ())
+            }
+            for point_id in candidates:
+                lon, lat = map(float, points[point_id])
+                cos_lat = math.cos(math.radians(lat))
+                segment_x = (lon2 - lon1) * 111_320.0 * cos_lat
+                segment_y = (lat2 - lat1) * 110_574.0
+                point_x = (lon - lon1) * 111_320.0 * cos_lat
+                point_y = (lat - lat1) * 110_574.0
+                segment_length_sq = segment_x * segment_x + segment_y * segment_y
+                ratio = (
+                    max(
+                        0.0,
+                        min(
+                            1.0,
+                            (point_x * segment_x + point_y * segment_y) / segment_length_sq,
+                        ),
+                    )
+                    if segment_length_sq
+                    else 0.0
+                )
+                distance_m = math.hypot(
+                    point_x - ratio * segment_x,
+                    point_y - ratio * segment_y,
+                )
+                if distance_m > ROAD_MATCH_M:
+                    continue
+                prior = best.get(point_id)
+                candidate = (distance_m, way_id, ref)
+                if prior is None or candidate[:2] < prior[:2]:
+                    best[point_id] = candidate
+
+    return {
+        point_id: (way_id, ref, distance_m)
+        for point_id, (distance_m, way_id, ref) in best.items()
+        if ref
+    }
+
+
 def derive_state_context(
     data: dict[str, Any],
     leg: dict[str, Any],
@@ -297,7 +432,12 @@ def derive_state_context(
         ers.spoken_state(data, data["cities"][leg["to"]]["state"]),
     )
     if len(geometry) < 2:
-        return {"state_crossings": [], "state_miles": [], "warnings": []}
+        return {
+            "state_crossings": [],
+            "crossing_coordinates": [],
+            "state_miles": [],
+            "warnings": [],
+        }
 
     membership = _initial_membership(float(geometry[0][0]), float(geometry[0][1]), boundaries)
     warnings = []
@@ -366,8 +506,17 @@ def derive_state_context(
     if sequence[-1]["state"] != endpoint_states[1]:
         sequence.append({"state": endpoint_states[1], "at_mi": leg_miles})
     sequence = ers.coalesce_short_states(sequence, leg_miles)
+    sequence_crossings = [
+        current
+        for previous, current in zip(sequence, sequence[1:], strict=False)
+        if previous["state"] != current["state"]
+    ]
     return {
         "state_crossings": ers.crossings_from_sequence(sequence, leg_miles, leg["highway"]),
+        "crossing_coordinates": [
+            _coordinate_at_geometry_mile(geometry, float(item["at_mi"]) / scale)
+            for item in sequence_crossings
+        ],
         "state_miles": ers.state_miles_from_sequence(sequence, leg_miles, endpoint_states),
         "warnings": warnings,
     }
@@ -379,6 +528,7 @@ def process_world(
     *,
     min_shift: float = 1.0,
     only: set[str] | None = None,
+    pbf_path: Path | None = None,
 ) -> dict[str, Any]:
     report: dict[str, Any] = {
         "legs_total": len(data.get("legs", ())),
@@ -388,12 +538,15 @@ def process_world(
         "sequence_differs": [],
         "changed": [],
         "warnings": [],
+        "place_fallbacks": [],
     }
     boundary_index = (
         state_boundaries
         if isinstance(state_boundaries, StateBoundaryIndex)
         else build_boundary_index(state_boundaries)
     )
+    prepared = []
+    road_points: list[list[float]] = []
     for leg in data.get("legs", ()):
         leg_id = _leg_id(leg)
         coords, skip_reason = _dense_geometry(leg)
@@ -441,22 +594,108 @@ def process_world(
             )
 
         shift = _max_crossing_shift(old_crossings, new_crossings)
-        should_update = selected or (sequence_matches and (shift >= min_shift or stale_source))
+        rerouted = leg_id in REROUTED_LEGS and bool(new_crossings)
+        should_update = (
+            selected or rerouted or (sequence_matches and (shift >= min_shift or stale_source))
+        )
         if not should_update:
             continue
 
-        if old_crossings == new_crossings and corridor.get("state_miles") == new_state_miles:
-            continue
-        leg.setdefault("corridor", {})["state_crossings"] = new_crossings
-        leg["corridor"]["state_miles"] = new_state_miles
-        report["changed"].append(
+        old_by_pair: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
+        for item in old_crossings:
+            old_by_pair[(str(item.get("from_state", "")), str(item.get("state", "")))].append(item)
+
+        prepared_crossings = []
+        crossing_coordinates = derived.get("crossing_coordinates", [])
+        for crossing_index, crossing in enumerate(new_crossings):
+            pair = (str(crossing["from_state"]), str(crossing["state"]))
+            old_match = old_by_pair[pair].pop(0) if old_by_pair.get(pair) else None
+            needs_road_ref = rerouted or old_match is None
+            point_id = None
+            if needs_road_ref and crossing_index < len(crossing_coordinates):
+                point_id = len(road_points)
+                road_points.append(crossing_coordinates[crossing_index])
+            prepared_crossings.append(
+                {
+                    "crossing": crossing,
+                    "old": old_match,
+                    "needs_road_ref": needs_road_ref,
+                    "point_id": point_id,
+                }
+            )
+
+        prepared.append(
             {
-                "leg": leg_id,
+                "leg": leg,
+                "leg_id": leg_id,
+                "corridor": corridor,
                 "old_crossings": old_crossings,
-                "new_crossings": new_crossings,
                 "old_state_miles": old_state_miles,
+                "new_crossings": new_crossings,
+                "prepared_crossings": prepared_crossings,
                 "new_state_miles": new_state_miles,
                 "sequence_matches": sequence_matches,
+            }
+        )
+
+    road_refs = {}
+    if road_points and pbf_path is not None:
+        print(
+            f"Looking up OSM road refs for {len(road_points)} state crossings in {pbf_path}.",
+            flush=True,
+        )
+        road_refs = nearest_osm_highway_refs(pbf_path, road_points)
+
+    for item in prepared:
+        new_crossings = []
+        for crossing_info in item["prepared_crossings"]:
+            crossing = dict(crossing_info["crossing"])
+            old_match = crossing_info["old"]
+            place = crossing["place"]
+            source = STATE_CONTEXT_SOURCE
+            point_id = crossing_info["point_id"]
+            road = road_refs.get(point_id) if point_id is not None else None
+            if road:
+                way_id, ref, _distance_m = road
+                place = f"{crossing['from_state']}-{crossing['state']} line on {ref}"
+                source += f"; place's road read from OpenStreetMap way {way_id} ref"
+            elif crossing_info["needs_road_ref"]:
+                if old_match is not None:
+                    place = old_match.get("place", place)
+                if point_id is None or pbf_path is None or road is None:
+                    fallback = {
+                        "leg": item["leg_id"],
+                        "from_state": crossing["from_state"],
+                        "state": crossing["state"],
+                        "place": place
+                        if old_match is not None
+                        else f"{crossing['from_state']}-{crossing['state']} line on "
+                        f"{item['leg'].get('highway', '')}",
+                    }
+                    report["place_fallbacks"].append(fallback)
+                    if old_match is None:
+                        place = fallback["place"]
+            elif old_match is not None:
+                place = old_match.get("place", place)
+            crossing["place"] = place
+            crossing["source"] = source
+            new_crossings.append(crossing)
+
+        if (
+            item["old_crossings"] == new_crossings
+            and item["corridor"].get("state_miles") == item["new_state_miles"]
+        ):
+            continue
+        item["leg"].setdefault("corridor", {})["state_crossings"] = new_crossings
+        item["leg"]["corridor"]["state_miles"] = item["new_state_miles"]
+        report["changed"].append(
+            {
+                "leg": item["leg_id"],
+                "old_crossings": item["old_crossings"],
+                "new_crossings": new_crossings,
+                "old_state_miles": item["old_state_miles"],
+                "new_state_miles": item["new_state_miles"],
+                "sequence_matches": item["sequence_matches"],
             }
         )
     return report
@@ -496,6 +735,16 @@ def _format_report(report: dict[str, Any]) -> str:
     )
     if report["warnings"]:
         lines.extend(["Boundary warnings:", *(f"  {item}" for item in report["warnings"])])
+    if report["place_fallbacks"]:
+        lines.extend(
+            [
+                "Crossing place fallbacks (no referenced motorway/trunk/primary way within 150 m):",
+                *(
+                    f"  {item['leg']} {item['from_state']}->{item['state']}: {item['place']}"
+                    for item in report["place_fallbacks"]
+                ),
+            ]
+        )
     return "\n".join(lines)
 
 
@@ -504,6 +753,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--only", help='semicolon-separated "from:to" leg ids')
     parser.add_argument("--min-shift", type=float, default=1.0)
     parser.add_argument("--cache", type=Path, default=BOUNDARIES_CACHE)
+    parser.add_argument("--pbf", type=Path, default=DEFAULT_PBF)
     parser.add_argument("--write", action="store_true", help="save changed world source")
     args = parser.parse_args(argv)
 
@@ -518,6 +768,7 @@ def main(argv: list[str] | None = None) -> int:
         state_boundaries,
         min_shift=args.min_shift,
         only=parse_only(args.only),
+        pbf_path=args.pbf,
     )
     print(_format_report(report))
     if args.write:
