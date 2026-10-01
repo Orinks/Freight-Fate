@@ -2,16 +2,18 @@
 
 Drafts for the owner's review; nothing here is baked. Sheets so far:
 `nebraska-2026-10-01.md`, `wyoming-2026-10-01.md`,
-`montana-2026-10-01.md`, and `mountain-west-reverse-copies-2026-10-01.md`.
+`montana-2026-10-01.md`, `utah-2026-10-01.md`, and
+`mountain-west-reverse-copies-2026-10-01.md`.
 
 ## Counts
 
 - Nebraska: 10 attractions, 46 signs, 10 new lines.
 - Wyoming: 11 attractions, 83 signs, 11 new lines.
 - Montana: 13 attractions, 51 signs, 13 new lines.
+- Utah: 12 attractions, 84 signs, 12 new lines.
 - Reused-copy signs (older approved copy, other directions and sibling
-  legs): 25, in Nebraska (17) and Montana (8).
-- Total so far: 34 attractions, 180 new-copy signs, 34 new lines, 25
+  legs): 34, in Nebraska (17), Montana (8) and Utah (9).
+- Total so far: 46 attractions, 264 new-copy signs, 46 new lines, 34
   reused-copy signs.
 
 Every sheet dry-runs clean through `tools/bake_billboards.py` (no
@@ -187,3 +189,53 @@ Kootenai Falls
 Grizzly and Wolf Discovery Center
 
 34. Billboard: The Grizzly and Wolf Discovery Center, ahead in West Yellowstone. Grizzlies and gray wolves that cannot live in the wild. These bears skip hibernation.
+
+### Utah
+
+St. George Dinosaur Discovery Site
+
+35. Billboard: The Dinosaur Discovery Site, ahead in Saint George, where a retired eye doctor found dinosaur tracks in two thousand. Good eyes run in the profession.
+
+Kolob Canyons, Zion National Park
+
+36. Billboard: The Kolob Canyons of Zion National Park, next exit. A five-mile drive into red finger canyons. The crowds all went to the other entrance.
+
+Cove Fort
+
+37. Billboard: Historic Cove Fort, ahead. An eighteen sixty-seven way station of black volcanic rock, halfway between Fillmore and Beaver. Rest areas were sturdier then.
+
+Territorial Statehouse
+
+38. Billboard: The Territorial Statehouse, ahead in Fillmore. Utah's first capitol was built one wing at a time. The first wing was also the last.
+
+Fremont Indian State Park
+
+39. Billboard: Fremont Indian State Park, ahead. The largest known Fremont village turned up when this interstate was built. Road work has rarely been so interesting.
+
+Museum of Ancient Life
+
+40. Billboard: The Museum of Ancient Life, ahead in Lehi, with one of the world's largest collections of mounted dinosaur skeletons. Extinction was never this tidy.
+
+Hill Aerospace Museum
+
+41. Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.
+
+Golden Spike National Historical Park
+
+42. Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.
+
+Bonneville Salt Flats
+
+43. Billboard: The Bonneville Salt Flats, next exit. A wheel-driven car hit four hundred forty-nine miles an hour out there. Dispatch would still call you late.
+
+Utah Olympic Park
+
+44. Billboard: Utah Olympic Park, next exit. The ski jumps and bobsled track from the two thousand two Winter Games, still in use. Mind your own downhill.
+
+Heber Valley Railroad
+
+45. Billboard: The Heber Valley Railroad, ahead in Heber City. A ninety-minute round trip into Provo Canyon. Locals called it the Heber Creeper, and it never argued.
+
+John Wesley Powell River History Museum
+
+46. Billboard: The John Wesley Powell River History Museum, ahead in Green River. In eighteen sixty-nine, a one-armed major boated these unmapped canyons. Then he mapped them.

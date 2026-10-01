@@ -171,3 +171,65 @@ Bozeman and Havre.
 - leg: glasgow_mt_us -> havre_mt_us
 - at_mi: 150.0
 - spoken: Billboard: Havre is ahead. After a fire, the town rebuilt underground and ran its shops, along with several vices, in tunnels beneath the sidewalks. You can still tour them.
+
+## Utah
+
+The Shakespeare festival sign stood only southbound on I-15 from
+Richfield; its copy names no direction, so it goes on every other road
+into Cedar City. The Tree of Utah sign stood only on the San Francisco
+leg eastbound; these add the West Wendover leg eastbound and both legs
+westbound.
+
+### Utah's Shakespeare (northbound)
+- treatment: billboard
+- leg: saint_george_ut_us -> cedar_city_ut_us
+- at_mi: 44.0
+- spoken: Billboard: Cedar City hosts a Tony-winning Shakespeare festival in the red-rock desert. It is also the gateway to Zion, Bryce, and the pink cliffs of Cedar Breaks.
+
+### Utah's Shakespeare (northbound)
+- treatment: billboard
+- leg: las_vegas_nv_us -> provo_ut_us
+- at_mi: 161.3
+- spoken: Billboard: Cedar City hosts a Tony-winning Shakespeare festival in the red-rock desert. It is also the gateway to Zion, Bryce, and the pink cliffs of Cedar Breaks.
+
+### Utah's Shakespeare (northbound)
+- treatment: billboard
+- leg: las_vegas_nv_us -> salt_lake_city_ut_us
+- at_mi: 160.8
+- spoken: Billboard: Cedar City hosts a Tony-winning Shakespeare festival in the red-rock desert. It is also the gateway to Zion, Bryce, and the pink cliffs of Cedar Breaks.
+
+### Utah's Shakespeare (southbound)
+- treatment: billboard
+- leg: provo_ut_us -> cedar_city_ut_us
+- at_mi: 199.0
+- spoken: Billboard: Cedar City hosts a Tony-winning Shakespeare festival in the red-rock desert. It is also the gateway to Zion, Bryce, and the pink cliffs of Cedar Breaks.
+
+### Utah's Shakespeare (southbound)
+- treatment: billboard
+- leg: provo_ut_us -> las_vegas_nv_us
+- at_mi: 197.7
+- spoken: Billboard: Cedar City hosts a Tony-winning Shakespeare festival in the red-rock desert. It is also the gateway to Zion, Bryce, and the pink cliffs of Cedar Breaks.
+
+### Utah's Shakespeare (southbound)
+- treatment: billboard
+- leg: salt_lake_city_ut_us -> las_vegas_nv_us
+- at_mi: 241.2
+- spoken: Billboard: Cedar City hosts a Tony-winning Shakespeare festival in the red-rock desert. It is also the gateway to Zion, Bryce, and the pink cliffs of Cedar Breaks.
+
+### Tree of Utah (eastbound)
+- treatment: billboard
+- leg: west_wendover_nv_us -> salt_lake_city_ut_us
+- at_mi: 19.2
+- spoken: Billboard: The Tree of Utah stands ahead on the salt flats, an eighty-seven-foot concrete tree sprouting from the middle of nowhere. How do you suppose this happened?
+
+### Tree of Utah (westbound)
+- treatment: billboard
+- leg: salt_lake_city_ut_us -> west_wendover_nv_us
+- at_mi: 85.8
+- spoken: Billboard: The Tree of Utah stands ahead on the salt flats, an eighty-seven-foot concrete tree sprouting from the middle of nowhere. How do you suppose this happened?
+
+### Tree of Utah (westbound)
+- treatment: billboard
+- leg: salt_lake_city_ut_us -> san_francisco_ca_us
+- at_mi: 85.9
+- spoken: Billboard: The Tree of Utah stands ahead on the salt flats, an eighty-seven-foot concrete tree sprouting from the middle of nowhere. How do you suppose this happened?
