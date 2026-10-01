@@ -45940,15 +45940,18 @@
         "state_miles": [
           {
             "state": "Oklahoma",
-            "miles": 98.0
+            "miles": 98.0,
+            "source": "derived 2026-10-01: differences of this leg's own state_crossings at_mi values (98.0 Kansas, 271.9 Missouri) and its 272-mile length; crossings as computed earlier from route geometry and public state boundary GeoJSON."
           },
           {
             "state": "Kansas",
-            "miles": 173.9
+            "miles": 173.9,
+            "source": "derived 2026-10-01: differences of this leg's own state_crossings at_mi values (98.0 Kansas, 271.9 Missouri) and its 272-mile length; crossings as computed earlier from route geometry and public state boundary GeoJSON."
           },
           {
             "state": "Missouri",
-            "miles": 0.1
+            "miles": 0.1,
+            "source": "derived 2026-10-01: differences of this leg's own state_crossings at_mi values (98.0 Kansas, 271.9 Missouri) and its 272-mile length; crossings as computed earlier from route geometry and public state boundary GeoJSON."
           }
         ],
         "state_crossings": [
