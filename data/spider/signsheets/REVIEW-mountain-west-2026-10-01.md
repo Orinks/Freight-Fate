@@ -1,16 +1,17 @@
 # Review: Mountain West billboard drafts -- 2026-10-01
 
 Drafts for the owner's review; nothing here is baked. Sheets so far:
-`nebraska-2026-10-01.md` and `mountain-west-reverse-copies-2026-10-01.md`.
+`nebraska-2026-10-01.md`, `wyoming-2026-10-01.md`, and
+`mountain-west-reverse-copies-2026-10-01.md`.
 
 ## Counts
 
-| State | Attractions | Signs | New lines |
-| --- | --- | --- | --- |
-| Nebraska | 10 | 46 | 10 |
-
-Reused-copy signs (older approved copy, other directions and sibling
-legs): 17, all Nebraska so far.
+- Nebraska: 10 attractions, 46 signs, 10 new lines.
+- Wyoming: 11 attractions, 83 signs, 11 new lines.
+- Reused-copy signs (older approved copy, other directions and sibling
+  legs): 17, all in Nebraska so far.
+- Total so far: 21 attractions, 129 new-copy signs, 21 new lines, 17
+  reused-copy signs.
 
 Every sheet dry-runs clean through `tools/bake_billboards.py` (no
 `--write`), and a spacing check across all the sheets together finds no
@@ -22,6 +23,14 @@ sign within 2.2 miles of another callout heard the same way.
    scenic byways. Recommendation: as drafted, nothing on US 30 (Lincoln
    Highway), US 385 (Gold Rush) or US 26 (Western Trails); Interstate 80 is
    not a byway and carries the signs.
+2. **Wyoming law.** The outdoor advertising act allows signs beside the
+   interstates in commercial and industrial areas, and none of the state's
+   scenic byways is on a leg. Recommendation: sign as drafted.
+3. **Two plain lines with no joke**, for a battle site and a sacred one:
+   Fort Phil Kearny and Devils Tower. Recommendation: keep them plain.
+4. **The Old West Museum is signed on all fourteen legs into Cheyenne.**
+   Recommendation: keep; a driver only ever hears the one on the road he is
+   on. Trim to the Interstate 25 and 80 approaches if it reads as too many.
 
 ## New lines
 
@@ -66,3 +75,49 @@ Front Street, Ogallala
 Homestead National Historical Park
 
 10. Billboard: Homestead National Historical Park, ahead at Beatrice, on the first homestead claim, filed ten minutes after midnight on New Year's Day. Some people cannot wait.
+
+### Wyoming
+
+Bear River State Park
+
+11. Billboard: Bear River State Park, ahead in Evanston. A small bison herd and a few bull elk, right by the trail. The elk are bachelors by policy.
+
+Fort Bridger State Historic Site
+
+12. Billboard: Historic Fort Bridger, ahead. Jim Bridger opened a trading post here in eighteen forty-three to supply the wagon trains. Business has slowed since.
+
+Wyoming Frontier Prison
+
+13. Billboard: The Wyoming Frontier Prison, ahead in Rawlins. The penitentiary opened in nineteen oh-one; guided tours take you inside. They also let you out.
+
+Cheyenne Frontier Days Old West Museum
+
+14. Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred and sixty strong. Every one turns tighter than you.
+
+Oregon Trail Ruts State Historic Site
+
+15. Billboard: The Oregon Trail Ruts, east of the next exit at Guernsey. Wagon wheels wore them five feet deep into sandstone. Mind your own tread.
+
+Douglas, home of the jackalope
+
+16. Billboard: Douglas, ahead, home of the jackalope, the antlered rabbit a local taxidermist dreamed up. Several statues in town. Wild sightings remain unconfirmed.
+
+National Historic Trails Interpretive Center
+
+17. Billboard: The National Historic Trails Interpretive Center, ahead in Casper. Half a million emigrants followed the river through here on the way west. Most of them walked.
+
+The Occidental Hotel
+
+18. Billboard: The Occidental Hotel, ahead in Buffalo. Owen Wister found characters for The Virginian in its lobby. The saloon kept its bullet holes, for the atmosphere.
+
+Fort Phil Kearny State Historic Site
+
+19. Billboard: Fort Phil Kearny State Historic Site, next exit. The Bozeman Trail fort Red Cloud's alliance fought to close. In eighteen sixty-eight, the army left.
+
+King's Saddlery
+
+20. Billboard: King's Saddlery, ahead in Sheridan. Ropes made on site and a museum of nearly six hundred saddles. Your seat has never felt so plain.
+
+Devils Tower National Monument
+
+21. Billboard: Devils Tower, next exit, then about thirty miles north. Proclaimed the nation's first national monument in nineteen oh-six, and sacred to many Plains tribes.
