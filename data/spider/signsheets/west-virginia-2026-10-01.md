@@ -35,43 +35,43 @@ Virginia State Capitol"). Signed on every leg into Charleston.
 - treatment: billboard
 - leg: beckley_wv_us -> charleston_wv_us
 - at_mi: 55.4
-- spoken: Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Nobody here brings it up. Much.
+- spoken: Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Locals bring this up often.
 
 ### State Capitol (from Huntington)
 - treatment: billboard
 - leg: huntington_wv_us -> charleston_wv_us
 - at_mi: 48.9
-- spoken: Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Nobody here brings it up. Much.
+- spoken: Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Locals bring this up often.
 
 ### State Capitol (from Morgantown)
 - treatment: billboard
 - leg: morgantown_wv_us -> charleston_wv_us
 - at_mi: 145.6
-- spoken: Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Nobody here brings it up. Much.
+- spoken: Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Locals bring this up often.
 
 ### State Capitol (from Parkersburg)
 - treatment: billboard
 - leg: parkersburg_wv_us -> charleston_wv_us
 - at_mi: 70.5
-- spoken: Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Nobody here brings it up. Much.
+- spoken: Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Locals bring this up often.
 
 ### State Capitol (from Pittsburgh)
 - treatment: billboard
 - leg: pittsburgh_pa_us -> charleston_wv_us
 - at_mi: 221.7
-- spoken: Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Nobody here brings it up. Much.
+- spoken: Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Locals bring this up often.
 
 ### State Capitol (from Richmond)
 - treatment: billboard
 - leg: richmond_va_us -> charleston_wv_us
 - at_mi: 312.4
-- spoken: Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Nobody here brings it up. Much.
+- spoken: Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Locals bring this up often.
 
 ### State Capitol (from Roanoke)
 - treatment: billboard
 - leg: roanoke_va_us -> charleston_wv_us
 - at_mi: 176.4
-- spoken: Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Nobody here brings it up. Much.
+- spoken: Billboard: Charleston, ahead. The gold dome on the West Virginia capitol stands a little taller than the one in Washington. Locals bring this up often.
 
 ## Tamarack, Beckley (I-64/I-77 Exit 45)
 
