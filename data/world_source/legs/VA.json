@@ -12799,6 +12799,36 @@
             "lat": 37.3043,
             "lon": -77.2872,
             "source": "Real town on US-460 between norfolk_va_us and petersburg_va_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.65 mi off-route at closest approach)."
+          },
+          {
+            "name": "Windsor",
+            "at_mi": 0.0,
+            "type": "place",
+            "state": "Virginia",
+            "highway": "US-460",
+            "lat": 36.80848,
+            "lon": -76.74412,
+            "source": "Real town on US-460; coordinates read 2026-10-01 from OpenStreetMap relation 207013 via Nominatim; at_mi derived by projecting them onto the leg's route geometry."
+          },
+          {
+            "name": "Wakefield",
+            "at_mi": 0.0,
+            "type": "place",
+            "state": "Virginia",
+            "highway": "US-460",
+            "lat": 36.96821,
+            "lon": -76.98969,
+            "source": "Real town on US-460; coordinates read 2026-10-01 from OpenStreetMap relation 207029 via Nominatim; at_mi derived by projecting them onto the leg's route geometry."
+          },
+          {
+            "name": "Waverly",
+            "at_mi": 0.0,
+            "type": "place",
+            "state": "Virginia",
+            "highway": "US-460",
+            "lat": 37.03591,
+            "lon": -77.09541,
+            "source": "Real town on US-460; coordinates read 2026-10-01 from OpenStreetMap relation 207030 via Nominatim; at_mi derived by projecting them onto the leg's route geometry."
           }
         ],
         "tollway_detected": true,
@@ -14263,7 +14293,24 @@
           "vehicle_access": "bobtail_only"
         }
       ],
-      "lanes": 1
+      "lanes": 1,
+      "route_via": [
+        {
+          "lat": 36.80729,
+          "lon": -76.74133,
+          "note": "Windsor on US-460 -- pins this leg to US-460 through Windsor, Wakefield and Waverly, the road it is labelled and its geometry drives. Its route points and checkpoints had followed VA-10 through Smithfield and Hopewell. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to US-460."
+        },
+        {
+          "lat": 36.97339,
+          "lon": -76.98741,
+          "note": "Wakefield on US-460. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to US-460."
+        },
+        {
+          "lat": 37.03296,
+          "lon": -77.10031,
+          "note": "Waverly on US-460. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to US-460."
+        }
+      ]
     },
     {
       "from": "norfolk_va_us",

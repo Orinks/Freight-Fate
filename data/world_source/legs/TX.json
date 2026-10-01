@@ -78648,19 +78648,44 @@
       ],
       "route_via": [
         {
-          "lat": 35.4676,
-          "lon": -97.5164,
-          "note": "Oklahoma City on I-35/I-44"
+          "lat": 34.17013,
+          "lon": -97.14326,
+          "note": "Ardmore on I-35 -- pins this leg to I-35 to Oklahoma City, then I-44 through Tulsa and Joplin, which its route points and checkpoints already follow. The old route ran I-30 and US-67 through Arkansas. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-35."
         },
         {
-          "lat": 36.154,
-          "lon": -95.9928,
-          "note": "Tulsa on I-44"
+          "lat": 35.50004,
+          "lon": -97.50316,
+          "note": "Oklahoma City on I-44. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-44."
         },
         {
-          "lat": 37.2153,
-          "lon": -93.2982,
-          "note": "Springfield, MO on I-44 -- pins the run to the I-44 route (I-35 to OKC, then I-44 through Tulsa, Joplin, Springfield, Rolla). ORS otherwise prefers I-30/US-67 through Little Rock, which strands this leg's curated I-44 stops."
+          "lat": 36.09042,
+          "lon": -95.94999,
+          "note": "Tulsa on I-44. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-44."
+        },
+        {
+          "lat": 36.6218,
+          "lon": -95.15111,
+          "note": "Vinita on I-44. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-44."
+        },
+        {
+          "lat": 37.03953,
+          "lon": -94.50987,
+          "note": "Joplin on I-44. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-44."
+        },
+        {
+          "lat": 37.25021,
+          "lon": -93.29,
+          "note": "Springfield on I-44. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-44."
+        },
+        {
+          "lat": 37.96439,
+          "lon": -91.76154,
+          "note": "Rolla on I-44. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-44."
+        },
+        {
+          "lat": 38.21576,
+          "lon": -91.16718,
+          "note": "Sullivan on I-44. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-44."
         }
       ],
       "divided": true,

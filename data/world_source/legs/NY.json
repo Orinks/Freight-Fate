@@ -18410,7 +18410,34 @@
         }
       ],
       "divided": false,
-      "lanes": 1
+      "lanes": 1,
+      "route_via": [
+        {
+          "lat": 42.32969,
+          "lon": -75.77031,
+          "note": "Greene on NY-12 -- pins this leg to NY-12 through Greene, Oxford, Norwich and Sherburne, as its checkpoints say. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to NY-12."
+        },
+        {
+          "lat": 42.43992,
+          "lon": -75.59987,
+          "note": "Oxford on NY-12. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to NY-12."
+        },
+        {
+          "lat": 42.52981,
+          "lon": -75.52366,
+          "note": "Norwich on NY-12. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to NY-12."
+        },
+        {
+          "lat": 42.68007,
+          "lon": -75.49964,
+          "note": "Sherburne on NY-12. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to NY-12."
+        },
+        {
+          "lat": 42.931,
+          "lon": -75.38027,
+          "note": "Waterville on NY-12. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to NY-12."
+        }
+      ]
     },
     {
       "from": "buffalo_ny_us",
@@ -30575,19 +30602,34 @@
       ],
       "route_via": [
         {
-          "lat": 43.0481,
-          "lon": -76.1474,
-          "note": "Syracuse on I-90 (NY Thruway)"
+          "lat": 43.09222,
+          "lon": -76.14719,
+          "note": "Syracuse on I-90 -- pins this leg to the New York State Thruway: I-90 to Albany, then I-87 down the west bank of the Hudson. The old route left it at Syracuse for I-81 and NY-17. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-90."
         },
         {
-          "lat": 42.6526,
-          "lon": -73.7562,
-          "note": "Albany on I-90 (NY Thruway)"
+          "lat": 43.11943,
+          "lon": -75.22396,
+          "note": "Utica on I-90. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-90."
         },
         {
-          "lat": 41.927,
-          "lon": -73.9974,
-          "note": "Kingston on I-87 (NY Thruway) -- pins the run to the Thruway (I-90 east to Albany, I-87 south to New York). ORS otherwise takes the Binghamton/Scranton shortcut, off the curated Thruway service-area stops."
+          "lat": 42.93989,
+          "lon": -74.19001,
+          "note": "Amsterdam on I-90. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-90."
+        },
+        {
+          "lat": 41.94971,
+          "lon": -74.02812,
+          "note": "Kingston on I-87. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-87."
+        },
+        {
+          "lat": 41.08045,
+          "lon": -73.92125,
+          "note": "Nyack on I-87. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-87."
+        },
+        {
+          "lat": 40.93341,
+          "lon": -73.87712,
+          "note": "Yonkers on I-87. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-87."
         }
       ],
       "lanes": 2
@@ -55041,19 +55083,34 @@
       ],
       "route_via": [
         {
-          "lat": 43.0481,
-          "lon": -76.1474,
-          "note": "Syracuse on I-90 (NY Thruway)"
+          "lat": 43.09222,
+          "lon": -76.14719,
+          "note": "Syracuse on I-90 -- pins this leg to the New York State Thruway: I-90 to Albany, then I-87 down the west bank of the Hudson. The old route crossed to the east bank at Newburgh. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-90."
         },
         {
-          "lat": 42.6526,
-          "lon": -73.7562,
-          "note": "Albany on I-90 (NY Thruway)"
+          "lat": 43.11943,
+          "lon": -75.22396,
+          "note": "Utica on I-90. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-90."
         },
         {
-          "lat": 41.927,
-          "lon": -73.9974,
-          "note": "Kingston on I-87 (NY Thruway) -- pins the run to the Thruway (I-90 east to Albany, I-87 south to New York). ORS otherwise takes the Binghamton/Scranton shortcut, off the curated Thruway service-area stops."
+          "lat": 42.93989,
+          "lon": -74.19001,
+          "note": "Amsterdam on I-90. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-90."
+        },
+        {
+          "lat": 41.94971,
+          "lon": -74.02812,
+          "note": "Kingston on I-87. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-87."
+        },
+        {
+          "lat": 41.08045,
+          "lon": -73.92125,
+          "note": "Nyack on I-87. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-87."
+        },
+        {
+          "lat": 40.93341,
+          "lon": -73.87712,
+          "note": "Yonkers on I-87. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-87."
         }
       ],
       "lanes": 2

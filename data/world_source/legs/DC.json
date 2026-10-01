@@ -4430,14 +4430,24 @@
       ],
       "route_via": [
         {
-          "lat": 38.7135,
-          "lon": -77.7952,
-          "note": "Warrenton on US-29"
+          "lat": 38.70032,
+          "lon": -77.7894,
+          "note": "Warrenton on US-29 -- pins this leg to US-29 through Warrenton, Culpeper and Madison, as its route points and checkpoints say. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to US-29."
         },
         {
-          "lat": 38.4735,
-          "lon": -77.9961,
-          "note": "Culpeper on US-29"
+          "lat": 38.48088,
+          "lon": -77.98027,
+          "note": "Culpeper on US-29. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to US-29."
+        },
+        {
+          "lat": 38.37919,
+          "lon": -78.2587,
+          "note": "Madison on US-29. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to US-29."
+        },
+        {
+          "lat": 38.23042,
+          "lon": -78.37102,
+          "note": "Ruckersville on US-29. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to US-29."
         }
       ],
       "divided": true,

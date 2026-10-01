@@ -15266,7 +15266,49 @@
       },
       "terrain": "flat",
       "divided": true,
-      "lanes": 2
+      "lanes": 2,
+      "route_via": [
+        {
+          "lat": 44.10001,
+          "lon": -87.72984,
+          "note": "Manitowoc on I-43 -- pins this leg to I-43 to Milwaukee, I-94 through Chicago on the Dan Ryan and around the lake, then I-196, as its route points and checkpoints say. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-43."
+        },
+        {
+          "lat": 42.73001,
+          "lon": -87.95382,
+          "note": "Racine on I-94. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-94."
+        },
+        {
+          "lat": 42.54999,
+          "lon": -87.95229,
+          "note": "Kenosha on I-94. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-94."
+        },
+        {
+          "lat": 41.79999,
+          "lon": -87.63091,
+          "note": "Chicago (Dan Ryan) on I-94. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-94."
+        },
+        {
+          "lat": 41.57994,
+          "lon": -87.35624,
+          "note": "Gary on I-94. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-94."
+        },
+        {
+          "lat": 42.10017,
+          "lon": -86.43437,
+          "note": "Benton Harbor on I-94. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-94."
+        },
+        {
+          "lat": 42.40002,
+          "lon": -86.25221,
+          "note": "South Haven on I-196. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-196."
+        },
+        {
+          "lat": 42.78319,
+          "lon": -86.07002,
+          "note": "Holland on I-196. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to I-196."
+        }
+      ]
     },
     {
       "from": "green_bay_wi_us",

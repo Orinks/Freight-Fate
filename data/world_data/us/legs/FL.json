@@ -27945,13 +27945,6 @@
             "spoken": "Passing Doral"
           },
           {
-            "name": "Entering the Florida Keys on the Overseas Highway",
-            "category": "highway_marker",
-            "kind": "point",
-            "at_mi": 12.0,
-            "spoken": "Entering the Florida Keys on the Overseas Highway"
-          },
-          {
             "name": "Monkey Jungle (southbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -28019,13 +28012,6 @@
             "spoken": "Passing Goulds"
           },
           {
-            "name": "Christ of the Abyss",
-            "category": "highway_marker",
-            "kind": "point",
-            "at_mi": 22.0,
-            "spoken": "Off Key Largo, a bronze statue of Christ stands on the sea floor with arms raised. Divers visit it twenty-five feet below the surface."
-          },
-          {
             "name": "Princeton",
             "at_mi": 25.8,
             "off_mi": 1.11,
@@ -28079,21 +28065,24 @@
             "spoken": "Entering Florida Keys National Marine Sanctuary"
           },
           {
-            "name": "The Hurricane Monument",
+            "name": "Entering the Florida Keys on the Overseas Highway",
             "category": "highway_marker",
             "kind": "point",
-            "at_mi": 51.0,
-            "spoken": "At Islamorada, a coral monument marks the hundreds lost in the Labor Day hurricane of nineteen thirty-five, the strongest storm ever to strike the United States."
+            "at_mi": 53.4,
+            "spoken": "Entering the Florida Keys on the Overseas Highway",
+            "lat": 25.18241,
+            "lon": -80.38488,
+            "source": "Coordinates read 2026-10-01 from OpenStreetMap way 996764860, Jewfish Creek Bridge onto Key Largo via Nominatim; derived: at_mi = its projection onto the leg's archived dense route geometry (0.0 mi off the road)."
           },
           {
-            "name": "Giant Lobster Betsy",
+            "name": "Christ of the Abyss",
             "category": "highway_marker",
             "kind": "point",
-            "at_mi": 55.0,
-            "spoken": "Betsy the giant lobster is ahead. Forty feet of fiberglass crustacean guards an art village, because the Keys do not believe seafood should remain normal-sized.",
-            "directions": [
-              "forward"
-            ]
+            "at_mi": 54.6,
+            "spoken": "Off Key Largo, a bronze statue of Christ stands on the sea floor with arms raised. Divers visit it twenty-five feet below the surface.",
+            "lat": 25.1234,
+            "lon": -80.29709,
+            "source": "Coordinates read 2026-10-01 from OpenStreetMap node 6565241385, offshore of Key Largo via Nominatim; derived: at_mi = its projection onto the leg's archived dense route geometry (5.9 mi off the road)."
           },
           {
             "name": "African Queen",
@@ -28106,34 +28095,53 @@
             ]
           },
           {
+            "name": "Giant Lobster Betsy",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 71.1,
+            "spoken": "Betsy the giant lobster is ahead. Forty feet of fiberglass crustacean guards an art village, because the Keys do not believe seafood should remain normal-sized.",
+            "directions": [
+              "forward"
+            ],
+            "lat": 24.95933,
+            "lon": -80.57195,
+            "source": "Coordinates read 2026-10-01 from OpenStreetMap node 4972396622, Rain Barrel Village via Nominatim; derived: at_mi = 74.1 (projection onto the leg's archived dense route geometry, 0.0 mi off the road) - 3.0 mi assumed lead for a forward-only 'is ahead' callout."
+          },
+          {
             "name": "Theater of the Sea",
             "category": "highway_marker",
             "kind": "point",
-            "at_mi": 66.0,
+            "at_mi": 73.4,
             "spoken": "Theater of the Sea is ahead in Islamorada. Visitors have swum with dolphins in this old coral quarry since the nineteen forties.",
             "directions": [
               "forward"
-            ]
+            ],
+            "lat": 24.94443,
+            "lon": -80.60359,
+            "source": "Coordinates read 2026-10-01 from OpenStreetMap way 301762362 via Nominatim; derived: at_mi = 76.4 (projection onto the leg's archived dense route geometry, 0.0 mi off the road) - 3.0 mi assumed lead for a forward-only 'is ahead' callout."
+          },
+          {
+            "name": "The Hurricane Monument",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 79.1,
+            "spoken": "At Islamorada, a coral monument marks the hundreds lost in the Labor Day hurricane of nineteen thirty-five, the strongest storm ever to strike the United States.",
+            "lat": 24.91712,
+            "lon": -80.63597,
+            "source": "Coordinates read 2026-10-01 from OpenStreetMap node 4723846456, Florida Keys Memorial via Nominatim; derived: at_mi = its projection onto the leg's archived dense route geometry (0.0 mi off the road)."
           },
           {
             "name": "Robbie's of Islamorada",
             "category": "highway_marker",
             "kind": "point",
-            "at_mi": 72.0,
+            "at_mi": 80.3,
             "spoken": "Robbie's is ahead. You can feed giant tarpon by hand from the dock, but mind your fingers and the pelicans, who cheat.",
             "directions": [
               "forward"
-            ]
-          },
-          {
-            "name": "Seven Mile Bridge",
-            "category": "highway_marker",
-            "kind": "point",
-            "at_mi": 106.0,
-            "spoken": "Seven Mile Bridge is ahead. For seven miles, you get nothing but water on both sides, while the old bridge runs alongside, open again to walkers and bikes as far as Pigeon Key.",
-            "directions": [
-              "forward"
-            ]
+            ],
+            "lat": 24.88274,
+            "lon": -80.69074,
+            "source": "Coordinates read 2026-10-01 from OpenStreetMap node 3058878543 via Nominatim; derived: at_mi = 83.3 (projection onto the leg's archived dense route geometry, 0.0 mi off the road) - 3.0 mi assumed lead for a forward-only 'is ahead' callout."
           },
           {
             "name": "Crane Point Museum",
@@ -28143,38 +28151,63 @@
             "spoken": "Crane Point Museum ahead"
           },
           {
-            "name": "Bahia Honda",
+            "name": "Seven Mile Bridge",
             "category": "highway_marker",
             "kind": "point",
-            "at_mi": 111.5,
-            "spoken": "Bahia Honda is ahead, with one of the best beaches in the Keys beneath the broken back of Flagler's old railroad bridge.",
+            "at_mi": 111.2,
+            "spoken": "Seven Mile Bridge is ahead. For seven miles, you get nothing but water on both sides, while the old bridge runs alongside, open again to walkers and bikes as far as Pigeon Key.",
             "directions": [
               "forward"
-            ]
-          },
-          {
-            "name": "No Name Pub",
-            "category": "highway_marker",
-            "kind": "point",
-            "at_mi": 114.0,
-            "spoken": "No Name Pub is on Big Pine Key, with walls papered in thousands of dollar bills. Watch for Key deer in the road; they are about the size of dogs and considerably less interested in traffic law.",
-            "directions": [
-              "forward"
-            ]
-          },
-          {
-            "name": "National Key Deer Refuge",
-            "category": "highway_marker",
-            "kind": "point",
-            "at_mi": 116.0,
-            "spoken": "Big Pine Key is home to the Key deer, found nowhere else on Earth. Slow down, because they are small and they do not look both ways."
+            ],
+            "lat": 24.70634,
+            "lon": -81.12845,
+            "source": "Coordinates read 2026-10-01 from OpenStreetMap east end of way 996764821 via Nominatim; derived: at_mi = 114.2 (projection onto the leg's archived dense route geometry, 0.0 mi off the road) - 3.0 mi assumed lead for a forward-only 'is ahead' callout."
           },
           {
             "name": "Crossing the Seven Mile Bridge",
             "category": "highway_marker",
             "kind": "point",
-            "at_mi": 120.8,
-            "spoken": "Crossing the Seven Mile Bridge"
+            "at_mi": 114.2,
+            "spoken": "Crossing the Seven Mile Bridge",
+            "lat": 24.70634,
+            "lon": -81.12845,
+            "source": "Coordinates read 2026-10-01 from OpenStreetMap east end of way 996764821 via Nominatim; derived: at_mi = its projection onto the leg's archived dense route geometry (0.0 mi off the road)."
+          },
+          {
+            "name": "Bahia Honda",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 120.1,
+            "spoken": "Bahia Honda is ahead, with one of the best beaches in the Keys beneath the broken back of Flagler's old railroad bridge.",
+            "directions": [
+              "forward"
+            ],
+            "lat": 24.66473,
+            "lon": -81.26152,
+            "source": "Coordinates read 2026-10-01 from OpenStreetMap relation 5360500, Bahia Honda State Park via Nominatim; derived: at_mi = 123.1 (projection onto the leg's archived dense route geometry, 0.0 mi off the road) - 3.0 mi assumed lead for a forward-only 'is ahead' callout."
+          },
+          {
+            "name": "No Name Pub",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 126.9,
+            "spoken": "No Name Pub is on Big Pine Key, with walls papered in thousands of dollar bills. Watch for Key deer in the road; they are about the size of dogs and considerably less interested in traffic law.",
+            "directions": [
+              "forward"
+            ],
+            "lat": 24.69817,
+            "lon": -81.35123,
+            "source": "Coordinates read 2026-10-01 from OpenStreetMap way 147639029 via Nominatim; derived: at_mi = 129.9 (projection onto the leg's archived dense route geometry, 2.0 mi off the road) - 3.0 mi assumed lead for a forward-only 'is ahead' callout."
+          },
+          {
+            "name": "National Key Deer Refuge",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 130.2,
+            "spoken": "Big Pine Key is home to the Key deer, found nowhere else on Earth. Slow down, because they are small and they do not look both ways.",
+            "lat": 24.67203,
+            "lon": -81.35684,
+            "source": "Coordinates read 2026-10-01 from OpenStreetMap node 889570872, refuge visitor center via Nominatim; derived: at_mi = its projection onto the leg's archived dense route geometry (0.2 mi off the road)."
           },
           {
             "name": "Key Lime Pie on a Stick",

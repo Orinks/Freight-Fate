@@ -33787,7 +33787,7 @@
       "from": "harrisburg_pa_us",
       "to": "wilmington_de_us",
       "miles": 99,
-      "highway": "US-1",
+      "highway": "I-76",
       "terrain": "hills",
       "corridor": {
         "checkpoints": [
@@ -33796,7 +33796,7 @@
             "at_mi": 11.3,
             "type": "place",
             "state": "Pennsylvania",
-            "highway": "US-1",
+            "highway": "I-76",
             "lat": 40.1998,
             "lon": -76.7311,
             "source": "Real town on US-1 between harrisburg_pa_us and wilmington_de_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.7 mi off-route at closest approach)."
@@ -33806,7 +33806,7 @@
             "at_mi": 44.1,
             "type": "place",
             "state": "Pennsylvania",
-            "highway": "US-1",
+            "highway": "I-76",
             "lat": 40.2332,
             "lon": -76.1372,
             "source": "Real town on US-1 between harrisburg_pa_us and wilmington_de_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.44 mi off-route at closest approach)."
@@ -33816,7 +33816,7 @@
             "at_mi": 61.8,
             "type": "place",
             "state": "Pennsylvania",
-            "highway": "US-1",
+            "highway": "I-76",
             "lat": 40.1568,
             "lon": -75.8327,
             "source": "Real town on US-1 between harrisburg_pa_us and wilmington_de_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.57 mi off-route at closest approach)."
@@ -35621,7 +35621,14 @@
         }
       ],
       "divided": true,
-      "lanes": 1
+      "lanes": 1,
+      "route_via": [
+        {
+          "lat": 40.056,
+          "lon": -75.653,
+          "note": "Exton on US-202 -- pins this leg to the Pennsylvania Turnpike (I-76) east toward Downingtown, then Exton and US-202 into Wilmington, which its route points, checkpoints and both stops follow. The old route ran PA-283, US-30 and PA-41. Read 2026-10-01: vertex of a Valhalla truck route through this town with through locations limited to non-ramp, primary-or-better edges; the edge map-matches to US-202."
+        }
+      ]
     },
     {
       "from": "meadville_pa_us",
