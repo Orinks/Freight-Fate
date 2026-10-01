@@ -191,9 +191,9 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
     // Company Yard in the chicago_il_us service area" (found by the first
     // agent-driven playtest, 2026-08-30).
     let location = format!(
-        "{} in the {} service area",
+        "{} in {} service area",
         terminal.spoken_name(),
-        ctx.world.spoken_city(&p.current_city, None)
+        ff_core::speech_text::the_city(&ctx.world.spoken_city(&p.current_city, None))
     );
     if option.is_owner_operator() {
         return vec![

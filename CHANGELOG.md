@@ -193,6 +193,14 @@
 
 ### Fixed
 
+- **A CDL suspended mid-drive now ends the run.** The truck stops on the shoulder, the way a roadside stop ends it.
+
+- **Escape on a roadside stop that suspends your CDL no longer drives on.** It returns to the terminal, like the Return to terminal row.
+
+- **A saved run on a suspended CDL no longer resumes.** Continuing the career closes it out and opens the terminal.
+
+- **The Dalles is no longer read as the The Dalles.**
+
 - **The truck no longer tells you to release a parking brake that is already off.** A late "Press P to release it" could send you to set the brake while rolling.
 
 - **The engine no longer leans into bends and corners the truck is already taking.** With curve assistance or partial lane keeping, it leans only when you drift.

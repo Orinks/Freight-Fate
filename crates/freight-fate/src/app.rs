@@ -331,8 +331,9 @@ impl PlayerInputFrame<'_> {
             .world
             .spoken_city(&profile.current_city, Some(true));
         let mut text = format!(
-            "Scenario staged: {} at the {where_now} terminal, level {}, {} deliveries, {} dollars, {}.",
+            "Scenario staged: {} at {} terminal, level {}, {} deliveries, {} dollars, {}.",
             profile.name,
+            ff_core::speech_text::the_city(&where_now),
             profile.career.level(),
             profile.career.deliveries,
             ff_core::pyfmt::fmt_grouped(profile.money(), 0),

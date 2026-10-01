@@ -343,6 +343,15 @@ into the release gate. Details stay in the linked dated sections, marked
 Everything found before 2026-09-25 moved to
 [2.0](#found-along-the-way-in-19-moved-to-20) that day.
 
+- [x] A CDL suspended at speed (a second run off the road asleep, or the
+      work-zone barrels) now ends the run on the shoulder the way a
+      roadside stop does; Escape on a stop that pulled the CDL no longer
+      drives on; a saved run on a pulled CDL closes out instead of resuming.
+      Ported from 2.0's PR #261 (2026-09-30).
+- [ ] An owner-operator can still start "Bobtail to a nearby city" on a
+      suspended or disqualified CDL; 2.0 refuses it (PR #259). On 1.9 a
+      bobtail on a pulled CDL ends at the next run-off, barrel strike,
+      roadside stop or reload (2026-09-30).
 - [ ] Placed attraction billboards speak in one direction only since
       2026-09-30; the other side hears the random pool. Signs standing at
       their attraction could be marked `both`, and the rest need copy

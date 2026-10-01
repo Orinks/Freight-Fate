@@ -925,9 +925,9 @@ impl ArrivalState {
                 clock_text(to_local(game_hours, destination_timezone))
             ),
             format!(
-                "Parked at {} for the {} service area.",
+                "Parked at {} for {} service area.",
                 self.terminal.name,
-                job.spoken_destination()
+                ff_core::speech_text::the_city(job.spoken_destination())
             ),
             format!(
                 "{}: {} dollars.",

@@ -851,6 +851,9 @@ impl DrivingState {
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Money),
         );
+        // A second serious violation just suspended the CDL: the drive ends
+        // here instead of carrying on.
+        self.end_drive_if_licence_pulled(ctx);
     }
 
     /// Left-lane time is legitimate while passing slower right-lane
