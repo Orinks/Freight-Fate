@@ -1,0 +1,119 @@
+# Mountain West: older signs copied to the directions they missed -- 2026-10-01
+
+Every block here reuses an already-approved placed billboard's copy word
+for word. Each older sign faced one way, or stood on one leg of a road that
+other legs also run; these add the other direction, and the sibling legs
+over the same road, wherever the line is true from that side (the sign
+stands before the place in its direction). No new copy, so nothing here
+needs approval of text; placement follows the same rules as the attraction
+sheets (2.2 miles from every callout heard the same way).
+
+Every `leg:` is written the way the driver reads the sign and `at_mi`
+counts from that end.
+
+## Nebraska, Interstate 80
+
+The Archway, Gothenburg's Pony Express station, the Golden Spike Tower and
+Cabela's were signed westbound on the Omaha to Cheyenne leg only.
+
+### Great Platte River Road Archway (eastbound)
+- treatment: billboard
+- leg: cheyenne_wy_us -> omaha_ne_us
+- at_mi: 306.0
+- spoken: Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it.
+
+### Great Platte River Road Archway (westbound)
+- treatment: billboard
+- leg: grand_island_ne_us -> kearney_ne_us
+- at_mi: 32.5
+- spoken: Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it.
+
+### Great Platte River Road Archway (eastbound)
+- treatment: billboard
+- leg: lexington_ne_us -> kearney_ne_us
+- at_mi: 30.0
+- spoken: Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it.
+
+### Great Platte River Road Archway (eastbound)
+- treatment: billboard
+- leg: north_platte_ne_us -> kearney_ne_us
+- at_mi: 89.0
+- spoken: Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it.
+
+### Pony Express Station (eastbound)
+- treatment: billboard
+- leg: cheyenne_wy_us -> omaha_ne_us
+- at_mi: 245.0
+- spoken: Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.
+
+### Pony Express Station (westbound)
+- treatment: billboard
+- leg: lexington_ne_us -> north_platte_ne_us
+- at_mi: 20.0
+- spoken: Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.
+
+### Pony Express Station (eastbound)
+- treatment: billboard
+- leg: north_platte_ne_us -> lexington_ne_us
+- at_mi: 27.0
+- spoken: Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.
+
+### Pony Express Station (westbound)
+- treatment: billboard
+- leg: kearney_ne_us -> north_platte_ne_us
+- at_mi: 56.0
+- spoken: Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.
+
+### Pony Express Station (eastbound)
+- treatment: billboard
+- leg: north_platte_ne_us -> kearney_ne_us
+- at_mi: 27.0
+- spoken: Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.
+
+### Golden Spike Tower (eastbound)
+- treatment: billboard
+- leg: cheyenne_wy_us -> omaha_ne_us
+- at_mi: 203.5
+- spoken: Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.
+
+### Golden Spike Tower (westbound)
+- treatment: billboard
+- leg: kearney_ne_us -> north_platte_ne_us
+- at_mi: 80.0
+- spoken: Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.
+
+### Golden Spike Tower (westbound)
+- treatment: billboard
+- leg: lexington_ne_us -> north_platte_ne_us
+- at_mi: 45.0
+- spoken: Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.
+
+### Golden Spike Tower (eastbound)
+- treatment: billboard
+- leg: ogallala_ne_us -> north_platte_ne_us
+- at_mi: 35.5
+- spoken: Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.
+
+### Golden Spike Tower (northbound)
+- treatment: billboard
+- leg: colby_ks_us -> north_platte_ne_us
+- at_mi: 138.5
+- spoken: Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.
+
+### The Original Cabela's (eastbound)
+- treatment: billboard
+- leg: cheyenne_wy_us -> omaha_ne_us
+- at_mi: 93.0
+- spoken: Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop.
+
+### The Original Cabela's (westbound)
+- treatment: billboard
+- leg: ogallala_ne_us -> sidney_ne_us
+- at_mi: 59.5
+- spoken: Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop.
+
+### The Original Cabela's (eastbound)
+- treatment: billboard
+- leg: cheyenne_wy_us -> sidney_ne_us
+- at_mi: 89.0
+- spoken: Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop.
