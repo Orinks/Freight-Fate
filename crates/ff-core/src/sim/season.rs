@@ -188,7 +188,7 @@ const MONTH_NAMES: [&str; 12] = [
 
 /// The 2001 calendar date for a point on the clock: the career runs a fixed
 /// 365-day (non-leap) year mapped onto 2001, where January 1 is day-of-year 1.
-fn calendar_date(game_hours: f64) -> NaiveDate {
+pub fn calendar_date(game_hours: f64) -> NaiveDate {
     let doy = day_of_year(game_hours).trunc() as i64;
     let jan_1 = NaiveDate::from_ymd_opt(2001, 1, 1).expect("2001-01-01 is a valid date");
     jan_1 + chrono::Duration::days((doy - 1).rem_euclid(365))

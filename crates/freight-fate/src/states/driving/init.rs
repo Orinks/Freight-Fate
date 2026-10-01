@@ -32,6 +32,7 @@ use ff_core::sim::weather::WeatherProvider;
 use crate::app::GameContext;
 use crate::net::UreqTransport;
 use crate::states::driving_core::*;
+use crate::states::driving_events::billboard_moment::BillboardWatch;
 
 use super::DrivingState;
 
@@ -356,6 +357,8 @@ impl DrivingState {
             overspeed_chime_timer: 0.0,
             construction_seen: false,
             traffic_seen: false,
+            billboard_watch: BillboardWatch::now(ctx, start_damage),
+            pool_billboards_heard: 0,
             brake_squeal_cooldown_s: 0.0,
             hydro_active: false,
             jake_slip_active: false,

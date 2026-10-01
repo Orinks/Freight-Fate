@@ -6,6 +6,8 @@
 
 - **Wall Drug and South of the Border count down from both directions.** Three signs lead you to the exit whichever way you drive.
 
+- **Some billboards now notice your drive.** Big Jim answers a crash or a ticket, tired drivers get the late-night signs, and holidays put up their own.
+
 - **Six hundred new attraction billboards across fifteen states, from Ocean City's boardwalk to the Enchanted Highway.** Each is signed in both directions.
 
 - **Seven Tennessee attractions have billboards, among them Loretta Lynn's Ranch, the Tina Turner Museum and Ruby Falls.** Each is signed in both directions.

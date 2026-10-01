@@ -41,6 +41,17 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Billboards that notice the drive (owner, 2026-09-30): when an
+      everyday pool sign comes up, Big Jim answers a collision, a citation
+      or an out-of-service order since the last one, once; church signs and
+      all-night diners take every other sign for a drowsy driver or between
+      one and five in the morning; a holiday's week (New Year's, the Fourth
+      of July, Halloween, Thanksgiving, Christmas, on the date the player
+      hears) takes every third. Placed attraction signs never change, and no
+      line names an exit or a service (`data/billboards_dynamic.rs`).
+- [ ] Billboards could also react to the cargo in the trailer and to the
+      weather (owner, 2026-09-30: "at least one and two" shipped first).
+
 - [x] Placed billboards face one way (owner, 2026-09-30): every placed
       attraction sign was heard from both sides of the road, and 128 of the
       230 say "ahead" or "next exit", so "Meridian is ahead" played just

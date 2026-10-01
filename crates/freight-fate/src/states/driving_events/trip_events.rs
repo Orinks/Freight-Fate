@@ -202,6 +202,8 @@ impl DrivingState {
             }
             TripEventKind::Curve => self.handle_curve_event(ctx, event, message, category),
             TripEventKind::Landmark | TripEventKind::Billboard => {
+                let sign = event.data.category.as_deref().unwrap_or_default();
+                let message = self.billboard_message(ctx, sign, message);
                 self.speak_ambient_event(ctx, message, Ambient::new().category(category));
             }
             TripEventKind::Lane => {

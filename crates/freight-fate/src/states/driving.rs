@@ -272,6 +272,10 @@ pub struct DrivingState {
     // Congestion badges: both kinds of slow inside one trip earns a nod.
     pub construction_seen: bool,
     pub traffic_seen: bool,
+    // Billboards that notice the drive: the record at the last pool sign,
+    // and how many pool signs this trip has read.
+    pub billboard_watch: crate::states::driving_events::billboard_moment::BillboardWatch,
+    pub pool_billboards_heard: usize,
     pub brake_squeal_cooldown_s: f64, // hot-brake squeal cue spacing
     pub hydro_active: bool,           // spoken hydroplane warning edge tracking
     pub jake_slip_active: bool,       // spoken jake-slip warning edge tracking
