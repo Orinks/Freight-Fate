@@ -545,6 +545,10 @@ fn test_zone_entry_no_longer_destroys_pending_ambient_chatter() {
         ),
     );
     assert_eq!(
+        d.pending_ambient_events.back().unwrap().priority,
+        Some(EventPriority::Route)
+    );
+    assert_eq!(
         app.event_calls(),
         vec![("Weather: rain.".to_string(), false)]
     );
