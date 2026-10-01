@@ -6414,22 +6414,22 @@
         "state_miles": [
           {
             "state": "Texas",
-            "miles": 73.1,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 72.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "New Mexico",
-            "miles": 214.9,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 216.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 73.1,
+            "at_mi": 72.0,
             "from_state": "Texas",
             "state": "New Mexico",
             "place": "Texas-New Mexico line on I-40",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -79283,34 +79283,34 @@
         "state_miles": [
           {
             "state": "Texas",
-            "miles": 83.2,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 77.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Oklahoma",
-            "miles": 337.1,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 342.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Missouri",
-            "miles": 292.7,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 292.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 83.2,
+            "at_mi": 77.4,
             "from_state": "Texas",
             "state": "Oklahoma",
             "place": "Texas-Oklahoma line on I-44",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
-            "at_mi": 420.3,
+            "at_mi": 420.1,
             "from_state": "Oklahoma",
             "state": "Missouri",
             "place": "Oklahoma-Missouri line on I-44",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -92201,34 +92201,34 @@
         "state_miles": [
           {
             "state": "Texas",
-            "miles": 20.6,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 19.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "New Mexico",
-            "miles": 165.5,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 164.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Arizona",
-            "miles": 130.9,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 133.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 20.6,
+            "at_mi": 19.9,
             "from_state": "Texas",
             "state": "New Mexico",
             "place": "Texas-New Mexico line on I-10",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
-            "at_mi": 186.0,
+            "at_mi": 183.9,
             "from_state": "New Mexico",
             "state": "Arizona",
             "place": "New Mexico-Arizona line on I-10",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -104594,22 +104594,22 @@
         "state_miles": [
           {
             "state": "Texas",
-            "miles": 76.9,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 71.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Oklahoma",
-            "miles": 123.1,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 129.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 76.9,
+            "at_mi": 71.0,
             "from_state": "Texas",
             "state": "Oklahoma",
             "place": "Texas-Oklahoma line on I-35",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -113535,22 +113535,22 @@
         "state_miles": [
           {
             "state": "Texas",
-            "miles": 120.8,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 112.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Louisiana",
-            "miles": 22.2,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 31.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 120.8,
+            "at_mi": 112.0,
             "from_state": "Texas",
             "state": "Louisiana",
             "place": "Texas-Louisiana line on I-10",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -161490,22 +161490,22 @@
         "state_miles": [
           {
             "state": "Texas",
-            "miles": 13.1,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 4.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Louisiana",
-            "miles": 12.9,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 21.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 13.1,
+            "at_mi": 4.2,
             "from_state": "Texas",
             "state": "Louisiana",
             "place": "Texas-Louisiana line on I-10",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -190524,22 +190524,22 @@
         "state_miles": [
           {
             "state": "Texas",
-            "miles": 17.0,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 15.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Oklahoma",
-            "miles": 21.0,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 22.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 17.0,
+            "at_mi": 15.4,
             "from_state": "Texas",
             "state": "Oklahoma",
             "place": "Texas-Oklahoma line on US-287",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "landmarks": [

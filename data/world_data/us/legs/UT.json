@@ -17687,22 +17687,22 @@
         "state_miles": [
           {
             "state": "Utah",
-            "miles": 166.2,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 158.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Idaho",
-            "miles": 217.8,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 226.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 166.2,
+            "at_mi": 158.0,
             "from_state": "Utah",
             "state": "Idaho",
             "place": "Utah-Idaho line on I-84",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",

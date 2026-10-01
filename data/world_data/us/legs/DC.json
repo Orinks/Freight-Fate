@@ -1492,42 +1492,46 @@
         "state_miles": [
           {
             "state": "District of Columbia",
-            "miles": 5.5
+            "miles": 5.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Virginia",
-            "miles": 6.5
+            "miles": 5.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Maryland",
-            "miles": 62.6
+            "miles": 62.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Pennsylvania",
-            "miles": 38.4
+            "miles": 39.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 5.5,
+            "at_mi": 5.6,
             "from_state": "District of Columbia",
             "state": "Virginia",
             "place": "District of Columbia-Virginia line on US-15",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
-            "at_mi": 12.0,
+            "at_mi": 11.5,
             "from_state": "Virginia",
             "state": "Maryland",
             "place": "Virginia-Maryland line on US-15",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
-            "at_mi": 74.6,
+            "at_mi": 73.6,
             "from_state": "Maryland",
             "state": "Pennsylvania",
             "place": "Maryland-Pennsylvania line on US-15",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -4149,22 +4153,22 @@
         "state_miles": [
           {
             "state": "District of Columbia",
-            "miles": 6.3,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 2.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Virginia",
-            "miles": 124.7,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 128.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 6.3,
+            "at_mi": 2.7,
             "from_state": "District of Columbia",
             "state": "Virginia",
             "place": "District of Columbia-Virginia line on US-29",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ]
       },
@@ -10716,20 +10720,22 @@
         "state_miles": [
           {
             "state": "District of Columbia",
-            "miles": 5.5
+            "miles": 2.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Virginia",
-            "miles": 103.5
+            "miles": 106.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 5.5,
+            "at_mi": 2.9,
             "from_state": "District of Columbia",
             "state": "Virginia",
             "place": "District of Columbia-Virginia line on I-95",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",

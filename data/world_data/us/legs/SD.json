@@ -13138,34 +13138,34 @@
         "state_miles": [
           {
             "state": "South Dakota",
-            "miles": 73.4,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 70.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Wyoming",
-            "miles": 23.5,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 20.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Montana",
-            "miles": 225.1,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 230.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 73.4,
+            "at_mi": 70.4,
             "from_state": "South Dakota",
             "state": "Wyoming",
             "place": "South Dakota-Wyoming line on US-212",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
-            "at_mi": 96.9,
+            "at_mi": 91.2,
             "from_state": "Wyoming",
             "state": "Montana",
             "place": "Wyoming-Montana line on US-212",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -21192,22 +21192,22 @@
         "state_miles": [
           {
             "state": "South Dakota",
-            "miles": 20.9,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 17.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Minnesota",
-            "miles": 134.1,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 137.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 20.9,
+            "at_mi": 17.1,
             "from_state": "South Dakota",
             "state": "Minnesota",
             "place": "South Dakota-Minnesota line on US-60",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -23033,22 +23033,22 @@
         "state_miles": [
           {
             "state": "South Dakota",
-            "miles": 23.6,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 17.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Minnesota",
-            "miles": 212.4,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 218.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 23.6,
+            "at_mi": 17.7,
             "from_state": "South Dakota",
             "state": "Minnesota",
             "place": "South Dakota-Minnesota line on I-90",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -26261,31 +26261,34 @@
         "state_miles": [
           {
             "state": "South Dakota",
-            "miles": 83.1
+            "miles": 81.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Iowa",
-            "miles": 96.9
+            "miles": 98.5,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Nebraska",
-            "miles": 1.0
+            "miles": 1.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 83.1,
+            "at_mi": 81.3,
             "from_state": "South Dakota",
             "state": "Iowa",
             "place": "South Dakota-Iowa line on I-29",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
-            "at_mi": 180.0,
+            "at_mi": 179.8,
             "from_state": "Iowa",
             "state": "Nebraska",
             "place": "Iowa-Nebraska line on I-29",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",

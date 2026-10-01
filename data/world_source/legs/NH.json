@@ -8273,31 +8273,34 @@
         "state_miles": [
           {
             "state": "New Hampshire",
-            "miles": 24.5
+            "miles": 23.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Massachusetts",
-            "miles": 69.0
+            "miles": 70.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Rhode Island",
-            "miles": 7.5
+            "miles": 6.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 24.5,
+            "at_mi": 23.8,
             "from_state": "New Hampshire",
             "state": "Massachusetts",
-            "place": "New Hampshire-Massachusetts line on I-495",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "place": "New Hampshire-Massachusetts line on I-95",
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
-            "at_mi": 93.4,
+            "at_mi": 94.6,
             "from_state": "Massachusetts",
             "state": "Rhode Island",
-            "place": "Massachusetts-Rhode Island line on I-495",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "place": "Massachusetts-Rhode Island line on I-95",
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",

@@ -11849,22 +11849,22 @@
         "state_miles": [
           {
             "state": "Illinois",
-            "miles": 43.1,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 40.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Indiana",
-            "miles": 83.9,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 86.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 43.1,
+            "at_mi": 40.1,
             "from_state": "Illinois",
             "state": "Indiana",
             "place": "Illinois-Indiana line on I-74",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -14643,22 +14643,22 @@
         "state_miles": [
           {
             "state": "Illinois",
-            "miles": 43.1,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 40.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Indiana",
-            "miles": 56.9,
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "miles": 59.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 43.1,
+            "at_mi": 40.2,
             "from_state": "Illinois",
             "state": "Indiana",
             "place": "Illinois-Indiana line on I-74",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -32103,20 +32103,22 @@
         "state_miles": [
           {
             "state": "Illinois",
-            "miles": 57.9
+            "miles": 54.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Indiana",
-            "miles": 35.1
+            "miles": 39.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 57.9,
+            "at_mi": 54.0,
             "from_state": "Illinois",
             "state": "Indiana",
             "place": "Illinois-Indiana line on I-64",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],

@@ -32165,11 +32165,11 @@
         ],
         "state_crossings": [
           {
-            "at_mi": 144.6,
+            "at_mi": 145.8,
             "from_state": "Arizona",
             "state": "California",
-            "place": "Colorado River near Blythe",
-            "source": "Curated from I-10 corridor state sequence and checked route geometry."
+            "place": "Arizona-California line on I-10",
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "checkpoints": [
@@ -32215,11 +32215,13 @@
         "state_miles": [
           {
             "state": "Arizona",
-            "miles": 144.6
+            "miles": 145.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "California",
-            "miles": 227.4
+            "miles": 226.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "interchanges": [
