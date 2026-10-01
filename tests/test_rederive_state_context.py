@@ -312,6 +312,11 @@ def test_first_road_ref_uses_the_first_osm_ref():
     assert rsc._first_road_ref("I 94; I 80") == "I-94"
 
 
+def test_leg_highway_ref_is_preferred_from_a_multi_ref_way():
+    assert rsc._matching_road_ref("I 80;I 94;US 6", "I-94") == "I-94"
+    assert rsc._matching_road_ref("I 80;I 94;US 6", "I-95") == "I-80"
+
+
 def test_nearest_road_lookup_skips_nodes_and_reads_way_ref(monkeypatch):
     class Location:
         lon = -75.0
@@ -325,7 +330,7 @@ def test_nearest_road_lookup_skips_nodes_and_reads_way_ref(monkeypatch):
 
     class RoadWay:
         id = 42
-        tags = {"highway": "motorway", "ref": "I 94; I 80"}
+        tags = {"highway": "motorway", "ref": "I 80;I 94;US 6"}
         nodes = [WayNode(), WayNode()]
 
     class Processor:
@@ -347,4 +352,4 @@ def test_nearest_road_lookup_skips_nodes_and_reads_way_ref(monkeypatch):
 
     result = rsc.nearest_osm_highway_refs(Path("roads.osm.pbf"), [[-75.0, 42.0]])
 
-    assert result == {0: (42, "I-94", 0.0)}
+    assert result == {0: (42, "I 80;I 94;US 6", 0.0)}

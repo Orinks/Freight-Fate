@@ -322,9 +322,36 @@ def _coordinate_at_geometry_mile(geometry: list[list[float]], target_mi: float) 
     return [float(geometry[-1][0]), float(geometry[-1][1])]
 
 
+def _normalize_road_ref(value: str) -> str:
+    ref = value.strip()
+    return re.sub(
+        r"^([A-Za-z]{1,3})(?:\s+|-)(?=\d)",
+        lambda match: f"{match.group(1).upper()}-",
+        ref,
+    )
+
+
+def _road_refs(value: str) -> tuple[str, ...]:
+    refs = []
+    for part in re.split(r"[;/]", value):
+        ref = _normalize_road_ref(part)
+        if ref and ref not in refs:
+            refs.append(ref)
+    return tuple(refs)
+
+
 def _first_road_ref(value: str) -> str:
-    ref = re.split(r"[;/]", value, maxsplit=1)[0].strip()
-    return re.sub(r"^([A-Za-z]{1,3})\s+(?=\d)", r"\1-", ref)
+    refs = _road_refs(value)
+    return refs[0] if refs else ""
+
+
+def _matching_road_ref(value: str, highway: str) -> str:
+    refs = _road_refs(value)
+    highway_refs = _road_refs(highway)
+    for highway_ref in highway_refs:
+        if highway_ref in refs:
+            return highway_ref
+    return refs[0] if refs else ""
 
 
 def nearest_osm_highway_refs(
@@ -370,7 +397,9 @@ def nearest_osm_highway_refs(
             continue
 
         way_id = int(way.id)
-        ref = _first_road_ref(str(way.tags.get("ref", "") or ""))
+        ref = str(way.tags.get("ref", "") or "")
+        if not _road_refs(ref):
+            continue
         for (lon1, lat1), (lon2, lat2) in zip(coordinates, coordinates[1:], strict=False):
             max_abs_lat = max(abs(lat1), abs(lat2))
             lon_padding = ROAD_MATCH_M / (111_320.0 * max(0.1, math.cos(math.radians(max_abs_lat))))
@@ -658,7 +687,8 @@ def process_world(
             point_id = crossing_info["point_id"]
             road = road_refs.get(point_id) if point_id is not None else None
             if road:
-                way_id, ref, _distance_m = road
+                way_id, way_refs, _distance_m = road
+                ref = _matching_road_ref(way_refs, str(item["leg"].get("highway", "")))
                 place = f"{crossing['from_state']}-{crossing['state']} line on {ref}"
                 source += f"; place's road read from OpenStreetMap way {way_id} ref"
             elif crossing_info["needs_road_ref"]:
