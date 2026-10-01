@@ -233,7 +233,11 @@ def route_tolls(world: dict[str, Any], leg: dict[str, Any]) -> bool | None:
     profile, between the same two city nodes.
     """
     cities = world["cities"]
-    fetched = rr.fetch_route(cities[leg["from"]], cities[leg["to"]])
+    fetched = rr.fetch_route(
+        cities[leg["from"]],
+        cities[leg["to"]],
+        via=rr.route_via_points(leg),
+    )
     if fetched is None:
         return None
     _shape, _miles, has_toll = fetched
