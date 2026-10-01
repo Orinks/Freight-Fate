@@ -1,5 +1,4 @@
 import copy
-from pathlib import Path
 
 import rederive_state_context as rsc
 
@@ -83,7 +82,7 @@ def test_sequence_equal_state_context_updates_only_above_minimum_shift(monkeypat
     data = _data(leg)
     old_miles = copy.deepcopy(leg["corridor"]["state_miles"])
     _install_geometry(monkeypatch)
-    monkeypatch.setattr(rsc.ers, "_state_context", lambda *_args: _context())
+    monkeypatch.setattr(rsc, "derive_state_context", lambda *_args: _context())
 
     report = rsc.process_world(data, [], min_shift=1.0)
 
@@ -103,7 +102,7 @@ def test_sequence_equal_boundary_below_minimum_shift_is_not_updated(monkeypatch)
     leg = _leg()
     before = copy.deepcopy(leg["corridor"])
     _install_geometry(monkeypatch)
-    monkeypatch.setattr(rsc.ers, "_state_context", lambda *_args: _context(at_mi=10.5))
+    monkeypatch.setattr(rsc, "derive_state_context", lambda *_args: _context(at_mi=10.5))
 
     report = rsc.process_world(_data(leg), [], min_shift=1.0)
 
@@ -115,7 +114,7 @@ def test_sequence_difference_is_reported_without_mutating_the_leg(monkeypatch):
     leg = _leg()
     before = copy.deepcopy(leg["corridor"])
     _install_geometry(monkeypatch)
-    monkeypatch.setattr(rsc.ers, "_state_context", lambda *_args: _context(state="New Mexico"))
+    monkeypatch.setattr(rsc, "derive_state_context", lambda *_args: _context(state="New Mexico"))
 
     report = rsc.process_world(_data(leg), [], min_shift=1.0)
 
@@ -134,7 +133,7 @@ def test_sequence_difference_is_reported_without_mutating_the_leg(monkeypatch):
 def test_only_overrides_a_state_sequence_difference(monkeypatch):
     leg = _leg()
     _install_geometry(monkeypatch)
-    monkeypatch.setattr(rsc.ers, "_state_context", lambda *_args: _context(state="New Mexico"))
+    monkeypatch.setattr(rsc, "derive_state_context", lambda *_args: _context(state="New Mexico"))
 
     report = rsc.process_world(_data(leg), [], min_shift=1.0, only={"a_tx_us:b_ok_us"})
 
@@ -153,7 +152,7 @@ def test_unselected_sequence_difference_is_report_only_with_only_filter(monkeypa
     data["cities"]["c_ok_us"] = {"state": "Oklahoma"}
     data["legs"].append(unselected_leg)
     _install_geometry(monkeypatch)
-    monkeypatch.setattr(rsc.ers, "_state_context", lambda *_args: _context(state="New Mexico"))
+    monkeypatch.setattr(rsc, "derive_state_context", lambda *_args: _context(state="New Mexico"))
 
     report = rsc.process_world(data, [], only={"a_tx_us:b_ok_us"})
 
@@ -183,7 +182,7 @@ def test_route_point_guard_skips_state_rederivation(monkeypatch):
     def should_not_derive(*_args):
         raise AssertionError("state context should not be computed for a mismatched archive")
 
-    monkeypatch.setattr(rsc.ers, "_state_context", should_not_derive)
+    monkeypatch.setattr(rsc, "derive_state_context", should_not_derive)
 
     report = rsc.process_world(_data(leg), [])
 
@@ -193,30 +192,82 @@ def test_route_point_guard_skips_state_rederivation(monkeypatch):
     ]
 
 
-def test_main_loads_cached_state_shapes_and_does_not_save_by_default(monkeypatch, capsys):
+def test_main_loads_cached_osm_boundaries_and_does_not_save_by_default(monkeypatch, capsys):
     leg = _leg()
     data = _data(leg)
-    shapes = [{"synthetic": True}]
+    boundaries = [{"name": "Texas", "ways": [[[0.0, 0.0], [1.0, 0.0]]]}]
     saved = []
     loaded = []
     monkeypatch.setattr(rsc, "load_world", lambda: data)
 
-    def load_shapes(cache_dir, rate_limit):
-        loaded.append((cache_dir, rate_limit))
-        return shapes
+    def load_boundaries(cache_path):
+        loaded.append(cache_path)
+        return boundaries
 
-    def derive(_data, _leg, coords, supplied_shapes):
+    def derive(_data, _leg, coords, supplied_boundaries):
         assert coords == [[-100.0, 30.0], [-99.0, 31.0]]
-        assert supplied_shapes is shapes
+        assert isinstance(supplied_boundaries, rsc.StateBoundaryIndex)
+        assert "Texas" in supplied_boundaries.bboxes
         return _context()
 
-    monkeypatch.setattr(rsc.ers, "_load_state_shapes", load_shapes)
-    monkeypatch.setattr(rsc.ers, "_state_context", derive)
+    monkeypatch.setattr(rsc, "load_state_boundaries", load_boundaries)
+    monkeypatch.setattr(rsc, "derive_state_context", derive)
     monkeypatch.setattr(rsc, "save_world", saved.append)
     _install_geometry(monkeypatch)
 
     assert rsc.main(["--only", "a_tx_us:b_ok_us"]) == 0
 
-    assert loaded == [(Path(".route-cache"), 1.0)]
+    assert loaded == [rsc.BOUNDARIES_CACHE]
     assert not saved
     assert "Dry run only" in capsys.readouterr().out
+
+
+def _shared_square_boundaries():
+    return [
+        {
+            "name": "Texas",
+            "ways": [[[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.0, 0.0]]],
+        },
+        {
+            "name": "Oklahoma",
+            "ways": [[[1.0, 0.0], [2.0, 0.0], [2.0, 1.0], [1.0, 1.0], [1.0, 0.0]]],
+        },
+    ]
+
+
+def test_shared_boundary_is_one_crossing_at_interpolated_route_mile():
+    leg = _leg()
+    leg["miles"] = 10.0
+    data = _data(leg)
+    boundaries = rsc.build_boundary_index(_shared_square_boundaries())
+
+    result = rsc.derive_state_context(data, leg, [[0.5, 0.5], [1.5, 0.5]], boundaries)
+
+    assert len(result["state_crossings"]) == 1
+    crossing = result["state_crossings"][0]
+    assert crossing["from_state"] == "Texas"
+    assert crossing["state"] == "Oklahoma"
+    assert crossing["at_mi"] == 5.0
+
+
+def test_initial_state_uses_parity_for_a_start_inside_the_second_square():
+    leg = _leg()
+    data = _data(leg)
+    leg["miles"] = 10.0
+    boundaries = rsc.build_boundary_index(_shared_square_boundaries())
+
+    result = rsc.derive_state_context(data, leg, [[1.5, 0.5], [1.75, 0.5]], boundaries)
+
+    assert result["state_crossings"] == []
+    assert [(item["state"], item["miles"]) for item in result["state_miles"]] == [
+        ("Oklahoma", 10.0)
+    ]
+
+
+def test_shared_vertex_hits_are_grouped_into_one_event():
+    boundaries = rsc.build_boundary_index(_shared_square_boundaries())
+
+    events = rsc._boundary_events([[0.5, 0.5], [1.5, -0.5]], boundaries)
+
+    assert len(events) == 1
+    assert events[0]["states"] == {"Texas", "Oklahoma"}
