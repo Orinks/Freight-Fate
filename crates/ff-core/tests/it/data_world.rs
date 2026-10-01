@@ -582,10 +582,8 @@ fn test_corridor_metadata_supports_offline_itineraries() {
         .map(|c| c.state.as_str())
         .collect();
     assert_eq!(crossings, vec!["Indiana"]);
-    // 33.16, not the 32.8 this used to pin: correcting Chicago-Indianapolis
-    // from 183 to the 185 miles its baked route actually runs carried every
-    // along-route position with it (tools/repair_leg_mileage.py).
-    assert_eq!(leg.state_crossings()[0].at_mi, 33.16);
+    // The OSM state-boundary relation intersects the archived I-65 route here.
+    assert_eq!(leg.state_crossings()[0].at_mi, 26.7);
     assert!(leg.checkpoints().iter().any(|c| c.name == "Lafayette"));
     let total: f64 = leg.state_miles().iter().map(|m| m.miles).sum();
     assert_eq!(total, leg.miles);
