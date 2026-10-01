@@ -8254,7 +8254,7 @@
             "both"
           ],
           "exit_ref": "322",
-          "interchange_mi": 125.4,
+          "interchange_mi": 135.1,
           "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.28 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
           "approach_chains": [
             {
@@ -8350,7 +8350,7 @@
           "lat": 42.871449,
           "lon": -87.944089,
           "exit_ref": "322",
-          "interchange_mi": 125.4,
+          "interchange_mi": 135.1,
           "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.44 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
           "approach_chains": [
             {
@@ -8444,8 +8444,7 @@
             "both"
           ],
           "exit_ref": "333",
-          "interchange_mi": 135.5,
-          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.35 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
+          "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.35 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; this leg has no interchange record with that number.",
           "approach_chains": [
             {
               "terminal_node": 3782851973,
@@ -8532,7 +8531,7 @@
             "both"
           ],
           "exit_ref": "340",
-          "interchange_mi": 142.9,
+          "interchange_mi": 165.6,
           "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.30 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
           "approach_chains_failed": [
             {
@@ -8623,7 +8622,7 @@
             "both"
           ],
           "exit_ref": "6",
-          "interchange_mi": 235.9,
+          "interchange_mi": 267.4,
           "exit_source": "exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction node on I94, 0.26 mi from the stop's read coordinates (derived snap, cut 0.6 mi), local Geofabrik extract accessed 2026-09-17; interchange_mi derived: this leg's interchange record with that exit number.",
           "approach_chains": [
             {

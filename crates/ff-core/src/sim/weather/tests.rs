@@ -2934,7 +2934,7 @@ fn test_gps_state_crossing_and_rest_stop_cues_deduplicate() {
     let crossing = trip.update(0.0);
     assert_eq!(
         kind_messages(&crossing, TripEventKind::StateCrossing),
-        vec!["Crossing into Indiana near the I-65 state line south of Hammond."]
+        vec!["Crossing into Indiana near Illinois-Indiana line on I-65."]
     );
     assert!(kind_messages(&trip.update(0.0), TripEventKind::StateCrossing).is_empty());
 
