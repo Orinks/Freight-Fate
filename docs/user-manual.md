@@ -1382,7 +1382,10 @@ that it is a fatigued-driving violation and joins the serious ladder.
 While your CDL is suspended, driving work comes off the dispatch board. The
 board opens by telling you so and naming the date the work returns, and any
 job you try to take says the same. A roadside stop that pulls your licence
-ends the run there and releases you to the terminal. Nothing else about your
+ends the run there and releases you to the terminal, and so does a suspension
+mid-drive with no stop, from running off the road asleep or through the
+barrels: the truck pulls onto the shoulder and the run closes out. A saved
+run on a pulled licence does not resume. Nothing else about your
 career is touched: your level, experience, endorsements, and equipment are
 all still yours when it clears.
 

@@ -219,8 +219,8 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
     let option = option_for_profile(p);
     // Spoken city, never the map key (same fix as the states::city copy).
     let location = format!(
-        "{terminal} in the {} service area",
-        ctx.world.spoken_city(&p.current_city, None)
+        "{terminal} in {} service area",
+        ff_core::speech_text::the_city(&ctx.world.spoken_city(&p.current_city, None))
     );
     if option.is_owner_operator() {
         return format!(
@@ -295,6 +295,17 @@ pub fn world_entry_state(ctx: &mut GameContext, queue_entry_announcement: bool) 
             );
             return share(CityMenuState::new(ctx, true));
         }
+        // A trip saved on a CDL that has since been pulled -- quit on the
+        // roadside screen that pulled it, or a save from before a mid-drive
+        // suspension ended the run -- does not resume: it closes out the
+        // way the roadside does, and the terminal says the CDL status.
+        if close_out_pulled_licence_trip(ctx) {
+            ctx.say(
+                "Your saved run cannot go on: dispatch cancels it, and a relief driver brings \
+                 the truck back.",
+            );
+            return share(CityMenuState::new(ctx, true));
+        }
         let snapshot = ctx
             .profile
             .as_ref()
@@ -351,6 +362,21 @@ pub fn world_entry_state(ctx: &mut GameContext, queue_entry_announcement: bool) 
     // spoken just before this state is chosen, so its entry announcement
     // queues behind that line instead of cutting it off.
     share(CityMenuState::new(ctx, queue_entry_announcement))
+}
+
+/// Clear and save a saved trip the CDL no longer allows. False (nothing
+/// touched) while the CDL is clear.
+fn close_out_pulled_licence_trip(ctx: &mut GameContext) -> bool {
+    let Some(p) = ctx.profile.as_mut() else {
+        return false;
+    };
+    if !p.driving_record.suspended(p.game_hours) {
+        return false;
+    }
+    p.active_trip = None;
+    p.pay_advance_used_for_load = false;
+    ctx.save_profile();
+    true
 }
 
 /// Write a one-time fair-deadline repair back into the saved active trip.

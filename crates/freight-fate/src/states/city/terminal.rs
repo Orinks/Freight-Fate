@@ -704,12 +704,13 @@ impl Menu for CityMenuState {
                 format!(" {record}")
             };
             format!(
-                "Parked at {} in the {city_name} \
+                "Parked at {} in {} \
                  service area, {city_state}. {} with \
                  level {}, {}.{cdl}{record} \
                  You have {} dollars. \
                  {first_day}",
                 terminal.spoken_name(),
+                ff_core::speech_text::the_city(&city_name),
                 crate::states::city::py_capitalize(business),
                 rank.level,
                 rank.title,

@@ -29,7 +29,9 @@ pub use fuel_pump::FuelPump;
 pub use loyalty::LoyaltyRewardsState;
 pub use parking_full::ParkingFullState;
 pub use rest_stop::{RestFocus, RestStopState};
-pub use roadside::{EnforcementStopState, FelonyStopState, RoadsideExit, TrafficStopState};
+pub use roadside::{
+    EnforcementStopState, FelonyStopState, LicencePulledState, RoadsideExit, TrafficStopState,
+};
 pub use shoulder::ShoulderSleepConfirmationState;
 
 use ff_core::models::enforcement;
@@ -292,6 +294,29 @@ impl DrivingState {
         stop: EnforcementStopParams,
     ) {
         let state = EnforcementStopState::new(ctx, self, stop);
+        ctx.push_state(state);
+    }
+
+    /// End the drive when the CDL was just pulled with no officer present.
+    ///
+    /// For the record events that happen at speed (a run off the road
+    /// asleep, the barrels): driving on with a suspended or disqualified CDL
+    /// is exactly what the suspension forbids, so the truck stops on the
+    /// shoulder and the roadside exit closes out the run. The debug hours
+    /// modes, which freeze the ladder, never end a run.
+    pub fn end_drive_if_licence_pulled(&mut self, ctx: &mut GameContext) {
+        let pulled = ctx
+            .profile
+            .as_ref()
+            .is_some_and(|p| p.driving_record.suspended(record_hours(ctx, self)));
+        if !pulled || self.enforcement_bypassed(ctx) {
+            return;
+        }
+        self.trip.truck.velocity_mps = 0.0;
+        self.trip.truck.throttle = 0.0;
+        self.trip.truck.brake = 1.0;
+        self.trip.truck.set_parking_brake();
+        let state = LicencePulledState::new(ctx, self);
         ctx.push_state(state);
     }
 
