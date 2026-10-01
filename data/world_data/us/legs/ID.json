@@ -6146,9 +6146,9 @@
             "kind": "point",
             "at_mi": 1.6,
             "spoken": "Crossing the Boise River",
-            "lat": 43.61852,
-            "lon": -116.22859,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 24004231 (Boise River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "lat": 43.61854,
+            "lon": -116.22814,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1348388013 (Boise River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Warhawk Air Museum (westbound)",

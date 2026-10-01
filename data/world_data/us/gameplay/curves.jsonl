@@ -1,4 +1,4 @@
-{"meta": {"data_version": "sha256:396233e54ed6", "params": {"a_lat_g": 0.3, "connector_window_mi": 0.75, "curve_pad_m": 150.0, "curve_radius_ft": 3000.0, "deflection_floor_deg": 8.0, "eps_tangent_m": 30.0, "layer": "curves", "point_budget": 600, "quant_deg": 5, "radius_window_m": 80.0, "sign_hysteresis_deg": 5.0, "speed_gap_mi": 4.0}, "schema": 1, "source": "OpenRouteService driving-hgv (self-hosted) + OSM via Overpass (ODbL, (c) OpenStreetMap contributors)"}}
+{"meta": {"data_version": "sha256:22a75863b91f", "params": {"a_lat_g": 0.3, "connector_window_mi": 0.75, "curve_pad_m": 150.0, "curve_radius_ft": 3000.0, "deflection_floor_deg": 8.0, "eps_tangent_m": 30.0, "layer": "curves", "point_budget": 600, "quant_deg": 5, "radius_window_m": 80.0, "sign_hysteresis_deg": 5.0, "speed_gap_mi": 4.0}, "schema": 1, "source": "OpenRouteService driving-hgv (self-hosted) + OSM via Overpass (ODbL, (c) OpenStreetMap contributors)"}}
 {"advisory_mph": 20, "apex_mi": 0.11, "connector": true, "connector_source": "osm:off-corridor", "deflection_deg": 180.0, "direction": "R", "end_mi": 0.14, "leg": "aberdeen_sd_us:pierre_sd_us", "min_radius_ft": 98, "seq": 1, "start_mi": 0.05}
 {"advisory_mph": 35, "apex_mi": 0.14, "connector": true, "connector_source": "osm:off-corridor", "deflection_deg": 89.6, "direction": "L", "end_mi": 0.2, "leg": "aberdeen_sd_us:pierre_sd_us", "min_radius_ft": 307, "seq": 2, "start_mi": 0.14}
 {"advisory_mph": 35, "apex_mi": 0.41, "connector": true, "connector_source": "osm:off-corridor", "deflection_deg": 90.0, "direction": "R", "end_mi": 0.52, "leg": "aberdeen_sd_us:pierre_sd_us", "min_radius_ft": 307, "seq": 3, "start_mi": 0.41}
@@ -16494,7 +16494,7 @@
 {"advisory_mph": 45, "apex_mi": 170.71, "deflection_deg": 24.9, "direction": "R", "end_mi": 170.8, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 453, "seq": 55, "start_mi": 170.7}
 {"advisory_mph": 70, "apex_mi": 170.89, "deflection_deg": 10.1, "direction": "R", "end_mi": 170.94, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1040, "seq": 56, "start_mi": 170.89}
 {"advisory_mph": 25, "apex_mi": 184.7, "deflection_deg": 159.0, "direction": "R", "end_mi": 184.7, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 117, "seq": 57, "start_mi": 184.5}
-{"advisory_mph": 15, "apex_mi": 184.71, "deflection_deg": 256.8, "direction": "L", "end_mi": 184.75, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 61, "seq": 58, "start_mi": 184.7}
+{"advisory_mph": 15, "apex_mi": 184.71, "deflection_deg": 256.7, "direction": "L", "end_mi": 184.75, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 61, "seq": 58, "start_mi": 184.7}
 {"advisory_mph": 30, "apex_mi": 184.75, "deflection_deg": 47.8, "direction": "R", "end_mi": 184.79, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 223, "seq": 59, "start_mi": 184.75}
 {"advisory_mph": 40, "apex_mi": 184.79, "deflection_deg": 13.0, "direction": "L", "end_mi": 184.8, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 372, "seq": 60, "start_mi": 184.79}
 {"advisory_mph": 35, "apex_mi": 184.86, "deflection_deg": 40.4, "direction": "R", "end_mi": 184.87, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 278, "seq": 61, "start_mi": 184.84}
@@ -16590,7 +16590,7 @@
 {"advisory_mph": 80, "apex_mi": 564.68, "deflection_deg": 8.1, "direction": "R", "end_mi": 564.71, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 2330, "seq": 151, "start_mi": 564.66}
 {"advisory_mph": 80, "apex_mi": 570.28, "deflection_deg": 9.0, "direction": "R", "end_mi": 570.36, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1580, "seq": 152, "start_mi": 570.26}
 {"advisory_mph": 60, "apex_mi": 571.0, "deflection_deg": 16.6, "direction": "L", "end_mi": 571.0, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 785, "seq": 153, "start_mi": 570.91}
-{"advisory_mph": 45, "apex_mi": 571.01, "deflection_deg": 29.1, "direction": "L", "end_mi": 571.1, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 468, "seq": 154, "start_mi": 571.0}
+{"advisory_mph": 45, "apex_mi": 571.02, "deflection_deg": 29.1, "direction": "L", "end_mi": 571.1, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 468, "seq": 154, "start_mi": 571.0}
 {"advisory_mph": 80, "apex_mi": 571.22, "deflection_deg": 12.5, "direction": "R", "end_mi": 571.25, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1705, "seq": 155, "start_mi": 571.18}
 {"advisory_mph": 80, "apex_mi": 574.75, "deflection_deg": 12.7, "direction": "L", "end_mi": 574.84, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1926, "seq": 156, "start_mi": 574.69}
 {"advisory_mph": 80, "apex_mi": 578.01, "deflection_deg": 11.1, "direction": "L", "end_mi": 578.03, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 2533, "seq": 157, "start_mi": 578.01}
@@ -16635,7 +16635,7 @@
 {"advisory_mph": 80, "apex_mi": 640.75, "deflection_deg": 28.7, "direction": "L", "end_mi": 640.88, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 2121, "seq": 196, "start_mi": 640.66}
 {"advisory_mph": 80, "apex_mi": 650.11, "deflection_deg": 10.5, "direction": "L", "end_mi": 650.15, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1713, "seq": 197, "start_mi": 650.07}
 {"advisory_mph": 80, "apex_mi": 652.18, "deflection_deg": 45.5, "direction": "R", "end_mi": 652.36, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1462, "seq": 198, "start_mi": 652.04}
-{"advisory_mph": 80, "apex_mi": 653.23, "deflection_deg": 21.3, "direction": "R", "end_mi": 653.31, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1461, "seq": 199, "start_mi": 653.19}
+{"advisory_mph": 80, "apex_mi": 653.23, "deflection_deg": 21.3, "direction": "R", "end_mi": 653.31, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1462, "seq": 199, "start_mi": 653.19}
 {"advisory_mph": 65, "apex_mi": 653.83, "deflection_deg": 13.7, "direction": "L", "end_mi": 653.87, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 920, "seq": 200, "start_mi": 653.75}
 {"advisory_mph": 80, "apex_mi": 657.76, "deflection_deg": 14.5, "direction": "R", "end_mi": 657.79, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1633, "seq": 201, "start_mi": 657.73}
 {"advisory_mph": 80, "apex_mi": 657.93, "deflection_deg": 21.0, "direction": "R", "end_mi": 658.09, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1954, "seq": 202, "start_mi": 657.93}
@@ -16655,7 +16655,7 @@
 {"advisory_mph": 80, "apex_mi": 698.58, "deflection_deg": 51.4, "direction": "L", "end_mi": 698.65, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1496, "seq": 216, "start_mi": 698.3}
 {"advisory_mph": 80, "apex_mi": 699.39, "deflection_deg": 42.9, "direction": "R", "end_mi": 699.53, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1709, "seq": 217, "start_mi": 699.26}
 {"advisory_mph": 80, "apex_mi": 701.37, "deflection_deg": 12.9, "direction": "R", "end_mi": 701.42, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1899, "seq": 218, "start_mi": 701.33}
-{"advisory_mph": 80, "apex_mi": 703.58, "deflection_deg": 47.2, "direction": "L", "end_mi": 703.61, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1351, "seq": 219, "start_mi": 703.3}
+{"advisory_mph": 80, "apex_mi": 703.48, "deflection_deg": 40.4, "direction": "L", "end_mi": 703.56, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1755, "seq": 219, "start_mi": 703.3}
 {"advisory_mph": 80, "apex_mi": 704.13, "deflection_deg": 26.6, "direction": "L", "end_mi": 704.2, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1795, "seq": 220, "start_mi": 704.02}
 {"advisory_mph": 80, "apex_mi": 704.82, "deflection_deg": 26.0, "direction": "L", "end_mi": 704.87, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1489, "seq": 221, "start_mi": 704.69}
 {"advisory_mph": 80, "apex_mi": 705.23, "deflection_deg": 8.4, "direction": "R", "end_mi": 705.28, "leg": "dallas_tx_us:st_louis_mo_us", "min_radius_ft": 1874, "seq": 222, "start_mi": 705.21}

@@ -28258,13 +28258,6 @@
             "spoken": "Entering Reidland"
           },
           {
-            "name": "Ohio River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 10.2,
-            "spoken": "Crossing the Ohio River"
-          },
-          {
             "name": "Benton",
             "at_mi": 17.5,
             "off_mi": 9.15,

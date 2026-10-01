@@ -2249,6 +2249,16 @@
             "spoken": "Passing Haymarket"
           },
           {
+            "name": "Thoroughfare Gap",
+            "category": "mountain_pass",
+            "kind": "point",
+            "at_mi": 46.8,
+            "lat": 38.77953,
+            "lon": -77.67757,
+            "spoken": "Approaching Thoroughfare Gap",
+            "source": "derived 2026-10-01: name, category and kind read from OpenStreetMap tags via classify_narratable_feature; spoken text derived via spoken_landmark_text; nearest projection of OSM node 210849571 (Thoroughfare Gap) onto the leg's archived dense route geometry; at_mi = interpolated cumulative distance at the projection, rescaled to leg miles. OpenStreetMap via Overpass: https://www.openstreetmap.org/."
+          },
+          {
             "name": "New Baltimore",
             "at_mi": 49.7,
             "off_mi": 0.18,
@@ -2276,6 +2286,16 @@
             "spoken": "Entering Remington"
           },
           {
+            "name": "Rappahannock River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 70.0,
+            "lat": 38.52907,
+            "lon": -77.82021,
+            "spoken": "Crossing the Rappahannock River",
+            "source": "derived 2026-10-01: crossing of OSM waterway way 37941839 (Rappahannock River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Brandy Station",
             "at_mi": 74.4,
             "off_mi": 0.14,
@@ -2283,16 +2303,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158653072, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Brandy Station"
-          },
-          {
-            "name": "Museum of Culpeper History",
-            "category": "museum",
-            "kind": "point",
-            "at_mi": 79.7,
-            "lat": 38.48085,
-            "lon": -77.98234,
-            "spoken": "Museum of Culpeper History ahead",
-            "source": "derived 2026-10-01: name, category and kind read from OpenStreetMap tags via classify_narratable_feature; spoken text derived via spoken_landmark_text; nearest projection of OSM node 4578422415 (Museum of Culpeper History) onto the leg's archived dense route geometry; at_mi = interpolated cumulative distance at the projection, rescaled to leg miles. OpenStreetMap via Overpass: https://www.openstreetmap.org/."
           },
           {
             "name": "Brightwood",
@@ -2321,6 +2331,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157558132, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Madison"
+          },
+          {
+            "name": "Rapidan River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 110.0,
+            "lat": 38.28018,
+            "lon": -78.34132,
+            "spoken": "Crossing the Rapidan River",
+            "source": "derived 2026-10-01: crossing of OSM waterway way 37945789 (Rapidan River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ruckersville",
@@ -2534,23 +2554,49 @@
             "hgv": false
           },
           {
-            "at_mi": 12.4,
+            "at_mi": 13.3,
             "mph": 65,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 13.0,
-            "mph": null
+            "at_mi": 14.4,
+            "mph": 55,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
           },
           {
-            "at_mi": 28.3,
+            "at_mi": 18.2,
+            "mph": 65,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 20.3,
             "mph": 70,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 28.7,
+            "at_mi": 20.5,
+            "mph": 65,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 20.8,
+            "mph": 55,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 21.1,
+            "mph": 70,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 22.9,
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
@@ -2562,14 +2608,52 @@
             "hgv": false
           },
           {
-            "at_mi": 31.3,
+            "at_mi": 32.2,
             "mph": 70,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 31.6,
-            "mph": null
+            "at_mi": 33.3,
+            "mph": 65,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 33.6,
+            "mph": 70,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 34.9,
+            "mph": 65,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 35.8,
+            "mph": 60,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 36.7,
+            "mph": 70,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 38.3,
+            "mph": 60,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 38.9,
+            "mph": 65,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
           },
           {
             "at_mi": 42.9,
@@ -2590,11 +2674,37 @@
             "hgv": false
           },
           {
-            "at_mi": 45.4,
-            "mph": null
+            "at_mi": 52.2,
+            "mph": 45,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
           },
           {
-            "at_mi": 59.9,
+            "at_mi": 53.6,
+            "mph": 55,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 56.5,
+            "mph": 45,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 57.0,
+            "mph": 40,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 58.1,
+            "mph": 45,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 58.6,
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
@@ -2619,7 +2729,15 @@
           },
           {
             "at_mi": 64.6,
-            "mph": null
+            "mph": 60,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 77.4,
+            "mph": 55,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
           },
           {
             "at_mi": 78.5,
@@ -2634,27 +2752,25 @@
             "hgv": false
           },
           {
-            "at_mi": 85.6,
-            "mph": null
-          },
-          {
-            "at_mi": 93.2,
-            "mph": 60,
-            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
-            "hgv": false
-          },
-          {
             "at_mi": 100.0,
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
           },
           {
-            "at_mi": 102.8,
-            "mph": null
+            "at_mi": 105.4,
+            "mph": 60,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
           },
           {
-            "at_mi": 117.9,
+            "at_mi": 112.7,
+            "mph": 45,
+            "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
+            "hgv": false
+          },
+          {
+            "at_mi": 115.5,
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
@@ -2770,10 +2886,107 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 60.7,
-            "end_mi": 62.5,
+            "start_mi": 12.1,
+            "end_mi": 14.0,
             "lanes": 2,
             "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 14.2,
+            "end_mi": 19.8,
+            "lanes": 4,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 20.0,
+            "end_mi": 21.4,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 21.4,
+            "end_mi": 23.4,
+            "lanes": 5,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 23.4,
+            "end_mi": 24.8,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 24.8,
+            "end_mi": 34.7,
+            "lanes": 4,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 34.7,
+            "end_mi": 41.0,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 41.0,
+            "end_mi": 42.0,
+            "lanes": 4,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 42.0,
+            "end_mi": 43.4,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 43.4,
+            "end_mi": 45.9,
+            "lanes": 4,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 45.9,
+            "end_mi": 57.3,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 57.8,
+            "end_mi": 58.1,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 58.1,
+            "end_mi": 76.8,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 77.4,
+            "end_mi": 78.2,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 78.2,
+            "end_mi": 78.7,
+            "lanes": 2,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
@@ -2784,14 +2997,14 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 82.0,
-            "end_mi": 84.7,
+            "start_mi": 81.7,
+            "end_mi": 86.4,
             "lanes": 2,
             "oneway": true,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 93.6,
+            "start_mi": 86.6,
             "end_mi": 101.5,
             "lanes": 2,
             "oneway": true,
@@ -2799,12 +3012,12 @@
           },
           {
             "start_mi": 101.5,
-            "end_mi": 102.5,
+            "end_mi": 106.8,
             "lanes": 2,
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           },
           {
-            "start_mi": 120.2,
+            "start_mi": 106.8,
             "end_mi": 123.1,
             "lanes": 2,
             "oneway": true,
@@ -4177,7 +4390,7 @@
           "name": "Manassas Safety/Rest Area West",
           "type": "public_rest_area",
           "at_mi": 36.6,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.; at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles); at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles)",
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.; at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles); at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles); at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles)",
           "parking": "limited",
           "actions": [
             "park",
@@ -4197,7 +4410,7 @@
           "name": "Sunoco",
           "type": "fuel_station",
           "at_mi": 63.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.; at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles); at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles)",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.; at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles); at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles); at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles)",
           "parking": "limited",
           "actions": [
             "park",
