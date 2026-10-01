@@ -32,6 +32,11 @@ GRID_CELL_DEG = 0.05
 EVENT_MERGE_MI = 20.0 / 1609.344
 INTERSECTION_EPSILON = 1e-10
 PARALLEL_EPSILON = 1e-16
+STALE_PUBLICAMUNDI_SOURCE = (
+    "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. "
+    "state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, "
+    "rescaled to leg miles; state miles = differences of those boundaries."
+)
 STATE_CONTEXT_SOURCE = (
     "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap "
     "U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative "
@@ -421,6 +426,10 @@ def process_world(
         new_sequence = _state_sequence(new_crossings, new_start_state)
         sequence_matches = old_sequence == new_sequence
         selected = only is not None and leg_id in only
+        stale_source = any(
+            item.get("source") == STALE_PUBLICAMUNDI_SOURCE
+            for item in old_crossings + old_state_miles
+        )
         if not sequence_matches:
             report["sequence_differs"].append(
                 {
@@ -432,7 +441,7 @@ def process_world(
             )
 
         shift = _max_crossing_shift(old_crossings, new_crossings)
-        should_update = selected or (sequence_matches and shift >= min_shift)
+        should_update = selected or (sequence_matches and (shift >= min_shift or stale_source))
         if not should_update:
             continue
 

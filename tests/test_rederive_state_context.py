@@ -110,6 +110,25 @@ def test_sequence_equal_boundary_below_minimum_shift_is_not_updated(monkeypatch)
     assert report["changed"] == []
 
 
+def test_stale_publicamundi_source_updates_below_minimum_shift(monkeypatch):
+    leg = _leg()
+    for item in leg["corridor"]["state_crossings"] + leg["corridor"]["state_miles"]:
+        item["source"] = rsc.STALE_PUBLICAMUNDI_SOURCE
+    _install_geometry(monkeypatch)
+    monkeypatch.setattr(rsc, "derive_state_context", lambda *_args: _context(at_mi=10.5))
+
+    report = rsc.process_world(_data(leg), [], min_shift=1.0)
+
+    assert len(report["changed"]) == 1
+    assert report["changed"][0]["sequence_matches"] is True
+    assert leg["corridor"]["state_crossings"][0]["at_mi"] == 10.5
+    assert all(
+        item["source"] == rsc.STATE_CONTEXT_SOURCE
+        for field in ("state_crossings", "state_miles")
+        for item in leg["corridor"][field]
+    )
+
+
 def test_sequence_difference_is_reported_without_mutating_the_leg(monkeypatch):
     leg = _leg()
     before = copy.deepcopy(leg["corridor"])
