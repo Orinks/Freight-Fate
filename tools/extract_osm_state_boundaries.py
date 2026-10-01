@@ -222,21 +222,45 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pbf", type=Path, default=DEFAULT_PBF)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument(
+        "--allow-incomplete-state",
+        action="append",
+        default=[],
+        metavar="US-XX",
+        help="allow a reviewed state-boundary validation failure (repeatable)",
+    )
     args = parser.parse_args(argv)
     if not args.pbf.exists():
         print(f"extract not found: {args.pbf}", file=sys.stderr)
         return 2
 
     payload, errors = extract_boundaries(args.pbf)
-    for error in errors:
-        print(f"ERROR: {error}", file=sys.stderr)
-    if errors:
+    allowed = set(args.allow_incomplete_state)
+    failed_states = {error.partition(":")[0] for error in errors}
+    payload_states = {state["iso"] for state in payload["states"]}
+    if allowed - payload_states or allowed - failed_states:
+        invalid = sorted((allowed - payload_states) | (allowed - failed_states))
         print(
-            f"State boundary extraction failed validation: {len(errors)} error(s); "
+            f"ERROR: incomplete-state allowance does not match a failed extracted state: {invalid}",
+            file=sys.stderr,
+        )
+        return 1
+    for error in errors:
+        level = "WARNING" if error.partition(":")[0] in allowed else "ERROR"
+        print(f"{level}: {error}", file=sys.stderr)
+    unallowed_errors = [error for error in errors if error.partition(":")[0] not in allowed]
+    if unallowed_errors:
+        print(
+            f"State boundary extraction failed validation: {len(unallowed_errors)} error(s); "
             "cache was not written.",
             file=sys.stderr,
         )
         return 1
+    if errors:
+        print(
+            "Proceeding with the explicitly allowed incomplete state boundary above.",
+            file=sys.stderr,
+        )
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(
