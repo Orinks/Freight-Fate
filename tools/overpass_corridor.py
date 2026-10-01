@@ -23,16 +23,22 @@ from __future__ import annotations
 
 import http.client
 import json
+import os
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Any
 
-MIRRORS = (
+DEFAULT_MIRRORS = (
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
     "https://overpass.private.coffee/api/interpreter",
+)
+# OVERPASS_URLS lets a bake choose reachable Overpass mirrors.
+MIRRORS = (
+    tuple(url.strip() for url in os.environ.get("OVERPASS_URLS", "").split(",") if url.strip())
+    or DEFAULT_MIRRORS
 )
 USER_AGENT = "Freight-Fate world bake (https://github.com/Orinks/Freight-Fate)"
 
