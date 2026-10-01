@@ -367,10 +367,11 @@ def delegated_steps(
 
 # --- the pass ---------------------------------------------------------------
 def pending_legs(world: dict[str, Any]) -> list[dict[str, Any]]:
+    """Rerouted legs still missing the grade profile dropped with the old route."""
     return [
         leg
         for leg in world["legs"]
-        if leg.get("rerouted") and not (leg.get("corridor") or {}).get("interchanges")
+        if leg.get("rerouted") and not (leg.get("corridor") or {}).get("grade_segments")
     ]
 
 
@@ -444,7 +445,7 @@ def main() -> int:
     ap.add_argument(
         "--all-pending",
         action="store_true",
-        help="every leg reroute_leg.py left incomplete",
+        help="every rerouted leg missing grade_segments",
     )
     ap.add_argument("--check", action="store_true", help="list incomplete legs and stop")
     ap.add_argument("--pbf", type=Path, help="local OSM extract for the interchange family")
