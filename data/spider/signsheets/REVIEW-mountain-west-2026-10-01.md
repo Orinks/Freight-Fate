@@ -3,7 +3,7 @@
 Drafts for the owner's review; nothing here is baked. Sheets so far:
 `nebraska-2026-10-01.md`, `wyoming-2026-10-01.md`,
 `montana-2026-10-01.md`, `utah-2026-10-01.md`, `arizona-2026-10-01.md`,
-and `mountain-west-reverse-copies-2026-10-01.md`.
+`new-mexico-2026-10-01.md`, and `mountain-west-reverse-copies-2026-10-01.md`.
 
 ## Counts
 
@@ -12,9 +12,11 @@ and `mountain-west-reverse-copies-2026-10-01.md`.
 - Montana: 13 attractions, 51 signs, 13 new lines.
 - Utah: 12 attractions, 84 signs, 12 new lines.
 - Arizona: 19 attractions, 68 signs, 19 new lines.
+- New Mexico: 13 attractions, 62 signs, 13 new lines.
 - Reused-copy signs (older approved copy, other directions and sibling
-  legs): 52, in Nebraska (17), Montana (8), Utah (9) and Arizona (18).
-- Total so far: 65 attractions, 332 new-copy signs, 65 new lines, 52
+  legs): 68, in Nebraska (17), Montana (8), Utah (9), Arizona (18) and New
+  Mexico (16).
+- Total so far: 78 attractions, 394 new-copy signs, 78 new lines, 68
   reused-copy signs.
 
 Every sheet dry-runs clean through `tools/bake_billboards.py` (no
@@ -318,3 +320,57 @@ Tonto Natural Bridge State Park
 Oatman
 
 65. Billboard: Oatman, north of Topock on old Route sixty-six. Wild burros run the main street and expect to be fed. They outrank the cars.
+
+### New Mexico
+
+The Blue Hole
+
+66. Billboard: The Blue Hole, ahead in Santa Rosa. A desert spring over eighty feet deep, sixty-two degrees year round. Divers love it; toes are less sure.
+
+Sandia Peak Tramway
+
+67. Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Your grades are gentler.
+
+Acoma Sky City
+
+68. Billboard: Acoma Sky City, ahead, a pueblo atop a mesa three hundred sixty-five feet high, home for centuries. Tours begin at the cultural center.
+
+El Rancho Hotel
+
+69. Billboard: The El Rancho Hotel, ahead in Gallup, built in nineteen thirty-seven for movie crews. Its rooms are named for the stars who stayed.
+
+Meow Wolf
+
+70. Billboard: Meow Wolf, ahead in Santa Fe. A bowling alley became a house with doors to other worlds. A fantasy novelist footed the bill.
+
+Bosque del Apache National Wildlife Refuge
+
+71. Billboard: Bosque del Apache National Wildlife Refuge, ahead at San Antonio. Thousands of sandhill cranes winter here with the snow geese. They are louder than you.
+
+Truth or Consequences
+
+72. Billboard: Truth or Consequences, ahead. In nineteen fifty, Hot Springs renamed itself after a radio quiz show for one broadcast. The name stuck; the show moved on.
+
+Hatch
+
+73. Billboard: Hatch, next exit, the chile capital of the world, by its own count. Its Labor Day festival draws thousands. Mild is a matter of opinion.
+
+Mesilla
+
+74. Billboard: Mesilla, ahead by Las Cruces. The railroad bypassed it in eighteen eighty-one over land prices, which kept the old plaza old. Thank the haggling.
+
+Rockhound State Park
+
+75. Billboard: Rockhound State Park, ahead near Deming, the first park in the country to let you take the rocks home. Your suspension gets a vote.
+
+White Sands National Park
+
+76. Billboard: White Sands National Park, ahead. The largest gypsum dunefield on Earth, and you may sled it. This road closes now and then for missile tests.
+
+New Mexico Museum of Space History
+
+77. Billboard: The New Mexico Museum of Space History, ahead in Alamogordo. Ham, the first chimpanzee in space, is buried on the grounds. He went first.
+
+Carlsbad Caverns National Park
+
+78. Billboard: Carlsbad Caverns National Park, southwest of Carlsbad. The Big Room is the largest cave chamber in North America. Your whole fleet would fit.

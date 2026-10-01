@@ -351,3 +351,107 @@ before its place in its own direction.
 - leg: kingman_az_us -> flagstaff_az_us
 - at_mi: 64.0
 - spoken: Billboard: Delgadillo's Snow Cap is ahead in Seligman. It serves burgers, shakes, fake mustard, practical jokes, and a menu delivered by people who consider confusion part of the service.
+
+## New Mexico
+
+Cline's Corners was signed only eastbound out of Albuquerque, Tucumcari
+Tonite only westbound from Amarillo, the Very Large Array only northbound
+into Socorro, and Roswell only on the Clovis road. These add the other
+direction and the through legs. The Socorro signs stand outside the El
+Camino Real byway's short I-25 stretches.
+
+### Cline's Corners (from Tucumcari)
+- treatment: billboard
+- leg: tucumcari_nm_us -> albuquerque_nm_us
+- at_mi: 106.3
+- spoken: Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young.
+
+### Cline's Corners (from Amarillo)
+- treatment: billboard
+- leg: amarillo_tx_us -> albuquerque_nm_us
+- at_mi: 218.1
+- spoken: Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young.
+
+### Cline's Corners (from Albuquerque)
+- treatment: billboard
+- leg: albuquerque_nm_us -> amarillo_tx_us
+- at_mi: 51.9
+- spoken: Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young.
+
+### Cline's Corners (from Dallas)
+- treatment: billboard
+- leg: dallas_tx_us -> albuquerque_nm_us
+- at_mi: 577.1
+- spoken: Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young.
+
+### Cline's Corners (from Albuquerque)
+- treatment: billboard
+- leg: albuquerque_nm_us -> dallas_tx_us
+- at_mi: 50.9
+- spoken: Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young.
+
+### Tucumcari Tonite (from Albuquerque)
+- treatment: billboard
+- leg: albuquerque_nm_us -> tucumcari_nm_us
+- at_mi: 167.0
+- spoken: Billboard: Stay in Tucumcari tonight, with a mile of motel neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.
+
+### Tucumcari Tonite (from Amarillo)
+- treatment: billboard
+- leg: amarillo_tx_us -> albuquerque_nm_us
+- at_mi: 104.1
+- spoken: Billboard: Stay in Tucumcari tonight, with a mile of motel neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.
+
+### Tucumcari Tonite (from Albuquerque)
+- treatment: billboard
+- leg: albuquerque_nm_us -> amarillo_tx_us
+- at_mi: 165.9
+- spoken: Billboard: Stay in Tucumcari tonight, with a mile of motel neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.
+
+### Tucumcari Tonite (from Dallas)
+- treatment: billboard
+- leg: dallas_tx_us -> albuquerque_nm_us
+- at_mi: 464.8
+- spoken: Billboard: Stay in Tucumcari tonight, with a mile of motel neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.
+
+### Tucumcari Tonite (from Albuquerque)
+- treatment: billboard
+- leg: albuquerque_nm_us -> dallas_tx_us
+- at_mi: 163.2
+- spoken: Billboard: Stay in Tucumcari tonight, with a mile of motel neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.
+
+### The Very Large Array (from Albuquerque)
+- treatment: billboard
+- leg: albuquerque_nm_us -> socorro_nm_us
+- at_mi: 68.0
+- spoken: Billboard: West of Socorro, twenty-seven giant white dish antennas listen to the universe together across the Plains of San Agustin. You have seen them in the movies, aimed at the stars.
+
+### The Very Large Array (from El Paso)
+- treatment: billboard
+- leg: el_paso_tx_us -> albuquerque_nm_us
+- at_mi: 180.7
+- spoken: Billboard: West of Socorro, twenty-seven giant white dish antennas listen to the universe together across the Plains of San Agustin. You have seen them in the movies, aimed at the stars.
+
+### The Very Large Array (from Albuquerque)
+- treatment: billboard
+- leg: albuquerque_nm_us -> el_paso_tx_us
+- at_mi: 68.3
+- spoken: Billboard: West of Socorro, twenty-seven giant white dish antennas listen to the universe together across the Plains of San Agustin. You have seen them in the movies, aimed at the stars.
+
+### Roswell (from Alamogordo)
+- treatment: billboard
+- leg: alamogordo_nm_us -> roswell_nm_us
+- at_mi: 108.0
+- spoken: Billboard: Roswell is ahead, where something crashed in the desert in nineteen forty-seven and the Air Force has been explaining it ever since. Even the streetlights and the McDonald's are shaped like aliens.
+
+### Roswell (from Carlsbad)
+- treatment: billboard
+- leg: carlsbad_nm_us -> roswell_nm_us
+- at_mi: 67.0
+- spoken: Billboard: Roswell is ahead, where something crashed in the desert in nineteen forty-seven and the Air Force has been explaining it ever since. Even the streetlights and the McDonald's are shaped like aliens.
+
+### Roswell (from Lubbock)
+- treatment: billboard
+- leg: lubbock_tx_us -> roswell_nm_us
+- at_mi: 200.0
+- spoken: Billboard: Roswell is ahead, where something crashed in the desert in nineteen forty-seven and the Air Force has been explaining it ever since. Even the streetlights and the McDonald's are shaped like aliens.
