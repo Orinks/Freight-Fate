@@ -5801,6 +5801,16 @@
             "spoken": "Passing Zurich"
           },
           {
+            "name": "Sternberg Museum (from Kearney)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 133.0,
+            "spoken": "Billboard: The Sternberg Museum, ahead in Hays. The famous fossil is a fourteen-foot fish with a six-foot fish inside it. Chew your lunch.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Victoria",
             "at_mi": 146.2,
             "off_mi": 9.55,
@@ -14333,6 +14343,16 @@
             "spoken": "Passing Barneston"
           },
           {
+            "name": "Pony Express Barn (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.0,
+            "spoken": "Billboard: The Pony Express Barn, ahead in Marysville, the last home station still on its original ground. The mail goes by truck now.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Horseshoe River",
             "category": "river",
             "kind": "point",
@@ -14356,6 +14376,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151740518, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Marysville"
+          },
+          {
+            "name": "Pony Express Barn (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 85.0,
+            "spoken": "Billboard: The Pony Express Barn, ahead in Marysville, the last home station still on its original ground. The mail goes by truck now.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Blue Rapids",
@@ -21775,6 +21805,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151489659, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Rexford"
+          },
+          {
+            "name": "Prairie Museum (from North Platte)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 135.0,
+            "spoken": "Billboard: The Prairie Museum, ahead in Colby, with the Cooper Barn, the biggest barn in Kansas. The truck stays outside.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [

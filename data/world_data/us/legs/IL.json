@@ -2106,6 +2106,26 @@
             "spoken": "Passing Old Mill Creek"
           },
           {
+            "name": "Mars Cheese Castle (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.5,
+            "spoken": "Billboard: Mars Cheese Castle, next exit. Turrets, a drawbridge, and cheese since nineteen forty-seven. Storm the castle. Nobody will stop you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Mars Cheese Castle (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 82.7,
+            "spoken": "Billboard: Mars Cheese Castle, next exit. Turrets, a drawbridge, and cheese since nineteen forty-seven. Storm the castle. Nobody will stop you.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Somers",
             "at_mi": 82.9,
             "off_mi": 1.92,

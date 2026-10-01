@@ -2256,6 +2256,16 @@
             "spoken": "Passing Clarks Village"
           },
           {
+            "name": "Mystic Seaport (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.3,
+            "spoken": "Billboard: Mystic Seaport, next exit. Home of the last wooden whaling ship in the world. She quit whaling in nineteen twenty-one and still gets visitors.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Wequetequock",
             "at_mi": 45.9,
             "off_mi": 1.87,
@@ -2290,6 +2300,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158809231, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Center Groton"
+          },
+          {
+            "name": "Mystic Seaport (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.0,
+            "spoken": "Billboard: Mystic Seaport, ahead. Home of the last wooden whaling ship in the world. She quit whaling in nineteen twenty-one and still gets visitors.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Poquonock River",
@@ -3401,6 +3421,16 @@
             "spoken": "Passing Hope"
           },
           {
+            "name": "Roger Williams Park Zoo (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.5,
+            "spoken": "Billboard: Roger Williams Park Zoo, ahead. Over a hundred and fifty years old, one of the oldest zoos in the country. The animals have tenure.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pawtuxet River",
             "category": "river",
             "kind": "point",
@@ -3442,6 +3472,26 @@
             "spoken": "Passing Seekonk"
           },
           {
+            "name": "The Big Blue Bug (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.4,
+            "spoken": "Billboard: The Big Blue Bug, ahead. A fifty-eight-foot termite named Nibbles, on a roof by the highway since nineteen eighty. He prefers houses to trucks.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Roger Williams Park Zoo (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.5,
+            "spoken": "Billboard: Roger Williams Park Zoo, ahead. Over a hundred and fifty years old, one of the oldest zoos in the country. The animals have tenure.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Johnston",
             "at_mi": 33.4,
             "off_mi": 6.27,
@@ -3449,6 +3499,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 2440685822, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Johnston"
+          },
+          {
+            "name": "The Big Blue Bug (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.7,
+            "spoken": "Billboard: The Big Blue Bug, ahead. A fifty-eight-foot termite named Nibbles, on a roof by the highway since nineteen eighty. He prefers houses to trucks.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Saylesville",
@@ -4526,6 +4586,26 @@
         ],
         "landmarks": [
           {
+            "name": "The Big Blue Bug (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 0.5,
+            "spoken": "Billboard: The Big Blue Bug, ahead. A fifty-eight-foot termite named Nibbles, on a roof by the highway since nineteen eighty. He prefers houses to trucks.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Roger Williams Park Zoo (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 2.8,
+            "spoken": "Billboard: Roger Williams Park Zoo, next exit. Over a hundred and fifty years old, one of the oldest zoos in the country. The animals have tenure.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Seekonk",
             "at_mi": 2.9,
             "off_mi": 3.44,
@@ -4542,6 +4622,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158868953, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Pawtuxet"
+          },
+          {
+            "name": "Roger Williams Park Zoo (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.2,
+            "spoken": "Billboard: Roger Williams Park Zoo, next exit. Over a hundred and fifty years old, one of the oldest zoos in the country. The animals have tenure.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Big Blue Bug (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.5,
+            "spoken": "Billboard: The Big Blue Bug, ahead. A fifty-eight-foot termite named Nibbles, on a roof by the highway since nineteen eighty. He prefers houses to trucks.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Apponaug",
@@ -4802,6 +4902,16 @@
             "spoken": "Passing Wequetequock"
           },
           {
+            "name": "Mystic Seaport (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.3,
+            "spoken": "Billboard: Mystic Seaport, next exit. Home of the last wooden whaling ship in the world. She quit whaling in nineteen twenty-one and still gets visitors.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Stonington",
             "at_mi": 46.5,
             "off_mi": 2.75,
@@ -4850,6 +4960,16 @@
             "kind": "point",
             "at_mi": 54.6,
             "spoken": "Crossing the Thames River"
+          },
+          {
+            "name": "Mystic Seaport (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.0,
+            "spoken": "Billboard: Mystic Seaport, ahead. Home of the last wooden whaling ship in the world. She quit whaling in nineteen twenty-one and still gets visitors.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "traffic_aadt": [
@@ -9534,6 +9654,46 @@
         ],
         "landmarks": [
           {
+            "name": "The Big Blue Bug (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 0.5,
+            "spoken": "Billboard: The Big Blue Bug, ahead. A fifty-eight-foot termite named Nibbles, on a roof by the highway since nineteen eighty. He prefers houses to trucks.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Roger Williams Park Zoo (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 2.8,
+            "spoken": "Billboard: Roger Williams Park Zoo, next exit. Over a hundred and fifty years old, one of the oldest zoos in the country. The animals have tenure.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Big Blue Bug (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.1,
+            "spoken": "Billboard: The Big Blue Bug, ahead. A fifty-eight-foot termite named Nibbles, on a roof by the highway since nineteen eighty. He prefers houses to trucks.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Roger Williams Park Zoo (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.3,
+            "spoken": "Billboard: Roger Williams Park Zoo, next exit. Over a hundred and fifty years old, one of the oldest zoos in the country. The animals have tenure.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Johnston",
             "at_mi": 8.6,
             "off_mi": 0.04,
@@ -9598,6 +9758,16 @@
             "spoken": "Crossing the Oxoboxo River"
           },
           {
+            "name": "Mystic Seaport (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.9,
+            "spoken": "Billboard: Mystic Seaport, next exit. Home of the last wooden whaling ship in the world. She quit whaling in nineteen twenty-one and still gets visitors.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Bean Hill",
             "at_mi": 48.2,
             "off_mi": 0.18,
@@ -9605,6 +9775,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 359279083, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Bean Hill"
+          },
+          {
+            "name": "Mystic Seaport (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.6,
+            "spoken": "Billboard: Mystic Seaport, next exit. Home of the last wooden whaling ship in the world. She quit whaling in nineteen twenty-one and still gets visitors.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Montville",
@@ -9725,6 +9905,16 @@
             "spoken": "Entering Southport"
           },
           {
+            "name": "Maritime Aquarium (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 130.4,
+            "spoken": "Billboard: The Maritime Aquarium, ahead in Norwalk. Sharks, harbor seals and sea turtles, open daily. The seals work for fish and seem happy about it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Saugatuck",
             "at_mi": 132.7,
             "off_mi": 0.06,
@@ -9777,6 +9967,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158799897, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Noroton Heights"
+          },
+          {
+            "name": "Maritime Aquarium (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 142.5,
+            "spoken": "Billboard: The Maritime Aquarium, ahead in Norwalk. Sharks, harbor seals and sea turtles, open daily. The seals work for fish and seem happy about it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Riverside",

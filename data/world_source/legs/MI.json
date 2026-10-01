@@ -21239,6 +21239,16 @@
             "spoken": "Passing Pulaski"
           },
           {
+            "name": "National Railroad Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 99.5,
+            "spoken": "Billboard: The National Railroad Museum, ahead in Green Bay. Its Big Boy steam engine weighs over a million pounds. Suddenly your load feels light.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Hobart",
             "at_mi": 106.4,
             "off_mi": 4.61,

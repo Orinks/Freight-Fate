@@ -53205,6 +53205,16 @@
             "spoken": "Entering Kalama"
           },
           {
+            "name": "Mount St. Helens Visitor Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.0,
+            "spoken": "Billboard: Mount Saint Helens Visitor Center, ahead at Castle Rock. The mountain lost thirteen hundred feet off its top in nineteen eighty. It kept the rest.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Coweeman River",
             "category": "river",
             "kind": "point",
@@ -53235,6 +53245,16 @@
             "spoken": "Entering Castle Rock"
           },
           {
+            "name": "Mount St. Helens Visitor Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.0,
+            "spoken": "Billboard: Mount Saint Helens Visitor Center, next exit. The mountain lost thirteen hundred feet off its top in nineteen eighty. It kept the rest.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Vader",
             "at_mi": 72.7,
             "off_mi": 2.77,
@@ -53253,6 +53273,16 @@
             "spoken": "Passing Toledo"
           },
           {
+            "name": "World's Largest Egg (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 77.7,
+            "spoken": "Billboard: The world's largest egg, next exit, five miles west in Winlock. Twelve feet long, up on a pedestal. The chicken has never been located.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Winlock",
             "at_mi": 79.0,
             "off_mi": 2.86,
@@ -53260,6 +53290,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 132632299, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Winlock"
+          },
+          {
+            "name": "World's Largest Egg (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.3,
+            "spoken": "Billboard: The world's largest egg, next exit, five miles west in Winlock. Twelve feet long, up on a pedestal. The chicken has never been located.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Napavine",
@@ -53427,6 +53467,16 @@
             "spoken": "Passing Algona"
           },
           {
+            "name": "Museum of Flight (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 158.4,
+            "spoken": "Billboard: Museum of Flight, ahead. A Concorde, the first jet Air Force One, and the barn where Boeing started. None of them haul freight.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lakeland North",
             "at_mi": 160.6,
             "off_mi": 0.46,
@@ -53470,6 +53520,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 48709935, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Tukwila"
+          },
+          {
+            "name": "Museum of Flight (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 175.0,
+            "spoken": "Billboard: Museum of Flight, next exit. A Concorde, the first jet Air Force One, and the barn where Boeing started. None of them haul freight.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "restrictions": [],

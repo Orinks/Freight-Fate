@@ -40751,6 +40751,16 @@
             "spoken": "Crossing the Arkansas River"
           },
           {
+            "name": "Clinton Library (from Memphis)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 127.5,
+            "spoken": "Billboard: The Clinton Library, ahead in Little Rock. It hangs over the river like a bridge, with a full-size Oval Office. No appointment needed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sherwood",
             "at_mi": 130.7,
             "off_mi": 2.46,

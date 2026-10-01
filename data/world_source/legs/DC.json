@@ -13570,11 +13570,71 @@
             "spoken": "Passing Queenstown"
           },
           {
+            "name": "Old Wye Mill (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.5,
+            "spoken": "Billboard: Old Wye Mill, ahead. The oldest water-powered grist mill still grinding in the country, open May through October. The river works for free.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Ocean City boardwalk (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.0,
+            "spoken": "Billboard: Ocean City, thirty miles east of Salisbury on Route Fifty. Two and a half miles of boardwalk. The first one rolled up for storage.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Thrasher's French Fries (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.0,
+            "spoken": "Billboard: Thrasher's French Fries, on the Ocean City boardwalk, thirty miles east of Salisbury. Salt and vinegar since nineteen twenty-nine. Do not ask for ketchup.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Old Wye Mill (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.0,
+            "spoken": "Billboard: Old Wye Mill, ahead. The oldest water-powered grist mill still grinding in the country, open May through October. The river works for free.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Life-Saving Station Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.0,
+            "spoken": "Billboard: The Life-Saving Station Museum, Ocean City inlet, thirty miles east of Salisbury. The surfmen rowed out into storms. You only have to drive.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Choptank River",
             "category": "river",
             "kind": "point",
             "at_mi": 73.2,
             "spoken": "Crossing the Choptank River"
+          },
+          {
+            "name": "Fisher's Popcorn (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.6,
+            "spoken": "Billboard: Fisher's Popcorn, Ocean City boardwalk, thirty miles east of Salisbury. Caramel corn from copper kettles since nineteen thirty-seven. Your steering wheel will never recover.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Trappe",
@@ -13584,6 +13644,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158585005, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Trappe"
+          },
+          {
+            "name": "Dolle's Candyland (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 83.0,
+            "spoken": "Billboard: Dolle's Candyland, Ocean City boardwalk, thirty miles east of Salisbury. Salt water taffy since nineteen ten. Your fillings have been warned.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Trimper Rides (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 89.0,
+            "spoken": "Billboard: Trimper Rides, on the Ocean City boardwalk, thirty miles east of Salisbury. The carousel has turned since nineteen twelve. Still going nowhere.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Assateague Island (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 95.0,
+            "spoken": "Billboard: Assateague Island, by Ocean City, thirty miles past Salisbury. Wild horses run the beach. Stay a school bus length back. They bite.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Vienna",
@@ -13602,6 +13692,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158603389, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Mardela Springs"
+          },
+          {
+            "name": "Salisbury Zoo (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 107.5,
+            "spoken": "Billboard: The Salisbury Zoo, ahead in Salisbury. Open all year, and admission is free. The animals are the only ones on the clock.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Hebron",

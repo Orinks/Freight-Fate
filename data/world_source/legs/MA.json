@@ -810,6 +810,16 @@
             "spoken": "Passing Marstons Mills"
           },
           {
+            "name": "Sandwich Glass Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.0,
+            "spoken": "Billboard: The Sandwich Glass Museum, ahead in Sandwich. Cape Cod glass from the eighteen hundreds, and live glassblowing on the hour. Do not lean on anything.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sandwich",
             "at_mi": 14.3,
             "off_mi": 1.09,
@@ -844,6 +854,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158821717, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Sagamore"
+          },
+          {
+            "name": "Plymouth Rock (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.0,
+            "spoken": "Billboard: Plymouth Rock, ahead in Plymouth. It sits under a granite canopy, and it is smaller than you think. So was the Mayflower.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Sandwich Glass Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.0,
+            "spoken": "Billboard: The Sandwich Glass Museum, ahead in Sandwich. Cape Cod glass from the eighteen hundreds, and live glassblowing on the hour. Do not lean on anything.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Manomet",
@@ -905,6 +935,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158851517, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Marshfield"
+          },
+          {
+            "name": "Plymouth Rock (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 41.5,
+            "spoken": "Billboard: Plymouth Rock, ahead in Plymouth. It sits under a granite canopy, and it is smaller than you think. So was the Mayflower.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Humarock",
@@ -973,6 +1013,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158806831, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rockland"
+          },
+          {
+            "name": "Adams National Historical Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.0,
+            "spoken": "Billboard: Adams National Historical Park, ahead in Quincy. Two presidents were born there, in houses side by side. Neither had far to commute.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Hingham Center",
@@ -1061,6 +1111,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158875508, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Milton"
+          },
+          {
+            "name": "Adams National Historical Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.0,
+            "spoken": "Billboard: Adams National Historical Park, ahead in Quincy. Two presidents were born there, in houses side by side. Neither had far to commute.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Winthrop",
@@ -2358,6 +2418,16 @@
             "spoken": "Passing Marstons Mills"
           },
           {
+            "name": "Sandwich Glass Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.0,
+            "spoken": "Billboard: The Sandwich Glass Museum, ahead in Sandwich. Cape Cod glass from the eighteen hundreds, and live glassblowing on the hour. Do not lean on anything.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sandwich",
             "at_mi": 14.4,
             "off_mi": 1.09,
@@ -2392,6 +2462,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158821717, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Sagamore"
+          },
+          {
+            "name": "Plymouth Rock (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.0,
+            "spoken": "Billboard: Plymouth Rock, ahead in Plymouth. It sits under a granite canopy, and it is smaller than you think. So was the Mayflower.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Sandwich Glass Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.0,
+            "spoken": "Billboard: The Sandwich Glass Museum, ahead in Sandwich. Cape Cod glass from the eighteen hundreds, and live glassblowing on the hour. Do not lean on anything.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Manomet",
@@ -2462,6 +2552,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158811471, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Halifax"
+          },
+          {
+            "name": "Plymouth Rock (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.0,
+            "spoken": "Billboard: Plymouth Rock, ahead in Plymouth. It sits under a granite canopy, and it is smaller than you think. So was the Mayflower.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Rock Village",
@@ -5169,6 +5269,16 @@
             "spoken": "Passing Rochdale"
           },
           {
+            "name": "Old Sturbridge Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.4,
+            "spoken": "Billboard: Old Sturbridge Village, ahead in Sturbridge. An eighteen-thirties New England town, run by people in period dress. The oxen are unimpressed by horsepower.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Charlton Depot",
             "at_mi": 52.6,
             "off_mi": 1.36,
@@ -5201,6 +5311,16 @@
             "kind": "point",
             "at_mi": 63.2,
             "spoken": "Crossing the Quinebaug River"
+          },
+          {
+            "name": "Old Sturbridge Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.1,
+            "spoken": "Billboard: Old Sturbridge Village, ahead in Sturbridge. An eighteen-thirties New England town, run by people in period dress. The oxen are unimpressed by horsepower.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Union",
@@ -5285,6 +5405,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158904433, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Manchester"
+          },
+          {
+            "name": "Mark Twain House (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 92.8,
+            "spoken": "Billboard: The Mark Twain House, ahead in Hartford. He wrote Huckleberry Finn and Tom Sawyer there. Tours daily. Do not whitewash the fence.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "restrictions": [],
@@ -6578,6 +6708,16 @@
             "spoken": "Museum ahead: Lawrence Heritage State Park - Visitors Center"
           },
           {
+            "name": "Canobie Lake Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: Canobie Lake Park, ahead in Salem. A lakeside amusement park since nineteen oh-two, when the trolley brought the crowds. You drove. Close enough.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Salem",
             "at_mi": 31.6,
             "off_mi": 2.32,
@@ -6596,6 +6736,26 @@
             "spoken": "Passing Pelham"
           },
           {
+            "name": "America's Stonehenge (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.2,
+            "spoken": "Billboard: America's Stonehenge, next exit, then about five miles east. Stone chambers in the woods. Nobody agrees who built them. The rocks are not talking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Canobie Lake Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.2,
+            "spoken": "Billboard: Canobie Lake Park, next exit. A lakeside amusement park since nineteen oh-two, when the trolley brought the crowds. You drove. Close enough.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Windham",
             "at_mi": 35.6,
             "off_mi": 1.49,
@@ -6603,6 +6763,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158835683, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Windham"
+          },
+          {
+            "name": "America's Stonehenge (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 37.9,
+            "spoken": "Billboard: America's Stonehenge, next exit, then about five miles east. Stone chambers in the woods. Nobody agrees who built them. The rocks are not talking.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Robert Frost Farm (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.6,
+            "spoken": "Billboard: The Robert Frost Farm, next exit. The poet farmed there eleven years. Two roads diverge at the ramp. Take the one to the farm.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Londonderry",
@@ -6630,6 +6810,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158835827, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Derry Village"
+          },
+          {
+            "name": "Robert Frost Farm (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.3,
+            "spoken": "Billboard: The Robert Frost Farm, next exit. The poet farmed there eleven years. Two roads diverge at the ramp. Take the one to the farm.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Auburn",
@@ -8422,6 +8612,16 @@
             "spoken": "Passing Winthrop"
           },
           {
+            "name": "Adams National Historical Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Adams National Historical Park, ahead in Quincy. Two presidents were born there, in houses side by side. Neither had far to commute.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Neponset River",
             "category": "river",
             "kind": "point",
@@ -8483,6 +8683,16 @@
             "spoken": "Passing North Randolph"
           },
           {
+            "name": "Patriots Hall of Fame (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.0,
+            "spoken": "Billboard: The Patriots Hall of Fame, ahead in Foxborough. All the team's Super Bowl trophies, under one roof. The parking lot is bigger than some towns.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Dedham",
             "at_mi": 17.3,
             "off_mi": 3.32,
@@ -8499,6 +8709,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158895269, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Islington"
+          },
+          {
+            "name": "Adams National Historical Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.0,
+            "spoken": "Billboard: Adams National Historical Park, ahead in Quincy. Two presidents were born there, in houses side by side. Neither had far to commute.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Westwood",
@@ -8589,6 +8809,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158825476, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wrentham"
+          },
+          {
+            "name": "Patriots Hall of Fame (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.7,
+            "spoken": "Billboard: The Patriots Hall of Fame, ahead in Foxborough. All the team's Super Bowl trophies, under one roof. The parking lot is bigger than some towns.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Plainville",
@@ -11805,6 +12035,16 @@
             "spoken": "Crossing the Westfield River"
           },
           {
+            "name": "Basketball Hall of Fame (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.5,
+            "spoken": "Billboard: The Basketball Hall of Fame, ahead in Springfield, where the game began with peach baskets. Somebody had to fetch the ball after every score.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Montgomery",
             "at_mi": 17.8,
             "off_mi": 3.42,
@@ -11864,6 +12104,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158854056, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Otis"
+          },
+          {
+            "name": "Norman Rockwell Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.0,
+            "spoken": "Billboard: The Norman Rockwell Museum, ahead in Stockbridge. The world's largest collection of his original art, and his studio. Everyone in the paintings is still smiling.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Lee",
@@ -13057,6 +13307,16 @@
             "spoken": "Passing South Hadley Falls"
           },
           {
+            "name": "New England Air Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 1.0,
+            "spoken": "Billboard: The New England Air Museum, ahead at Bradley Airport. Over a hundred aircraft, from early flying machines to supersonic jets. All safely parked.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "East Longmeadow",
             "at_mi": 2.0,
             "off_mi": 3.56,
@@ -13274,6 +13534,26 @@
             "spoken": "Passing Bloomfield"
           },
           {
+            "name": "Mark Twain House (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.6,
+            "spoken": "Billboard: The Mark Twain House, ahead in Hartford. He wrote Huckleberry Finn and Tom Sawyer there. Tours daily. Do not whitewash the fence.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Basketball Hall of Fame (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.0,
+            "spoken": "Billboard: The Basketball Hall of Fame, ahead in Springfield, where the game began with peach baskets. Somebody had to fetch the ball after every score.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Manchester",
             "at_mi": 23.4,
             "off_mi": 6.83,
@@ -13281,6 +13561,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158904433, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Manchester"
+          },
+          {
+            "name": "New England Air Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.2,
+            "spoken": "Billboard: The New England Air Museum, ahead at Bradley Airport. Over a hundred aircraft, from early flying machines to supersonic jets. All safely parked.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bishop's Corner",
@@ -15115,6 +15405,26 @@
             "spoken": "Passing Suffield"
           },
           {
+            "name": "New England Air Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.9,
+            "spoken": "Billboard: The New England Air Museum, ahead at Bradley Airport. Over a hundred aircraft, from early flying machines to supersonic jets. All safely parked.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Basketball Hall of Fame (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Basketball Hall of Fame, ahead in Springfield, where the game began with peach baskets. Somebody had to fetch the ball after every score.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Warehouse Point",
             "at_mi": 13.1,
             "off_mi": 0.47,
@@ -15201,6 +15511,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 178348306, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bishop's Corner"
+          },
+          {
+            "name": "New England Air Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.9,
+            "spoken": "Billboard: The New England Air Museum, ahead at Bradley Airport. Over a hundred aircraft, from early flying machines to supersonic jets. All safely parked.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Glastonbury",
@@ -16759,6 +17079,16 @@
             "spoken": "Crossing the Chicopee River"
           },
           {
+            "name": "Basketball Hall of Fame (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The Basketball Hall of Fame, ahead in Springfield, where the game began with peach baskets. Somebody had to fetch the ball after every score.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "North Wilbraham",
             "at_mi": 12.7,
             "off_mi": 0.66,
@@ -16827,6 +17157,16 @@
             "kind": "point",
             "at_mi": 18.6,
             "spoken": "Crossing the Quaboag River"
+          },
+          {
+            "name": "Old Sturbridge Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.0,
+            "spoken": "Billboard: Old Sturbridge Village, ahead in Sturbridge. An eighteen-thirties New England town, run by people in period dress. The oxen are unimpressed by horsepower.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Ware",
@@ -16917,6 +17257,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158839884, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Charlton Depot"
+          },
+          {
+            "name": "Old Sturbridge Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.3,
+            "spoken": "Billboard: Old Sturbridge Village, ahead in Sturbridge. An eighteen-thirties New England town, run by people in period dress. The oxen are unimpressed by horsepower.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Spencer",
@@ -18561,6 +18911,16 @@
             "spoken": "Entering Charlton City"
           },
           {
+            "name": "Old Sturbridge Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.6,
+            "spoken": "Billboard: Old Sturbridge Village, ahead in Sturbridge. An eighteen-thirties New England town, run by people in period dress. The oxen are unimpressed by horsepower.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Quinebaug River",
             "category": "river",
             "kind": "point",
@@ -18584,6 +18944,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158892401, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Holland"
+          },
+          {
+            "name": "Old Sturbridge Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.1,
+            "spoken": "Billboard: Old Sturbridge Village, ahead in Sturbridge. An eighteen-thirties New England town, run by people in period dress. The oxen are unimpressed by horsepower.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Union",
@@ -18756,6 +19126,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158855857, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing East Windsor Hill"
+          },
+          {
+            "name": "Mark Twain House (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.0,
+            "spoken": "Billboard: The Mark Twain House, ahead in Hartford. He wrote Huckleberry Finn and Tom Sawyer there. Tours daily. Do not whitewash the fence.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Glastonbury",
@@ -23065,6 +23445,16 @@
             "spoken": "Entering Auburn"
           },
           {
+            "name": "Old Sturbridge Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.9,
+            "spoken": "Billboard: Old Sturbridge Village, ahead in Sturbridge. An eighteen-thirties New England town, run by people in period dress. The oxen are unimpressed by horsepower.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Quinebaug River",
             "category": "river",
             "kind": "point",
@@ -23088,6 +23478,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158854568, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Sturbridge"
+          },
+          {
+            "name": "Old Sturbridge Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.0,
+            "spoken": "Billboard: Old Sturbridge Village, ahead in Sturbridge. An eighteen-thirties New England town, run by people in period dress. The oxen are unimpressed by horsepower.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "West Willington",
@@ -23136,6 +23536,46 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158811527, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Talcottville"
+          },
+          {
+            "name": "Mark Twain House (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.9,
+            "spoken": "Billboard: The Mark Twain House, ahead in Hartford. He wrote Huckleberry Finn and Tom Sawyer there. Tours daily. Do not whitewash the fence.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Dinosaur State Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.6,
+            "spoken": "Billboard: Dinosaur State Park, next exit. Hundreds of real dinosaur footprints under a dome, two hundred million years old. Whoever made them never came back.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Mark Twain House (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.8,
+            "spoken": "Billboard: The Mark Twain House, ahead in Hartford. He wrote Huckleberry Finn and Tom Sawyer there. Tours daily. Do not whitewash the fence.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Dinosaur State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 73.1,
+            "spoken": "Billboard: Dinosaur State Park, next exit. Hundreds of real dinosaur footprints under a dome, two hundred million years old. Whoever made them never came back.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Connecticut River",
@@ -23274,6 +23714,16 @@
             "spoken": "Entering Southport"
           },
           {
+            "name": "Maritime Aquarium (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 132.1,
+            "spoken": "Billboard: The Maritime Aquarium, ahead in Norwalk. Sharks, harbor seals and sea turtles, open daily. The seals work for fish and seem happy about it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Saugatuck",
             "at_mi": 134.6,
             "off_mi": 0.06,
@@ -23317,6 +23767,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158799897, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Noroton Heights"
+          },
+          {
+            "name": "Maritime Aquarium (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 144.5,
+            "spoken": "Billboard: The Maritime Aquarium, ahead in Norwalk. Sharks, harbor seals and sea turtles, open daily. The seals work for fish and seem happy about it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Riverside",

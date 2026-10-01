@@ -579,6 +579,16 @@
             "spoken": "Entering Felton"
           },
           {
+            "name": "Ocean City boardwalk (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Billboard: Ocean City, thirty miles east of Salisbury on Route Fifty. Two and a half miles of boardwalk. The first one rolled up for storage.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Houston",
             "at_mi": 16.9,
             "off_mi": 3.39,
@@ -640,6 +650,16 @@
             "spoken": "Passing Bridgeville"
           },
           {
+            "name": "Thrasher's French Fries (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.0,
+            "spoken": "Billboard: Thrasher's French Fries, on the Ocean City boardwalk, thirty miles east of Salisbury. Salt and vinegar since nineteen twenty-nine. Do not ask for ketchup.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Federalsburg",
             "at_mi": 34.0,
             "off_mi": 9.83,
@@ -667,6 +687,16 @@
             "spoken": "Passing Sharptown"
           },
           {
+            "name": "Assateague Island (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.8,
+            "spoken": "Billboard: Assateague Island, by Ocean City, thirty miles past Salisbury. Wild horses run the beach. Stay a school bus length back. They bite.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Bethel",
             "at_mi": 40.5,
             "off_mi": 2.74,
@@ -683,6 +713,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 157575491, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Laurel"
+          },
+          {
+            "name": "Salisbury Zoo (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.0,
+            "spoken": "Billboard: The Salisbury Zoo, ahead in Salisbury. Open all year, and admission is free. The animals are the only ones on the clock.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Delmar",
@@ -1675,6 +1715,16 @@
             "spoken": "Passing Little Creek"
           },
           {
+            "name": "Dover Motor Speedway (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Dover Motor Speedway, ahead. The Monster Mile, one mile of steeply banked concrete, racing since nineteen sixty-nine. Your truck is not entered.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Leipsic River",
             "category": "river",
             "kind": "point",
@@ -1707,6 +1757,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158269237, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kenton"
+          },
+          {
+            "name": "Dover Motor Speedway (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.6,
+            "spoken": "Billboard: Dover Motor Speedway, ahead. The Monster Mile, one mile of steeply banked concrete, racing since nineteen sixty-nine. Your truck is not entered.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Clayton",
@@ -1786,6 +1846,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158388288, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Christiana"
+          },
+          {
+            "name": "Hagley Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 41.0,
+            "spoken": "Billboard: Hagley Museum, ahead in Wilmington. The du Pont black powder works on the Brandywine, with demonstrations. They keep the bangs small.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "New Castle",
@@ -3608,6 +3678,16 @@
             "spoken": "Passing Bear"
           },
           {
+            "name": "Hagley Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.1,
+            "spoken": "Billboard: Hagley Museum, ahead in Wilmington. The du Pont black powder works on the Brandywine, with demonstrations. They keep the bangs small.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Elkton",
             "at_mi": 18.2,
             "off_mi": 2.55,
@@ -4812,6 +4892,16 @@
           }
         ],
         "landmarks": [
+          {
+            "name": "Hagley Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.9,
+            "spoken": "Billboard: Hagley Museum, ahead in Wilmington. The du Pont black powder works on the Brandywine, with demonstrations. They keep the bangs small.",
+            "directions": [
+              "reverse"
+            ]
+          },
           {
             "name": "Ardencroft",
             "at_mi": 6.2,
@@ -6708,6 +6798,16 @@
             "spoken": "Passing New Castle"
           },
           {
+            "name": "Hagley Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.6,
+            "spoken": "Billboard: Hagley Museum, ahead in Wilmington. The du Pont black powder works on the Brandywine, with demonstrations. They keep the bangs small.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Marshallton",
             "at_mi": 8.1,
             "off_mi": 2.55,
@@ -6803,6 +6903,16 @@
             "spoken": "Passing Clayton"
           },
           {
+            "name": "Dover Motor Speedway (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 41.0,
+            "spoken": "Billboard: Dover Motor Speedway, ahead. The Monster Mile, one mile of steeply banked concrete, racing since nineteen sixty-nine. Your truck is not entered.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Cheswold",
             "at_mi": 43.5,
             "off_mi": 0.88,
@@ -6835,6 +6945,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158613411, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Little Creek"
+          },
+          {
+            "name": "Dover Motor Speedway (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.5,
+            "spoken": "Billboard: Dover Motor Speedway, ahead. The Monster Mile, one mile of steeply banked concrete, racing since nineteen sixty-nine. Your truck is not entered.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Rising Sun\u2013Lebanon",
@@ -6891,6 +7011,16 @@
             "spoken": "Entering Felton"
           },
           {
+            "name": "Fisher's Popcorn (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.0,
+            "spoken": "Billboard: Fisher's Popcorn, Ocean City boardwalk, thirty miles east of Salisbury. Caramel corn from copper kettles since nineteen thirty-seven. Your steering wheel will never recover.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Houston",
             "at_mi": 67.8,
             "off_mi": 3.39,
@@ -6907,6 +7037,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158572728, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Farmington"
+          },
+          {
+            "name": "Life-Saving Station Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 73.8,
+            "spoken": "Billboard: The Life-Saving Station Museum, Ocean City inlet, thirty miles east of Salisbury. The surfmen rowed out into storms. You only have to drive.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Greenwood",
@@ -6927,6 +7067,16 @@
             "spoken": "Passing Bridgeville"
           },
           {
+            "name": "Dolle's Candyland (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.0,
+            "spoken": "Billboard: Dolle's Candyland, Ocean City boardwalk, thirty miles east of Salisbury. Salt water taffy since nineteen ten. Your fillings have been warned.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Blades",
             "at_mi": 87.8,
             "off_mi": 0.87,
@@ -6934,6 +7084,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158515393, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Blades"
+          },
+          {
+            "name": "Trimper Rides (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 90.8,
+            "spoken": "Billboard: Trimper Rides, on the Ocean City boardwalk, thirty miles east of Salisbury. The carousel has turned since nineteen twelve. Still going nowhere.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Bethel",
@@ -6959,6 +7119,16 @@
             "kind": "point",
             "at_mi": 93.9,
             "spoken": "Crossing the Nanticoke River"
+          },
+          {
+            "name": "Salisbury Zoo (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 97.0,
+            "spoken": "Billboard: The Salisbury Zoo, ahead in Salisbury. Open all year, and admission is free. The animals are the only ones on the clock.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Delmar",

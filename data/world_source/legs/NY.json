@@ -5665,6 +5665,16 @@
             "spoken": "Museum ahead: Studio"
           },
           {
+            "name": "Norman Rockwell Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.5,
+            "spoken": "Billboard: The Norman Rockwell Museum, ahead in Stockbridge. The world's largest collection of his original art, and his studio. Everyone in the paintings is still smiling.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "South Lee",
             "at_mi": 42.3,
             "off_mi": 1.35,
@@ -5681,6 +5691,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158862435, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lee"
+          },
+          {
+            "name": "Norman Rockwell Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.0,
+            "spoken": "Billboard: The Norman Rockwell Museum, ahead in Stockbridge. The world's largest collection of his original art, and his studio. Everyone in the paintings is still smiling.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Otis",
@@ -5742,6 +5762,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158844046, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hampton Ponds"
+          },
+          {
+            "name": "New England Air Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 88.0,
+            "spoken": "Billboard: The New England Air Museum, ahead at Bradley Airport. Over a hundred aircraft, from early flying machines to supersonic jets. All safely parked.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Shaker Pines",
@@ -5823,6 +5853,16 @@
             "spoken": "Passing Windsor Locks"
           },
           {
+            "name": "Mark Twain House (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.7,
+            "spoken": "Billboard: The Mark Twain House, ahead in Hartford. He wrote Huckleberry Finn and Tom Sawyer there. Tours daily. Do not whitewash the fence.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Poquonock",
             "at_mi": 102.0,
             "off_mi": 1.7,
@@ -5848,6 +5888,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158824118, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Windsor"
+          },
+          {
+            "name": "New England Air Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 106.5,
+            "spoken": "Billboard: The New England Air Museum, ahead at Bradley Airport. Over a hundred aircraft, from early flying machines to supersonic jets. All safely parked.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "restrictions": [],
@@ -11481,6 +11531,16 @@
             "spoken": "Crossing the Housatonic River"
           },
           {
+            "name": "Norman Rockwell Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.7,
+            "spoken": "Billboard: The Norman Rockwell Museum, ahead in Stockbridge. The world's largest collection of his original art, and his studio. Everyone in the paintings is still smiling.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "South Lee",
             "at_mi": 42.5,
             "off_mi": 1.35,
@@ -11497,6 +11557,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158862435, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lee"
+          },
+          {
+            "name": "Norman Rockwell Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.0,
+            "spoken": "Billboard: The Norman Rockwell Museum, ahead in Stockbridge. The world's largest collection of his original art, and his studio. Everyone in the paintings is still smiling.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Chester Historical Museum (Old Jail)",
@@ -11626,6 +11696,16 @@
             "spoken": "Passing Bondsville"
           },
           {
+            "name": "Old Sturbridge Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 100.0,
+            "spoken": "Billboard: Old Sturbridge Village, ahead in Sturbridge. An eighteen-thirties New England town, run by people in period dress. The oxen are unimpressed by horsepower.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Warren",
             "at_mi": 103.6,
             "off_mi": 2.31,
@@ -11669,6 +11749,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158839884, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Charlton Depot"
+          },
+          {
+            "name": "Old Sturbridge Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 119.3,
+            "spoken": "Billboard: Old Sturbridge Village, ahead in Sturbridge. An eighteen-thirties New England town, run by people in period dress. The oxen are unimpressed by horsepower.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Rochdale",
@@ -41836,6 +41926,16 @@
             "spoken": "Entering Riverside"
           },
           {
+            "name": "Maritime Aquarium (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.0,
+            "spoken": "Billboard: The Maritime Aquarium, ahead in Norwalk. Sharks, harbor seals and sea turtles, open daily. The seals work for fish and seem happy about it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Noroton Heights",
             "at_mi": 31.3,
             "off_mi": 0.16,
@@ -41927,6 +42027,16 @@
             "spoken": "Entering Fairfield"
           },
           {
+            "name": "Maritime Aquarium (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.3,
+            "spoken": "Billboard: The Maritime Aquarium, ahead in Norwalk. Sharks, harbor seals and sea turtles, open daily. The seals work for fish and seem happy about it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Devon",
             "at_mi": 55.4,
             "off_mi": 0.3,
@@ -41968,6 +42078,16 @@
             "spoken": "Entering North Haven"
           },
           {
+            "name": "Dinosaur State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 87.0,
+            "spoken": "Billboard: Dinosaur State Park, ahead in Rocky Hill. Hundreds of dinosaur footprints under a dome, two hundred million years old. Whoever made them never came back.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Berlin",
             "at_mi": 94.3,
             "off_mi": 0.2,
@@ -41975,6 +42095,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158845944, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Berlin"
+          },
+          {
+            "name": "Mark Twain House (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 96.5,
+            "spoken": "Billboard: The Mark Twain House, ahead in Hartford. He wrote Huckleberry Finn and Tom Sawyer there. Tours daily. Do not whitewash the fence.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Dinosaur State Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 107.0,
+            "spoken": "Billboard: Dinosaur State Park, ahead in Rocky Hill. Hundreds of dinosaur footprints under a dome, two hundred million years old. Whoever made them never came back.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Mark Twain House (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 112.2,
+            "spoken": "Billboard: The Mark Twain House, ahead in Hartford. He wrote Huckleberry Finn and Tom Sawyer there. Tours daily. Do not whitewash the fence.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Talcottville",
@@ -42004,6 +42154,16 @@
             "spoken": "Passing West Willington"
           },
           {
+            "name": "Old Sturbridge Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 135.0,
+            "spoken": "Billboard: Old Sturbridge Village, ahead in Sturbridge. An eighteen-thirties New England town, run by people in period dress. The oxen are unimpressed by horsepower.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sturbridge",
             "at_mi": 145.7,
             "off_mi": 0.1,
@@ -42020,6 +42180,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158871235, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Charlton City"
+          },
+          {
+            "name": "Old Sturbridge Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 155.0,
+            "spoken": "Billboard: Old Sturbridge Village, ahead in Sturbridge. An eighteen-thirties New England town, run by people in period dress. The oxen are unimpressed by horsepower.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Auburn",
@@ -44128,6 +44298,16 @@
             "spoken": "Entering Riverside"
           },
           {
+            "name": "Maritime Aquarium (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.6,
+            "spoken": "Billboard: The Maritime Aquarium, ahead in Norwalk. Sharks, harbor seals and sea turtles, open daily. The seals work for fish and seem happy about it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Turn of River",
             "at_mi": 30.3,
             "off_mi": 3.39,
@@ -44262,6 +44442,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158814151, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Fairfield"
+          },
+          {
+            "name": "Maritime Aquarium (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.8,
+            "spoken": "Billboard: The Maritime Aquarium, ahead in Norwalk. Sharks, harbor seals and sea turtles, open daily. The seals work for fish and seem happy about it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Nichols",
@@ -46759,6 +46949,16 @@
             "spoken": "Passing Secaucus"
           },
           {
+            "name": "Thomas Edison Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.8,
+            "spoken": "Billboard: The Thomas Edison Center, ahead in Edison. On the site of his lab, a tower wears a fourteen-foot light bulb. It still works.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Linden",
             "at_mi": 32.1,
             "off_mi": 1.27,
@@ -46821,6 +47021,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158856860, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Woodbridge Township"
+          },
+          {
+            "name": "Thomas Edison Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.7,
+            "spoken": "Billboard: The Thomas Edison Center, next exit. On the site of his lab, a tower wears a fourteen-foot light bulb. It still works.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Edison",
@@ -46961,6 +47171,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158821396, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Cinnaminson Township"
+          },
+          {
+            "name": "Battleship New Jersey (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 97.3,
+            "spoken": "Billboard: Battleship New Jersey, ahead on the Camden waterfront. The most decorated battleship in Navy history, open for tours. It parks better than you do.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pennsauken Township",

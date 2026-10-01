@@ -7183,6 +7183,16 @@
             "spoken": "Passing Bloomsbury"
           },
           {
+            "name": "Red Mill Museum Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.0,
+            "spoken": "Billboard: The Red Mill Museum Village, ahead in Clinton. A wool mill from around eighteen ten, with a quarry and a schoolhouse. Still red, still open.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Musconetcong River",
             "category": "river",
             "kind": "point",
@@ -7231,6 +7241,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158858108, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Lebanon"
+          },
+          {
+            "name": "Red Mill Museum Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.5,
+            "spoken": "Billboard: The Red Mill Museum Village, ahead in Clinton. A wool mill from around eighteen ten, with a quarry and a schoolhouse. Still red, still open.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "North Branch Raritan River",
@@ -7396,6 +7416,16 @@
             "spoken": "Entering Riverside"
           },
           {
+            "name": "Maritime Aquarium (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 135.2,
+            "spoken": "Billboard: The Maritime Aquarium, ahead in Norwalk. Sharks, harbor seals and sea turtles, open daily. The seals work for fish and seem happy about it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Noroton Heights",
             "at_mi": 137.5,
             "off_mi": 0.16,
@@ -7448,6 +7478,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 12833631123, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Saugatuck"
+          },
+          {
+            "name": "Maritime Aquarium (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 147.6,
+            "spoken": "Billboard: The Maritime Aquarium, ahead in Norwalk. Sharks, harbor seals and sea turtles, open daily. The seals work for fish and seem happy about it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Southport",
@@ -10138,6 +10178,16 @@
             "spoken": "Passing Bloomsbury"
           },
           {
+            "name": "Red Mill Museum Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.0,
+            "spoken": "Billboard: The Red Mill Museum Village, ahead in Clinton. A wool mill from around eighteen ten, with a quarry and a schoolhouse. Still red, still open.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Franklin",
             "at_mi": 39.7,
             "off_mi": 0.43,
@@ -10193,6 +10243,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158858108, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Lebanon"
+          },
+          {
+            "name": "Red Mill Museum Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.0,
+            "spoken": "Billboard: The Red Mill Museum Village, ahead in Clinton. A wool mill from around eighteen ten, with a quarry and a schoolhouse. Still red, still open.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Liberty Corner",
@@ -40990,6 +41050,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158477564, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Ardencroft"
+          },
+          {
+            "name": "Hagley Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: Hagley Museum, ahead in Wilmington. The du Pont black powder works on the Brandywine, with demonstrations. They keep the bangs small.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Hagley Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: Hagley Museum, ahead in Wilmington. The du Pont black powder works on the Brandywine, with demonstrations. They keep the bangs small.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Newport",

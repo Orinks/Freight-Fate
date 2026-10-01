@@ -11003,6 +11003,16 @@
             "spoken": "Entering Tyro"
           },
           {
+            "name": "Dalton Defenders Museum (from Bartlesville)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.5,
+            "spoken": "Billboard: The Dalton Defenders Museum, ahead in Coffeyville. The Dalton Gang tried to rob two banks at once here in eighteen ninety-two. The town objected.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Dearing",
             "at_mi": 33.2,
             "off_mi": 1.52,
@@ -21043,6 +21053,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151566954, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gans"
+          },
+          {
+            "name": "U.S. Marshals Museum (from Muskogee)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.7,
+            "spoken": "Billboard: The United States Marshals Museum, ahead in Fort Smith. The building is shaped like a marshal's badge. Drive like somebody is watching.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Spiro",

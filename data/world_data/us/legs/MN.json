@@ -2102,6 +2102,16 @@
             "spoken": "Passing Wilkinson"
           },
           {
+            "name": "The Big Fish (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: The Big Fish, ahead near Bena. A sixty-five-foot muskie, built as a drive-in in the nineteen fifties. Out of water ever since, and looking great.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Chippewa National Forest",
             "category": "national_forest",
             "kind": "zone",
@@ -2130,6 +2140,26 @@
             "kind": "point",
             "at_mi": 44.0,
             "spoken": "Crossing the Ball Club River"
+          },
+          {
+            "name": "The Big Fish (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.0,
+            "spoken": "Billboard: The Big Fish, ahead near Bena. A sixty-five-foot muskie, built as a drive-in in the nineteen fifties. Out of water ever since, and looking great.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Judy Garland Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.0,
+            "spoken": "Billboard: The Judy Garland Museum, ahead in Grand Rapids, her birthplace. Ruby slippers were stolen here once. The FBI found them. Clicking heels did not.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Deer River",
@@ -4452,6 +4482,26 @@
             "spoken": "Passing Proctor"
           },
           {
+            "name": "Frank Lloyd Wright gas station (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: Frank Lloyd Wright's gas station, ahead in Cloquet. The only one built in his lifetime, and it still pumps gas. Fill up on architecture.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Aerial Lift Bridge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: The Aerial Lift Bridge, ahead in Duluth. Ships sound long, short, long, short, and the whole road deck rises. Your horn will not work.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Esko",
             "at_mi": 14.6,
             "off_mi": 0.75,
@@ -4477,6 +4527,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151963541, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Carlton"
+          },
+          {
+            "name": "Frank Lloyd Wright gas station (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.0,
+            "spoken": "Billboard: Frank Lloyd Wright's gas station, ahead in Cloquet. The only one built in his lifetime, and it still pumps gas. Fill up on architecture.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Big Lake",
@@ -4688,6 +4748,16 @@
             "spoken": "Entering New York Mills"
           },
           {
+            "name": "Big Tom (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 186.0,
+            "spoken": "Billboard: Big Tom, ahead in Frazee, a twenty-foot turkey on a hill. The first one caught fire during a touch-up. This one has been very careful.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Frazee",
             "at_mi": 196.6,
             "off_mi": 0.94,
@@ -4695,6 +4765,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151407258, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Frazee"
+          },
+          {
+            "name": "Big Tom (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 208.0,
+            "spoken": "Billboard: Big Tom, ahead in Frazee, a twenty-foot turkey on a hill. The first one caught fire during a touch-up. This one has been very careful.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Audubon",
@@ -4731,6 +4811,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151482579, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Glyndon"
+          },
+          {
+            "name": "Hjemkomst Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 244.5,
+            "spoken": "Billboard: The Hjemkomst Center, ahead in Moorhead. A school counselor built a Viking ship in a potato warehouse. It sailed to Norway. The potatoes stayed home.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Sabin",
@@ -7230,6 +7320,26 @@
             "spoken": "Passing Proctor"
           },
           {
+            "name": "Frank Lloyd Wright gas station (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.8,
+            "spoken": "Billboard: Frank Lloyd Wright's gas station, ahead in Cloquet. The only one built in his lifetime, and it still pumps gas. Fill up on architecture.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Aerial Lift Bridge (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.8,
+            "spoken": "Billboard: The Aerial Lift Bridge, ahead in Duluth. Ships sound long, short, long, short, and the whole road deck rises. Your horn will not work.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Midway River",
             "category": "river",
             "kind": "point",
@@ -7262,6 +7372,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151963541, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Carlton"
+          },
+          {
+            "name": "Frank Lloyd Wright gas station (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.0,
+            "spoken": "Billboard: Frank Lloyd Wright's gas station, ahead in Cloquet. The only one built in his lifetime, and it still pumps gas. Fill up on architecture.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mahtowa",
@@ -7321,6 +7441,16 @@
             "spoken": "Crossing the Grindstone River"
           },
           {
+            "name": "Tobies (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 71.0,
+            "spoken": "Billboard: Tobies bakery, next exit in Hinckley. Halfway between the Twin Cities and Duluth since nineteen forty-eight. That is a long time to be halfway.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Hinckley Fire Museum",
             "category": "museum",
             "kind": "point",
@@ -7335,6 +7465,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151635033, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hinckley"
+          },
+          {
+            "name": "Tobies (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.0,
+            "spoken": "Billboard: Tobies bakery, ahead in Hinckley. Halfway between the Twin Cities and Duluth since nineteen forty-eight. That is a long time to be halfway.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Pine City voyageur (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.4,
+            "spoken": "Billboard: The Pine City voyageur, next exit. Forty-five feet of redwood, chainsawed into a fur trader. The log came from California and decided to stay.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pine City voyageur (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 87.8,
+            "spoken": "Billboard: The Pine City voyageur, next exit. Forty-five feet of redwood, chainsawed into a fur trader. The log came from California and decided to stay.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Rock Creek",
@@ -8567,6 +8727,16 @@
             "spoken": "Passing Taconite"
           },
           {
+            "name": "Judy Garland Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.5,
+            "spoken": "Billboard: The Judy Garland Museum, ahead in Grand Rapids, her birthplace. Ruby slippers were stolen here once. The FBI found them. Clicking heels did not.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Marble",
             "at_mi": 6.2,
             "off_mi": 10.41,
@@ -8735,6 +8905,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151963541, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Carlton"
+          },
+          {
+            "name": "Aerial Lift Bridge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 71.0,
+            "spoken": "Billboard: The Aerial Lift Bridge, ahead in Duluth. Ships sound long, short, long, short, and the whole road deck rises. Your horn will not work.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Hermantown",
@@ -10028,6 +10208,16 @@
             "spoken": "Passing Cherry"
           },
           {
+            "name": "Hull Rust Mine View (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.5,
+            "spoken": "Billboard: The Hull Rust Mine View, ahead in Hibbing. In nineteen eighteen, part of town rolled two miles south to make room for the mine.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mountain Iron",
             "at_mi": 20.5,
             "off_mi": 1.06,
@@ -10042,6 +10232,16 @@
             "kind": "point",
             "at_mi": 21.1,
             "spoken": "Virginia Heritage Museum ahead"
+          },
+          {
+            "name": "Hockey Hall of Fame (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: The United States Hockey Hall of Fame, ahead in Eveleth, on Hat Trick Avenue. Three on-time deliveries in one day is a hat trick too.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Biwabik",
@@ -10092,6 +10292,16 @@
             "kind": "point",
             "at_mi": 31.9,
             "spoken": "Crossing the Saint Louis River"
+          },
+          {
+            "name": "Hockey Hall of Fame (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.0,
+            "spoken": "Billboard: The United States Hockey Hall of Fame, ahead in Eveleth, on Hat Trick Avenue. Three on-time deliveries in one day is a hat trick too.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kelsey",
@@ -10203,6 +10413,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151565585, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Esko"
+          },
+          {
+            "name": "Aerial Lift Bridge (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.0,
+            "spoken": "Billboard: The Aerial Lift Bridge, ahead in Duluth. Ships sound long, short, long, short, and the whole road deck rises. Your horn will not work.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Hermantown",
@@ -12280,6 +12500,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Hull Rust Mine View (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Hull Rust Mine View, ahead in Hibbing. In nineteen eighteen, part of town rolled two miles south to make room for the mine.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Nashwauk",
             "at_mi": 12.8,
             "off_mi": 0.43,
@@ -12341,6 +12571,16 @@
             "spoken": "Entering Bovey"
           },
           {
+            "name": "Judy Garland Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.5,
+            "spoken": "Billboard: The Judy Garland Museum, ahead in Grand Rapids, her birthplace. Ruby slippers were stolen here once. The FBI found them. Clicking heels did not.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Mississippi River",
             "category": "river",
             "kind": "point",
@@ -12353,6 +12593,16 @@
             "kind": "point",
             "at_mi": 39.0,
             "spoken": "Crossing the Hill River"
+          },
+          {
+            "name": "Judy Garland Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.0,
+            "spoken": "Billboard: The Judy Garland Museum, ahead in Grand Rapids, her birthplace. Ruby slippers were stolen here once. The FBI found them. Clicking heels did not.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Willow River",
@@ -12401,6 +12651,16 @@
             "spoken": "Entering Farm Island"
           },
           {
+            "name": "Garrison walleye (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 97.0,
+            "spoken": "Billboard: Garrison, ahead on Mille Lacs, where a nineteen-foot fiberglass walleye stands by the lake. The plaque says Paul Bunyan caught it. Sure he did.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Garrison",
             "at_mi": 105.4,
             "off_mi": 0.12,
@@ -12408,6 +12668,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151751806, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Garrison"
+          },
+          {
+            "name": "Garrison walleye (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 115.0,
+            "spoken": "Billboard: Garrison, ahead on Mille Lacs, where a nineteen-foot fiberglass walleye stands by the lake. The plaque says Paul Bunyan caught it. Sure he did.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Rum River",
@@ -18645,6 +18915,26 @@
             "spoken": "Passing Lakeville"
           },
           {
+            "name": "Northfield History Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.6,
+            "spoken": "Billboard: The Northfield History Center, next exit, seven miles east. The Jesse James gang tried to rob its bank in eighteen seventy-six. The town said no.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Northfield History Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.0,
+            "spoken": "Billboard: The Northfield History Center, next exit, seven miles east. The Jesse James gang tried to rob its bank in eighteen seventy-six. The town said no.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Vermillion River",
             "category": "river",
             "kind": "point",
@@ -18657,6 +18947,26 @@
             "kind": "point",
             "at_mi": 40.6,
             "spoken": "Crossing the Cannon River"
+          },
+          {
+            "name": "Faribault Woolen Mill (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.4,
+            "spoken": "Billboard: The Faribault Woolen Mill, next exit. Making wool blankets by the Cannon River since eighteen sixty-five. Minnesota winters have kept it in business.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Faribault Woolen Mill (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.6,
+            "spoken": "Billboard: The Faribault Woolen Mill, next exit. Making wool blankets by the Cannon River since eighteen sixty-five. Minnesota winters have kept it in business.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Faribault",
@@ -20190,6 +20500,16 @@
             "spoken": "Passing Faribault"
           },
           {
+            "name": "Faribault Woolen Mill (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.6,
+            "spoken": "Billboard: The Faribault Woolen Mill, next exit. Making wool blankets by the Cannon River since eighteen sixty-five. Minnesota winters have kept it in business.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Cannon City",
             "at_mi": 18.98,
             "off_mi": 4.04,
@@ -20197,6 +20517,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151664365, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cannon City"
+          },
+          {
+            "name": "Faribault Woolen Mill (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.8,
+            "spoken": "Billboard: The Faribault Woolen Mill, next exit. Making wool blankets by the Cannon River since eighteen sixty-five. Minnesota winters have kept it in business.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Shieldsville",
@@ -20217,6 +20547,16 @@
             "spoken": "Passing Dundas"
           },
           {
+            "name": "Northfield History Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.0,
+            "spoken": "Billboard: The Northfield History Center, next exit, seven miles east. The Jesse James gang tried to rob its bank in eighteen seventy-six. The town said no.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Northfield",
             "at_mi": 27.78,
             "off_mi": 6.46,
@@ -20224,6 +20564,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151835127, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Northfield"
+          },
+          {
+            "name": "Northfield History Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.5,
+            "spoken": "Billboard: The Northfield History Center, next exit, seven miles east. The Jesse James gang tried to rob its bank in eighteen seventy-six. The town said no.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Elko New Market",
@@ -23695,6 +24045,16 @@
             "spoken": "Passing Trempealeau"
           },
           {
+            "name": "World's Largest Six-Pack (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.8,
+            "spoken": "Billboard: The World's Largest Six-Pack, ahead in La Crosse. Six brewery tanks, fifty-four feet tall, dressed as cans. It is a look-only six-pack.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Holmen",
             "at_mi": 63.3,
             "off_mi": 6.14,
@@ -24944,6 +25304,16 @@
             "spoken": "Entering Oronoco"
           },
           {
+            "name": "Zumbrota Covered Bridge (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.0,
+            "spoken": "Billboard: Zumbrota, ahead, with Minnesota's last historic covered bridge, built in eighteen sixty-nine. It has moved twice, which is unusual for a bridge.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pine Island",
             "at_mi": 17.0,
             "off_mi": 0.47,
@@ -24985,6 +25355,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151335794, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Belle Creek"
+          },
+          {
+            "name": "Zumbrota Covered Bridge (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.0,
+            "spoken": "Billboard: Zumbrota, ahead, with Minnesota's last historic covered bridge, built in eighteen sixty-nine. It has moved twice, which is unusual for a bridge.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cannon Falls Historical Museum",
@@ -28251,6 +28631,26 @@
             "spoken": "Passing Meire Grove"
           },
           {
+            "name": "Sauk Centre (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.2,
+            "spoken": "Billboard: Sauk Centre, next exit. Sinclair Lewis mocked his hometown in his novel Main Street. Its downtown is now the Original Main Street Historic District.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Sauk Centre (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.4,
+            "spoken": "Billboard: Sauk Centre, next exit. Sinclair Lewis mocked his hometown in his novel Main Street. Its downtown is now the Original Main Street Historic District.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Osakis",
             "at_mi": 54.2,
             "off_mi": 2.33,
@@ -28269,6 +28669,16 @@
             "spoken": "Passing Nelson"
           },
           {
+            "name": "Runestone Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.5,
+            "spoken": "Billboard: The Runestone Museum, next exit in Alexandria. A farmer found the stone in eighteen ninety-eight, and people still argue. The stone is not saying.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Alexandria",
             "at_mi": 66.2,
             "off_mi": 2.75,
@@ -28276,6 +28686,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 6267163423, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Alexandria"
+          },
+          {
+            "name": "Runestone Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.8,
+            "spoken": "Billboard: The Runestone Museum, next exit in Alexandria. A farmer found the stone in eighteen ninety-eight, and people still argue. The stone is not saying.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Chippewa River",
@@ -28353,6 +28773,26 @@
             "spoken": "Passing Dalton"
           },
           {
+            "name": "Otto the Otter (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 104.0,
+            "spoken": "Billboard: Otto the Otter, ahead in Fergus Falls. Forty feet of concrete otter since nineteen seventy-two. He has never once gone in the water.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Otto the Otter (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 115.0,
+            "spoken": "Billboard: Otto the Otter, next exit in Fergus Falls. Forty feet of concrete otter since nineteen seventy-two. He has never once gone in the water.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Elizabeth",
             "at_mi": 120.1,
             "off_mi": 1.95,
@@ -28369,6 +28809,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151852559, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Carlisle"
+          },
+          {
+            "name": "Rothsay prairie chicken (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 125.5,
+            "spoken": "Billboard: The world's largest prairie chicken, ahead in Rothsay. Thirteen feet of bird, puffed up and booming since nineteen seventy-six. Do not boom back.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pelican River",
@@ -28394,6 +28844,16 @@
             "spoken": "Passing Rothsay"
           },
           {
+            "name": "Rothsay prairie chicken (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 133.2,
+            "spoken": "Billboard: The world's largest prairie chicken, next exit in Rothsay. Thirteen feet of bird, puffed up and booming since nineteen seventy-six. Do not boom back.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Sabin",
             "at_mi": 158.7,
             "off_mi": 3.59,
@@ -28401,6 +28861,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151332763, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sabin"
+          },
+          {
+            "name": "Hjemkomst Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 159.0,
+            "spoken": "Billboard: The Hjemkomst Center, ahead in Moorhead. A school counselor built a Viking ship in a potato warehouse. It sailed to Norway. The potatoes stayed home.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Glyndon",
@@ -34488,6 +34958,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151330367, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Galesville"
+          },
+          {
+            "name": "World's Largest Six-Pack (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.0,
+            "spoken": "Billboard: The World's Largest Six-Pack, ahead in La Crosse. Six brewery tanks, fifty-four feet tall, dressed as cans. It is a look-only six-pack.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Holmen",

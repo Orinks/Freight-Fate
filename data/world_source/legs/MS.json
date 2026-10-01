@@ -19289,6 +19289,16 @@
             "spoken": "Passing Saint George"
           },
           {
+            "name": "The Tallest Capitol (from Jackson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 171.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Addis",
             "at_mi": 173.0,
             "off_mi": 7.62,
@@ -25746,6 +25756,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151762445, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rome"
+          },
+          {
+            "name": "Middendorf's (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 143.4,
+            "spoken": "Billboard: Middendorf's, next exit at Manchac. Thin fried catfish beside Lake Maurepas since nineteen thirty-four. Thick is on the menu too, for the stubborn.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Middendorf's (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 147.0,
+            "spoken": "Billboard: Middendorf's, next exit at Manchac. Thin fried catfish beside Lake Maurepas since nineteen thirty-four. Thick is on the menu too, for the stubborn.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "LaPlace",
@@ -35933,6 +35963,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151703257, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Central"
+          },
+          {
+            "name": "The Tallest Capitol (from Natchez)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 88.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Saint George",

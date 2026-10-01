@@ -1016,6 +1016,16 @@
         ],
         "landmarks": [
           {
+            "name": "Lucy the Elephant (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.6,
+            "spoken": "Billboard: Lucy the Elephant, in Margate, about six miles south of Atlantic City. Six stories of elephant since eighteen eighty-one. You can walk inside her.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Pleasantville",
             "at_mi": 5.9,
             "off_mi": 0.71,
@@ -1041,6 +1051,46 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158819522, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Northfield"
+          },
+          {
+            "name": "Absecon Lighthouse (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.1,
+            "spoken": "Billboard: Absecon Lighthouse, ahead in Atlantic City. New Jersey's tallest lighthouse, two hundred twenty-eight steps to the top. The elevator is you.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Storybook Land (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: Storybook Land, next exit. Nursery rhymes you can walk through, family-run since nineteen fifty-five. The big bad wolf is on his lunch break.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Steel Pier (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: Steel Pier, on the Atlantic City boardwalk. A pier over the ocean since eighteen ninety-eight, with rides and a Ferris wheel. Hold your hat.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Storybook Land (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Billboard: Storybook Land, next exit. Nursery rhymes you can walk through, family-run since nineteen fifty-five. The big bad wolf is on his lunch break.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Egg Harbor City",
@@ -1156,6 +1206,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157571534, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hi-Nella"
+          },
+          {
+            "name": "Battleship New Jersey (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.0,
+            "spoken": "Billboard: Battleship New Jersey, ahead on the Camden waterfront. The most decorated battleship in Navy history, open for tours. It parks better than you do.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Deptford Township",
@@ -3413,6 +3473,16 @@
             "spoken": "Passing Liberty Corner"
           },
           {
+            "name": "Red Mill Museum Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.5,
+            "spoken": "Billboard: The Red Mill Museum Village, ahead in Clinton. A wool mill from around eighteen ten, with a quarry and a schoolhouse. Still red, still open.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "North Branch Raritan River",
             "category": "river",
             "kind": "point",
@@ -3477,6 +3547,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158843608, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Franklin"
+          },
+          {
+            "name": "Red Mill Museum Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.0,
+            "spoken": "Billboard: The Red Mill Museum Village, ahead in Clinton. A wool mill from around eighteen ten, with a quarry and a schoolhouse. Still red, still open.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bloomsbury",
@@ -6614,6 +6694,16 @@
         ],
         "landmarks": [
           {
+            "name": "Thomas Edison Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.0,
+            "spoken": "Billboard: The Thomas Edison Center, ahead in Edison. On the site of his lab, a tower wears a fourteen-foot light bulb. It still works.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Rahway River",
             "category": "river",
             "kind": "point",
@@ -6662,6 +6752,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158856860, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Woodbridge Township"
+          },
+          {
+            "name": "Thomas Edison Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.0,
+            "spoken": "Billboard: The Thomas Edison Center, next exit. On the site of his lab, a tower wears a fourteen-foot light bulb. It still works.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Metuchen",
@@ -6917,6 +7017,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158605549, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Collingswood"
+          },
+          {
+            "name": "Battleship New Jersey (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.8,
+            "spoken": "Billboard: Battleship New Jersey, ahead on the Camden waterfront. The most decorated battleship in Navy history, open for tours. It parks better than you do.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "restrictions": [],
@@ -7705,6 +7815,16 @@
         ],
         "landmarks": [
           {
+            "name": "Thomas Edison Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.0,
+            "spoken": "Billboard: The Thomas Edison Center, ahead in Edison. On the site of his lab, a tower wears a fourteen-foot light bulb. It still works.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Roselle",
             "at_mi": 8.3,
             "off_mi": 2.78,
@@ -7794,6 +7914,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158875254, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Perth Amboy"
+          },
+          {
+            "name": "Thomas Edison Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.0,
+            "spoken": "Billboard: The Thomas Edison Center, next exit. On the site of his lab, a tower wears a fourteen-foot light bulb. It still works.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Metuchen",
@@ -7981,6 +8111,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 9927671683, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Foxmoor"
+          },
+          {
+            "name": "Grounds For Sculpture (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.2,
+            "spoken": "Billboard: Grounds For Sculpture, ahead in Hamilton. Forty-two acres of art outdoors, and some of the people on the benches are bronze. Say hello anyway.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Bordentown Township",
@@ -11755,6 +11895,16 @@
             "spoken": "Passing Florence Township"
           },
           {
+            "name": "Grounds For Sculpture (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: Grounds For Sculpture, ahead in Hamilton. Forty-two acres of art outdoors, and some of the people on the benches are bronze. Say hello anyway.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Springfield Township",
             "at_mi": 12.5,
             "off_mi": 4.25,
@@ -11902,6 +12052,26 @@
             "spoken": "Entering Egg Harbor City"
           },
           {
+            "name": "Steel Pier (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.0,
+            "spoken": "Billboard: Steel Pier, on the Atlantic City boardwalk. A pier over the ocean since eighteen ninety-eight, with rides and a Ferris wheel. Hold your hat.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Absecon Lighthouse (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.0,
+            "spoken": "Billboard: Absecon Lighthouse, ahead in Atlantic City. New Jersey's tallest lighthouse, two hundred twenty-eight steps to the top. The elevator is you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Galloway Township",
             "at_mi": 62.4,
             "off_mi": 2.02,
@@ -11918,6 +12088,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158845677, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Absecon"
+          },
+          {
+            "name": "Lucy the Elephant (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.0,
+            "spoken": "Billboard: Lucy the Elephant, in Margate, about six miles south of Atlantic City. Six stories of elephant since eighteen eighty-one. You can walk inside her.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pleasantville",
@@ -13892,6 +14072,16 @@
             "spoken": "Passing Mullica Township"
           },
           {
+            "name": "Storybook Land (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.5,
+            "spoken": "Billboard: Storybook Land, ahead. Nursery rhymes you can walk through, family-run since nineteen fifty-five. The big bad wolf is on his lunch break.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Egg Harbor City",
             "at_mi": 22.83,
             "off_mi": 5.42,
@@ -13899,6 +14089,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158860648, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Egg Harbor City"
+          },
+          {
+            "name": "Steel Pier (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.0,
+            "spoken": "Billboard: Steel Pier, on the Atlantic City boardwalk. A pier over the ocean since eighteen ninety-eight, with rides and a Ferris wheel. Hold your hat.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Port Republic",
@@ -13917,6 +14117,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 4835901438, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Egg Harbor Township"
+          },
+          {
+            "name": "Absecon Lighthouse (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.0,
+            "spoken": "Billboard: Absecon Lighthouse, ahead in Atlantic City. New Jersey's tallest lighthouse, two hundred twenty-eight steps to the top. The elevator is you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Storybook Land (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.4,
+            "spoken": "Billboard: Storybook Land, ahead. Nursery rhymes you can walk through, family-run since nineteen fifty-five. The big bad wolf is on his lunch break.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Northfield",
@@ -13989,6 +14209,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158857070, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Longport"
+          },
+          {
+            "name": "Lucy the Elephant (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.0,
+            "spoken": "Billboard: Lucy the Elephant, in Margate, about six miles south of Atlantic City. Six stories of elephant since eighteen eighty-one. You can walk inside her.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Margate City",
@@ -14689,6 +14919,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158348965, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Glassboro"
+          },
+          {
+            "name": "Battleship New Jersey (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.0,
+            "spoken": "Billboard: Battleship New Jersey, ahead on the Camden waterfront. The most decorated battleship in Navy history, open for tours. It parks better than you do.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pitman",

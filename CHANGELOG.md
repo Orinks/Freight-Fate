@@ -6,6 +6,8 @@
 
 - **Wall Drug and South of the Border count down from both directions.** Three signs lead you to the exit whichever way you drive.
 
+- **Six hundred new attraction billboards across fifteen states, from Ocean City's boardwalk to the Enchanted Highway.** Each is signed in both directions.
+
 - **Seven Tennessee attractions have billboards, among them Loretta Lynn's Ranch, the Tina Turner Museum and Ruby Falls.** Each is signed in both directions.
 
 - **You can pull in at The Thing, on Interstate 10 in Arizona.** Its signs count down from both directions; only a tractor without a trailer can fuel there.

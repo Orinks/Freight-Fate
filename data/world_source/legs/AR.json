@@ -1166,6 +1166,16 @@
             "spoken": "Passing Highfill"
           },
           {
+            "name": "Daisy Airgun Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: The Daisy Airgun Museum, ahead in Rogers. Daisy makes the Red Ryder, the BB gun from A Christmas Story. Eye protection recommended.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Little Flock",
             "at_mi": 5.2,
             "off_mi": 1.6,
@@ -1184,6 +1194,16 @@
             "spoken": "Passing Lowell"
           },
           {
+            "name": "Crystal Bridges (from Harrison)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Crystal Bridges, ahead in Bentonville. American art in an Ozark ravine around a spring, and admission is free. Parking is too, for cars.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Avoca",
             "at_mi": 10.4,
             "off_mi": 0.04,
@@ -1200,6 +1220,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151624701, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Pea Ridge"
+          },
+          {
+            "name": "The Walmart Museum (from Harrison)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.5,
+            "spoken": "Billboard: The Walmart Museum, ahead in Bentonville. Sam Walton's five-and-dime, and a hologram of him that answers questions. Ask him where to park the truck.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Daisy Airgun Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.0,
+            "spoken": "Billboard: The Daisy Airgun Museum, ahead in Rogers. Daisy makes the Red Ryder, the BB gun from A Christmas Story. Eye protection recommended.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gateway",
@@ -1229,11 +1269,31 @@
             "spoken": "Passing Washburn"
           },
           {
+            "name": "Eureka Springs (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.5,
+            "spoken": "Billboard: Eureka Springs, ahead. Streets that wind and hardly ever cross square, and not one traffic light in town. Your trailer has been warned.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "White River",
             "category": "river",
             "kind": "point",
             "at_mi": 29.0,
             "spoken": "Crossing the White River"
+          },
+          {
+            "name": "Thorncrown Chapel (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.5,
+            "spoken": "Billboard: Thorncrown Chapel, ahead near Eureka Springs. Four hundred twenty-five windows in the middle of the woods, free to visit. Somebody else washes them.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Chain-O-Lakes",
@@ -1261,11 +1321,31 @@
             "spoken": "Museum ahead: Holy Land Tour"
           },
           {
+            "name": "Thorncrown Chapel (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.0,
+            "spoken": "Billboard: Thorncrown Chapel, ahead near Eureka Springs. Four hundred twenty-five windows in the middle of the woods, free to visit. Somebody else washes them.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "King's River",
             "category": "river",
             "kind": "point",
             "at_mi": 49.1,
             "spoken": "Crossing the King's River"
+          },
+          {
+            "name": "Eureka Springs (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.0,
+            "spoken": "Billboard: Eureka Springs, ahead. Streets that wind and hardly ever cross square, and not one traffic light in town. Your trailer has been warned.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Oak Grove",
@@ -2483,6 +2563,16 @@
             "spoken": "Passing Bella Vista"
           },
           {
+            "name": "Crystal Bridges (from Joplin)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Crystal Bridges, ahead in Bentonville. American art in an Ozark ravine around a spring, and admission is free. Parking is too, for cars.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Decatur",
             "at_mi": 12.0,
             "off_mi": 8.33,
@@ -2490,6 +2580,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151344967, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Decatur"
+          },
+          {
+            "name": "The Walmart Museum (from Joplin)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.0,
+            "spoken": "Billboard: The Walmart Museum, ahead in Bentonville. Sam Walton's five-and-dime, and a hologram of him that answers questions. Ask him where to park the truck.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gravette",
@@ -8561,6 +8661,16 @@
             "spoken": "Passing Elm Springs"
           },
           {
+            "name": "Daisy Airgun Museum (from Fayetteville)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Billboard: The Daisy Airgun Museum, ahead in Rogers. Daisy makes the Red Ryder, the BB gun from A Christmas Story. Eye protection recommended.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Cave Springs",
             "at_mi": 15.8,
             "off_mi": 3.85,
@@ -8568,6 +8678,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151474136, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cave Springs"
+          },
+          {
+            "name": "The Walmart Museum (from Fayetteville)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.5,
+            "spoken": "Billboard: The Walmart Museum, ahead in Bentonville. Sam Walton's five-and-dime, and a hologram of him that answers questions. Ask him where to park the truck.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Crystal Bridges (from Fayetteville)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.0,
+            "spoken": "Billboard: Crystal Bridges, ahead in Bentonville. American art in an Ozark ravine around a spring, and admission is free. Parking is too, for cars.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Highfill",
@@ -11126,6 +11256,16 @@
             "kind": "point",
             "at_mi": 6.8,
             "spoken": "Crossing the Arkansas River"
+          },
+          {
+            "name": "U.S. Marshals Museum (from Fayetteville)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.5,
+            "spoken": "Billboard: The United States Marshals Museum, ahead in Fort Smith. The building is shaped like a marshal's badge. Drive like somebody is watching.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kibler",
@@ -14173,6 +14313,26 @@
             "spoken": "Passing Cedarville"
           },
           {
+            "name": "Alma (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: Alma, ahead. The town calls itself the spinach capital of the world and keeps a bronze Popeye to prove it. Results may vary.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "U.S. Marshals Museum (from Little Rock)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: The United States Marshals Museum, ahead in Fort Smith. The building is shaped like a marshal's badge. Drive like somebody is watching.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Kibler",
             "at_mi": 12.1,
             "off_mi": 3.32,
@@ -14194,6 +14354,16 @@
             "kind": "point",
             "at_mi": 13.4,
             "spoken": "Crossing the Mulberry River"
+          },
+          {
+            "name": "Alma (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.0,
+            "spoken": "Billboard: Alma, next exit. The town calls itself the spinach capital of the world and keeps a bronze Popeye to prove it. Results may vary.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Dyer",
@@ -14401,6 +14571,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151545883, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Mayflower"
+          },
+          {
+            "name": "Clinton Library (from Fort Smith)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 147.0,
+            "spoken": "Billboard: The Clinton Library, ahead in Little Rock. It hangs over the river like a bridge, with a full-size Oval Office. No appointment needed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Sherwood",
@@ -17097,6 +17277,16 @@
             "spoken": "Passing Rock Island"
           },
           {
+            "name": "U.S. Marshals Museum (from Texarkana)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: The United States Marshals Museum, ahead in Fort Smith. The building is shaped like a marshal's badge. Drive like somebody is watching.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Hackett",
             "at_mi": 12.9,
             "off_mi": 5.68,
@@ -17161,6 +17351,26 @@
             "kind": "point",
             "at_mi": 61.7,
             "spoken": "Crossing the Ouachita River"
+          },
+          {
+            "name": "Queen Wilhelmina State Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 72.0,
+            "spoken": "Billboard: Queen Wilhelmina State Park, ahead, west of Mena. A railroad named its eighteen ninety-eight mountaintop hotel for the young Dutch queen. Arkansas kept the name.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Queen Wilhelmina State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 92.0,
+            "spoken": "Billboard: Queen Wilhelmina State Park, ahead, west of Mena. A railroad named its eighteen ninety-eight mountaintop hotel for the young Dutch queen. Arkansas kept the name.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hatfield",
@@ -20778,6 +20988,16 @@
             "spoken": "Passing Mountain Pine"
           },
           {
+            "name": "Bathhouse Row (from Fort Smith)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: Bathhouse Row, ahead in Hot Springs. The water comes up a hundred forty-three degrees and four thousand years old. Fill a jug free.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Ouachita River",
             "category": "river",
             "kind": "point",
@@ -20919,6 +21139,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151567727, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bonanza"
+          },
+          {
+            "name": "U.S. Marshals Museum (from Hot Springs)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 119.0,
+            "spoken": "Billboard: The United States Marshals Museum, ahead in Fort Smith. The building is shaped like a marshal's badge. Drive like somebody is watching.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pocola",
@@ -22024,6 +22254,16 @@
             "spoken": "Passing Magnet Cove"
           },
           {
+            "name": "Bathhouse Row (from Little Rock)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: Bathhouse Row, ahead in Hot Springs. The water comes up a hundred forty-three degrees and four thousand years old. Fill a jug free.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lonsdale",
             "at_mi": 18.14,
             "off_mi": 0.81,
@@ -22126,6 +22366,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151883869, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Shannon Hills"
+          },
+          {
+            "name": "Clinton Library (from Hot Springs)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.0,
+            "spoken": "Billboard: The Clinton Library, ahead in Little Rock. It hangs over the river like a bridge, with a full-size Oval Office. No appointment needed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Wrightsville",
@@ -23729,6 +23979,16 @@
             "spoken": "Crossing the Ouachita River"
           },
           {
+            "name": "Bathhouse Row (from Texarkana)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.5,
+            "spoken": "Billboard: Bathhouse Row, ahead in Hot Springs. The water comes up a hundred forty-three degrees and four thousand years old. Fill a jug free.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Midway",
             "at_mi": 30.45,
             "off_mi": 7.19,
@@ -24844,6 +25104,16 @@
             "kind": "point",
             "at_mi": 127.9,
             "spoken": "Crossing the Arkansas River"
+          },
+          {
+            "name": "Clinton Library (from Jonesboro)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 130.5,
+            "spoken": "Billboard: The Clinton Library, ahead in Little Rock. It hangs over the river like a bridge, with a full-size Oval Office. No appointment needed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Sherwood",
@@ -26814,6 +27084,16 @@
             "spoken": "Passing Sherwood"
           },
           {
+            "name": "Clinton Library (from Conway)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: The Clinton Library, ahead in Little Rock. It hangs over the river like a bridge, with a full-size Oval Office. No appointment needed.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mayflower",
             "at_mi": 22.1,
             "off_mi": 0.29,
@@ -28508,6 +28788,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151883869, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Shannon Hills"
+          },
+          {
+            "name": "Clinton Library (from El Dorado)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: The Clinton Library, ahead in Little Rock. It hangs over the river like a bridge, with a full-size Oval Office. No appointment needed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wrightsville",
@@ -34414,6 +34704,16 @@
             "spoken": "Passing Sherwood"
           },
           {
+            "name": "Clinton Library (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: The Clinton Library, ahead in Little Rock. It hangs over the river like a bridge, with a full-size Oval Office. No appointment needed.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Maumelle",
             "at_mi": 15.2,
             "off_mi": 2.4,
@@ -34554,6 +34854,26 @@
             "spoken": "Passing Dyer"
           },
           {
+            "name": "Alma (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 142.6,
+            "spoken": "Billboard: Alma, next exit. The town calls itself the spinach capital of the world and keeps a bronze Popeye to prove it. Results may vary.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "U.S. Marshals Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 147.0,
+            "spoken": "Billboard: The United States Marshals Museum, ahead in Fort Smith. The building is shaped like a marshal's badge. Drive like somebody is watching.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Kibler",
             "at_mi": 147.4,
             "off_mi": 3.36,
@@ -34572,6 +34892,16 @@
             "spoken": "Passing Van Buren"
           },
           {
+            "name": "Alma (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 155.5,
+            "spoken": "Billboard: Alma, ahead. The town calls itself the spinach capital of the world and keeps a bronze Popeye to prove it. Results may vary.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Muldrow",
             "at_mi": 168.5,
             "off_mi": 0.84,
@@ -34579,6 +34909,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151781367, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Muldrow"
+          },
+          {
+            "name": "U.S. Marshals Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 171.0,
+            "spoken": "Billboard: The United States Marshals Museum, ahead in Fort Smith. The building is shaped like a marshal's badge. Drive like somebody is watching.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gans",
@@ -36051,6 +36391,16 @@
             "spoken": "Passing Shannon Hills"
           },
           {
+            "name": "Clinton Library (from Pine Bluff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: The Clinton Library, ahead in Little Rock. It hangs over the river like a bridge, with a full-size Oval Office. No appointment needed.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Wrightsville",
             "at_mi": 11.3,
             "off_mi": 2.94,
@@ -36602,6 +36952,26 @@
             "spoken": "Crossing the Arkansas River"
           },
           {
+            "name": "Plum Bayou Mounds (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.5,
+            "spoken": "Billboard: Plum Bayou Mounds, ahead. The tallest mound in Arkansas. For generations it was named for the Toltecs, who never came near the place.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Clinton Library (from Stuttgart)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Clinton Library, ahead in Little Rock. It hangs over the river like a bridge, with a full-size Oval Office. No appointment needed.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Jacksonville",
             "at_mi": 11.7,
             "off_mi": 9.55,
@@ -36647,6 +37017,16 @@
             "spoken": "Passing Sherrill"
           },
           {
+            "name": "Plum Bayou Mounds (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.0,
+            "spoken": "Billboard: Plum Bayou Mounds, ahead. The tallest mound in Arkansas. For generations it was named for the Toltecs, who never came near the place.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Humphrey",
             "at_mi": 42.7,
             "off_mi": 8.13,
@@ -36654,6 +37034,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151538047, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Humphrey"
+          },
+          {
+            "name": "Stuttgart (from Little Rock)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.0,
+            "spoken": "Billboard: Stuttgart, ahead. The world duck calling championship began here in nineteen thirty-six. The first winner used no call, just his throat.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Ulm",
@@ -38315,6 +38705,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151616235, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wrightsville"
+          },
+          {
+            "name": "Clinton Library (from Texarkana)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.5,
+            "spoken": "Billboard: The Clinton Library, ahead in Little Rock. It hangs over the river like a bridge, with a full-size Oval Office. No appointment needed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Saline River",
@@ -41835,6 +42235,16 @@
             "spoken": "Entering Imboden"
           },
           {
+            "name": "Walnut Ridge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 92.0,
+            "spoken": "Billboard: Walnut Ridge, ahead. The Beatles changed planes at its airport in nineteen sixty-four. The town built a monument and named a street Abbey Road.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lynn",
             "at_mi": 93.8,
             "off_mi": 9.55,
@@ -41910,6 +42320,16 @@
             "kind": "point",
             "at_mi": 110.7,
             "spoken": "Crossing the Cache River"
+          },
+          {
+            "name": "Walnut Ridge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 117.0,
+            "spoken": "Billboard: Walnut Ridge, ahead. The Beatles changed planes at its airport in nineteen sixty-four. The town built a monument and named a street Abbey Road.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bono",
@@ -44652,6 +45072,16 @@
             "spoken": "Passing Dyer"
           },
           {
+            "name": "Alma (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.5,
+            "spoken": "Billboard: Alma, next exit. The town calls itself the spinach capital of the world and keeps a bronze Popeye to prove it. Results may vary.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Alma",
             "at_mi": 69.81,
             "off_mi": 0.81,
@@ -44702,6 +45132,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151401946, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Van Buren"
+          },
+          {
+            "name": "Alma (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.5,
+            "spoken": "Billboard: Alma, ahead. The town calls itself the spinach capital of the world and keeps a bronze Popeye to prove it. Results may vary.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "U.S. Marshals Museum (from Russellville)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.5,
+            "spoken": "Billboard: The United States Marshals Museum, ahead in Fort Smith. The building is shaped like a marshal's badge. Drive like somebody is watching.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Barling",
@@ -45601,6 +46051,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151705746, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ulm"
+          },
+          {
+            "name": "Stuttgart (from Pine Bluff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: Stuttgart, ahead. The world duck calling championship began here in nineteen thirty-six. The first winner used no call, just his throat.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Humnoke",

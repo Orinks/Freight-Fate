@@ -20992,6 +20992,16 @@
             "kind": "point",
             "at_mi": 34.3,
             "spoken": "Crossing the Florida River"
+          },
+          {
+            "name": "Durango and Silverton Railroad (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.0,
+            "spoken": "Billboard: The Durango and Silverton steam train, ahead in Durango. Up the Animas canyon since eighteen eighty-two. Your truck is faster, and nobody photographs it.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [

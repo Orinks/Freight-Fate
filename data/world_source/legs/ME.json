@@ -3425,6 +3425,16 @@
             "spoken": "Passing Hampton"
           },
           {
+            "name": "Strawbery Banke Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 196.1,
+            "spoken": "Billboard: Strawbery Banke Museum, ahead in Portsmouth. Houses on their original sites, spanning over three hundred years. They spell strawberry the old way.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Epping",
             "at_mi": 206.6,
             "off_mi": 0.89,
@@ -7799,6 +7809,16 @@
             "spoken": "Passing Rye"
           },
           {
+            "name": "Strawbery Banke Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 87.8,
+            "spoken": "Billboard: Strawbery Banke Museum, ahead in Portsmouth. Houses on their original sites, spanning over three hundred years. They spell strawberry the old way.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "North Hampton",
             "at_mi": 90.01,
             "off_mi": 0.97,
@@ -11166,6 +11186,16 @@
             "spoken": "Passing Rye"
           },
           {
+            "name": "Strawbery Banke Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.5,
+            "spoken": "Billboard: Strawbery Banke Museum, ahead in Portsmouth. Houses on their original sites, spanning over three hundred years. They spell strawberry the old way.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "North Hampton",
             "at_mi": 60.7,
             "off_mi": 0.97,
@@ -13313,6 +13343,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 12900635933, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hampton Falls"
+          },
+          {
+            "name": "Strawbery Banke Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.1,
+            "spoken": "Billboard: Strawbery Banke Museum, ahead in Portsmouth. Houses on their original sites, spanning over three hundred years. They spell strawberry the old way.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kensington",

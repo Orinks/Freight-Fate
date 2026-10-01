@@ -1484,6 +1484,26 @@
             "spoken": "Passing Girdletree"
           },
           {
+            "name": "Ocean City boardwalk (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.0,
+            "spoken": "Billboard: Ocean City, thirty miles east of Salisbury on Route Fifty. Two and a half miles of boardwalk. The first one rolled up for storage.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Thrasher's French Fries (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 74.5,
+            "spoken": "Billboard: Thrasher's French Fries, on the Ocean City boardwalk, thirty miles east of Salisbury. Salt and vinegar since nineteen twenty-nine. Do not ask for ketchup.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Princess Anne",
             "at_mi": 80.7,
             "off_mi": 0.33,
@@ -1491,6 +1511,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158357362, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Princess Anne"
+          },
+          {
+            "name": "Salisbury Zoo (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 85.0,
+            "spoken": "Billboard: The Salisbury Zoo, ahead in Salisbury. Open all year, and admission is free. The animals are the only ones on the clock.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Dolle's Candyland (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 89.0,
+            "spoken": "Billboard: Dolle's Candyland, Ocean City boardwalk, thirty miles east of Salisbury. Salt water taffy since nineteen ten. Your fillings have been warned.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pittsville",

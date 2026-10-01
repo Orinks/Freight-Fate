@@ -997,6 +997,26 @@
             "spoken": "Crossing the Missouri River"
           },
           {
+            "name": "Salem Sue (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.5,
+            "spoken": "Billboard: Salem Sue, the world's largest Holstein cow, next exit at New Salem. Thirty-eight feet of fiberglass on a hill. Nobody has tried to milk her.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Salem Sue (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.5,
+            "spoken": "Billboard: Salem Sue, the world's largest Holstein cow, next exit at New Salem. Thirty-eight feet of fiberglass on a hill. Nobody has tried to milk her.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Glen Ullin",
             "at_mi": 51.2,
             "off_mi": 3.25,
@@ -1024,6 +1044,16 @@
             "spoken": "Passing Taylor"
           },
           {
+            "name": "Enchanted Highway (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.0,
+            "spoken": "Billboard: The Enchanted Highway, next exit. Thirty-two miles of giant scrap-metal sculptures. The geese at the exit set a world record and never flew south.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Gladstone",
             "at_mi": 86.4,
             "off_mi": 1.12,
@@ -1038,6 +1068,16 @@
             "kind": "point",
             "at_mi": 87.2,
             "spoken": "Crossing the Green River"
+          },
+          {
+            "name": "Enchanted Highway (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 89.5,
+            "spoken": "Billboard: The Enchanted Highway, next exit. Thirty-two miles of giant scrap-metal sculptures. The geese at the exit set a world record and never flew south.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "South Heart",
@@ -2320,6 +2360,16 @@
             "spoken": "Passing Driscoll"
           },
           {
+            "name": "Sandy the Sandhill Crane (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.8,
+            "spoken": "Billboard: Sandy, the world's largest sandhill crane, next exit at Steele. Forty feet of sheet metal. The real cranes only pass through.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Steele",
             "at_mi": 43.25,
             "off_mi": 0.66,
@@ -2327,6 +2377,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151940660, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Steele"
+          },
+          {
+            "name": "Sandy the Sandhill Crane (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.5,
+            "spoken": "Billboard: Sandy, the world's largest sandhill crane, next exit at Steele. Forty feet of sheet metal. The real cranes only pass through.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Tappen",
@@ -2361,6 +2421,16 @@
             "kind": "point",
             "at_mi": 89.56,
             "spoken": "Crossing the James River"
+          },
+          {
+            "name": "World's Largest Buffalo (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 91.9,
+            "spoken": "Billboard: The world's largest buffalo, ahead in Jamestown. Sixty tons of concrete, on the hill since nineteen fifty-nine. The live herd next door gets around more.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Eldridge",
@@ -4248,6 +4318,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151833003, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Menoken"
+          },
+          {
+            "name": "Lewis and Clark Interpretive Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: The Lewis and Clark Interpretive Center, ahead at Washburn. The expedition spent the winter of eighteen oh-four nearby, with no heater at all.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Lewis and Clark Interpretive Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.0,
+            "spoken": "Billboard: The Lewis and Clark Interpretive Center, ahead at Washburn. The expedition spent the winter of eighteen oh-four nearby, with no heater at all.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Turtle Lake",
@@ -6395,11 +6485,31 @@
             "spoken": "Passing Gladstone"
           },
           {
+            "name": "Theodore Roosevelt National Park North Unit (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.5,
+            "spoken": "Billboard: Theodore Roosevelt National Park, North Unit, ahead on this highway. Badlands, bison, and bighorn sheep, and hardly anybody else. The bison prefer it that way.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Little Missouri River",
             "category": "river",
             "kind": "point",
             "at_mi": 68.3,
             "spoken": "Crossing the Little Missouri River"
+          },
+          {
+            "name": "Theodore Roosevelt National Park North Unit (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.0,
+            "spoken": "Billboard: Theodore Roosevelt National Park, North Unit, ahead on this highway. Badlands, bison, and bighorn sheep, and hardly anybody else. The bison prefer it that way.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Watford City",
@@ -9599,6 +9709,16 @@
             "spoken": "Passing Dilworth"
           },
           {
+            "name": "Hjemkomst Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: The Hjemkomst Center, ahead in Moorhead. A school counselor built a Viking ship in a potato warehouse. It sailed to Norway. The potatoes stayed home.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "South Branch Buffalo River",
             "category": "river",
             "kind": "point",
@@ -9611,6 +9731,16 @@
             "kind": "point",
             "at_mi": 24.9,
             "spoken": "Fire Museum ahead"
+          },
+          {
+            "name": "Rothsay prairie chicken (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.4,
+            "spoken": "Billboard: The world's largest prairie chicken, next exit in Rothsay. Thirteen feet of bird, puffed up and booming since nineteen seventy-six. Do not boom back.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Rothsay",
@@ -9636,6 +9766,16 @@
             "spoken": "Crossing the Otter Tail River"
           },
           {
+            "name": "Rothsay prairie chicken (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.5,
+            "spoken": "Billboard: The world's largest prairie chicken, ahead in Rothsay. Thirteen feet of bird, puffed up and booming since nineteen seventy-six. Do not boom back.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Carlisle",
             "at_mi": 49.8,
             "off_mi": 0.67,
@@ -9652,6 +9792,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151608160, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Elizabeth"
+          },
+          {
+            "name": "Otto the Otter (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.3,
+            "spoken": "Billboard: Otto the Otter, next exit in Fergus Falls. Forty feet of concrete otter since nineteen seventy-two. He has never once gone in the water.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Otto the Otter (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.0,
+            "spoken": "Billboard: Otto the Otter, ahead in Fergus Falls. Forty feet of concrete otter since nineteen seventy-two. He has never once gone in the water.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Dalton",
@@ -9697,6 +9857,16 @@
             "spoken": "Passing Brandon"
           },
           {
+            "name": "Runestone Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 95.0,
+            "spoken": "Billboard: The Runestone Museum, ahead in Alexandria. A farmer found the stone in eighteen ninety-eight, and people still argue. The stone is not saying.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Garfield",
             "at_mi": 97.3,
             "off_mi": 2.98,
@@ -9722,6 +9892,16 @@
             "spoken": "Passing Alexandria"
           },
           {
+            "name": "Runestone Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 107.0,
+            "spoken": "Billboard: The Runestone Museum, next exit in Alexandria. A farmer found the stone in eighteen ninety-eight, and people still argue. The stone is not saying.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Osakis",
             "at_mi": 117.2,
             "off_mi": 2.34,
@@ -9729,6 +9909,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151758007, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Osakis"
+          },
+          {
+            "name": "Sauk Centre (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 125.0,
+            "spoken": "Billboard: Sauk Centre, next exit. Sinclair Lewis mocked his hometown in his novel Main Street. Its downtown is now the Original Main Street Historic District.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Sauk Centre (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 131.3,
+            "spoken": "Billboard: Sauk Centre, next exit. Sinclair Lewis mocked his hometown in his novel Main Street. Its downtown is now the Original Main Street Historic District.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Melrose",
@@ -14442,6 +14642,16 @@
             "spoken": "Passing Ypsilanti"
           },
           {
+            "name": "World's Largest Buffalo (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: The world's largest buffalo, ahead in Jamestown. Sixty tons of concrete, on the hill since nineteen fifty-nine. The live herd next door gets around more.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Sanborn",
             "at_mi": 24.5,
             "off_mi": 2.46,
@@ -14530,6 +14740,16 @@
             "spoken": "Passing Casselton"
           },
           {
+            "name": "Fargo Woodchipper (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 78.5,
+            "spoken": "Billboard: The woodchipper from the movie Fargo, ahead at the Fargo visitors center. The actual prop. It has retired from show business, and from yard work.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Davenport",
             "at_mi": 80.3,
             "off_mi": 11.25,
@@ -14562,6 +14782,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151535073, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Warren"
+          },
+          {
+            "name": "Bonanzaville (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 85.0,
+            "spoken": "Billboard: Bonanzaville, next exit in West Fargo. A pioneer village of thirty-four old buildings. The settlers had no air conditioning and no complaints department.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Horace",
@@ -16040,11 +16270,31 @@
             "spoken": "Entering Granville"
           },
           {
+            "name": "Rugby Center of North America (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.0,
+            "spoken": "Billboard: Rugby, ahead, and its stone marker for the center of North America. The true spot is about fifteen miles off. Close enough for a monument.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Prairie Village Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 63.3,
             "spoken": "Prairie Village Museum ahead"
+          },
+          {
+            "name": "Rugby Center of North America (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 74.0,
+            "spoken": "Billboard: Rugby, ahead, and its stone marker for the center of North America. The true spot is about fifteen miles off. Close enough for a monument.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "York",

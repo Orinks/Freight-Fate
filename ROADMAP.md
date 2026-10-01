@@ -75,7 +75,15 @@ bookmarks usable.
       Andersen's moved from closed Buellton to Santa Nella on I-5. Seven
       Tennessee attractions are signed both ways
       (`signsheets/tennessee-2026-09-30.md`); the leg's own "Norris Museum
-      ahead" now faces southbound only.
+      ahead" now faces southbound only. The states with almost no placed
+      signs were then signed in one pass (owner, 2026-09-30): 615 signs for
+      137 new attractions in Arkansas, Louisiana, Kansas, Colorado,
+      Washington, North Dakota, Minnesota, Wisconsin, New Jersey,
+      Delaware, Maryland (Ocean City from US 50 and US 13), Rhode Island,
+      Connecticut, Massachusetts and New Hampshire, each checked open
+      today and following the state's billboard law (none in DC; none on
+      Washington's scenic highways, Colorado's scenic byways or
+      Maryland's interstates).
 
 - [x] New installs start on All assists (owner, 2026-09-30): first drives kept
       going wrong at the wheel, city street corners above all, so the truck
@@ -327,6 +335,12 @@ Everything found before 2026-09-25 moved to
       11 to 29 miles off their dense geometry; the Florida Keys markers and
       the I-40 Tennessee, Buffalo and Duck River callouts are miles from the
       real places.
+- [ ] Scenic-highway billboard bans are honored only by the 2026-09-30
+      Colorado and Washington sheets. Washington bans billboards visible
+      from its scenic system (RCW 47.42.040: I-90 Issaquah to Thorp, US 101
+      on the peninsula, US 195) and Colorado restricts them on its scenic
+      byways, but the random roadside pool and the older placed signs still
+      read there; only the four whole-state bans are screened.
 - [ ] Big Buck's never plays: its twenty-four approach billboards, the
       brisket plate, the gate turn-away lines and the landmark loyalty rate
       are all written, and the world has no Big Buck's stop. Needs a stop,

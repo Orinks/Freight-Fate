@@ -33757,6 +33757,16 @@
             "spoken": "Passing Start"
           },
           {
+            "name": "Duck Commander (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 494.0,
+            "spoken": "Billboard: Duck Commander, ahead in West Monroe. The Robertsons' duck call company, with a museum of fifteen galleries about Duck Dynasty. Beards optional.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Claiborne",
             "at_mi": 504.0,
             "off_mi": 0.34,
@@ -33764,6 +33774,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151708380, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Claiborne"
+          },
+          {
+            "name": "Duck Commander (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 510.5,
+            "spoken": "Billboard: Duck Commander, ahead in West Monroe. The Robertsons' duck call company, with a museum of fifteen galleries about Duck Dynasty. Beards optional.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Calhoun",

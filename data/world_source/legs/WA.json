@@ -2075,6 +2075,16 @@
             "spoken": "Passing Mukilteo"
           },
           {
+            "name": "Boeing Future of Flight (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 2.8,
+            "spoken": "Billboard: Boeing's Future of Flight, next exit in Mukilteo. The factory tour goes inside the world's largest building by volume. Your trailer feels smaller already.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Northwest Snohomish",
             "at_mi": 3.2,
             "off_mi": 4.27,
@@ -2100,6 +2110,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 141020067, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Silver Firs"
+          },
+          {
+            "name": "Boeing Future of Flight (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.2,
+            "spoken": "Billboard: Boeing's Future of Flight, next exit in Mukilteo. The factory tour goes inside the world's largest building by volume. Your trailer feels smaller already.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Clearview",
@@ -5918,6 +5938,16 @@
             "spoken": "Passing Quincy"
           },
           {
+            "name": "Ginkgo Petrified Forest (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.0,
+            "spoken": "Billboard: Ginkgo Petrified Forest, ahead at Vantage. A forest that turned to stone about fifteen million years ago. It has not needed watering since.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sunland Estates",
             "at_mi": 34.3,
             "off_mi": 5.44,
@@ -5927,6 +5957,16 @@
             "spoken": "Passing Sunland Estates"
           },
           {
+            "name": "Wild Horses Monument (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.0,
+            "spoken": "Billboard: The Wild Horses Monument, next exit. Fifteen steel horses on the ridge, where the last big roundup ran in nineteen oh-six. They are still running.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Vantage",
             "at_mi": 42.3,
             "off_mi": 0.23,
@@ -5934,6 +5974,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 48662675, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Vantage"
+          },
+          {
+            "name": "Ginkgo Petrified Forest (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.0,
+            "spoken": "Billboard: Ginkgo Petrified Forest, next exit at Vantage. A forest that turned to stone about fifteen million years ago. It has not needed watering since.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Columbia River",
@@ -6070,6 +6120,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 48721198, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sammamish"
+          },
+          {
+            "name": "Snoqualmie Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 164.0,
+            "spoken": "Billboard: Snoqualmie Falls, ahead. Two hundred seventy feet, a good hundred taller than Niagara. Nobody up here goes over in a barrel.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Union Hill-Novelty Hill",
@@ -9304,6 +9364,16 @@
             "spoken": "Passing Napavine"
           },
           {
+            "name": "World's Largest Egg (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 41.5,
+            "spoken": "Billboard: The world's largest egg, next exit, five miles west in Winlock. Twelve feet long, up on a pedestal. The chicken has never been located.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Winlock",
             "at_mi": 42.46,
             "off_mi": 2.85,
@@ -9329,6 +9399,16 @@
             "spoken": "Passing Toledo"
           },
           {
+            "name": "World's Largest Egg (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.0,
+            "spoken": "Billboard: The world's largest egg, next exit, five miles west in Winlock. Twelve feet long, up on a pedestal. The chicken has never been located.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Vader",
             "at_mi": 48.51,
             "off_mi": 2.77,
@@ -9336,6 +9416,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 132625795, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Vader"
+          },
+          {
+            "name": "Mount St. Helens Visitor Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.7,
+            "spoken": "Billboard: Mount Saint Helens Visitor Center, next exit. The mountain lost thirteen hundred feet off its top in nineteen eighty. It kept the rest.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Castle Rock",
@@ -9352,6 +9442,16 @@
             "kind": "point",
             "at_mi": 61.14,
             "spoken": "Crossing the Toutle River"
+          },
+          {
+            "name": "Mount St. Helens Visitor Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 65.5,
+            "spoken": "Billboard: Mount Saint Helens Visitor Center, ahead at Castle Rock. The mountain lost thirteen hundred feet off its top in nineteen eighty. It kept the rest.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kalama",
@@ -14880,6 +14980,16 @@
             "spoken": "Passing White Center"
           },
           {
+            "name": "Museum of Flight (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.0,
+            "spoken": "Billboard: Museum of Flight, next exit. A Concorde, the first jet Air Force One, and the barn where Boeing started. None of them haul freight.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Burien",
             "at_mi": 10.3,
             "off_mi": 3.61,
@@ -17339,6 +17449,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 5084491770, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Union Hill-Novelty Hill"
+          },
+          {
+            "name": "Snoqualmie Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.0,
+            "spoken": "Billboard: Snoqualmie Falls, ahead. Two hundred seventy feet, a good hundred taller than Niagara. Nobody up here goes over in a barrel.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Sammamish",
@@ -31896,6 +32016,16 @@
             "spoken": "Passing Cheney"
           },
           {
+            "name": "Ginkgo Petrified Forest (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 135.0,
+            "spoken": "Billboard: Ginkgo Petrified Forest, ahead at Vantage. A forest that turned to stone about fifteen million years ago. It has not needed watering since.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sunland Estates",
             "at_mi": 136.1,
             "off_mi": 5.44,
@@ -31905,6 +32035,16 @@
             "spoken": "Passing Sunland Estates"
           },
           {
+            "name": "Wild Horses Monument (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 141.7,
+            "spoken": "Billboard: The Wild Horses Monument, next exit. Fifteen steel horses on the ridge, where the last big roundup ran in nineteen oh-six. They are still running.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Vantage",
             "at_mi": 144.0,
             "off_mi": 0.23,
@@ -31912,6 +32052,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 48662675, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Vantage"
+          },
+          {
+            "name": "Ginkgo Petrified Forest (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 146.5,
+            "spoken": "Billboard: Ginkgo Petrified Forest, next exit at Vantage. A forest that turned to stone about fifteen million years ago. It has not needed watering since.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Columbia River",
@@ -32076,6 +32226,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 48721198, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sammamish"
+          },
+          {
+            "name": "Snoqualmie Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 266.0,
+            "spoken": "Billboard: Snoqualmie Falls, ahead. Two hundred seventy feet, a good hundred taller than Niagara. Nobody up here goes over in a barrel.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Redmond",
@@ -46735,6 +46895,16 @@
             "spoken": "Entering Outlook"
           },
           {
+            "name": "Teapot Dome (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.7,
+            "spoken": "Billboard: The Teapot Dome gas station, ahead in Zillah. Shaped like a teapot in nineteen twenty-two, to poke fun at a scandal in the other Washington.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Granger",
             "at_mi": 56.2,
             "off_mi": 0.78,
@@ -46769,6 +46939,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150935883, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Buena"
+          },
+          {
+            "name": "Teapot Dome (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.5,
+            "spoken": "Billboard: The Teapot Dome gas station, ahead in Zillah. Shaped like a teapot in nineteen twenty-two, to poke fun at a scandal in the other Washington.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Naches River",
@@ -46935,6 +47115,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 48721198, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sammamish"
+          },
+          {
+            "name": "Snoqualmie Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 210.0,
+            "spoken": "Billboard: Snoqualmie Falls, ahead. Two hundred seventy feet, a good hundred taller than Niagara. Nobody up here goes over in a barrel.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Newcastle",
@@ -52671,6 +52861,16 @@
             "spoken": "Passing Sammamish"
           },
           {
+            "name": "Snoqualmie Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 134.5,
+            "spoken": "Billboard: Snoqualmie Falls, ahead. Two hundred seventy feet, a good hundred taller than Niagara. Nobody up here goes over in a barrel.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Newcastle",
             "at_mi": 137.8,
             "off_mi": 2.78,
@@ -56480,6 +56680,16 @@
             "spoken": "Passing Thorp"
           },
           {
+            "name": "Ginkgo Petrified Forest (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.0,
+            "spoken": "Billboard: Ginkgo Petrified Forest, next exit at Vantage. A forest that turned to stone about fifteen million years ago. It has not needed watering since.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Columbia River",
             "category": "river",
             "kind": "point",
@@ -56496,6 +56706,16 @@
             "spoken": "Entering Vantage"
           },
           {
+            "name": "Wild Horses Monument (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.0,
+            "spoken": "Billboard: The Wild Horses Monument, next exit. Fifteen steel horses on the ridge, where the last big roundup ran in nineteen oh-six. They are still running.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sunland Estates",
             "at_mi": 65.8,
             "off_mi": 5.46,
@@ -56503,6 +56723,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 12405670842, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sunland Estates"
+          },
+          {
+            "name": "Ginkgo Petrified Forest (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.5,
+            "spoken": "Billboard: Ginkgo Petrified Forest, ahead at Vantage. A forest that turned to stone about fifteen million years ago. It has not needed watering since.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Quincy",
@@ -58765,6 +58995,16 @@
             "spoken": "Passing Sammamish"
           },
           {
+            "name": "Snoqualmie Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 129.0,
+            "spoken": "Billboard: Snoqualmie Falls, ahead. Two hundred seventy feet, a good hundred taller than Niagara. Nobody up here goes over in a barrel.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Union Hill-Novelty Hill",
             "at_mi": 130.3,
             "off_mi": 8.44,
@@ -60836,6 +61076,16 @@
             "spoken": "Crossing the Yakima River"
           },
           {
+            "name": "Teapot Dome (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.0,
+            "spoken": "Billboard: The Teapot Dome gas station, ahead in Zillah. Shaped like a teapot in nineteen twenty-two, to poke fun at a scandal in the other Washington.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Buena",
             "at_mi": 17.7,
             "off_mi": 0.86,
@@ -60870,6 +61120,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150967121, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Granger"
+          },
+          {
+            "name": "Teapot Dome (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.0,
+            "spoken": "Billboard: The Teapot Dome gas station, ahead in Zillah. Shaped like a teapot in nineteen twenty-two, to poke fun at a scandal in the other Washington.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Outlook",

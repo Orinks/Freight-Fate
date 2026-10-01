@@ -21997,6 +21997,16 @@
             "spoken": "Passing McFarland"
           },
           {
+            "name": "Oz Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 109.0,
+            "spoken": "Billboard: The Oz Museum is ahead in Wamego. Follow the yellow brick road off Interstate seventy, because there is no place like home and apparently no place like Kansas either.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Chapman",
             "at_mi": 139.4,
             "off_mi": 1.23,
@@ -22004,6 +22014,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151364833, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Chapman"
+          },
+          {
+            "name": "Eisenhower Library (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 149.1,
+            "spoken": "Billboard: The Eisenhower Presidential Library, next exit in Abilene, where he grew up. The whole interstate system is named for him, this road included.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Eisenhower Library (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 152.4,
+            "spoken": "Billboard: The Eisenhower Presidential Library, next exit in Abilene, where he grew up. The whole interstate system is named for him, this road included.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Solomon River",
@@ -22027,6 +22057,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151408633, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Solomon"
+          },
+          {
+            "name": "Rolling Hills Zoo (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 179.3,
+            "spoken": "Billboard: Rolling Hills Zoo, next exit, two miles south. A zoo and a wildlife museum among the wheat fields. The cows you passed were free.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Rolling Hills Zoo (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 182.9,
+            "spoken": "Billboard: Rolling Hills Zoo, next exit, two miles south. A zoo and a wildlife museum among the wheat fields. The cows you passed were free.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Glendale",
@@ -22065,6 +22115,16 @@
             ]
           },
           {
+            "name": "World's Largest Czech Egg (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 223.8,
+            "spoken": "Billboard: The world's largest Czech egg is ahead in Wilson, the Czech Capital of Kansas. It stands twenty feet tall and is covered in hand-painted folk art, because every small town deserves one enormous thing.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Dorrance",
             "at_mi": 226.1,
             "off_mi": 0.71,
@@ -22072,6 +22132,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151331639, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dorrance"
+          },
+          {
+            "name": "The Garden of Eden (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 228.5,
+            "spoken": "Billboard: The Garden of Eden is ahead in Lucas. Its front yard mixes concrete Bible scenes, populist politics, and roadside folk art unlike anything else.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cathedral of the Plains",
@@ -22091,6 +22161,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151892911, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gorham"
+          },
+          {
+            "name": "Cathedral of the Plains (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 263.5,
+            "spoken": "Billboard: The Cathedral of the Plains is ahead at Victoria. Twin limestone spires rise over wheat country as though somebody imported Europe and forgot to return it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Sternberg Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 263.9,
+            "spoken": "Billboard: The Sternberg Museum, next exit in Hays. The famous fossil is a fourteen-foot fish with a six-foot fish inside it. Chew your lunch.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Sternberg Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 267.2,
+            "spoken": "Billboard: The Sternberg Museum, next exit in Hays. The famous fossil is a fourteen-foot fish with a six-foot fish inside it. Chew your lunch.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Ellis",
@@ -22179,6 +22279,26 @@
             "spoken": "Fick Fossil and History Museum ahead"
           },
           {
+            "name": "Giant Buffalo Bill (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 358.5,
+            "spoken": "Billboard: A giant Buffalo Bill is ahead near Oakley, forever charging a bronze buffalo on horseback. He is bigger than life, and life on the plains was already pretty big. Please stop for real buffalo too.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Prairie Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 365.5,
+            "spoken": "Billboard: The Prairie Museum, next exit in Colby, with the Cooper Barn, the biggest barn in Kansas. The truck stays outside.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Monument Rocks",
             "category": "highway_marker",
             "kind": "point",
@@ -22186,11 +22306,31 @@
             "spoken": "South of Interstate seventy near Oakley stand Monument Rocks, chalk spires and arches left by an ancient inland sea. They rise alone from the high plains as Kansas's first National Natural Landmark."
           },
           {
+            "name": "Prairie Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 372.2,
+            "spoken": "Billboard: The Prairie Museum, next exit in Colby, with the Cooper Barn, the biggest barn in Kansas. The truck stays outside.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "World's Largest Easel",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 400.0,
             "spoken": "Billboard: The world's largest easel is ahead in Goodland, holding a giant sunflower painting because Kansas found ordinary roadside art too close to the ground."
+          },
+          {
+            "name": "World's Largest Easel (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 411.4,
+            "spoken": "Billboard: The world's largest easel is ahead in Goodland, holding a giant sunflower painting because Kansas found ordinary roadside art too close to the ground.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kanorado",
@@ -22247,6 +22387,16 @@
             "spoken": "Entering Arriba"
           },
           {
+            "name": "Wonder View Tower (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 499.6,
+            "spoken": "Billboard: The World's Wonder View Tower, next exit in Genoa. It claims six states from the top. South Dakota is over two hundred fifty miles off.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Genoa",
             "at_mi": 503.2,
             "off_mi": 0.25,
@@ -22254,6 +22404,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151514239, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Genoa"
+          },
+          {
+            "name": "Wonder View Tower (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 505.5,
+            "spoken": "Billboard: The World's Wonder View Tower, next exit in Genoa. It claims six states from the top. South Dakota is over two hundred fifty miles off.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Deer Trail",
@@ -33944,6 +34104,16 @@
             "spoken": "Crossing the Black River"
           },
           {
+            "name": "Walnut Ridge (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.5,
+            "spoken": "Billboard: Walnut Ridge, ahead. The Beatles changed planes at its airport in nineteen sixty-four. The town built a monument and named a street Abbey Road.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "O'Kean",
             "at_mi": 64.76,
             "off_mi": 8.03,
@@ -34014,6 +34184,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151567709, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hoxie"
+          },
+          {
+            "name": "Walnut Ridge (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.0,
+            "spoken": "Billboard: Walnut Ridge, ahead. The Beatles changed planes at its airport in nineteen sixty-four. The town built a monument and named a street Abbey Road.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cache River",

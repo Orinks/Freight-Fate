@@ -1068,6 +1068,16 @@
             "spoken": "Passing Middlebury"
           },
           {
+            "name": "Lake Compounce (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.5,
+            "spoken": "Billboard: Lake Compounce, ahead near Bristol. Open since eighteen forty-six, the oldest amusement park in North America still running. The rides have been updated.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Wolcott",
             "at_mi": 32.7,
             "off_mi": 4.05,
@@ -1156,6 +1166,26 @@
             "spoken": "Passing Plainville"
           },
           {
+            "name": "Mark Twain House (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.7,
+            "spoken": "Billboard: The Mark Twain House, ahead in Hartford. He wrote Huckleberry Finn and Tom Sawyer there. Tours daily. Do not whitewash the fence.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Lake Compounce (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.5,
+            "spoken": "Billboard: Lake Compounce, ahead near Bristol. Open since eighteen forty-six, the oldest amusement park in North America still running. The rides have been updated.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "South Branch Park River",
             "category": "river",
             "kind": "point",
@@ -1179,6 +1209,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 178348306, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bishop's Corner"
+          },
+          {
+            "name": "Mark Twain House (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.7,
+            "spoken": "Billboard: The Mark Twain House, ahead. He wrote Huckleberry Finn and Tom Sawyer there. Tours daily. Do not whitewash the fence.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "interchanges": [
@@ -4507,6 +4547,36 @@
         ],
         "landmarks": [
           {
+            "name": "Dinosaur State Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.0,
+            "spoken": "Billboard: Dinosaur State Park, next exit. Hundreds of real dinosaur footprints under a dome, two hundred million years old. Whoever made them never came back.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Mark Twain House (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.3,
+            "spoken": "Billboard: The Mark Twain House, ahead in Hartford. He wrote Huckleberry Finn and Tom Sawyer there. Tours daily. Do not whitewash the fence.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Dinosaur State Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.5,
+            "spoken": "Billboard: Dinosaur State Park, next exit. Hundreds of real dinosaur footprints under a dome, two hundred million years old. Whoever made them never came back.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Plainville",
             "at_mi": 13.6,
             "off_mi": 1.13,
@@ -4643,6 +4713,16 @@
             "spoken": "Housatonic Museum of Art ahead"
           },
           {
+            "name": "Maritime Aquarium (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.5,
+            "spoken": "Billboard: The Maritime Aquarium, ahead in Norwalk. Sharks, harbor seals and sea turtles, open daily. The seals work for fish and seem happy about it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fairfield",
             "at_mi": 64.7,
             "off_mi": 0.22,
@@ -4734,6 +4814,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158799897, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Noroton Heights"
+          },
+          {
+            "name": "Maritime Aquarium (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.5,
+            "spoken": "Billboard: The Maritime Aquarium, ahead in Norwalk. Sharks, harbor seals and sea turtles, open daily. The seals work for fish and seem happy about it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Riverside",
@@ -6426,6 +6516,26 @@
             "spoken": "Crossing the Connecticut River"
           },
           {
+            "name": "Mark Twain House (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: The Mark Twain House, ahead in Hartford. He wrote Huckleberry Finn and Tom Sawyer there. Tours daily. Do not whitewash the fence.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Frog Bridge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.4,
+            "spoken": "Billboard: The Frog Bridge, ahead in Willimantic. Four copper frogs on giant thread spools. In seventeen fifty-four, the town mistook croaking for an invasion.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Talcottville",
             "at_mi": 12.8,
             "off_mi": 3.3,
@@ -6578,6 +6688,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158858067, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hampton"
+          },
+          {
+            "name": "The Frog Bridge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.9,
+            "spoken": "Billboard: The Frog Bridge, ahead in Willimantic. Four copper frogs on giant thread spools. In seventeen fifty-four, the town mistook croaking for an invasion.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Brooklyn",
@@ -9207,6 +9327,16 @@
             "spoken": "Entering Berlin"
           },
           {
+            "name": "Mark Twain House (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.5,
+            "spoken": "Billboard: The Mark Twain House, ahead in Hartford. He wrote Huckleberry Finn and Tom Sawyer there. Tours daily. Do not whitewash the fence.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Rocky Hill",
             "at_mi": 31.1,
             "off_mi": 3.84,
@@ -11332,6 +11462,16 @@
             "spoken": "Entering Nichols"
           },
           {
+            "name": "Maritime Aquarium (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.2,
+            "spoken": "Billboard: The Maritime Aquarium, ahead in Norwalk. Sharks, harbor seals and sea turtles, open daily. The seals work for fish and seem happy about it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fairfield",
             "at_mi": 26.5,
             "off_mi": 0.22,
@@ -11434,6 +11574,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158799897, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Noroton Heights"
+          },
+          {
+            "name": "Maritime Aquarium (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.5,
+            "spoken": "Billboard: The Maritime Aquarium, ahead in Norwalk. Sharks, harbor seals and sea turtles, open daily. The seals work for fish and seem happy about it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Riverside",

@@ -409,6 +409,36 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Prairie Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.3,
+            "spoken": "Billboard: The Prairie Museum, next exit in Colby, with the Cooper Barn, the biggest barn in Kansas. The truck stays outside.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "World's Largest Easel (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.3,
+            "spoken": "Billboard: The world's largest easel is ahead in Goodland, holding a giant sunflower painting because Kansas found ordinary roadside art too close to the ground.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "World's Largest Easel (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.7,
+            "spoken": "Billboard: The world's largest easel is ahead in Goodland, holding a giant sunflower painting because Kansas found ordinary roadside art too close to the ground.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Kanorado",
             "at_mi": 55.8,
             "off_mi": 0.47,
@@ -1316,6 +1346,16 @@
             "spoken": "Passing Wilroads Gardens"
           },
           {
+            "name": "Boot Hill (from Garden City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Billboard: Dodge City was once the wickedest little city in the West. Wyatt Earp and Bat Masterson kept the peace badly, while the losers went up to Boot Hill with their boots on. Get out of Dodge, or stay a while.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Arkansas River",
             "category": "river",
             "kind": "point",
@@ -1348,6 +1388,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151329184, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Pierceville"
+          },
+          {
+            "name": "Lee Richardson Zoo (from Dodge City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.0,
+            "spoken": "Billboard: Lee Richardson Zoo, ahead in Garden City. Walking in is free; driving through costs extra. Even the zoo has a drive-through.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Holcomb",
@@ -2471,6 +2521,16 @@
             "spoken": "Passing Schoenchen"
           },
           {
+            "name": "Sternberg Museum (from Dodge City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 106.3,
+            "spoken": "Billboard: The Sternberg Museum, ahead in Hays. The famous fossil is a fourteen-foot fish with a six-foot fish inside it. Chew your lunch.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Victoria",
             "at_mi": 113.7,
             "off_mi": 9.26,
@@ -3547,6 +3607,26 @@
             "spoken": "Passing Wilroads Gardens"
           },
           {
+            "name": "Boot Hill (from Salina)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "Billboard: Dodge City was once the wickedest little city in the West. Wyatt Earp and Bat Masterson kept the peace badly, while the losers went up to Boot Hill with their boots on. Get out of Dodge, or stay a while.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Kinsley (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: Kinsley, ahead, Midway U.S.A. Its sign says fifteen hundred sixty-one miles to New York and the same to San Francisco. Halfway to somewhere.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Offerle",
             "at_mi": 28.1,
             "off_mi": 0.01,
@@ -3563,6 +3643,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151430207, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lewis"
+          },
+          {
+            "name": "Kinsley (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.0,
+            "spoken": "Billboard: Kinsley, ahead, Midway U.S.A. Its sign says fifteen hundred sixty-one miles to New York and the same to San Francisco. Halfway to somewhere.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Belpre",
@@ -3766,6 +3856,16 @@
             "spoken": "Passing New Gottland"
           },
           {
+            "name": "Lindsborg (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 158.0,
+            "spoken": "Billboard: Lindsborg, next exit. Little Sweden, U.S.A., settled by Swedes in eighteen sixty-nine, with painted Dala horses on the sidewalks. None of them need feeding.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Marquette",
             "at_mi": 160.5,
             "off_mi": 11.49,
@@ -3782,6 +3882,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151660696, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lindsborg"
+          },
+          {
+            "name": "Lindsborg (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 161.7,
+            "spoken": "Billboard: Lindsborg, next exit. Little Sweden, U.S.A., settled by Swedes in eighteen sixty-nine, with painted Dala horses on the sidewalks. None of them need feeding.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Falun",
@@ -4847,6 +4957,26 @@
             "spoken": "Passing Wilroads Gardens"
           },
           {
+            "name": "Boot Hill (from Wichita)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "Billboard: Dodge City was once the wickedest little city in the West. Wyatt Earp and Bat Masterson kept the peace badly, while the losers went up to Boot Hill with their boots on. Get out of Dodge, or stay a while.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Kinsley (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: Kinsley, ahead, Midway U.S.A. Its sign says fifteen hundred sixty-one miles to New York and the same to San Francisco. Halfway to somewhere.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Offerle",
             "at_mi": 28.2,
             "off_mi": 0.01,
@@ -4879,6 +5009,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151954606, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Garfield"
+          },
+          {
+            "name": "Kinsley (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.0,
+            "spoken": "Billboard: Kinsley, ahead, Midway U.S.A. Its sign says fifteen hundred sixty-one miles to New York and the same to San Francisco. Halfway to somewhere.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Belpre",
@@ -4953,6 +5093,16 @@
             "spoken": "Passing Arlington"
           },
           {
+            "name": "The Cosmosphere (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 107.0,
+            "spoken": "Billboard: The Cosmosphere, ahead in Hutchinson. The real Apollo Thirteen capsule is inside, still marked from the ride home. Your trip has already gone better.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Partridge",
             "at_mi": 110.2,
             "off_mi": 1.23,
@@ -4962,6 +5112,16 @@
             "spoken": "Passing Partridge"
           },
           {
+            "name": "Strataca (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 112.5,
+            "spoken": "Billboard: Strataca, ahead in Hutchinson. An elevator drops six hundred fifty feet into a working salt mine. Lowest point on your whole route.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Nickerson",
             "at_mi": 115.7,
             "off_mi": 10.27,
@@ -4969,6 +5129,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151937271, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Nickerson"
+          },
+          {
+            "name": "Strataca (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 124.0,
+            "spoken": "Billboard: Strataca, ahead in Hutchinson. An elevator drops six hundred fifty feet into a working salt mine. Lowest point on your whole route.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Castleton",
@@ -4987,6 +5157,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151349736, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Yoder"
+          },
+          {
+            "name": "The Cosmosphere (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 129.8,
+            "spoken": "Billboard: The Cosmosphere, ahead in Hutchinson. The real Apollo Thirteen capsule is inside, still marked from the ride home. Your trip has already gone better.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Haven",
@@ -6313,6 +6493,16 @@
             "spoken": "Entering Tallgrass Prairie National Preserve"
           },
           {
+            "name": "The Hays House (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.0,
+            "spoken": "Billboard: The Hays House, ahead in Council Grove. Feeding Santa Fe Trail travelers since eighteen fifty-seven without a break. You qualify.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Neosho River",
             "category": "river",
             "kind": "point",
@@ -6343,6 +6533,16 @@
             "kind": "point",
             "at_mi": 40.8,
             "spoken": "Post Office Oak Museum ahead"
+          },
+          {
+            "name": "The Hays House (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.5,
+            "spoken": "Billboard: The Hays House, ahead in Council Grove. Feeding Santa Fe Trail travelers since eighteen fifty-seven without a break. You qualify.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Alta Vista",
@@ -9107,6 +9307,16 @@
             "spoken": "Passing Pierceville"
           },
           {
+            "name": "Lee Richardson Zoo (from Amarillo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: Lee Richardson Zoo, ahead in Garden City. Walking in is free; driving through costs extra. Even the zoo has a drive-through.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Arkansas River",
             "category": "river",
             "kind": "point",
@@ -9139,6 +9349,16 @@
             "spoken": "Passing Kismet"
           },
           {
+            "name": "Dorothy's House (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.0,
+            "spoken": "Billboard: Dorothy's House, ahead in Liberal. A real nineteen-oh-seven Kansas farmhouse, and a walk through the Land of Oz. The twister is not included.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Turpin",
             "at_mi": 72.3,
             "off_mi": 10.62,
@@ -9155,6 +9375,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151352599, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Tyrone"
+          },
+          {
+            "name": "Dorothy's House (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.5,
+            "spoken": "Billboard: Dorothy's House, ahead in Liberal. A real nineteen-oh-seven Kansas farmhouse, and a walk through the Land of Oz. The twister is not included.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Beaver River",
@@ -10315,11 +10545,41 @@
             "spoken": "Passing Holcomb"
           },
           {
+            "name": "Lee Richardson Zoo (from Colby)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: Lee Richardson Zoo, ahead in Garden City. Walking in is free; driving through costs extra. Even the zoo has a drive-through.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Little Jerusalem (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.0,
+            "spoken": "Billboard: Little Jerusalem Badlands State Park, ahead, a few miles west. Hundred-foot chalk spires left by a sea. Yes, a sea, in Kansas.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Steele Home Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 50.6,
             "spoken": "Steele Home Museum ahead"
+          },
+          {
+            "name": "Little Jerusalem (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.0,
+            "spoken": "Billboard: Little Jerusalem Badlands State Park, ahead, a few miles west. Hundred-foot chalk spires left by a sea. Yes, a sea, in Kansas.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Grinnell",
@@ -10338,6 +10598,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151845470, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Monument"
+          },
+          {
+            "name": "Prairie Museum (from Garden City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 95.0,
+            "spoken": "Billboard: The Prairie Museum, ahead in Colby, with the Cooper Barn, the biggest barn in Kansas. The truck stays outside.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "state_miles": [
@@ -11203,6 +11473,16 @@
             "spoken": "Passing Schoenchen"
           },
           {
+            "name": "Sternberg Museum (from Great Bend)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.3,
+            "spoken": "Billboard: The Sternberg Museum, ahead in Hays. The famous fossil is a fourteen-foot fish with a six-foot fish inside it. Chew your lunch.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Victoria",
             "at_mi": 58.68,
             "off_mi": 9.26,
@@ -11746,6 +12026,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151937271, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Nickerson"
+          },
+          {
+            "name": "The Cosmosphere (from Great Bend)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.5,
+            "spoken": "Billboard: The Cosmosphere, ahead in Hutchinson. The real Apollo Thirteen capsule is inside, still marked from the ride home. Your trip has already gone better.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Strataca (from Great Bend)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.0,
+            "spoken": "Billboard: Strataca, ahead in Hutchinson. An elevator drops six hundred fifty feet into a working salt mine. Lowest point on your whole route.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Partridge",
@@ -12459,6 +12759,16 @@
             "spoken": "Passing Victoria"
           },
           {
+            "name": "Sternberg Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: The Sternberg Museum, ahead in Hays. The famous fossil is a fourteen-foot fish with a six-foot fish inside it. Chew your lunch.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Ogallah",
             "at_mi": 25.3,
             "off_mi": 0.59,
@@ -12513,6 +12823,16 @@
             "spoken": "Passing Grinnell"
           },
           {
+            "name": "Giant Buffalo Bill (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 85.7,
+            "spoken": "Billboard: A giant Buffalo Bill is ahead near Oakley, forever charging a bronze buffalo on horseback. He is bigger than life, and life on the plains was already pretty big. Please stop for real buffalo too.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fick Fossil and History Museum",
             "category": "museum",
             "kind": "point",
@@ -12527,6 +12847,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151845470, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Monument"
+          },
+          {
+            "name": "Giant Buffalo Bill (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 95.0,
+            "spoken": "Billboard: A giant Buffalo Bill is ahead near Oakley, forever charging a bronze buffalo on horseback. He is bigger than life, and life on the plains was already pretty big. Please stop for real buffalo too.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Prairie Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 104.8,
+            "spoken": "Billboard: The Prairie Museum, next exit in Colby, with the Cooper Barn, the biggest barn in Kansas. The truck stays outside.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -13719,6 +14059,16 @@
             "spoken": "Passing Yoder"
           },
           {
+            "name": "Strataca (from Salina)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.5,
+            "spoken": "Billboard: Strataca, ahead in Hutchinson. An elevator drops six hundred fifty feet into a working salt mine. Lowest point on your whole route.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Little Arkansas River",
             "category": "river",
             "kind": "point",
@@ -13742,6 +14092,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151887234, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Buhler"
+          },
+          {
+            "name": "The Cosmosphere (from Salina)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.0,
+            "spoken": "Billboard: The Cosmosphere, ahead in Hutchinson. The real Apollo Thirteen capsule is inside, still marked from the ride home. Your trip has already gone better.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Inman",
@@ -13823,6 +14183,16 @@
             "spoken": "Passing New Gottland"
           },
           {
+            "name": "Lindsborg (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.0,
+            "spoken": "Billboard: Lindsborg, next exit. Little Sweden, U.S.A., settled by Swedes in eighteen sixty-nine, with painted Dala horses on the sidewalks. None of them need feeding.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Smoky Hill River",
             "category": "river",
             "kind": "point",
@@ -13846,6 +14216,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151660696, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lindsborg"
+          },
+          {
+            "name": "Lindsborg (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.7,
+            "spoken": "Billboard: Lindsborg, next exit. Little Sweden, U.S.A., settled by Swedes in eighteen sixty-nine, with painted Dala horses on the sidewalks. None of them need feeding.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Falun",
@@ -14323,6 +14703,16 @@
             "spoken": "Crossing the Arkansas River"
           },
           {
+            "name": "Strataca (from Wichita)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Strataca, ahead in Hutchinson. An elevator drops six hundred fifty feet into a working salt mine. Lowest point on your whole route.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Castleton",
             "at_mi": 10.82,
             "off_mi": 6.93,
@@ -14339,6 +14729,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151349736, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Yoder"
+          },
+          {
+            "name": "The Cosmosphere (from Wichita)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.0,
+            "spoken": "Billboard: The Cosmosphere, ahead in Hutchinson. The real Apollo Thirteen capsule is inside, still marked from the ride home. Your trip has already gone better.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Haven",
@@ -15131,6 +15531,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151395287, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Enterprise"
+          },
+          {
+            "name": "Eisenhower Library (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.8,
+            "spoken": "Billboard: The Eisenhower Presidential Library, next exit in Abilene, where he grew up. The whole interstate system is named for him, this road included.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Eisenhower Library (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: The Eisenhower Presidential Library, next exit in Abilene, where he grew up. The whole interstate system is named for him, this road included.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Manchester",
@@ -17529,6 +17949,16 @@
             "spoken": "Crossing the Cimarron River"
           },
           {
+            "name": "Dorothy's House (from Dodge City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.5,
+            "spoken": "Billboard: Dorothy's House, ahead in Liberal. A real nineteen-oh-seven Kansas farmhouse, and a walk through the Land of Oz. The twister is not included.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Kismet",
             "at_mi": 18.5,
             "off_mi": 0.27,
@@ -17561,6 +17991,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151687109, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ensign"
+          },
+          {
+            "name": "Boot Hill (from Liberal)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.0,
+            "spoken": "Billboard: Dodge City was once the wickedest little city in the West. Wyatt Earp and Bat Masterson kept the peace badly, while the losers went up to Boot Hill with their boots on. Get out of Dodge, or stay a while.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Wilroads Gardens",
@@ -18157,6 +18597,16 @@
             "spoken": "Crossing the Cimarron River"
           },
           {
+            "name": "Dorothy's House (from Garden City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: Dorothy's House, ahead in Liberal. A real nineteen-oh-seven Kansas farmhouse, and a walk through the Land of Oz. The twister is not included.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Kismet",
             "at_mi": 14.1,
             "off_mi": 9.1,
@@ -18173,6 +18623,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151815313, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Satanta"
+          },
+          {
+            "name": "Lee Richardson Zoo (from Liberal)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.0,
+            "spoken": "Billboard: Lee Richardson Zoo, ahead in Garden City. Walking in is free; driving through costs extra. Even the zoo has a drive-through.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Arkansas River",
@@ -19186,6 +19646,16 @@
             "spoken": "Passing Bennington"
           },
           {
+            "name": "Rolling Hills Zoo (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.2,
+            "spoken": "Billboard: Rolling Hills Zoo, next exit, two miles south. A zoo and a wildlife museum among the wheat fields. The cows you passed were free.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Culver",
             "at_mi": 10.9,
             "off_mi": 6.4,
@@ -19193,6 +19663,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151878792, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Culver"
+          },
+          {
+            "name": "Rolling Hills Zoo (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.8,
+            "spoken": "Billboard: Rolling Hills Zoo, next exit, two miles south. A zoo and a wildlife museum among the wheat fields. The cows you passed were free.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Brookville",
@@ -19249,6 +19729,26 @@
             "spoken": "Passing Ellsworth"
           },
           {
+            "name": "World's Largest Czech Egg (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.1,
+            "spoken": "Billboard: The world's largest Czech egg is ahead in Wilson, the Czech Capital of Kansas. It stands twenty feet tall and is covered in hand-painted folk art, because every small town deserves one enormous thing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Garden of Eden (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.1,
+            "spoken": "Billboard: The Garden of Eden is ahead in Lucas. Its front yard mixes concrete Bible scenes, populist politics, and roadside folk art unlike anything else.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sylvan Grove",
             "at_mi": 45.7,
             "off_mi": 11.09,
@@ -19256,6 +19756,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151794005, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sylvan Grove"
+          },
+          {
+            "name": "World's Largest Czech Egg (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.9,
+            "spoken": "Billboard: The world's largest Czech egg is ahead in Wilson, the Czech Capital of Kansas. It stands twenty feet tall and is covered in hand-painted folk art, because every small town deserves one enormous thing.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Dorrance",
@@ -19267,6 +19777,16 @@
             "spoken": "Passing Dorrance"
           },
           {
+            "name": "The Garden of Eden (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.6,
+            "spoken": "Billboard: The Garden of Eden is ahead in Lucas. Its front yard mixes concrete Bible scenes, populist politics, and roadside folk art unlike anything else.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Russell",
             "at_mi": 70.8,
             "off_mi": 1.9,
@@ -19276,6 +19796,16 @@
             "spoken": "Passing Russell"
           },
           {
+            "name": "Cathedral of the Plains (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 77.0,
+            "spoken": "Billboard: The Cathedral of the Plains is ahead at Victoria. Twin limestone spires rise over wheat country as though somebody imported Europe and forgot to return it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Gorham",
             "at_mi": 79.6,
             "off_mi": 1.15,
@@ -19283,6 +19813,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151892911, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gorham"
+          },
+          {
+            "name": "Cathedral of the Plains (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 91.0,
+            "spoken": "Billboard: The Cathedral of the Plains is ahead at Victoria. Twin limestone spires rise over wheat country as though somebody imported Europe and forgot to return it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Sternberg Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 94.3,
+            "spoken": "Billboard: The Sternberg Museum, next exit in Hays. The famous fossil is a fourteen-foot fish with a six-foot fish inside it. Chew your lunch.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Schoenchen",
@@ -20468,6 +21018,16 @@
             "spoken": "Passing Falun"
           },
           {
+            "name": "Lindsborg (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.6,
+            "spoken": "Billboard: Lindsborg, next exit. Little Sweden, U.S.A., settled by Swedes in eighteen sixty-nine, with painted Dala horses on the sidewalks. None of them need feeding.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lindsborg",
             "at_mi": 20.8,
             "off_mi": 2.87,
@@ -20484,6 +21044,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151337883, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Marquette"
+          },
+          {
+            "name": "Lindsborg (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.2,
+            "spoken": "Billboard: Lindsborg, next exit. Little Sweden, U.S.A., settled by Swedes in eighteen sixty-nine, with painted Dala horses on the sidewalks. None of them need feeding.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "New Gottland",
@@ -23195,6 +23765,16 @@
             "spoken": "Passing Saint Marys"
           },
           {
+            "name": "Oz Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.5,
+            "spoken": "Billboard: The Oz Museum is ahead in Wamego. Follow the yellow brick road off Interstate seventy, because there is no place like home and apparently no place like Kansas either.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Paxico",
             "at_mi": 28.1,
             "off_mi": 0.76,
@@ -23265,6 +23845,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151764382, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Zeandale"
+          },
+          {
+            "name": "Oz Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.0,
+            "spoken": "Billboard: The Oz Museum is ahead in Wamego. Follow the yellow brick road off Interstate seventy, because there is no place like home and apparently no place like Kansas either.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Green Valley",

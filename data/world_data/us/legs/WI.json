@@ -1999,6 +1999,16 @@
             "spoken": "Passing North Bend"
           },
           {
+            "name": "World's Largest Six-Pack (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 72.5,
+            "spoken": "Billboard: The World's Largest Six-Pack, ahead in La Crosse. Six brewery tanks, fifty-four feet tall, dressed as cans. It is a look-only six-pack.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Nodine",
             "at_mi": 72.8,
             "off_mi": 8.43,
@@ -5767,6 +5777,16 @@
             "spoken": "Entering Owen"
           },
           {
+            "name": "Colby (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.0,
+            "spoken": "Billboard: Colby, ahead, just south of the highway. Colby cheese was invented here in eighteen eighty-five, and named for the town, not the other way round.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Curtiss",
             "at_mi": 60.29,
             "off_mi": 0.69,
@@ -5822,6 +5842,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151808167, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Unity"
+          },
+          {
+            "name": "Colby (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 77.0,
+            "spoken": "Billboard: Colby, ahead, just south of the highway. Colby cheese was invented here in eighteen eighty-five, and named for the town, not the other way round.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Athens",
@@ -7814,6 +7844,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 5747769936, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Nekimi"
+          },
+          {
+            "name": "EAA Aviation Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.4,
+            "spoken": "Billboard: The EAA Aviation Museum, next exit. Each July about ten thousand airplanes fly into Oshkosh for one week. You thought the truck stop was busy.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Omro",
@@ -14259,6 +14299,16 @@
             "spoken": "Entering Bellevue"
           },
           {
+            "name": "National Railroad Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.6,
+            "spoken": "Billboard: The National Railroad Museum, ahead in Green Bay. Its Big Boy steam engine weighs over a million pounds. Suddenly your load feels light.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Devils River",
             "category": "river",
             "kind": "point",
@@ -14275,6 +14325,26 @@
             "spoken": "Passing Denmark"
           },
           {
+            "name": "Wisconsin Maritime Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.8,
+            "spoken": "Billboard: The Wisconsin Maritime Museum, next exit. Manitowoc built twenty-eight World War Two submarines and sent them to sea down the Mississippi. Some detour.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Wisconsin Maritime Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.0,
+            "spoken": "Billboard: The Wisconsin Maritime Museum, next exit. Manitowoc built twenty-eight World War Two submarines and sent them to sea down the Mississippi. Some detour.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Manitowoc River",
             "category": "river",
             "kind": "point",
@@ -14289,6 +14359,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153691465, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cleveland"
+          },
+          {
+            "name": "Kohler Design Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.6,
+            "spoken": "Billboard: The Kohler Design Center, next exit. A showroom of bathtubs, sinks and toilets, free to walk through. Please do not use the exhibits.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Kohler Design Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.0,
+            "spoken": "Billboard: The Kohler Design Center, next exit. A showroom of bathtubs, sinks and toilets, free to walk through. Please do not use the exhibits.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pigeon River",
@@ -14405,6 +14495,26 @@
             "kind": "point",
             "at_mi": 132.5,
             "spoken": "Crossing the Kinnickinnic River"
+          },
+          {
+            "name": "Mars Cheese Castle (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 141.2,
+            "spoken": "Billboard: Mars Cheese Castle, next exit. Turrets, a drawbridge, and cheese since nineteen forty-seven. Storm the castle. Nobody will stop you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Mars Cheese Castle (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 144.5,
+            "spoken": "Billboard: Mars Cheese Castle, next exit. Turrets, a drawbridge, and cheese since nineteen forty-seven. Storm the castle. Nobody will stop you.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Des Plaines River",
@@ -17161,6 +17271,16 @@
             "spoken": "Passing De Pere"
           },
           {
+            "name": "National Railroad Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Billboard: The National Railroad Museum, ahead in Green Bay. Its Big Boy steam engine weighs over a million pounds. Suddenly your load feels light.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Greenleaf",
             "at_mi": 15.5,
             "off_mi": 5.41,
@@ -17285,6 +17405,16 @@
             "spoken": "Crossing the Fox River"
           },
           {
+            "name": "EAA Aviation Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.0,
+            "spoken": "Billboard: The EAA Aviation Museum, ahead in Oshkosh. Each July about ten thousand airplanes fly in for one week. You thought the truck stop was busy.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Butte des Morts",
             "at_mi": 50.0,
             "off_mi": 4.72,
@@ -17292,6 +17422,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153622890, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Butte des Morts"
+          },
+          {
+            "name": "EAA Aviation Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.6,
+            "spoken": "Billboard: The EAA Aviation Museum, next exit. Each July about ten thousand airplanes fly into Oshkosh for one week. You thought the truck stop was busy.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Nekimi",
@@ -19986,6 +20126,16 @@
             "spoken": "Passing Brighton"
           },
           {
+            "name": "Mars Cheese Castle (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.5,
+            "spoken": "Billboard: Mars Cheese Castle, next exit. Turrets, a drawbridge, and cheese since nineteen forty-seven. Storm the castle. Nobody will stop you.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Somers",
             "at_mi": 10.6,
             "off_mi": 1.92,
@@ -22465,6 +22615,16 @@
             "spoken": "Passing Medary"
           },
           {
+            "name": "World's Largest Six-Pack (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.5,
+            "spoken": "Billboard: The World's Largest Six-Pack, ahead in La Crosse. Six brewery tanks, fifty-four feet tall, dressed as cans. It is a look-only six-pack.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "West Salem",
             "at_mi": 13.6,
             "off_mi": 0.42,
@@ -22508,6 +22668,16 @@
             "spoken": "Entering Rockland"
           },
           {
+            "name": "Sparta (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.8,
+            "spoken": "Billboard: Sparta, next exit, where America's first rail trail begins. Its longest tunnel runs three-quarters of a mile, and no train is coming.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Leon",
             "at_mi": 25.9,
             "off_mi": 2.77,
@@ -22524,6 +22694,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151822979, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Angelo"
+          },
+          {
+            "name": "Sparta (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.5,
+            "spoken": "Billboard: Sparta, next exit, where America's first rail trail begins. Its longest tunnel runs three-quarters of a mile, and no train is coming.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wyeville",
@@ -22612,6 +22792,16 @@
             "spoken": "Crossing the Little Lemonweir River"
           },
           {
+            "name": "Wisconsin Dells (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 78.0,
+            "spoken": "Billboard: Wisconsin Dells, ahead. The duck tours ride in World War Two army trucks that drive into the river. Do not try this with yours.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Lyndon Station",
             "at_mi": 80.8,
             "off_mi": 0.52,
@@ -22653,6 +22843,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153463573, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lewiston"
+          },
+          {
+            "name": "Wisconsin Dells (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 103.0,
+            "spoken": "Billboard: Wisconsin Dells, ahead. The duck tours ride in World War Two army trucks that drive into the river. Do not try this with yours.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wisconsin River",
@@ -22714,6 +22914,16 @@
             "spoken": "Passing Arlington"
           },
           {
+            "name": "Ehlenbach's Cheese Chalet (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 128.0,
+            "spoken": "Billboard: Ehlenbach's Cheese Chalet, next exit. Over two hundred Wisconsin cheeses, and a fiberglass cow out front named Sissy. She is not for sale.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Windsor",
             "at_mi": 130.7,
             "off_mi": 1.04,
@@ -22730,6 +22940,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153772321, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Waunakee"
+          },
+          {
+            "name": "Ehlenbach's Cheese Chalet (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 133.0,
+            "spoken": "Billboard: Ehlenbach's Cheese Chalet, next exit. Over two hundred Wisconsin cheeses, and a fiberglass cow out front named Sissy. She is not for sale.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sun Prairie",
@@ -28883,11 +29103,31 @@
             "spoken": "Passing Somers"
           },
           {
+            "name": "Mars Cheese Castle (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: Mars Cheese Castle, next exit. Turrets, a drawbridge, and cheese since nineteen forty-seven. Storm the castle. Nobody will stop you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Des Plaines River",
             "category": "river",
             "kind": "point",
             "at_mi": 34.2,
             "spoken": "Crossing the Des Plaines River"
+          },
+          {
+            "name": "Mars Cheese Castle (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.5,
+            "spoken": "Billboard: Mars Cheese Castle, ahead in Kenosha. Turrets, a drawbridge, and cheese since nineteen forty-seven. Storm the castle. Nobody will stop you.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Russell Military Museum",
@@ -35672,6 +35912,16 @@
             "spoken": "Crossing the Yahara River"
           },
           {
+            "name": "Ehlenbach's Cheese Chalet (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.5,
+            "spoken": "Billboard: Ehlenbach's Cheese Chalet, ahead in DeForest. Over two hundred Wisconsin cheeses, and a fiberglass cow out front named Sissy. She is not for sale.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Windsor",
             "at_mi": 80.0,
             "off_mi": 1.02,
@@ -35679,6 +35929,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 3730777713, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Windsor"
+          },
+          {
+            "name": "Ehlenbach's Cheese Chalet (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.7,
+            "spoken": "Billboard: Ehlenbach's Cheese Chalet, next exit. Over two hundred Wisconsin cheeses, and a fiberglass cow out front named Sissy. She is not for sale.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wisconsin River",
@@ -35704,6 +35964,16 @@
             "spoken": "Passing Dekorra"
           },
           {
+            "name": "Wisconsin Dells (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 106.0,
+            "spoken": "Billboard: Wisconsin Dells, ahead. The duck tours ride in World War Two army trucks that drive into the river. Do not try this with yours.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Wisconsin Dells",
             "at_mi": 121.7,
             "off_mi": 1.62,
@@ -35720,6 +35990,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153712955, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lyndon Station"
+          },
+          {
+            "name": "Wisconsin Dells (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 134.0,
+            "spoken": "Billboard: Wisconsin Dells, ahead. The duck tours ride in World War Two army trucks that drive into the river. Do not try this with yours.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lemonweir",
@@ -35822,6 +36102,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151403895, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Northfield"
+          },
+          {
+            "name": "Norske Nook (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 221.2,
+            "spoken": "Billboard: Norske Nook, next exit in Osseo. Homemade pie since nineteen seventy-three, every crust rolled by hand. Nobody has ever stopped for just one slice.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Norske Nook (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 224.5,
+            "spoken": "Billboard: Norske Nook, next exit in Osseo. Homemade pie since nineteen seventy-three, every crust rolled by hand. Nobody has ever stopped for just one slice.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Town of Washington",
@@ -39603,6 +39903,16 @@
             "spoken": "Passing Gibbsville"
           },
           {
+            "name": "Kohler Design Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.5,
+            "spoken": "Billboard: The Kohler Design Center, ahead in Kohler. A showroom of bathtubs, sinks and toilets, free to walk through. Please do not use the exhibits.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sheboygan River",
             "category": "river",
             "kind": "point",
@@ -40696,6 +41006,16 @@
             "spoken": "Passing Winneconne"
           },
           {
+            "name": "EAA Aviation Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The EAA Aviation Museum, ahead in Oshkosh. Each July about ten thousand airplanes fly in for one week. You thought the truck stop was busy.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Neenah",
             "at_mi": 12.2,
             "off_mi": 1.25,
@@ -40879,6 +41199,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153479452, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Greenleaf"
+          },
+          {
+            "name": "National Railroad Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.0,
+            "spoken": "Billboard: The National Railroad Museum, ahead in Green Bay. Its Big Boy steam engine weighs over a million pounds. Suddenly your load feels light.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Morrison",
@@ -42865,6 +43195,16 @@
             "spoken": "Passing Cloverland"
           },
           {
+            "name": "Bong Veterans Historical Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.5,
+            "spoken": "Billboard: The Bong Veterans Historical Center, ahead in Superior. Richard Bong, America's top fighter ace of World War Two, was a farm kid from nearby Poplar.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Parkland",
             "at_mi": 85.9,
             "off_mi": 0.72,
@@ -42888,6 +43228,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 3813348787, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Town of Superior"
+          },
+          {
+            "name": "Aerial Lift Bridge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 88.5,
+            "spoken": "Billboard: The Aerial Lift Bridge, ahead in Duluth. Ships sound long, short, long, short, and the whole road deck rises. Your horn will not work.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Superior Village",
@@ -43724,6 +44074,16 @@
             "spoken": "Passing Saint Nazianz"
           },
           {
+            "name": "Wisconsin Maritime Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.0,
+            "spoken": "Billboard: The Wisconsin Maritime Museum, ahead in Manitowoc. The town built twenty-eight World War Two submarines and sent them to sea down the Mississippi. Some detour.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Newtonburg",
             "at_mi": 24.0,
             "off_mi": 2.78,
@@ -43772,6 +44132,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153472080, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Whitelaw"
+          },
+          {
+            "name": "Wisconsin Maritime Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.5,
+            "spoken": "Billboard: The Wisconsin Maritime Museum, next exit. Manitowoc built twenty-eight World War Two submarines and sent them to sea down the Mississippi. Some detour.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Two Rivers",
@@ -43851,6 +44221,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153455167, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Denmark"
+          },
+          {
+            "name": "National Railroad Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.0,
+            "spoken": "Billboard: The National Railroad Museum, ahead in Green Bay. Its Big Boy steam engine weighs over a million pounds. Suddenly your load feels light.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Greenleaf",
@@ -45499,6 +45879,16 @@
             "spoken": "Passing Athens"
           },
           {
+            "name": "Colby (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.0,
+            "spoken": "Billboard: Colby, ahead, just south of the highway. Colby cheese was invented here in eighteen eighty-five, and named for the town, not the other way round.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Big Eau Pleine River",
             "category": "river",
             "kind": "point",
@@ -45547,6 +45937,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151911601, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Curtiss"
+          },
+          {
+            "name": "Colby (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.0,
+            "spoken": "Billboard: Colby, ahead, just south of the highway. Colby cheese was invented here in eighteen eighty-five, and named for the town, not the other way round.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Owen",
@@ -47061,6 +47461,16 @@
             "kind": "point",
             "at_mi": 84.1,
             "spoken": "Crossing the West Branch Suamico River"
+          },
+          {
+            "name": "National Railroad Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 87.0,
+            "spoken": "Billboard: The National Railroad Museum, ahead in Green Bay. Its Big Boy steam engine weighs over a million pounds. Suddenly your load feels light.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Hobart",
@@ -49538,6 +49948,16 @@
             "spoken": "Passing Dane"
           },
           {
+            "name": "Ehlenbach's Cheese Chalet (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 126.2,
+            "spoken": "Billboard: Ehlenbach's Cheese Chalet, next exit. Over two hundred Wisconsin cheeses, and a fiberglass cow out front named Sissy. She is not for sale.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Windsor",
             "at_mi": 130.6,
             "off_mi": 1.04,
@@ -49554,6 +49974,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153772321, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Waunakee"
+          },
+          {
+            "name": "Ehlenbach's Cheese Chalet (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 133.5,
+            "spoken": "Billboard: Ehlenbach's Cheese Chalet, ahead in DeForest. Over two hundred Wisconsin cheeses, and a fiberglass cow out front named Sissy. She is not for sale.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sun Prairie",

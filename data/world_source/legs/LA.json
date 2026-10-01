@@ -549,6 +549,16 @@
             "spoken": "Passing Sunset"
           },
           {
+            "name": "Vermilionville (from Alexandria)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 78.0,
+            "spoken": "Billboard: Vermilionville, ahead in Lafayette. A bayou village kept between seventeen sixty-five and eighteen ninety, Acadian, Creole and Native. Leave the century in the truck.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Arnaudville",
             "at_mi": 78.4,
             "off_mi": 7.33,
@@ -2737,6 +2747,16 @@
             "spoken": "Passing Montgomery"
           },
           {
+            "name": "Natchitoches (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 41.0,
+            "spoken": "Billboard: Natchitoches, ahead, the oldest European settlement in the Louisiana Purchase. It was founded four years before New Orleans, and it brings that up.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Provencal",
             "at_mi": 50.6,
             "off_mi": 9.26,
@@ -3895,6 +3915,16 @@
             "spoken": "Passing Ponchatoula"
           },
           {
+            "name": "The Abita Mystery House (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.0,
+            "spoken": "Billboard: The Abita Mystery House, ahead in Abita Springs. An old gas station leads to fifty thousand odd objects and Buford the Bassigator. No fishing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Madisonville",
             "at_mi": 64.9,
             "off_mi": 3.09,
@@ -3952,6 +3982,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153529568, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lacombe"
+          },
+          {
+            "name": "The Abita Mystery House (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 83.0,
+            "spoken": "Billboard: The Abita Mystery House, ahead in Abita Springs. An old gas station leads to fifty thousand odd objects and Buford the Bassigator. No fishing.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Slidell",
@@ -5839,6 +5879,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151469145, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Addis"
+          },
+          {
+            "name": "The Tallest Capitol (from New Orleans)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Saint George",
@@ -8194,6 +8244,16 @@
         ],
         "landmarks": [
           {
+            "name": "The Tallest Capitol (from Shreveport)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Brusly",
             "at_mi": 4.9,
             "off_mi": 3.71,
@@ -8402,6 +8462,16 @@
             "spoken": "Passing Colfax"
           },
           {
+            "name": "Natchitoches (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 150.0,
+            "spoken": "Billboard: Natchitoches, ahead, the oldest European settlement in the Louisiana Purchase. It was founded four years before New Orleans, and it brings that up.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Natchez",
             "at_mi": 156.3,
             "off_mi": 3.11,
@@ -8452,6 +8522,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151518148, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Powhatan"
+          },
+          {
+            "name": "Natchitoches (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 174.0,
+            "spoken": "Billboard: Natchitoches, ahead, the oldest European settlement in the Louisiana Purchase. It was founded four years before New Orleans, and it brings that up.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pleasant Hill",
@@ -9342,6 +9422,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151573013, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Saint Gabriel"
+          },
+          {
+            "name": "The Tallest Capitol (from Hammond)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Plaquemine",
@@ -10689,6 +10779,26 @@
             "spoken": "Passing Killian"
           },
           {
+            "name": "Middendorf's (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Billboard: Middendorf's, next exit at Manchac. Thin fried catfish beside Lake Maurepas since nineteen thirty-four. Thick is on the menu too, for the stubborn.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Middendorf's (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.6,
+            "spoken": "Billboard: Middendorf's, next exit at Manchac. Thin fried catfish beside Lake Maurepas since nineteen thirty-four. Thick is on the menu too, for the stubborn.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "LaPlace",
             "at_mi": 32.13,
             "off_mi": 3.02,
@@ -11573,6 +11683,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151360637, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brusly"
+          },
+          {
+            "name": "The Tallest Capitol (from Houma)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Saint George",
@@ -13532,6 +13652,16 @@
             "spoken": "Crossing the Vermilion River"
           },
           {
+            "name": "Breaux Bridge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.9,
+            "spoken": "Billboard: Breaux Bridge, next exit. The state legislature named it the crawfish capital of the world in nineteen fifty-nine. Nobody has filed an appeal.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Arnaudville",
             "at_mi": 9.9,
             "off_mi": 7.05,
@@ -13539,6 +13669,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151603036, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Arnaudville"
+          },
+          {
+            "name": "Breaux Bridge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: Breaux Bridge, next exit. The state legislature named it the crawfish capital of the world in nineteen fifty-nine. Nobody has filed an appeal.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Parks",
@@ -13557,6 +13697,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151580408, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cecilia"
+          },
+          {
+            "name": "Vermilionville (from Baton Rouge)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.0,
+            "spoken": "Billboard: Vermilionville, ahead in Lafayette. A bayou village kept between seventeen sixty-five and eighteen ninety, Acadian, Creole and Native. Leave the century in the truck.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Henderson",
@@ -13634,6 +13784,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151364047, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Plaquemine"
+          },
+          {
+            "name": "The Tallest Capitol (from Lafayette)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Saint George",
@@ -15541,6 +15701,16 @@
             "spoken": "Passing Maurice"
           },
           {
+            "name": "Vermilionville (from Beaumont)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.5,
+            "spoken": "Billboard: Vermilionville, ahead in Lafayette. A bayou village kept between seventeen sixty-five and eighteen ninety, Acadian, Creole and Native. Leave the century in the truck.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Duson",
             "at_mi": 12.1,
             "off_mi": 0.68,
@@ -15548,6 +15718,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151571474, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Duson"
+          },
+          {
+            "name": "Rayne (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.8,
+            "spoken": "Billboard: Rayne, next exit, frog capital of the world. More than a hundred painted frogs, and a giant metal one tipping his hat. Wave back.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Church Point",
@@ -15568,6 +15748,16 @@
             "spoken": "Passing Rayne"
           },
           {
+            "name": "Rayne (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.0,
+            "spoken": "Billboard: Rayne, next exit, frog capital of the world. More than a hundred painted frogs, and a giant metal one tipping his hat. Wave back.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Estherwood",
             "at_mi": 29.8,
             "off_mi": 3.38,
@@ -15575,6 +15765,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151364260, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Estherwood"
+          },
+          {
+            "name": "Gator Chateau (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: Gator Chateau, ahead in Jennings. Hold a baby alligator, free. At seven feet they go back to the marsh. Visit before then.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Morse",
@@ -15611,6 +15811,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151580825, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mermentau"
+          },
+          {
+            "name": "Gator Chateau (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.7,
+            "spoken": "Billboard: Gator Chateau, next exit in Jennings. Hold a baby alligator, free. At seven feet they go back to the marsh. Visit before then.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Roanoke",
@@ -15665,11 +15875,31 @@
             "spoken": "Passing Moss Bluff"
           },
           {
+            "name": "Creole Nature Trail (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 74.5,
+            "spoken": "Billboard: The Creole Nature Trail, ahead in Sulphur. A hundred eighty miles of marsh and beach road, alligators included. Admire them from the cab.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Brimstone Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 85.1,
             "spoken": "Brimstone Museum ahead"
+          },
+          {
+            "name": "Creole Nature Trail (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 87.5,
+            "spoken": "Billboard: The Creole Nature Trail, next exit in Sulphur. A hundred eighty miles of marsh and beach road, alligators included. Admire them from the cab.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Vinton",
@@ -17462,6 +17692,36 @@
             "spoken": "Passing Carencro"
           },
           {
+            "name": "Breaux Bridge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.5,
+            "spoken": "Billboard: Breaux Bridge, next exit. The state legislature named it the crawfish capital of the world in nineteen fifty-nine. Nobody has filed an appeal.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Vermilionville (from New Orleans)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Vermilionville, ahead in Lafayette. A bayou village kept between seventeen sixty-five and eighteen ninety, Acadian, Creole and Native. Leave the century in the truck.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Breaux Bridge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.8,
+            "spoken": "Billboard: Breaux Bridge, next exit. The state legislature named it the crawfish capital of the world in nineteen fifty-nine. Nobody has filed an appeal.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Atchafalaya River",
             "category": "river",
             "kind": "point",
@@ -17512,6 +17772,16 @@
             "spoken": "Crossing the Mississippi River"
           },
           {
+            "name": "The Tallest Capitol (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Brusly",
             "at_mi": 51.1,
             "off_mi": 3.68,
@@ -17528,6 +17798,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151469145, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Addis"
+          },
+          {
+            "name": "The Tallest Capitol (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.8,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "LSU AgCenter Botanic Gardens and Museum",
@@ -18216,6 +18496,16 @@
             "spoken": "Passing Roanoke"
           },
           {
+            "name": "Gator Chateau (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.0,
+            "spoken": "Billboard: Gator Chateau, next exit in Jennings. Hold a baby alligator, free. At seven feet they go back to the marsh. Visit before then.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Zigler Art Museum",
             "category": "museum",
             "kind": "point",
@@ -18268,6 +18558,16 @@
             "spoken": "Passing Morse"
           },
           {
+            "name": "Gator Chateau (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.0,
+            "spoken": "Billboard: Gator Chateau, ahead in Jennings. Hold a baby alligator, free. At seven feet they go back to the marsh. Visit before then.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Estherwood",
             "at_mi": 45.8,
             "off_mi": 3.35,
@@ -18275,6 +18575,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151364260, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Estherwood"
+          },
+          {
+            "name": "Rayne (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.5,
+            "spoken": "Billboard: Rayne, next exit, frog capital of the world. More than a hundred painted frogs, and a giant metal one tipping his hat. Wave back.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Rayne",
@@ -18295,6 +18605,16 @@
             "spoken": "Passing Church Point"
           },
           {
+            "name": "Rayne (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.5,
+            "spoken": "Billboard: Rayne, next exit, frog capital of the world. More than a hundred painted frogs, and a giant metal one tipping his hat. Wave back.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Duson",
             "at_mi": 63.5,
             "off_mi": 0.67,
@@ -18302,6 +18622,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151571474, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Duson"
+          },
+          {
+            "name": "Vermilionville (from Lake Charles)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 65.8,
+            "spoken": "Billboard: Vermilionville, ahead in Lafayette. A bayou village kept between seventeen sixty-five and eighteen ninety, Acadian, Creole and Native. Leave the century in the truck.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cankton",
@@ -19408,6 +19738,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151335976, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Moss Bluff"
+          },
+          {
+            "name": "Creole Nature Trail (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 1.8,
+            "spoken": "Billboard: The Creole Nature Trail, ahead in Sulphur. A hundred eighty miles of marsh and beach road, alligators included. Admire them from the cab.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Calcasieu River",
@@ -21968,6 +22308,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151518148, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Powhatan"
+          },
+          {
+            "name": "Natchitoches (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.0,
+            "spoken": "Billboard: Natchitoches, ahead, the oldest European settlement in the Louisiana Purchase. It was founded four years before New Orleans, and it brings that up.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Marthaville",
@@ -25709,6 +26059,26 @@
             "spoken": "Crossing the Mississippi River"
           },
           {
+            "name": "The Tallest Capitol (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 77.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Tallest Capitol (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 86.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Grosse Tete",
             "at_mi": 96.2,
             "off_mi": 0.52,
@@ -25743,6 +26113,36 @@
             "spoken": "Passing Cecilia"
           },
           {
+            "name": "Breaux Bridge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 124.0,
+            "spoken": "Billboard: Breaux Bridge, next exit. The state legislature named it the crawfish capital of the world in nineteen fifty-nine. Nobody has filed an appeal.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Vermilionville (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 127.0,
+            "spoken": "Billboard: Vermilionville, ahead in Lafayette. A bayou village kept between seventeen sixty-five and eighteen ninety, Acadian, Creole and Native. Leave the century in the truck.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Breaux Bridge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 127.5,
+            "spoken": "Billboard: Breaux Bridge, next exit. The state legislature named it the crawfish capital of the world in nineteen fifty-nine. Nobody has filed an appeal.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Scott",
             "at_mi": 137.4,
             "off_mi": 0.79,
@@ -25761,6 +26161,26 @@
             "spoken": "Passing Duson"
           },
           {
+            "name": "Vermilionville (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.0,
+            "spoken": "Billboard: Vermilionville, ahead in Lafayette. A bayou village kept between seventeen sixty-five and eighteen ninety, Acadian, Creole and Native. Leave the century in the truck.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Rayne (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.5,
+            "spoken": "Billboard: Rayne, next exit, frog capital of the world. More than a hundred painted frogs, and a giant metal one tipping his hat. Wave back.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Rayne",
             "at_mi": 147.9,
             "off_mi": 1.21,
@@ -25770,6 +26190,16 @@
             "spoken": "Passing Rayne"
           },
           {
+            "name": "Rayne (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 150.5,
+            "spoken": "Billboard: Rayne, next exit, frog capital of the world. More than a hundred painted frogs, and a giant metal one tipping his hat. Wave back.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Estherwood",
             "at_mi": 160.2,
             "off_mi": 3.38,
@@ -25777,6 +26207,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151364260, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Estherwood"
+          },
+          {
+            "name": "Gator Chateau (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 160.5,
+            "spoken": "Billboard: Gator Chateau, ahead in Jennings. Hold a baby alligator, free. At seven feet they go back to the marsh. Visit before then.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Mermentau",
@@ -25811,6 +26251,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151491365, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Welsh"
+          },
+          {
+            "name": "Gator Chateau (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 184.0,
+            "spoken": "Billboard: Gator Chateau, ahead in Jennings. Hold a baby alligator, free. At seven feet they go back to the marsh. Visit before then.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Creole Nature Trail (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 204.0,
+            "spoken": "Billboard: The Creole Nature Trail, ahead in Sulphur. A hundred eighty miles of marsh and beach road, alligators included. Admire them from the cab.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Creole Nature Trail (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 217.0,
+            "spoken": "Billboard: The Creole Nature Trail, next exit in Sulphur. A hundred eighty miles of marsh and beach road, alligators included. Admire them from the cab.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Calcasieu River",
@@ -27586,6 +28056,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151488525, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Calhoun"
+          },
+          {
+            "name": "Duck Commander (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.0,
+            "spoken": "Billboard: Duck Commander, ahead in West Monroe. The Robertsons' duck call company, with a museum of fifteen galleries about Duck Dynasty. Beards optional.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Claiborne",
@@ -34755,6 +35235,16 @@
             "kind": "point",
             "at_mi": 8.2,
             "spoken": "Crossing the Calcasieu River"
+          },
+          {
+            "name": "Creole Nature Trail (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.5,
+            "spoken": "Billboard: The Creole Nature Trail, ahead in Sulphur. A hundred eighty miles of marsh and beach road, alligators included. Admire them from the cab.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Moss Bluff",

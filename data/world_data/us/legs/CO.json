@@ -690,6 +690,16 @@
         "restrictions": [],
         "landmarks": [
           {
+            "name": "Great Sand Dunes (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.0,
+            "spoken": "Billboard: Great Sand Dunes National Park, ahead. North on Highway one fifty, about twenty miles. The tallest dunes in North America. The ocean never showed up.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Blanca",
             "at_mi": 20.2,
             "off_mi": 0.0,
@@ -697,6 +707,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151953828, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Blanca"
+          },
+          {
+            "name": "Great Sand Dunes (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.0,
+            "spoken": "Billboard: Great Sand Dunes National Park, ahead. North on Highway one fifty, about twenty miles. The tallest dunes in North America. The ocean never showed up.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "La Veta",
@@ -1968,6 +1988,16 @@
             "spoken": "Entering Arriba"
           },
           {
+            "name": "Wonder View Tower (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.8,
+            "spoken": "Billboard: The World's Wonder View Tower, next exit in Genoa. It claims six states from the top. South Dakota is over two hundred fifty miles off.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Genoa",
             "at_mi": 67.1,
             "off_mi": 0.25,
@@ -1984,6 +2014,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151326426, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hugo"
+          },
+          {
+            "name": "Wonder View Tower (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.5,
+            "spoken": "Billboard: The World's Wonder View Tower, next exit in Genoa. It claims six states from the top. South Dakota is over two hundred fifty miles off.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Deer Trail",
@@ -8457,6 +8497,26 @@
             "spoken": "Crossing the St. Charles River"
           },
           {
+            "name": "Bishop Castle (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 65.0,
+            "spoken": "Billboard: Bishop Castle, next exit, then twenty-four miles. One man built it by hand over fifty years. Free to climb, at your own risk.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Bishop Castle (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.4,
+            "spoken": "Billboard: Bishop Castle, next exit, then twenty-four miles. One man built it by hand over fifty years. Free to climb, at your own risk.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Rye",
             "at_mi": 71.2,
             "off_mi": 5.6,
@@ -10787,6 +10847,26 @@
             "spoken": "Passing Manitou Springs"
           },
           {
+            "name": "ProRodeo Hall of Fame (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "Billboard: The ProRodeo Hall of Fame, next exit. Champion riders, and a few of the bulls that threw them. Eight seconds was a full day's work.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "ProRodeo Hall of Fame (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.3,
+            "spoken": "Billboard: The ProRodeo Hall of Fame, ahead. Champion riders, and a few of the bulls that threw them. Eight seconds was a full day's work.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Black Forest",
             "at_mi": 12.1,
             "off_mi": 6.3,
@@ -10794,6 +10874,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151358444, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Black Forest"
+          },
+          {
+            "name": "Garden of the Gods (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.5,
+            "spoken": "Billboard: Garden of the Gods, ahead. Red rock towers, given to the city in nineteen oh-nine on condition it stay free forever. The rocks agreed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gleneagle",
@@ -13199,6 +13289,16 @@
             "kind": "point",
             "at_mi": 4.8,
             "spoken": "Crossing the Uncompahgre River"
+          },
+          {
+            "name": "Colorado National Monument (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.5,
+            "spoken": "Billboard: Colorado National Monument, ahead past Grand Junction. Its first ranger, John Otto, built the trails and was paid a dollar a month. You make more.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Palisade",
@@ -18212,6 +18312,26 @@
             "spoken": "Passing Como"
           },
           {
+            "name": "South Park City (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 77.0,
+            "spoken": "Billboard: South Park City, ahead in Fairplay. More than thirty buildings from the mining days, gathered into one town. The town decided history was worth hauling.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "South Park City (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 92.5,
+            "spoken": "Billboard: South Park City, ahead in Fairplay. More than thirty buildings from the mining days, gathered into one town. The town decided history was worth hauling.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Arkansas River",
             "category": "river",
             "kind": "point",
@@ -18251,6 +18371,26 @@
             "spoken": "Entering Moffat"
           },
           {
+            "name": "UFO Watchtower (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 185.0,
+            "spoken": "Billboard: The UFO Watchtower, ahead near Hooper. A rancher's barn with a sky-watching deck on top. Over a hundred sightings reported. The cattle aren't talking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Colorado Gators (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 190.0,
+            "spoken": "Billboard: Colorado Gators Reptile Park, ahead. Hundreds of alligators, seven thousand feet up, in water the earth keeps warm. They have no plans to move south.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Hooper",
             "at_mi": 197.37,
             "off_mi": 0.11,
@@ -18258,6 +18398,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151809141, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Hooper"
+          },
+          {
+            "name": "UFO Watchtower (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 201.5,
+            "spoken": "Billboard: The UFO Watchtower, ahead near Hooper. A rancher's barn with a sky-watching deck on top. Over a hundred sightings reported. The cattle aren't talking.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Great Sand Dunes (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 202.5,
+            "spoken": "Billboard: Great Sand Dunes National Park, turn east at Mosca, the next town. The tallest dunes in North America. The ocean never showed up.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Colorado Gators (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 204.0,
+            "spoken": "Billboard: Colorado Gators Reptile Park, ahead. Hundreds of alligators, seven thousand feet up, in water the earth keeps warm. They have no plans to move south.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "La Jara",
@@ -20987,6 +21157,16 @@
             "spoken": "Passing Wheat Ridge"
           },
           {
+            "name": "Red Rocks (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.5,
+            "spoken": "Billboard: Red Rocks Amphitheatre, ahead at Morrison. The stage sits between two sandstone rocks three hundred feet tall. The rocks have heard everybody.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "West Pleasant View",
             "at_mi": 11.2,
             "off_mi": 0.6,
@@ -21003,6 +21183,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151408598, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Morrison"
+          },
+          {
+            "name": "Buffalo Bill's Grave (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.3,
+            "spoken": "Billboard: Buffalo Bill's grave, next exit on Lookout Mountain. A group in Cody, Wyoming once offered a reward to steal him back. Denver posted a guard.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Red Rocks (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Billboard: Red Rocks Amphitheatre, next exit at Morrison. The stage sits between two sandstone rocks three hundred feet tall. The rocks have heard everybody.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Buffalo Bill's Grave (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.2,
+            "spoken": "Billboard: Buffalo Bill's grave, next exit on Lookout Mountain. A group in Cody, Wyoming once offered a reward to steal him back. Denver posted a guard.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Evergreen",
@@ -21028,6 +21238,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 6920814940, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Black Hawk"
+          },
+          {
+            "name": "Georgetown Loop Railroad (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.5,
+            "spoken": "Billboard: The Georgetown Loop Railroad, ahead. Georgetown and Silver Plume are two miles apart. The train takes four and a half, and nobody aboard minds.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Central City",
@@ -21073,6 +21293,16 @@
             "spoken": "Entering Silver Plume"
           },
           {
+            "name": "Georgetown Loop Railroad (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.5,
+            "spoken": "Billboard: The Georgetown Loop Railroad, ahead. Georgetown and Silver Plume are two miles apart. The train takes four and a half, and nobody aboard minds.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Arapaho National Forest",
             "category": "national_forest",
             "kind": "zone",
@@ -21115,6 +21345,26 @@
             "kind": "zone",
             "at_mi": 132.7,
             "spoken": "Entering Medicine Bow-Routt National Forest"
+          },
+          {
+            "name": "Old Town Hot Springs (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.0,
+            "spoken": "Billboard: Old Town Hot Springs, ahead in Steamboat Springs. The name comes from a spring that chugged like a steamboat. Trappers went looking for the boat.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Old Town Hot Springs (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 166.0,
+            "spoken": "Billboard: Old Town Hot Springs, ahead in Steamboat Springs. The name comes from a spring that chugged like a steamboat. Trappers went looking for the boat.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hayden",
@@ -22860,6 +23110,16 @@
             "spoken": "Crossing the South Platte River"
           },
           {
+            "name": "Red Rocks (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: Red Rocks Amphitheatre, ahead at Morrison. The stage sits between two sandstone rocks three hundred feet tall. The rocks have heard everybody.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Leyden",
             "at_mi": 11.3,
             "off_mi": 8.22,
@@ -22878,6 +23138,16 @@
             "spoken": "Passing Morrison"
           },
           {
+            "name": "Buffalo Bill's Grave (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.5,
+            "spoken": "Billboard: Buffalo Bill's grave, next exit on Lookout Mountain. A group in Cody, Wyoming once offered a reward to steal him back. Denver posted a guard.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Aspen Park",
             "at_mi": 15.4,
             "off_mi": 11.2,
@@ -22885,6 +23155,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151376447, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Aspen Park"
+          },
+          {
+            "name": "Red Rocks (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.5,
+            "spoken": "Billboard: Red Rocks Amphitheatre, next exit at Morrison. The stage sits between two sandstone rocks three hundred feet tall. The rocks have heard everybody.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Buffalo Bill's Grave (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.5,
+            "spoken": "Billboard: Buffalo Bill's grave, next exit on Lookout Mountain. A group in Cody, Wyoming once offered a reward to steal him back. Denver posted a guard.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Evergreen",
@@ -22928,6 +23218,16 @@
             "spoken": "Passing Central City"
           },
           {
+            "name": "Georgetown Loop Railroad (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.5,
+            "spoken": "Billboard: The Georgetown Loop Railroad, ahead. Georgetown and Silver Plume are two miles apart. The train takes four and a half, and nobody aboard minds.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Tolland",
             "at_mi": 37.5,
             "off_mi": 9.69,
@@ -22969,6 +23269,16 @@
             "kind": "zone",
             "at_mi": 49.7,
             "spoken": "Entering Arapaho National Forest"
+          },
+          {
+            "name": "Georgetown Loop Railroad (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.5,
+            "spoken": "Billboard: The Georgetown Loop Railroad, ahead. Georgetown and Silver Plume are two miles apart. The train takes four and a half, and nobody aboard minds.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Loveland Pass",
@@ -27091,6 +27401,16 @@
             "spoken": "Crossing the Florida River"
           },
           {
+            "name": "Durango and Silverton Railroad (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Durango and Silverton steam train, ahead in Durango. Up the Animas canyon since eighteen eighty-two. Your truck is faster, and nobody photographs it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Ignacio",
             "at_mi": 16.7,
             "off_mi": 7.12,
@@ -28162,6 +28482,16 @@
             "kind": "point",
             "at_mi": 29.9,
             "spoken": "Crossing the Colorado River"
+          },
+          {
+            "name": "Glenwood Hot Springs (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.0,
+            "spoken": "Billboard: Glenwood Hot Springs, ahead. The world's largest hot springs pool, since eighteen eighty-eight. A million gallons, and not one of them cold.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Carbondale",
@@ -32407,6 +32737,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151364146, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gleneagle"
+          },
+          {
+            "name": "Garden of the Gods (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 119.4,
+            "spoken": "Billboard: Garden of the Gods, ahead. Red rock towers, given to the city in nineteen oh-nine on condition it stay free forever. The rocks agreed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "ProRodeo Hall of Fame (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 121.6,
+            "spoken": "Billboard: The ProRodeo Hall of Fame, ahead. Champion riders, and a few of the bulls that threw them. Eight seconds was a full day's work.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "ProRodeo Hall of Fame (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 127.9,
+            "spoken": "Billboard: The ProRodeo Hall of Fame, next exit. Champion riders, and a few of the bulls that threw them. Eight seconds was a full day's work.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Manitou Springs",
@@ -36917,6 +37277,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151840248, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Carbondale"
+          },
+          {
+            "name": "Glenwood Hot Springs (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.5,
+            "spoken": "Billboard: Glenwood Hot Springs, ahead. The world's largest hot springs pool, since eighteen eighty-eight. A million gallons, and not one of them cold.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Colorado River",
@@ -48063,6 +48433,46 @@
             "spoken": "Passing Fort Carson"
           },
           {
+            "name": "Garden of the Gods (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.5,
+            "spoken": "Billboard: Garden of the Gods, ahead. Red rock towers, given to the city in nineteen oh-nine on condition it stay free forever. The rocks agreed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "ProRodeo Hall of Fame (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.7,
+            "spoken": "Billboard: The ProRodeo Hall of Fame, next exit. Champion riders, and a few of the bulls that threw them. Eight seconds was a full day's work.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "ProRodeo Hall of Fame (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.0,
+            "spoken": "Billboard: The ProRodeo Hall of Fame, ahead. Champion riders, and a few of the bulls that threw them. Eight seconds was a full day's work.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Garden of the Gods (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.2,
+            "spoken": "Billboard: Garden of the Gods, ahead. Red rock towers, given to the city in nineteen oh-nine on condition it stay free forever. The rocks agreed.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Gleneagle",
             "at_mi": 60.4,
             "off_mi": 0.98,
@@ -51204,6 +51614,16 @@
             "spoken": "Passing Fort Carson"
           },
           {
+            "name": "Garden of the Gods (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.5,
+            "spoken": "Billboard: Garden of the Gods, ahead. Red rock towers, given to the city in nineteen oh-nine on condition it stay free forever. The rocks agreed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Manitou Springs",
             "at_mi": 46.7,
             "off_mi": 4.51,
@@ -51213,6 +51633,26 @@
             "spoken": "Passing Manitou Springs"
           },
           {
+            "name": "ProRodeo Hall of Fame (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.4,
+            "spoken": "Billboard: The ProRodeo Hall of Fame, next exit. Champion riders, and a few of the bulls that threw them. Eight seconds was a full day's work.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "ProRodeo Hall of Fame (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.8,
+            "spoken": "Billboard: The ProRodeo Hall of Fame, ahead. Champion riders, and a few of the bulls that threw them. Eight seconds was a full day's work.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Black Forest",
             "at_mi": 56.5,
             "off_mi": 6.3,
@@ -51220,6 +51660,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151358444, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Black Forest"
+          },
+          {
+            "name": "Garden of the Gods (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.0,
+            "spoken": "Billboard: Garden of the Gods, ahead. Red rock towers, given to the city in nineteen oh-nine on condition it stay free forever. The rocks agreed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gleneagle",
@@ -55558,6 +56008,46 @@
             "spoken": "Passing Fort Carson"
           },
           {
+            "name": "Garden of the Gods (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.5,
+            "spoken": "Billboard: Garden of the Gods, ahead. Red rock towers, given to the city in nineteen oh-nine on condition it stay free forever. The rocks agreed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "ProRodeo Hall of Fame (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.6,
+            "spoken": "Billboard: The ProRodeo Hall of Fame, next exit. Champion riders, and a few of the bulls that threw them. Eight seconds was a full day's work.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "ProRodeo Hall of Fame (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.9,
+            "spoken": "Billboard: The ProRodeo Hall of Fame, ahead. Champion riders, and a few of the bulls that threw them. Eight seconds was a full day's work.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Garden of the Gods (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.1,
+            "spoken": "Billboard: Garden of the Gods, ahead. Red rock towers, given to the city in nineteen oh-nine on condition it stay free forever. The rocks agreed.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Gleneagle",
             "at_mi": 60.3,
             "off_mi": 0.98,
@@ -58296,6 +58786,26 @@
             "spoken": "Passing Rye"
           },
           {
+            "name": "Bishop Castle (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.3,
+            "spoken": "Billboard: Bishop Castle, next exit, then twenty-four miles. One man built it by hand over fifty years. Free to climb, at your own risk.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Bishop Castle (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.7,
+            "spoken": "Billboard: Bishop Castle, next exit, then twenty-four miles. One man built it by hand over fifty years. Free to climb, at your own risk.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "St. Charles River",
             "category": "river",
             "kind": "point",
@@ -59829,6 +60339,16 @@
         ],
         "landmarks": [
           {
+            "name": "Bishop Castle (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.5,
+            "spoken": "Billboard: Bishop Castle, ahead. Colorado City exit, then twenty-four miles. One man built it by hand over fifty years. Free to climb, at your own risk.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Rye",
             "at_mi": 20.5,
             "off_mi": 5.62,
@@ -59845,6 +60365,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151435080, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Colorado City"
+          },
+          {
+            "name": "Bishop Castle (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.5,
+            "spoken": "Billboard: Bishop Castle, next exit, then twenty-four miles. One man built it by hand over fifty years. Free to climb, at your own risk.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "St. Charles River",

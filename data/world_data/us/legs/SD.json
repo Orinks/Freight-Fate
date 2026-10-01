@@ -20697,6 +20697,26 @@
             "spoken": "Passing Steen"
           },
           {
+            "name": "Verne the Patriot (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.8,
+            "spoken": "Billboard: Verne the Patriot, a sixty-five-foot nutcracker, next exit in Luverne. One woman here owns more nutcrackers than the town has people.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Verne the Patriot (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.7,
+            "spoken": "Billboard: Verne the Patriot, a sixty-five-foot nutcracker, next exit in Luverne. One woman here owns more nutcrackers than the town has people.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Kanaranzi",
             "at_mi": 35.4,
             "off_mi": 4.27,
@@ -20905,6 +20925,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151885877, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Linden"
+          },
+          {
+            "name": "Minneopa bison (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 137.0,
+            "spoken": "Billboard: Minneopa State Park, ahead near Mankato. A bison herd roams a range you can drive through. Stay inside and yield. They will not.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Garden City",
@@ -23851,6 +23881,26 @@
             "spoken": "Entering Beaver Creek"
           },
           {
+            "name": "Verne the Patriot (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.3,
+            "spoken": "Billboard: Verne the Patriot, a sixty-five-foot nutcracker, next exit in Luverne. One woman here owns more nutcrackers than the town has people.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Verne the Patriot (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.7,
+            "spoken": "Billboard: Verne the Patriot, a sixty-five-foot nutcracker, next exit in Luverne. One woman here owns more nutcrackers than the town has people.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Magnolia",
             "at_mi": 36.3,
             "off_mi": 0.52,
@@ -23971,6 +24021,16 @@
             "spoken": "Passing Madelia"
           },
           {
+            "name": "Minneopa bison (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 136.0,
+            "spoken": "Billboard: Minneopa State Park, ahead near Mankato. A bison herd roams a range you can drive through. Stay inside and yield. They will not.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "South Fork Watonwan River",
             "category": "river",
             "kind": "point",
@@ -24001,6 +24061,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151361283, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rapidan"
+          },
+          {
+            "name": "Minneopa bison (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 162.0,
+            "spoken": "Billboard: Minneopa State Park, ahead near Mankato. A bison herd roams a range you can drive through. Stay inside and yield. They will not.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kasota",

@@ -2684,6 +2684,16 @@
             "spoken": "Passing Conway"
           },
           {
+            "name": "Yankee Candle Village (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.5,
+            "spoken": "Billboard: Yankee Candle Village, next exit. The flagship candle store, with a Christmas village inside all year. Your cab will smell like pine for a week.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sunderland",
             "at_mi": 48.79,
             "off_mi": 1.83,
@@ -2705,6 +2715,16 @@
             "kind": "point",
             "at_mi": 48.93,
             "spoken": "Crossing the Mill River"
+          },
+          {
+            "name": "Yankee Candle Village (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.2,
+            "spoken": "Billboard: Yankee Candle Village, next exit. The flagship candle store, with a Christmas village inside all year. Your cab will smell like pine for a week.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "North Hadley",
@@ -2770,6 +2790,26 @@
             "spoken": "Passing South Hadley"
           },
           {
+            "name": "Basketball Hall of Fame (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.2,
+            "spoken": "Billboard: The Basketball Hall of Fame, ahead in Springfield, where the game began with peach baskets. Somebody had to fetch the ball after every score.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Volleyball Hall of Fame (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.5,
+            "spoken": "Billboard: The Volleyball Hall of Fame, ahead in Holyoke, where the game was invented in eighteen ninety-five. Basketball was too rough for some people.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Southampton",
             "at_mi": 67.08,
             "off_mi": 4.73,
@@ -2809,6 +2849,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158844046, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hampton Ponds"
+          },
+          {
+            "name": "Volleyball Hall of Fame (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 71.0,
+            "spoken": "Billboard: The Volleyball Hall of Fame, ahead in Holyoke, where the game was invented in eighteen ninety-five. Basketball was too rough for some people.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Feeding Hills",
@@ -4913,6 +4963,16 @@
         ],
         "landmarks": [
           {
+            "name": "Robert Frost Farm (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The Robert Frost Farm, next exit. The poet farmed there eleven years. Two roads diverge at the ramp. Take the one to the farm.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Derry Village",
             "at_mi": 11.0,
             "off_mi": 1.83,
@@ -4940,6 +5000,26 @@
             "spoken": "Passing Londonderry"
           },
           {
+            "name": "Robert Frost Farm (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.6,
+            "spoken": "Billboard: The Robert Frost Farm, next exit. The poet farmed there eleven years. Two roads diverge at the ramp. Take the one to the farm.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "America's Stonehenge (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.4,
+            "spoken": "Billboard: America's Stonehenge, next exit, then about five miles east. Stone chambers in the woods. Nobody agrees who built them. The rocks are not talking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Windham",
             "at_mi": 16.7,
             "off_mi": 1.42,
@@ -4947,6 +5027,46 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158835683, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Windham"
+          },
+          {
+            "name": "America's Stonehenge (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.0,
+            "spoken": "Billboard: America's Stonehenge, next exit, then about five miles east. Stone chambers in the woods. Nobody agrees who built them. The rocks are not talking.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Canobie Lake Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.2,
+            "spoken": "Billboard: Canobie Lake Park, next exit. A lakeside amusement park since nineteen oh-two, when the trolley brought the crowds. You drove. Close enough.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Canobie Lake Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.0,
+            "spoken": "Billboard: Canobie Lake Park, ahead in Salem. A lakeside amusement park since nineteen oh-two, when the trolley brought the crowds. You drove. Close enough.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Lowell National Historical Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: Lowell National Historical Park, ahead in Lowell. Brick mills on the canals, and a weave room with working looms. Bring your loud voice.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Tewksbury",
@@ -4981,6 +5101,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158806475, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Chelmsford"
+          },
+          {
+            "name": "Lowell National Historical Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.0,
+            "spoken": "Billboard: Lowell National Historical Park, ahead in Lowell. Brick mills on the canals, and a weave room with working looms. Bring your loud voice.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Littleton",
@@ -5128,6 +5258,16 @@
             "spoken": "Passing Rochdale"
           },
           {
+            "name": "Old Sturbridge Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 89.7,
+            "spoken": "Billboard: Old Sturbridge Village, ahead in Sturbridge. An eighteen-thirties New England town, run by people in period dress. The oxen are unimpressed by horsepower.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Charlton Depot",
             "at_mi": 91.9,
             "off_mi": 1.36,
@@ -5153,6 +5293,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158854568, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Sturbridge"
+          },
+          {
+            "name": "Old Sturbridge Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 105.3,
+            "spoken": "Billboard: Old Sturbridge Village, ahead in Sturbridge. An eighteen-thirties New England town, run by people in period dress. The oxen are unimpressed by horsepower.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Union",
@@ -5205,6 +5355,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158812648, projected onto the leg's checked-in route geometry",
             "spoken": "Passing South Willington"
+          },
+          {
+            "name": "Mark Twain House (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 125.2,
+            "spoken": "Billboard: The Mark Twain House, ahead in Hartford. He wrote Huckleberry Finn and Tom Sawyer there. Tours daily. Do not whitewash the fence.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Vernon",
@@ -9157,6 +9317,16 @@
             "spoken": "Crossing the Merrimack River"
           },
           {
+            "name": "Lowell National Historical Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.0,
+            "spoken": "Billboard: Lowell National Historical Park, ahead in Lowell. Brick mills on the canals, and a weave room with working looms. Bring your loud voice.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Tyngsborough",
             "at_mi": 25.9,
             "off_mi": 0.85,
@@ -9200,6 +9370,26 @@
             "spoken": "Passing Billerica"
           },
           {
+            "name": "Minute Man National Historical Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.7,
+            "spoken": "Billboard: Minute Man National Historical Park, ahead in Lexington. The Battle Road, where the Revolution began in seventeen seventy-five. Allow more than a minute.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Lowell National Historical Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.0,
+            "spoken": "Billboard: Lowell National Historical Park, ahead in Lowell. Brick mills on the canals, and a weave room with working looms. Bring your loud voice.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lexington",
             "at_mi": 47.7,
             "off_mi": 1.58,
@@ -9214,6 +9404,16 @@
             "kind": "point",
             "at_mi": 50.4,
             "spoken": "Museum ahead: Munroe Tavern"
+          },
+          {
+            "name": "Minute Man National Historical Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.8,
+            "spoken": "Billboard: Minute Man National Historical Park, ahead in Lexington. The Battle Road, where the Revolution began in seventeen seventy-five. Allow more than a minute.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Weston",
@@ -9340,6 +9540,16 @@
             "spoken": "Passing Islington"
           },
           {
+            "name": "Patriots Hall of Fame (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.0,
+            "spoken": "Billboard: The Patriots Hall of Fame, ahead in Foxborough. All the team's Super Bowl trophies, under one roof. The parking lot is bigger than some towns.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Canton",
             "at_mi": 71.0,
             "off_mi": 1.62,
@@ -9383,6 +9593,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158861961, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mansfield"
+          },
+          {
+            "name": "Patriots Hall of Fame (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 85.3,
+            "spoken": "Billboard: The Patriots Hall of Fame, ahead in Foxborough. All the team's Super Bowl trophies, under one roof. The parking lot is bigger than some towns.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Neponset River",
@@ -10569,6 +10789,16 @@
             "spoken": "Passing Auburn"
           },
           {
+            "name": "Robert Frost Farm (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The Robert Frost Farm, next exit. The poet farmed there eleven years. Two roads diverge at the ramp. Take the one to the farm.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Derry Village",
             "at_mi": 11.1,
             "off_mi": 1.83,
@@ -10596,6 +10826,26 @@
             "spoken": "Passing Londonderry"
           },
           {
+            "name": "Robert Frost Farm (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.8,
+            "spoken": "Billboard: The Robert Frost Farm, next exit. The poet farmed there eleven years. Two roads diverge at the ramp. Take the one to the farm.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "America's Stonehenge (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.6,
+            "spoken": "Billboard: America's Stonehenge, next exit, then about five miles east. Stone chambers in the woods. Nobody agrees who built them. The rocks are not talking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Windham",
             "at_mi": 16.9,
             "off_mi": 1.42,
@@ -10603,6 +10853,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158835683, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Windham"
+          },
+          {
+            "name": "America's Stonehenge (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.2,
+            "spoken": "Billboard: America's Stonehenge, next exit, then about five miles east. Stone chambers in the woods. Nobody agrees who built them. The rocks are not talking.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pelham",
@@ -10614,6 +10874,16 @@
             "spoken": "Passing Pelham"
           },
           {
+            "name": "Canobie Lake Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.4,
+            "spoken": "Billboard: Canobie Lake Park, next exit. A lakeside amusement park since nineteen oh-two, when the trolley brought the crowds. You drove. Close enough.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Salem",
             "at_mi": 20.8,
             "off_mi": 2.36,
@@ -10621,6 +10891,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158909594, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Salem"
+          },
+          {
+            "name": "Canobie Lake Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.5,
+            "spoken": "Billboard: Canobie Lake Park, ahead in Salem. A lakeside amusement park since nineteen oh-two, when the trolley brought the crowds. You drove. Close enough.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Lowell National Historical Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: Lowell National Historical Park, ahead in Lowell. Brick mills on the canals, and a weave room with working looms. Bring your loud voice.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Andover",
@@ -10707,6 +10997,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158868340, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Carlisle"
+          },
+          {
+            "name": "Lowell National Historical Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.0,
+            "spoken": "Billboard: Lowell National Historical Park, ahead in Lowell. Brick mills on the canals, and a weave room with working looms. Bring your loud voice.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Littleton",
@@ -12970,6 +13270,16 @@
             "spoken": "Passing Newington"
           },
           {
+            "name": "Strawbery Banke Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Billboard: Strawbery Banke Museum, ahead in Portsmouth. Houses on their original sites, spanning over three hundred years. They spell strawberry the old way.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Greenland",
             "at_mi": 6.2,
             "off_mi": 0.58,
@@ -14300,6 +14610,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158866335, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rye Beach"
+          },
+          {
+            "name": "Strawbery Banke Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.5,
+            "spoken": "Billboard: Strawbery Banke Museum, ahead in Portsmouth. Houses on their original sites, spanning over three hundred years. They spell strawberry the old way.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "North Hampton",

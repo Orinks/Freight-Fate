@@ -31567,6 +31567,16 @@
             "spoken": "Passing Wibaux"
           },
           {
+            "name": "Theodore Roosevelt Presidential Library (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.5,
+            "spoken": "Billboard: The Theodore Roosevelt Presidential Library, next exit in Medora. The roof is planted with native prairie. Please do not graze the library.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Little Missouri River",
             "category": "river",
             "kind": "point",
@@ -31581,6 +31591,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151448916, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Medora"
+          },
+          {
+            "name": "Theodore Roosevelt Presidential Library (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.0,
+            "spoken": "Billboard: The Theodore Roosevelt Presidential Library, next exit in Medora. The roof is planted with native prairie. Please do not graze the library.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Painted Canyon (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.5,
+            "spoken": "Billboard: Theodore Roosevelt National Park, Painted Canyon, next exit. The badlands open up right off the interstate. The bison have the right of way.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Painted Canyon (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 71.4,
+            "spoken": "Billboard: Theodore Roosevelt National Park, Painted Canyon, next exit. The badlands open up right off the interstate. The bison have the right of way.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Little Missouri National Grassland",
