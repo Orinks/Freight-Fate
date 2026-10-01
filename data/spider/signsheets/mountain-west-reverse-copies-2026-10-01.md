@@ -455,3 +455,82 @@ Camino Real byway's short I-25 stretches.
 - leg: lubbock_tx_us -> roswell_nm_us
 - at_mi: 200.0
 - spoken: Billboard: Roswell is ahead, where something crashed in the desert in nineteen forty-seven and the Air Force has been explaining it ever since. Even the streetlights and the McDonald's are shaped like aliens.
+
+## Oklahoma, Interstate 44 east of Tulsa
+
+The Blue Whale and the Foyil totem pole were signed only eastbound, and
+only on the Dallas to St. Louis leg. These put them both ways on the three
+legs that run the Will Rogers Turnpike from Tulsa: to Joplin, to
+Springfield and to Kansas City.
+
+### Blue Whale of Catoosa (from Joplin)
+- treatment: billboard
+- leg: joplin_mo_us -> tulsa_ok_us
+- at_mi: 86.7
+- spoken: Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.
+
+### Blue Whale of Catoosa (from Tulsa)
+- treatment: billboard
+- leg: tulsa_ok_us -> joplin_mo_us
+- at_mi: 8.3
+- spoken: Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.
+
+### Blue Whale of Catoosa (from Springfield)
+- treatment: billboard
+- leg: springfield_mo_us -> tulsa_ok_us
+- at_mi: 154.8
+- spoken: Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.
+
+### Blue Whale of Catoosa (from Tulsa)
+- treatment: billboard
+- leg: tulsa_ok_us -> springfield_mo_us
+- at_mi: 8.2
+- spoken: Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.
+
+### Blue Whale of Catoosa (from Tulsa)
+- treatment: billboard
+- leg: tulsa_ok_us -> kansas_city_mo_us
+- at_mi: 8.9
+- spoken: Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.
+
+### Blue Whale of Catoosa (from Kansas City)
+- treatment: billboard
+- leg: kansas_city_mo_us -> tulsa_ok_us
+- at_mi: 245.1
+- spoken: Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.
+
+### World's Largest Totem Pole (from Joplin)
+- treatment: billboard
+- leg: joplin_mo_us -> tulsa_ok_us
+- at_mi: 63.7
+- spoken: Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.
+
+### World's Largest Totem Pole (from Tulsa)
+- treatment: billboard
+- leg: tulsa_ok_us -> joplin_mo_us
+- at_mi: 31.3
+- spoken: Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.
+
+### World's Largest Totem Pole (from Springfield)
+- treatment: billboard
+- leg: springfield_mo_us -> tulsa_ok_us
+- at_mi: 131.8
+- spoken: Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.
+
+### World's Largest Totem Pole (from Tulsa)
+- treatment: billboard
+- leg: tulsa_ok_us -> springfield_mo_us
+- at_mi: 31.2
+- spoken: Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.
+
+### World's Largest Totem Pole (from Tulsa)
+- treatment: billboard
+- leg: tulsa_ok_us -> kansas_city_mo_us
+- at_mi: 32.7
+- spoken: Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.
+
+### World's Largest Totem Pole (from Kansas City)
+- treatment: billboard
+- leg: kansas_city_mo_us -> tulsa_ok_us
+- at_mi: 221.3
+- spoken: Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.

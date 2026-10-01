@@ -1,53 +1,85 @@
 # Review: Mountain West billboard drafts -- 2026-10-01
 
-Drafts for the owner's review; nothing here is baked. Sheets so far:
+Drafts for the owner's review; nothing here is baked. Sheets:
 `nebraska-2026-10-01.md`, `wyoming-2026-10-01.md`,
 `montana-2026-10-01.md`, `utah-2026-10-01.md`, `arizona-2026-10-01.md`,
-`new-mexico-2026-10-01.md`, and `mountain-west-reverse-copies-2026-10-01.md`.
+`new-mexico-2026-10-01.md`, `oklahoma-2026-10-01.md`, and
+`mountain-west-reverse-copies-2026-10-01.md`.
 
 ## Counts
 
-- Nebraska: 10 attractions, 46 signs, 10 new lines.
-- Wyoming: 11 attractions, 83 signs, 11 new lines.
-- Montana: 13 attractions, 51 signs, 13 new lines.
-- Utah: 12 attractions, 84 signs, 12 new lines.
-- Arizona: 19 attractions, 68 signs, 19 new lines.
-- New Mexico: 13 attractions, 62 signs, 13 new lines.
-- Reused-copy signs (older approved copy, other directions and sibling
-  legs): 68, in Nebraska (17), Montana (8), Utah (9), Arizona (18) and New
-  Mexico (16).
-- Total so far: 78 attractions, 394 new-copy signs, 78 new lines, 68
-  reused-copy signs.
+- Attractions: 92 (Nebraska 10, Wyoming 11, Montana 13, Utah 12, Arizona
+  19, New Mexico 13, Oklahoma 14).
+- New-copy signs: 450 (Nebraska 46, Wyoming 83, Montana 51, Utah 84,
+  Arizona 68, New Mexico 62, Oklahoma 56).
+- New lines: 92, one per attraction, listed below.
+- Reused-copy signs: 80, older approved copy word for word on the
+  directions and sibling legs it missed (Nebraska 17, Montana 8, Utah 9,
+  Arizona 18, New Mexico 16, Oklahoma 12). Not listed as new lines.
 
 Every sheet dry-runs clean through `tools/bake_billboards.py` (no
-`--write`), and a spacing check across all the sheets together finds no
-sign within 2.2 miles of another callout heard the same way.
+`--write`), and a spacing check across all eight sheets together finds no
+sign within 2.2 miles of another callout heard the same way, no name
+collision with an existing record, and no digits.
 
 ## Decisions
 
-1. **Nebraska law.** Section 39-218 bars off-premise signs on the nine
-   scenic byways. Recommendation: as drafted, nothing on US 30 (Lincoln
-   Highway), US 385 (Gold Rush) or US 26 (Western Trails); Interstate 80 is
-   not a byway and carries the signs.
-2. **Wyoming law.** The outdoor advertising act allows signs beside the
-   interstates in commercial and industrial areas, and none of the state's
-   scenic byways is on a leg. Recommendation: sign as drafted.
-3. **Three plain lines with no joke**, for battle sites and a sacred one:
-   Fort Phil Kearny, Little Bighorn and Devils Tower. Recommendation: keep
-   them plain.
-5. **Montana law.** The Outdoor Advertising Act allows signs beside the
-   interstates and primary roads in commercial and industrial areas; the
-   state's scenic byways are not on these legs. Recommendation: sign as
-   drafted.
-6. **How the facts were checked.** The session's web-search allowance ran
+1. **Dallas to St. Louis leg runs the wrong road for its signs.** Its
+   geometry goes I-30 to Little Rock and US 67 to St. Louis, but its state
+   miles and its Route 66 billboards (Blue Whale, Totem Pole, Galena, Gay
+   Parita, Munger Moss, Uranus, Meramec Caverns) assume I-44, so those lines
+   are probably heard in Arkansas and the Missouri bootheel. Recommendation:
+   re-check that leg's route before baking anything onto it; I added nothing
+   to it and put the Whale and Totem Pole copies on the three Tulsa I-44
+   legs instead.
+2. **Two older Utah signs stand on a scenic byway.** Hole N' the Rock (US
+   191 south of Moab) and "Arches and Canyonlands" (US 191 north of Moab)
+   are on the Dinosaur Diamond National Scenic Byway, where 23 USC 131(s)
+   bars billboards. Recommendation: turn both into landmark callouts, as the
+   Keys signs were; I left them as they are.
+3. **The placed Winslow sign paraphrases the Eagles lyric** ("a girl in a
+   flatbed Ford may slow down to look"). Recommendation: cut that sentence;
+   I did not copy it to the other directions, and the Interstate 40 pool's
+   Winslow line already covers the corner.
+4. **Byway law per state, as drafted.** Recommendation: accept.
+   - Nebraska (section 39-218): nothing on US 30 (Lincoln Highway), US 385
+     (Gold Rush) or US 26 (Western Trails); I-80 is not a byway.
+   - Wyoming (W.S. 24-10) and Montana (MCA 75-15): no byway on these legs.
+   - Utah (72-4-303, federal rule): nothing on the Dinosaur Diamond roads
+     (US 191 Monticello to Crescent Junction, US 6 and 191 Helper to Green
+     River, US 40 east of Duchesne); Provo Canyon's US 189 could not be
+     confirmed either way and carries none.
+   - Arizona (ADOT scenic and historic roads): no interstate mainline is
+     designated; US 89A (Jerome, Oak Creek), US 60 Gila-Pinal, US 93 Joshua
+     Forest and AZ 82 Patagonia-Sonoita carry none, and Sedona bans
+     off-premise signs.
+   - New Mexico: none on I-25 from Raton to Fort Union (Santa Fe Trail) or
+     on El Camino Real's three short I-25 stretches (Bernardo to Alamillo,
+     Escondida to Socorro, NM 1 to NM 181) or its US 84/285 north of Santa
+     Fe; the Route 66 byway is the old road, not I-40. If you would rather
+     treat El Camino Real like Colorado's byways, drop the I-25 signs between
+     Albuquerque and Las Cruces.
+   - Oklahoma (69 O.S. 1271): nothing on US 60 between Ponca City and
+     Bartlesville (Osage Nation Heritage Trail); the Route 66 byway is the
+     old road and business loops, not the I-40 and I-44 mainlines.
+5. **Six plain lines with no joke**, for battle sites, sacred and living
+   places: Fort Phil Kearny, Little Bighorn, Devils Tower, Mission San
+   Xavier, Acoma Sky City, Sequoyah's Cabin. Recommendation: keep them
+   plain.
+6. **Big-city attractions are signed on every leg in.** The Old West Museum
+   (14 legs into Cheyenne), Golden Spike (20 legs through Brigham City), Hill
+   Aerospace (15 through Roy), the Golden Driller (11 into Tulsa), the
+   Cowboy Museum (9 into Oklahoma City). Recommendation: keep; a driver only
+   hears the one on his road. Trim to the interstate approaches if it reads
+   as too many.
+7. **How the facts were checked.** The session's web-search allowance ran
    out partway through Montana. From there each attraction was checked by
-   fetching its own site, the park agency's page or Wikipedia directly; the
-   one fact resting on settled history alone (the Missouri Headwaters
-   naming) is marked in its sheet. Recommendation: approve on that basis,
-   or name any line you want re-checked.
-4. **The Old West Museum is signed on all fourteen legs into Cheyenne.**
-   Recommendation: keep; a driver only ever hears the one on the road he is
-   on. Trim to the Interstate 25 and 80 approaches if it reads as too many.
+   fetching its own site, the park agency's page or Wikipedia directly; two
+   facts rest on long-documented history, not a fetch, and are marked in
+   their sheets (the Missouri Headwaters naming, Petrified Forest's
+   mailed-back wood). Places whose status could not be confirmed were
+   dropped, not guessed. Recommendation: approve on that basis, or name any
+   line you want re-checked.
 
 ## New lines
 
@@ -374,3 +406,61 @@ New Mexico Museum of Space History
 Carlsbad Caverns National Park
 
 78. Billboard: Carlsbad Caverns National Park, southwest of Carlsbad. The Big Room is the largest cave chamber in North America. Your whole fleet would fit.
+
+### Oklahoma
+
+Stafford Air and Space Museum
+
+79. Billboard: The Stafford Air and Space Museum, ahead in Weatherford. The town's own astronaut flew four missions, one around the Moon. His Gemini capsule retired here.
+
+Oklahoma Route 66 Museum
+
+80. Billboard: The Oklahoma Route sixty-six Museum, ahead in Clinton. It covers Chicago to Santa Monica in a single building. Much quicker than driving it.
+
+Sequoyah's Cabin
+
+81. Billboard: Sequoyah's Cabin, ahead near Sallisaw. Sequoyah lived here from eighteen twenty-nine; he gave the Cherokee their written language. Now a Cherokee Nation museum.
+
+Rock Cafe
+
+82. Billboard: The Rock Cafe, ahead in Stroud, built of leftover Route sixty-six sandstone and open since nineteen thirty-nine. Its owner inspired Sally, the Porsche in Cars.
+
+Will Rogers Memorial Museum
+
+83. Billboard: The Will Rogers Memorial Museum, ahead in Claremore. He never met a man he didn't like, he said. He never met your dispatcher.
+
+Coleman Theatre
+
+84. Billboard: The Coleman Theatre, ahead in Miami, Oklahoma, a nineteen twenty-nine movie palace on Route sixty-six. Its Wurlitzer organ is a year older than the building.
+
+The Golden Driller
+
+85. Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.
+
+National Cowboy and Western Heritage Museum
+
+86. Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.
+
+Turner Falls Park
+
+87. Billboard: Turner Falls Park, ahead near Davis, a seventy-seven-foot waterfall in the Arbuckle Mountains, and a stone castle a professor built for his summers.
+
+WinStar World Casino
+
+88. Billboard: WinStar World Casino, ahead at Thackerville, the biggest casino floor in the country, one exit before Texas. Leave the trailer keys in the truck.
+
+Wichita Mountains Wildlife Refuge
+
+89. Billboard: Wichita Mountains Wildlife Refuge, ahead near Lawton. The bison herd began with fifteen from the Bronx Zoo in nineteen oh-seven. None of them miss New York.
+
+Woolaroc
+
+90. Billboard: Woolaroc, ahead near Bartlesville, an oilman's ranch with bison and longhorns, and the plane that won the nineteen twenty-seven air race to Hawaii.
+
+Marland Mansion
+
+91. Billboard: The Marland Mansion, ahead in Ponca City. An oilman built fifty-five rooms, lost his company to Wall Street, and moved out. Easy come.
+
+Boise City Bomb Memorial
+
+92. Billboard: Boise City, ahead. In nineteen forty-three a lost bomber crew dropped practice bombs on the town square. Nobody was hurt. The crew skipped the reunion.
