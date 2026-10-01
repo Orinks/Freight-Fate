@@ -193,6 +193,8 @@
 
 ### Fixed
 
+- **State lines, rivers and exits on several highways now match where the truck is.** The New York Thruway no longer announces Pennsylvania.
+
 - **A CDL suspended mid-drive now ends the run.** The truck stops on the shoulder, the way a roadside stop ends it.
 
 - **Escape on a roadside stop that suspends your CDL no longer drives on.** It returns to the terminal, like the Return to terminal row.

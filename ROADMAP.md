@@ -365,18 +365,44 @@ Everything found before 2026-09-25 moved to
       2026-09-30; the other side hears the random pool. Signs standing at
       their attraction could be marked `both`, and the rest need copy
       written from the other side ([1.9 in flight](#19-in-flight-featcareer-19)).
-- [ ] Some legs disagree with their own geometry (billboard audit,
-      2026-09-30): Dallas to St. Louis is routed through Tulsa and Joplin
-      but its exits and stops are Arkansas ones on I-30; five more legs are
-      11 to 29 miles off their dense geometry; the Florida Keys markers and
-      the I-40 Tennessee, Buffalo and Duck River callouts are miles from the
-      real places. The 2026-10-01 billboard passes added more: the Buffalo
-      and Rochester to New York City Thruway legs announce Pennsylvania and
-      New Jersey (with about 110 phantom Pennsylvania miles each); I-24 and
-      the southern Indiana I-65 legs call the Ohio River early; several
-      Mississippi crossings are misplaced; Minneapolis to Des Moines puts the
-      Iowa line about 40 miles south; Indianapolis to Nashville lists its
-      Kentucky exits out of order (REVIEW-east-south, REVIEW-midwest).
+- [x] Some legs disagreed with their own geometry (billboard audit,
+      2026-09-30, and the 2026-10-01 billboard passes, REVIEW-east-south and
+      REVIEW-midwest). Fixed 2026-10-01: the Buffalo and Rochester to New
+      York City Thruway legs, Dallas to St. Louis (I-44 via Tulsa and
+      Joplin), Washington to Charlottesville, Harrisburg to Wilmington,
+      Norfolk to Petersburg, Green Bay to Grand Rapids and Binghamton to Utica
+      were rerouted onto their roads and rebuilt; the Florida Keys markers
+      were placed from their coordinates; Indianapolis to Nashville's
+      Kentucky exits were rebuilt; every river callout was placed on its
+      crossing of the leg's geometry; and state lines across the world were
+      re-derived from OpenStreetMap state boundaries.
+- [ ] Legs still off their own geometry. The audit counted 36 legs whose
+      dense geometry strays 11 to 29 miles from their route points; after the
+      fixes above, these legs stray more than 10 miles (largest distance
+      from a route point to the geometry, 2026-10-01): Sacramento to
+      Portland (76), San Francisco to Portland (76), Duluth to Fargo (51),
+      Hibbing to Minneapolis (46), Norfolk to Raleigh (32), Virginia Beach to
+      Raleigh (32), Burlington to Albany (32), Clarksville to Huntsville (24),
+      Washington to Philadelphia (24), Tulsa to Kansas City (22), Charlotte
+      to Lumberton (16), Roanoke to Greensboro (15), Allentown to Bridgeport
+      (15), Providence to New York (15), Lynchburg to Richmond (14), Hartford
+      to New York (12), Albany to Bridgeport (11) and Detroit to Chicago (10).
+      Durango to Moab has no dense geometry at all. Their state lines and
+      rivers were left as they were.
+- [ ] Checkpoints announced in a state the geometry is not in: Tallapoosa
+      on Atlanta to Birmingham is placed seven miles past the Alabama line;
+      Whitehall and Queensbury on Burlington to Albany, Ashland on San
+      Francisco to Portland, and Carthage through Harrisonville on Tulsa to
+      Kansas City lie 17 to 43 miles off their geometry (which runs through
+      Kansas); Green Spring on Cumberland to Winchester and Trempealeau on
+      Winona to La Crosse name the town across the river; Kenova on Ashland
+      to Huntington is announced in West Virginia where the geometry is in
+      Ohio, so that leg kept its old state lines.
+- [ ] 260 river callouts name a river the leg's geometry never crosses
+      (for example the Tennessee River on Gadsden to Chattanooga and the
+      Oklahoma River on Little Rock to Oklahoma City). They keep their old
+      miles; each wants checking against the road (Paducah to Clarksville's
+      Ohio River, which I-24 never crosses, was removed).
 - [ ] Two approved signs could also stand on the roads that pass their
       places: the USS Alabama on I-10 and Madison, Georgia on I-20
       (REVIEW-east-south, 2026-10-01).
