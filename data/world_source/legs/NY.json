@@ -17951,7 +17951,7 @@
         {
           "name": "Sunoco",
           "type": "fuel_station",
-          "at_mi": 0.0,
+          "at_mi": 0.1,
           "source": "OpenStreetMap/Overpass development-time amenity query centered on the binghamton_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.; at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles); at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles); at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles)",
           "parking": "limited",
           "actions": [
@@ -17971,7 +17971,7 @@
         {
           "name": "Stewart's",
           "type": "fuel_station",
-          "at_mi": 89.3,
+          "at_mi": 88.9,
           "source": "OpenStreetMap/Overpass development-time amenity query centered on the utica_ny_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.; at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles); at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles); at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles)",
           "parking": "limited",
           "actions": [
