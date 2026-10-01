@@ -205,6 +205,26 @@ def test_reroute_repositions_stops_and_drops_ones_farther_than_three_miles():
     assert dropped[0][1] > rr.STOP_MAX_OFF_MI
 
 
+def test_reroute_stops_keep_positions_strictly_inside_the_adopted_leg():
+    stops = [
+        {"name": "coordinate start", "lat": 30.0, "lon": -100.0, "at_mi": 1.0},
+        {"name": "coordinate end", "lat": 30.0, "lon": -99.0, "at_mi": 49.0},
+        {"name": "unlocated start", "at_mi": 0.0},
+        {"name": "unlocated end", "at_mi": 50.0},
+    ]
+    shape = [[-100.0, 30.0], [-99.5, 30.0], [-99.0, 30.0]]
+
+    kept, dropped = rr.reroute_stops(stops, shape, miles=10.0, old_miles=50.0)
+
+    assert not dropped
+    assert {stop["name"]: stop["at_mi"] for stop in kept} == {
+        "coordinate start": 0.1,
+        "coordinate end": 9.9,
+        "unlocated start": 0.1,
+        "unlocated end": 9.9,
+    }
+
+
 def _reroute_world(landmarks):
     leg = {
         "from": "a",

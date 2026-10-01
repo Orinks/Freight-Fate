@@ -306,7 +306,7 @@ def landmarks_beyond_miles(landmarks: list[dict], miles: float) -> list[dict]:
 def reroute_stops(
     stops: list[dict], shape: list[list[float]], miles: float, old_miles: float
 ) -> tuple[list[dict], list[tuple[dict, float]]]:
-    """Re-place coordinate stops and proportionally carry stops without coordinates."""
+    """Re-place coordinate stops and keep them inside the adopted leg mileage."""
     with_coords, without_coords = [], []
     for stop in stops:
         lat, lon = stop.get("lat"), stop.get("lon")
@@ -320,6 +320,9 @@ def reroute_stops(
 
     placed, dropped = lg.reposition_on_route(with_coords, shape, miles, STOP_MAX_OFF_MI)
 
+    def interior_mile(at_mi: float) -> float:
+        return round(min(max(float(at_mi), 0.1), max(0.1, round(miles - 0.1, 1))), 1)
+
     def with_source(stop: dict, provenance: str) -> dict:
         source = str(stop.get("source") or "").strip().rstrip("; ")
         stop["source"] = f"{source}; {provenance}" if source else provenance
@@ -328,6 +331,7 @@ def reroute_stops(
     rerouted = []
     for stop in placed:
         stop.pop("_off_mi", None)
+        stop["at_mi"] = interior_mile(stop["at_mi"])
         rerouted.append(
             with_source(
                 stop,
@@ -339,7 +343,7 @@ def reroute_stops(
         carried = dict(stop)
         at_mi = carried.get("at_mi")
         if at_mi is not None and old_miles > 0:
-            carried["at_mi"] = round(min(max(float(at_mi) * miles / old_miles, 0.0), miles), 1)
+            carried["at_mi"] = interior_mile(float(at_mi) * miles / old_miles)
             with_source(
                 carried,
                 "at_mi derived 2026-10-01: old at_mi x new miles / old miles "
@@ -579,7 +583,9 @@ def main() -> int:
     for key in STALE_AFTER_REROUTE:
         corridor.pop(key, None)
 
-    stops, dropped_stops = reroute_stops(list(leg.get("stops") or []), shape, miles, old_miles)
+    stops, dropped_stops = reroute_stops(
+        list(leg.get("stops") or []), shape, float(leg["miles"]), old_miles
+    )
     if leg.get("stops"):
         leg["stops"] = stops
 
