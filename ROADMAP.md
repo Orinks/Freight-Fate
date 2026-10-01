@@ -401,8 +401,8 @@ Everything found before 2026-09-25 moved to
 - [ ] Dallas to St. Louis now plans over Ardmore, Oklahoma City, Tulsa and
       Springfield instead of the direct leg, which grew from 695 to the 713
       miles its I-44 road runs. Sleep stops on that chain are sparse (the
-      southern sleep-gap measure reads 496 miles there, against 200 on the
-      direct leg), so those legs want sleep stops or the planner a nudge.
+      southern sleep-gap measure reads 496 miles there; the direct leg stays
+      under 200), so those legs want sleep stops or the planner a nudge.
 - [ ] 260 river callouts name a river the leg's geometry never crosses
       (for example the Tennessee River on Gadsden to Chattanooga and the
       Oklahoma River on Little Rock to Oklahoma City). They keep their old
