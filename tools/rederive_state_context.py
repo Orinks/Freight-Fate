@@ -355,6 +355,8 @@ def nearest_osm_highway_refs(
         .with_filter(osmium.filter.KeyFilter("highway"))
     )
     for way in processor:
+        if not hasattr(way, "nodes"):
+            continue
         if way.tags.get("highway") not in ROAD_CLASSES:
             continue
         coordinates = []

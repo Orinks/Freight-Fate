@@ -1,4 +1,7 @@
 import copy
+import sys
+from pathlib import Path
+from types import SimpleNamespace
 
 import rederive_state_context as rsc
 
@@ -307,3 +310,41 @@ def test_shared_vertex_hits_are_grouped_into_one_event():
 
 def test_first_road_ref_uses_the_first_osm_ref():
     assert rsc._first_road_ref("I 94; I 80") == "I-94"
+
+
+def test_nearest_road_lookup_skips_nodes_and_reads_way_ref(monkeypatch):
+    class Location:
+        lon = -75.0
+        lat = 42.0
+
+        def valid(self):
+            return True
+
+    class WayNode:
+        location = Location()
+
+    class RoadWay:
+        id = 42
+        tags = {"highway": "motorway", "ref": "I 94; I 80"}
+        nodes = [WayNode(), WayNode()]
+
+    class Processor:
+        def with_locations(self, *_args):
+            return self
+
+        def with_filter(self, *_args):
+            return self
+
+        def __iter__(self):
+            return iter([SimpleNamespace(tags={}), RoadWay()])
+
+    fake_osmium = SimpleNamespace(
+        FileProcessor=lambda *_args, **_kwargs: Processor(),
+        osm=SimpleNamespace(osm_entity_bits=SimpleNamespace(NODE=1, WAY=2)),
+        filter=SimpleNamespace(KeyFilter=lambda *_args: None),
+    )
+    monkeypatch.setitem(sys.modules, "osmium", fake_osmium)
+
+    result = rsc.nearest_osm_highway_refs(Path("roads.osm.pbf"), [[-75.0, 42.0]])
+
+    assert result == {0: (42, "I-94", 0.0)}
