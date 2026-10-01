@@ -117,3 +117,57 @@ Cabela's were signed westbound on the Omaha to Cheyenne leg only.
 - leg: cheyenne_wy_us -> sidney_ne_us
 - at_mi: 89.0
 - spoken: Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop.
+
+## Montana
+
+The Museum of the Rockies sign stood only on US 287 from Helena; the
+Havre sign only on US 87 from Great Falls. These add the other roads into
+Bozeman and Havre.
+
+### Museum of the Rockies (eastbound)
+- treatment: billboard
+- leg: butte_mt_us -> bozeman_mt_us
+- at_mi: 77.0
+- spoken: Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. A bronze Tyrannosaurus stands out front, and Yellowstone waits beyond.
+
+### Museum of the Rockies (eastbound)
+- treatment: billboard
+- leg: missoula_mt_us -> billings_mt_us
+- at_mi: 195.0
+- spoken: Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. A bronze Tyrannosaurus stands out front, and Yellowstone waits beyond.
+
+### Museum of the Rockies (westbound)
+- treatment: billboard
+- leg: billings_mt_us -> bozeman_mt_us
+- at_mi: 132.5
+- spoken: Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. A bronze Tyrannosaurus stands out front, and Yellowstone waits beyond.
+
+### Museum of the Rockies (westbound)
+- treatment: billboard
+- leg: billings_mt_us -> missoula_mt_us
+- at_mi: 133.5
+- spoken: Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. A bronze Tyrannosaurus stands out front, and Yellowstone waits beyond.
+
+### Museum of the Rockies (westbound)
+- treatment: billboard
+- leg: billings_mt_us -> salt_lake_city_ut_us
+- at_mi: 134.0
+- spoken: Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. A bronze Tyrannosaurus stands out front, and Yellowstone waits beyond.
+
+### Museum of the Rockies (northbound)
+- treatment: billboard
+- leg: salt_lake_city_ut_us -> billings_mt_us
+- at_mi: 400.0
+- spoken: Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. A bronze Tyrannosaurus stands out front, and Yellowstone waits beyond.
+
+### Havre Beneath the Streets (eastbound)
+- treatment: billboard
+- leg: shelby_mt_us -> havre_mt_us
+- at_mi: 94.0
+- spoken: Billboard: Havre is ahead. After a fire, the town rebuilt underground and ran its shops, along with several vices, in tunnels beneath the sidewalks. You can still tour them.
+
+### Havre Beneath the Streets (westbound)
+- treatment: billboard
+- leg: glasgow_mt_us -> havre_mt_us
+- at_mi: 150.0
+- spoken: Billboard: Havre is ahead. After a fire, the town rebuilt underground and ran its shops, along with several vices, in tunnels beneath the sidewalks. You can still tour them.

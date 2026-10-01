@@ -1,16 +1,17 @@
 # Review: Mountain West billboard drafts -- 2026-10-01
 
 Drafts for the owner's review; nothing here is baked. Sheets so far:
-`nebraska-2026-10-01.md`, `wyoming-2026-10-01.md`, and
-`mountain-west-reverse-copies-2026-10-01.md`.
+`nebraska-2026-10-01.md`, `wyoming-2026-10-01.md`,
+`montana-2026-10-01.md`, and `mountain-west-reverse-copies-2026-10-01.md`.
 
 ## Counts
 
 - Nebraska: 10 attractions, 46 signs, 10 new lines.
 - Wyoming: 11 attractions, 83 signs, 11 new lines.
+- Montana: 13 attractions, 51 signs, 13 new lines.
 - Reused-copy signs (older approved copy, other directions and sibling
-  legs): 17, all in Nebraska so far.
-- Total so far: 21 attractions, 129 new-copy signs, 21 new lines, 17
+  legs): 25, in Nebraska (17) and Montana (8).
+- Total so far: 34 attractions, 180 new-copy signs, 34 new lines, 25
   reused-copy signs.
 
 Every sheet dry-runs clean through `tools/bake_billboards.py` (no
@@ -26,8 +27,19 @@ sign within 2.2 miles of another callout heard the same way.
 2. **Wyoming law.** The outdoor advertising act allows signs beside the
    interstates in commercial and industrial areas, and none of the state's
    scenic byways is on a leg. Recommendation: sign as drafted.
-3. **Two plain lines with no joke**, for a battle site and a sacred one:
-   Fort Phil Kearny and Devils Tower. Recommendation: keep them plain.
+3. **Three plain lines with no joke**, for battle sites and a sacred one:
+   Fort Phil Kearny, Little Bighorn and Devils Tower. Recommendation: keep
+   them plain.
+5. **Montana law.** The Outdoor Advertising Act allows signs beside the
+   interstates and primary roads in commercial and industrial areas; the
+   state's scenic byways are not on these legs. Recommendation: sign as
+   drafted.
+6. **How the facts were checked.** The session's web-search allowance ran
+   out partway through Montana. From there each attraction was checked by
+   fetching its own site, the park agency's page or Wikipedia directly; the
+   one fact resting on settled history alone (the Missouri Headwaters
+   naming) is marked in its sheet. Recommendation: approve on that basis,
+   or name any line you want re-checked.
 4. **The Old West Museum is signed on all fourteen legs into Cheyenne.**
    Recommendation: keep; a driver only ever hears the one on the road he is
    on. Trim to the Interstate 25 and 80 approaches if it reads as too many.
@@ -121,3 +133,57 @@ King's Saddlery
 Devils Tower National Monument
 
 21. Billboard: Devils Tower, next exit, then about thirty miles north. Proclaimed the nation's first national monument in nineteen oh-six, and sacred to many Plains tribes.
+
+### Montana
+
+Lincoln's 50,000 Silver Dollar Bar
+
+22. Billboard: Lincoln's Fifty Thousand Silver Dollar Bar, next exit in Haugan. The walls hold more than fifty thousand donated dollars. Please do not ask for change.
+
+Old Montana Prison
+
+23. Billboard: The Old Montana Prison, next exit in Deer Lodge. It held inmates for over a century and now holds five museums. Visitors may leave.
+
+World Museum of Mining
+
+24. Billboard: The World Museum of Mining, ahead in Butte, on top of the old Orphan Girl mine. Fifty buildings up here. Nobody counts what is down there.
+
+Missouri Headwaters State Park
+
+25. Billboard: Missouri Headwaters State Park, ahead at Three Forks. Three rivers meet to make the Missouri. Lewis and Clark named all three after their bosses.
+
+Greycliff Prairie Dog Town State Park
+
+26. Billboard: Greycliff Prairie Dog Town State Park, next exit. A whole town of black-tailed prairie dogs beside the interstate. Please do not feed the residents.
+
+Little Bighorn Battlefield National Monument
+
+27. Billboard: Little Bighorn Battlefield National Monument, ahead at Crow Agency. Where the Lakota, Northern Cheyenne and Arapaho defeated Custer's Seventh Cavalry in June of eighteen seventy-six.
+
+Pompeys Pillar National Monument
+
+28. Billboard: Pompeys Pillar, next exit. William Clark carved his name here in eighteen oh-six, the expedition's only trace left on the trail. Do not add yours.
+
+Makoshika State Park
+
+29. Billboard: Makoshika State Park, ahead at Glendive. Eleven thousand acres of badlands, and a triceratops skull in the visitor center. It has waited longer than you.
+
+Bannack State Park
+
+30. Billboard: Bannack State Park, west of the next exit. Montana's first territorial capital, now a ghost town of more than fifty buildings. The government left first.
+
+Giant Springs State Park
+
+31. Billboard: Giant Springs, ahead in Great Falls, feeds the Roe River, once the world's shortest at two hundred feet. Your trailer is a quarter of it.
+
+Glacier National Park
+
+32. Billboard: Glacier National Park, ahead at West Glacier. Going-to-the-Sun Road takes nothing longer than twenty-one feet over Logan Pass. Your rig is not invited.
+
+Kootenai Falls
+
+33. Billboard: Kootenai Falls, ahead between Libby and Troy, the largest undammed falls in Montana, with a swinging bridge below. It swings. That is the point.
+
+Grizzly and Wolf Discovery Center
+
+34. Billboard: The Grizzly and Wolf Discovery Center, ahead in West Yellowstone. Grizzlies and gray wolves that cannot live in the wild. These bears skip hibernation.
