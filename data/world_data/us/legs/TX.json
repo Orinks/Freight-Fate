@@ -80437,6 +80437,34 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Love's Travel Stop Ardmore",
+          "type": "travel_center",
+          "at_mi": 112.6,
+          "source": "Love's official Ardmore, Oklahoma store 266 page lists truck parking, accessed 2026-06-18: https://www.loves.com/locations/ok/ardmore/loves-travel-stop-ardmore-266; OpenStreetMap way 226284943 (Love's Travel Stop, branch=Ardmore, ref=266, hgv=yes) provides the service-area center coordinates; CAT Scale node 11670365985 (ref=267) is next to the stop, from the 2026-09-29 corridor extract; at_mi derived 2026-10-01: the stop's own coordinates projected onto the rerouted Valhalla truck geometry (nearest point, distance rescaled to adopted leg miles).",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking",
+            "scale"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 34.188163,
+          "lon": -97.1718501
+        },
+        {
           "name": "Scissortail Travel Stop",
           "type": "travel_center",
           "at_mi": 188.9,
