@@ -646,6 +646,16 @@
             "spoken": "Passing Chaparral"
           },
           {
+            "name": "Franklin Mountains (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 71.5,
+            "spoken": "Billboard: Franklin Mountains State Park, ahead off Transmountain Road. Thirty-seven square miles of mountains, all inside the El Paso city limits. That is quite a backyard.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Anthony",
             "at_mi": 76.16,
             "off_mi": 10.48,
@@ -671,6 +681,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151925625, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Canutillo"
+          },
+          {
+            "name": "Franklin Mountains (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 83.0,
+            "spoken": "Billboard: Franklin Mountains State Park, ahead off Transmountain Road. Thirty-seven square miles of mountains, all inside the El Paso city limits. That is quite a backyard.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sunland Park",
@@ -19072,6 +19092,16 @@
             "spoken": "Entering Friona"
           },
           {
+            "name": "Palo Duro Canyon (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.0,
+            "spoken": "Billboard: Palo Duro Canyon, ahead through Canyon, then twelve miles east. The second largest canyon in the country. The Panhandle is not as flat as advertised.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Canyon",
             "at_mi": 87.3,
             "off_mi": 0.43,
@@ -19081,6 +19111,16 @@
             "spoken": "Entering Canyon"
           },
           {
+            "name": "Ozymandias on the Plains (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 91.5,
+            "spoken": "Billboard: Ozymandias on the Plains, ahead beside the highway. Two giant legs standing alone in a pasture, wearing socks. Somebody keeps painting the socks back on.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Timbercreek Canyon",
             "at_mi": 92.5,
             "off_mi": 5.72,
@@ -19088,6 +19128,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151713181, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Timbercreek Canyon"
+          },
+          {
+            "name": "Palo Duro Canyon (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 92.5,
+            "spoken": "Billboard: Palo Duro Canyon, ahead through Canyon, then twelve miles east. The second largest canyon in the country. The Panhandle is not as flat as advertised.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Palisades",
@@ -19124,6 +19174,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 12662291806, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Catalpa"
+          },
+          {
+            "name": "Ozymandias on the Plains (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.5,
+            "spoken": "Billboard: Ozymandias on the Plains, ahead beside the highway. Two giant legs standing alone in a pasture, wearing socks. Somebody keeps painting the socks back on.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bishop Hills",
@@ -24088,6 +24148,16 @@
             "spoken": "Entering Wolfforth"
           },
           {
+            "name": "Buddy Holly Center (from Hobbs)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 102.0,
+            "spoken": "Billboard: The Buddy Holly Center, ahead in Lubbock. His guitar and glasses inside, and a seven-hundred-fifty-pound pair of glasses out front. No prescription required.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Shallowater",
             "at_mi": 107.22,
             "off_mi": 9.49,
@@ -26578,6 +26648,16 @@
             "spoken": "Passing Chaparral"
           },
           {
+            "name": "Franklin Mountains (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.9,
+            "spoken": "Billboard: Franklin Mountains State Park, ahead off Transmountain Road. Thirty-seven square miles of mountains, all inside the El Paso city limits. That is quite a backyard.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Vinton",
             "at_mi": 28.2,
             "off_mi": 0.73,
@@ -26603,6 +26683,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151925625, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Canutillo"
+          },
+          {
+            "name": "Franklin Mountains (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.0,
+            "spoken": "Billboard: Franklin Mountains State Park, ahead off Transmountain Road. Thirty-seven square miles of mountains, all inside the El Paso city limits. That is quite a backyard.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Santa Teresa",
@@ -31037,6 +31127,16 @@
             "spoken": "Passing Chamberino"
           },
           {
+            "name": "Franklin Mountains (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.1,
+            "spoken": "Billboard: Franklin Mountains State Park, ahead off Transmountain Road. Thirty-seven square miles of mountains, all inside the El Paso city limits. That is quite a backyard.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Vinton",
             "at_mi": 28.4,
             "off_mi": 0.73,
@@ -31064,6 +31164,16 @@
             "spoken": "Passing Canutillo"
           },
           {
+            "name": "Franklin Mountains (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.2,
+            "spoken": "Billboard: Franklin Mountains State Park, ahead off Transmountain Road. Thirty-seven square miles of mountains, all inside the El Paso city limits. That is quite a backyard.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Santa Teresa",
             "at_mi": 34.4,
             "off_mi": 4.05,
@@ -31082,6 +31192,16 @@
             "spoken": "Passing Sunland Park"
           },
           {
+            "name": "Ysleta Mission (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.5,
+            "spoken": "Billboard: Ysleta Mission, ahead on the Mission Trail. Founded in sixteen eighty-two, the oldest active parish in Texas. It was here before Texas was.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Horizon City",
             "at_mi": 64.1,
             "off_mi": 2.86,
@@ -31089,6 +31209,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151331817, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Horizon City"
+          },
+          {
+            "name": "Ysleta Mission (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.0,
+            "spoken": "Billboard: Ysleta Mission, ahead on the Mission Trail. Founded in sixteen eighty-two, the oldest active parish in Texas. It was here before Texas was.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "San Elizario",
@@ -31168,6 +31298,26 @@
             "spoken": "Crossing the Pecos River"
           },
           {
+            "name": "West of the Pecos Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 254.0,
+            "spoken": "Billboard: The West of the Pecos Museum, next exit. An old saloon with a hallway straight to the hotel. The rodeo here dates to eighteen eighty-three.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "West of the Pecos Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 257.5,
+            "spoken": "Billboard: The West of the Pecos Museum, next exit. An old saloon with a hallway straight to the hotel. The rodeo here dates to eighteen eighty-three.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Barstow",
             "at_mi": 263.2,
             "off_mi": 1.83,
@@ -31204,6 +31354,26 @@
             "spoken": "Entering Thorntonville"
           },
           {
+            "name": "Monahans Sandhills (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 297.5,
+            "spoken": "Billboard: Monahans Sandhills State Park, next exit. Dunes up to seventy feet tall, and they rent you a disc to ride down. Your boots will bring some home.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Monahans Sandhills (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 301.0,
+            "spoken": "Billboard: Monahans Sandhills State Park, next exit. Dunes up to seventy feet tall, and they rent you a disc to ride down. Your boots will bring some home.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Penwell",
             "at_mi": 314.7,
             "off_mi": 0.13,
@@ -31213,6 +31383,16 @@
             "spoken": "Entering Penwell"
           },
           {
+            "name": "Odessa Meteor Crater (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 320.3,
+            "spoken": "Billboard: The Odessa Meteor Crater, next exit. A rock from space hit here sixty-three thousand years ago. Admission is free, and it has not been back.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "West Odessa",
             "at_mi": 323.7,
             "off_mi": 3.15,
@@ -31220,6 +31400,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 1920734893, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing West Odessa"
+          },
+          {
+            "name": "Odessa Meteor Crater (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 323.8,
+            "spoken": "Billboard: The Odessa Meteor Crater, next exit. A rock from space hit here sixty-three thousand years ago. Admission is free, and it has not been back.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Petroleum Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 337.5,
+            "spoken": "Billboard: The Petroleum Museum, ahead in Midland. Antique drilling rigs out back, Jim Hall's Chaparral race cars inside. All of it ran on the local product.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Warfield",
@@ -38679,6 +38879,16 @@
             "spoken": "Passing Shallowater"
           },
           {
+            "name": "Buddy Holly Center (from Roswell)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 200.5,
+            "spoken": "Billboard: The Buddy Holly Center, ahead in Lubbock. His guitar and glasses inside, and a seven-hundred-fifty-pound pair of glasses out front. No prescription required.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Wolfforth",
             "at_mi": 203.2,
             "off_mi": 10.09,
@@ -43040,6 +43250,16 @@
             "spoken": "Entering Bard"
           },
           {
+            "name": "Route 66 Midpoint (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.6,
+            "spoken": "Billboard: The Route sixty-six Midpoint, next exit in Adrian. Chicago and Los Angeles are each eleven hundred thirty-nine miles away. Halfway calls for pie.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Adrian",
             "at_mi": 64.9,
             "off_mi": 0.35,
@@ -43047,6 +43267,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151368062, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Adrian"
+          },
+          {
+            "name": "Route 66 Midpoint (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.2,
+            "spoken": "Billboard: The Route sixty-six Midpoint, next exit in Adrian. Chicago and Los Angeles are each eleven hundred thirty-nine miles away. Halfway calls for pie.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Oldham County Farm and Ranch Heritage Museum",
@@ -43063,6 +43293,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151446317, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Wildorado"
+          },
+          {
+            "name": "Cadillac Ranch (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 96.0,
+            "spoken": "Billboard: Cadillac Ranch is ahead. Ten Cadillacs are buried nose-down in a field with their tailfins to the sky, and you are invited to spray-paint them. Bring a can.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cadillac Ranch",

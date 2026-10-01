@@ -265,3 +265,36 @@ fn test_the_thing_counts_down_both_ways_and_fuels_bobtails_only() {
         }
     }
 }
+
+/// US 1 south of Florida City carries no billboards (the 18-Mile Stretch's
+/// conservation land, then the Florida Keys Scenic Highway and Monroe
+/// County's ban on off-premises signs). The Keys signs kept their copy as
+/// roadside callouts, owner 2026-09-30; each must still be heard.
+#[test]
+fn test_the_keys_hear_their_sights_but_carry_no_billboards() {
+    let trip = trip_through(&["miami_fl_us", "key_west_fl_us"]);
+    let in_the_keys = |at: f64| at > 40.0;
+    let billboards: Vec<_> = trip
+        .landmarks
+        .iter()
+        .filter(|c| c.category == "billboard_sign" && in_the_keys(c.at_mi))
+        .map(|c| c.key.clone())
+        .collect();
+    assert!(billboards.is_empty(), "{billboards:?}");
+    for sight in [
+        "Giant Lobster Betsy",
+        "Theater of the Sea",
+        "Seven Mile Bridge",
+        "No Name Pub",
+        "Key Lime Pie on a Stick",
+        "Hemingway House",
+    ] {
+        let suffix = format!(":{sight}");
+        let heard = trip
+            .landmarks
+            .iter()
+            .find(|c| c.key.ends_with(&suffix))
+            .unwrap_or_else(|| panic!("{sight} is never heard"));
+        assert!(!heard.spoken.starts_with("Billboard"), "{}", heard.spoken);
+    }
+}

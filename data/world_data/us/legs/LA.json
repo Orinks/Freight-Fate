@@ -15920,6 +15920,16 @@
             "spoken": "Passing Starks"
           },
           {
+            "name": "Shangri La (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.7,
+            "spoken": "Billboard: Shangri La Botanical Gardens, ahead in Orange. Two hundred fifty acres of gardens and bayou, and admission is free. Paradise usually costs more.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Forest Heights",
             "at_mi": 109.3,
             "off_mi": 7.95,
@@ -15956,6 +15966,16 @@
             "spoken": "Passing Mauriceville"
           },
           {
+            "name": "Shangri La (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 117.1,
+            "spoken": "Billboard: Shangri La Botanical Gardens, ahead in Orange. Two hundred fifty acres of gardens and bayou, and admission is free. Paradise usually costs more.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Sabine River",
             "category": "river",
             "kind": "point",
@@ -15970,6 +15990,16 @@
             "spoken": "Crossing the Neches River"
           },
           {
+            "name": "Spindletop Gladys City (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 121.5,
+            "spoken": "Billboard: Spindletop Gladys City, ahead in Beaumont. The nineteen oh-one gusher started the Texas oil boom. The replica gushes water. Easier to clean up.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Port Neches",
             "at_mi": 122.1,
             "off_mi": 9.55,
@@ -15977,6 +16007,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151575415, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Port Neches"
+          },
+          {
+            "name": "Fire Museum of Texas (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 124.0,
+            "spoken": "Billboard: The Fire Museum of Texas, ahead in Beaumont. Out front, a twenty-four-foot fire hydrant that really works. Do not park in front of it.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pine Forest",
@@ -19771,6 +19811,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151873755, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Starks"
+          },
+          {
+            "name": "Shangri La (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.0,
+            "spoken": "Billboard: Shangri La Botanical Gardens, ahead in Orange. Two hundred fifty acres of gardens and bayou, and admission is free. Paradise usually costs more.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Deweyville",
@@ -26299,6 +26349,16 @@
             "spoken": "Passing Vinton"
           },
           {
+            "name": "Shangri La (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 231.4,
+            "spoken": "Billboard: Shangri La Botanical Gardens, ahead in Orange. Two hundred fifty acres of gardens and bayou, and admission is free. Paradise usually costs more.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Orangefield",
             "at_mi": 244.6,
             "off_mi": 3.4,
@@ -26306,6 +26366,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151824344, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Orangefield"
+          },
+          {
+            "name": "Shangri La (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 247.1,
+            "spoken": "Billboard: Shangri La Botanical Gardens, ahead in Orange. Two hundred fifty acres of gardens and bayou, and admission is free. Paradise usually costs more.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sabine River",
@@ -26320,6 +26390,46 @@
             "kind": "point",
             "at_mi": 249.3,
             "spoken": "Crossing the Neches River"
+          },
+          {
+            "name": "Spindletop Gladys City (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 252.3,
+            "spoken": "Billboard: Spindletop Gladys City, ahead in Beaumont. The nineteen oh-one gusher started the Texas oil boom. The replica gushes water. Easier to clean up.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Fire Museum of Texas (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 254.9,
+            "spoken": "Billboard: The Fire Museum of Texas, ahead in Beaumont. Out front, a twenty-four-foot fire hydrant that really works. Do not park in front of it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Fire Museum of Texas (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 270.9,
+            "spoken": "Billboard: The Fire Museum of Texas, ahead in Beaumont. Out front, a twenty-four-foot fire hydrant that really works. Do not park in front of it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Spindletop Gladys City (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 274.3,
+            "spoken": "Billboard: Spindletop Gladys City, ahead in Beaumont. The nineteen oh-one gusher started the Texas oil boom. The replica gushes water. Easier to clean up.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Nome",
@@ -31452,6 +31562,16 @@
             "spoken": "Crossing the Sabine River"
           },
           {
+            "name": "World's Richest Acre (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.8,
+            "spoken": "Billboard: Kilgore, next exit. Downtown keeps a block of oil derricks standing on the World's Richest Acre. At Christmas they wear lighted stars.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "White Oak",
             "at_mi": 69.0,
             "off_mi": 6.5,
@@ -31459,6 +31579,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151888180, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing White Oak"
+          },
+          {
+            "name": "World's Richest Acre (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.8,
+            "spoken": "Billboard: Kilgore, next exit. Downtown keeps a block of oil derricks standing on the World's Richest Acre. At Christmas they wear lighted stars.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gladewater",
@@ -31497,6 +31627,16 @@
             "spoken": "Passing Van"
           },
           {
+            "name": "First Monday Trade Days (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 127.3,
+            "spoken": "Billboard: First Monday Trade Days, next exit in Canton. Trading here since the eighteen fifties, the weekend before the first Monday. Close enough.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fruitvale",
             "at_mi": 129.3,
             "off_mi": 7.84,
@@ -31522,6 +31662,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151446276, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Myrtle Springs"
+          },
+          {
+            "name": "First Monday Trade Days (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 138.8,
+            "spoken": "Billboard: First Monday Trade Days, ahead in Canton. Trading here since the eighteen fifties, the weekend before the first Monday. Close enough.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wills Point",

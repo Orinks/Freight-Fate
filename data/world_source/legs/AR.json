@@ -47643,6 +47643,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Texarkana post office (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.4,
+            "spoken": "Billboard: Texarkana, ahead. Its post office stands on the state line, the only federal building in two states. Your letter can leave from either one.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Wake Village",
             "at_mi": 6.4,
             "off_mi": 1.82,
@@ -47756,6 +47766,16 @@
             "spoken": "Passing Mount Vernon"
           },
           {
+            "name": "Sulphur Springs glass restrooms (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 92.5,
+            "spoken": "Billboard: Sulphur Springs, ahead. Downtown has a public restroom walled in one-way mirror glass. You see the whole square. The square sees a mirror.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Como",
             "at_mi": 93.1,
             "off_mi": 5.95,
@@ -47770,6 +47790,16 @@
             "kind": "point",
             "at_mi": 99.9,
             "spoken": "Hopkins County Historical Museum ahead"
+          },
+          {
+            "name": "Sulphur Springs glass restrooms (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 104.5,
+            "spoken": "Billboard: Sulphur Springs, ahead. Downtown has a public restroom walled in one-way mirror glass. You see the whole square. The square sees a mirror.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Brashear",
@@ -47797,6 +47827,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151371510, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Campbell"
+          },
+          {
+            "name": "Audie Murphy Cotton Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 129.6,
+            "spoken": "Billboard: The Audie Murphy American Cotton Museum, next exit in Greenville. The cotton fields, and the sharecropper's son who became America's most decorated soldier.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Audie Murphy Cotton Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 132.6,
+            "spoken": "Billboard: The Audie Murphy American Cotton Museum, ahead in Greenville. The cotton fields, and the sharecropper's son who became America's most decorated soldier.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Caddo Mills",

@@ -144,7 +144,9 @@ far side of the road that is false. Write the sheet's `leg:` the way the driver
 reads the sign, with `at_mi` counted from that end; `tools/bake_billboards.py`
 mirrors the milepost onto a leg stored the other way round and records
 `directions` on the record. The other direction needs its own sign, placed
-before the attraction from that side.
+before the attraction from that side. A `landmark` block faces the same way
+unless it carries `- facing: both`, for a line true from either side, such
+as a monument named as the truck passes it.
 
 ### 4.2 Spacing
 

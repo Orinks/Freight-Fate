@@ -21852,6 +21852,26 @@
             "spoken": "Passing Greenwood"
           },
           {
+            "name": "Florida Caverns (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.1,
+            "spoken": "Billboard: Florida Caverns State Park, next exit, north of Marianna. The only cave tours in Florida, sixty-five degrees all year. The state's oldest air conditioning.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Florida Caverns (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.7,
+            "spoken": "Billboard: Florida Caverns State Park, next exit, north of Marianna. The only cave tours in Florida, sixty-five degrees all year. The state's oldest air conditioning.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Altha",
             "at_mi": 55.0,
             "off_mi": 7.87,

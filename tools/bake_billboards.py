@@ -10,6 +10,7 @@ sheet (data/spider/signsheets/<corridor>.md): one block per sign --
     - leg: <from_slug> -> <to_slug>   (the direction the driver reads it)
     - at_mi: <float>                   (miles from <from_slug>)
     - spoken: <exact spoken text>
+    - facing: both                     (optional: heard from either side)
     - describe: <optional pull-in text; NOT baked -- kept in the sheet for the
       future pull-off interaction>
 
@@ -84,19 +85,20 @@ def sign_record(sign: dict) -> tuple[str, str, dict] | None:
     return a, b, rec
 
 
-def orient_to_leg(rec: dict, leg: dict, frm: str) -> None:
+def orient_to_leg(rec: dict, leg: dict, frm: str, both: bool = False) -> None:
     """Put a sheet sign into the leg's own frame.
 
     A sheet names the leg in the direction the driver reads the sign, and
     at_mi counts from that end. A leg stored the other way round gets the
-    milepost mirrored, and a billboard records which way it faces: its copy
-    says "ahead", so heard from the other side it would be false.
+    milepost mirrored, and the record faces the way the sheet was written:
+    copy that says "ahead" is false from the other side. `- facing: both` on
+    a sheet block is for a line true from either side, like a monument read
+    as the truck passes it.
     """
     forward = leg["from"] == frm
     if not forward:
         rec["at_mi"] = round(float(leg["miles"]) - rec["at_mi"], 1)
-    if rec["category"] == "billboard_sign":
-        rec["directions"] = ["forward" if forward else "reverse"]
+    rec["directions"] = ["both"] if both else ["forward" if forward else "reverse"]
 
 
 def merge_into_leg(leg: dict, rec: dict) -> None:
@@ -151,7 +153,7 @@ def main() -> int:
         leg = legs_by_pair.get((frm, to)) or legs_by_pair.get((to, frm))
         if leg is None:
             raise SystemExit(f"ERROR: no leg {frm} <-> {to} for sign {rec['name']!r}")
-        orient_to_leg(rec, leg, frm)
+        orient_to_leg(rec, leg, frm, both=sign.get("facing", "").lower() == "both")
         merge_into_leg(leg, rec)
         baked += 1
         print(f"  {rec['category']:14} {frm}->{to} @ {rec['at_mi']:>6} mi  {rec['name']}")

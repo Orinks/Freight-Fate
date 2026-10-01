@@ -1091,6 +1091,16 @@
             "spoken": "Passing Metcalfe"
           },
           {
+            "name": "Historic Capitol (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 78.0,
+            "spoken": "Billboard: Florida's Historic Capitol, ahead in Tallahassee. The plan was to tear it down for the twenty-two story tower. People said no, and the striped awnings stayed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Midway",
             "at_mi": 87.0,
             "off_mi": 10.84,
@@ -33849,6 +33859,26 @@
             "spoken": "Passing Waskom"
           },
           {
+            "name": "World's Richest Acre (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 663.4,
+            "spoken": "Billboard: Kilgore, next exit. Downtown keeps a block of oil derricks standing on the World's Richest Acre. At Christmas they wear lighted stars.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "World's Richest Acre (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 666.4,
+            "spoken": "Billboard: Kilgore, next exit. Downtown keeps a block of oil derricks standing on the World's Richest Acre. At Christmas they wear lighted stars.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Van",
             "at_mi": 710.8,
             "off_mi": 1.3,
@@ -33856,6 +33886,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151718455, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Van"
+          },
+          {
+            "name": "First Monday Trade Days (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 723.3,
+            "spoken": "Billboard: First Monday Trade Days, next exit in Canton. Trading here since the eighteen fifties, the weekend before the first Monday. Close enough.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "First Monday Trade Days (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 726.3,
+            "spoken": "Billboard: First Monday Trade Days, ahead in Canton. Trading here since the eighteen fifties, the weekend before the first Monday. Close enough.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Myrtle Springs",
@@ -86722,6 +86772,26 @@
             "spoken": "Passing Boston"
           },
           {
+            "name": "Greenville (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.5,
+            "spoken": "Billboard: Greenville, ahead, where Ray Charles grew up. A life-size bronze Ray plays piano in the town park. He has not missed a show since.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Greenville (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.6,
+            "spoken": "Billboard: Greenville, next exit, where Ray Charles grew up. A life-size bronze Ray plays piano in the town park. He has not missed a show since.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Aucilla River",
             "category": "river",
             "kind": "point",
@@ -86745,6 +86815,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153837815, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wacissa"
+          },
+          {
+            "name": "Historic Capitol (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.0,
+            "spoken": "Billboard: Florida's Historic Capitol, ahead in Tallahassee. The plan was to tear it down for the twenty-two story tower. People said no, and the striped awnings stayed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Midway",

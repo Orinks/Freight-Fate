@@ -4,15 +4,9 @@
 
 ### Added
 
-- **Wall Drug and South of the Border count down from both directions.** Three signs lead you to the exit whichever way you drive.
+- **Before a stable release, the billboards grow: about twelve hundred new ones, from Ocean City's boardwalk to Big Bend.** Big Jim notices your driving.
 
-- **Some billboards now notice your drive.** Big Jim answers a crash or a ticket, tired drivers get the late-night signs, and holidays put up their own.
-
-- **Six hundred new attraction billboards across fifteen states, from Ocean City's boardwalk to the Enchanted Highway.** Each is signed in both directions.
-
-- **Seven Tennessee attractions have billboards, among them Loretta Lynn's Ranch, the Tina Turner Museum and Ruby Falls.** Each is signed in both directions.
-
-- **You can pull in at The Thing, on Interstate 10 in Arizona.** Its signs count down from both directions; only a tractor without a trailer can fuel there.
+- **You can pull in at The Thing, on Interstate 10 in Arizona.** Only a tractor without a trailer can fuel there.
 
 - **The game asks how much the truck should do for you before the main menu, once.** Choose All assists, Balanced or Realistic; Escape keeps what you have.
 
@@ -198,16 +192,6 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
-
-- **Billboards for roadside attractions are read only on the way to them.** A sign saying a place is ahead no longer plays after you have passed it.
-
-- **The Cadillac Ranch, Tucumcari and Bates House of Turkey billboards stand near those places.** Some had been read more than a hundred miles away.
-
-- **Billboards and state welcomes say what is true today.** Song credits, prices and closed places were corrected; Pea Soup Andersen's now points to Santa Nella.
-
-- **Over a hundred attraction billboards now stand just before the place they name.** Some were on the wrong road or after it; closed attractions lost their signs.
-
-- **A billboard about one real place is read only near it.** "Dinosaurs, next exit" no longer plays anywhere in California, nor the Grapevine anywhere on Interstate 5.
 
 - **The truck no longer tells you to release a parking brake that is already off.** A late "Press P to release it" could send you to set the brake while rolling.
 

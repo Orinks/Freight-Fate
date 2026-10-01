@@ -94,7 +94,14 @@ bookmarks usable.
       Connecticut, Massachusetts and New Hampshire, each checked open
       today and following the state's billboard law (none in DC; none on
       Washington's scenic highways, Colorado's scenic byways or
-      Maryland's interstates).
+      Maryland's interstates). Texas and Florida followed: 596 signs, with
+      the Orlando theme parks plainly on I-4, none on Texas's scenic byways
+      or inside the cities that ban them. Florida's billboard bans moved the
+      older signs too: the ten in the Keys and on the 18-Mile Stretch are
+      roadside landmark callouts now, same copy, and two of the four on
+      Alligator Alley stand west of its toll plaza while the others are gone
+      (`signsheets/keys-alligator-alley-2026-09-30.md`). Sheet landmarks
+      face the way the sheet reads unless marked `facing: both`.
 
 - [x] New installs start on All assists (owner, 2026-09-30): first drives kept
       going wrong at the wheel, city street corners above all, so the truck

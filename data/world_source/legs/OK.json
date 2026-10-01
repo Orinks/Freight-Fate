@@ -5295,6 +5295,16 @@
             "spoken": "Passing Pleasant Valley"
           },
           {
+            "name": "The World's Littlest Skyscraper (from Altus)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.0,
+            "spoken": "Billboard: Wichita Falls is home to the World's Littlest Skyscraper, a four-story swindle. A con man sold shares in a tower, built it four stories tall instead of four hundred feet, and pocketed the difference.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Cashion Community",
             "at_mi": 81.26,
             "off_mi": 6.45,
@@ -6589,6 +6599,16 @@
             "spoken": "Passing Lone Grove"
           },
           {
+            "name": "Frank Buck Zoo (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.8,
+            "spoken": "Billboard: The Frank Buck Zoo, ahead in Gainesville. Named for the hometown boy famous for bringing wild animals back alive. These ones stayed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Oak Ridge",
             "at_mi": 36.9,
             "off_mi": 6.59,
@@ -6639,6 +6659,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 13918512838, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Road Runner"
+          },
+          {
+            "name": "Frank Buck Zoo (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.6,
+            "spoken": "Billboard: The Frank Buck Zoo, ahead in Gainesville. Named for the hometown boy famous for bringing wild animals back alive. These ones stayed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sanger",
@@ -18475,6 +18505,16 @@
             "spoken": "Passing Grandfield"
           },
           {
+            "name": "The World's Littlest Skyscraper (from Lawton)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.0,
+            "spoken": "Billboard: Wichita Falls is home to the World's Littlest Skyscraper, a four-story swindle. A con man sold shares in a tower, built it four stories tall instead of four hundred feet, and pocketed the difference.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Cashion Community",
             "at_mi": 45.1,
             "off_mi": 3.26,
@@ -25186,6 +25226,46 @@
             "spoken": "Passing Erick"
           },
           {
+            "name": "The U-Drop Inn (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 162.9,
+            "spoken": "Billboard: The U-Drop Inn, next exit in Shamrock. A nineteen thirty-six art deco gas station that helped inspire the movie Cars. No fuel now, just photographs.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The U-Drop Inn (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 166.7,
+            "spoken": "Billboard: The U-Drop Inn, next exit in Shamrock. A nineteen thirty-six art deco gas station that helped inspire the movie Cars. No fuel now, just photographs.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Devil's Rope Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 183.5,
+            "spoken": "Billboard: The Devil's Rope Museum, next exit in McLean. More than two thousand kinds of barbed wire under one roof. Please do not lean on the exhibits.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Devil's Rope Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 189.2,
+            "spoken": "Billboard: The Devil's Rope Museum, next exit in McLean. More than two thousand kinds of barbed wire under one roof. Please do not lean on the exhibits.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Alanreed",
             "at_mi": 192.7,
             "off_mi": 0.17,
@@ -25193,6 +25273,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151342236, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Alanreed"
+          },
+          {
+            "name": "The Cross at Groom (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 208.5,
+            "spoken": "Billboard: The Cross of Our Lord Jesus Christ, ahead in Groom. Nineteen stories tall. The town's water tower leans on purpose, so your mirrors are fine.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Cross at Groom (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 225.0,
+            "spoken": "Billboard: The Cross of Our Lord Jesus Christ, ahead in Groom. Nineteen stories tall. The town's water tower leans on purpose, so your mirrors are fine.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Claude",

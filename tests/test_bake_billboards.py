@@ -42,7 +42,10 @@ def test_remove_deletes_only_the_named_billboard_and_refuses_a_miss():
         remove_from_leg(pairs, {"name": "Gone", "leg": "mitchell_sd_us -> rapid_city_sd_us"})
 
 
-def test_a_monument_is_mirrored_but_heard_both_ways():
+def test_a_landmark_faces_the_way_its_sheet_reads_unless_marked_both():
     rec = {"category": "highway_marker", "at_mi": 63.0}
     orient_to_leg(rec, LEG, "rapid_city_sd_us")
-    assert rec == {"category": "highway_marker", "at_mi": 215.0}
+    assert rec == {"category": "highway_marker", "at_mi": 215.0, "directions": ["reverse"]}
+    rec = {"category": "highway_marker", "at_mi": 63.0}
+    orient_to_leg(rec, LEG, "rapid_city_sd_us", both=True)
+    assert rec == {"category": "highway_marker", "at_mi": 215.0, "directions": ["both"]}
