@@ -1874,20 +1874,22 @@
         "state_miles": [
           {
             "state": "Pennsylvania",
-            "miles": 106.7
+            "miles": 108.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           },
           {
             "state": "Maryland",
-            "miles": 34.3
+            "miles": 32.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 106.7,
+            "at_mi": 108.9,
             "from_state": "Pennsylvania",
             "state": "Maryland",
-            "place": "Pennsylvania-Maryland line on I-95",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "place": "Pennsylvania-Maryland line on US-222",
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -3163,6 +3165,16 @@
             "spoken": "Passing Spring Ridge"
           },
           {
+            "name": "Schuylkill River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 35.4,
+            "spoken": "Crossing the Schuylkill River",
+            "lat": 40.39352,
+            "lon": -75.97266,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 586764215 (Schuylkill River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "West Lawn",
             "at_mi": 39.1,
             "off_mi": 0.73,
@@ -3170,13 +3182,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158228492, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing West Lawn"
-          },
-          {
-            "name": "Schuylkill River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.7,
-            "spoken": "Crossing the Schuylkill River"
           },
           {
             "name": "Adamstown",
@@ -3231,13 +3236,6 @@
             "spoken": "Entering Rohrerstown"
           },
           {
-            "name": "Susquehanna River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 71.4,
-            "spoken": "Crossing the Susquehanna River"
-          },
-          {
             "name": "Mountville",
             "at_mi": 72.1,
             "off_mi": 0.3,
@@ -3273,6 +3271,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 59767510, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Wrightsville"
+          },
+          {
+            "name": "Susquehanna River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 78.9,
+            "spoken": "Crossing the Susquehanna River",
+            "lat": 40.03628,
+            "lon": -76.52122,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 88527122 (Susquehanna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Hallam",
@@ -9161,31 +9169,34 @@
         "state_miles": [
           {
             "state": "Pennsylvania",
-            "miles": 21.3
+            "miles": 22.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           },
           {
             "state": "New Jersey",
-            "miles": 82.0
+            "miles": 82.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           },
           {
             "state": "New York",
-            "miles": 6.8
+            "miles": 5.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 21.3,
+            "at_mi": 22.4,
             "from_state": "Pennsylvania",
             "state": "New Jersey",
-            "place": "Pennsylvania-New Jersey line on I-95",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "place": "Pennsylvania-New Jersey line on I-78",
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           },
           {
-            "at_mi": 103.2,
+            "at_mi": 104.4,
             "from_state": "New Jersey",
             "state": "New York",
-            "place": "New Jersey-New York line on I-95",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "place": "New Jersey-New York line on I-78",
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -10153,15 +10164,11 @@
             "name": "Lehigh River",
             "category": "river",
             "kind": "point",
-            "at_mi": 12.1,
-            "spoken": "Crossing the Lehigh River"
-          },
-          {
-            "name": "Delaware River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.1,
-            "spoken": "Crossing the Delaware River"
+            "at_mi": 16.3,
+            "spoken": "Crossing the Lehigh River",
+            "lat": 40.64188,
+            "lon": -75.27685,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 575729706 (Lehigh River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Glendon",
@@ -10200,6 +10207,16 @@
             "spoken": "Passing Phillipsburg"
           },
           {
+            "name": "Delaware River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 23.5,
+            "spoken": "Crossing the Delaware River",
+            "lat": 40.67204,
+            "lon": -75.17799,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 257378493 (Delaware River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Alpha",
             "at_mi": 26.8,
             "off_mi": 0.89,
@@ -10216,6 +10233,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158621304, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bloomsbury"
+          },
+          {
+            "name": "Musconetcong River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 30.7,
+            "spoken": "Crossing the Musconetcong River",
+            "lat": 40.66156,
+            "lon": -75.07854,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 884940196 (Musconetcong River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "The Crayola Experience (westbound)",
@@ -10245,27 +10272,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158843608, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Franklin"
-          },
-          {
-            "name": "Musconetcong River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 40.5,
-            "spoken": "Crossing the Musconetcong River"
-          },
-          {
-            "name": "North Branch Raritan River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 40.5,
-            "spoken": "Crossing the North Branch Raritan River"
-          },
-          {
-            "name": "Lamington River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 40.5,
-            "spoken": "Crossing the Lamington River"
           },
           {
             "name": "Clinton",
@@ -10305,6 +10311,26 @@
             ]
           },
           {
+            "name": "Lamington River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 50.9,
+            "spoken": "Crossing the Lamington River",
+            "lat": 40.64513,
+            "lon": -74.72391,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 241811428 (Lamington River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "North Branch Raritan River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 53.1,
+            "spoken": "Crossing the North Branch Raritan River",
+            "lat": 40.64271,
+            "lon": -74.684,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 31465069 (North Branch Raritan River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Liberty Corner",
             "at_mi": 58.9,
             "off_mi": 1.26,
@@ -10341,25 +10367,11 @@
             "spoken": "Passing Summit"
           },
           {
-            "name": "Passaic River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 72.6,
-            "spoken": "Crossing the Passaic River"
-          },
-          {
             "name": "Dead River",
             "category": "river",
             "kind": "point",
             "at_mi": 72.6,
             "spoken": "Crossing the Dead River"
-          },
-          {
-            "name": "Elizabeth River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 72.6,
-            "spoken": "Crossing the Elizabeth River"
           },
           {
             "name": "Springfield Township",
@@ -10396,6 +10408,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158863501, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Union"
+          },
+          {
+            "name": "Elizabeth River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 78.3,
+            "spoken": "Crossing the Elizabeth River",
+            "lat": 40.70577,
+            "lon": -74.24714,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1365565315 (Elizabeth River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Passaic River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 87.8,
+            "spoken": "Crossing the Passaic River",
+            "lat": 40.74185,
+            "lon": -74.1222,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1447420977 (Passaic River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Secaucus",
@@ -11931,13 +11963,6 @@
             "spoken": "Passing Washington Crossing"
           },
           {
-            "name": "Delaware River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 53.47,
-            "spoken": "Crossing the Delaware River"
-          },
-          {
             "name": "Fallsington",
             "at_mi": 57.68,
             "off_mi": 2.84,
@@ -11945,6 +11970,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158844480, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fallsington"
+          },
+          {
+            "name": "Delaware River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 58.2,
+            "spoken": "Crossing the Delaware River",
+            "lat": 40.20889,
+            "lon": -74.7681,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 407099323 (Delaware River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -13103,13 +13138,6 @@
             "spoken": "Passing Newry"
           },
           {
-            "name": "Little Juniata River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 5.15,
-            "spoken": "Crossing the Little Juniata River"
-          },
-          {
             "name": "Elberta",
             "at_mi": 5.97,
             "off_mi": 2.33,
@@ -13161,6 +13189,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158343114, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Alexandria"
+          },
+          {
+            "name": "Little Juniata River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Crossing the Little Juniata River",
+            "lat": 40.66905,
+            "lon": -78.23692,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 825984967 (Little Juniata River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Tyrone",
@@ -16565,13 +16603,6 @@
             "spoken": "Passing Orchard Park"
           },
           {
-            "name": "Buffalo River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 84.2,
-            "spoken": "Crossing the Buffalo River"
-          },
-          {
             "name": "West Seneca",
             "at_mi": 84.8,
             "off_mi": 4.31,
@@ -16597,6 +16628,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 9925929775, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lackawanna"
+          },
+          {
+            "name": "Buffalo River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 93.0,
+            "spoken": "Crossing the Buffalo River",
+            "lat": 42.8742,
+            "lon": -78.87824,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1517089942 (Buffalo River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Sloan",
@@ -17700,20 +17741,22 @@
         "state_miles": [
           {
             "state": "Pennsylvania",
-            "miles": 30.3
+            "miles": 32.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           },
           {
             "state": "Ohio",
-            "miles": 71.7
+            "miles": 69.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 30.3,
+            "at_mi": 32.3,
             "from_state": "Pennsylvania",
             "state": "Ohio",
             "place": "Pennsylvania-Ohio line on I-90",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -18420,13 +18463,6 @@
             "spoken": "Passing Platea"
           },
           {
-            "name": "Ashtabula River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.1,
-            "spoken": "Crossing the Ashtabula River"
-          },
-          {
             "name": "North Kingsville",
             "at_mi": 38.7,
             "off_mi": 2.12,
@@ -18453,6 +18489,16 @@
             "directions": [
               "forward"
             ]
+          },
+          {
+            "name": "Ashtabula River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 43.1,
+            "spoken": "Crossing the Ashtabula River",
+            "lat": 41.83999,
+            "lon": -80.72668,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 32436893 (Ashtabula River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Plymouth",
@@ -18538,8 +18584,11 @@
             "name": "Grand River",
             "category": "river",
             "kind": "point",
-            "at_mi": 63.8,
-            "spoken": "Crossing the Grand River"
+            "at_mi": 64.6,
+            "spoken": "Crossing the Grand River",
+            "lat": 41.73516,
+            "lon": -81.10405,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1332054818 (Grand River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Perry",
@@ -18605,6 +18654,16 @@
             "spoken": "Passing Waite Hill"
           },
           {
+            "name": "Chagrin River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 82.0,
+            "spoken": "Crossing the Chagrin River",
+            "lat": 41.62782,
+            "lon": -81.39903,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 32930407 (Chagrin River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Eastlake",
             "at_mi": 82.7,
             "off_mi": 2.43,
@@ -18648,13 +18707,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153997297, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Willowick"
-          },
-          {
-            "name": "Chagrin River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 89.6,
-            "spoken": "Crossing the Chagrin River"
           },
           {
             "name": "Euclid",
@@ -21625,13 +21677,6 @@
             "spoken": "Entering Shartlesville"
           },
           {
-            "name": "Schuylkill River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 51.6,
-            "spoken": "Crossing the Schuylkill River"
-          },
-          {
             "name": "West Hamburg",
             "at_mi": 52.4,
             "off_mi": 0.49,
@@ -21657,6 +21702,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157560631, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Shoemakersville"
+          },
+          {
+            "name": "Schuylkill River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 53.3,
+            "spoken": "Crossing the Schuylkill River",
+            "lat": 40.56021,
+            "lon": -75.98927,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 586763453 (Schuylkill River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Edenburg",
@@ -22966,20 +23021,22 @@
         "state_miles": [
           {
             "state": "Pennsylvania",
-            "miles": 45.5
+            "miles": 46.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           },
           {
             "state": "Maryland",
-            "miles": 34.5
+            "miles": 33.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 45.5,
+            "at_mi": 46.9,
             "from_state": "Pennsylvania",
             "state": "Maryland",
             "place": "Pennsylvania-Maryland line on I-83",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -24500,13 +24557,6 @@
             "spoken": "Passing Hummelstown"
           },
           {
-            "name": "Susquehanna River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 2.4,
-            "spoken": "Crossing the Susquehanna River"
-          },
-          {
             "name": "Colonial Park",
             "at_mi": 2.4,
             "off_mi": 3.56,
@@ -24550,6 +24600,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158392636, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Linglestown"
+          },
+          {
+            "name": "Susquehanna River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 3.8,
+            "spoken": "Crossing the Susquehanna River",
+            "lat": 40.31216,
+            "lon": -76.90184,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1254442310 (Susquehanna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Halifax",
@@ -30151,13 +30211,6 @@
             ]
           },
           {
-            "name": "Raystown Branch Juniata River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 76.4,
-            "spoken": "Crossing the Raystown Branch Juniata River"
-          },
-          {
             "name": "Breezewood",
             "at_mi": 83.2,
             "off_mi": 0.84,
@@ -30165,6 +30218,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158316704, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Breezewood"
+          },
+          {
+            "name": "Raystown Branch Juniata River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 86.2,
+            "spoken": "Crossing the Raystown Branch Juniata River",
+            "lat": 39.99442,
+            "lon": -78.26923,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 809693700 (Raystown Branch Juniata River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Earlston",
@@ -37285,13 +37348,6 @@
             "spoken": "Passing McCandless"
           },
           {
-            "name": "Allegheny River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 80.6,
-            "spoken": "Crossing the Allegheny River"
-          },
-          {
             "name": "Mount Nebo",
             "at_mi": 81.75,
             "off_mi": 0.96,
@@ -37407,6 +37463,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 4554680510, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ross Township"
+          },
+          {
+            "name": "Allegheny River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 91.1,
+            "spoken": "Crossing the Allegheny River",
+            "lat": 40.44966,
+            "lon": -79.99335,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 465555708 (Allegheny River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "interchanges": [
@@ -38840,6 +38906,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Schuylkill River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.0,
+            "spoken": "Crossing the Schuylkill River",
+            "lat": 39.95554,
+            "lon": -75.18021,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1318115650 (Schuylkill River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Millbourne",
             "at_mi": 3.5,
             "off_mi": 2.6,
@@ -38847,13 +38923,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158339282, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Millbourne"
-          },
-          {
-            "name": "Schuylkill River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 6.8,
-            "spoken": "Crossing the Schuylkill River"
           },
           {
             "name": "Bala Cynwyd",
@@ -40670,31 +40739,34 @@
         "state_miles": [
           {
             "state": "Pennsylvania",
-            "miles": 21.9
+            "miles": 21.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           },
           {
             "state": "Delaware",
-            "miles": 23.3
+            "miles": 21.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           },
           {
             "state": "Maryland",
-            "miles": 56.8
+            "miles": 58.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 21.9,
+            "at_mi": 21.3,
             "from_state": "Pennsylvania",
             "state": "Delaware",
             "place": "Pennsylvania-Delaware line on I-95",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           },
           {
-            "at_mi": 45.2,
+            "at_mi": 43.1,
             "from_state": "Delaware",
             "state": "Maryland",
             "place": "Delaware-Maryland line on I-95",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -41791,8 +41863,21 @@
             "name": "Christina River",
             "category": "river",
             "kind": "point",
-            "at_mi": 39.0,
-            "spoken": "Crossing the Christina River"
+            "at_mi": 40.9,
+            "spoken": "Crossing the Christina River",
+            "lat": 39.64707,
+            "lon": -75.74249,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 135957626 (Christina River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Susquehanna River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 61.6,
+            "spoken": "Crossing the Susquehanna River",
+            "lat": 39.58178,
+            "lon": -76.10365,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1255024156 (Susquehanna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Perryville Railroad Museum",
@@ -41800,13 +41885,6 @@
             "kind": "point",
             "at_mi": 63.0,
             "spoken": "Perryville Railroad Museum ahead"
-          },
-          {
-            "name": "Susquehanna River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 66.3,
-            "spoken": "Crossing the Susquehanna River"
           },
           {
             "name": "Riverside",
@@ -46890,8 +46968,11 @@
             "name": "Raystown Branch Juniata River",
             "category": "river",
             "kind": "point",
-            "at_mi": 186.8,
-            "spoken": "Crossing the Raystown Branch Juniata River"
+            "at_mi": 184.9,
+            "spoken": "Crossing the Raystown Branch Juniata River",
+            "lat": 39.99442,
+            "lon": -78.26923,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 809693700 (Raystown Branch Juniata River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Earlston",
@@ -49194,8 +49275,11 @@
             "name": "Conemaugh River",
             "category": "river",
             "kind": "point",
-            "at_mi": 39.41,
-            "spoken": "Crossing the Conemaugh River"
+            "at_mi": 41.3,
+            "spoken": "Crossing the Conemaugh River",
+            "lat": 40.43805,
+            "lon": -79.27195,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 626752641 (Conemaugh River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Blairsville",
@@ -52055,13 +52139,6 @@
             ]
           },
           {
-            "name": "Raystown Branch Juniata River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 94.5,
-            "spoken": "Crossing the Raystown Branch Juniata River"
-          },
-          {
             "name": "Manns Choice",
             "at_mi": 98.4,
             "off_mi": 0.74,
@@ -52069,6 +52146,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158567284, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Manns Choice"
+          },
+          {
+            "name": "Raystown Branch Juniata River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 98.7,
+            "spoken": "Crossing the Raystown Branch Juniata River",
+            "lat": 40.01396,
+            "lon": -78.59448,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1254735484 (Raystown Branch Juniata River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Napier",
@@ -54601,20 +54688,22 @@
         "state_miles": [
           {
             "state": "Pennsylvania",
-            "miles": 54.6
+            "miles": 48.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           },
           {
             "state": "Ohio",
-            "miles": 78.4
+            "miles": 84.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 54.6,
+            "at_mi": 48.9,
             "from_state": "Pennsylvania",
             "state": "Ohio",
             "place": "Pennsylvania-Ohio line on I-76",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -55424,6 +55513,16 @@
             "spoken": "Passing Cranberry"
           },
           {
+            "name": "Beaver River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 35.1,
+            "spoken": "Crossing the Beaver River",
+            "lat": 40.81149,
+            "lon": -80.31871,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 175129574 (Beaver River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Homewood",
             "at_mi": 35.8,
             "off_mi": 0.16,
@@ -55451,13 +55550,6 @@
             "spoken": "Passing New Galilee"
           },
           {
-            "name": "Beaver River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 40.4,
-            "spoken": "Crossing the Beaver River"
-          },
-          {
             "name": "Petersburg",
             "at_mi": 48.9,
             "off_mi": 0.26,
@@ -55479,8 +55571,11 @@
             "name": "Mahoning River",
             "category": "river",
             "kind": "point",
-            "at_mi": 68.9,
-            "spoken": "Crossing the Mahoning River"
+            "at_mi": 79.7,
+            "spoken": "Crossing the Mahoning River",
+            "lat": 41.20883,
+            "lon": -80.94888,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1165921850 (Mahoning River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Braceville",
@@ -55538,8 +55633,11 @@
             "name": "Cuyahoga River",
             "category": "river",
             "kind": "point",
-            "at_mi": 96.5,
-            "spoken": "Crossing the Cuyahoga River"
+            "at_mi": 98.2,
+            "spoken": "Crossing the Cuyahoga River",
+            "lat": 41.24815,
+            "lon": -81.28382,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 277257091 (Cuyahoga River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Streetsboro",
@@ -58344,13 +58442,6 @@
             "spoken": "Entering Napier"
           },
           {
-            "name": "Raystown Branch Juniata River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 105.7,
-            "spoken": "Crossing the Raystown Branch Juniata River"
-          },
-          {
             "name": "Bedford",
             "at_mi": 106.1,
             "off_mi": 1.0,
@@ -58358,6 +58449,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158406420, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bedford"
+          },
+          {
+            "name": "Raystown Branch Juniata River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 108.2,
+            "spoken": "Crossing the Raystown Branch Juniata River",
+            "lat": 40.01185,
+            "lon": -78.4656,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 809693700 (Raystown Branch Juniata River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Everett",
@@ -60850,6 +60951,16 @@
             "spoken": "Passing Penn Lake Park"
           },
           {
+            "name": "Lehigh River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 28.8,
+            "spoken": "Crossing the Lehigh River",
+            "lat": 41.10413,
+            "lon": -75.75,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 142695368 (Lehigh River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "White Haven",
             "at_mi": 29.5,
             "off_mi": 2.54,
@@ -60866,13 +60977,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157620578, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing East Side"
-          },
-          {
-            "name": "Lehigh River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 29.7,
-            "spoken": "Crossing the Lehigh River"
           },
           {
             "name": "Lake Harmony",
@@ -62635,13 +62739,6 @@
             "spoken": "Entering New Milford"
           },
           {
-            "name": "Susquehanna River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 39.3,
-            "spoken": "Crossing the Susquehanna River"
-          },
-          {
             "name": "Hallstead",
             "at_mi": 42.8,
             "off_mi": 0.52,
@@ -62649,6 +62746,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157628092, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hallstead"
+          },
+          {
+            "name": "Susquehanna River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 42.9,
+            "spoken": "Crossing the Susquehanna River",
+            "lat": 41.96377,
+            "lon": -75.73746,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 180651194 (Susquehanna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Great Bend",
@@ -62679,13 +62786,6 @@
             ]
           },
           {
-            "name": "Chenango River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 53.7,
-            "spoken": "Crossing the Chenango River"
-          },
-          {
             "name": "Chenango Bridge",
             "at_mi": 57.2,
             "off_mi": 3.74,
@@ -62693,6 +62793,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158584651, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Chenango Bridge"
+          },
+          {
+            "name": "Chenango River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 59.9,
+            "spoken": "Crossing the Chenango River",
+            "lat": 42.09876,
+            "lon": -75.91618,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 247724249 (Chenango River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Endwell",
@@ -63915,6 +64025,16 @@
             "spoken": "Passing Granville"
           },
           {
+            "name": "Juniata River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 41.0,
+            "spoken": "Crossing the Juniata River",
+            "lat": 40.58965,
+            "lon": -77.51575,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1214895307 (Juniata River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Mifflintown",
             "at_mi": 46.0,
             "off_mi": 1.48,
@@ -63969,13 +64089,6 @@
             "spoken": "Passing Van Wert"
           },
           {
-            "name": "Juniata River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 54.9,
-            "spoken": "Crossing the Juniata River"
-          },
-          {
             "name": "Thompsontown",
             "at_mi": 55.9,
             "off_mi": 0.36,
@@ -64024,8 +64137,11 @@
             "name": "Susquehanna River",
             "category": "river",
             "kind": "point",
-            "at_mi": 79.6,
-            "spoken": "Crossing the Susquehanna River"
+            "at_mi": 78.0,
+            "spoken": "Crossing the Susquehanna River",
+            "lat": 40.39921,
+            "lon": -77.00891,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1254442317 (Susquehanna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cove",
@@ -65847,13 +65963,6 @@
             "spoken": "Passing Sheshequin"
           },
           {
-            "name": "Susquehanna River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 78.36,
-            "spoken": "Crossing the Susquehanna River"
-          },
-          {
             "name": "Athens",
             "at_mi": 80.6,
             "off_mi": 0.5,
@@ -65897,6 +66006,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158518477, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Waverly"
+          },
+          {
+            "name": "Susquehanna River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 88.2,
+            "spoken": "Crossing the Susquehanna River",
+            "lat": 42.00752,
+            "lon": -76.46835,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 329398532 (Susquehanna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Litchfield",
@@ -67282,13 +67401,6 @@
             ]
           },
           {
-            "name": "West Branch Susquehanna River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 9.4,
-            "spoken": "Crossing the West Branch Susquehanna River"
-          },
-          {
             "name": "Muncy",
             "at_mi": 13.71,
             "off_mi": 0.91,
@@ -67379,6 +67491,16 @@
             "spoken": "Passing Linntown"
           },
           {
+            "name": "West Branch Susquehanna River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 37.1,
+            "spoken": "Crossing the West Branch Susquehanna River",
+            "lat": 40.90379,
+            "lon": -76.83893,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 247738645 (West Branch Susquehanna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Northumberland",
             "at_mi": 40.48,
             "off_mi": 1.67,
@@ -67442,13 +67564,6 @@
             "spoken": "Entering Chapman"
           },
           {
-            "name": "Susquehanna River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 58.94,
-            "spoken": "Crossing the Susquehanna River"
-          },
-          {
             "name": "Liverpool",
             "at_mi": 65.03,
             "off_mi": 0.08,
@@ -67490,6 +67605,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158453498, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering New Buffalo"
+          },
+          {
+            "name": "Susquehanna River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 79.5,
+            "spoken": "Crossing the Susquehanna River",
+            "lat": 40.40069,
+            "lon": -77.00976,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 457552751 (Susquehanna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Duncannon",
@@ -68691,13 +68816,6 @@
             "spoken": "Passing Muncy"
           },
           {
-            "name": "West Branch Susquehanna River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 8.25,
-            "spoken": "Crossing the West Branch Susquehanna River"
-          },
-          {
             "name": "Bastress",
             "at_mi": 9.62,
             "off_mi": 3.42,
@@ -68751,6 +68869,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158384078, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Avis"
+          },
+          {
+            "name": "West Branch Susquehanna River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 19.8,
+            "spoken": "Crossing the West Branch Susquehanna River",
+            "lat": 41.16933,
+            "lon": -77.33723,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 899063775 (West Branch Susquehanna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Gallagher",

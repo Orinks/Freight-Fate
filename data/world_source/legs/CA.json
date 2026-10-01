@@ -943,8 +943,11 @@
             "name": "Mojave River",
             "category": "river",
             "kind": "point",
-            "at_mi": 116.4,
-            "spoken": "Crossing the Mojave River"
+            "at_mi": 123.3,
+            "spoken": "Crossing the Mojave River",
+            "lat": 34.90024,
+            "lon": -117.09396,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 109438128 (Mojave River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lenwood",
@@ -1719,6 +1722,26 @@
             "spoken": "Passing Woodville"
           },
           {
+            "name": "South Branch Tule River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 55.2,
+            "spoken": "Crossing the South Branch Tule River",
+            "lat": 36.09411,
+            "lon": -119.32182,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 79495076 (South Branch Tule River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "North Branch Tule River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 56.5,
+            "spoken": "Crossing the North Branch Tule River",
+            "lat": 36.1128,
+            "lon": -119.32363,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 79488806 (North Branch Tule River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Exeter",
             "at_mi": 64.1,
             "off_mi": 11.76,
@@ -1735,20 +1758,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150940445, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Farmersville"
-          },
-          {
-            "name": "North Branch Tule River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 68.3,
-            "spoken": "Crossing the North Branch Tule River"
-          },
-          {
-            "name": "South Branch Tule River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 68.3,
-            "spoken": "Crossing the South Branch Tule River"
           },
           {
             "name": "Ivanhoe",
@@ -1806,6 +1815,16 @@
             "spoken": "Passing Dinuba"
           },
           {
+            "name": "Kings River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 86.4,
+            "spoken": "Crossing the Kings River",
+            "lat": 36.49681,
+            "lon": -119.53077,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 73978075 (Kings River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Kingsburg",
             "at_mi": 88.2,
             "off_mi": 0.1,
@@ -1840,13 +1859,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150950782, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Parlier"
-          },
-          {
-            "name": "Kings River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 95.4,
-            "spoken": "Crossing the Kings River"
           },
           {
             "name": "Sanger",
@@ -4104,13 +4116,6 @@
             "spoken": "Entering Angeles National Forest"
           },
           {
-            "name": "Santa Clara River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 69.3,
-            "spoken": "Crossing the Santa Clara River"
-          },
-          {
             "name": "Piru",
             "at_mi": 75.0,
             "off_mi": 10.42,
@@ -4118,6 +4123,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 3769880982, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Piru"
+          },
+          {
+            "name": "Santa Clara River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 78.1,
+            "spoken": "Crossing the Santa Clara River",
+            "lat": 34.42576,
+            "lon": -118.58497,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 80221856 (Santa Clara River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "William S. Hart Ranch House",
@@ -5541,6 +5556,16 @@
             ]
           },
           {
+            "name": "Mojave River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.9,
+            "spoken": "Crossing the Mojave River",
+            "lat": 34.89628,
+            "lon": -116.99419,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 109438128 (Mojave River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Peggy Sue's Fifties Diner (northbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -5648,13 +5673,6 @@
             "directions": [
               "reverse"
             ]
-          },
-          {
-            "name": "Mojave River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 65.6,
-            "spoken": "Crossing the Mojave River"
           },
           {
             "name": "Alien Fresh Jerky (southbound)",
@@ -7418,8 +7436,11 @@
             "name": "Mojave River",
             "category": "river",
             "kind": "point",
-            "at_mi": 29.5,
-            "spoken": "Crossing the Mojave River"
+            "at_mi": 30.3,
+            "spoken": "Crossing the Mojave River",
+            "lat": 34.54903,
+            "lon": -117.29486,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 109438128 (Mojave River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Adelanto",
@@ -9872,6 +9893,16 @@
         ],
         "landmarks": [
           {
+            "name": "Colorado River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 4.1,
+            "spoken": "Crossing the Colorado River",
+            "lat": 33.60478,
+            "lon": -114.53089,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 202463451 (Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Ehrenberg",
             "at_mi": 4.7,
             "off_mi": 0.37,
@@ -9879,13 +9910,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150964102, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Ehrenberg"
-          },
-          {
-            "name": "Colorado River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.4,
-            "spoken": "Crossing the Colorado River"
           },
           {
             "name": "Hi Jolly's tomb (from Blythe)",
@@ -9947,8 +9971,11 @@
             "name": "Hassayampa River",
             "category": "river",
             "kind": "point",
-            "at_mi": 111.7,
-            "spoken": "Crossing the Hassayampa River"
+            "at_mi": 108.5,
+            "spoken": "Crossing the Hassayampa River",
+            "lat": 33.45777,
+            "lon": -112.7609,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 194580839 (Hassayampa River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -11026,8 +11053,11 @@
             "name": "Feather River",
             "category": "river",
             "kind": "point",
-            "at_mi": 64.6,
-            "spoken": "Crossing the Feather River"
+            "at_mi": 62.9,
+            "spoken": "Crossing the Feather River",
+            "lat": 38.90145,
+            "lon": -121.58694,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 26467188 (Feather River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Knights Landing",
@@ -11070,8 +11100,11 @@
             "name": "Sacramento River",
             "category": "river",
             "kind": "point",
-            "at_mi": 88.9,
-            "spoken": "Crossing the Sacramento River"
+            "at_mi": 85.5,
+            "spoken": "Crossing the Sacramento River",
+            "lat": 38.5982,
+            "lon": -121.54814,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 79293843 (Sacramento River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "California State Railroad Museum (eastbound)",
@@ -12168,8 +12201,11 @@
             "name": "Sacramento River",
             "category": "river",
             "kind": "point",
-            "at_mi": 46.8,
-            "spoken": "Crossing the Sacramento River"
+            "at_mi": 42.7,
+            "spoken": "Crossing the Sacramento River",
+            "lat": 40.18676,
+            "lon": -122.22997,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 26462708 (Sacramento River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cottonwood",
@@ -14016,15 +14052,11 @@
             "name": "Smith River",
             "category": "river",
             "kind": "point",
-            "at_mi": 9.1,
-            "spoken": "Crossing the Smith River"
-          },
-          {
-            "name": "Middle Fork Smith River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 9.1,
-            "spoken": "Crossing the Middle Fork Smith River"
+            "at_mi": 8.5,
+            "spoken": "Crossing the Smith River",
+            "lat": 41.80652,
+            "lon": -124.08231,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 88648298 (Smith River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Hiouchi",
@@ -14041,6 +14073,16 @@
             "kind": "zone",
             "at_mi": 18.3,
             "spoken": "Entering Six Rivers National Forest"
+          },
+          {
+            "name": "Middle Fork Smith River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 21.4,
+            "spoken": "Crossing the Middle Fork Smith River",
+            "lat": 41.84501,
+            "lon": -123.92161,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 88795798 (Middle Fork Smith River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Hazel View Summit",
@@ -14777,13 +14819,6 @@
             "spoken": "Passing Calexico"
           },
           {
-            "name": "Alamo River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 7.1,
-            "spoken": "Crossing the Alamo River"
-          },
-          {
             "name": "Holtville",
             "at_mi": 12.1,
             "off_mi": 2.81,
@@ -14791,6 +14826,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150963224, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Holtville"
+          },
+          {
+            "name": "Alamo River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 13.7,
+            "spoken": "Crossing the Alamo River",
+            "lat": 32.77323,
+            "lon": -115.34979,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 184310144 (Alamo River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Imperial Sand Dunes (eastbound)",
@@ -14829,13 +14874,6 @@
             "spoken": "Passing Cocopah"
           },
           {
-            "name": "Colorado River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 51.8,
-            "spoken": "Crossing the Colorado River"
-          },
-          {
             "name": "Somerton",
             "at_mi": 53.1,
             "off_mi": 10.11,
@@ -14863,6 +14901,16 @@
             "directions": [
               "reverse"
             ]
+          },
+          {
+            "name": "Colorado River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 58.7,
+            "spoken": "Crossing the Colorado River",
+            "lat": 32.72902,
+            "lon": -114.62462,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1457011992 (Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -18523,15 +18571,11 @@
             "name": "Mad River",
             "category": "river",
             "kind": "point",
-            "at_mi": 12.4,
-            "spoken": "Crossing the Mad River"
-          },
-          {
-            "name": "North Fork Mad River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.4,
-            "spoken": "Crossing the North Fork Mad River"
+            "at_mi": 11.4,
+            "spoken": "Crossing the Mad River",
+            "lat": 40.91017,
+            "lon": -124.06136,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 91512271 (Mad River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Blue Lake",
@@ -18541,6 +18585,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141038785, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Blue Lake"
+          },
+          {
+            "name": "North Fork Mad River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 20.8,
+            "spoken": "Crossing the North Fork Mad River",
+            "lat": 40.91384,
+            "lon": -123.91644,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 91669849 (North Fork Mad River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lord-Ellis Summit",
@@ -25428,8 +25482,11 @@
             "name": "Fresno River",
             "category": "river",
             "kind": "point",
-            "at_mi": 14.1,
-            "spoken": "Crossing the Fresno River"
+            "at_mi": 23.4,
+            "spoken": "Crossing the Fresno River",
+            "lat": 36.96935,
+            "lon": -120.07145,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 76164638 (Fresno River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Le Grand",
@@ -25508,13 +25565,6 @@
             ]
           },
           {
-            "name": "Merced River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 70.6,
-            "spoken": "Crossing the Merced River"
-          },
-          {
             "name": "Livingston",
             "at_mi": 70.6,
             "off_mi": 0.11,
@@ -25522,6 +25572,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150934827, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Livingston"
+          },
+          {
+            "name": "Merced River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 72.0,
+            "spoken": "Crossing the Merced River",
+            "lat": 37.39937,
+            "lon": -120.74264,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 450945767 (Merced River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Delhi",
@@ -25588,6 +25648,16 @@
             "spoken": "Passing Empire"
           },
           {
+            "name": "Tuolumne River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 93.6,
+            "spoken": "Crossing the Tuolumne River",
+            "lat": 37.62613,
+            "lon": -120.99646,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 25155350 (Tuolumne River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "McHenry Museum",
             "category": "museum",
             "kind": "point",
@@ -25602,20 +25672,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150939750, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Riverbank"
-          },
-          {
-            "name": "Tuolumne River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 98.6,
-            "spoken": "Crossing the Tuolumne River"
-          },
-          {
-            "name": "Stanislaus River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 98.6,
-            "spoken": "Crossing the Stanislaus River"
           },
           {
             "name": "American Graffiti (southbound)",
@@ -25635,6 +25691,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150966866, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Escalon"
+          },
+          {
+            "name": "Stanislaus River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 103.3,
+            "spoken": "Crossing the Stanislaus River",
+            "lat": 37.7304,
+            "lon": -121.10988,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 800890889 (Stanislaus River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ripon",
@@ -25658,8 +25724,11 @@
             "name": "Mokelumne River",
             "category": "river",
             "kind": "point",
-            "at_mi": 127.1,
-            "spoken": "Crossing the Mokelumne River"
+            "at_mi": 135.0,
+            "spoken": "Crossing the Mokelumne River",
+            "lat": 38.1489,
+            "lon": -121.26119,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 26784840 (Mokelumne River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Galt",
@@ -25683,8 +25752,11 @@
             "name": "Cosumnes River",
             "category": "river",
             "kind": "point",
-            "at_mi": 155.2,
-            "spoken": "Crossing the Cosumnes River"
+            "at_mi": 150.3,
+            "spoken": "Crossing the Cosumnes River",
+            "lat": 38.35779,
+            "lon": -121.3435,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 166011657 (Cosumnes River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "California State Railroad Museum (northbound)",
@@ -26499,6 +26571,16 @@
             "spoken": "Entering Kingsburg"
           },
           {
+            "name": "Kings River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 22.5,
+            "spoken": "Crossing the Kings River",
+            "lat": 36.49665,
+            "lon": -119.53082,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 73978075 (Kings River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Bravo Farms Treehouse",
             "category": "billboard_sign",
             "kind": "point",
@@ -26531,13 +26613,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150938750, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing London"
-          },
-          {
-            "name": "Kings River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 28.4,
-            "spoken": "Crossing the Kings River"
           },
           {
             "name": "Kingsburg Coffeepot (northbound)",
@@ -28412,6 +28487,16 @@
             "spoken": "Passing Calipatria"
           },
           {
+            "name": "New River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 71.0,
+            "spoken": "Crossing the New River",
+            "lat": 32.97881,
+            "lon": -115.55818,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 181017554 (New River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Brawley",
             "at_mi": 72.0,
             "off_mi": 0.66,
@@ -28419,13 +28504,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150969855, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brawley"
-          },
-          {
-            "name": "New River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 76.3,
-            "spoken": "Crossing the New River"
           },
           {
             "name": "Seeley",
@@ -30436,8 +30514,11 @@
             "name": "Mojave River",
             "category": "river",
             "kind": "point",
-            "at_mi": 83.7,
-            "spoken": "Crossing the Mojave River"
+            "at_mi": 89.3,
+            "spoken": "Crossing the Mojave River",
+            "lat": 34.90024,
+            "lon": -117.09396,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 109438128 (Mojave River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lenwood",
@@ -34650,8 +34731,11 @@
             "name": "Santa Clara River",
             "category": "river",
             "kind": "point",
-            "at_mi": 39.2,
-            "spoken": "Crossing the Santa Clara River"
+            "at_mi": 37.9,
+            "spoken": "Crossing the Santa Clara River",
+            "lat": 34.42565,
+            "lon": -118.58461,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 80221856 (Santa Clara River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Angeles National Forest",
@@ -34718,8 +34802,11 @@
             "name": "Kern River",
             "category": "river",
             "kind": "point",
-            "at_mi": 121.4,
-            "spoken": "Crossing the Kern River"
+            "at_mi": 113.5,
+            "spoken": "Crossing the Kern River",
+            "lat": 35.37948,
+            "lon": -119.04417,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 75215322 (Kern River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Shafter",
@@ -34794,18 +34881,24 @@
             "spoken": "Passing Woodville"
           },
           {
-            "name": "North Branch Tule River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 178.3,
-            "spoken": "Crossing the North Branch Tule River"
-          },
-          {
             "name": "South Branch Tule River",
             "category": "river",
             "kind": "point",
-            "at_mi": 178.3,
-            "spoken": "Crossing the South Branch Tule River"
+            "at_mi": 166.7,
+            "spoken": "Crossing the South Branch Tule River",
+            "lat": 36.09411,
+            "lon": -119.32182,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 79495076 (South Branch Tule River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "North Branch Tule River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 168.0,
+            "spoken": "Crossing the North Branch Tule River",
+            "lat": 36.1128,
+            "lon": -119.32363,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 79488806 (North Branch Tule River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Goshen",
@@ -34845,6 +34938,16 @@
             "spoken": "Passing Delft Colony"
           },
           {
+            "name": "Kings River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 197.6,
+            "spoken": "Crossing the Kings River",
+            "lat": 36.49694,
+            "lon": -119.53073,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 73978075 (Kings River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Kingsburg",
             "at_mi": 199.2,
             "off_mi": 0.1,
@@ -34861,13 +34964,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150950782, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Parlier"
-          },
-          {
-            "name": "Kings River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 206.0,
-            "spoken": "Crossing the Kings River"
           },
           {
             "name": "Fowler",
@@ -36461,6 +36557,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Los Angeles River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.1,
+            "spoken": "Crossing the Los Angeles River",
+            "lat": 34.05337,
+            "lon": -118.22839,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 787842211 (Los Angeles River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "South Pasadena",
             "at_mi": 6.4,
             "off_mi": 2.91,
@@ -36522,13 +36628,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150968614, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing South El Monte"
-          },
-          {
-            "name": "Los Angeles River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.0,
-            "spoken": "Crossing the Los Angeles River"
           },
           {
             "name": "Baldwin Park",
@@ -36664,6 +36763,16 @@
             "spoken": "San Bernardino History and Railroad Museum ahead"
           },
           {
+            "name": "Santa Ana River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 55.7,
+            "spoken": "Crossing the Santa Ana River",
+            "lat": 34.06487,
+            "lon": -117.30237,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 422097184 (Santa Ana River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Little Pigeon Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -36703,13 +36812,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150936244, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mentone"
-          },
-          {
-            "name": "Santa Ana River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 64.4,
-            "spoken": "Crossing the Santa Ana River"
           },
           {
             "name": "Yucaipa",
@@ -36769,15 +36871,11 @@
             "name": "San Gorgonio River",
             "category": "river",
             "kind": "point",
-            "at_mi": 90.0,
-            "spoken": "Crossing the San Gorgonio River"
-          },
-          {
-            "name": "Whitewater River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 90.0,
-            "spoken": "Crossing the Whitewater River"
+            "at_mi": 87.0,
+            "spoken": "Crossing the San Gorgonio River",
+            "lat": 33.93118,
+            "lon": -116.82843,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 859725886 (San Gorgonio River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cabazon Dinosaurs (westbound)",
@@ -36808,6 +36906,16 @@
             "directions": [
               "reverse"
             ]
+          },
+          {
+            "name": "Whitewater River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 98.5,
+            "spoken": "Crossing the Whitewater River",
+            "lat": 33.92265,
+            "lon": -116.63607,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 229571024 (Whitewater River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "San Gorgonio Windmills (westbound)",
@@ -40478,6 +40586,16 @@
         ],
         "landmarks": [
           {
+            "name": "Los Angeles River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.0,
+            "spoken": "Crossing the Los Angeles River",
+            "lat": 34.05301,
+            "lon": -118.22866,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 787842211 (Los Angeles River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Huntington Park",
             "at_mi": 4.1,
             "off_mi": 3.26,
@@ -40559,20 +40677,6 @@
             "spoken": "Passing Pico Rivera"
           },
           {
-            "name": "Los Angeles River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.2,
-            "spoken": "Crossing the Los Angeles River"
-          },
-          {
-            "name": "San Gabriel River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.2,
-            "spoken": "Crossing the San Gabriel River"
-          },
-          {
             "name": "Whittier",
             "at_mi": 12.3,
             "off_mi": 4.28,
@@ -40580,6 +40684,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150963169, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Whittier"
+          },
+          {
+            "name": "San Gabriel River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 12.4,
+            "spoken": "Crossing the San Gabriel River",
+            "lat": 33.94429,
+            "lon": -118.09883,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1044128332 (San Gabriel River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Santa Fe Springs",
@@ -40654,6 +40768,16 @@
             "spoken": "Entering Buena Park"
           },
           {
+            "name": "Santa Ana River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 29.4,
+            "spoken": "Crossing the Santa Ana River",
+            "lat": 33.78408,
+            "lon": -117.88296,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1389870250 (Santa Ana River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Villa Park",
             "at_mi": 30.0,
             "off_mi": 4.05,
@@ -40661,13 +40785,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150955851, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Villa Park"
-          },
-          {
-            "name": "Santa Ana River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 36.8,
-            "spoken": "Crossing the Santa Ana River"
           },
           {
             "name": "Pretend City Children's Museum",
@@ -40770,15 +40887,11 @@
             "name": "San Dieguito River",
             "category": "river",
             "kind": "point",
-            "at_mi": 109.0,
-            "spoken": "Crossing the San Dieguito River"
-          },
-          {
-            "name": "San Diego River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 109.0,
-            "spoken": "Crossing the San Diego River"
+            "at_mi": 100.9,
+            "spoken": "Crossing the San Dieguito River",
+            "lat": 32.9728,
+            "lon": -117.25065,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 136954608 (San Dieguito River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Allied Gardens",
@@ -40788,6 +40901,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150979447, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Allied Gardens"
+          },
+          {
+            "name": "San Diego River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 116.9,
+            "spoken": "Crossing the San Diego River",
+            "lat": 32.76688,
+            "lon": -117.16263,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 105263530 (San Diego River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -45831,8 +45954,11 @@
             "name": "Santa Clara River",
             "category": "river",
             "kind": "point",
-            "at_mi": 42.2,
-            "spoken": "Crossing the Santa Clara River"
+            "at_mi": 38.1,
+            "spoken": "Crossing the Santa Clara River",
+            "lat": 34.42565,
+            "lon": -118.58461,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 80221856 (Santa Clara River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Angeles National Forest",
@@ -45881,8 +46007,11 @@
             "name": "Kern River",
             "category": "river",
             "kind": "point",
-            "at_mi": 100.2,
-            "spoken": "Crossing the Kern River"
+            "at_mi": 114.8,
+            "spoken": "Crossing the Kern River",
+            "lat": 35.30211,
+            "lon": -119.26304,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 75215322 (Kern River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Buttonwillow",
@@ -48005,8 +48134,11 @@
             "name": "Fresno River",
             "category": "river",
             "kind": "point",
-            "at_mi": 35.6,
-            "spoken": "Crossing the Fresno River"
+            "at_mi": 32.7,
+            "spoken": "Crossing the Fresno River",
+            "lat": 36.96937,
+            "lon": -120.07179,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 76164638 (Fresno River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "The Underground Gardens",
@@ -48031,8 +48163,11 @@
             "name": "San Joaquin River",
             "category": "river",
             "kind": "point",
-            "at_mi": 49.5,
-            "spoken": "Crossing the San Joaquin River"
+            "at_mi": 44.3,
+            "spoken": "Crossing the San Joaquin River",
+            "lat": 36.84294,
+            "lon": -119.93255,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 76438515 (San Joaquin River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Clovis",
@@ -48675,6 +48810,16 @@
             "spoken": "Passing Ripon"
           },
           {
+            "name": "Tuolumne River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.2,
+            "spoken": "Crossing the Tuolumne River",
+            "lat": 37.62605,
+            "lon": -120.99677,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 25155350 (Tuolumne River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Empire",
             "at_mi": 4.1,
             "off_mi": 4.39,
@@ -48682,13 +48827,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150949999, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Empire"
-          },
-          {
-            "name": "Tuolumne River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 4.8,
-            "spoken": "Crossing the Tuolumne River"
           },
           {
             "name": "Hughson",
@@ -48746,6 +48884,16 @@
             "spoken": "Entering Delhi"
           },
           {
+            "name": "Merced River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 22.5,
+            "spoken": "Crossing the Merced River",
+            "lat": 37.39921,
+            "lon": -120.743,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 450945767 (Merced River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Livingston",
             "at_mi": 24.0,
             "off_mi": 0.09,
@@ -48753,13 +48901,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150934827, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Livingston"
-          },
-          {
-            "name": "Merced River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 24.4,
-            "spoken": "Crossing the Merced River"
           },
           {
             "name": "Castle Air Museum (southbound)",
@@ -49931,8 +50072,11 @@
             "name": "Shasta River",
             "category": "river",
             "kind": "point",
-            "at_mi": 14.4,
-            "spoken": "Crossing the Shasta River"
+            "at_mi": 12.5,
+            "spoken": "Crossing the Shasta River",
+            "lat": 41.43776,
+            "lon": -122.43102,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 86743665 (Shasta River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Montague",
@@ -52373,13 +52517,6 @@
             "spoken": "Pretend City Children's Museum ahead"
           },
           {
-            "name": "Santa Ana River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 52.3,
-            "spoken": "Crossing the Santa Ana River"
-          },
-          {
             "name": "Villa Park",
             "at_mi": 53.9,
             "off_mi": 4.04,
@@ -52387,6 +52524,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150955851, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Villa Park"
+          },
+          {
+            "name": "Santa Ana River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 54.5,
+            "spoken": "Crossing the Santa Ana River",
+            "lat": 33.78453,
+            "lon": -117.88267,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1389870250 (Santa Ana River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Buena Park",
@@ -52491,8 +52638,11 @@
             "name": "San Gabriel River",
             "category": "river",
             "kind": "point",
-            "at_mi": 73.7,
-            "spoken": "Crossing the San Gabriel River"
+            "at_mi": 71.4,
+            "spoken": "Crossing the San Gabriel River",
+            "lat": 33.94465,
+            "lon": -118.09872,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1044128332 (San Gabriel River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pico Rivera",
@@ -56936,8 +57086,11 @@
             "name": "Santa Clara River",
             "category": "river",
             "kind": "point",
-            "at_mi": 39.5,
-            "spoken": "Crossing the Santa Clara River"
+            "at_mi": 46.4,
+            "spoken": "Crossing the Santa Clara River",
+            "lat": 34.42576,
+            "lon": -118.58497,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 80221856 (Santa Clara River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "William S. Hart Museum",
@@ -60613,18 +60766,21 @@
             "spoken": "Passing Calabasas"
           },
           {
-            "name": "Los Angeles River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 34.6,
-            "spoken": "Crossing the Los Angeles River"
-          },
-          {
             "name": "Sepulveda Pass",
             "category": "mountain_pass",
             "kind": "point",
             "at_mi": 44.1,
             "spoken": "Approaching Sepulveda Pass"
+          },
+          {
+            "name": "Los Angeles River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 47.3,
+            "spoken": "Crossing the Los Angeles River",
+            "lat": 34.15538,
+            "lon": -118.4407,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 561170341 (Los Angeles River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Warner Bros. Transportation Museum",
@@ -60767,6 +60923,16 @@
             "spoken": "Passing Santa Fe Springs"
           },
           {
+            "name": "San Gabriel River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 74.0,
+            "spoken": "Crossing the San Gabriel River",
+            "lat": 33.94429,
+            "lon": -118.09883,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1044128332 (San Gabriel River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Bellflower",
             "at_mi": 75.8,
             "off_mi": 3.15,
@@ -60837,13 +61003,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 1837293388, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Buena Park"
-          },
-          {
-            "name": "San Gabriel River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 82.1,
-            "spoken": "Crossing the San Gabriel River"
           },
           {
             "name": "Villa Park",
@@ -61791,8 +61950,11 @@
             "name": "Santa Clara River",
             "category": "river",
             "kind": "point",
-            "at_mi": 3.9,
-            "spoken": "Crossing the Santa Clara River"
+            "at_mi": 5.4,
+            "spoken": "Crossing the Santa Clara River",
+            "lat": 34.24269,
+            "lon": -119.18994,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 80210634 (Santa Clara River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ojai",
@@ -63762,6 +63924,16 @@
             "spoken": "Passing Anderson"
           },
           {
+            "name": "Sacramento River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.3,
+            "spoken": "Crossing the Sacramento River",
+            "lat": 40.58584,
+            "lon": -122.36823,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 543477333 (Sacramento River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Palo Cedro",
             "at_mi": 2.9,
             "off_mi": 7.24,
@@ -63797,13 +63969,6 @@
             "directions": [
               "forward"
             ]
-          },
-          {
-            "name": "Sacramento River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.4,
-            "spoken": "Crossing the Sacramento River"
           },
           {
             "name": "The Sundial Bridge (southbound)",
@@ -63918,8 +64083,11 @@
             "name": "Klamath River",
             "category": "river",
             "kind": "point",
-            "at_mi": 128.5,
-            "spoken": "Crossing the Klamath River"
+            "at_mi": 137.2,
+            "spoken": "Crossing the Klamath River",
+            "lat": 42.17575,
+            "lon": -121.79931,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 86732551 (Klamath River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -65099,6 +65267,16 @@
             "spoken": "Passing Anderson"
           },
           {
+            "name": "Sacramento River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.3,
+            "spoken": "Crossing the Sacramento River",
+            "lat": 40.58584,
+            "lon": -122.36823,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 543477333 (Sacramento River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Palo Cedro",
             "at_mi": 2.9,
             "off_mi": 7.24,
@@ -65134,13 +65312,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141046044, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bella Vista"
-          },
-          {
-            "name": "Sacramento River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 7.9,
-            "spoken": "Crossing the Sacramento River"
           },
           {
             "name": "The Sundial Bridge (southbound)",
@@ -69049,6 +69220,16 @@
             ]
           },
           {
+            "name": "San Gorgonio River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 36.8,
+            "spoken": "Crossing the San Gorgonio River",
+            "lat": 33.93118,
+            "lon": -116.82843,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 859725886 (San Gorgonio River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Cabazon Dinosaurs (eastbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -69096,6 +69277,16 @@
             ]
           },
           {
+            "name": "Whitewater River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 48.3,
+            "spoken": "Crossing the Whitewater River",
+            "lat": 33.92265,
+            "lon": -116.63607,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 229571024 (Whitewater River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Morongo Valley",
             "at_mi": 48.4,
             "off_mi": 9.14,
@@ -69103,20 +69294,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 12401298054, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Morongo Valley"
-          },
-          {
-            "name": "San Gorgonio River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 48.9,
-            "spoken": "Crossing the San Gorgonio River"
-          },
-          {
-            "name": "Whitewater River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 48.9,
-            "spoken": "Crossing the Whitewater River"
           },
           {
             "name": "Desert Hot Springs",
@@ -73222,6 +73399,16 @@
             "spoken": "Passing Meadowbrook"
           },
           {
+            "name": "San Jacinto River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 19.3,
+            "spoken": "Crossing the San Jacinto River",
+            "lat": 33.77317,
+            "lon": -117.19999,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 62140440 (San Jacinto River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Nuevo",
             "at_mi": 20.0,
             "off_mi": 3.53,
@@ -73265,13 +73452,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150964329, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Canyon Lake"
-          },
-          {
-            "name": "San Jacinto River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 26.0,
-            "spoken": "Crossing the San Jacinto River"
           },
           {
             "name": "Winchester",
@@ -73434,6 +73614,16 @@
             "spoken": "Passing Hidden Meadows"
           },
           {
+            "name": "San Luis Rey River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 59.5,
+            "spoken": "Crossing the San Luis Rey River",
+            "lat": 33.26103,
+            "lon": -117.23635,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 125111718 (San Luis Rey River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Buena Creek",
             "at_mi": 60.2,
             "off_mi": 5.9,
@@ -73450,13 +73640,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150955239, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lake San Marcos"
-          },
-          {
-            "name": "San Luis Rey River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 61.4,
-            "spoken": "Crossing the San Luis Rey River"
           }
         ],
         "restrictions": [],
@@ -75737,13 +75920,6 @@
             "spoken": "Passing El Cerrito"
           },
           {
-            "name": "Santa Ana River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 10.4,
-            "spoken": "Crossing the Santa Ana River"
-          },
-          {
             "name": "Norco",
             "at_mi": 10.9,
             "off_mi": 3.43,
@@ -75751,6 +75927,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150947696, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Norco"
+          },
+          {
+            "name": "Santa Ana River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 16.9,
+            "spoken": "Crossing the Santa Ana River",
+            "lat": 33.88509,
+            "lon": -117.64397,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 283558687 (Santa Ana River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Eastvale",
@@ -75816,13 +76002,6 @@
             "spoken": "Passing Walnut"
           },
           {
-            "name": "San Gabriel River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 33.3,
-            "spoken": "Crossing the San Gabriel River"
-          },
-          {
             "name": "La Verne",
             "at_mi": 35.5,
             "off_mi": 2.94,
@@ -75884,6 +76063,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150966416, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Baldwin Park"
+          },
+          {
+            "name": "San Gabriel River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 44.4,
+            "spoken": "Crossing the San Gabriel River",
+            "lat": 34.13216,
+            "lon": -117.94966,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 784626536 (San Gabriel River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Bradbury",
@@ -75994,13 +76183,6 @@
             "spoken": "Passing Altadena"
           },
           {
-            "name": "Big Tujunga River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 58.8,
-            "spoken": "Crossing the Big Tujunga River"
-          },
-          {
             "name": "La Ca\u00f1ada Flintridge",
             "at_mi": 61.3,
             "off_mi": 0.45,
@@ -76008,6 +76190,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150948528, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering La Ca\u00f1ada Flintridge"
+          },
+          {
+            "name": "Big Tujunga River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 71.2,
+            "spoken": "Crossing the Big Tujunga River",
+            "lat": 34.27047,
+            "lon": -118.3419,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 372695450 (Big Tujunga River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Dillon Divide",
@@ -76033,13 +76225,6 @@
             "spoken": "Approaching Bear Divide"
           },
           {
-            "name": "Santa Clara River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 83.4,
-            "spoken": "Crossing the Santa Clara River"
-          },
-          {
             "name": "South Fork Santa Clara River",
             "category": "river",
             "kind": "point",
@@ -76052,6 +76237,16 @@
             "kind": "point",
             "at_mi": 85.0,
             "spoken": "Approaching Newhall Pass"
+          },
+          {
+            "name": "Santa Clara River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 91.0,
+            "spoken": "Crossing the Santa Clara River",
+            "lat": 34.4256,
+            "lon": -118.58443,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 80221856 (Santa Clara River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -76980,13 +77175,6 @@
             "spoken": "Passing Mead Valley"
           },
           {
-            "name": "Santa Ana River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 6.7,
-            "spoken": "Crossing the Santa Ana River"
-          },
-          {
             "name": "Bloomington",
             "at_mi": 6.8,
             "off_mi": 4.68,
@@ -77028,6 +77216,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150958819, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Colton"
+          },
+          {
+            "name": "Santa Ana River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 10.4,
+            "spoken": "Crossing the Santa Ana River",
+            "lat": 34.06695,
+            "lon": -117.29581,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 422097184 (Santa Ana River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Redlands",
@@ -87475,8 +87673,11 @@
             "name": "Sacramento River",
             "category": "river",
             "kind": "point",
-            "at_mi": 12.2,
-            "spoken": "Crossing the Sacramento River"
+            "at_mi": 11.8,
+            "spoken": "Crossing the Sacramento River",
+            "lat": 38.67339,
+            "lon": -121.62673,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 26478139 (Sacramento River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Knights Landing",
@@ -92022,15 +92223,11 @@
             "name": "South Yuba River",
             "category": "river",
             "kind": "point",
-            "at_mi": 96.7,
-            "spoken": "Crossing the South Yuba River"
-          },
-          {
-            "name": "Truckee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 96.7,
-            "spoken": "Crossing the Truckee River"
+            "at_mi": 89.2,
+            "spoken": "Crossing the South Yuba River",
+            "lat": 39.32649,
+            "lon": -120.38983,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 431894631 (South Yuba River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Olympic Valley",
@@ -92049,6 +92246,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141033637, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Tahoe City"
+          },
+          {
+            "name": "Truckee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 105.8,
+            "spoken": "Crossing the Truckee River",
+            "lat": 39.36822,
+            "lon": -120.11483,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 32152080 (Truckee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Kings Beach",
@@ -94247,6 +94454,16 @@
             "spoken": "Passing Rio Linda"
           },
           {
+            "name": "Sacramento River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 2.0,
+            "spoken": "Crossing the Sacramento River",
+            "lat": 38.57132,
+            "lon": -121.51568,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 79293843 (Sacramento River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "California State Railroad Museum (eastbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -94255,13 +94472,6 @@
             "directions": [
               "reverse"
             ]
-          },
-          {
-            "name": "Sacramento River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.5,
-            "spoken": "Crossing the Sacramento River"
           },
           {
             "name": "Dixon",
@@ -95129,8 +95339,11 @@
             "name": "American River",
             "category": "river",
             "kind": "point",
-            "at_mi": 5.8,
-            "spoken": "Crossing the American River"
+            "at_mi": 2.1,
+            "spoken": "Crossing the American River",
+            "lat": 38.60042,
+            "lon": -121.5048,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 209197343 (American River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Rio Linda",
@@ -95164,8 +95377,11 @@
             "name": "Bear River",
             "category": "river",
             "kind": "point",
-            "at_mi": 28.49,
-            "spoken": "Crossing the Bear River"
+            "at_mi": 28.3,
+            "spoken": "Crossing the Bear River",
+            "lat": 38.97251,
+            "lon": -121.5431,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 26618746 (Bear River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Wheatland",
@@ -95198,8 +95414,11 @@
             "name": "Feather River",
             "category": "river",
             "kind": "point",
-            "at_mi": 38.38,
-            "spoken": "Crossing the Feather River"
+            "at_mi": 42.4,
+            "spoken": "Crossing the Feather River",
+            "lat": 39.14354,
+            "lon": -121.60813,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 924592253 (Feather River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Live Oak",
@@ -96655,13 +96874,6 @@
             ]
           },
           {
-            "name": "San Benito River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.2,
-            "spoken": "Crossing the San Benito River"
-          },
-          {
             "name": "Las Lomas",
             "at_mi": 13.6,
             "off_mi": 5.57,
@@ -96730,6 +96942,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150978614, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering San Juan Bautista"
+          },
+          {
+            "name": "San Benito River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 25.6,
+            "spoken": "Crossing the San Benito River",
+            "lat": 36.85883,
+            "lon": -121.44782,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 70508627 (San Benito River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Hollister",
@@ -96825,8 +97047,11 @@
             "name": "San Joaquin River",
             "category": "river",
             "kind": "point",
-            "at_mi": 95.1,
-            "spoken": "Crossing the San Joaquin River"
+            "at_mi": 87.2,
+            "spoken": "Crossing the San Joaquin River",
+            "lat": 37.0559,
+            "lon": -120.54955,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 76177737 (San Joaquin River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Chowchilla",
@@ -96850,8 +97075,11 @@
             "name": "Fresno River",
             "category": "river",
             "kind": "point",
-            "at_mi": 125.4,
-            "spoken": "Crossing the Fresno River"
+            "at_mi": 117.5,
+            "spoken": "Crossing the Fresno River",
+            "lat": 36.96936,
+            "lon": -120.07167,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 76164638 (Fresno River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Kerman",
@@ -98165,8 +98393,11 @@
             "name": "Guadalupe River",
             "category": "river",
             "kind": "point",
-            "at_mi": 69.2,
-            "spoken": "Crossing the Guadalupe River"
+            "at_mi": 64.3,
+            "spoken": "Crossing the Guadalupe River",
+            "lat": 37.37485,
+            "lon": -121.93296,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 49639056 (Guadalupe River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Los Altos",
@@ -99755,13 +99986,6 @@
             "spoken": "Mission Soledad Museum ahead"
           },
           {
-            "name": "Salinas River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 39.8,
-            "spoken": "Crossing the Salinas River"
-          },
-          {
             "name": "Pine Canyon",
             "at_mi": 45.6,
             "off_mi": 1.11,
@@ -99771,6 +99995,16 @@
             "spoken": "Passing Pine Canyon"
           },
           {
+            "name": "Salinas River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 46.3,
+            "spoken": "Crossing the Salinas River",
+            "lat": 36.20325,
+            "lon": -121.13984,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 533082148 (Salinas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "King City",
             "at_mi": 46.9,
             "off_mi": 0.66,
@@ -99778,6 +100012,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 12503790673, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing King City"
+          },
+          {
+            "name": "San Antonio River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 79.2,
+            "spoken": "Crossing the San Antonio River",
+            "lat": 35.85495,
+            "lon": -120.7999,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 73182065 (San Antonio River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Nacimiento River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 83.4,
+            "spoken": "Crossing the Nacimiento River",
+            "lat": 35.81959,
+            "lon": -120.75714,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 73937675 (Nacimiento River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Heritage Ranch",
@@ -99796,20 +100050,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150963647, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering San Miguel"
-          },
-          {
-            "name": "San Antonio River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 92.1,
-            "spoken": "Crossing the San Antonio River"
-          },
-          {
-            "name": "Nacimiento River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 92.1,
-            "spoken": "Crossing the Nacimiento River"
           },
           {
             "name": "Paso Robles",
@@ -102070,13 +102310,6 @@
             "spoken": "Passing Pajaro Dunes"
           },
           {
-            "name": "San Benito River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.0,
-            "spoken": "Crossing the San Benito River"
-          },
-          {
             "name": "Mission San Juan Bautista (northbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -102155,6 +102388,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150978614, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering San Juan Bautista"
+          },
+          {
+            "name": "San Benito River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 25.7,
+            "spoken": "Crossing the San Benito River",
+            "lat": 36.85883,
+            "lon": -121.44782,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 70508627 (San Benito River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Hollister",
@@ -102258,8 +102501,11 @@
             "name": "San Joaquin River",
             "category": "river",
             "kind": "point",
-            "at_mi": 115.5,
-            "spoken": "Crossing the San Joaquin River"
+            "at_mi": 118.3,
+            "spoken": "Crossing the San Joaquin River",
+            "lat": 37.78527,
+            "lon": -121.30589,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 83155891 (San Joaquin River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ripon",
@@ -103717,13 +103963,6 @@
             ]
           },
           {
-            "name": "New River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 97.2,
-            "spoken": "Crossing the New River"
-          },
-          {
             "name": "Dixieland",
             "at_mi": 99.5,
             "off_mi": 1.27,
@@ -103731,6 +103970,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 7083379341, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dixieland"
+          },
+          {
+            "name": "New River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 104.0,
+            "spoken": "Crossing the New River",
+            "lat": 32.77326,
+            "lon": -115.69413,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 431853486 (New River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Heber",
@@ -108217,13 +108466,6 @@
             ]
           },
           {
-            "name": "New River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 97.1,
-            "spoken": "Crossing the New River"
-          },
-          {
             "name": "Dixieland",
             "at_mi": 99.6,
             "off_mi": 1.27,
@@ -108231,6 +108473,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 7083379341, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dixieland"
+          },
+          {
+            "name": "New River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 103.7,
+            "spoken": "Crossing the New River",
+            "lat": 32.77385,
+            "lon": -115.69426,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 852246053 (New River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Seeley",
@@ -108263,8 +108515,11 @@
             "name": "Alamo River",
             "category": "river",
             "kind": "point",
-            "at_mi": 129.0,
-            "spoken": "Crossing the Alamo River"
+            "at_mi": 123.7,
+            "spoken": "Crossing the Alamo River",
+            "lat": 32.77322,
+            "lon": -115.34979,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 184310144 (Alamo River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Imperial Sand Dunes (eastbound)",
@@ -108347,13 +108602,6 @@
             "spoken": "Passing Fortuna Foothills"
           },
           {
-            "name": "Gila River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 188.0,
-            "spoken": "Crossing the Gila River"
-          },
-          {
             "name": "Tacna",
             "at_mi": 211.2,
             "off_mi": 0.35,
@@ -108361,6 +108609,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150964483, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Tacna"
+          },
+          {
+            "name": "Gila River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 314.5,
+            "spoken": "Crossing the Gila River",
+            "lat": 33.3324,
+            "lon": -112.62351,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 52508672 (Gila River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Litchfield Park",
@@ -110041,6 +110299,16 @@
             "spoken": "Passing Del Cerro"
           },
           {
+            "name": "San Diego River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 7.5,
+            "spoken": "Crossing the San Diego River",
+            "lat": 32.78091,
+            "lon": -117.11286,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 794195857 (San Diego River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Allied Gardens",
             "at_mi": 8.4,
             "off_mi": 1.83,
@@ -110057,13 +110325,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 2232327111, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing San Carlos"
-          },
-          {
-            "name": "San Diego River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.1,
-            "spoken": "Crossing the San Diego River"
           },
           {
             "name": "Fairbanks Ranch",
@@ -110089,6 +110350,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 13067830316, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing 4S Ranch"
+          },
+          {
+            "name": "San Dieguito River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 27.5,
+            "spoken": "Crossing the San Dieguito River",
+            "lat": 33.05878,
+            "lon": -117.06984,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 817952858 (San Dieguito River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Del Dios",
@@ -110136,20 +110407,6 @@
             "spoken": "Passing Hidden Meadows"
           },
           {
-            "name": "San Dieguito River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 39.8,
-            "spoken": "Crossing the San Dieguito River"
-          },
-          {
-            "name": "San Luis Rey River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 39.8,
-            "spoken": "Crossing the San Luis Rey River"
-          },
-          {
             "name": "Bonsall",
             "at_mi": 43.4,
             "off_mi": 4.17,
@@ -110157,6 +110414,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150977551, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bonsall"
+          },
+          {
+            "name": "San Luis Rey River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 47.4,
+            "spoken": "Crossing the San Luis Rey River",
+            "lat": 33.32433,
+            "lon": -117.158,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 849739535 (San Luis Rey River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pala",
@@ -110303,6 +110570,16 @@
             "spoken": "Passing Nuevo"
           },
           {
+            "name": "San Jacinto River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 80.5,
+            "spoken": "Crossing the San Jacinto River",
+            "lat": 33.77329,
+            "lon": -117.19987,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 62140440 (San Jacinto River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Meadowbrook",
             "at_mi": 82.6,
             "off_mi": 5.89,
@@ -110319,13 +110596,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150935317, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mead Valley"
-          },
-          {
-            "name": "San Jacinto River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 92.2,
-            "spoken": "Crossing the San Jacinto River"
           },
           {
             "name": "Grand Terrace",
@@ -126144,31 +126414,34 @@
         "state_miles": [
           {
             "state": "California",
-            "miles": 204.2
+            "miles": 205.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           },
           {
             "state": "Nevada",
-            "miles": 458.7
+            "miles": 410.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           },
           {
             "state": "Utah",
-            "miles": 74.1
+            "miles": 121.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 204.2,
+            "at_mi": 205.2,
             "from_state": "California",
             "state": "Nevada",
             "place": "California-Nevada line on I-80",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           },
           {
-            "at_mi": 662.9,
+            "at_mi": 615.6,
             "from_state": "Nevada",
             "state": "Utah",
             "place": "Nevada-Utah line on I-80",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -130001,8 +130274,11 @@
             "name": "Sacramento River",
             "category": "river",
             "kind": "point",
-            "at_mi": 75.2,
-            "spoken": "Crossing the Sacramento River"
+            "at_mi": 84.7,
+            "spoken": "Crossing the Sacramento River",
+            "lat": 38.59807,
+            "lon": -121.54788,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 79293843 (Sacramento River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Rio Linda",
@@ -132363,8 +132639,11 @@
             "name": "Petaluma River",
             "category": "river",
             "kind": "point",
-            "at_mi": 33.8,
-            "spoken": "Crossing the Petaluma River"
+            "at_mi": 37.7,
+            "spoken": "Crossing the Petaluma River",
+            "lat": 38.2285,
+            "lon": -122.61532,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 35333193 (Petaluma River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "El Verano",
@@ -134041,13 +134320,6 @@
             "spoken": "Approaching Pacheco Pass"
           },
           {
-            "name": "San Joaquin River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 82.6,
-            "spoken": "Crossing the San Joaquin River"
-          },
-          {
             "name": "Dos Palos Y",
             "at_mi": 91.5,
             "off_mi": 0.11,
@@ -134075,6 +134347,16 @@
             "spoken": "Passing Dos Palos"
           },
           {
+            "name": "San Joaquin River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 96.1,
+            "spoken": "Crossing the San Joaquin River",
+            "lat": 37.0559,
+            "lon": -120.54955,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 76177737 (San Joaquin River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Chowchilla",
             "at_mi": 112.8,
             "off_mi": 2.71,
@@ -134096,8 +134378,11 @@
             "name": "Fresno River",
             "category": "river",
             "kind": "point",
-            "at_mi": 136.5,
-            "spoken": "Crossing the Fresno River"
+            "at_mi": 126.5,
+            "spoken": "Crossing the Fresno River",
+            "lat": 36.96932,
+            "lon": -120.07118,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 76164638 (Fresno River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Kerman",
@@ -137808,8 +138093,11 @@
             "name": "Pajaro River",
             "category": "river",
             "kind": "point",
-            "at_mi": 38.5,
-            "spoken": "Crossing the Pajaro River"
+            "at_mi": 38.4,
+            "spoken": "Crossing the Pajaro River",
+            "lat": 36.91744,
+            "lon": -121.54808,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 50743503 (Pajaro River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Hollister",
@@ -139993,6 +140281,16 @@
             "spoken": "Passing Mountain House"
           },
           {
+            "name": "San Joaquin River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 60.3,
+            "spoken": "Crossing the San Joaquin River",
+            "lat": 37.78528,
+            "lon": -121.30591,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 83155891 (San Joaquin River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Ripon",
             "at_mi": 60.7,
             "off_mi": 10.25,
@@ -140009,13 +140307,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150948421, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lathrop"
-          },
-          {
-            "name": "San Joaquin River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 64.9,
-            "spoken": "Crossing the San Joaquin River"
           },
           {
             "name": "Old River",
@@ -141210,8 +141501,11 @@
             "name": "Santa Maria River",
             "category": "river",
             "kind": "point",
-            "at_mi": 28.3,
-            "spoken": "Crossing the Santa Maria River"
+            "at_mi": 29.3,
+            "spoken": "Crossing the Santa Maria River",
+            "lat": 34.99065,
+            "lon": -120.43385,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 401465458 (Santa Maria River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Orcutt",
@@ -143642,13 +143936,6 @@
             "spoken": "Passing La Mirada"
           },
           {
-            "name": "San Gabriel River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 15.74,
-            "spoken": "Crossing the San Gabriel River"
-          },
-          {
             "name": "Cerritos",
             "at_mi": 15.74,
             "off_mi": 1.94,
@@ -143701,6 +143988,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 1837323614, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Paramount"
+          },
+          {
+            "name": "San Gabriel River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 20.7,
+            "spoken": "Crossing the San Gabriel River",
+            "lat": 33.94479,
+            "lon": -118.09868,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1044128332 (San Gabriel River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Whittier",
@@ -143832,8 +144129,11 @@
             "name": "Los Angeles River",
             "category": "river",
             "kind": "point",
-            "at_mi": 46.61,
-            "spoken": "Crossing the Los Angeles River"
+            "at_mi": 40.7,
+            "spoken": "Crossing the Los Angeles River",
+            "lat": 34.15599,
+            "lon": -118.28974,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 722325961 (Los Angeles River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Warner Bros. Transportation Museum",
@@ -146101,6 +146401,16 @@
             "spoken": "Passing Whittier"
           },
           {
+            "name": "San Gabriel River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 20.7,
+            "spoken": "Crossing the San Gabriel River",
+            "lat": 33.94483,
+            "lon": -118.09867,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1044128332 (San Gabriel River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Lynwood",
             "at_mi": 22.6,
             "off_mi": 5.45,
@@ -146182,20 +146492,6 @@
             "spoken": "Passing Maywood"
           },
           {
-            "name": "Los Angeles River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 28.4,
-            "spoken": "Crossing the Los Angeles River"
-          },
-          {
-            "name": "San Gabriel River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 28.4,
-            "spoken": "Crossing the San Gabriel River"
-          },
-          {
             "name": "Firestone Park",
             "at_mi": 28.8,
             "off_mi": 4.54,
@@ -146230,6 +146526,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 1783696512, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing South Pasadena"
+          },
+          {
+            "name": "Los Angeles River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 34.3,
+            "spoken": "Crossing the Los Angeles River",
+            "lat": 34.08315,
+            "lon": -118.2277,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 787842211 (Los Angeles River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Southwest Museum of the American Indian",
@@ -148568,6 +148874,16 @@
             "spoken": "Passing Westminster"
           },
           {
+            "name": "Santa Ana River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 4.1,
+            "spoken": "Crossing the Santa Ana River",
+            "lat": 33.7993,
+            "lon": -117.87768,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 158611432 (Santa Ana River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Villa Park",
             "at_mi": 5.5,
             "off_mi": 3.2,
@@ -148611,13 +148927,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 1837296119, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing La Mirada"
-          },
-          {
-            "name": "Santa Ana River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.2,
-            "spoken": "Crossing the Santa Ana River"
           },
           {
             "name": "Brea",
@@ -149728,6 +150037,16 @@
             "spoken": "Crossing the Ventura River"
           },
           {
+            "name": "Santa Clara River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 33.9,
+            "spoken": "Crossing the Santa Clara River",
+            "lat": 34.24251,
+            "lon": -119.19014,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 80210634 (Santa Clara River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Santa Paula",
             "at_mi": 34.6,
             "off_mi": 10.53,
@@ -149735,13 +150054,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150972549, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Santa Paula"
-          },
-          {
-            "name": "Santa Clara River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 35.3,
-            "spoken": "Crossing the Santa Clara River"
           },
           {
             "name": "Somis",
@@ -152166,8 +152478,11 @@
             "name": "Santa Ynez River",
             "category": "river",
             "kind": "point",
-            "at_mi": 30.0,
-            "spoken": "Crossing the Santa Ynez River"
+            "at_mi": 32.7,
+            "spoken": "Crossing the Santa Ynez River",
+            "lat": 34.60658,
+            "lon": -120.19129,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 326126630 (Santa Ynez River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Solvang",
@@ -155888,13 +156203,6 @@
             "spoken": "Passing Fetters Hot Springs"
           },
           {
-            "name": "Napa River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 32.0,
-            "spoken": "Crossing the Napa River"
-          },
-          {
             "name": "Yountville",
             "at_mi": 34.5,
             "off_mi": 9.95,
@@ -155902,6 +156210,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 6199249846, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Yountville"
+          },
+          {
+            "name": "Napa River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 39.0,
+            "spoken": "Crossing the Napa River",
+            "lat": 38.2439,
+            "lon": -122.28542,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 172364989 (Napa River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "American Canyon",
@@ -158111,8 +158429,11 @@
             "name": "Petaluma River",
             "category": "river",
             "kind": "point",
-            "at_mi": 12.8,
-            "spoken": "Crossing the Petaluma River"
+            "at_mi": 17.3,
+            "spoken": "Crossing the Petaluma River",
+            "lat": 38.22855,
+            "lon": -122.61559,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 35333193 (Petaluma River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Novato",
@@ -160130,13 +160451,6 @@
             ]
           },
           {
-            "name": "Sacramento River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 64.3,
-            "spoken": "Crossing the Sacramento River"
-          },
-          {
             "name": "Pittsburg",
             "at_mi": 66.7,
             "off_mi": 11.11,
@@ -160151,6 +160465,16 @@
             "kind": "point",
             "at_mi": 74.7,
             "spoken": "Rio Vista Museum ahead"
+          },
+          {
+            "name": "Sacramento River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 75.6,
+            "spoken": "Crossing the Sacramento River",
+            "lat": 38.15804,
+            "lon": -121.68219,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 426050436 (Sacramento River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Oakley",
@@ -160180,6 +160504,16 @@
             "spoken": "Passing Walnut Grove"
           },
           {
+            "name": "North Mokelumne River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 81.5,
+            "spoken": "Crossing the North Mokelumne River",
+            "lat": 38.1257,
+            "lon": -121.57965,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 435698839 (North Mokelumne River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Bethel Island",
             "at_mi": 82.5,
             "off_mi": 8.31,
@@ -160196,13 +160530,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150935621, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Galt"
-          },
-          {
-            "name": "North Mokelumne River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 92.6,
-            "spoken": "Crossing the North Mokelumne River"
           },
           {
             "name": "Lathrop",
@@ -161292,13 +161619,6 @@
             "spoken": "Passing Occidental"
           },
           {
-            "name": "Russian River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 7.9,
-            "spoken": "Crossing the Russian River"
-          },
-          {
             "name": "Forestville",
             "at_mi": 8.0,
             "off_mi": 6.51,
@@ -161316,6 +161636,16 @@
             "directions": [
               "reverse"
             ]
+          },
+          {
+            "name": "Russian River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 14.1,
+            "spoken": "Crossing the Russian River",
+            "lat": 38.59764,
+            "lon": -122.858,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 738119528 (Russian River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Guerneville",
@@ -161888,13 +162218,6 @@
             "spoken": "Manteca Historical Museum ahead"
           },
           {
-            "name": "Stanislaus River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 18.8,
-            "spoken": "Crossing the Stanislaus River"
-          },
-          {
             "name": "Ripon",
             "at_mi": 20.6,
             "off_mi": 0.12,
@@ -161902,6 +162225,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150981306, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Ripon"
+          },
+          {
+            "name": "Stanislaus River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 21.7,
+            "spoken": "Crossing the Stanislaus River",
+            "lat": 37.73027,
+            "lon": -121.11005,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 800890853 (Stanislaus River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Escalon",
@@ -162726,13 +163059,6 @@
             "spoken": "Passing Lathrop"
           },
           {
-            "name": "Mokelumne River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 18.2,
-            "spoken": "Crossing the Mokelumne River"
-          },
-          {
             "name": "Galt",
             "at_mi": 20.4,
             "off_mi": 7.16,
@@ -162749,6 +163075,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150976291, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Isleton"
+          },
+          {
+            "name": "Mokelumne River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 24.4,
+            "spoken": "Crossing the Mokelumne River",
+            "lat": 38.25489,
+            "lon": -121.44761,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 435698838 (Mokelumne River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Walnut Grove",
@@ -164465,13 +164801,6 @@
         ],
         "landmarks": [
           {
-            "name": "San Joaquin River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 9.5,
-            "spoken": "Crossing the San Joaquin River"
-          },
-          {
             "name": "Middle River",
             "category": "river",
             "kind": "point",
@@ -164486,6 +164815,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150948421, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lathrop"
+          },
+          {
+            "name": "San Joaquin River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 12.7,
+            "spoken": "Crossing the San Joaquin River",
+            "lat": 37.78552,
+            "lon": -121.30624,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 83155891 (San Joaquin River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Mountain House",
@@ -166359,13 +166698,6 @@
             "spoken": "Passing Manton"
           },
           {
-            "name": "Sacramento River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 96.96,
-            "spoken": "Crossing the Sacramento River"
-          },
-          {
             "name": "Millville",
             "at_mi": 99.84,
             "off_mi": 0.7,
@@ -166419,6 +166751,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 141037484, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Anderson"
+          },
+          {
+            "name": "Sacramento River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 110.6,
+            "spoken": "Crossing the Sacramento River",
+            "lat": 40.58599,
+            "lon": -122.36818,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 543477333 (Sacramento River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Shasta Lake",
@@ -167527,6 +167869,16 @@
         ],
         "landmarks": [
           {
+            "name": "Susan River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.6,
+            "spoken": "Crossing the Susan River",
+            "lat": 40.40277,
+            "lon": -120.63114,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 88896396 (Susan River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Johnstonville",
             "at_mi": 4.35,
             "off_mi": 0.34,
@@ -167534,13 +167886,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141032948, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Johnstonville"
-          },
-          {
-            "name": "Susan River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.23,
-            "spoken": "Crossing the Susan River"
           },
           {
             "name": "Janesville",
@@ -169977,13 +170322,6 @@
             "spoken": "Entering Leggett"
           },
           {
-            "name": "South Fork Eel River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 69.1,
-            "spoken": "Crossing the South Fork Eel River"
-          },
-          {
             "name": "Confusion Hill (northbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -169992,6 +170330,16 @@
             "directions": [
               "forward"
             ]
+          },
+          {
+            "name": "South Fork Eel River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 74.7,
+            "spoken": "Crossing the South Fork Eel River",
+            "lat": 39.92091,
+            "lon": -123.76362,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 91556156 (South Fork Eel River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Chandelier Drive-Thru Tree (southbound)",
@@ -170070,8 +170418,11 @@
             "name": "Eel River",
             "category": "river",
             "kind": "point",
-            "at_mi": 118.6,
-            "spoken": "Crossing the Eel River"
+            "at_mi": 127.9,
+            "spoken": "Crossing the Eel River",
+            "lat": 40.45632,
+            "lon": -124.06663,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 91616699 (Eel River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Scotia",
@@ -170102,6 +170453,16 @@
             ]
           },
           {
+            "name": "Van Duzen River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 136.3,
+            "spoken": "Crossing the Van Duzen River",
+            "lat": 40.53742,
+            "lon": -124.14729,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 91498420 (Van Duzen River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Ferndale",
             "at_mi": 143.8,
             "off_mi": 4.02,
@@ -170109,13 +170470,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 141042627, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ferndale"
-          },
-          {
-            "name": "Van Duzen River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 144.8,
-            "spoken": "Crossing the Van Duzen River"
           },
           {
             "name": "North Fork Elk River",
@@ -176428,6 +176782,16 @@
             "spoken": "Passing La Puente"
           },
           {
+            "name": "San Gabriel River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 70.5,
+            "spoken": "Crossing the San Gabriel River",
+            "lat": 34.06463,
+            "lon": -118.00449,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1044128330 (San Gabriel River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "South El Monte",
             "at_mi": 72.8,
             "off_mi": 1.19,
@@ -176444,13 +176808,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 1837339300, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Temple City"
-          },
-          {
-            "name": "San Gabriel River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 74.2,
-            "spoken": "Crossing the San Gabriel River"
           },
           {
             "name": "Rosemead",
@@ -177481,8 +177838,11 @@
             "name": "Tule River",
             "category": "river",
             "kind": "point",
-            "at_mi": 28.3,
-            "spoken": "Crossing the Tule River"
+            "at_mi": 30.1,
+            "spoken": "Crossing the Tule River",
+            "lat": 36.06031,
+            "lon": -119.03942,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 530453751 (Tule River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Terra Bella",
@@ -177494,6 +177854,16 @@
             "spoken": "Passing Terra Bella"
           },
           {
+            "name": "White River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 43.8,
+            "spoken": "Crossing the White River",
+            "lat": 35.86501,
+            "lon": -119.05233,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 75201740 (White River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Richgrove",
             "at_mi": 48.5,
             "off_mi": 3.05,
@@ -177501,13 +177871,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150981331, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Richgrove"
-          },
-          {
-            "name": "White River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 50.5,
-            "spoken": "Crossing the White River"
           },
           {
             "name": "McFarland",
@@ -178967,6 +179330,16 @@
             "spoken": "Passing Strathmore"
           },
           {
+            "name": "Tule River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 30.2,
+            "spoken": "Crossing the Tule River",
+            "lat": 36.06025,
+            "lon": -119.04016,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 530453751 (Tule River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Terra Bella",
             "at_mi": 37.1,
             "off_mi": 0.52,
@@ -178974,13 +179347,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150970218, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Terra Bella"
-          },
-          {
-            "name": "Tule River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 40.4,
-            "spoken": "Crossing the Tule River"
           },
           {
             "name": "Richgrove",
@@ -179013,8 +179379,11 @@
             "name": "Kern River",
             "category": "river",
             "kind": "point",
-            "at_mi": 69.9,
-            "spoken": "Crossing the Kern River"
+            "at_mi": 77.8,
+            "spoken": "Crossing the Kern River",
+            "lat": 35.39552,
+            "lon": -119.03088,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 75215322 (Kern River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Kern County Museum Historical Reference Library",
@@ -181022,8 +181391,11 @@
             "name": "Kings River",
             "category": "river",
             "kind": "point",
-            "at_mi": 45.1,
-            "spoken": "Crossing the Kings River"
+            "at_mi": 37.3,
+            "spoken": "Crossing the Kings River",
+            "lat": 36.18036,
+            "lon": -119.83449,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 74115709 (Kings River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Avenal",
@@ -181049,6 +181421,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150963647, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing San Miguel"
+          },
+          {
+            "name": "Salinas River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 106.7,
+            "spoken": "Crossing the Salinas River",
+            "lat": 35.64298,
+            "lon": -120.6839,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 72967853 (Salinas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Paso Robles",
@@ -181102,13 +181484,6 @@
             "directions": [
               "forward"
             ]
-          },
-          {
-            "name": "Salinas River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 126.8,
-            "spoken": "Crossing the Salinas River"
           },
           {
             "name": "The Madonna Inn (southbound)",
@@ -181239,13 +181614,6 @@
             "spoken": "Passing Oceano"
           },
           {
-            "name": "Santa Maria River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 153.4,
-            "spoken": "Crossing the Santa Maria River"
-          },
-          {
             "name": "Pismo Beach (northbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -181272,6 +181640,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150978092, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Guadalupe"
+          },
+          {
+            "name": "Santa Maria River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 164.3,
+            "spoken": "Crossing the Santa Maria River",
+            "lat": 34.99067,
+            "lon": -120.4339,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 401465458 (Santa Maria River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Orcutt",
@@ -183328,8 +183706,11 @@
             "name": "South Fork Eel River",
             "category": "river",
             "kind": "point",
-            "at_mi": 74.3,
-            "spoken": "Crossing the South Fork Eel River"
+            "at_mi": 74.1,
+            "spoken": "Crossing the South Fork Eel River",
+            "lat": 40.1824,
+            "lon": -123.77586,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 91627857 (South Fork Eel River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Miranda",
@@ -183360,15 +183741,11 @@
             "name": "Eel River",
             "category": "river",
             "kind": "point",
-            "at_mi": 103.1,
-            "spoken": "Crossing the Eel River"
-          },
-          {
-            "name": "Van Duzen River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 103.1,
-            "spoken": "Crossing the Van Duzen River"
+            "at_mi": 104.5,
+            "spoken": "Crossing the Eel River",
+            "lat": 40.45633,
+            "lon": -124.06663,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 91616699 (Eel River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Scotia",
@@ -183388,6 +183765,16 @@
             "directions": [
               "reverse"
             ]
+          },
+          {
+            "name": "Van Duzen River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 112.8,
+            "spoken": "Crossing the Van Duzen River",
+            "lat": 40.53743,
+            "lon": -124.1473,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 91498420 (Van Duzen River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ferndale",

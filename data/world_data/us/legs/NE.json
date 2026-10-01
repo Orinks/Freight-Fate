@@ -151,6 +151,16 @@
         ],
         "landmarks": [
           {
+            "name": "Loup River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.9,
+            "spoken": "Crossing the Loup River",
+            "lat": 41.41678,
+            "lon": -97.3682,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 192432338 (Loup River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Bellwood",
             "at_mi": 1.4,
             "off_mi": 8.2,
@@ -167,13 +177,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151363455, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Platte Center"
-          },
-          {
-            "name": "Loup River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 7.91,
-            "spoken": "Crossing the Loup River"
           },
           {
             "name": "Duncan",
@@ -1109,13 +1112,6 @@
             "spoken": "Passing Stanton"
           },
           {
-            "name": "Elkhorn River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 44.0,
-            "spoken": "Crossing the Elkhorn River"
-          },
-          {
             "name": "Battle Creek",
             "at_mi": 46.6,
             "off_mi": 8.81,
@@ -1123,6 +1119,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 6221537800, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Battle Creek"
+          },
+          {
+            "name": "Elkhorn River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 47.0,
+            "spoken": "Crossing the Elkhorn River",
+            "lat": 42.00312,
+            "lon": -97.4265,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 140061987 (Elkhorn River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Hadar",
@@ -1974,6 +1980,16 @@
             "spoken": "Passing Yutan"
           },
           {
+            "name": "Elkhorn River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 68.7,
+            "spoken": "Crossing the Elkhorn River",
+            "lat": 41.2635,
+            "lon": -96.26394,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 132742128 (Elkhorn River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Gretna",
             "at_mi": 69.98,
             "off_mi": 8.0,
@@ -1990,13 +2006,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151948423, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bennington"
-          },
-          {
-            "name": "Elkhorn River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 75.57,
-            "spoken": "Crossing the Elkhorn River"
           },
           {
             "name": "Papillion",
@@ -2633,6 +2642,16 @@
             "spoken": "Passing Doniphan"
           },
           {
+            "name": "North Channel Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 10.2,
+            "spoken": "Crossing the North Channel Platte River",
+            "lat": 40.82283,
+            "lon": -98.39803,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 397989533 (North Channel Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Alda",
             "at_mi": 12.3,
             "off_mi": 4.19,
@@ -2640,13 +2659,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151400862, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Alda"
-          },
-          {
-            "name": "North Channel Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 18.3,
-            "spoken": "Crossing the North Channel Platte River"
           },
           {
             "name": "Wood River",
@@ -3582,13 +3594,6 @@
             "spoken": "Passing Alda"
           },
           {
-            "name": "Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 8.2,
-            "spoken": "Crossing the Platte River"
-          },
-          {
             "name": "Wood River",
             "at_mi": 9.0,
             "off_mi": 11.61,
@@ -3605,6 +3610,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151696121, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Doniphan"
+          },
+          {
+            "name": "Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 11.7,
+            "spoken": "Crossing the Platte River",
+            "lat": 40.82496,
+            "lon": -98.33404,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 491544446 (Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Trumbull",
@@ -3777,6 +3792,16 @@
             "spoken": "Passing Seward"
           },
           {
+            "name": "Big Blue River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 77.8,
+            "spoken": "Crossing the Big Blue River",
+            "lat": 40.82188,
+            "lon": -97.06661,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 262587985 (Big Blue River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Milford",
             "at_mi": 78.9,
             "off_mi": 3.27,
@@ -3793,13 +3818,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151393520, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Garland"
-          },
-          {
-            "name": "Big Blue River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 84.4,
-            "spoken": "Crossing the Big Blue River"
           },
           {
             "name": "Pleasant Dale",
@@ -5627,13 +5645,6 @@
             ]
           },
           {
-            "name": "Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 10.9,
-            "spoken": "Crossing the Platte River"
-          },
-          {
             "name": "Amherst",
             "at_mi": 15.2,
             "off_mi": 10.82,
@@ -5650,6 +5661,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151433257, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Overton"
+          },
+          {
+            "name": "Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 18.4,
+            "spoken": "Crossing the Platte River",
+            "lat": 40.68278,
+            "lon": -99.37994,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 820342600 (Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Phelps County Historical Museum",
@@ -5740,6 +5761,16 @@
             "spoken": "Passing Republican City"
           },
           {
+            "name": "Republican River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 59.8,
+            "spoken": "Crossing the Republican River",
+            "lat": 40.08732,
+            "lon": -99.37267,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 446732719 (Republican River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Long Island",
             "at_mi": 66.0,
             "off_mi": 9.6,
@@ -5756,13 +5787,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151958536, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Naponee"
-          },
-          {
-            "name": "Republican River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 68.8,
-            "spoken": "Crossing the Republican River"
           },
           {
             "name": "Phillipsburg",
@@ -5792,6 +5816,16 @@
             "spoken": "Entering Glade"
           },
           {
+            "name": "North Fork Solomon River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 90.9,
+            "spoken": "Crossing the North Fork Solomon River",
+            "lat": 39.67356,
+            "lon": -99.30941,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 460386103 (North Fork Solomon River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Kirwin",
             "at_mi": 91.0,
             "off_mi": 9.94,
@@ -5799,20 +5833,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151533415, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kirwin"
-          },
-          {
-            "name": "North Fork Solomon River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 99.6,
-            "spoken": "Crossing the North Fork Solomon River"
-          },
-          {
-            "name": "South Fork Solomon River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 99.6,
-            "spoken": "Crossing the South Fork Solomon River"
           },
           {
             "name": "Woodston",
@@ -5831,6 +5851,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151325205, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Stockton"
+          },
+          {
+            "name": "South Fork Solomon River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 109.0,
+            "spoken": "Crossing the South Fork Solomon River",
+            "lat": 39.41678,
+            "lon": -99.2756,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 539368571 (South Fork Solomon River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Plainville",
@@ -7374,8 +7404,11 @@
             "name": "Platte River",
             "category": "river",
             "kind": "point",
-            "at_mi": 61.6,
-            "spoken": "Crossing the Platte River"
+            "at_mi": 64.1,
+            "spoken": "Crossing the Platte River",
+            "lat": 40.92192,
+            "lon": -100.18062,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 185448033 (Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pony Express Station (eastbound)",
@@ -7416,13 +7449,6 @@
             "spoken": "Passing Maxwell"
           },
           {
-            "name": "South Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 86.7,
-            "spoken": "Crossing the South Platte River"
-          },
-          {
             "name": "Fort Cody Trading Post (westbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -7431,6 +7457,16 @@
             "directions": [
               "forward"
             ]
+          },
+          {
+            "name": "South Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 98.2,
+            "spoken": "Crossing the South Platte River",
+            "lat": 41.11769,
+            "lon": -100.76364,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 146077684 (South Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "interchanges": [
@@ -8226,8 +8262,11 @@
             "name": "Platte River",
             "category": "river",
             "kind": "point",
-            "at_mi": 22.6,
-            "spoken": "Crossing the Platte River"
+            "at_mi": 23.7,
+            "spoken": "Crossing the Platte River",
+            "lat": 40.88576,
+            "lon": -100.09089,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 185460159 (Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Sod House Museum",
@@ -8288,8 +8327,11 @@
             "name": "South Platte River",
             "category": "river",
             "kind": "point",
-            "at_mi": 55.9,
-            "spoken": "Crossing the South Platte River"
+            "at_mi": 63.2,
+            "spoken": "Crossing the South Platte River",
+            "lat": 41.11769,
+            "lon": -100.76364,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 146077684 (South Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -11884,6 +11926,16 @@
             ]
           },
           {
+            "name": "Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Crossing the Platte River",
+            "lat": 41.0287,
+            "lon": -96.29497,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1346421393 (Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "South Bend",
             "at_mi": 30.1,
             "off_mi": 3.19,
@@ -11901,13 +11953,6 @@
             "directions": [
               "reverse"
             ]
-          },
-          {
-            "name": "Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 38.0,
-            "spoken": "Crossing the Platte River"
           },
           {
             "name": "Gretna",
@@ -11968,8 +12013,11 @@
             "name": "Missouri River",
             "category": "river",
             "kind": "point",
-            "at_mi": 64.0,
-            "spoken": "Crossing the Missouri River"
+            "at_mi": 57.9,
+            "spoken": "Crossing the Missouri River",
+            "lat": 41.2316,
+            "lon": -95.91087,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 133848663 (Missouri River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "McClelland",
@@ -11999,13 +12047,6 @@
             "spoken": "Passing Minden"
           },
           {
-            "name": "East Branche West Nishnabotna River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 90.6,
-            "spoken": "Crossing the East Branche West Nishnabotna River"
-          },
-          {
             "name": "Shelby",
             "at_mi": 92.0,
             "off_mi": 1.2,
@@ -12020,6 +12061,16 @@
             "kind": "point",
             "at_mi": 99.1,
             "spoken": "Walnut Creek Historical Museum ahead"
+          },
+          {
+            "name": "East Branche West Nishnabotna River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 99.2,
+            "spoken": "Crossing the East Branche West Nishnabotna River",
+            "lat": 41.49796,
+            "lon": -95.31266,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1085082346 (East Branche West Nishnabotna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Walnut",
@@ -12063,8 +12114,11 @@
             "name": "East Nishnabotna River",
             "category": "river",
             "kind": "point",
-            "at_mi": 118.5,
-            "spoken": "Crossing the East Nishnabotna River"
+            "at_mi": 118.7,
+            "spoken": "Crossing the East Nishnabotna River",
+            "lat": 41.49703,
+            "lon": -94.93446,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 691355282 (East Nishnabotna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Brayton",
@@ -14593,8 +14647,11 @@
             "name": "Big Blue River",
             "category": "river",
             "kind": "point",
-            "at_mi": 42.1,
-            "spoken": "Crossing the Big Blue River"
+            "at_mi": 42.5,
+            "spoken": "Crossing the Big Blue River",
+            "lat": 40.25644,
+            "lon": -96.74662,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 261191875 (Big Blue River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Homestead National Historical Park (northbound)",
@@ -14656,8 +14713,11 @@
             "name": "Horseshoe River",
             "category": "river",
             "kind": "point",
-            "at_mi": 69.1,
-            "spoken": "Crossing the Horseshoe River"
+            "at_mi": 71.5,
+            "spoken": "Crossing the Horseshoe River",
+            "lat": 39.89741,
+            "lon": -96.66689,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 594764667 (Horseshoe River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Herkimer",
@@ -14792,13 +14852,6 @@
             "spoken": "Passing Wakefield"
           },
           {
-            "name": "Republican River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 140.3,
-            "spoken": "Crossing the Republican River"
-          },
-          {
             "name": "Milford",
             "at_mi": 140.7,
             "off_mi": 0.63,
@@ -14806,6 +14859,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151916448, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Milford"
+          },
+          {
+            "name": "Republican River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 147.9,
+            "spoken": "Crossing the Republican River",
+            "lat": 39.07123,
+            "lon": -96.86696,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 73978485 (Republican River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ogden",
@@ -16471,6 +16534,16 @@
             "spoken": "Passing South Bend"
           },
           {
+            "name": "Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 29.8,
+            "spoken": "Crossing the Platte River",
+            "lat": 41.0287,
+            "lon": -96.29497,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1346421393 (Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Louisville",
             "at_mi": 30.1,
             "off_mi": 7.17,
@@ -16497,13 +16570,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151599283, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Memphis"
-          },
-          {
-            "name": "Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.0,
-            "spoken": "Crossing the Platte River"
           },
           {
             "name": "Gretna",
@@ -17514,6 +17580,16 @@
             "spoken": "Passing Hadar"
           },
           {
+            "name": "Elkhorn River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 2.8,
+            "spoken": "Crossing the Elkhorn River",
+            "lat": 42.00308,
+            "lon": -97.42667,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 140061987 (Elkhorn River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Battle Creek",
             "at_mi": 3.18,
             "off_mi": 8.8,
@@ -17530,13 +17606,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151784006, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Stanton"
-          },
-          {
-            "name": "Elkhorn River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 14.42,
-            "spoken": "Crossing the Elkhorn River"
           },
           {
             "name": "Madison",
@@ -17605,8 +17674,11 @@
             "name": "Loup River",
             "category": "river",
             "kind": "point",
-            "at_mi": 39.36,
-            "spoken": "Crossing the Loup River"
+            "at_mi": 47.1,
+            "spoken": "Crossing the Loup River",
+            "lat": 41.41679,
+            "lon": -97.3682,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 192432338 (Loup River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Bellwood",
@@ -18884,6 +18956,16 @@
             "spoken": "Passing Hadar"
           },
           {
+            "name": "North Fork Elkhorn River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 2.2,
+            "spoken": "Crossing the North Fork Elkhorn River",
+            "lat": 42.01835,
+            "lon": -97.38767,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 139742597 (North Fork Elkhorn River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Hoskins",
             "at_mi": 6.4,
             "off_mi": 6.49,
@@ -18900,20 +18982,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151784006, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Stanton"
-          },
-          {
-            "name": "North Fork Elkhorn River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 15.0,
-            "spoken": "Crossing the North Fork Elkhorn River"
-          },
-          {
-            "name": "Elkhorn River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 15.0,
-            "spoken": "Crossing the Elkhorn River"
           },
           {
             "name": "Pilger",
@@ -18950,6 +19018,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151773096, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering West Point"
+          },
+          {
+            "name": "Elkhorn River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 50.6,
+            "spoken": "Crossing the Elkhorn River",
+            "lat": 41.71849,
+            "lon": -96.70822,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 62196710 (Elkhorn River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Dodge",
@@ -20464,6 +20542,16 @@
             "spoken": "Passing Battle Creek"
           },
           {
+            "name": "North Fork Elkhorn River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 4.4,
+            "spoken": "Crossing the North Fork Elkhorn River",
+            "lat": 42.08461,
+            "lon": -97.42644,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 139742597 (North Fork Elkhorn River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Hadar",
             "at_mi": 5.75,
             "off_mi": 1.28,
@@ -20480,13 +20568,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151384853, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hoskins"
-          },
-          {
-            "name": "North Fork Elkhorn River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.36,
-            "spoken": "Crossing the North Fork Elkhorn River"
           },
           {
             "name": "Pierce",
@@ -20640,13 +20721,6 @@
             "spoken": "Entering Jackson"
           },
           {
-            "name": "Missouri River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 73.42,
-            "spoken": "Crossing the Missouri River"
-          },
-          {
             "name": "Big Sioux River",
             "category": "river",
             "kind": "point",
@@ -20688,6 +20762,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151395884, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sergeant Bluff"
+          },
+          {
+            "name": "Missouri River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 81.5,
+            "spoken": "Crossing the Missouri River",
+            "lat": 42.4875,
+            "lon": -96.41357,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 133850017 (Missouri River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "North Sioux City",
@@ -22054,6 +22138,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "South Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.6,
+            "spoken": "Crossing the South Platte River",
+            "lat": 41.11773,
+            "lon": -100.76401,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 146077684 (South Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Golden Spike Tower (northbound)",
             "category": "billboard_sign",
             "kind": "point",
@@ -22072,13 +22166,6 @@
             "directions": [
               "reverse"
             ]
-          },
-          {
-            "name": "South Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 15.1,
-            "spoken": "Crossing the South Platte River"
           },
           {
             "name": "Wellfleet",
@@ -22136,8 +22223,11 @@
             "name": "Republican River",
             "category": "river",
             "kind": "point",
-            "at_mi": 74.5,
-            "spoken": "Crossing the Republican River"
+            "at_mi": 68.6,
+            "spoken": "Crossing the Republican River",
+            "lat": 40.18743,
+            "lon": -100.61907,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 403398421 (Republican River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Danbury",
@@ -22605,8 +22695,11 @@
             "name": "South Platte River",
             "category": "river",
             "kind": "point",
-            "at_mi": 6.3,
-            "spoken": "Crossing the South Platte River"
+            "at_mi": 0.6,
+            "spoken": "Crossing the South Platte River",
+            "lat": 41.11773,
+            "lon": -100.76398,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 146077684 (South Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Fort Cody Trading Post (eastbound)",
@@ -23459,8 +23552,11 @@
             "name": "South Platte River",
             "category": "river",
             "kind": "point",
-            "at_mi": 8.9,
-            "spoken": "Crossing the South Platte River"
+            "at_mi": 0.8,
+            "spoken": "Crossing the South Platte River",
+            "lat": 41.11935,
+            "lon": -101.7142,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 146077684 (South Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Brule",
@@ -26292,20 +26388,22 @@
         "state_miles": [
           {
             "state": "Nebraska",
-            "miles": 461.7
+            "miles": 454.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           },
           {
             "state": "Wyoming",
-            "miles": 35.3
+            "miles": 42.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 461.7,
+            "at_mi": 454.6,
             "from_state": "Nebraska",
             "state": "Wyoming",
             "place": "Nebraska-Wyoming line on I-80",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. state boundary GeoJSON; at_mi = cumulative geometry distance at each boundary change, rescaled to leg miles; state miles = differences of those boundaries."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -28063,13 +28161,6 @@
             "spoken": "Passing Papillion"
           },
           {
-            "name": "Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.1,
-            "spoken": "Crossing the Platte River"
-          },
-          {
             "name": "Gretna",
             "at_mi": 20.1,
             "off_mi": 2.32,
@@ -28087,6 +28178,16 @@
             "directions": [
               "forward"
             ]
+          },
+          {
+            "name": "Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 28.3,
+            "spoken": "Crossing the Platte River",
+            "lat": 41.02891,
+            "lon": -96.29523,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1346421393 (Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "South Bend",
@@ -28189,13 +28290,6 @@
             "spoken": "Passing Aurora"
           },
           {
-            "name": "North Channel Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 129.7,
-            "spoken": "Crossing the North Channel Platte River"
-          },
-          {
             "name": "South Channel Platte River",
             "category": "river",
             "kind": "point",
@@ -28229,6 +28323,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151696121, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Doniphan"
+          },
+          {
+            "name": "North Channel Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 144.4,
+            "spoken": "Crossing the North Channel Platte River",
+            "lat": 40.82282,
+            "lon": -98.39809,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 397989533 (North Channel Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Stuhr Museum (eastbound)",
@@ -28461,13 +28565,6 @@
             ]
           },
           {
-            "name": "South Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 307.7,
-            "spoken": "Crossing the South Platte River"
-          },
-          {
             "name": "Paxton",
             "at_mi": 309.3,
             "off_mi": 0.89,
@@ -28514,6 +28611,16 @@
             "directions": [
               "reverse"
             ]
+          },
+          {
+            "name": "South Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 352.8,
+            "spoken": "Crossing the South Platte River",
+            "lat": 41.0287,
+            "lon": -102.16593,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 146077684 (South Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Julesburg",
@@ -30552,6 +30659,16 @@
             "spoken": "Approaching Coyote Pass"
           },
           {
+            "name": "North Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 3.9,
+            "spoken": "Crossing the North Platte River",
+            "lat": 41.83904,
+            "lon": -103.63554,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 246282423 (North Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Minatare",
             "at_mi": 5.0,
             "off_mi": 6.53,
@@ -30568,13 +30685,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151502815, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Melbeta"
-          },
-          {
-            "name": "North Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 14.5,
-            "spoken": "Crossing the North Platte River"
           },
           {
             "name": "Dix",
@@ -31561,6 +31671,16 @@
             "spoken": "Approaching Coyote Pass"
           },
           {
+            "name": "North Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 3.9,
+            "spoken": "Crossing the North Platte River",
+            "lat": 41.83904,
+            "lon": -103.63554,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 246282423 (North Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Minatare",
             "at_mi": 5.0,
             "off_mi": 6.53,
@@ -31577,13 +31697,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151502815, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Melbeta"
-          },
-          {
-            "name": "North Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 10.3,
-            "spoken": "Crossing the North Platte River"
           },
           {
             "name": "Plains Historical Museum",

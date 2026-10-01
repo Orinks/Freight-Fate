@@ -758,8 +758,11 @@
             "name": "Agua Fria River",
             "category": "river",
             "kind": "point",
-            "at_mi": 24.3,
-            "spoken": "Crossing the Agua Fria River"
+            "at_mi": 23.3,
+            "spoken": "Crossing the Agua Fria River",
+            "lat": 33.45764,
+            "lon": -112.33346,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 102864452 (Agua Fria River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "El Mirage",
@@ -1790,6 +1793,16 @@
             ]
           },
           {
+            "name": "Colorado River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 35.0,
+            "spoken": "Crossing the Colorado River",
+            "lat": 34.71729,
+            "lon": -114.48709,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1456602134 (Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Golden Shores",
             "at_mi": 35.69,
             "off_mi": 4.31,
@@ -1797,13 +1810,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 6186810171, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Golden Shores"
-          },
-          {
-            "name": "Colorado River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.43,
-            "spoken": "Crossing the Colorado River"
           },
           {
             "name": "Oatman burros (from Lake Havasu City)",
@@ -3738,8 +3744,11 @@
             "name": "Verde River",
             "category": "river",
             "kind": "point",
-            "at_mi": 7.2,
-            "spoken": "Crossing the Verde River"
+            "at_mi": 3.1,
+            "spoken": "Crossing the Verde River",
+            "lat": 34.58677,
+            "lon": -111.87919,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 502237931 (Verde River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cornville",
@@ -4746,8 +4755,11 @@
             "name": "East Verde River",
             "category": "river",
             "kind": "point",
-            "at_mi": 49.9,
-            "spoken": "Crossing the East Verde River"
+            "at_mi": 52.0,
+            "spoken": "Crossing the East Verde River",
+            "lat": 34.3013,
+            "lon": -111.35796,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 300593216 (East Verde River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Beaver Valley Estates",
@@ -6390,8 +6402,11 @@
             "name": "Verde River",
             "category": "river",
             "kind": "point",
-            "at_mi": 2.5,
-            "spoken": "Crossing the Verde River"
+            "at_mi": 0.6,
+            "spoken": "Crossing the Verde River",
+            "lat": 34.73913,
+            "lon": -111.99937,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 502237931 (Verde River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cornville",
@@ -7042,6 +7057,16 @@
             "spoken": "Passing Tombstone"
           },
           {
+            "name": "San Pedro River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 45.1,
+            "spoken": "Crossing the San Pedro River",
+            "lat": 31.55193,
+            "lon": -110.13849,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 428982358 (San Pedro River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Miracle Valley",
             "at_mi": 46.4,
             "off_mi": 11.27,
@@ -7049,13 +7074,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150974045, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Miracle Valley"
-          },
-          {
-            "name": "San Pedro River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 48.2,
-            "spoken": "Crossing the San Pedro River"
           },
           {
             "name": "Huachuca City",
@@ -8433,6 +8451,16 @@
             "spoken": "Passing Tombstone"
           },
           {
+            "name": "San Pedro River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 41.2,
+            "spoken": "Crossing the San Pedro River",
+            "lat": 31.55193,
+            "lon": -110.13849,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 428982358 (San Pedro River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Miracle Valley",
             "at_mi": 42.35,
             "off_mi": 11.27,
@@ -8451,20 +8479,6 @@
             "spoken": "Passing Nicksville"
           },
           {
-            "name": "San Pedro River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 47.92,
-            "spoken": "Crossing the San Pedro River"
-          },
-          {
-            "name": "Babacomari River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 47.92,
-            "spoken": "Crossing the Babacomari River"
-          },
-          {
             "name": "Sierra Vista Estates",
             "at_mi": 48.02,
             "off_mi": 4.92,
@@ -8481,6 +8495,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150950608, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Huachuca City"
+          },
+          {
+            "name": "Babacomari River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 57.9,
+            "spoken": "Crossing the Babacomari River",
+            "lat": 31.64519,
+            "lon": -110.34037,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 487472447 (Babacomari River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Whetstone",
@@ -13402,13 +13426,6 @@
             "spoken": "Entering Coconino National Forest"
           },
           {
-            "name": "Little Colorado River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 39.5,
-            "spoken": "Crossing the Little Colorado River"
-          },
-          {
             "name": "Cameron Trading Post (from Flagstaff)",
             "category": "billboard_sign",
             "kind": "point",
@@ -13424,6 +13441,16 @@
             "kind": "point",
             "at_mi": 52.0,
             "spoken": "Museum ahead: old Cameron Trading Post"
+          },
+          {
+            "name": "Little Colorado River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 52.7,
+            "spoken": "Crossing the Little Colorado River",
+            "lat": 35.8774,
+            "lon": -111.41153,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 704397251 (Little Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cameron Trading Post (from Page)",
@@ -16209,8 +16236,11 @@
             "name": "Salt River",
             "category": "river",
             "kind": "point",
-            "at_mi": 32.0,
-            "spoken": "Crossing the Salt River"
+            "at_mi": 39.9,
+            "spoken": "Crossing the Salt River",
+            "lat": 33.79784,
+            "lon": -110.50423,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 337673852 (Salt River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lake of the Woods",
@@ -17846,13 +17876,6 @@
             ]
           },
           {
-            "name": "Puerco River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.5,
-            "spoken": "Crossing the Puerco River"
-          },
-          {
             "name": "Nahata Dziil",
             "at_mi": 51.3,
             "off_mi": 8.11,
@@ -17896,6 +17919,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151480715, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Lupton"
+          },
+          {
+            "name": "Puerco River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 74.0,
+            "spoken": "Crossing the Puerco River",
+            "lat": 35.37364,
+            "lon": -109.03494,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 481681885 (Puerco River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Oak Springs",
@@ -19425,13 +19458,6 @@
             ]
           },
           {
-            "name": "Colorado River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.6,
-            "spoken": "Crossing the Colorado River"
-          },
-          {
             "name": "Golden Shores",
             "at_mi": 49.0,
             "off_mi": 4.3,
@@ -19439,6 +19465,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 6186810171, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Golden Shores"
+          },
+          {
+            "name": "Colorado River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 49.7,
+            "spoken": "Crossing the Colorado River",
+            "lat": 34.71736,
+            "lon": -114.48712,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1376658370 (Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Needles Regional Museum",
@@ -22734,8 +22770,11 @@
             "name": "Colorado River",
             "category": "river",
             "kind": "point",
-            "at_mi": 70.5,
-            "spoken": "Crossing the Colorado River"
+            "at_mi": 70.4,
+            "spoken": "Crossing the Colorado River",
+            "lat": 36.01251,
+            "lon": -114.74135,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1421140840 (Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Boulder City",
@@ -26477,8 +26516,11 @@
             "name": "Little Colorado River",
             "category": "river",
             "kind": "point",
-            "at_mi": 113.0,
-            "spoken": "Crossing the Little Colorado River"
+            "at_mi": 119.9,
+            "spoken": "Crossing the Little Colorado River",
+            "lat": 34.89657,
+            "lon": -110.15946,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 76790291 (Little Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Jack Rabbit Trading Post (from Payson)",
@@ -28679,15 +28721,11 @@
             "name": "New River",
             "category": "river",
             "kind": "point",
-            "at_mi": 35.6,
-            "spoken": "Crossing the New River"
-          },
-          {
-            "name": "Agua Fria River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 35.6,
-            "spoken": "Crossing the Agua Fria River"
+            "at_mi": 34.0,
+            "spoken": "Crossing the New River",
+            "lat": 33.90579,
+            "lon": -112.14588,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 102901200 (New River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Black Canyon City",
@@ -28697,6 +28735,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150932977, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Black Canyon City"
+          },
+          {
+            "name": "Agua Fria River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 45.9,
+            "spoken": "Crossing the Agua Fria River",
+            "lat": 34.07132,
+            "lon": -112.14076,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 191667934 (Agua Fria River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Spring Valley",
@@ -29658,8 +29706,11 @@
             "name": "Salt River",
             "category": "river",
             "kind": "point",
-            "at_mi": 4.9,
-            "spoken": "Crossing the Salt River"
+            "at_mi": 5.0,
+            "spoken": "Crossing the Salt River",
+            "lat": 33.41856,
+            "lon": -112.01812,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 936578425 (Salt River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Paradise Valley",
@@ -29692,8 +29743,11 @@
             "name": "Gila River",
             "category": "river",
             "kind": "point",
-            "at_mi": 29.6,
-            "spoken": "Crossing the Gila River"
+            "at_mi": 27.5,
+            "spoken": "Crossing the Gila River",
+            "lat": 33.14897,
+            "lon": -111.86587,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 73106700 (Gila River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Stotonic",
@@ -30960,6 +31014,16 @@
             "spoken": "Passing Tolleson"
           },
           {
+            "name": "Salt River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 6.4,
+            "spoken": "Crossing the Salt River",
+            "lat": 33.41832,
+            "lon": -112.01857,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 936578425 (Salt River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Paradise Valley",
             "at_mi": 7.7,
             "off_mi": 8.56,
@@ -30976,13 +31040,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150970836, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Guadalupe"
-          },
-          {
-            "name": "Salt River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.1,
-            "spoken": "Crossing the Salt River"
           },
           {
             "name": "Mesa Contemporary Arts Museum",
@@ -34279,18 +34336,21 @@
             "spoken": "Entering Ehrenberg"
           },
           {
+            "name": "Colorado River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 145.8,
+            "spoken": "Crossing the Colorado River",
+            "lat": 33.60486,
+            "lon": -114.5308,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 202463451 (Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Palo Verde Historical Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 151.1,
             "spoken": "Palo Verde Historical Museum ahead"
-          },
-          {
-            "name": "Colorado River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 159.6,
-            "spoken": "Crossing the Colorado River"
           },
           {
             "name": "Chuckwalla National Monument",
@@ -34390,15 +34450,11 @@
             "name": "Whitewater River",
             "category": "river",
             "kind": "point",
-            "at_mi": 274.3,
-            "spoken": "Crossing the Whitewater River"
-          },
-          {
-            "name": "San Gorgonio River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 274.3,
-            "spoken": "Crossing the San Gorgonio River"
+            "at_mi": 273.6,
+            "spoken": "Crossing the Whitewater River",
+            "lat": 33.92267,
+            "lon": -116.63605,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 229571024 (Whitewater River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Hadley's Date Shakes (westbound)",
@@ -34446,6 +34502,16 @@
             "directions": [
               "reverse"
             ]
+          },
+          {
+            "name": "San Gorgonio River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 285.1,
+            "spoken": "Crossing the San Gorgonio River",
+            "lat": 33.93141,
+            "lon": -116.8286,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 859725886 (San Gorgonio River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Banning",
@@ -34522,6 +34588,16 @@
             "spoken": "Passing Loma Linda"
           },
           {
+            "name": "Santa Ana River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 316.4,
+            "spoken": "Crossing the Santa Ana River",
+            "lat": 34.06508,
+            "lon": -117.30206,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 422097184 (Santa Ana River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Little Pigeon Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -34554,13 +34630,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150950291, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Bloomington"
-          },
-          {
-            "name": "Santa Ana River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 329.3,
-            "spoken": "Crossing the Santa Ana River"
           },
           {
             "name": "Upland",
@@ -36182,6 +36251,16 @@
             "spoken": "Passing Fountain Hills"
           },
           {
+            "name": "Verde River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 30.1,
+            "spoken": "Crossing the Verde River",
+            "lat": 33.5808,
+            "lon": -111.67143,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 194870698 (Verde River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Fort McDowell",
             "at_mi": 30.6,
             "off_mi": 3.83,
@@ -36189,13 +36268,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150943188, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fort McDowell"
-          },
-          {
-            "name": "Verde River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 32.9,
-            "spoken": "Crossing the Verde River"
           },
           {
             "name": "Tonto National Forest",
@@ -37683,8 +37755,11 @@
             "name": "Verde River",
             "category": "river",
             "kind": "point",
-            "at_mi": 37.9,
-            "spoken": "Crossing the Verde River"
+            "at_mi": 42.4,
+            "spoken": "Crossing the Verde River",
+            "lat": 34.58661,
+            "lon": -111.8795,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 502237931 (Verde River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cornville",
@@ -39279,6 +39354,16 @@
             "spoken": "Passing Cordes Lakes"
           },
           {
+            "name": "Agua Fria River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 54.1,
+            "spoken": "Crossing the Agua Fria River",
+            "lat": 34.07138,
+            "lon": -112.14109,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 191667934 (Agua Fria River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Black Canyon City",
             "at_mi": 54.3,
             "off_mi": 0.54,
@@ -39291,15 +39376,11 @@
             "name": "New River",
             "category": "river",
             "kind": "point",
-            "at_mi": 60.4,
-            "spoken": "Crossing the New River"
-          },
-          {
-            "name": "Agua Fria River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 60.4,
-            "spoken": "Crossing the Agua Fria River"
+            "at_mi": 66.2,
+            "spoken": "Crossing the New River",
+            "lat": 33.90562,
+            "lon": -112.14616,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 102901200 (New River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Anthem",
@@ -40504,8 +40585,11 @@
             "name": "Little Colorado River",
             "category": "river",
             "kind": "point",
-            "at_mi": 41.2,
-            "spoken": "Crossing the Little Colorado River"
+            "at_mi": 46.6,
+            "spoken": "Crossing the Little Colorado River",
+            "lat": 34.89657,
+            "lon": -110.15946,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 76790291 (Little Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Joseph City",
@@ -41568,13 +41652,6 @@
             "spoken": "Passing Nicksville"
           },
           {
-            "name": "Babacomari River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 7.14,
-            "spoken": "Crossing the Babacomari River"
-          },
-          {
             "name": "Huachuca City",
             "at_mi": 7.51,
             "off_mi": 0.09,
@@ -41582,6 +41659,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150950608, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Huachuca City"
+          },
+          {
+            "name": "Babacomari River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 9.7,
+            "spoken": "Crossing the Babacomari River",
+            "lat": 31.64516,
+            "lon": -110.34044,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 487472447 (Babacomari River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Whetstone",
@@ -41614,8 +41701,11 @@
             "name": "Santa Cruz River",
             "category": "river",
             "kind": "point",
-            "at_mi": 55.63,
-            "spoken": "Crossing the Santa Cruz River"
+            "at_mi": 58.6,
+            "spoken": "Crossing the Santa Cruz River",
+            "lat": 31.38736,
+            "lon": -110.87447,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 386576624 (Santa Cruz River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -42490,13 +42580,6 @@
             ]
           },
           {
-            "name": "Santa Cruz River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 8.43,
-            "spoken": "Crossing the Santa Cruz River"
-          },
-          {
             "name": "Pascua Pueblo",
             "at_mi": 8.83,
             "off_mi": 4.59,
@@ -42504,6 +42587,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 9435835019, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Pascua Pueblo"
+          },
+          {
+            "name": "Santa Cruz River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 8.9,
+            "spoken": "Crossing the Santa Cruz River",
+            "lat": 32.10408,
+            "lon": -110.99312,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 1004994385 (Santa Cruz River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Mission San Xavier del Bac (from Nogales)",
@@ -44090,8 +44183,11 @@
             "name": "Babacomari River",
             "category": "river",
             "kind": "point",
-            "at_mi": 66.66,
-            "spoken": "Crossing the Babacomari River"
+            "at_mi": 66.4,
+            "spoken": "Crossing the Babacomari River",
+            "lat": 31.6452,
+            "lon": -110.34036,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 487472447 (Babacomari River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Huachuca City",
@@ -44826,8 +44922,11 @@
             "name": "Little Colorado River",
             "category": "river",
             "kind": "point",
-            "at_mi": 4.1,
-            "spoken": "Crossing the Little Colorado River"
+            "at_mi": 3.1,
+            "spoken": "Crossing the Little Colorado River",
+            "lat": 35.01162,
+            "lon": -110.65217,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 76227022 (Little Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Jack Rabbit Trading Post",
@@ -45671,8 +45770,11 @@
             "name": "Gila River",
             "category": "river",
             "kind": "point",
-            "at_mi": 123.2,
-            "spoken": "Crossing the Gila River"
+            "at_mi": 145.4,
+            "spoken": "Crossing the Gila River",
+            "lat": 33.33236,
+            "lon": -112.62336,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 52508672 (Gila River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Waddell",
@@ -45691,6 +45793,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150979227, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Litchfield Park"
+          },
+          {
+            "name": "Agua Fria River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 169.1,
+            "spoken": "Crossing the Agua Fria River",
+            "lat": 33.45764,
+            "lon": -112.33346,
+            "source": "derived 2026-10-01: crossing of OSM waterway way 102864452 (Agua Fria River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "El Mirage",
@@ -45718,13 +45830,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150974590, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sun City"
-          },
-          {
-            "name": "Agua Fria River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 172.7,
-            "spoken": "Crossing the Agua Fria River"
           },
           {
             "name": "Tolleson",
