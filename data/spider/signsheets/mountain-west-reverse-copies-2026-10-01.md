@@ -233,3 +233,121 @@ westbound.
 - leg: salt_lake_city_ut_us -> san_francisco_ca_us
 - at_mi: 85.9
 - spoken: Billboard: The Tree of Utah stands ahead on the salt flats, an eighty-seven-foot concrete tree sprouting from the middle of nowhere. How do you suppose this happened?
+
+## Arizona, Interstate 40
+
+Meteor Crater and Two Guns were signed only eastbound on the Flagstaff to
+Winslow leg, the Jack Rabbit and the Wigwam Motel only eastbound on Winslow
+to Holbrook, and Delgadillo's Snow Cap only westbound on Flagstaff to
+Kingman. These add the other direction and the through Albuquerque to
+Phoenix leg both ways, and the Payson leg that runs I-40 between Holbrook
+and Winslow. Every line says "ahead" or names the town, and each stands
+before its place in its own direction.
+
+### Meteor Crater (from Winslow)
+- treatment: billboard
+- leg: winslow_az_us -> flagstaff_az_us
+- at_mi: 10.8
+- spoken: Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger.
+
+### Meteor Crater (from Albuquerque)
+- treatment: billboard
+- leg: albuquerque_nm_us -> phoenix_az_us
+- at_mi: 275.5
+- spoken: Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger.
+
+### Meteor Crater (from Phoenix)
+- treatment: billboard
+- leg: phoenix_az_us -> albuquerque_nm_us
+- at_mi: 172.5
+- spoken: Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger.
+
+### Two Guns (from Winslow)
+- treatment: billboard
+- leg: winslow_az_us -> flagstaff_az_us
+- at_mi: 15.0
+- spoken: Billboard: The ghost town of Two Guns is ahead. Its stone ruins, old zoo and canyon are on private land now, posted against visitors, with enough Route sixty-six legends to make every abandoned wall suspicious.
+
+### Two Guns (from Albuquerque)
+- treatment: billboard
+- leg: albuquerque_nm_us -> phoenix_az_us
+- at_mi: 279.7
+- spoken: Billboard: The ghost town of Two Guns is ahead. Its stone ruins, old zoo and canyon are on private land now, posted against visitors, with enough Route sixty-six legends to make every abandoned wall suspicious.
+
+### Two Guns (from Phoenix)
+- treatment: billboard
+- leg: phoenix_az_us -> albuquerque_nm_us
+- at_mi: 168.3
+- spoken: Billboard: The ghost town of Two Guns is ahead. Its stone ruins, old zoo and canyon are on private land now, posted against visitors, with enough Route sixty-six legends to make every abandoned wall suspicious.
+
+### Jack Rabbit Trading Post (from Holbrook)
+- treatment: billboard
+- leg: holbrook_az_us -> winslow_az_us
+- at_mi: 11.1
+- spoken: Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.
+
+### Jack Rabbit Trading Post (from Albuquerque)
+- treatment: billboard
+- leg: albuquerque_nm_us -> phoenix_az_us
+- at_mi: 240.9
+- spoken: Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.
+
+### Jack Rabbit Trading Post (from Phoenix)
+- treatment: billboard
+- leg: phoenix_az_us -> albuquerque_nm_us
+- at_mi: 204.9
+- spoken: Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.
+
+### Jack Rabbit Trading Post (from Payson)
+- treatment: billboard
+- leg: payson_az_us -> winslow_az_us
+- at_mi: 129.1
+- spoken: Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.
+
+### Jack Rabbit Trading Post (from Winslow)
+- treatment: billboard
+- leg: winslow_az_us -> payson_az_us
+- at_mi: 3.8
+- spoken: Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.
+
+### Wigwam Motel (from Gallup)
+- treatment: billboard
+- leg: gallup_nm_us -> holbrook_az_us
+- at_mi: 86.0
+- spoken: Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?
+
+### Wigwam Motel (from Show Low)
+- treatment: billboard
+- leg: show_low_az_us -> holbrook_az_us
+- at_mi: 38.0
+- spoken: Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?
+
+### Wigwam Motel (from Albuquerque)
+- treatment: billboard
+- leg: albuquerque_nm_us -> phoenix_az_us
+- at_mi: 223.3
+- spoken: Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?
+
+### Wigwam Motel (from Phoenix)
+- treatment: billboard
+- leg: phoenix_az_us -> albuquerque_nm_us
+- at_mi: 225.1
+- spoken: Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?
+
+### Wigwam Motel (from Payson)
+- treatment: billboard
+- leg: payson_az_us -> winslow_az_us
+- at_mi: 110.7
+- spoken: Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?
+
+### Wigwam Motel (from Winslow)
+- treatment: billboard
+- leg: winslow_az_us -> payson_az_us
+- at_mi: 23.9
+- spoken: Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?
+
+### Delgadillo's Snow Cap (from Kingman)
+- treatment: billboard
+- leg: kingman_az_us -> flagstaff_az_us
+- at_mi: 64.0
+- spoken: Billboard: Delgadillo's Snow Cap is ahead in Seligman. It serves burgers, shakes, fake mustard, practical jokes, and a menu delivered by people who consider confusion part of the service.

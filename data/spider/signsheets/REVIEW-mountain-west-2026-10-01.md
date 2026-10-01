@@ -2,8 +2,8 @@
 
 Drafts for the owner's review; nothing here is baked. Sheets so far:
 `nebraska-2026-10-01.md`, `wyoming-2026-10-01.md`,
-`montana-2026-10-01.md`, `utah-2026-10-01.md`, and
-`mountain-west-reverse-copies-2026-10-01.md`.
+`montana-2026-10-01.md`, `utah-2026-10-01.md`, `arizona-2026-10-01.md`,
+and `mountain-west-reverse-copies-2026-10-01.md`.
 
 ## Counts
 
@@ -11,9 +11,10 @@ Drafts for the owner's review; nothing here is baked. Sheets so far:
 - Wyoming: 11 attractions, 83 signs, 11 new lines.
 - Montana: 13 attractions, 51 signs, 13 new lines.
 - Utah: 12 attractions, 84 signs, 12 new lines.
+- Arizona: 19 attractions, 68 signs, 19 new lines.
 - Reused-copy signs (older approved copy, other directions and sibling
-  legs): 34, in Nebraska (17), Montana (8) and Utah (9).
-- Total so far: 46 attractions, 264 new-copy signs, 46 new lines, 34
+  legs): 52, in Nebraska (17), Montana (8), Utah (9) and Arizona (18).
+- Total so far: 65 attractions, 332 new-copy signs, 65 new lines, 52
   reused-copy signs.
 
 Every sheet dry-runs clean through `tools/bake_billboards.py` (no
@@ -239,3 +240,81 @@ Heber Valley Railroad
 John Wesley Powell River History Museum
 
 46. Billboard: The John Wesley Powell River History Museum, ahead in Green River. In eighteen sixty-nine, a one-armed major boated these unmapped canyons. Then he mapped them.
+
+### Arizona
+
+Petrified Forest National Park
+
+47. Billboard: Petrified Forest National Park, next exit, with trees turned to stone two hundred twenty-five million years ago. Thieves keep mailing pieces back.
+
+Walnut Canyon National Monument
+
+48. Billboard: Walnut Canyon National Monument, next exit. Twenty-five cliff dwelling rooms down a trail that drops a hundred eighty-five feet. The climb back is included.
+
+Lowell Observatory
+
+49. Billboard: Lowell Observatory, ahead in Flagstaff. Pluto was found here in nineteen thirty. It has since been demoted, and the observatory took it well.
+
+Bearizona
+
+50. Billboard: Bearizona, ahead in Williams. Drive through a pine forest past black bears, wolves and bison. Windows up; the bears have no manners.
+
+Montezuma Castle National Monument
+
+51. Billboard: Montezuma Castle National Monument, ahead near Camp Verde. A five-story cliff dwelling ninety feet up. Montezuma never lived there, and it is not a castle.
+
+Sunset Crater Volcano National Monument
+
+52. Billboard: Sunset Crater Volcano National Monument, ahead. It last erupted around the year ten eighty-five and has been quiet since. Keep it that way.
+
+Cameron Trading Post
+
+53. Billboard: Cameron Trading Post, ahead, trading since nineteen sixteen beside the Little Colorado River gorge. The Navajo taco covers the whole plate.
+
+Horseshoe Bend
+
+54. Billboard: Horseshoe Bend, ahead before Page. A short trail ends a thousand feet above a hairpin loop of the Colorado River. Your hairpin turns are smaller.
+
+Pima Air and Space Museum
+
+55. Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.
+
+Rooster Cogburn Ostrich Ranch
+
+56. Billboard: Rooster Cogburn Ostrich Ranch, next exit at Picacho Peak. Feed ostriches, goats, deer and even stingrays. The ostriches do not wait their turn.
+
+Kartchner Caverns State Park
+
+57. Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.
+
+Rex Allen Arizona Cowboy Museum
+
+58. Billboard: The Rex Allen Arizona Cowboy Museum, ahead in Willcox. He sang, rode Koko through nineteen Westerns, and narrated for Disney. Koko gets a memorial too.
+
+Titan Missile Museum
+
+59. Billboard: The Titan Missile Museum, next exit at Sahuarita. An inert Titan Two stands in its silo, with a hole cut in the nose to prove it.
+
+Mission San Xavier del Bac
+
+60. Billboard: Mission San Xavier del Bac, ahead. Built between seventeen eighty-three and seventeen ninety-seven, the White Dove of the Desert still serves its parish.
+
+Hi Jolly's tomb
+
+61. Billboard: Hi Jolly's tomb, ahead in Quartzsite. A stone pyramid topped with a copper camel, for the Army's camel driver. The Army really tried camels.
+
+Yuma Territorial Prison State Historic Park
+
+62. Billboard: Yuma Territorial Prison State Historic Park, ahead. More than three thousand inmates from eighteen seventy-six to nineteen oh-nine. Then the high school moved in.
+
+London Bridge
+
+63. Billboard: London Bridge, ahead in Lake Havasu City, bought in nineteen sixty-eight and rebuilt in Arizona. The buyer swore it was the bridge he wanted.
+
+Tonto Natural Bridge State Park
+
+64. Billboard: Tonto Natural Bridge State Park, ahead, probably the world's largest travertine bridge, a hundred eighty-three feet high. It is rated for hikers only.
+
+Oatman
+
+65. Billboard: Oatman, north of Topock on old Route sixty-six. Wild burros run the main street and expect to be fed. They outrank the cars.
