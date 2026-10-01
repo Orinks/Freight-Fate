@@ -17013,7 +17013,7 @@
             "at_mi": 26.7,
             "from_state": "Illinois",
             "state": "Indiana",
-            "place": "Illinois-Indiana line on I-65",
+            "place": "the I-65 state line south of Hammond",
             "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],

@@ -1888,7 +1888,7 @@
             "at_mi": 107.6,
             "from_state": "Pennsylvania",
             "state": "Maryland",
-            "place": "Pennsylvania-Maryland line on US-222",
+            "place": "Pennsylvania-Maryland line on I-95",
             "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
@@ -9188,14 +9188,14 @@
             "at_mi": 23.5,
             "from_state": "Pennsylvania",
             "state": "New Jersey",
-            "place": "Pennsylvania-New Jersey line on I-78",
+            "place": "Pennsylvania-New Jersey line on I-95",
             "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "at_mi": 103.6,
             "from_state": "New Jersey",
             "state": "New York",
-            "place": "New Jersey-New York line on I-78",
+            "place": "New Jersey-New York line on I-95",
             "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
@@ -35836,8 +35836,8 @@
             "at_mi": 96.9,
             "from_state": "Pennsylvania",
             "state": "Delaware",
-            "place": "Pennsylvania-Delaware line on I-76",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
+            "place": "Pennsylvania-Delaware line on US-202",
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/.; place's road read from OpenStreetMap way 1066222666 ref"
           }
         ],
         "lane_segments": [

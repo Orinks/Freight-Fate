@@ -13157,14 +13157,14 @@
             "at_mi": 70.4,
             "from_state": "South Dakota",
             "state": "Wyoming",
-            "place": "South Dakota-Wyoming line on US-212",
+            "place": "South Dakota-Wyoming line on I-90",
             "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "at_mi": 91.2,
             "from_state": "Wyoming",
             "state": "Montana",
-            "place": "Wyoming-Montana line on US-212",
+            "place": "Wyoming-Montana line on I-90",
             "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],

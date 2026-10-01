@@ -16948,7 +16948,7 @@
             "at_mi": 252.5,
             "from_state": "Colorado",
             "state": "New Mexico",
-            "place": "Colorado-New Mexico line on US-285",
+            "place": "Colorado-New Mexico line on I-25",
             "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
@@ -19906,7 +19906,7 @@
             "at_mi": 287.3,
             "from_state": "Colorado",
             "state": "Utah",
-            "place": "Colorado-Utah line on US-40",
+            "place": "Colorado-Utah line near Cisco",
             "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],

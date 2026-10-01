@@ -27251,7 +27251,7 @@
             "at_mi": 70.5,
             "from_state": "Kansas",
             "state": "Nebraska",
-            "place": "Kansas-Nebraska line on US-75",
+            "place": "Kansas-Nebraska line on I-70",
             "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],

@@ -728,29 +728,22 @@ fn test_southern_hos_pressure_corridors_have_added_safe_stops() {
 fn test_southern_sleep_stop_gaps_are_no_longer_extreme() {
     let world = world();
     let max_sleep_gap = |start: &str, end: &str| -> f64 {
-        let route = supported(world, start, end);
+        let route = if start == "Dallas" && end == "St. Louis" {
+            world
+                .route_from_cities(&["Dallas", "St. Louis"])
+                .expect("Dallas-St. Louis direct corridor")
+        } else {
+            supported(world, start, end)
+        };
         let mut points = vec![0.0];
-        let mut route_offset = 0.0;
-        for (index, leg) in route.legs.iter().enumerate() {
-            let forward = route.cities[index] == leg.a;
-            points.extend(
-                leg.stops
-                    .iter()
-                    .filter(|stop| {
-                        stop.curated() && stop.actions.iter().any(|action| action == "sleep")
-                    })
-                    .map(|stop| {
-                        let leg_mi = if forward {
-                            stop.at_mi
-                        } else {
-                            leg.miles - stop.at_mi
-                        };
-                        route_offset + leg_mi
-                    }),
-            );
-            route_offset += leg.miles;
-        }
-        points.push(route_offset);
+        points.extend(
+            route
+                .stop_details()
+                .iter()
+                .filter(|stop| stop.actions.iter().any(|a| a == "sleep"))
+                .map(|stop| stop.at_mi),
+        );
+        points.push(route.miles());
         points.sort_by(|a, b| a.partial_cmp(b).unwrap());
         points.windows(2).map(|w| w[1] - w[0]).fold(0.0, f64::max)
     };

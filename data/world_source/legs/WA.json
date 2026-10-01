@@ -21433,14 +21433,14 @@
             "at_mi": 164.0,
             "from_state": "Washington",
             "state": "Oregon",
-            "place": "Washington-Oregon line on I-84",
+            "place": "Washington-Oregon line on US-95",
             "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "at_mi": 366.7,
             "from_state": "Oregon",
             "state": "Idaho",
-            "place": "Oregon-Idaho line on I-84",
+            "place": "Oregon-Idaho line on US-95",
             "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],

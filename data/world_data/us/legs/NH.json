@@ -8292,14 +8292,14 @@
             "at_mi": 23.8,
             "from_state": "New Hampshire",
             "state": "Massachusetts",
-            "place": "New Hampshire-Massachusetts line on I-95",
+            "place": "New Hampshire-Massachusetts line on I-495",
             "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "at_mi": 94.6,
             "from_state": "Massachusetts",
             "state": "Rhode Island",
-            "place": "Massachusetts-Rhode Island line on I-95",
+            "place": "Massachusetts-Rhode Island line on I-495",
             "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
