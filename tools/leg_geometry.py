@@ -24,6 +24,7 @@ Read it first; fall back only when a leg has no archived record.
 from __future__ import annotations
 
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -139,10 +140,10 @@ def corridor_geometry(leg: dict[str, Any]) -> list[tuple[float, float, float]] |
 
 
 def route_point_max_off_mi(leg: dict[str, Any], coords: list[list[float]]) -> float | None:
-    """Maximum route-point distance to its nearest archived ``[lon, lat]`` vertex."""
+    """Maximum route-point distance to the archived ``[lon, lat]`` polyline."""
     route_points = (leg.get("corridor") or {}).get("route_points") or []
     vertices = [(float(coord[1]), float(coord[0])) for coord in coords if len(coord) >= 2]
-    if not route_points or not vertices:
+    if not route_points or len(vertices) < 2:
         return None
 
     distances = []
@@ -157,12 +158,25 @@ def route_point_max_off_mi(leg: dict[str, Any], coords: list[list[float]]) -> fl
             or isinstance(lon, bool)
         ):
             continue
-        distances.append(
-            min(
-                scs._haversine_m(float(lat), float(lon), vertex_lat, vertex_lon)
-                for vertex_lat, vertex_lon in vertices
+        lat, lon = float(lat), float(lon)
+        lon_scale = math.cos(math.radians(lat))
+        segment_distances = []
+        for (lat1, lon1), (lat2, lon2) in zip(vertices, vertices[1:], strict=False):
+            lon_delta = (lon2 - lon1 + 180.0) % 360.0 - 180.0
+            dx = lon_delta * lon_scale
+            dy = lat2 - lat1
+            point_x = ((lon1 - lon + 180.0) % 360.0 - 180.0) * lon_scale
+            point_y = lat1 - lat
+            length_squared = dx * dx + dy * dy
+            t = (
+                max(0.0, min(1.0, -(point_x * dx + point_y * dy) / length_squared))
+                if length_squared
+                else 0.0
             )
-        )
+            nearest_lat = lat1 + t * dy
+            nearest_lon = lon1 + t * lon_delta
+            segment_distances.append(scs._haversine_m(lat, lon, nearest_lat, nearest_lon))
+        distances.append(min(segment_distances))
     if not distances:
         return None
     return max(distances) / 1609.344

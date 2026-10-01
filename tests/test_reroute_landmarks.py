@@ -37,7 +37,12 @@ def test_fetch_route_builds_through_locations_and_joins_leg_shapes(monkeypatch):
         "body": {
             "locations": [
                 {"lat": 30.0, "lon": -100.0},
-                {"lat": 31.0, "lon": -99.0, "type": "through"},
+                {
+                    "lat": 31.0,
+                    "lon": -99.0,
+                    "type": "through",
+                    "search_filter": rr.VIA_SEARCH_FILTER,
+                },
                 {"lat": 32.0, "lon": -98.0},
             ],
             "costing": rr.COSTING,

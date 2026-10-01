@@ -105,6 +105,7 @@ VALHALLA_ELEVATION = os.environ.get(
 ).rstrip("/")
 USER_AGENT = "Freight-Fate rerouting (https://github.com/Orinks/Freight-Fate)"
 COSTING = "truck"
+VIA_SEARCH_FILTER = {"min_road_class": "primary", "exclude_ramp": True}
 
 # What the truck actually is. Valhalla's truck costing defaults to 21.77
 # tonnes -- about 48,000 lb -- which is not a loaded US semi, and a weight
@@ -252,7 +253,15 @@ def fetch_route(
     if len(via) + 2 > 10:
         raise ValueError("Valhalla routes support at most 10 locations, including endpoints")
     locations = [{"lat": start["lat"], "lon": start["lon"]}]
-    locations.extend({"lat": point["lat"], "lon": point["lon"], "type": "through"} for point in via)
+    locations.extend(
+        {
+            "lat": point["lat"],
+            "lon": point["lon"],
+            "type": "through",
+            "search_filter": VIA_SEARCH_FILTER,
+        }
+        for point in via
+    )
     locations.append({"lat": end["lat"], "lon": end["lon"]})
     result = _post(
         "/route",

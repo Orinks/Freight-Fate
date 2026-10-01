@@ -44,11 +44,11 @@ def _two_crossings():
     ]
 
 
-def test_route_point_max_off_uses_archived_lon_lat_vertices():
-    leg = {"corridor": {"route_points": [{"lat": 30.0, "lon": -89.8}]}}
+def test_route_point_max_off_uses_archived_lon_lat_segments():
+    leg = {"corridor": {"route_points": [{"lat": 30.1, "lon": -89.5}]}}
     coords = [[-90.0, 30.0], [-89.0, 30.0]]
 
-    expected = prc.lg.scs._haversine_m(30.0, -89.8, 30.0, -90.0) / 1609.344
+    expected = prc.lg.scs._haversine_m(30.1, -89.5, 30.0, -89.5) / 1609.344
 
     assert prc.lg.route_point_max_off_mi(leg, coords) == pytest.approx(expected)
     assert prc.lg.route_point_max_off_mi({"corridor": {}}, coords) is None
