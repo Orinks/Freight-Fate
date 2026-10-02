@@ -307,6 +307,12 @@ Costs the drive (found 2026-09-25, gate drive on I-70):
       downgrade call asked for J. Only the driver's own accelerator refuses
       it now.
 
+Costs the drive (found 2026-10-01, owner's drive into Chicago):
+
+- [x] Lane keeping on full held the middle lane through the destination
+      exit's gore, twice; it now moves to the right lane itself
+      ([October 1](#october-1-lane-keeping-moves-right-for-its-exit)).
+
 World data (the rest of the 1.9 world-data list moved to
 [2.0](#world-data-deferred-from-19) on 2026-09-25):
 
@@ -2368,6 +2374,23 @@ rev ceiling.
       owner-operator buy-in). The profile's Carrier line links to its page.
       Every figure rides the invariants export (`carriers`, `companyPay`),
       so a wage-plan rebalance needs an invariants regen to reach the site.
+
+### October 1 lane keeping moves right for its exit
+
+- [x] (Release gate) **Lane keeping on full moves to the right lane for an
+      exit it is taking** (owner's drive, Kenosha to Chicago on I-94, All
+      assists, urgent-only speech). He pulled out to the middle lane around
+      truck traffic three miles from exit 50B; lane keeping held the middle
+      lane through the gore and the exit was missed, then missed again on
+      the loop-back, whose line had promised "lane keeping will take it".
+      Full lane keeping only ever took the exit lane from the right lane and
+      never moved there, and the one line that asked the driver to (the
+      countdown's request to tap into the right lane) is cut by quiet and
+      urgent-only speech. Now `keep_right_for_exit` moves one lane right at
+      a time from `EXIT_KEEP_RIGHT_MI` (the 2-mile anchor) into a lane the
+      lane-gap clearance calls open, says "Changing to the right lane for
+      the exit.", and waits out a dodge in progress. The tap requests on the
+      full-mode approach lines are gone.
 
 ## 2.0 planned -- the working week and home
 

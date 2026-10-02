@@ -36,6 +36,7 @@
 //! missed the line -- or who wants to know before committing -- can ask.
 
 use ff_core::sim::traffic_manager::TrafficVehicle;
+use ff_core::sim::trip_models::RoadStop;
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, SayEvent};
@@ -186,6 +187,49 @@ impl DrivingState {
             SayEvent::queued()
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Status),
+        );
+    }
+
+    // -- full lane keeping lines up for its exit -----------------------------
+
+    /// Lane keeping on full takes the exit, and the exit lane opens only
+    /// beside the right lane, so it moves there itself: one lane at a time
+    /// from the two-mile anchor in, and only into a lane this same clearance
+    /// reading calls open. It used to hold whatever lane the truck was in, so
+    /// a truck that pulled out around traffic three miles out rode the middle
+    /// lane through the gore and missed the destination exit twice, each
+    /// loop-back promising "lane keeping will take it" (owner's drive, I-94
+    /// into Chicago, 2026-10-01).
+    pub fn keep_right_for_exit(&mut self, ctx: &mut GameContext, stop: &RoadStop) {
+        let ahead = stop.at_mi - self.trip.position_mi;
+        if self.in_right_lane_for_exit()
+            || self.lane_change_target.is_some()
+            || self.ramp_mi.is_some()
+            // A dodge in progress is the driver's; it is not undone for an
+            // exit, and the move right waits until the hazard is answered.
+            || self.hazard_deadline.is_some()
+            || self.microsleep_deadline.is_some()
+            || !(ahead > 0.0 && ahead <= EXIT_KEEP_RIGHT_MI)
+            || !self.trip.truck.engine_on
+            || self.trip.truck.speed_mph() < LANE_MIN_MPH
+        {
+            return;
+        }
+        let target = self.lane.lane - 1;
+        if Some(target) == self.closed_lane_here() || !self.lane_gap_open(target) {
+            return;
+        }
+        // The tap change's own drift and arrival, which runs the same
+        // sideswipe check the clearance above already passed.
+        self.lane_change_target = Some(target);
+        self.lane_change_timer = LANE_TAP_CHANGE_S;
+        self.lane_signal_timer = 0.0;
+        let name = lane_label(target, self.lane.lane_count);
+        ctx.say_event_with(
+            format!("Changing to the {name} lane for the exit."),
+            SayEvent::queued()
+                .priority(EventPriority::Route)
+                .category(SpeechCategory::Confirmation),
         );
     }
 

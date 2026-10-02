@@ -1237,8 +1237,9 @@ Unless lane keeping is on full, move to the right lane and stay centered there;
 the game asks for that move only while you are out of the right lane. Just
 before the gore the exit lane opens beside the right lane, and the game says
 "Exit lane opening. Steer right into it." Steer right across the line and you
-are in the exit lane, the start of the ramp. On full, lane keeping takes it for
-you. Keep road speed until then: the gore accepts anything up to the speed the
+are in the exit lane, the start of the ramp. On full, lane keeping makes both moves
+for you: from two miles out it changes to the right lane once that lane is
+clear, saying "Changing to the right lane for the exit", then takes the exit lane. Keep road speed until then: the gore accepts anything up to the speed the
 posted limit allows. The exit lane, which road engineers call the deceleration
 lane, is where you slow down, and the game says the exit speed as you enter it.
 Brake to it before the ramp curve at the end of that lane; a loaded truck

@@ -132,6 +132,10 @@ pub const EXIT_TAPER_MI: f64 = 300.0 / 5280.0;
 /// (MUTCD 11th ed. 2E.23, 1/2 mi). X commits to the exit wherever it is
 /// pressed; this is only when the blinker runs.
 pub const EXIT_BLINKER_MI: f64 = EXIT_COUNTDOWN_MILESTONES_MI[2];
+/// How far out lane keeping on full starts moving to the right lane for an
+/// exit it is taking: the countdown's first anchor, where a manual driver is
+/// asked for the same lane.
+pub const EXIT_KEEP_RIGHT_MI: f64 = EXIT_COUNTDOWN_MILESTONES_MI[0];
 pub const EXIT_CANCEL_GUARD_MI: f64 = 1.0; // inside this, X keeps the signal; a second press cancels
 pub const EXIT_TAP_HOLD_S: f64 = 0.35; // a Right press this short is a tap, not held steering
 pub const AEB_BUDGET_MARGIN: f64 = 1.2; // emergency braking leads the physics budget by this factor
