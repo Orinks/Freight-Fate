@@ -257,3 +257,56 @@ def test_archived_river_landmarks_have_crossing_tool_provenance():
                 assert "tools/place_river_crossings.py" in landmark.get("source", ""), (
                     f"{prc._leg_id(leg)} {landmark.get('name')}"
                 )
+
+
+WATERWAY_RELATION_FIXTURE = """<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="fixture">
+  <node id="1" version="1" lat="35.00" lon="-90.00"/>
+  <node id="2" version="1" lat="35.10" lon="-90.00"/>
+  <node id="3" version="1" lat="35.20" lon="-90.00"/>
+  <node id="4" version="1" lat="35.00" lon="-89.50"/>
+  <node id="5" version="1" lat="35.10" lon="-89.50"/>
+  <node id="6" version="1" lat="35.00" lon="-89.00"/>
+  <node id="7" version="1" lat="35.10" lon="-89.00"/>
+  <way id="10" version="1"><nd ref="1"/><nd ref="2"/></way>
+  <way id="11" version="1"><nd ref="2"/><nd ref="3"/><tag k="waterway" v="river"/></way>
+  <way id="20" version="1"><nd ref="4"/><nd ref="5"/></way>
+  <way id="30" version="1"><nd ref="6"/><nd ref="7"/></way>
+  <relation id="100" version="1">
+    <member type="way" ref="10" role="main_stream"/>
+    <member type="way" ref="11" role="main_stream"/>
+    <tag k="type" v="waterway"/>
+    <tag k="waterway" v="river"/>
+    <tag k="name" v="Test River"/>
+  </relation>
+  <relation id="200" version="1">
+    <member type="way" ref="30" role="main_stream"/>
+    <tag k="type" v="waterway"/>
+    <tag k="waterway" v="river"/>
+    <tag k="name" v="Other River"/>
+  </relation>
+</osm>
+"""
+
+
+def _extract_fixture(monkeypatch, tmp_path):
+    pytest.importorskip("osmium")
+    fixture = tmp_path / "fixture.osm"
+    fixture.write_text(WATERWAY_RELATION_FIXTURE, encoding="utf-8")
+    monkeypatch.setattr(prc, "_water_feature_pbf", lambda _pbf, _cache: fixture)
+    features = prc.extract_river_lines(fixture, {"Test River"}, cache_dir=tmp_path / "cache")
+    return {(feature["feature_id"], feature["name"]): feature for feature in features}
+
+
+def test_untagged_member_way_of_named_waterway_relation_is_extracted(monkeypatch, tmp_path):
+    features = _extract_fixture(monkeypatch, tmp_path)
+
+    assert (10, "Test River") in features
+    assert features[(10, "Test River")]["coords"] == [[-90.0, 35.0], [-90.0, 35.1]]
+    assert (11, "Test River") in features
+
+
+def test_untagged_ways_outside_wanted_waterway_relations_stay_excluded(monkeypatch, tmp_path):
+    features = _extract_fixture(monkeypatch, tmp_path)
+
+    assert not {feature_id for feature_id, _name in features} & {20, 30}

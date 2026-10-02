@@ -59,7 +59,7 @@ def _river_names(data: dict[str, Any]) -> set[str]:
 def _cache_path(pbf_path: Path, names: set[str], cache_dir: Path) -> Path:
     stat = pbf_path.stat()
     name_hash = hashlib.sha256("\0".join(sorted(names)).encode("utf-8")).hexdigest()[:12]
-    return cache_dir / (f"river-features-v3-{stat.st_size}-{stat.st_mtime_ns}-{name_hash}.json.gz")
+    return cache_dir / (f"river-features-v4-{stat.st_size}-{stat.st_mtime_ns}-{name_hash}.json.gz")
 
 
 WATER_FEATURE_FILTERS = (
@@ -216,6 +216,7 @@ def extract_river_lines(
     os.environ["TMPDIR"] = str(cache_dir)
     features: list[dict[str, Any]] = []
     polygon_member_ways: dict[int, list[list[float]]] = {}
+    scanned_way_ids: set[int] = set()
     seen = 0
     try:
         ways = (
@@ -232,6 +233,7 @@ def extract_river_lines(
             seen += 1
             tags = way.tags
             way_id = int(way.id)
+            scanned_way_ids.add(way_id)
             name = str(tags.get("name") or "")
             coords = _way_coordinates(way)
             if not coords:
@@ -269,7 +271,7 @@ def extract_river_lines(
                     }
                 )
 
-        missing_member_ids = member_ids - polygon_member_ways.keys()
+        missing_member_ids = (member_ids | relation_names.keys()) - scanned_way_ids
         if missing_member_ids:
             member_ways = (
                 osmium.FileProcessor(
@@ -280,10 +282,24 @@ def extract_river_lines(
                 .with_filter(osmium.filter.IdFilter(missing_member_ids))
             )
             for way in member_ways:
-                if hasattr(way, "nodes") and int(way.id) in missing_member_ids:
-                    coords = _way_coordinates(way)
-                    if coords:
-                        polygon_member_ways[int(way.id)] = coords
+                way_id = int(way.id)
+                if not hasattr(way, "nodes") or way_id not in missing_member_ids:
+                    continue
+                coords = _way_coordinates(way)
+                if not coords:
+                    continue
+                if way_id in member_ids:
+                    polygon_member_ways[way_id] = coords
+                for matched_name in sorted(relation_names.get(way_id, ()), key=str.casefold):
+                    features.append(
+                        {
+                            "geometry": "line",
+                            "feature_type": "waterway way",
+                            "feature_id": way_id,
+                            "name": matched_name,
+                            "coords": coords,
+                        }
+                    )
     finally:
         if previous_tmpdir is None:
             os.environ.pop("TMPDIR", None)
