@@ -145,10 +145,14 @@ def test_committed_pack_has_freight_fate_header():
     #
     # Repacked 2026-08-14 (weigh-station warning earcon): added the procedural
     # events/weigh_station_warning.ogg cue, taking the pack 159 -> 160.
-    assert len(pack_bytes) == 8_263_717
+    #
+    # Repacked 2026-10-01 (the CB): events/cb_radio_chatter.ogg replaced by a
+    # 0.14 s squelch tail from sound-test/cb_squelch.json; still 174 entries,
+    # the other 173 preserved byte for byte.
+    assert len(pack_bytes) == 8_224_170
     assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
     assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "de9e39c951ef69d661fcee9e448579d57596f30585b31a337de312ca2c40c712"
+        "e5ea32c377012b4c7aa792ee4e530fef040d3669351c8b7cf79c26b9b48a3a1c"
     )
 
 
