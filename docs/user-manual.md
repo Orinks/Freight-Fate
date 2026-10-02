@@ -177,6 +177,11 @@ When an update is available, the prompt offers:
 
 Updates replace the game files only. They preserve the `saves` folder.
 
+While an update downloads, Tab reads the progress and Escape leaves at once;
+the game says when it moves on to unpacking. If no data arrives for a minute,
+or unpacking runs far too long, the game says so, keeps the version you have,
+and names the releases page for downloading it yourself.
+
 ## Main menu and career flow
 
 The main menu can include:
@@ -2025,7 +2030,8 @@ If Check for updates says the copy is running from source, download a packaged
 release archive from the releases page and play from that folder.
 
 If an update cannot reach the server, check your internet connection and try
-again later. The game writes packaged-build logs to `logs/game.log`, which can
+again later. The game writes packaged-build logs to `logs/game.log` (on macOS,
+`~/Library/Application Support/FreightFate/logs/game.log`), which can
 help when reporting update or startup problems. That log also records every
 line the game spoke, so it is the most useful thing to attach to any bug
 report. Settings, Problem reports, Where the game log is saved reads out its

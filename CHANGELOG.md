@@ -197,6 +197,14 @@
 
 ### Fixed
 
+- **A stalled update no longer freezes the download screen.** After a quiet minute the game says so and names where to download it yourself.
+
+- **Escape now leaves an update download at once, and the game says when it is unpacking.**
+
+- **An update download that arrives damaged is no longer installed.** The game says so and keeps the version you have.
+
+- **On a Mac, Report a problem names the folder that really holds your game log.**
+
 - **Chain controls now stand only while a chain law is in effect.** On dry roads the CB no longer calls one, and no chain-control trooper watches you.
 
 - **Chain laws now apply only in the western states that post them.** A steep grade in Texas or Wisconsin no longer brings a chain law in snow.

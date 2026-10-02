@@ -657,12 +657,12 @@ impl MainMenuState {
             ));
             return;
         }
-        ctx.say(
+        ctx.say(&format!(
             "Opening the bug report page in your web browser. Attach your game \
-             log: game.log in the logs folder next to the game. If you restarted \
-             the game after the problem, attach game.prev.log, the previous \
-             run's log.",
-        );
+             log: game.log in {}. If you restarted the game after the problem, \
+             attach game.prev.log, the previous run's log.",
+            crate::app::logging::log_folder_words()
+        ));
     }
 }
 
