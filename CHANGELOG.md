@@ -588,7 +588,7 @@
 
 ### Compatibility
 
-- **On Linux, speech now uses the Speech Dispatcher installed on your computer.** Install it first if your system lacks it; the game will not start without it.
+- **On Linux, speech uses the Speech Dispatcher installed on your computer.** Without it the game still starts, but stays silent.
 
 
 ### Changed
