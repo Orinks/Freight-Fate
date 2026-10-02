@@ -11,9 +11,9 @@
 # because a container has no FUSE). Each boots for five frames with SDL's
 # dummy video and audio drivers, and the session log then has to say that
 # BASS loaded from beside the executable. Speech is NOT disabled here:
-# Prism is linked into the executable and opens the system's
-# speech-dispatcher, which is where a distribution's loader would
-# object if it were going to.
+# Prism is linked into the executable and opens the system's Speech
+# Dispatcher at run time, so a container without it has to boot silent
+# rather than fail.
 #
 # Every log is also required to hold no error-level line at all: a boot
 # that reaches the menu while something inside it failed is not a pass.
@@ -27,10 +27,11 @@
 # is what differs between them.
 #
 # What each container is given is what every desktop install already has:
-# libdbus-1 (the executable links it for the Secret Service keyring),
-# libstdc++, and speech-dispatcher's client library (Prism links it; a
-# desktop with Orca already has it). Nothing else is installed -- a distribution that needs
-# more is a finding, not something to paper over here.
+# libdbus-1 (the executable links it for the Secret Service keyring) and
+# libstdc++. Debian, Ubuntu and openSUSE get no speech-dispatcher client
+# library, which proves the game starts without it. Nothing else is
+# installed -- a distribution that needs more is a finding, not something
+# to paper over here.
 #
 # The container's own architecture decides which pair of downloads is
 # booted: the x64 tarball and x86_64 AppImage on a PC runner, the arm64
@@ -53,7 +54,7 @@ echo "== $PRETTY_NAME ($(uname -m))"
 case "${ID:-}" in
   ubuntu|debian)
     apt-get update -qq >/dev/null
-    apt-get install -y -qq --no-install-recommends libdbus-1-3 libstdc++6 libspeechd2 >/dev/null
+    apt-get install -y -qq --no-install-recommends libdbus-1-3 libstdc++6 >/dev/null
     ;;
   fedora)
     dnf install -y -q dbus-libs libstdc++ speech-dispatcher-libs xorg-x11-server-Xvfb \
@@ -65,7 +66,7 @@ case "${ID:-}" in
     pacman -Sy --noconfirm --quiet dbus gcc-libs speech-dispatcher >/dev/null
     ;;
   opensuse-tumbleweed|opensuse-leap)
-    zypper --quiet --non-interactive install libdbus-1-3 libstdc++6 libspeechd2 >/dev/null
+    zypper --quiet --non-interactive install libdbus-1-3 libstdc++6 >/dev/null
     ;;
   *)
     echo "No package step for ${ID:-unknown}; booting with what the image has."

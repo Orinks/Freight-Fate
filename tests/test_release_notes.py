@@ -745,7 +745,7 @@ def test_career_19_snapshot_builds_and_boots_a_linux_release():
         encoding="utf-8"
     )
     # Speech is not disabled in the container boot: Prism really opens the
-    # system's speech-dispatcher, which is where a loader would object.
+    # system's Speech Dispatcher, or boots silent where there is none.
     assert "FREIGHT_FATE_NO_SPEECH" not in smoke
     assert "Speech backend: Speech Dispatcher" in smoke
     assert 'grep -q " ERROR "' in smoke

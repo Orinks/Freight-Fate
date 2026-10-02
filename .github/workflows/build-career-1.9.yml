@@ -309,8 +309,8 @@ jobs:
     # 22.04, not latest: the executable carries its build host's glibc as a
     # floor (2.35 here), and one built on 24.04 would refuse to start on any
     # distribution still shipping an older release, with no useful error.
-    # SDL2 and Prism (with gcc 13's libstdc++) are compiled in; what else is
-    # linked is the host's speech-dispatcher client.
+    # SDL2 and Prism (with gcc 13's libstdc++) are compiled in; Prism opens
+    # the player's Speech Dispatcher at run time rather than linking it.
     #
     # Two native builds, one per CPU: x86_64 for PCs and aarch64 for the
     # Blazie BT Speak and BT Braille (Debian on a Raspberry Pi Compute
@@ -389,8 +389,9 @@ jobs:
       # 22.04 stops at 12, so gcc 13 comes from Ubuntu's toolchain PPA and
       # crates/freight-fate/build.rs links its libstdc++ statically -- the
       # player's system libstdc++ can be as old as 22.04's. Prism builds its
-      # speech-dispatcher backend only when the development package is here;
-      # without it Linux players would get no speech. Its Orca backend needs
+      # Speech Dispatcher backend (headers only; it opens the library at run
+      # time) only when the development package is here; without it Linux
+      # players would get no speech. Its Orca backend needs
       # glibmm 2.68, which 22.04 does not carry, so it is left out; Orca
       # users hear the game through Speech Dispatcher instead.
       - name: Install Prism build dependencies

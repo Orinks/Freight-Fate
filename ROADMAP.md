@@ -328,8 +328,8 @@ Driving and platform:
 - [x] The speed keeper holds the next turn's speed when it is too close to
       build back up and brake again
       ([September 23](#september-23-agent-drive-into-abilene); PR #232).
-- [ ] Drop the whole-archive Prism link once a `prismer` release vendors
-      ethindp/prism#135
+- [x] Drop the whole-archive Prism link once a `prismer` release vendors
+      ethindp/prism#135: done with `prismer` 0.1.4
       ([September 21](#september-21-prism-from-the-prismer-crate)).
 
 The owner's:
@@ -909,12 +909,16 @@ its status or release decision.
       links the archive whole on Linux and macOS, and the nightly now fails
       when a platform's own backend (SAPI, AVSpeech, Speech Dispatcher) is
       missing from `--list-speech-backends`.
-- (Release gate) Prism's backend anchors cover MSVC only; a GCC static link drops
+- [x] (Release gate) Prism's backend anchors cover MSVC only; a GCC static link drops
       every backend unless linked whole. Reported with a standalone
       reproduction as ethindp/prism#130, fixed upstream 2026-09-22 by
-      ethindp/prism#135 (anchors for GCC and Clang). Waiting on a `prismer`
-      release that vendors it (0.1.3 does not); then drop the whole-archive
-      link in `crates/freight-fate/build.rs` and dry-run the nightly.
+      ethindp/prism#135 (anchors for GCC and Clang). `prismer` 0.1.4
+      (Prism 0.18.3, 2026-10-02) vendors it, so `build.rs` dropped the
+      whole-archive link. The same release opens the Windows screen-reader
+      DLLs and Linux's Speech Dispatcher at run time, so the `/DELAYLOAD`
+      and failure-hook flags went too, and a Linux install no longer needs
+      Speech Dispatcher to start (the nightly's Debian, Ubuntu and openSUSE
+      boots now run without its client library).
 
 ### September 21 the Python sunset
 
