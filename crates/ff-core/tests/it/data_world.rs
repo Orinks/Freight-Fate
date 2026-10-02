@@ -759,7 +759,7 @@ fn test_southern_sleep_stop_gaps_are_no_longer_extreme() {
         let mut points = vec![0.0];
         points.extend(
             route
-                .raw_stop_details()
+                .stop_details()
                 .into_iter()
                 .filter(|stop| stop.actions.iter().any(|action| action == "sleep"))
                 .map(|stop| stop.at_mi),

@@ -9256,7 +9256,15 @@
           "name": "rolling",
           "sections": 596,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": [
+          {
+            "from_mi": 101.08,
+            "to_mi": 103.83,
+            "name": "Dinosaur Diamond",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: US 6;US 50; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 313906712, 313906715, 313910755, 313910976, 313910977, 313962904, 313962908, 313962909, 313962911, 313962912, 515927114, 688060265, 688254167."
+          }
+        ]
       },
       "stops": [
         {
@@ -31424,7 +31432,15 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": [
+          {
+            "from_mi": 460.48,
+            "to_mi": 470.38,
+            "name": "Cache la Poudre--North Park",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: CO 14, US 287, US 287;CO 14; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 106208494, 106208497, 106208499, 106208506, 117951693, 117951706, 117951762, 117951811, 1308693407, 1308693408, 1308695243, 1459073320, 161629856, 173697322, 177242506, 177242512, 177242515, 278143123, 290286622, 290286624, 322771305, 322772981, 322772984, 322774495, 322778918, 322778922, 322778939, 322872717, 322872718, 322875382, 322875383, 322875387, 322875392, 322890814, 322890815, 322897103, 322897104, 322897110, 322897111, 322897117, 322900295, 322900297, 366604219, 47472376, 47472377, 47472381, 48730897, 49174425, 49174427, 6163678, 6169351, 6173000, 659565511, 659565512, 769217819, 769217821, 769217823, 937779629, 942326759."
+          }
+        ]
       },
       "terrain": "hills",
       "divided": true,

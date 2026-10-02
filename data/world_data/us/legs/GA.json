@@ -11745,14 +11745,14 @@
             "source": "Real town on I-75 between athens_ga_us and chattanooga_tn_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.81 mi off-route at closest approach)."
           },
           {
-            "name": "Fort Oglethorpe",
-            "at_mi": 168.8,
-            "type": "place",
-            "state": "Georgia",
-            "highway": "I-75",
-            "lat": 34.949,
-            "lon": -85.2569,
-            "source": "Real town on I-75 between athens_ga_us and chattanooga_tn_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.4 mi off-route at closest approach)."
+            "name": "East Ridge",
+            "at_mi": 171.1,
+            "type": "town",
+            "state": "Tennessee",
+            "highway": "I-24",
+            "lat": 35.01424,
+            "lon": -85.2519,
+            "source": "OSM village/town cache node 153747734; OpenStreetMap US PBF dated 2026-09-29 ref I 24; real place on I-24 between athens_ga_us and chattanooga_tn_us; position matched to the nearest point on the archived dense route geometry (0.12 mi off-route at closest approach)."
           }
         ],
         "state_miles": [
@@ -28742,43 +28742,43 @@
         "checkpoints": [
           {
             "name": "Douglasville",
-            "at_mi": 22.0,
+            "at_mi": 26.1,
             "type": "place",
             "state": "Georgia",
             "highway": "I-20",
             "lat": 33.7515,
             "lon": -84.7477,
-            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.41 mi off-route at closest approach)."
+            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.41 mi off-route at closest approach).; real place on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the archived dense route geometry (1.41 mi off-route at closest approach)."
           },
           {
             "name": "Temple",
-            "at_mi": 39.1,
+            "at_mi": 43.2,
             "type": "place",
             "state": "Georgia",
             "highway": "I-20",
             "lat": 33.7371,
             "lon": -85.0324,
-            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.45 mi off-route at closest approach)."
+            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.45 mi off-route at closest approach).; real place on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the archived dense route geometry (1.5 mi off-route at closest approach)."
           },
           {
             "name": "Oxford",
-            "at_mi": 86.8,
+            "at_mi": 90.9,
             "type": "place",
             "state": "Alabama",
             "highway": "I-20",
             "lat": 33.6143,
             "lon": -85.835,
-            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.63 mi off-route at closest approach)."
+            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.63 mi off-route at closest approach).; real place on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the archived dense route geometry (0.71 mi off-route at closest approach)."
           },
           {
             "name": "Pell City",
-            "at_mi": 113.9,
+            "at_mi": 117.0,
             "type": "place",
             "state": "Alabama",
             "highway": "I-20",
             "lat": 33.5862,
             "lon": -86.2861,
-            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.33 mi off-route at closest approach)."
+            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.33 mi off-route at closest approach).; real place on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the archived dense route geometry (1.41 mi off-route at closest approach)."
           },
           {
             "name": "Irondale",
@@ -28791,14 +28791,14 @@
             "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.53 mi off-route at closest approach)."
           },
           {
-            "name": "Bessemer",
-            "at_mi": 159.9,
-            "type": "place",
+            "name": "McCalla",
+            "at_mi": 167.6,
+            "type": "town",
             "state": "Alabama",
             "highway": "I-20",
-            "lat": 33.4018,
-            "lon": -86.9544,
-            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.06 mi off-route at closest approach)."
+            "lat": 33.34872,
+            "lon": -87.01416,
+            "source": "OSM village/town cache node 153402493; OpenStreetMap US PBF dated 2026-09-29 ref I 20; real place on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the archived dense route geometry (0.78 mi off-route at closest approach)."
           },
           {
             "name": "Coaling",
@@ -28981,14 +28981,14 @@
             "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.37 mi off-route at closest approach)."
           },
           {
-            "name": "Canton",
-            "at_mi": 724.0,
-            "type": "place",
+            "name": "Myrtle Springs",
+            "at_mi": 729.3,
+            "type": "village",
             "state": "Texas",
             "highway": "I-20",
-            "lat": 32.5565,
-            "lon": -95.8633,
-            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.57 mi off-route at closest approach)."
+            "lat": 32.61045,
+            "lon": -95.93167,
+            "source": "OSM village/town cache node 151446276; OpenStreetMap US PBF dated 2026-09-29 ref I 20; real place on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the archived dense route geometry (0.67 mi off-route at closest approach)."
           }
         ],
         "state_miles": [

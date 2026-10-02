@@ -21716,7 +21716,15 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": [
+          {
+            "from_mi": 45.83,
+            "to_mi": 51.48,
+            "name": "Tracks Across Borders",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: US 160, US 160;US 550; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 117912818, 117912908, 1210581565, 1210581568, 1210793104, 1210793105, 1210793106, 1210793108, 1210793109, 1210793110, 1210793111, 1210793113, 1210793114, 1210793115, 1210793116, 1210793117, 1301871701, 1301871702, 1317002789, 1366753848, 1366753849, 1377903597, 1377903605, 1393611245, 17089332, 276202762, 276202767, 276203845, 277659306, 277659308, 277660217, 277660221, 291070565, 440198023, 478196486, 478196487, 933120933, 933122826."
+          }
+        ]
       },
       "stops": [
         {
@@ -37508,7 +37516,8 @@
           "name": "mountainous",
           "sections": 235,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {

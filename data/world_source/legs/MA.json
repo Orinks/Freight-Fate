@@ -21712,24 +21712,24 @@
             "source": "Real town on I-84 between worcester_ma_us and new_york_ny_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.68 mi off-route at closest approach)."
           },
           {
-            "name": "Waterbury",
-            "at_mi": 94.0,
-            "type": "place",
+            "name": "North Haven",
+            "at_mi": 94.1,
+            "type": "town",
             "state": "Connecticut",
-            "highway": "I-84",
-            "lat": 41.5581,
-            "lon": -73.0515,
-            "source": "Real town on I-84 between worcester_ma_us and new_york_ny_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.47 mi off-route at closest approach)."
+            "highway": "I-91",
+            "lat": 41.39093,
+            "lon": -72.85954,
+            "source": "OSM village/town cache node 158905560; OpenStreetMap US PBF dated 2026-09-29 ref I 91; real place on I-91 between worcester_ma_us and new_york_ny_us; position matched to the nearest point on the archived dense route geometry (0.28 mi off-route at closest approach)."
           },
           {
-            "name": "Shelton",
-            "at_mi": 111.9,
-            "type": "place",
+            "name": "Devon",
+            "at_mi": 115.0,
+            "type": "village",
             "state": "Connecticut",
             "highway": "I-95",
-            "lat": 41.3165,
-            "lon": -73.0932,
-            "source": "Real town on I-95 between worcester_ma_us and new_york_ny_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.35 mi off-route at closest approach)."
+            "lat": 41.20215,
+            "lon": -73.10205,
+            "source": "OSM village/town cache node 158845669; OpenStreetMap US PBF dated 2026-09-29 ref I 95; real place on I-95 between worcester_ma_us and new_york_ny_us; position matched to the nearest point on the archived dense route geometry (0.32 mi off-route at closest approach)."
           },
           {
             "name": "Stamford",

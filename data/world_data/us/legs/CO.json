@@ -836,76 +836,16 @@
         },
         "billboard_bans": [
           {
-            "from_mi": 0.75,
-            "to_mi": 0.89,
-            "name": "CDOT scenic byway: Los Caminos Antiguos",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 44780128 (US 160;CO 17), 775620710 (US 160)."
+            "from_mi": 60.53,
+            "to_mi": 72.0,
+            "name": "Highway of Legends",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: US 160; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1458860065, 1458860066, 1536443366, 17066320, 262493381, 262493383, 319053468, 319053470, 319053471, 319054133, 319054134, 319054135, 319054136, 319054137, 319054138, 508551065, 515380426, 714008843, 714008845, 714008854, 714008860, 876393432, 876393436."
           },
           {
-            "from_mi": 15.44,
-            "to_mi": 15.85,
-            "name": "CDOT scenic byway: Los Caminos Antiguos",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 202593783 (US 160)."
-          },
-          {
-            "from_mi": 20.09,
-            "to_mi": 20.27,
-            "name": "CDOT scenic byway: Los Caminos Antiguos",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 17033651 (US 160), 202593760 (US 160)."
-          },
-          {
-            "from_mi": 24.97,
-            "to_mi": 25.1,
-            "name": "CDOT scenic byway: Los Caminos Antiguos",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1509763660 (US 160), 17033669 (US 160)."
-          },
-          {
-            "from_mi": 60.7,
-            "to_mi": 60.87,
-            "name": "CDOT scenic byway: Highway of Legends",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1458860065 (US 160), 1536443366 (US 160)."
-          },
-          {
-            "from_mi": 63.27,
-            "to_mi": 63.4,
-            "name": "CDOT scenic byway: Highway of Legends",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 508551065 (US 160)."
-          },
-          {
-            "from_mi": 64.72,
-            "to_mi": 64.84,
-            "name": "CDOT scenic byway: Highway of Legends",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 508551065 (US 160)."
-          },
-          {
-            "from_mi": 65.78,
-            "to_mi": 65.91,
-            "name": "CDOT scenic byway: Highway of Legends",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 319054138 (US 160)."
-          },
-          {
-            "from_mi": 66.89,
-            "to_mi": 67.19,
-            "name": "CDOT scenic byway: Highway of Legends",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 319054134 (US 160), 319054138 (US 160)."
-          },
-          {
-            "from_mi": 69.81,
-            "to_mi": 70.18,
-            "name": "CDOT scenic byway: Highway of Legends",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 262493383 (US 160), 319053470 (US 160)."
-          },
-          {
-            "from_mi": 70.92,
-            "to_mi": 71.03,
-            "name": "CDOT scenic byway: Highway of Legends",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 17066320 (US 160), 714008860 (US 160)."
-          },
-          {
-            "from_mi": 71.83,
-            "to_mi": 71.98,
-            "name": "CDOT scenic byway: Highway of Legends",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 714008848 (I 25 Business), 714008854 (US 160)."
+            "from_mi": 14.68,
+            "to_mi": 25.12,
+            "name": "Los Caminos Antiguos",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: CO 150, US 160; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1509763660, 17033651, 17033669, 17034615, 17035015, 202593760, 202593783, 515316883, 520181827."
           }
         ]
       },
@@ -3335,7 +3275,8 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -9067,92 +9008,7 @@
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
         },
-        "billboard_bans": [
-          {
-            "from_mi": 43.53,
-            "to_mi": 43.69,
-            "name": "CDOT scenic byway: Frontier Pathways",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 170684325 (I 25;US 50 Bus), 756813606 (I 25;US 50 Bus)."
-          },
-          {
-            "from_mi": 128.48,
-            "to_mi": 128.61,
-            "name": "CDOT scenic byway: Highway of Legends",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 46818415 (I 25), 46867991 (I 25)."
-          },
-          {
-            "from_mi": 128.78,
-            "to_mi": 128.9,
-            "name": "CDOT scenic byway: Santa Fe Trail",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 46818582 (I 25), 46819141 (I 25)."
-          },
-          {
-            "from_mi": 129.53,
-            "to_mi": 129.81,
-            "name": "CDOT scenic byway: Santa Fe Trail",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 866501245 (I 25), 866501249 (I 25)."
-          },
-          {
-            "from_mi": 131.11,
-            "to_mi": 131.28,
-            "name": "CDOT scenic byway: Santa Fe Trail",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1006633051 (I 25)."
-          },
-          {
-            "from_mi": 133.04,
-            "to_mi": 133.37,
-            "name": "CDOT scenic byway: Santa Fe Trail",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 46735861 (I 25)."
-          },
-          {
-            "from_mi": 133.78,
-            "to_mi": 135.05,
-            "name": "CDOT scenic byway: Santa Fe Trail",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 46735861 (I 25), 46752139 (I 25)."
-          },
-          {
-            "from_mi": 135.39,
-            "to_mi": 135.69,
-            "name": "CDOT scenic byway: Santa Fe Trail",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 46752139 (I 25)."
-          },
-          {
-            "from_mi": 136.01,
-            "to_mi": 136.72,
-            "name": "CDOT scenic byway: Santa Fe Trail",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 46736140 (I 25), 46752139 (I 25)."
-          },
-          {
-            "from_mi": 137.02,
-            "to_mi": 137.36,
-            "name": "CDOT scenic byway: Santa Fe Trail",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 46736140 (I 25)."
-          },
-          {
-            "from_mi": 138.91,
-            "to_mi": 139.78,
-            "name": "CDOT scenic byway: Santa Fe Trail",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 46736140 (I 25)."
-          },
-          {
-            "from_mi": 140.28,
-            "to_mi": 140.55,
-            "name": "CDOT scenic byway: Santa Fe Trail",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 46733163 (I 25)."
-          },
-          {
-            "from_mi": 141.03,
-            "to_mi": 141.2,
-            "name": "CDOT scenic byway: Santa Fe Trail",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 46733163 (I 25)."
-          },
-          {
-            "from_mi": 141.74,
-            "to_mi": 142.23,
-            "name": "CDOT scenic byway: Santa Fe Trail",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 46733163 (I 25), 47053562 (I 25)."
-          }
-        ]
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -11553,7 +11409,8 @@
           "name": "rolling",
           "sections": 339,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -12725,14 +12582,7 @@
           "sections": 179,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
         },
-        "billboard_bans": [
-          {
-            "from_mi": 42.71,
-            "to_mi": 42.86,
-            "name": "CDOT scenic byway: Frontier Pathways",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 170684325 (I 25;US 50 Bus), 170684326 (I 25;US 50 Bus)."
-          }
-        ]
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -13769,7 +13619,8 @@
           "name": "rolling",
           "sections": 78,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "terrain": "flat",
       "divided": true,
@@ -19466,82 +19317,16 @@
         },
         "billboard_bans": [
           {
-            "from_mi": 120.29,
-            "to_mi": 120.4,
-            "name": "CDOT scenic byway: Collegiate Peaks",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 313512542 (US 285)."
+            "from_mi": 119.78,
+            "to_mi": 141.43,
+            "name": "Collegiate Peaks",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: US 24;US 285, US 285, US 50, US 50;US 285; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1096787947, 1244207929, 1244207930, 1244207931, 1244207932, 1244207933, 1244207934, 1244207935, 1244207936, 1244207937, 1244207938, 1244207939, 1244207940, 1244207941, 1244207942, 1244207943, 1244207944, 1244207945, 1244207946, 1244207947, 1244207948, 1244207949, 1244207950, 1244207951, 1244207952, 1244207953, 1244207954, 1417661363, 1417661364, 17017511, 17017530, 17018161, 202754936, 245694608, 307818701, 307818703, 307818707, 313512538, 313512542, 313512548, 313512549, 439469537, 527605664, 720098509."
           },
           {
-            "from_mi": 121.26,
-            "to_mi": 122.28,
-            "name": "CDOT scenic byway: Collegiate Peaks",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1244207929 (US 285), 313512542 (US 285)."
-          },
-          {
-            "from_mi": 122.63,
-            "to_mi": 122.8,
-            "name": "CDOT scenic byway: Collegiate Peaks",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1244207929 (US 285)."
-          },
-          {
-            "from_mi": 124.3,
-            "to_mi": 124.51,
-            "name": "CDOT scenic byway: Collegiate Peaks",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 313512549 (US 285)."
-          },
-          {
-            "from_mi": 124.9,
-            "to_mi": 125.04,
-            "name": "CDOT scenic byway: Collegiate Peaks",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1244207933 (US 285), 313512548 (US 285)."
-          },
-          {
-            "from_mi": 126.75,
-            "to_mi": 126.92,
-            "name": "CDOT scenic byway: Collegiate Peaks",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 439469537 (US 285)."
-          },
-          {
-            "from_mi": 127.4,
-            "to_mi": 127.65,
-            "name": "CDOT scenic byway: Collegiate Peaks",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 439469537 (US 285)."
-          },
-          {
-            "from_mi": 132.43,
-            "to_mi": 132.84,
-            "name": "CDOT scenic byway: Collegiate Peaks",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1244207954 (US 285)."
-          },
-          {
-            "from_mi": 133.36,
-            "to_mi": 133.6,
-            "name": "CDOT scenic byway: Collegiate Peaks",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1096787947 (US 285)."
-          },
-          {
-            "from_mi": 138.29,
-            "to_mi": 138.94,
-            "name": "CDOT scenic byway: Collegiate Peaks",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1096787947 (US 285)."
-          },
-          {
-            "from_mi": 140.74,
-            "to_mi": 141.36,
-            "name": "CDOT scenic byway: Collegiate Peaks",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 17017511 (US 285), 307818701 (US 50;US 285), 720098508 (US 285)."
-          },
-          {
-            "from_mi": 217.12,
-            "to_mi": 217.24,
-            "name": "CDOT scenic byway: Los Caminos Antiguos",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 309631585 (US 160;CO 17), 775620709 (CO 17)."
-          },
-          {
-            "from_mi": 247.11,
-            "to_mi": 247.26,
-            "name": "CDOT scenic byway: Los Caminos Antiguos",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 17028829 (US 285;CO 17), 264253438 (US 285)."
+            "from_mi": 239.58,
+            "to_mi": 247.58,
+            "name": "Los Caminos Antiguos",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: CO 142, US 285, US 285;CO 17; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 17028818, 17028829, 17029091, 264253438, 264254790, 264254796, 264254797, 264254800, 309157301, 309157304, 309331455, 309333282, 309336137, 309336144, 309336148, 309336152, 309336162."
           }
         ]
       },
@@ -22631,58 +22416,10 @@
         },
         "billboard_bans": [
           {
-            "from_mi": 18.65,
-            "to_mi": 18.78,
-            "name": "CDOT scenic byway: Lariat Loop",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1306930155 (I 70), 909519238 (I 70)."
-          },
-          {
-            "from_mi": 19.52,
-            "to_mi": 19.86,
-            "name": "CDOT scenic byway: Lariat Loop",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 49245445 (I 70;US 40)."
-          },
-          {
-            "from_mi": 20.85,
-            "to_mi": 20.97,
-            "name": "CDOT scenic byway: Lariat Loop",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 49245444 (I 70)."
-          },
-          {
-            "from_mi": 32.57,
-            "to_mi": 32.71,
-            "name": "CDOT scenic byway: Mount Blue Sky",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 617944244 (I 70)."
-          },
-          {
-            "from_mi": 101.83,
-            "to_mi": 102.02,
-            "name": "CDOT scenic byway: Colorado River Headwaters",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 247736415 (CO 9)."
-          },
-          {
-            "from_mi": 102.3,
-            "to_mi": 102.44,
-            "name": "CDOT scenic byway: Colorado River Headwaters",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 43100299 (CO 9)."
-          },
-          {
-            "from_mi": 102.72,
-            "to_mi": 103.22,
-            "name": "CDOT scenic byway: Colorado River Headwaters",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 622554654 (CO 9), 622555823 (CO 9)."
-          },
-          {
-            "from_mi": 103.68,
-            "to_mi": 104.08,
-            "name": "CDOT scenic byway: Colorado River Headwaters",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 17060810 (CO 9), 622181870 (US 40)."
-          },
-          {
-            "from_mi": 284.3,
-            "to_mi": 284.89,
-            "name": "CDOT scenic byway: Dinosaur Diamond",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1431001474 (US 40), 17105929 (US 40), 17107356 (US 40)."
+            "from_mi": 284.28,
+            "to_mi": 287.38,
+            "name": "Dinosaur Diamond",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: CO 64, US 40; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 10191163, 10191168, 1431001474, 17106820, 17107356."
           }
         ]
       },
@@ -24476,26 +24213,7 @@
           "sections": 261,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
         },
-        "billboard_bans": [
-          {
-            "from_mi": 19.47,
-            "to_mi": 19.82,
-            "name": "CDOT scenic byway: Lariat Loop",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 49245445 (I 70;US 40)."
-          },
-          {
-            "from_mi": 20.79,
-            "to_mi": 20.9,
-            "name": "CDOT scenic byway: Lariat Loop",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 49245444 (I 70)."
-          },
-          {
-            "from_mi": 32.46,
-            "to_mi": 32.58,
-            "name": "CDOT scenic byway: Mount Blue Sky",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 617944244 (I 70)."
-          }
-        ]
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -26218,6 +25936,26 @@
             "place": "Colorado-Utah line on US-491",
             "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/.; place's road read from OpenStreetMap way 10153409 ref"
           }
+        ],
+        "billboard_bans": [
+          {
+            "from_mi": 0.42,
+            "to_mi": 43.58,
+            "name": "San Juan Skyway",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: US 160, US 550; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 117912677, 117912842, 117912863, 117912892, 117912960, 117912968, 117912990, 117913030, 117913061, 117913106, 1450151137, 1450151138, 1450151142, 1450151143, 1450151144, 1450155083, 1450155084, 1450155085, 1450155086, 1450155087, 1450155089, 1450155091, 1450155092, 1503561363, 1503561365, 1503561366, 17089327, 17090971, 172044538, 193793503, 193793519, 193793526, 193793529, 193793535, 193793538, 193793555, 193793558, 193793562, 193793563, 311201467, 311201469, 311201473, 311201478, 311202074, 311202075, 311202076, 311202077, 311202078, 311202079, 311202080, 311202081, 311202405, 311202407, 311202409, 440198023, 440198026, 519835929, 519835930, 595295270, 595295271, 738046279, 839927004, 866808021, 866808022, 866808023, 866808024, 866808025, 866808026, 866808027, 866808029, 933111425, 933113218."
+          },
+          {
+            "from_mi": 43.43,
+            "to_mi": 46.08,
+            "name": "Trail of the Ancients",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: US 160; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1017450200, 1053663779, 114127848, 1201885438, 17100292, 17100445, 17100828, 311199123, 311199124, 311199127, 311199128, 311199129, 311199130, 311199132, 311201178, 311201179, 311201180, 311201181, 311201466, 311201467, 311201468, 311201469, 311201470, 311201471, 311201472, 311201474, 311201475, 311201477, 311201478, 322249274."
+          },
+          {
+            "from_mi": 56.18,
+            "to_mi": 65.88,
+            "name": "Trail of the Ancients",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: US 491; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1459082686, 310750170, 310750171, 310750173, 310750174, 317015492, 317015493."
+          }
         ]
       },
       "stops": [],
@@ -27882,220 +27620,10 @@
         },
         "billboard_bans": [
           {
-            "from_mi": 0.19,
-            "to_mi": 0.32,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1227608490 (US 550), 52494540 (US 550)."
-          },
-          {
-            "from_mi": 1.92,
-            "to_mi": 2.2,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 291070061 (US 550), 980942607 (US 550)."
-          },
-          {
-            "from_mi": 2.41,
-            "to_mi": 2.72,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 278833646 (US 550)."
-          },
-          {
-            "from_mi": 2.97,
-            "to_mi": 3.86,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 278833646 (US 550)."
-          },
-          {
-            "from_mi": 4.0,
-            "to_mi": 4.15,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1320228588 (US 550), 278833646 (US 550)."
-          },
-          {
-            "from_mi": 4.59,
-            "to_mi": 4.75,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1320228588 (US 550)."
-          },
-          {
-            "from_mi": 7.95,
-            "to_mi": 8.07,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 118016374 (US 550)."
-          },
-          {
-            "from_mi": 10.45,
-            "to_mi": 10.65,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1320228586 (US 550), 17090499 (US 550)."
-          },
-          {
-            "from_mi": 13.58,
-            "to_mi": 14.2,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 17090322 (US 550)."
-          },
-          {
-            "from_mi": 14.64,
-            "to_mi": 15.8,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1173508503 (US 550), 17090322 (US 550)."
-          },
-          {
-            "from_mi": 17.28,
-            "to_mi": 18.06,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1173508503 (US 550), 148776667 (US 550)."
-          },
-          {
-            "from_mi": 19.67,
-            "to_mi": 19.89,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 148776667 (US 550)."
-          },
-          {
-            "from_mi": 21.57,
-            "to_mi": 22.63,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 148776667 (US 550)."
-          },
-          {
-            "from_mi": 23.58,
-            "to_mi": 23.78,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 148776667 (US 550)."
-          },
-          {
-            "from_mi": 27.17,
-            "to_mi": 27.84,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 17141309 (US 550), 738046276 (US 550)."
-          },
-          {
-            "from_mi": 28.31,
-            "to_mi": 32.95,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 17141309 (US 550)."
-          },
-          {
-            "from_mi": 33.21,
-            "to_mi": 39.16,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 17141309 (US 550), 194487914 (US 550), 194487915 (US 550)."
-          },
-          {
-            "from_mi": 39.53,
-            "to_mi": 41.73,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 194487914 (US 550)."
-          },
-          {
-            "from_mi": 42.2,
-            "to_mi": 47.7,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 121115352 (US 550), 194487914 (US 550), 29985489 (US 550)."
-          },
-          {
-            "from_mi": 47.72,
-            "to_mi": 47.83,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1159242672 (US 550), 1459082685 (US 550)."
-          },
-          {
-            "from_mi": 48.1,
-            "to_mi": 50.92,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1159411614 (US 550), 29985494 (US 550)."
-          },
-          {
-            "from_mi": 51.0,
-            "to_mi": 51.15,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1159411614 (US 550)."
-          },
-          {
-            "from_mi": 51.35,
-            "to_mi": 52.65,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1159411614 (US 550), 17141860 (US 550)."
-          },
-          {
-            "from_mi": 53.02,
-            "to_mi": 53.94,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 17141860 (US 550)."
-          },
-          {
-            "from_mi": 54.29,
-            "to_mi": 57.34,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 193698189 (US 550), 193698190 (US 550)."
-          },
-          {
-            "from_mi": 57.84,
-            "to_mi": 62.06,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1159247327 (US 550), 1159411615 (US 550), 1159411616 (US 550), 17114801 (US 550)."
-          },
-          {
-            "from_mi": 62.72,
-            "to_mi": 63.06,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1159411616 (US 550)."
-          },
-          {
-            "from_mi": 64.25,
-            "to_mi": 66.8,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1073455801 (US 550), 1159411616 (US 550), 194351191 (US 550)."
-          },
-          {
-            "from_mi": 66.82,
-            "to_mi": 67.98,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 194351191 (US 550), 194377401 (US 550)."
-          },
-          {
-            "from_mi": 68.28,
-            "to_mi": 70.46,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1299535156 (US 550), 172241464 (US 550)."
-          },
-          {
-            "from_mi": 71.0,
-            "to_mi": 71.85,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 17114417 (US 550), 17114830 (US 550)."
-          },
-          {
-            "from_mi": 72.34,
-            "to_mi": 72.74,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 17114417 (US 550), 17114467 (US 550)."
-          },
-          {
-            "from_mi": 73.02,
-            "to_mi": 73.6,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 117315829 (US 550), 17114467 (US 550)."
-          },
-          {
-            "from_mi": 74.1,
-            "to_mi": 74.36,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 117315829 (US 550)."
-          },
-          {
-            "from_mi": 77.58,
-            "to_mi": 78.03,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 117315829 (US 550)."
-          },
-          {
-            "from_mi": 79.28,
-            "to_mi": 79.64,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 117315829 (US 550)."
+            "from_mi": 0.08,
+            "to_mi": 80.93,
+            "name": "San Juan Skyway",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: CO 62, US 550; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1073455801, 1159242672, 1159242673, 1159247327, 1159411613, 1159411614, 1159411615, 1159411616, 117315829, 1173508503, 1173508504, 118016374, 121115352, 1227608490, 1227608493, 1299535156, 1320228586, 1320228587, 1320228588, 1414774941, 1459082684, 148776667, 148776673, 17090322, 17090499, 17113607, 17114417, 17114467, 17114469, 17114801, 17114830, 17141309, 17141860, 172241464, 172360158, 172360162, 193698189, 193698190, 194351191, 194351192, 194377401, 194487914, 194487915, 278833646, 291070061, 29985489, 29985494, 29985495, 32526724, 52494540, 659513607, 738046276, 932109235, 979898331, 980942607."
           }
         ]
       },
@@ -29279,40 +28807,10 @@
         },
         "billboard_bans": [
           {
-            "from_mi": 0.31,
-            "to_mi": 0.61,
-            "name": "CDOT scenic byway: San Juan Skyway",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1227608525 (US 550), 17090971 (US 550)."
-          },
-          {
-            "from_mi": 0.87,
-            "to_mi": 1.44,
-            "name": "CDOT scenic byway: Tracks Across Borders",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 17089333 (US 160;US 550), 17092513 (US 160;US 550), 172398566 (US 160;US 550)."
-          },
-          {
-            "from_mi": 3.03,
-            "to_mi": 3.2,
-            "name": "CDOT scenic byway: Tracks Across Borders",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 1210581561 (US 160;US 550), 123521737 (US 160;US 550)."
-          },
-          {
-            "from_mi": 4.51,
-            "to_mi": 5.17,
-            "name": "CDOT scenic byway: Tracks Across Borders",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 117912908 (US 160;US 550), 123521733 (US 160;US 550), 1317002790 (US 160;US 550)."
-          },
-          {
-            "from_mi": 5.28,
-            "to_mi": 5.52,
-            "name": "CDOT scenic byway: Tracks Across Borders",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 117912908 (US 160;US 550), 478196487 (US 160;US 550)."
-          },
-          {
-            "from_mi": 5.97,
-            "to_mi": 6.29,
-            "name": "CDOT scenic byway: Tracks Across Borders",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 539147835 (US 160), 539147836 (US 160)."
+            "from_mi": 0.58,
+            "to_mi": 8.18,
+            "name": "Tracks Across Borders",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: CO 172, US 160, US 160;US 550; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 117912818, 117912908, 1210581560, 1210581561, 1210581562, 1210581563, 1210581564, 1210581565, 1210581566, 1210581567, 1210581568, 1210581569, 1210581570, 1210581571, 1210581572, 123521733, 123521737, 1301871702, 1317002790, 1366753854, 1393611246, 1393611247, 1459185105, 17089332, 17089333, 17092508, 17092513, 172398566, 172398567, 281011730, 281011733, 291070565, 317020811, 440198018, 440198023, 478196485, 478196487, 539147835, 539147836, 539147838, 539147846, 731238571."
           }
         ]
       },
@@ -30421,7 +29919,8 @@
           "name": "mountainous",
           "sections": 257,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -31485,14 +30984,7 @@
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
         },
-        "billboard_bans": [
-          {
-            "from_mi": 4.84,
-            "to_mi": 4.96,
-            "name": "CDOT scenic byway: Cache la Poudre--North Park",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 294281428 (CO 14), 322982985 (CO 14)."
-          }
-        ]
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -34802,14 +34294,7 @@
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
         },
-        "billboard_bans": [
-          {
-            "from_mi": 4.62,
-            "to_mi": 4.8,
-            "name": "CDOT scenic byway: Cache la Poudre--North Park",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 322982983 (CO 14), 322982987 (CO 14)."
-          }
-        ]
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -36848,14 +36333,7 @@
           "sections": 207,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
         },
-        "billboard_bans": [
-          {
-            "from_mi": 4.61,
-            "to_mi": 4.79,
-            "name": "CDOT scenic byway: Cache la Poudre--North Park",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 322982983 (CO 14), 322982987 (CO 14)."
-          }
-        ]
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -38036,52 +37514,10 @@
         },
         "billboard_bans": [
           {
-            "from_mi": 0.83,
-            "to_mi": 0.96,
-            "name": "CDOT scenic byway: Cache la Poudre--North Park",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 278143118 (US 287;CO 14), 322900296 (US 287;CO 14)."
-          },
-          {
-            "from_mi": 2.27,
-            "to_mi": 2.64,
-            "name": "CDOT scenic byway: Cache la Poudre--North Park",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 117951732 (US 287;CO 14), 322897115 (US 287;CO 14)."
-          },
-          {
-            "from_mi": 2.95,
-            "to_mi": 3.6,
-            "name": "CDOT scenic byway: Cache la Poudre--North Park",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 278143123 (US 287;CO 14), 322875392 (US 287;CO 14)."
-          },
-          {
-            "from_mi": 4.16,
-            "to_mi": 4.38,
-            "name": "CDOT scenic byway: Cache la Poudre--North Park",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 106208497 (US 287;CO 14), 322875382 (US 287;CO 14)."
-          },
-          {
-            "from_mi": 6.31,
-            "to_mi": 6.74,
-            "name": "CDOT scenic byway: Cache la Poudre--North Park",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 177242515 (US 287;CO 14), 322872717 (US 287;CO 14)."
-          },
-          {
-            "from_mi": 7.14,
-            "to_mi": 8.62,
-            "name": "CDOT scenic byway: Cache la Poudre--North Park",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 117951706 (US 287;CO 14), 173697322 (US 287;CO 14), 322872717 (US 287;CO 14)."
-          },
-          {
-            "from_mi": 8.94,
-            "to_mi": 9.37,
-            "name": "CDOT scenic byway: Cache la Poudre--North Park",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 322772983 (US 287;CO 14), 322778914 (US 287;CO 14)."
-          },
-          {
-            "from_mi": 9.63,
-            "to_mi": 10.43,
-            "name": "CDOT scenic byway: Cache la Poudre--North Park",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 49174415 (US 287;CO 14), 49174584 (US 287)."
+            "from_mi": 0.62,
+            "to_mi": 10.48,
+            "name": "Cache la Poudre--North Park",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: CO 14, US 287, US 287;CO 14; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 106208490, 106208497, 106208506, 117951693, 117951706, 117951762, 117951811, 1181509522, 1308693408, 1308695242, 134552324, 134552334, 134552337, 134584350, 161629866, 177242506, 177242512, 177242515, 278143118, 278143123, 290286623, 322409248, 322771305, 322772982, 322772983, 322772985, 322773471, 322778910, 322778914, 322778922, 322872714, 322872717, 322872718, 322875382, 322875383, 322875387, 322875392, 322890815, 322897105, 322897108, 322897112, 322897115, 322897116, 322897123, 322897133, 322900292, 322900296, 366604219, 366604220, 47472381, 48730897, 49174415, 49174416, 49174426, 49174427, 49174432, 6173000, 769217823."
           }
         ]
       },
@@ -39651,14 +39087,7 @@
           "sections": 246,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
         },
-        "billboard_bans": [
-          {
-            "from_mi": 67.95,
-            "to_mi": 68.07,
-            "name": "CDOT scenic byway: Grand Mesa",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 120084153 (I 70), 120084158 (I 70)."
-          }
-        ]
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -41489,34 +40918,10 @@
         },
         "billboard_bans": [
           {
-            "from_mi": 6.36,
-            "to_mi": 6.52,
-            "name": "CDOT scenic byway: Dinosaur Diamond",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 279941742 (I 70 Business;US 6;US 50), 32181382 (I 70)."
-          },
-          {
-            "from_mi": 26.17,
-            "to_mi": 26.44,
-            "name": "CDOT scenic byway: Dinosaur Diamond",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 32117125 (I 70)."
-          },
-          {
-            "from_mi": 26.99,
-            "to_mi": 27.28,
-            "name": "CDOT scenic byway: Dinosaur Diamond",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 32116643 (I 70)."
-          },
-          {
-            "from_mi": 29.62,
-            "to_mi": 29.85,
-            "name": "CDOT scenic byway: Dinosaur Diamond",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 32116643 (I 70)."
-          },
-          {
-            "from_mi": 31.02,
-            "to_mi": 31.21,
-            "name": "CDOT scenic byway: Dinosaur Diamond",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 32116643 (I 70)."
+            "from_mi": 9.18,
+            "to_mi": 12.13,
+            "name": "Dinosaur Diamond",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: US 6;US 50; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1296556245, 313906705, 313906712, 313906715, 313910755, 313910975, 313910976, 313910977, 313962904, 313962908, 313962909, 313962911, 313962912, 313962913, 515927114, 688059741, 688060265, 688254167."
           }
         ]
       },
@@ -42795,10 +42200,10 @@
         },
         "billboard_bans": [
           {
-            "from_mi": 0.05,
-            "to_mi": 0.17,
-            "name": "CDOT scenic byway: Santa Fe Trail",
-            "source": "Colorado SB21-263 / C.R.S. 43-1-401; official CDOT Colorado Scenic and Historic Byways line dataset 6aqe-63uq (map ewqz-5hmi), including designated America's Byways. Scenic overlap projected onto archived route geometry and verified against OpenStreetMap US PBF dated 2026-09-29 at way(s) 460403616 (US 50;US 287), 460403619 (US 287;US 385)."
+            "from_mi": 0.03,
+            "to_mi": 7.83,
+            "name": "Santa Fe Trail",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: US 50, US 50;US 287, US 50;US 385; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 17124465, 17125171, 17125318, 225310793, 296051584, 307449639, 307449640, 307463897, 307463898, 307494684, 307508380, 307508381, 307508382, 307508384, 307508385, 307508389, 307508390, 307508391, 460403508, 460403511, 460403516, 460403517, 460403518, 460403544, 460403546, 460403547, 460403551, 460403552, 460403558, 460403559, 460403562, 460403567, 460403572, 460403573, 460403574, 460403583, 460403585, 460403587, 460403589, 460403595, 460403597, 460403598, 460403612, 460403616, 460403617, 460562434, 460562435, 460562436, 460562437, 460562444, 460562445, 460562446, 460563801, 460563807, 460563809, 460565647, 460565648, 460572156, 49090012, 52080565, 52080613, 52116495, 979894614, 979895855."
           }
         ]
       },
@@ -44042,7 +43447,8 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "terrain": "flat",
       "divided": true,
@@ -44564,7 +43970,8 @@
           "name": "rolling",
           "sections": 32,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "terrain": "flat",
       "divided": true,
@@ -45820,7 +45227,8 @@
           "name": "level",
           "sections": 578,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "terrain": "mountain",
       "divided": false,
@@ -50943,7 +50351,8 @@
           "name": "level",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "terrain": "hills",
       "divided": true,
@@ -53950,7 +53359,8 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "terrain": "hills",
       "divided": true,
@@ -58581,7 +57991,8 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "terrain": "hills",
       "divided": true,
@@ -59637,7 +59048,8 @@
           "name": "mountainous",
           "sections": 115,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -61253,7 +60665,8 @@
           "name": "rolling",
           "sections": 424,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -62625,7 +62038,8 @@
           "name": "rolling",
           "sections": 288,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "terrain": "hills",
       "divided": true,
