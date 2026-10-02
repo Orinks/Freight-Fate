@@ -638,7 +638,7 @@
             "spoken": "Crossing the Samish River",
             "lat": 48.52426,
             "lon": -122.34915,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 480103129 (Samish River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 480103129 (Samish River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Sedro-Woolley",
@@ -673,7 +673,7 @@
             "spoken": "Crossing the Skagit River",
             "lat": 48.44493,
             "lon": -122.34142,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 321321525 (Skagit River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 321321525 (Skagit River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lake Ketchum",
@@ -728,7 +728,7 @@
             "spoken": "Crossing the Stillaguamish River",
             "lat": 48.19693,
             "lon": -122.21032,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 37786032 (Stillaguamish River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 37786032 (Stillaguamish River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Warm Beach",
@@ -891,7 +891,7 @@
             "spoken": "Crossing the Snohomish River",
             "lat": 47.99311,
             "lon": -122.18001,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1286993794 (Snohomish River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1286993794 (Snohomish River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Northwest Snohomish",
@@ -1602,7 +1602,8 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -2789,7 +2790,8 @@
             "lanes": 4,
             "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
           }
-        ]
+        ],
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -3381,7 +3383,7 @@
             "spoken": "Crossing the Cowlitz River",
             "lat": 46.14729,
             "lon": -122.91385,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 233815967 (Cowlitz River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 233815967 (Cowlitz River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Castle Rock",
@@ -3400,7 +3402,7 @@
             "spoken": "Crossing the Kalama River",
             "lat": 46.03529,
             "lon": -122.85736,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 369195559 (Kalama River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 369195559 (Kalama River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Kalama",
@@ -3437,7 +3439,7 @@
             "spoken": "Crossing the Lewis River",
             "lat": 45.89053,
             "lon": -122.7337,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 130208736 (Lewis River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 130208736 (Lewis River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Saint Helens",
@@ -3528,7 +3530,7 @@
             "spoken": "Crossing the Columbia River",
             "lat": 45.57631,
             "lon": -122.54531,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1394004134 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1394004134 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Fairview",
@@ -3619,7 +3621,7 @@
             "spoken": "Crossing the Willamette River",
             "lat": 45.5177,
             "lon": -122.66917,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 164125011 (Willamette River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 164125011 (Willamette River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Sylvan Hill",
@@ -4316,7 +4318,8 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -6003,7 +6006,7 @@
             "spoken": "Crossing the Columbia River",
             "lat": 46.94329,
             "lon": -119.96874,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 385784235 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 385784235 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Vantage",
@@ -6057,7 +6060,7 @@
             "spoken": "Crossing the Yakima River",
             "lat": 47.17999,
             "lon": -120.89644,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 32663677 (Yakima River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 32663677 (Yakima River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "South Cle Elum",
@@ -6094,7 +6097,7 @@
             "spoken": "Crossing the South Fork Snoqualmie River",
             "lat": 47.47397,
             "lon": -121.77941,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 32510050 (South Fork Snoqualmie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 32510050 (South Fork Snoqualmie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "North Bend",
@@ -7594,7 +7597,15 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": [
+          {
+            "from_mi": 77.97,
+            "to_mi": 160.42,
+            "name": "Washington I-90 Scenic System: East Sunset Way to Thorp Road",
+            "source": "RCW 47.39.020; off-premise sign restriction: RCW 47.42.040; designated segment: Washington I-90 Scenic System: East Sunset Way to Thorp Road; route ref I 90; OSM route refs: I 90; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1007232879, 1102252234, 1102252236, 1189458296, 1213079123, 1242336418, 1242336419, 1242336420, 1242336421, 1242336423, 1242336424, 1242336425, 1242336426, 1242336427, 1242336428, 1242336429, 1242336430, 1242336431, 1242336432, 1249407526, 1249407527, 133090787, 133397748, 1525395341, 1525395342, 1525633456, 174667337, 174667338, 174667341, 215951058, 215951059, 215965225, 23746824, 23746826, 23746827, 249757368, 249757370, 249757371, 249757372, 25613635, 25613642, 25613643, 25613649, 25613650, 25613651, 25613866, 25613868, 25613873, 26135247, 26135249, 26599194, 26986595, 26986917, 27053841, 27053842, 27053843, 31233751, 31233752, 317011530, 32835809, 32837405, 32837406, 32837507, 32837508, 364274505, 364274506, 36939214, 36939217, 37427930, 37427931, 37427938, 37427939, 37427940, 37427943, 37427944, 37427946, 37428257, 37428258, 37844995, 37844997, 37844999, 39132621, 39132626, 41821373, 41821398, 41821406, 421781135, 43176251, 43176252, 51543997, 51544000, 5159916, 52638524, 53247377, 53247378, 58679658, 58679659, 58679660, 592331633, 60786859, 60823882, 60823887, 60823896, 60823902, 60823904, 60823905, 60823912, 60823915, 60823926, 60825942, 60825946, 621874261, 621874264, 621898654, 622750554, 622750571, 622750575, 623536807, 65229955, 65229963, 65229964, 65229968, 65229971, 65229980, 65229981, 65229982, 65229983, 65230000, 65230009, 65230011, 65230022, 65230034, 65230058, 65230064, 654846308, 654846309, 722001412, 722001414, 722001416, 722001417, 722001418, 722001420, 722001421, 73923129, 761819569, 761862693, 761862694, 773621006, 793288750, 793288759, 799170891, 799170900, 799170901, 799170902, 799193496, 799193497, 84618155, 84618181, 84618182, 970886543, 971545045, 971598607, 971602474, 971602475, 971631308, 971635186, 999464574."
+          }
+        ]
       },
       "stops": [
         {
@@ -8379,7 +8390,7 @@
             "spoken": "Crossing the Columbia River",
             "lat": 47.40985,
             "lon": -120.29552,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 385784225 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 385784225 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cashmere",
@@ -8592,7 +8603,8 @@
           "name": "level",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -9303,7 +9315,7 @@
             "spoken": "Crossing the Deschutes River",
             "lat": 47.02387,
             "lon": -122.9031,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 232356567 (Deschutes River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 232356567 (Deschutes River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Tenino",
@@ -9367,7 +9379,7 @@
             "spoken": "Crossing the Skookumchuck River",
             "lat": 46.72097,
             "lon": -122.97657,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1004635693 (Skookumchuck River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1004635693 (Skookumchuck River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Centralia",
@@ -9402,7 +9414,7 @@
             "spoken": "Crossing the Newaukum River",
             "lat": 46.5984,
             "lon": -122.90222,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 906942186 (Newaukum River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 906942186 (Newaukum River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Napavine",
@@ -9459,7 +9471,7 @@
             "spoken": "Crossing the Cowlitz River",
             "lat": 46.41433,
             "lon": -122.89018,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 233815967 (Cowlitz River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 233815967 (Cowlitz River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Vader",
@@ -9478,7 +9490,7 @@
             "spoken": "Crossing the Toutle River",
             "lat": 46.31073,
             "lon": -122.91387,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 697308273 (Toutle River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 697308273 (Toutle River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Mount St. Helens Visitor Center (southbound)",
@@ -10115,7 +10127,8 @@
           "name": "rolling",
           "sections": 621,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -11979,7 +11992,7 @@
             "spoken": "Crossing the Dosewallips River",
             "lat": 47.69015,
             "lon": -122.89897,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 302898259 (Dosewallips River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 302898259 (Dosewallips River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Silverdale",
@@ -12025,7 +12038,7 @@
             "spoken": "Crossing the Skokomish River",
             "lat": 47.31,
             "lon": -123.17668,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 37473842 (Skokomish River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 37473842 (Skokomish River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Shelton",
@@ -12416,7 +12429,15 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": [
+          {
+            "from_mi": 0.0,
+            "to_mi": 117.93,
+            "name": "Washington US-101 Olympic Peninsula Scenic System",
+            "source": "RCW 47.39.020; off-premise sign restriction: RCW 47.42.040; designated segment: Washington US-101 Olympic Peninsula Scenic System; route ref US 101; OSM route refs: US 101; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1019898252, 1042348925, 1042348926, 1078070113, 1124030341, 119208846, 119208989, 119209078, 119209110, 122741980, 122741982, 1264414875, 1264414877, 1264414879, 1264414881, 1264414883, 1264414884, 1264414885, 1264414887, 1264414888, 1264414889, 1264414891, 1264414893, 1264414895, 1264414897, 1264414899, 1264414901, 1264415653, 1264415655, 1304530312, 1304530317, 1306499663, 1306499874, 133397763, 133397764, 1367178365, 140166374, 140166375, 1469673703, 1469673704, 1469673705, 1484394307, 1484394308, 1484394309, 1484394312, 1484394313, 1484394318, 1484394319, 1502740779, 1502740922, 1502740923, 1502740924, 1502740927, 1514047964, 1549465887, 1549465888, 171699649, 174016997, 215656968, 215656969, 215656970, 215656973, 215656974, 230617240, 23842014, 23842015, 23842154, 23842155, 23843908, 23843923, 23843925, 256498481, 256498482, 281091347, 292510212, 292510213, 292510214, 292510215, 303289623, 303289627, 303289628, 303292541, 303292543, 303292553, 313508090, 313508091, 313508092, 32883502, 32884558, 32884981, 32884982, 32885934, 32888288, 32888290, 32888292, 32888293, 32888297, 32888300, 32888590, 32888596, 32888600, 32888601, 32896938, 32896939, 32896945, 32896946, 32896947, 32897467, 32897471, 32916637, 32916638, 32916780, 32916969, 32917090, 32917094, 32917098, 32917155, 32917361, 32917372, 32917552, 32917553, 32917638, 32917640, 33167664, 33167665, 33167794, 33262934, 33262935, 33262951, 33263124, 33263125, 33292045, 33292046, 33292709, 33349362, 33349363, 33349373, 33387619, 354389053, 384017130, 388779667, 388779668, 388779673, 426160707, 441855955, 441855956, 441855957, 441855959, 441855960, 441855962, 441856524, 441856525, 441856526, 441856527, 441856528, 441856529, 441856530, 441864342, 446440433, 479443164, 480215516, 480228320, 506291016, 506291017, 506291092, 506291093, 506291099, 525505921, 525505922, 525505923, 525735172, 56052061, 570684410, 570684417, 570684418, 571758385, 571761308, 571766898, 571767656, 571773071, 571774775, 571776435, 571776921, 571777394, 571780551, 572495866, 577791745, 5857138, 5861906, 5861929, 5861978, 5907284, 590978755, 590978758, 5918168, 6194789, 6194820, 692311399, 694452851, 696633441, 696633442, 705464561, 720087618, 720087621, 720087623, 720087624, 746884057, 746884059, 746884061, 746884062, 746884519, 746884521, 746894621, 746894934, 746894935, 746899877, 746899878, 746900064, 746961397, 747303830, 747303831, 761580794, 761580796, 761580798, 761580800, 761580802, 761585859, 761585861, 761585865, 77414691, 784680542, 784680543, 789029875, 814354230, 815461378, 821533404, 82479142, 82479144, 837904925, 858734373, 858750014, 858750015, 868843239, 869990482, 935179491, 935179499, 937301951, 937821266, 937830090, 961627424, 961627429, 961630730, 961630731, 961630736, 963499639, 975152849, 975152850."
+          }
+        ]
       },
       "stops": [
         {
@@ -13854,7 +13875,7 @@
             "spoken": "Crossing the Dungeness River",
             "lat": 48.07647,
             "lon": -123.1507,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 761601731 (Dungeness River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 761601731 (Dungeness River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Sequim",
@@ -14456,7 +14477,15 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": [
+          {
+            "from_mi": 0.0,
+            "to_mi": 36.23,
+            "name": "Washington US-101 Olympic Peninsula Scenic System",
+            "source": "RCW 47.39.020; off-premise sign restriction: RCW 47.42.040; designated segment: Washington US-101 Olympic Peninsula Scenic System; route ref US 101; OSM route refs: US 101; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1019559123, 1019898252, 119209078, 119209110, 1304530312, 1304530317, 1306499663, 1306499874, 1307155581, 1307155582, 140166375, 1484394306, 1484394308, 1484394309, 1484394312, 1484394313, 1484394318, 1502740779, 1502740922, 1502740923, 1502740924, 1502740927, 1513672210, 1549465887, 230617240, 281091347, 292510212, 292510213, 292510214, 292510215, 303289623, 303289627, 303289628, 303292541, 303292543, 303292553, 313508090, 313508091, 313508092, 33167665, 33167794, 33262934, 33262935, 33262951, 33263124, 33263125, 33292045, 33292046, 33292709, 33349362, 33349363, 33349373, 33387619, 388779667, 388779668, 388779669, 388779673, 441864342, 479443164, 480215516, 480228320, 506291016, 506291017, 506291092, 506291093, 506291099, 525505921, 525505922, 525505923, 525735172, 570684410, 570684417, 570684418, 571758385, 571761308, 571766898, 571767656, 571773071, 571774775, 571776435, 571776921, 571777394, 571780551, 572495866, 577791745, 5857138, 5861906, 5861929, 5861978, 590978755, 590978758, 5918168, 746884519, 746884521, 746894621, 746899877, 746899878, 746900064, 746961397, 761580793, 761580795, 761580796, 761580798, 761580800, 761580801, 761580802, 789029875, 82479142, 858750014, 961627424, 961627429, 961627430, 961630731, 961630736."
+          }
+        ]
       },
       "stops": [
         {
@@ -15060,9 +15089,9 @@
             "kind": "point",
             "at_mi": 9.6,
             "spoken": "Crossing the Duwamish River",
-            "lat": 47.48813,
-            "lon": -122.2653,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 26229371 (Duwamish River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "lat": 47.4881,
+            "lon": -122.26533,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 1240970 (Duwamish River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Burien",
@@ -15241,7 +15270,7 @@
             "spoken": "Crossing the Puyallup River",
             "lat": 47.2405,
             "lon": -122.39987,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 25891150 (Puyallup River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 25891150 (Puyallup River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Midland",
@@ -15752,7 +15781,8 @@
             "lanes": 4,
             "source": "Derived from FHWA Highway Performance Monitoring System (HPMS) AADT and through-lane counts: median of HPMS sections snapping within 250 m of a 5-mile window of the leg, rounded to the nearest 500, lone dips between agreeing neighbours carried across. Sections queried from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view) and snapped to checked-in route geometry, accessed 2026-07-05: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
           }
-        ]
+        ],
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -17593,7 +17623,7 @@
             "spoken": "Crossing the South Fork Snoqualmie River",
             "lat": 47.39411,
             "lon": -121.47585,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 32506322 (South Fork Snoqualmie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 32506322 (South Fork Snoqualmie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Windy Pass",
@@ -17651,7 +17681,7 @@
             "spoken": "Crossing the Teanaway River",
             "lat": 47.19555,
             "lon": -120.78512,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1236103592 (Teanaway River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1236103592 (Teanaway River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Thorp",
@@ -18105,7 +18135,15 @@
           "name": "mountainous",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": [
+          {
+            "from_mi": 16.84,
+            "to_mi": 84.98,
+            "name": "Washington I-90 Scenic System: East Sunset Way to Thorp Road",
+            "source": "RCW 47.39.020; off-premise sign restriction: RCW 47.42.040; designated segment: Washington I-90 Scenic System: East Sunset Way to Thorp Road; route ref I 90; OSM route refs: I 90; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1007232879, 1012095795, 1069952413, 1102252235, 1177904397, 1189458298, 1192569382, 1192569384, 1192802275, 1213079123, 1242336423, 1242336424, 1242336433, 1307907546, 133090776, 133397745, 1369829938, 1525395343, 159429927, 174667339, 174667340, 174667341, 215950519, 215950521, 215951059, 215965225, 222239387, 23746828, 23746830, 249757369, 25613634, 25613635, 25613637, 25613645, 25613646, 25613650, 25613651, 25613867, 25613868, 25613870, 26135249, 26135254, 26599197, 26986593, 26986918, 27053842, 27053843, 31233748, 31233750, 314935900, 32837404, 32837406, 32837505, 32837506, 364274507, 364274508, 37427937, 37428259, 37428260, 37844995, 37844997, 41821373, 421781135, 43176247, 43176248, 436143536, 438224736, 51543996, 51544006, 5156355, 52638521, 52638524, 53247379, 53247380, 592331639, 60786860, 60823887, 60823905, 60823908, 60823911, 60823915, 60823916, 60823918, 60825935, 60825939, 621874260, 621874262, 621874263, 621898655, 622750554, 622750566, 622750568, 623536810, 623957747, 65229955, 65229972, 65229982, 65229986, 65229994, 65230008, 65230022, 65230023, 65230026, 65230028, 65230060, 65230064, 654846310, 654846311, 722001413, 722001415, 722001418, 722001419, 722001422, 722001423, 73923130, 73923131, 761819570, 761862693, 761862694, 773621028, 793288752, 793288757, 793288758, 799170894, 799170898, 799170901, 799170903, 799170904, 84618157, 84618183, 84618184, 971545045, 971578874, 971594542, 971594543, 971631307, 971631308, 987963852, 987963853."
+          }
+        ]
       },
       "stops": [
         {
@@ -21784,7 +21822,7 @@
             "spoken": "Crossing the Columbia River",
             "lat": 46.22521,
             "lon": -119.13574,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1395752748 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1395752748 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Finley",
@@ -21865,7 +21903,7 @@
             "spoken": "Crossing the Umatilla River",
             "lat": 45.66627,
             "lon": -118.8167,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 30154743 (Umatilla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 30154743 (Umatilla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pendleton (westbound)",
@@ -21899,7 +21937,7 @@
             "spoken": "Crossing the Grande Ronde River",
             "lat": 45.35213,
             "lon": -118.17221,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 895747816 (Grande Ronde River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 895747816 (Grande Ronde River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Union",
@@ -21918,7 +21956,7 @@
             "spoken": "Crossing the North Powder River",
             "lat": 45.01875,
             "lon": -117.92224,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1256678292 (North Powder River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1256678292 (North Powder River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Powder River",
@@ -21928,7 +21966,7 @@
             "spoken": "Crossing the Powder River",
             "lat": 44.98204,
             "lon": -117.89071,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 221962467 (Powder River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 221962467 (Powder River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Haines",
@@ -23545,7 +23583,8 @@
           "name": "level",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -24762,7 +24801,7 @@
             "spoken": "Crossing the Spokane River",
             "lat": 47.69665,
             "lon": -117.04056,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 56702599 (Spokane River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 56702599 (Spokane River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Stateline",
@@ -25205,7 +25244,8 @@
           "name": "level",
           "sections": 313,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -26615,7 +26655,7 @@
             "spoken": "Crossing the Palouse River",
             "lat": 46.89008,
             "lon": -117.36412,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 113545762 (Palouse River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 113545762 (Palouse River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "South Fork Palouse River",
@@ -26625,7 +26665,7 @@
             "spoken": "Crossing the South Fork Palouse River",
             "lat": 46.87623,
             "lon": -117.36495,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 113581042 (South Fork Palouse River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 113581042 (South Fork Palouse River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Albion",
@@ -26680,7 +26720,7 @@
             "spoken": "Crossing the Clearwater River",
             "lat": 46.41882,
             "lon": -117.00028,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1323726887 (Clearwater River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1323726887 (Clearwater River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Asotin",
@@ -26959,7 +26999,15 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": [
+          {
+            "from_mi": 2.58,
+            "to_mi": 94.83,
+            "name": "Washington US-195 Scenic System",
+            "source": "RCW 47.39.020; off-premise sign restriction: RCW 47.42.040; designated segment: Washington US-195 Scenic System; route ref US 195; OSM route refs: US 195; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 113545760, 113545766, 113545768, 113545770, 117922042, 133397765, 1373788382, 1523243437, 172772664, 172772665, 179300698, 207404065, 220214016, 220214480, 220214481, 220214920, 220214922, 220335310, 220335312, 220336394, 220336395, 220348969, 220348970, 220349640, 220349642, 220351167, 220476521, 220476522, 220476735, 234000394, 234003488, 242555037, 242555038, 246464984, 246464988, 246472409, 311677282, 311677283, 33067653, 34020172, 369582193, 369582195, 389462054, 389462055, 389830630, 39453141, 39453142, 39453143, 39453144, 40214194, 40214829, 40214830, 40215592, 40218293, 40220596, 40220617, 40220622, 421949590, 421949591, 421949592, 421949593, 421949595, 421949596, 421949597, 421949598, 421949600, 421949602, 445853640, 445853642, 445853644, 446236168, 446236169, 446236170, 446236171, 446236172, 446236173, 446236174, 446236176, 446236177, 453617601, 456136363, 456138703, 460237180, 460237190, 52829067, 52829068, 52829069, 576917278, 576917279, 576921133, 576921140, 576921150, 577189938, 577189951, 577189960, 577189974, 577189994, 596046029, 596051204, 596051207, 596051211, 596051214, 596051219, 596051227, 596051231, 596903627, 6146210, 6147301, 6151516, 6154321, 6191392, 6194693, 6194708, 6194709, 6195046, 6195190, 6195299, 6195514, 658523464, 658523471, 846398999, 934902057, 934902059, 934902061, 934902062."
+          }
+        ]
       },
       "stops": [
         {
@@ -28285,7 +28333,8 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -32239,7 +32288,7 @@
             "spoken": "Crossing the Columbia River",
             "lat": 46.94329,
             "lon": -119.96874,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 385784235 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 385784235 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Vantage",
@@ -32277,7 +32326,7 @@
             "spoken": "Crossing the Yakima River",
             "lat": 47.04376,
             "lon": -120.63887,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 32663694 (Yakima River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 32663694 (Yakima River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Thorp",
@@ -32314,7 +32363,7 @@
             "spoken": "Crossing the Cle Elum River",
             "lat": 47.18473,
             "lon": -121.00428,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 32663663 (Cle Elum River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 32663663 (Cle Elum River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Easton",
@@ -32361,7 +32410,7 @@
             "spoken": "Crossing the South Fork Snoqualmie River",
             "lat": 47.42947,
             "lon": -121.62947,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 32510086 (South Fork Snoqualmie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 32510086 (South Fork Snoqualmie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "North Bend",
@@ -32849,7 +32898,15 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": [
+          {
+            "from_mi": 180.15,
+            "to_mi": 262.45,
+            "name": "Washington I-90 Scenic System: East Sunset Way to Thorp Road",
+            "source": "RCW 47.39.020; off-premise sign restriction: RCW 47.42.040; designated segment: Washington I-90 Scenic System: East Sunset Way to Thorp Road; route ref I 90; OSM route refs: I 90; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1007232879, 1102252234, 1102252236, 1189458296, 1189458297, 1213079123, 1242336418, 1242336419, 1242336420, 1242336423, 1242336424, 1242336425, 1242336426, 1242336427, 1242336428, 1242336429, 1242336430, 1242336431, 1242336432, 1249407526, 1249407527, 133090786, 133090787, 133397748, 1525395341, 1525395342, 1525633456, 174667337, 174667338, 174667341, 215951058, 215951059, 215965225, 23746824, 23746826, 23746827, 249757368, 249757370, 249757372, 25613634, 25613635, 25613642, 25613643, 25613649, 25613650, 25613651, 25613865, 25613866, 25613868, 25613873, 26135247, 26135249, 26599194, 26986595, 26986917, 27053841, 27053842, 27053843, 31233752, 317011530, 32835809, 32837406, 32837507, 32837508, 364274505, 364274506, 36939213, 36939214, 36939217, 37427931, 37427938, 37427939, 37427940, 37427943, 37427944, 37427946, 37428258, 37844995, 37844997, 37844999, 39132621, 39132626, 41821373, 41821398, 41821406, 421781135, 43176251, 43176252, 51543997, 51544000, 5159916, 52638523, 52638524, 53247377, 53247378, 58679658, 58679659, 58679660, 592331633, 60786859, 60823882, 60823887, 60823889, 60823902, 60823904, 60823905, 60823909, 60823912, 60823915, 60823926, 60825942, 60825946, 621874261, 621874264, 621898654, 622750554, 622750571, 622750575, 623536807, 65229955, 65229963, 65229964, 65229968, 65229971, 65229980, 65229982, 65229983, 65230000, 65230009, 65230011, 65230022, 65230034, 65230058, 65230064, 654846308, 654846309, 722001412, 722001414, 722001416, 722001417, 722001418, 722001421, 73923129, 761819569, 761862693, 761862694, 773621006, 793288750, 793288759, 799170891, 799170892, 799170900, 799170901, 799170902, 799193496, 799193497, 84618155, 84618181, 84618182, 970886543, 971545045, 971598607, 971602474, 971602475, 971631308, 971635186, 999464574."
+          }
+        ]
       },
       "stops": [
         {
@@ -34607,7 +34664,7 @@
             "spoken": "Crossing the Columbia River",
             "lat": 47.40985,
             "lon": -120.29552,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 385784225 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 385784225 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cashmere",
@@ -35408,7 +35465,8 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -36260,7 +36318,7 @@
             "spoken": "Crossing the Nisqually River",
             "lat": 47.07183,
             "lon": -122.70429,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 251827751 (Nisqually River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 251827751 (Nisqually River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Tanglewilde",
@@ -36733,7 +36791,8 @@
           "name": "rolling",
           "sections": 82,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -38300,7 +38359,7 @@
             "spoken": "Crossing the Puyallup River",
             "lat": 47.24039,
             "lon": -122.39942,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 25891150 (Puyallup River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 25891150 (Puyallup River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Waller",
@@ -38418,7 +38477,7 @@
             "spoken": "Crossing the Green River",
             "lat": 47.3033,
             "lon": -122.17768,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 25797405 (Green River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 25797405 (Green River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Covington",
@@ -38874,7 +38933,15 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": [
+          {
+            "from_mi": 37.62,
+            "to_mi": 112.14,
+            "name": "Washington I-90 Scenic System: East Sunset Way to Thorp Road",
+            "source": "RCW 47.39.020; off-premise sign restriction: RCW 47.42.040; designated segment: Washington I-90 Scenic System: East Sunset Way to Thorp Road; route ref I 90; OSM route refs: I 90; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1007232879, 1012095795, 1069952413, 1102252235, 1189458298, 1192569382, 1192569384, 1192569385, 1192802275, 1213079123, 1242336423, 1242336424, 1307907546, 1369829938, 1525395343, 1525633456, 159429927, 174667339, 174667340, 174667341, 215965225, 222239387, 23746830, 25613634, 25613635, 25613637, 25613645, 25613646, 25613650, 25613651, 25613867, 25613868, 25613869, 25613870, 26135249, 26135250, 26135254, 26599197, 26986918, 27053842, 27053843, 31233748, 31233750, 314935900, 32837404, 32837406, 32837505, 32837506, 36939213, 36939214, 36939217, 37427934, 37427937, 37428259, 37428260, 39132629, 39132634, 41821373, 43176247, 43176248, 436143536, 438224736, 58679657, 58679660, 592331639, 592331645, 60823887, 60823905, 60823908, 60823911, 60823915, 60823916, 60823918, 60825935, 60825939, 622750554, 623536810, 65229955, 65229970, 65229972, 65229994, 65230008, 65230011, 65230022, 65230023, 65230026, 65230028, 65230034, 65230058, 65230060, 65230064, 654846311, 722001413, 722001415, 722001418, 722001419, 722001423, 73923130, 761819570, 761862693, 761862694, 773621028, 793288752, 799170893, 799170897, 799170898, 799170901, 799170903, 799170904, 84618156, 84618157, 84618183, 84618184, 971545045, 971578874, 971594542, 971594543, 971631307, 971631308, 987963852, 987963853."
+          }
+        ]
       },
       "stops": [
         {
@@ -39597,7 +39664,8 @@
           "name": "level",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -43349,7 +43417,7 @@
             "spoken": "Crossing the Columbia River",
             "lat": 45.93124,
             "lon": -119.32782,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 163917829 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163917829 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Irrigon",
@@ -43377,7 +43445,7 @@
             "spoken": "Crossing the John Day River",
             "lat": 45.73121,
             "lon": -120.64928,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 156901004 (John Day River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 156901004 (John Day River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Maryhill Stonehenge (westbound)",
@@ -43493,7 +43561,7 @@
             "spoken": "Crossing the Hood River",
             "lat": 45.71039,
             "lon": -121.50801,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 66623271 (Hood River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 66623271 (Hood River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "White Salmon",
@@ -43629,7 +43697,7 @@
             "spoken": "Crossing the Willamette River",
             "lat": 45.50797,
             "lon": -122.669,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 164125011 (Willamette River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 164125011 (Willamette River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Milwaukie",
@@ -43816,7 +43884,8 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "terrain": "flat",
       "divided": true,
@@ -47102,7 +47171,7 @@
             "spoken": "Crossing the Yakima River",
             "lat": 46.21751,
             "lon": -119.74745,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 30434682 (Yakima River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 30434682 (Yakima River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Prosser",
@@ -47213,7 +47282,7 @@
             "spoken": "Crossing the Naches River",
             "lat": 46.63088,
             "lon": -120.51436,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1423323538 (Naches River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1423323538 (Naches River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Gleed",
@@ -47268,7 +47337,7 @@
             "spoken": "Crossing the Cle Elum River",
             "lat": 47.18473,
             "lon": -121.00428,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 32663663 (Cle Elum River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 32663663 (Cle Elum River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Easton",
@@ -47315,7 +47384,7 @@
             "spoken": "Crossing the South Fork Snoqualmie River",
             "lat": 47.42947,
             "lon": -121.62947,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 32510086 (South Fork Snoqualmie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 32510086 (South Fork Snoqualmie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "North Bend",
@@ -47748,7 +47817,15 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": [
+          {
+            "from_mi": 123.51,
+            "to_mi": 206.34,
+            "name": "Washington I-90 Scenic System: East Sunset Way to Thorp Road",
+            "source": "RCW 47.39.020; off-premise sign restriction: RCW 47.42.040; designated segment: Washington I-90 Scenic System: East Sunset Way to Thorp Road; route ref I 90; OSM route refs: I 90; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1007232879, 1102252234, 1102252236, 1189458296, 1213079123, 1242336418, 1242336419, 1242336420, 1242336423, 1242336424, 1242336425, 1242336426, 1242336427, 1242336428, 1242336429, 1242336430, 1242336431, 1242336432, 1249407526, 1249407527, 133090786, 133090787, 133397748, 1525395341, 1525395342, 1525633456, 174667337, 174667338, 174667341, 215951058, 215951059, 215965225, 23746824, 23746826, 23746827, 249757368, 249757370, 249757371, 249757372, 25613635, 25613642, 25613643, 25613649, 25613650, 25613651, 25613866, 25613868, 25613872, 25613873, 26135247, 26135249, 26599194, 26986595, 26986917, 27053841, 27053842, 27053843, 31233751, 31233752, 317011530, 32835809, 32837406, 32837507, 32837508, 364274505, 364274506, 36939214, 36939217, 37427930, 37427931, 37427938, 37427939, 37427940, 37427943, 37427944, 37427946, 37428257, 37428258, 37844995, 37844997, 37844999, 39132621, 39132626, 41821406, 421781135, 43176251, 43176252, 51543997, 51544000, 52638524, 53247377, 53247378, 58679658, 58679659, 58679660, 592331627, 60786859, 60823882, 60823887, 60823889, 60823896, 60823902, 60823904, 60823905, 60823912, 60823915, 60823926, 60825942, 60825946, 621874261, 621874264, 621898654, 622750554, 622750571, 622750575, 623536807, 65229955, 65229963, 65229964, 65229968, 65229971, 65229980, 65229982, 65229983, 65230000, 65230009, 65230011, 65230022, 65230034, 65230058, 65230064, 654846308, 654846309, 722001412, 722001414, 722001417, 722001418, 722001420, 722001421, 73923129, 761819569, 761862693, 761862694, 773621006, 793288750, 793288751, 793288759, 799170891, 799170892, 799170900, 799170901, 799170902, 799193497, 84618155, 84618181, 84618182, 970886543, 971545045, 971598607, 971602474, 971602475, 971631308, 971635186, 999464574."
+          }
+        ]
       },
       "terrain": "mountain",
       "divided": true,
@@ -49517,7 +49594,8 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "terrain": "flat",
       "divided": true,
@@ -49948,7 +50026,7 @@
             "spoken": "Crossing the Walla Walla River",
             "lat": 46.01258,
             "lon": -118.3895,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1077808423 (Walla Walla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1077808423 (Walla Walla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Milton-Freewater",
@@ -50020,7 +50098,7 @@
             "spoken": "Crossing the Umatilla River",
             "lat": 45.67444,
             "lon": -118.75945,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 30154743 (Umatilla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 30154743 (Umatilla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -50177,7 +50255,8 @@
           "name": "level",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -50838,7 +50917,7 @@
             "spoken": "Crossing the Touchet River",
             "lat": 46.05454,
             "lon": -118.67099,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 379677497 (Touchet River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 379677497 (Touchet River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Touchet",
@@ -50857,7 +50936,7 @@
             "spoken": "Crossing the Walla Walla River",
             "lat": 46.07207,
             "lon": -118.78524,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 76480126 (Walla Walla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 76480126 (Walla Walla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Finley",
@@ -50894,7 +50973,7 @@
             "spoken": "Crossing the Snake River",
             "lat": 46.21532,
             "lon": -119.02178,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 163918103 (Snake River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163918103 (Snake River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "West Richland",
@@ -51054,7 +51133,8 @@
           "name": "rolling",
           "sections": 434,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -54277,7 +54357,15 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": [
+          {
+            "from_mi": 63.03,
+            "to_mi": 130.82,
+            "name": "Washington I-90 Scenic System: East Sunset Way to Thorp Road",
+            "source": "RCW 47.39.020; off-premise sign restriction: RCW 47.42.040; designated segment: Washington I-90 Scenic System: East Sunset Way to Thorp Road; route ref I 90; OSM route refs: I 90; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1007232879, 1102252234, 1102252236, 1189458296, 1189458297, 1213079123, 1242336418, 1242336419, 1242336420, 1242336423, 1242336424, 1242336425, 1242336426, 1242336427, 1242336428, 1242336429, 1242336430, 1242336431, 1242336432, 1242336433, 1249407526, 1249407527, 133090787, 133397748, 1525395341, 1525395342, 174667337, 174667338, 174667341, 215951058, 215951059, 215965225, 23746824, 23746827, 249757368, 249757370, 249757371, 249757372, 25613634, 25613635, 25613642, 25613643, 25613649, 25613650, 25613651, 25613866, 25613868, 25613872, 25613873, 26135247, 26135249, 26599194, 26986595, 26986917, 27053841, 27053842, 27053843, 31233751, 31233752, 317011530, 32835809, 32837406, 32837507, 32837508, 364274505, 364274506, 37427931, 37427938, 37427939, 37427940, 37427943, 37427944, 37427946, 37428257, 37428258, 37844995, 37844997, 37844999, 41821398, 41821406, 421781135, 43176251, 43176252, 51543997, 51544000, 5159916, 52638524, 53247377, 53247378, 592331633, 60786859, 60823882, 60823887, 60823889, 60823902, 60823904, 60823905, 60823909, 60823912, 60823915, 60823926, 60825942, 60825946, 621874261, 621874264, 621898654, 622750554, 622750571, 622750575, 623536807, 65229955, 65229963, 65229964, 65229971, 65229981, 65229982, 65229983, 65230000, 65230022, 654846308, 654846309, 722001412, 722001414, 722001416, 722001417, 722001418, 722001420, 722001421, 73923128, 73923129, 761819569, 761862693, 761862694, 773621006, 793288750, 793288759, 799170891, 799170892, 799170900, 799170901, 799170902, 799193496, 799193497, 84618181, 84618182, 84618184, 970886543, 971545045, 971602474, 971602475, 971631308, 971635186, 999464574."
+          }
+        ]
       },
       "stops": [
         {
@@ -55671,7 +55759,7 @@
             "spoken": "Crossing the Yakima River",
             "lat": 46.63115,
             "lon": -120.51756,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 866395070 (Yakima River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 866395070 (Yakima River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Eschbach",
@@ -55970,7 +56058,8 @@
           "name": "mountainous",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -56884,9 +56973,9 @@
             "kind": "point",
             "at_mi": 2.2,
             "spoken": "Crossing the Yakima River",
-            "lat": 46.63124,
-            "lon": -120.51699,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 866395070 (Yakima River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "lat": 46.63126,
+            "lon": -120.51703,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 13440129 (Yakima River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Summitview",
@@ -56994,7 +57083,7 @@
             "spoken": "Crossing the Columbia River",
             "lat": 46.94319,
             "lon": -119.96868,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 385784235 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 385784235 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Wild Horses Monument (eastbound)",
@@ -57464,7 +57553,8 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -59091,9 +59181,9 @@
             "kind": "point",
             "at_mi": 2.2,
             "spoken": "Crossing the Yakima River",
-            "lat": 46.63131,
-            "lon": -120.51647,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 866395070 (Yakima River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "lat": 46.63134,
+            "lon": -120.5165,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 13440129 (Yakima River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Summitview",
@@ -59173,7 +59263,7 @@
             "spoken": "Crossing the Cle Elum River",
             "lat": 47.18473,
             "lon": -121.00428,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 32663663 (Cle Elum River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 32663663 (Cle Elum River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Easton",
@@ -59220,7 +59310,7 @@
             "spoken": "Crossing the South Fork Snoqualmie River",
             "lat": 47.42947,
             "lon": -121.62947,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 32510086 (South Fork Snoqualmie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 32510086 (South Fork Snoqualmie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "North Bend",
@@ -60492,7 +60582,15 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": [
+          {
+            "from_mi": 42.98,
+            "to_mi": 125.42,
+            "name": "Washington I-90 Scenic System: East Sunset Way to Thorp Road",
+            "source": "RCW 47.39.020; off-premise sign restriction: RCW 47.42.040; designated segment: Washington I-90 Scenic System: East Sunset Way to Thorp Road; route ref I 90; OSM route refs: I 90; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 1007232879, 1102252234, 1102252236, 1189458296, 1213079123, 1242336418, 1242336419, 1242336420, 1242336421, 1242336423, 1242336424, 1242336425, 1242336426, 1242336427, 1242336428, 1242336429, 1242336430, 1242336431, 1242336432, 1249407526, 1249407527, 133090787, 133397748, 1525395341, 1525395342, 1525633456, 174667337, 174667338, 174667341, 215951058, 215951059, 215965225, 23746824, 23746826, 23746827, 249757368, 249757370, 249757371, 249757372, 25613634, 25613635, 25613642, 25613643, 25613649, 25613650, 25613651, 25613865, 25613866, 25613868, 25613873, 26135247, 26135249, 26599194, 26986595, 26986917, 27053841, 27053842, 27053843, 31233751, 31233752, 317011530, 32835809, 32837405, 32837406, 32837507, 32837508, 364274505, 364274506, 36939214, 36939217, 37427930, 37427931, 37427938, 37427939, 37427940, 37427943, 37427944, 37427946, 37428257, 37428258, 37844995, 37844997, 37844999, 39132621, 39132626, 41821373, 41821398, 41821406, 421781135, 43176251, 43176252, 51543997, 51544000, 52638524, 53247377, 53247378, 58679658, 58679659, 58679660, 592331633, 60786859, 60823882, 60823887, 60823896, 60823902, 60823904, 60823905, 60823912, 60823915, 60823920, 60823926, 60825942, 60825946, 621874261, 621874264, 621898654, 622750554, 622750571, 622750575, 623536807, 65229955, 65229963, 65229964, 65229968, 65229971, 65229980, 65229982, 65229983, 65230000, 65230009, 65230011, 65230022, 65230034, 65230052, 65230058, 65230064, 654846308, 654846309, 722001412, 722001414, 722001416, 722001417, 722001418, 722001420, 722001421, 73923129, 761819569, 761862693, 761862694, 773621006, 793288750, 793288759, 799170891, 799170892, 799170900, 799170901, 799170902, 799193496, 799193497, 84618155, 84618181, 84618182, 970886543, 971545045, 971598607, 971602474, 971602475, 971631308, 971635186, 999464574."
+          }
+        ]
       },
       "stops": [
         {
@@ -61365,9 +61463,9 @@
             "kind": "point",
             "at_mi": 6.3,
             "spoken": "Crossing the Yakima River",
-            "lat": 46.53044,
-            "lon": -120.47139,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 866395070 (Yakima River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "lat": 46.53037,
+            "lon": -120.47138,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 13440129 (Yakima River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Harrah",
@@ -61501,7 +61599,7 @@
             "spoken": "Crossing the Columbia River",
             "lat": 46.2644,
             "lon": -119.24241,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1395752748 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1395752748 (Columbia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Burbank",
@@ -62080,7 +62178,8 @@
           "name": "level",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {

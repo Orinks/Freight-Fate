@@ -579,7 +579,7 @@
             "spoken": "Crossing the Murderkill River",
             "lat": 38.97603,
             "lon": -75.56728,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 191321738 (Murderkill River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 191321738 (Murderkill River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ocean City boardwalk (southbound)",
@@ -1762,7 +1762,7 @@
             "spoken": "Crossing the Leipsic River",
             "lat": 39.24208,
             "lon": -75.58144,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 134721983 (Leipsic River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 134721983 (Leipsic River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Dover Motor Speedway (southbound)",
@@ -1800,7 +1800,7 @@
             "spoken": "Crossing the Appoquinimink River",
             "lat": 39.44203,
             "lon": -75.66402,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 133585152 (Appoquinimink River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 133585152 (Appoquinimink River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Odessa",
@@ -1937,7 +1937,7 @@
             "spoken": "Crossing the Christina River",
             "lat": 39.71861,
             "lon": -75.57981,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 141791404 (Christina River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 141791404 (Christina River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Talleyville",
@@ -3663,7 +3663,7 @@
             "spoken": "Crossing the Christina River",
             "lat": 39.69463,
             "lon": -75.62267,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 141791404 (Christina River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 141791404 (Christina River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Marshallton",
@@ -3755,7 +3755,7 @@
             "spoken": "Crossing the Susquehanna River",
             "lat": 39.58178,
             "lon": -76.10365,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1255024156 (Susquehanna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1255024156 (Susquehanna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Havre de Grace",
@@ -5205,7 +5205,7 @@
             "spoken": "Crossing the Schuylkill River",
             "lat": 39.9421,
             "lon": -75.19389,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1318115670 (Schuylkill River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1318115670 (Schuylkill River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -6899,7 +6899,7 @@
             "spoken": "Crossing the Appoquinimink River",
             "lat": 39.44169,
             "lon": -75.66408,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 133585152 (Appoquinimink River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 133585152 (Appoquinimink River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Townsend",
@@ -6937,7 +6937,7 @@
             "spoken": "Crossing the Leipsic River",
             "lat": 39.24213,
             "lon": -75.58193,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 134721983 (Leipsic River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 134721983 (Leipsic River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cheswold",
@@ -7111,7 +7111,7 @@
             "spoken": "Crossing the Nanticoke River",
             "lat": 38.64328,
             "lon": -75.59371,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 129729085 (Nanticoke River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 129729085 (Nanticoke River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Blades",

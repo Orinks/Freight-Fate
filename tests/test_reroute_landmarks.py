@@ -296,3 +296,38 @@ def test_reroute_refuses_out_of_range_curated_landmark_before_any_write(monkeypa
     output = capsys.readouterr().out
     assert "REFUSING" in output
     assert "Highway marker" in output
+
+
+def test_reroute_accepts_a_pinned_highway_with_signed_connectors(monkeypatch, capsys):
+    world, leg = _reroute_world([])
+    leg["route_via"] = [
+        {
+            "lat": 30.5,
+            "lon": -99.5,
+            "note": "OSM way 1 ref US 2; signed connector.",
+        },
+        {
+            "lat": 30.7,
+            "lon": -99.3,
+            "note": "OSM way 2 ref I 5; signed route pin.",
+        },
+    ]
+    saved = _mock_successful_reroute(monkeypatch, world)
+    monkeypatch.setattr(rr, "rides_its_label", lambda *_args: (0.17, "US-2"))
+    monkeypatch.setattr(rr.sys, "argv", ["reroute_leg.py", "--leg", "a:b", "--write"])
+
+    assert rr.main() == 0
+    assert saved == [world]
+    assert "signed connector roads" in capsys.readouterr().out
+
+
+def test_reroute_still_refuses_low_label_share_without_an_osm_pin(monkeypatch, capsys):
+    world, _leg = _reroute_world([])
+    _mock_successful_reroute(monkeypatch, world)
+    monkeypatch.setattr(rr, "rides_its_label", lambda *_args: (0.17, "US-2"))
+    monkeypatch.setattr(rr.sys, "argv", ["reroute_leg.py", "--leg", "a:b", "--write"])
+    monkeypatch.setattr(rr, "write_geometry", lambda *_args: pytest.fail("geometry written"))
+    monkeypatch.setattr(rr, "save_world", lambda *_args: pytest.fail("world written"))
+
+    assert rr.main() == 1
+    assert "REFUSING" in capsys.readouterr().out

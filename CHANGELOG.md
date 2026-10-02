@@ -227,6 +227,8 @@
 
 - **A CDL suspended mid-drive now ends the run.** The truck stops on the shoulder, the way a roadside stop ends it.
 
+- **More route cues match the roads trucks drive.** Repaired checkpoints, river callouts and signs follow their routes; scenic stretches keep billboards quiet.
+
 - **Escape on a roadside stop that suspends your CDL no longer drives on.** It returns to the terminal, like the Return to terminal row.
 
 - **A saved run on a suspended CDL no longer resumes.** Continuing the career closes it out and opens the terminal.

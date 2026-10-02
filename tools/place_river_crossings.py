@@ -1,7 +1,8 @@
-"""Re-place existing river landmarks against dense archived geometry.
+"""Place and remove river landmarks against dense archived geometry.
 
-The tool reads matching waterway=river ways from a Geofabrik PBF and moves
-only existing ``category == "river"`` landmarks. It is dry-run by default.
+The tool reads matching OSM waterways and river polygons from a Geofabrik PBF,
+placing existing ``category == "river"`` landmarks at real crossings and
+removing named waters the archived route never crosses. It is dry-run by default.
 
     python tools/place_river_crossings.py --pbf ~/osm/us-latest.osm.pbf
 """
@@ -9,10 +10,13 @@ only existing ``category == "river"`` landmarks. It is dry-run by default.
 from __future__ import annotations
 
 import argparse
+import bisect
 import gzip
 import hashlib
 import json
 import os
+import shutil
+import subprocess
 import sys
 import time
 from datetime import datetime, timezone
@@ -25,7 +29,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 import leg_geometry as lg  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
 
-ROUTE_POINT_AGREEMENT_MI = 5.0
+WATERWAY_TYPES = {"river", "stream", "canal", "drain"}
 OSM_CACHE_DIR = Path.home() / "osm"
 DEFAULT_PBF = OSM_CACHE_DIR / "us-latest.osm.pbf"
 SHIFT_BUCKETS = ("0-1", "1-3", "3-5", "5-10", "10+")
@@ -55,30 +59,139 @@ def _river_names(data: dict[str, Any]) -> set[str]:
 def _cache_path(pbf_path: Path, names: set[str], cache_dir: Path) -> Path:
     stat = pbf_path.stat()
     name_hash = hashlib.sha256("\0".join(sorted(names)).encode("utf-8")).hexdigest()[:12]
-    return cache_dir / (f"river-lines-{stat.st_size}-{stat.st_mtime_ns}-{name_hash}.json.gz")
+    return cache_dir / (f"river-features-v4-{stat.st_size}-{stat.st_mtime_ns}-{name_hash}.json.gz")
 
 
-def _relation_names_by_way(pbf_path: Path, names: set[str]) -> dict[int, set[str]]:
+WATER_FEATURE_FILTERS = (
+    "w/waterway=river,stream,canal,drain",
+    "r/type=waterway",
+    "w/water=river",
+    "r/water=river",
+)
+
+
+def _water_feature_pbf(pbf_path: Path, cache_dir: Path) -> Path:
+    stat = pbf_path.stat()
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    filtered_path = cache_dir / f"river-source-v1-{stat.st_size}-{stat.st_mtime_ns}.osm.pbf"
+    if filtered_path.exists():
+        return filtered_path
+
+    osmium = shutil.which("osmium")
+    if osmium is None:
+        raise RuntimeError("the osmium command is required to filter river features from the PBF")
+    temporary_path = cache_dir / f".{filtered_path.name}.tmp"
+    subprocess.run(
+        [
+            osmium,
+            "tags-filter",
+            "--no-progress",
+            "--output",
+            str(temporary_path),
+            "--overwrite",
+            "--output-format",
+            "pbf",
+            str(pbf_path),
+            *WATER_FEATURE_FILTERS,
+        ],
+        check=True,
+    )
+    os.replace(temporary_path, filtered_path)
+    return filtered_path
+
+
+def _relation_features(
+    pbf_path: Path, names: set[str]
+) -> tuple[dict[int, set[str]], list[dict[str, Any]]]:
     import osmium
 
     relation_names: dict[int, set[str]] = {}
-    relations = osmium.FileProcessor(
-        str(pbf_path), entities=osmium.osm.osm_entity_bits.RELATION
-    ).with_filter(osmium.filter.TagFilter(("type", "waterway")))
+    polygons: list[dict[str, Any]] = []
+    relations = osmium.FileProcessor(str(pbf_path), entities=osmium.osm.osm_entity_bits.RELATION)
     for relation in relations:
         name = relation.tags.get("name")
         if not name or str(name).casefold() not in names:
             continue
-        for member in relation.members:
-            if member.type == "w":
-                relation_names.setdefault(int(member.ref), set()).add(str(name))
-    return relation_names
+        name = str(name)
+        if relation.tags.get("type") == "waterway":
+            for member in relation.members:
+                if member.type == "w":
+                    relation_names.setdefault(int(member.ref), set()).add(name)
+        if relation.tags.get("natural") == "water" and relation.tags.get("water") == "river":
+            members = [
+                {"way_id": int(member.ref), "role": str(member.role)}
+                for member in relation.members
+                if member.type == "w" and member.role in ("", "outer", "inner")
+            ]
+            if members:
+                polygons.append({"relation_id": int(relation.id), "name": name, "members": members})
+    return relation_names, polygons
+
+
+def _way_coordinates(way: Any) -> list[list[float]]:
+    coordinates = []
+    for node in way.nodes:
+        location = node.location
+        if not location.valid():
+            return []
+        coordinates.append([float(location.lon), float(location.lat)])
+    return coordinates if len(coordinates) >= 2 else []
+
+
+def _waterway_names_for_way(
+    way_id: int,
+    name: str,
+    waterway_type: str | None,
+    relation_names: dict[int, set[str]],
+    wanted: set[str],
+) -> list[str]:
+    matched_names = set(relation_names.get(way_id, ()))
+    if waterway_type in WATERWAY_TYPES and name and name.casefold() in wanted:
+        matched_names.add(name)
+    if waterway_type not in WATERWAY_TYPES and not matched_names:
+        return []
+    return sorted(matched_names, key=str.casefold)
+
+
+def _stitch_rings(
+    members: list[dict[str, Any]], ways_by_id: dict[int, list[list[float]]]
+) -> tuple[list[list[list[float]]], list[list[list[float]]]]:
+    rings: dict[str, list[list[list[float]]]] = {"outer": [], "inner": []}
+    for role in ("outer", "inner"):
+        remaining = [
+            list(ways_by_id[member["way_id"]])
+            for member in members
+            if (member["role"] == role or (role == "outer" and not member["role"]))
+            and member["way_id"] in ways_by_id
+        ]
+        while remaining:
+            ring = remaining.pop()
+            while ring[0] != ring[-1]:
+                end = ring[-1]
+                match_index = next(
+                    (
+                        index
+                        for index, segment in enumerate(remaining)
+                        if segment[0] == end or segment[-1] == end
+                    ),
+                    None,
+                )
+                if match_index is None:
+                    ring = []
+                    break
+                segment = remaining.pop(match_index)
+                if segment[-1] == end:
+                    segment.reverse()
+                ring.extend(segment[1:])
+            if len(ring) >= 4 and ring[0] == ring[-1]:
+                rings[role].append(ring)
+    return rings["outer"], rings["inner"]
 
 
 def extract_river_lines(
     pbf_path: Path, names: set[str], cache_dir: Path = OSM_CACHE_DIR
 ) -> list[dict[str, Any]]:
-    """Extract named matching river ways using a disk-backed location index."""
+    """Extract named waterways and river polygons from a filtered PBF."""
     import osmium
 
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -87,93 +200,164 @@ def extract_river_lines(
         return []
 
     started = time.monotonic()
-    print("    reading waterway relations for unnamed river ways", flush=True)
-    relation_names = _relation_names_by_way(pbf_path, wanted)
-    print(f"    {len(relation_names):,} river-way memberships found", flush=True)
+    feature_pbf = _water_feature_pbf(pbf_path, cache_dir)
+    print("    reading named waterway relations and river polygons", flush=True)
+    relation_names, polygon_relations = _relation_features(feature_pbf, wanted)
+    member_ids = {
+        member["way_id"] for relation in polygon_relations for member in relation["members"]
+    }
+    print(
+        f"    {len(relation_names):,} waterway memberships and "
+        f"{len(polygon_relations):,} river polygons found",
+        flush=True,
+    )
 
     previous_tmpdir = os.environ.get("TMPDIR")
     os.environ["TMPDIR"] = str(cache_dir)
-    lines: list[dict[str, Any]] = []
+    features: list[dict[str, Any]] = []
+    polygon_member_ways: dict[int, list[list[float]]] = {}
+    scanned_way_ids: set[int] = set()
     seen = 0
     try:
         ways = (
             osmium.FileProcessor(
-                str(pbf_path),
+                str(feature_pbf),
                 entities=osmium.osm.osm_entity_bits.NODE | osmium.osm.osm_entity_bits.WAY,
             )
-            .with_locations("sparse_file_array")
-            .with_filter(osmium.filter.KeyFilter("waterway"))
+            .with_locations("flex_mem")
+            .with_filter(osmium.filter.KeyFilter("waterway", "natural"))
         )
         for way in ways:
+            if not hasattr(way, "nodes"):
+                continue
             seen += 1
             tags = way.tags
-            if tags.get("waterway") != "river":
+            way_id = int(way.id)
+            scanned_way_ids.add(way_id)
+            name = str(tags.get("name") or "")
+            coords = _way_coordinates(way)
+            if not coords:
                 continue
-            name = tags.get("name")
-            if name:
-                matching_names = [str(name)] if str(name).casefold() in wanted else []
-            else:
-                matching_names = sorted(relation_names.get(int(way.id), ()), key=str.casefold)
-            if not matching_names:
-                continue
+            if way_id in member_ids:
+                polygon_member_ways[way_id] = coords
 
-            coords = []
-            for node in way.nodes:
-                location = node.location
-                if not location.valid():
-                    coords = []
-                    break
-                coords.append([float(location.lon), float(location.lat)])
-            if len(coords) < 2:
-                continue
-            lines.extend(
-                {"way_id": int(way.id), "name": name, "coords": coords} for name in matching_names
+            for matched_name in _waterway_names_for_way(
+                way_id, name, str(tags.get("waterway") or "") or None, relation_names, wanted
+            ):
+                features.append(
+                    {
+                        "geometry": "line",
+                        "feature_type": "waterway way",
+                        "feature_id": way_id,
+                        "name": matched_name,
+                        "coords": coords,
+                    }
+                )
+            if (
+                tags.get("natural") == "water"
+                and tags.get("water") == "river"
+                and name.casefold() in wanted
+                and len(coords) >= 4
+                and coords[0] == coords[-1]
+            ):
+                features.append(
+                    {
+                        "geometry": "polygon",
+                        "feature_type": "river polygon way",
+                        "feature_id": way_id,
+                        "name": name,
+                        "outer": [coords],
+                        "inner": [],
+                    }
+                )
+
+        missing_member_ids = (member_ids | relation_names.keys()) - scanned_way_ids
+        if missing_member_ids:
+            member_ways = (
+                osmium.FileProcessor(
+                    str(feature_pbf),
+                    entities=osmium.osm.osm_entity_bits.NODE | osmium.osm.osm_entity_bits.WAY,
+                )
+                .with_locations("flex_mem")
+                .with_filter(osmium.filter.IdFilter(missing_member_ids))
             )
+            for way in member_ways:
+                way_id = int(way.id)
+                if not hasattr(way, "nodes") or way_id not in missing_member_ids:
+                    continue
+                coords = _way_coordinates(way)
+                if not coords:
+                    continue
+                if way_id in member_ids:
+                    polygon_member_ways[way_id] = coords
+                for matched_name in sorted(relation_names.get(way_id, ()), key=str.casefold):
+                    features.append(
+                        {
+                            "geometry": "line",
+                            "feature_type": "waterway way",
+                            "feature_id": way_id,
+                            "name": matched_name,
+                            "coords": coords,
+                        }
+                    )
     finally:
         if previous_tmpdir is None:
             os.environ.pop("TMPDIR", None)
         else:
             os.environ["TMPDIR"] = previous_tmpdir
 
+    for relation in polygon_relations:
+        outer, inner = _stitch_rings(relation["members"], polygon_member_ways)
+        if outer:
+            features.append(
+                {
+                    "geometry": "polygon",
+                    "feature_type": "river polygon relation",
+                    "feature_id": relation["relation_id"],
+                    "name": relation["name"],
+                    "outer": outer,
+                    "inner": inner,
+                }
+            )
+    features.sort(
+        key=lambda feature: (
+            str(feature["name"]).casefold(),
+            str(feature["feature_type"]),
+            int(feature["feature_id"]),
+        )
+    )
     print(
-        f"    scanned {seen:,} waterway-tagged ways; extracted {len(lines):,} river lines "
+        f"    scanned {seen:,} tagged ways; extracted {len(features):,} water features "
         f"({time.monotonic() - started:.0f}s)",
         flush=True,
     )
-    return lines
+    return features
 
 
-def load_or_extract_river_lines(
+def load_or_extract_river_features(
     pbf_path: Path, names: set[str], cache_dir: Path = OSM_CACHE_DIR
 ) -> list[dict[str, Any]]:
     cache_dir.mkdir(parents=True, exist_ok=True)
     path = _cache_path(pbf_path, names, cache_dir)
     if path.exists():
         with gzip.open(path, "rt", encoding="utf-8") as stream:
-            lines = json.load(stream)
-        print(f"    loaded {len(lines):,} cached river lines from {path}", flush=True)
-        return lines
+            features = json.load(stream)
+        print(f"    loaded {len(features):,} cached water features from {path}", flush=True)
+        return features
 
-    lines = extract_river_lines(pbf_path, names, cache_dir)
+    features = extract_river_lines(pbf_path, names, cache_dir)
     with gzip.open(path, "wt", encoding="utf-8") as stream:
-        json.dump(lines, stream, separators=(",", ":"))
-    print(f"    cached {len(lines):,} river lines at {path}", flush=True)
-    return lines
+        json.dump(features, stream, separators=(",", ":"))
+    print(f"    cached {len(features):,} water features at {path}", flush=True)
+    return features
 
 
 def _dense_route(
     leg: dict[str, Any],
 ) -> tuple[list[tuple[float, float]], list[float], str | None]:
     geometry = lg.corridor_geometry(leg)
-    polyline = lg.archived_polyline(lg.leg_id_of(leg), lg.state_code_of(leg))
-    if not geometry or not polyline:
+    if not geometry:
         return [], [], "no dense archived geometry"
-
-    max_off_mi = lg.route_point_max_off_mi(leg, polyline[0])
-    if max_off_mi is None:
-        return [], [], "route-point agreement could not be checked"
-    if max_off_mi > ROUTE_POINT_AGREEMENT_MI:
-        return [], [], f"route_points are {max_off_mi:.2f} mi from archive (limit 5.00)"
 
     route = [(float(lat), float(lon)) for lat, lon, _at_mi in geometry]
     cum = [float(at_mi) for _lat, _lon, at_mi in geometry]
@@ -249,19 +433,99 @@ def _route_segment_grid(
     return buckets, overflow
 
 
+def _route_point_at(
+    route: list[tuple[float, float]], cum: list[float], at_mi: float
+) -> tuple[float, float]:
+    index = max(0, min(len(route) - 2, bisect.bisect_right(cum, at_mi) - 1))
+    span = cum[index + 1] - cum[index]
+    ratio = 0.0 if span <= 0 else (at_mi - cum[index]) / span
+    lat1, lon1 = route[index]
+    lat2, lon2 = route[index + 1]
+    return lat1 + ratio * (lat2 - lat1), lon1 + ratio * (lon2 - lon1)
+
+
+def _point_in_ring(lon: float, lat: float, ring: list[list[float]]) -> bool:
+    inside = False
+    previous_lon, previous_lat = ring[-1]
+    for current_lon, current_lat in ring:
+        if (current_lat > lat) != (previous_lat > lat):
+            crossing_lon = (previous_lon - current_lon) * (lat - current_lat) / (
+                previous_lat - current_lat
+            ) + current_lon
+            if lon < crossing_lon:
+                inside = not inside
+        previous_lon, previous_lat = current_lon, current_lat
+    return inside
+
+
+def _inside_polygon(
+    lon: float, lat: float, outer: list[list[list[float]]], inner: list[list[list[float]]]
+) -> bool:
+    return any(_point_in_ring(lon, lat, ring) for ring in outer) and not any(
+        _point_in_ring(lon, lat, ring) for ring in inner
+    )
+
+
+def _polygon_midpoints(
+    route: list[tuple[float, float]],
+    cum: list[float],
+    feature: dict[str, Any],
+    route_grid: tuple[dict[tuple[int, int], list[int]], list[int]],
+) -> list[tuple[float, float, float]]:
+    outer = feature["outer"]
+    inner = feature.get("inner", [])
+    boundaries = [cum[0], cum[-1]]
+    for ring in [*outer, *inner]:
+        line = [(float(lat), float(lon)) for lon, lat in ring]
+        boundaries.extend(
+            at_mi for at_mi, _lat, _lon in _all_crossings(route, cum, line, route_grid)
+        )
+    boundaries.sort()
+    unique_boundaries = []
+    for at_mi in boundaries:
+        if not unique_boundaries or at_mi - unique_boundaries[-1] > 1e-7:
+            unique_boundaries.append(at_mi)
+
+    spans: list[list[float]] = []
+    for start, end in zip(unique_boundaries, unique_boundaries[1:], strict=False):
+        if end - start <= 1e-8:
+            continue
+        lat, lon = _route_point_at(route, cum, (start + end) / 2.0)
+        if _inside_polygon(lon, lat, outer, inner):
+            if spans and abs(spans[-1][1] - start) <= 1e-7:
+                spans[-1][1] = end
+            else:
+                spans.append([start, end])
+    return [
+        ((start + end) / 2.0, *_route_point_at(route, cum, (start + end) / 2.0))
+        for start, end in spans
+    ]
+
+
 def _crossings_for_name(
     route: list[tuple[float, float]],
     cum: list[float],
     name: str,
-    lines_by_name: dict[str, list[dict[str, Any]]],
+    features_by_name: dict[str, list[dict[str, Any]]],
     route_grid: tuple[dict[tuple[int, int], list[int]], list[int]],
-) -> list[tuple[float, float, float, int, str]]:
+) -> list[tuple[float, float, float, int, str, str]]:
     crossings = []
-    for line in lines_by_name.get(name.casefold(), ()):
-        coords = [(float(lat), float(lon)) for lon, lat in line["coords"]]
+    for feature in features_by_name.get(name.casefold(), ()):
+        if feature.get("geometry") == "polygon":
+            candidates = _polygon_midpoints(route, cum, feature, route_grid)
+        else:
+            coords = [(float(lat), float(lon)) for lon, lat in feature["coords"]]
+            candidates = _all_crossings(route, cum, coords, route_grid)
         crossings.extend(
-            (at_mi, lat, lon, int(line["way_id"]), str(line["name"]))
-            for at_mi, lat, lon in _all_crossings(route, cum, coords, route_grid)
+            (
+                at_mi,
+                lat,
+                lon,
+                int(feature["feature_id"]),
+                str(feature["name"]),
+                str(feature["feature_type"]),
+            )
+            for at_mi, lat, lon in candidates
         )
     return crossings
 
@@ -278,9 +542,10 @@ def _shift_bucket(shift: float) -> str:
     return "10+"
 
 
-def _river_source(way_id: int, name: str, pbf_date: str) -> str:
+def _river_source(feature_type: str, feature_id: int, name: str, pbf_date: str) -> str:
     return (
-        f"derived 2026-10-01: crossing of OSM waterway way {way_id} ({name}) with the "
+        f"derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of "
+        f"OSM {feature_type} {feature_id} ({name}) with the "
         "leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) "
         "rescaled to leg miles, taking the crossing nearest the previous at_mi when "
         "the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract "
@@ -290,22 +555,21 @@ def _river_source(way_id: int, name: str, pbf_date: str) -> str:
 
 def process_world(
     data: dict[str, Any],
-    lines: list[dict[str, Any]],
+    features: list[dict[str, Any]],
     *,
     pbf_date: str,
     only: set[str] | None = None,
 ) -> dict[str, Any]:
-    lines_by_name: dict[str, list[dict[str, Any]]] = {}
-    for line in lines:
-        lines_by_name.setdefault(str(line["name"]).casefold(), []).append(line)
+    features_by_name: dict[str, list[dict[str, Any]]] = {}
+    for feature in features:
+        features_by_name.setdefault(str(feature["name"]).casefold(), []).append(feature)
 
     report: dict[str, Any] = {
         "legs_total": len(data.get("legs", ())),
         "legs_scanned": 0,
-        "guard_skipped": [],
         "geometry_skipped": [],
         "legs_without_rivers": 0,
-        "rivers_moved": 0,
+        "rivers_placed": 0,
         "changed_legs": 0,
         "histogram": {bucket: 0 for bucket in SHIFT_BUCKETS},
         "unmatched": [],
@@ -325,28 +589,28 @@ def process_world(
         route, cum, skip_reason = _dense_route(leg)
         if skip_reason:
             entry = f"{leg_id}: {skip_reason}"
-            if "route_points are" in skip_reason:
-                report["guard_skipped"].append(entry)
-            else:
-                report["geometry_skipped"].append(entry)
+            report["geometry_skipped"].append(entry)
             continue
         report["legs_scanned"] += 1
         route_grid = _route_segment_grid(route)
         leg_changed = False
+        removed_ids: set[int] = set()
         for landmark in rivers:
             name = str(landmark.get("name") or "")
             old_at_mi = float(landmark["at_mi"])
-            candidates = _crossings_for_name(route, cum, name, lines_by_name, route_grid)
+            candidates = _crossings_for_name(route, cum, name, features_by_name, route_grid)
             if not candidates:
                 entry = {"leg": leg_id, "name": name, "at_mi": old_at_mi}
                 report["unmatched"].append(entry)
+                removed_ids.add(id(landmark))
+                leg_changed = True
                 if only is not None:
                     report["only_changes"].append(
-                        f"{leg_id} {name}: {old_at_mi:.1f} -> no crossing (unmatched)"
+                        f"{leg_id} {name}: {old_at_mi:.1f} -> removed (no crossing)"
                     )
                 continue
 
-            at_mi, lat, lon, way_id, osm_name = min(
+            at_mi, lat, lon, feature_id, osm_name, feature_type = min(
                 candidates, key=lambda item: (abs(item[0] - old_at_mi), item[0], item[3])
             )
             new_at_mi = round(at_mi, 1)
@@ -354,7 +618,7 @@ def process_world(
                 "at_mi": new_at_mi,
                 "lat": round(lat, 5),
                 "lon": round(lon, 5),
-                "source": _river_source(way_id, osm_name, pbf_date),
+                "source": _river_source(feature_type, feature_id, osm_name, pbf_date),
             }
             if any(landmark.get(key) != value for key, value in updates.items()):
                 landmark.update(updates)
@@ -362,13 +626,17 @@ def process_world(
 
             shift = abs(old_at_mi - new_at_mi)
             report["histogram"][_shift_bucket(shift)] += 1
-            report["rivers_moved"] += 1
+            report["rivers_placed"] += 1
             if only is not None:
                 report["only_changes"].append(
                     f"{leg_id} {name}: {old_at_mi:.1f} -> {new_at_mi:.1f}"
                 )
 
         if leg_changed:
+            corridor["landmarks"] = [
+                landmark for landmark in landmarks if id(landmark) not in removed_ids
+            ]
+            landmarks = corridor["landmarks"]
             landmarks.sort(key=lambda item: item["at_mi"])
             report["changed_legs"] += 1
 
@@ -378,17 +646,15 @@ def process_world(
 def _format_report(report: dict[str, Any]) -> str:
     lines = [
         f"Legs: {report['legs_total']} total; {report['legs_scanned']} scanned; "
-        f"{len(report['guard_skipped'])} skipped by agreement guard; "
         f"{len(report['geometry_skipped'])} skipped for missing/unusable geometry; "
         f"{report['legs_without_rivers']} had no river landmarks.",
-        f"Rivers moved: {report['rivers_moved']} across {report['changed_legs']} changed legs.",
+        f"Rivers placed: {report['rivers_placed']}; "
+        f"removed: {len(report['unmatched'])} across {report['changed_legs']} changed legs.",
         "Shift histogram: "
         + ", ".join(f"{bucket} mi: {report['histogram'][bucket]}" for bucket in SHIFT_BUCKETS),
-        "Skipped by agreement guard:",
-        *(f"  {item}" for item in report["guard_skipped"]),
         "Skipped for geometry:",
         *(f"  {item}" for item in report["geometry_skipped"]),
-        "Unmatched rivers:",
+        "Removed unmatched rivers:",
         *(
             f"  {item['leg']} {item['name']} at {item['at_mi']:.1f} mi"
             for item in report["unmatched"]
@@ -404,14 +670,26 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--pbf", type=Path, default=DEFAULT_PBF)
     parser.add_argument("--only", help='semicolon-separated "from:to" leg ids')
     parser.add_argument("--write", action="store_true", help="save changed world source")
+    parser.add_argument(
+        "--removed-out",
+        type=Path,
+        help="write the list of removed false river callouts as JSON",
+    )
     args = parser.parse_args(argv)
 
     data = load_world()
     names = _river_names(data)
-    lines = load_or_extract_river_lines(args.pbf, names)
+    features = load_or_extract_river_features(args.pbf, names)
     pbf_date = datetime.fromtimestamp(args.pbf.stat().st_mtime, timezone.utc).date().isoformat()
-    report = process_world(data, lines, pbf_date=pbf_date, only=parse_only(args.only))
+    report = process_world(data, features, pbf_date=pbf_date, only=parse_only(args.only))
     print(_format_report(report))
+    if args.removed_out:
+        args.removed_out.parent.mkdir(parents=True, exist_ok=True)
+        args.removed_out.write_text(
+            json.dumps(report["unmatched"], indent=2) + "\n",
+            encoding="utf-8",
+        )
+        print(f"Wrote {len(report['unmatched'])} removed river callouts to {args.removed_out}")
     if args.write:
         print(f"Saved {save_world(data)} world-source files.")
     else:

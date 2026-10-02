@@ -24,6 +24,8 @@ const DES_MOINES_IA_TO_CHICAGO: &str = "des_moines_ia_us:chicago_il_us";
 const CHICAGO_IL_TO_ST_LOUIS: &str = "chicago_il_us:st_louis_mo_us";
 const MINNEAPOLIS_MN_TO_DES_MOINES: &str = "minneapolis_mn_us:des_moines_ia_us";
 const MIAMI_FL_TO_KEY_WEST: &str = "miami_fl_us:key_west_fl_us";
+const DURANGO_CO_TO_MONTROSE: &str = "durango_co_us:montrose_co_us";
+const DURANGO_CO_TO_MOAB: &str = "durango_co_us:moab_ut_us";
 
 const REPAIRED_LEGS: &[&str] = &[
     BUFFALO_NY_TO_NEW_YORK,
@@ -35,16 +37,6 @@ const REPAIRED_LEGS: &[&str] = &[
     GREEN_BAY_WI_TO_GRAND_RAPIDS,
     BINGHAMTON_NY_TO_UTICA,
     INDIANAPOLIS_IN_TO_NASHVILLE,
-];
-
-// checkpoints that disagree with the leg's own geometry; listed in ROADMAP.md
-const KNOWN_STATE_LINE_DISAGREEMENTS: &[&str] = &[
-    "atlanta_ga_us:birmingham_al_us",
-    "burlington_vt_us:albany_ny_us",
-    "cumberland_md_us:winchester_va_us",
-    "san_francisco_ca_us:portland_or_us",
-    "tulsa_ok_us:kansas_city_mo_us",
-    "winona_mn_us:la_crosse_wi_us",
 ];
 
 const EARTH_RADIUS_MILES: f64 = 3958.7613;
@@ -344,21 +336,9 @@ fn checkpoints_sit_in_the_state_the_game_announces() {
             }
         }
     }
-    let stale_allowlist: Vec<_> = KNOWN_STATE_LINE_DISAGREEMENTS
-        .iter()
-        .filter(|known| !failures.iter().any(|failure| failure.0.as_str() == **known))
-        .collect();
     assert!(
-        stale_allowlist.is_empty(),
-        "fixed legs still on KNOWN_STATE_LINE_DISAGREEMENTS: {stale_allowlist:?}"
-    );
-    let unexpected: Vec<_> = failures
-        .iter()
-        .filter(|failure| !KNOWN_STATE_LINE_DISAGREEMENTS.contains(&failure.0.as_str()))
-        .collect();
-    assert!(
-        unexpected.is_empty(),
-        "checkpoint state disagreements: {unexpected:?}"
+        failures.is_empty(),
+        "checkpoint state disagreements: {failures:?}"
     );
 }
 
@@ -468,6 +448,123 @@ fn repaired_legs_keep_their_records_on_their_road() {
     }
 }
 
+/// Every archived leg's route points and coordinate-bearing checkpoints match its geometry.
+#[test]
+fn all_archived_leg_route_points_and_checkpoints_stay_near_geometry() {
+    assert!(
+        data().geometry.contains_key(DURANGO_CO_TO_MOAB),
+        "Durango–Moab archive is required for alignment coverage"
+    );
+    let mut route_point_failures = Vec::new();
+    let mut checkpoint_failures = Vec::new();
+    for (id, leg_data) in &data().legs {
+        let Some(geometry) = data().geometry.get(id) else {
+            continue;
+        };
+        let leg = leg_data;
+        for route_point in corridor_records(leg, "route_points") {
+            let Some((lat, lon)) = coordinates(route_point) else {
+                route_point_failures.push(format!("{id}: route point has no coordinates"));
+                continue;
+            };
+            let (_, off_mi) = project(geometry, lat, lon);
+            if off_mi > 10.0 {
+                route_point_failures.push(format!("{id}: route point {off_mi:.2} mi off"));
+            }
+        }
+        for checkpoint in corridor_records(leg, "checkpoints") {
+            let Some((lat, lon)) = coordinates(checkpoint) else {
+                continue;
+            };
+            let (_, off_mi) = project(geometry, lat, lon);
+            if off_mi > 3.0 {
+                checkpoint_failures.push(format!(
+                    "{id}: {:?} is {off_mi:.2} mi off",
+                    text(checkpoint, "name")
+                ));
+            }
+        }
+    }
+    assert!(
+        route_point_failures.is_empty(),
+        "route points over 10 mi from archived geometry ({}): {route_point_failures:?}",
+        route_point_failures.len()
+    );
+    assert!(
+        checkpoint_failures.is_empty(),
+        "checkpoints over 3 mi from archived geometry ({}): {checkpoint_failures:?}",
+        checkpoint_failures.len()
+    );
+}
+
+#[test]
+fn scenic_billboard_bans_are_complete_and_not_crossing_fragments() {
+    for (id, leg_data) in &data().legs {
+        for span in corridor_records(leg_data, "billboard_bans") {
+            let from_mi = number(span, "from_mi").expect("ban span has a start mile");
+            let to_mi = number(span, "to_mi").expect("ban span has an end mile");
+            assert!(
+                to_mi - from_mi >= 1.0,
+                "{id}: scenic ban {:?} is only {:.2} mi",
+                text(span, "name"),
+                to_mi - from_mi
+            );
+        }
+        let is_i25_leg = text(&leg_data.raw, "highway")
+            .unwrap_or_default()
+            .split([';', '|', '/', ','])
+            .any(|route_ref| {
+                route_ref
+                    .chars()
+                    .filter(|character| character.is_ascii_alphanumeric())
+                    .collect::<String>()
+                    .eq_ignore_ascii_case("I25")
+            });
+        if is_i25_leg {
+            assert!(
+                corridor_records(leg_data, "billboard_bans")
+                    .iter()
+                    .all(|span| !text(span, "name")
+                        .unwrap_or_default()
+                        .contains("Cache la Poudre")),
+                "{id}: Cache la Poudre is a crossing, not a scenic span"
+            );
+        }
+    }
+
+    let san_juan: Vec<_> = corridor_records(leg(DURANGO_CO_TO_MONTROSE), "billboard_bans")
+        .iter()
+        .filter(|span| {
+            text(span, "name")
+                .unwrap_or_default()
+                .contains("San Juan Skyway")
+        })
+        .collect();
+    assert_eq!(
+        san_juan.len(),
+        1,
+        "Durango–Montrose should have one contiguous San Juan Skyway span"
+    );
+    let san_juan = san_juan[0];
+    assert!(
+        number(san_juan, "to_mi").unwrap() - number(san_juan, "from_mi").unwrap() >= 60.0,
+        "Durango–Montrose San Juan Skyway span is too short: {san_juan}"
+    );
+
+    let san_juan = corridor_records(leg(DURANGO_CO_TO_MOAB), "billboard_bans")
+        .iter()
+        .find(|span| {
+            text(span, "name")
+                .unwrap_or_default()
+                .contains("San Juan Skyway")
+        })
+        .expect("Durango–Moab begins on the San Juan Skyway");
+    assert!(
+        number(san_juan, "from_mi").unwrap() <= 2.0,
+        "Durango–Moab San Juan Skyway span begins too late: {san_juan}"
+    );
+}
+
 /// The Dallas–St. Louis trip stays on I-44 through Oklahoma, not Arkansas.
 #[test]
 fn dallas_st_louis_rides_i44() {
@@ -515,13 +612,17 @@ fn river_callouts_sit_on_the_crossing() {
             continue;
         };
         for landmark in corridor_records(leg, "landmarks") {
-            if text(landmark, "category") != Some("river")
-                || !text(landmark, "source").is_some_and(|source| {
-                    source.starts_with("derived 2026-10-01: crossing of OSM waterway")
-                })
-            {
+            if text(landmark, "category") != Some("river") {
                 continue;
             }
+            let source = text(landmark, "source").unwrap_or_default();
+            assert!(
+                source.starts_with("derived ")
+                    && source.contains("tools/place_river_crossings.py")
+                    && source.contains("at the crossing of OSM "),
+                "{id}: {} lacks place_river_crossings provenance: {source}",
+                text(landmark, "name").unwrap_or_default()
+            );
             let Some((lat, lon)) = coordinates(landmark) else {
                 continue;
             };

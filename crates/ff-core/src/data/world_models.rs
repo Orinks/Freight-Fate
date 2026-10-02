@@ -21,7 +21,7 @@ mod street;
 pub use interchange::{
     destinations_without_via, format_route_ref, join_destinations, route_token, Interchange,
 };
-pub use leg::{CorridorBuilder, CorridorDetail, DetailSource, Leg, Route, NO_LEG_ID};
+pub use leg::{BillboardBan, CorridorBuilder, CorridorDetail, DetailSource, Leg, Route, NO_LEG_ID};
 pub use street::{Driveway, ExitChain, LocalGeometrySegment, StreetControl, StreetLimit};
 
 /// The errors the Python data layer raised: `ValueError` for data that

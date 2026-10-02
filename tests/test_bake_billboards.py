@@ -4,7 +4,7 @@ in the leg's own frame."""
 from __future__ import annotations
 
 import pytest
-from bake_billboards import orient_to_leg, remove_from_leg
+from bake_billboards import orient_to_leg, remove_from_leg, sign_record
 
 LEG = {"from": "mitchell_sd_us", "to": "rapid_city_sd_us", "miles": 278}
 
@@ -49,3 +49,18 @@ def test_a_landmark_faces_the_way_its_sheet_reads_unless_marked_both():
     rec = {"category": "highway_marker", "at_mi": 63.0}
     orient_to_leg(rec, LEG, "rapid_city_sd_us", both=True)
     assert rec == {"category": "highway_marker", "at_mi": 215.0, "directions": ["both"]}
+
+
+def test_billboard_source_from_sheet_is_preserved():
+    sign = {
+        "name": "Madison",
+        "treatment": "billboard",
+        "leg": "atlanta_ga_us -> augusta_ga_us",
+        "at_mi": "50.0",
+        "spoken": "Billboard: Madison is ahead.",
+        "source": "derived from the approved review.",
+    }
+
+    _from, _to, record = sign_record(sign)
+
+    assert record["source"] == "derived from the approved review."
