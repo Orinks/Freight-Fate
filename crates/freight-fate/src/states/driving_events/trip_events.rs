@@ -362,6 +362,12 @@ impl DrivingState {
         // repeats are done" -- Shane, 2026-08-21, and that is the loop.
         // The lane belongs to the hazard, not to the truck.
         self.hazard_slow_hint_said = false;
+        // Lane keeping on full answers a slow vehicle by passing it, and the
+        // call says so instead of asking the driver to change lanes.
+        let message = match event.data.pass_message.clone() {
+            Some(pass) if self.hazard_dodgeable && self.pass_for_hazard(ctx, event) => pass,
+            _ => message,
+        };
         // A dodgeable hazard leaves the wheel alone: adaptive cruise or
         // the keeper stays armed through the lane change that answers it,
         // and only braking -- the driver's own, or the automatic brake

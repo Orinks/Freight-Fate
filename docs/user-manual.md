@@ -1021,6 +1021,15 @@ lane you are in and whether the lanes beside you are open. With automatic
 emergency braking on, the truck brakes for you at the last moment -- down to
 a crawl for an object in the lane. Fatigue shortens the reaction window.
 
+With lane keeping on full, the truck passes a slow vehicle itself. The call
+names what it is doing instead of asking you: "Slow car right ahead. Passing
+on the left." It moves into the open lane, says "In the left lane, passing
+the slow car", and moves back to the right lane once the vehicle is behind
+you and the lane is clear. It does not pull out to pass in the last two miles
+before an exit it is taking; there the call stays "Change lanes or brake!",
+and the truck brakes unless you change lanes. Debris and other objects in the
+lane are still yours to steer around.
+
 The road tells you how many lanes you have. Road status names the lanes on
 your side -- "divided, three lanes your side" -- and as the road widens or
 narrows mid-leg you hear it happen. Where the map has no lane data the game

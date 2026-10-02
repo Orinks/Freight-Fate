@@ -253,6 +253,7 @@ from the words, and synonyms cost them a re-read.
 | Vehicles around you now | traffic | NPCs, cars | `TrafficManager` |
 | Room adaptive cruise leaves to the vehicle ahead | following gap, always with its seconds ("close, two and a half seconds") | following distance, headway, gap on its own (bare "gap" is the lane row below, and the two are different things) | `settings.acc_following_gap`, `ACC_GAP_CHOICES` |
 | Room to move into the next lane over | the lane is open ("right lane open"); held by somebody, it is blocked ("right lane blocked by a semi"); at a hazard call the same words name the side a dodge can go ("Left lane open.", "Either lane open.", "No lane open.") | clear (that is what the truck is clear OF -- the vehicle passed), safe, free, gap, "open lane on the left" | `Trip::open_side_at`, `Trip::lane_blocker_at`, `states/driving_lane_gap.rs` |
+| Lane keeping on full moving into the open lane around a slow vehicle the hazard call named, and back to the right lane once it is behind | passing ("Passing on the left.", "In the left lane, passing the slow car.") | overtaking, going around, swerving (the driver's own dodge), dodge | `DrivingState::pass_for_hazard`, `update_pass_return`, `passing_hazard_call` |
 | Incidents reported ahead | delays, road reports | traffic (unqualified) | `RealTrafficProvider` |
 | A parking space at a stop | parking | slot, spot | `TruckParkingLocation` |
 | The trailer liquid bulk rides in | tank trailer | tanker (as a noun for the trailer), tank truck | `TRAILER_CATALOG["tank"]` |
@@ -656,8 +657,14 @@ synonym for the game's most safety-critical cue and is exactly what this
 table exists to prevent. The lane change leads the braking (owner,
 2026-08-17): both actions stay on offer, because a driver who cannot see the
 gap may reasonably prefer to slow, but at a hazard the first word is the one
-that gets acted on. Lane changes stay driver-initiated: one tap of the arrow
-the call named, with adaptive cruise riding through the dodge.
+that gets acted on. On partial or off, lane changes stay driver-initiated:
+one tap of the arrow the call named, with adaptive cruise riding through the
+dodge. On full, a slow VEHICLE ahead is passed by the truck itself (owner,
+2026-10-01): the call drops the opener and the lane answer and says what the
+truck is doing, "Slow car right ahead. Passing on the left.", the arrival is
+"In the left lane, passing the slow car.", and the move back is reported by
+"In the right lane." alone. "Passing" is the canonical word for it -- never
+overtaking or going around. Objects in the lane keep the driver's call.
 
 ## Open naming decisions
 

@@ -2391,6 +2391,20 @@ rev ceiling.
       lane-gap clearance calls open, says "Changing to the right lane for
       the exit.", and waits out a dodge in progress. The tap requests on the
       full-mode approach lines are gone.
+- [x] **Lane keeping on full passes a slow vehicle** (owner ruling, same
+      drive: braking to the speed of a slow car with a lane open beside it
+      is not what a driver does). On a vehicle-ahead hazard call with a side
+      open, `pass_for_hazard` starts the change at the call, which now says
+      "Slow car right ahead. Passing on the left." (`passing_hazard_call`,
+      carried on the event as `pass_message` with `open_side`). Left wherever
+      left is open; right only where it is the one side. The lane-tap
+      allowance already in the hazard window means emergency braking holds
+      off while the pass lands, and the arrival is "In the left lane, passing
+      the slow car." `update_pass_return` moves back once the lane-gap
+      clearance calls the home lane open, which it cannot while the passed
+      vehicle is still ahead or alongside. Not inside `EXIT_KEEP_RIGHT_MI` of
+      an armed exit, and not for objects in the lane; partial and off are
+      unchanged.
 
 ## 2.0 planned -- the working week and home
 

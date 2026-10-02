@@ -617,6 +617,12 @@ pub struct TripEventData {
     /// thing sitting in the lane, the moving-hazard safe speed for weather
     /// that spans the road.
     pub in_lane: Option<bool>,
+    /// Which neighbouring lane the call found open, the reading
+    /// `dodgeable` folds in. Set on a vehicle-ahead hazard.
+    pub open_side: Option<OpenSide>,
+    /// The vehicle-ahead call as lane keeping on full answers it, by
+    /// passing into `open_side` (see `passing_hazard_call`).
+    pub pass_message: Option<SpokenMessage>,
     pub name: Option<String>,
     pub weather: Option<WeatherKind>,
     pub curve: Option<RouteCurve>,

@@ -815,6 +815,9 @@ pub struct DrivingState {
     pub lane_change_target: Option<i64>,
     pub lane_change_timer: f64,
     pub lane_signal_timer: f64,
+    /// Lane keeping on full is passing a slow vehicle: (the lane to come
+    /// back to, the lane it passed into). See `pass_for_hazard`.
+    pub passing: Option<(i64, i64)>,
     pub merge_deadline: Option<f64>,
     // Miles of acceleration lane still ahead after pulling out of a
     // facility. None once the lane is behind the truck (or when the run

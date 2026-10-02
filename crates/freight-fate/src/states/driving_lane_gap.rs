@@ -36,7 +36,7 @@
 //! missed the line -- or who wants to know before committing -- can ask.
 
 use ff_core::sim::traffic_manager::TrafficVehicle;
-use ff_core::sim::trip_models::RoadStop;
+use ff_core::sim::trip_models::{OpenSide, RoadStop, TripEvent};
 use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, SayEvent};
@@ -160,7 +160,9 @@ impl DrivingState {
         // Marked spoken either way. A cue held back by the spacing and let out
         // later would be describing a gap that has moved on since.
         self.lane_gap_said_keys.insert(key);
-        if self.lane_gap_cue_s > 0.0 {
+        if self.lane_gap_cue_s > 0.0 || self.passing.is_some() {
+            // Spaced out, or lane keeping is passing and takes the lane back
+            // itself: "In the right lane." is the line for that.
             return;
         }
         self.lane_gap_cue_s = LANE_GAP_CUE_MIN_GAP_S;
@@ -203,15 +205,11 @@ impl DrivingState {
     pub fn keep_right_for_exit(&mut self, ctx: &mut GameContext, stop: &RoadStop) {
         let ahead = stop.at_mi - self.trip.position_mi;
         if self.in_right_lane_for_exit()
-            || self.lane_change_target.is_some()
-            || self.ramp_mi.is_some()
             // A dodge in progress is the driver's; it is not undone for an
             // exit, and the move right waits until the hazard is answered.
             || self.hazard_deadline.is_some()
-            || self.microsleep_deadline.is_some()
             || !(ahead > 0.0 && ahead <= EXIT_KEEP_RIGHT_MI)
-            || !self.trip.truck.engine_on
-            || self.trip.truck.speed_mph() < LANE_MIN_MPH
+            || !self.lane_keeping_may_change_lanes()
         {
             return;
         }
@@ -219,11 +217,7 @@ impl DrivingState {
         if Some(target) == self.closed_lane_here() || !self.lane_gap_open(target) {
             return;
         }
-        // The tap change's own drift and arrival, which runs the same
-        // sideswipe check the clearance above already passed.
-        self.lane_change_target = Some(target);
-        self.lane_change_timer = LANE_TAP_CHANGE_S;
-        self.lane_signal_timer = 0.0;
+        self.begin_lane_change(target);
         let name = lane_label(target, self.lane.lane_count);
         ctx.say_event_with(
             format!("Changing to the {name} lane for the exit."),
@@ -231,6 +225,100 @@ impl DrivingState {
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Confirmation),
         );
+    }
+
+    // -- full lane keeping passes a slow vehicle -------------------------------
+
+    /// Lane keeping on full passes a slow vehicle the hazard call names, into
+    /// the lane the call found open, instead of braking to its speed behind
+    /// it: the truck is the one steering, so it takes the gap a driver would
+    /// (owner ruling, 2026-10-01). Only a vehicle ahead -- debris and the
+    /// like stay the driver's call -- and not in the two miles where the
+    /// truck is lining up for its own exit. Returns whether the pass began,
+    /// so the call can say so.
+    pub fn pass_for_hazard(&mut self, ctx: &GameContext, event: &TripEvent) -> bool {
+        if !ctx.settings.lane_is_automated()
+            || event.data.traffic.is_none()
+            || self.lining_up_for_exit()
+            || !self.lane_keeping_may_change_lanes()
+        {
+            return false;
+        }
+        let Some(step) = event.data.open_side.and_then(OpenSide::pass_step) else {
+            return false;
+        };
+        let home = self.lane.lane;
+        self.begin_lane_change(home + step);
+        self.passing = Some((home, home + step));
+        true
+    }
+
+    /// Back into the lane a pass left once the vehicle passed is behind and
+    /// the lane is clear: keep right except to pass. The same clearance
+    /// reading as every other lane change, so a vehicle still alongside or
+    /// ahead in that lane holds the truck where it is. Dropped without a word
+    /// if the truck is no longer in the lane it passed in (the driver moved
+    /// it, or the road took the lane away) or leaves the highway.
+    pub fn update_pass_return(&mut self, ctx: &GameContext) {
+        let Some((home, passed_in)) = self.passing else {
+            return;
+        };
+        if self.lane_change_target.is_some() {
+            return; // still moving over to pass
+        }
+        if home > passed_in {
+            // Passed on the right: already where keeping right puts it.
+            self.passing = None;
+            return;
+        }
+        if !ctx.settings.lane_is_automated()
+            || self.ramp_mi.is_some()
+            || self.lane.lane != passed_in
+            || home >= self.lane.lane_count
+        {
+            self.passing = None;
+            return;
+        }
+        if self.hazard_deadline.is_some()
+            || !self.lane_keeping_may_change_lanes()
+            || Some(home) == self.closed_lane_here()
+            || !self.lane_gap_open(home)
+        {
+            return;
+        }
+        self.passing = None;
+        // "In the right lane." on arrival is the whole report; the blinker
+        // says it is coming.
+        self.begin_lane_change(home);
+    }
+
+    /// Whether an armed exit is close enough that the truck should be
+    /// heading for the right lane, not out of it.
+    pub fn lining_up_for_exit(&self) -> bool {
+        self.exit_stop.as_ref().is_some_and(|stop| {
+            let ahead = stop.at_mi - self.trip.position_mi;
+            !self.exit_signal_canceled && ahead > 0.0 && ahead <= EXIT_KEEP_RIGHT_MI
+        })
+    }
+
+    /// What every change lane keeping makes on its own needs: no change
+    /// already underway, on the highway, awake, and rolling with the engine
+    /// on -- the same conditions a tap is refused for.
+    fn lane_keeping_may_change_lanes(&self) -> bool {
+        self.lane_change_target.is_none()
+            && self.ramp_mi.is_none()
+            && self.microsleep_deadline.is_none()
+            && self.trip.truck.engine_on
+            && self.trip.truck.speed_mph() >= LANE_MIN_MPH
+    }
+
+    /// Start a lane change lane keeping chose: the tap change's own drift,
+    /// signal and arrival, which runs the same sideswipe check the
+    /// clearance reading has already passed.
+    fn begin_lane_change(&mut self, target: i64) {
+        self.lane_change_target = Some(target);
+        self.lane_change_timer = LANE_TAP_CHANGE_S;
+        self.lane_signal_timer = 0.0;
     }
 
     // -- the on-demand readout ------------------------------------------------

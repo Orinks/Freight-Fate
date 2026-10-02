@@ -455,6 +455,7 @@ impl DrivingState {
             self.on_lane_crossed(ctx);
         }
         self.update_tap_lane_change(ctx, dt);
+        self.update_pass_return(ctx);
         self.update_merge(ctx, dt);
         self.update_keep_right(ctx, dt);
     }
@@ -577,7 +578,20 @@ impl DrivingState {
             // spoken damage line, so the outcome pair is never ambiguous
             // (R4, R14).
             let names = self.hazard_names_text();
-            self.finish_hazard_clear(ctx, &format!("You swerve around {names}. Well done."));
+            // Lane keeping's own pass is not the driver's swerve to praise:
+            // say where the truck is now, the line a tap change ends on.
+            let text = if self
+                .passing
+                .is_some_and(|(_, passed_in)| passed_in == lane_index)
+            {
+                format!(
+                    "In {}, passing {names}.",
+                    lane_phrase(lane_index, lane_count)
+                )
+            } else {
+                format!("You swerve around {names}. Well done.")
+            };
+            self.finish_hazard_clear(ctx, &text);
             return;
         }
         if !quiet {

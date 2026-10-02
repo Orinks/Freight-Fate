@@ -267,6 +267,19 @@ pub fn in_lane_hazard_call(body: &str, side: OpenSide) -> SpokenMessage {
     }
 }
 
+/// The same call when lane keeping on full answers it by passing: the thing
+/// and where, then what the truck is doing ("Slow car right ahead. Passing
+/// on the left."). No "Change lanes or brake!" -- the truck is the one
+/// changing lanes -- and terse is the same line. None where no lane is open.
+pub fn passing_hazard_call(body: &str, side: OpenSide) -> Option<SpokenMessage> {
+    let side = if side.pass_step()? > 0 {
+        "left"
+    } else {
+        "right"
+    };
+    Some(SpokenMessage::new(format!("{body} Passing on the {side}.")))
+}
+
 // -- traffic lead cues --------------------------------------------------------
 // Terse slot grammar for hazard-family cues: [thing, distance, target speed].
 // The trailing bare number is only parseable because the frame never
@@ -742,6 +755,16 @@ mod tests {
 
     /// The Python half that reads `main_menu_help.py` stays with the help
     /// port; the phrase itself is pinned here.
+    #[test]
+    fn test_the_passing_call_names_the_side_the_truck_takes() {
+        let left = passing_hazard_call("Slow car right ahead.", OpenSide::Either).unwrap();
+        assert_eq!(left.normal, "Slow car right ahead. Passing on the left.");
+        assert_eq!(left.terse, None);
+        let right = passing_hazard_call("Slow semi ahead.", OpenSide::Right).unwrap();
+        assert_eq!(right.normal, "Slow semi ahead. Passing on the right.");
+        assert!(passing_hazard_call("Slow car ahead.", OpenSide::Neither).is_none());
+    }
+
     #[test]
     fn test_the_dodge_call_is_the_phrase_the_help_teaches() {
         assert_eq!(
