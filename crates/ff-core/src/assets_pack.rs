@@ -989,13 +989,17 @@ mod tests {
         // by one synthesized flasher cycle and vehicle/turn_signal_off.ogg
         // added, both from sound-test/turn_signal.json; 173 -> 174 entries,
         // the other 172 kept byte for byte.
-        assert_eq!(pack_bytes.len(), 8_263_717);
+        //
+        // Repacked 2026-10-01 (the CB): events/cb_radio_chatter.ogg replaced
+        // by a 0.14 s squelch tail from sound-test/cb_squelch.json; still 174
+        // entries, the other 173 kept byte for byte.
+        assert_eq!(pack_bytes.len(), 8_224_170);
         assert!(pack_bytes.starts_with(PACK_MAGIC));
         use sha2::{Digest, Sha256};
         let digest = hex::encode(Sha256::digest(&pack_bytes));
         assert_eq!(
             digest,
-            "de9e39c951ef69d661fcee9e448579d57596f30585b31a337de312ca2c40c712"
+            "e5ea32c377012b4c7aa792ee4e530fef040d3669351c8b7cf79c26b9b48a3a1c"
         );
         let pack = SoundPack::open(&path).unwrap();
         assert_eq!(pack.names().len(), 174);
