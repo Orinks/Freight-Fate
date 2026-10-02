@@ -963,46 +963,34 @@ mod tests {
             return;
         }
         let pack_bytes = std::fs::read(&path).unwrap();
-        // Repacked 2026-08-29 (the scale verdict tones): added the procedural
-        // events/scale_green.ogg and events/scale_red.ogg cues, which the code
-        // and the sound catalog both named while the pack carried neither --
-        // and the release ships THIS pack rather than baking a fresh one, so
-        // both lights changed in silence for players. 162 entries, the prior
-        // 160 preserved byte for byte plus the two new assets.
-        //
-        // Merged into rather than rebuilt, deliberately: a plain
-        // `tools/pack_sounds.py` run on the current builder machine yields
-        // 113 entries, because 60 API-generated effects are no longer in the
-        // loose tree. Re-baking here would silently drop them.
-        //
-        // Repacked 2026-08-14 (weigh-station warning earcon): added the
-        // procedural events/weigh_station_warning.ogg cue (owner ruling --
-        // the scale gets its own earcon instead of reusing the shared
-        // inspection cue), taking the pack from 159 entries to 160.
-        //
-        // Repacked 2026-09-11 (traffic cues): the eleven pass and crossing
-        // cues from 2026-08-20 regenerated through the ElevenLabs Sound
-        // Effects API and merged in, 162 -> 173 entries, the prior 162 kept
-        // byte for byte.
-        //
-        // Repacked 2026-09-29 (the blinker): vehicle/turn_signal.ogg replaced
-        // by one synthesized flasher cycle and vehicle/turn_signal_off.ogg
-        // added, both from sound-test/turn_signal.json; 173 -> 174 entries,
-        // the other 172 kept byte for byte.
-        //
-        // Repacked 2026-10-01 (the CB): events/cb_radio_chatter.ogg replaced
-        // by a 0.14 s squelch tail from sound-test/cb_squelch.json; still 174
-        // entries, the other 173 kept byte for byte.
-        assert_eq!(pack_bytes.len(), 8_224_170);
         assert!(pack_bytes.starts_with(PACK_MAGIC));
-        use sha2::{Digest, Sha256};
-        let digest = hex::encode(Sha256::digest(&pack_bytes));
-        assert_eq!(
-            digest,
-            "e5ea32c377012b4c7aa792ee4e530fef040d3669351c8b7cf79c26b9b48a3a1c"
-        );
+        // The release ships THIS pack, so what has to hold is that it carries
+        // every cue the game teaches -- the failure that happened was cues
+        // missing from it (the scale lights, 2026-08-29) and a re-bake from
+        // the incomplete loose tree dropping 60 effects. A deliberate swap of
+        // one sound is not a failure, so size and hash are not pinned.
         let pack = SoundPack::open(&path).unwrap();
-        assert_eq!(pack.names().len(), 174);
+        // Synthesized cues are not packed: these two publish themselves here,
+        // and enforcement/ is the game crate's siren signature.
+        crate::ladder_earcons::register_ladder_earcons();
+        crate::lane_guide_tone::register_lane_guide_tone();
+        let ships = |key: &str| {
+            !key.is_empty()
+                && (key.starts_with("enforcement/")
+                    || ["ogg", "wav"]
+                        .iter()
+                        .any(|ext| pack.has(&format!("{key}.{ext}")))
+                    || generated_sound(key).is_some())
+        };
+        let missing: Vec<&str> = crate::sound_catalog::catalog_entries()
+            .flat_map(|entry| entry.plays.iter())
+            .filter(|cue| !ships(cue.key) && !ships(cue.fallback))
+            .map(|cue| cue.key)
+            .collect();
+        assert!(
+            missing.is_empty(),
+            "taught but not in sounds.pak: {missing:?}"
+        );
     }
 
     #[test]
