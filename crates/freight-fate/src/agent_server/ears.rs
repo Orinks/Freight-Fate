@@ -272,6 +272,21 @@ impl Audio for TeeAudio {
         self.hear(format!("[sound] {base}{}{soft}", pan_text(pan)));
         self.inner.play_bank_with(base, fallback, volume, pan);
     }
+    // The held-cue pair reaches the engine as itself. Left to the trait's
+    // defaults, a repeat-when-idle came through as a plain play, so in the
+    // agent server every blinker click started a fresh copy over the one
+    // still sounding (owner, 2026-10-01: the blinker "played twice over each
+    // other"), and a held cue's pan never followed the move.
+    fn play_if_idle(&mut self, key: &str, volume: f64, pan: f64) {
+        let soft = if volume < 0.4 { ", soft" } else { "" };
+        self.hear(format!("[sound] {key}{}{soft}", pan_text(pan)));
+        self.hold_cue(key);
+        self.inner.play_if_idle(key, volume, pan);
+    }
+    fn update_cue(&mut self, key: &str, volume: f64, pan: f64) {
+        self.hold_cue(key);
+        self.inner.update_cue(key, volume, pan);
+    }
     fn set_engine_duck(&mut self, duck: f64) {
         self.inner.set_engine_duck(duck);
     }
@@ -644,6 +659,25 @@ mod tests {
         assert_eq!(
             heard.matches("[bed] vehicle/road pans").count(),
             2,
+            "{heard}"
+        );
+    }
+
+    #[test]
+    fn a_repeating_cue_reaches_the_engine_held_not_as_a_fresh_play() {
+        // A blinker click is play-if-idle: the engine starts it only when the
+        // last one has finished, and holds it as a cue. Through the tee it
+        // used to arrive as a plain play, held by nobody, and every click
+        // stacked a second copy on the first.
+        let ears = Ears::shared();
+        let mut audio = tee_audio(&ears);
+        audio.play_if_idle("vehicle/turn_signal", 0.8, -0.6);
+        assert!(audio.inner.cue_held("vehicle/turn_signal"));
+        audio.release_cue("vehicle/turn_signal");
+        let heard = drain_ears(&ears);
+        assert_eq!(
+            heard.matches("[cue] vehicle/turn_signal holds").count(),
+            1,
             "{heard}"
         );
     }
