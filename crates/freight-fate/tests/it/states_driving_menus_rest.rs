@@ -819,9 +819,32 @@ fn test_calling_the_mechanic_leaves_the_pause_menu_with_its_rows() {
 }
 
 #[test]
+fn test_chains_are_not_offered_on_a_bare_road_with_no_chain_law() {
+    // Owner, 2026-10-01: an October run into Chicago offered "Install snow
+    // chains" at every pause. They ride in the side box until the road or the
+    // law calls for them.
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    {
+        let profile = app.ctx.profile.as_mut().expect("a career");
+        profile.set_chains_owned(true);
+    }
+    assert_eq!(with_drive(&drive, |d| d.trip.chain_law_level()), 0);
+    let mut state = PauseMenuState::with_drive(DriveRef::of(&drive));
+    Menu::enter(&mut state, &mut app.ctx);
+    let rows = labels(&state, &app.ctx);
+    assert!(
+        !rows.iter().any(|row| row.contains("snow chains")),
+        "{rows:?}"
+    );
+}
+
+#[test]
 fn test_hanging_chains_leaves_the_pause_menu_with_its_rows() {
     let mut app = TestApp::new();
     let drive = a_drive(&mut app);
+    // Snow under the truck: the only place the row is offered.
+    with_drive(&drive, |d| d.trip.truck.surface = "snow".to_string());
     {
         let profile = app.ctx.profile.as_mut().expect("a career");
         profile.set_chains_owned(true);

@@ -197,6 +197,22 @@
 
 ### Fixed
 
+- **Chain controls now stand only while a chain law is in effect.** On dry roads the CB no longer calls one, and no chain-control trooper watches you.
+
+- **Chain laws now apply only in the western states that post them.** A steep grade in Texas or Wisconsin no longer brings a chain law in snow.
+
+- **A chain citation now comes only on a grade where the chain law is posted.** Snow elsewhere no longer lets a scale or patrol write one.
+
+- **Install snow chains appears in the pause menu only when snow, ice or a chain law calls for them.**
+
+- **With live weather setting the calendar, real snow now stays snow in any month.** An October snow in Denver is no longer driven as rain.
+
+- **Simulated weather no longer says rain below freezing out of season.** A cold March night is overcast instead.
+
+- **A real winter storm warning no longer reaches a career that is in summer on its own calendar.**
+
+- **On the real calendar, dates now name the right weekday.** A leap year no longer shifts every date a day late.
+
 - **Lane keeping on full now moves to the right lane for your exit.** Pulling out to pass no longer costs you the exit.
 
 - **State lines, rivers and exits on several highways now match where the truck is.** The New York Thruway no longer announces Pennsylvania.

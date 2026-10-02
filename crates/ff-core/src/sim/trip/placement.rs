@@ -590,7 +590,7 @@ impl Trip {
 
     /// The two-letter state code at a trip milepost, or None where the bake is
     /// silent and the route names no city we can fall back on.
-    fn state_code_at(&self, at: f64) -> Option<String> {
+    pub(crate) fn state_code_at(&self, at: f64) -> Option<String> {
         let name = self.state_at(Some(at));
         if !name.is_empty() {
             if let Some(code) = self.state_codes.get(&name) {

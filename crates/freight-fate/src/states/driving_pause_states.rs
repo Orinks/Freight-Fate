@@ -142,7 +142,15 @@ impl PauseMenuState {
                 )
                 .help("Chains grind apart fast on bare pavement."),
             );
-        } else if profile_of(ctx).chains_owned() && profile_of(ctx).chain_wear_pct() < 100.0 {
+        } else if profile_of(ctx).chains_owned()
+            && profile_of(ctx).chain_wear_pct() < 100.0
+            // Offered only where chains would matter: snow or ice under the
+            // truck, or a chain law posted on the run. Every pause in an
+            // October in Chicago used to offer them (owner, 2026-10-01); the
+            // help already says they ride in the side box until a pass calls.
+            && (matches!(d.trip.truck.surface.as_str(), "snow" | "ice")
+                || d.trip.chain_law_level() > 0)
+        {
             items.push(
                 MenuItem::new(install_chains_label(d), |s: &mut Self, ctx| {
                     s.install_chains(ctx)

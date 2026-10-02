@@ -13,7 +13,7 @@ use std::sync::Arc;
 
 use ff_core::sim::real_traffic::RealTrafficProvider;
 use ff_core::sim::real_weather::RealWeatherProvider;
-use ff_core::sim::real_weather_alerts::ALERT_POLL_MI;
+use ff_core::sim::real_weather_alerts::{alerts_chain_law_level, ALERT_POLL_MI};
 use ff_core::sim::trip_traffic::TrafficProvider;
 use ff_core::sim::truck_parking::TruckParkingProvider;
 use ff_core::sim::weather::WeatherProvider;
@@ -76,6 +76,18 @@ impl DrivingState {
             return;
         };
         self.alerts_pending = None;
+        // A real winter warning in a career that is in July on its own
+        // calendar is neither said nor allowed to post a chain law: the sky
+        // is already kept out of season snow, and the warning has to agree
+        // with it (seasonal audit, 2026-10-01).
+        let alerts: Vec<_> = if self.trip.weather.winter_fits_calendar() {
+            alerts
+        } else {
+            alerts
+                .into_iter()
+                .filter(|alert| alerts_chain_law_level(std::slice::from_ref(alert)) == 0)
+                .collect()
+        };
         // One line for everything new, not one per warning: a second safety
         // line in the same frame cuts the first, and the ladder then repeats
         // the cut one, so the driver would hear the wind warning twice.

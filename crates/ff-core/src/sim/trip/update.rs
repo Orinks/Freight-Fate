@@ -319,6 +319,7 @@ impl Trip {
         self.traffic_manager
             .update(dt, self.position_mi, time_scale, Some(hour), Some(weekend));
         self.check_zones();
+        self.sync_chain_posts();
         self.check_chain_law();
         self.check_speed_limit();
         self.check_limit_drop_ahead();

@@ -312,6 +312,9 @@ Costs the drive (found 2026-10-01, owner's drive into Chicago):
 - [x] Lane keeping on full held the middle lane through the destination
       exit's gore, twice; it now moves to the right lane itself
       ([October 1](#october-1-lane-keeping-moves-right-for-its-exit)).
+- [x] Chain law anywhere with a steep mile, chain controls and their CB
+      calls all year, and chain citations off the posted grade
+      ([October 1](#october-1-seasons)).
 
 World data (the rest of the 1.9 world-data list moved to
 [2.0](#world-data-deferred-from-19) on 2026-09-25):
@@ -357,6 +360,20 @@ into the release gate. Details stay in the linked dated sections, marked
 
 Everything found before 2026-09-25 moved to
 [2.0](#found-along-the-way-in-19-moved-to-20) that day.
+
+- [ ] Simulated snow by region and month, not a hard Dec-Feb gate
+      ([October 1](#october-1-seasons)).
+- [ ] Each chain-control state's own law on its signs and fines; every one
+      reads Colorado's today ([October 1](#october-1-seasons)).
+- [ ] Roadcheck on CVSA's announced dates under the live calendar
+      ([October 1](#october-1-seasons)).
+- [ ] Dawn and dusk from latitude and date, not fixed hours
+      ([October 1](#october-1-seasons)).
+- [ ] Trip weekday (weekend traffic, weekend scales) from the calendar
+      clock ([October 1](#october-1-seasons)).
+- [ ] Fewer simulated work zones in a snow-belt winter; deer strikes peaking
+      in November; holiday billboard windows on the real holiday
+      ([October 1](#october-1-seasons)).
 
 - [x] A CDL suspended at speed (a second run off the road asleep, or the
       work-zone barrels) now ends the run on the shoulder the way a
@@ -2405,6 +2422,60 @@ rev ceiling.
       vehicle is still ahead or alongside. Not inside `EXIT_KEEP_RIGHT_MI` of
       an armed exit, and not for objects in the lane; partial and off are
       unchanged.
+
+### October 1 seasons
+
+Owner, October on I-94: a chain-control CB call and "Install snow chains" in
+the pause menu, with no snow and no chain law. An audit of everything keyed
+on the season or the date found more.
+
+- [x] (Release gate) Chain law keyed on grade alone: 218 legs in 35 states
+      and DC carried chain-law areas, Texas, Alabama and Wisconsin among
+      them. Areas now need a state in `CHAIN_CONTROL_STATES` (CA, CO, ID,
+      MT, NV, OR, UT, WA, WY; read from each state's chain-control program).
+- [x] (Release gate) The chain-control post stood all year, staffed half
+      the time, so the CB called it on dry pavement and its trooper watched
+      for anything else. `sync_chain_posts` keeps it on the route only while
+      `chain_law_level` is above zero.
+- [x] (Release gate) Any visual or scale post could cite "running the chain
+      control without chains" wherever it snowed. The road sample now needs
+      a chain-law area at the truck, the same test as the entry citation.
+- [x] "Install snow chains" in every pause menu; now only with snow or ice
+      under the truck or a chain law posted.
+- [x] With the live calendar, real snow was turned into rain outside
+      Dec-Feb; the season guard now applies only to the independent career
+      calendar.
+- [x] Out of season, snow turned into rain, so the colder a March night the
+      surer it rained ("rain, 14 degrees"); now overcast. Freezing rain stays
+      unguarded: a March glaze on the Great Lakes is real, and the hard gate
+      itself is the open item below.
+- [x] A real winter warning reached a career in July on its own calendar,
+      spoken and posting a chain law; winter alerts now need
+      `winter_fits_calendar`.
+- [x] Live-calendar weekdays were counted on 2001's calendar, three days off
+      2026's (`real_weekday_name`), and a leap year shifted every date from
+      March 1 a day late (`real_clock_game_hours` now maps month and day).
+- [ ] (Found along the way) Simulated snow is allowed only Dec-Feb
+      everywhere, so a simulated Colorado chain law can only happen then,
+      though March is Denver's snowiest month (NWS Boulder) and CDOT has
+      trucks carry chains on I-70 Sept 1 - May 31. Replace the hard gate
+      with per-region windows.
+- [ ] (Found along the way) The chain-law sign and the 580-dollar fine are
+      Colorado's (Level 1 / Level 2) in every chain-control state; WYDOT,
+      Caltrans R-1 to R-3, WSDOT and ODOT each word theirs differently.
+- [ ] (Found along the way) Roadcheck is fixed to May 13-15; CVSA sets it
+      each year (2026: May 12-14). A table of announced dates for the live
+      calendar, and the blitz flag re-read when the date changes mid-drive.
+- [ ] (Found along the way) Dawn, day, dusk and night are fixed hours all
+      year, so a December 6 PM in Chicago is "day". Derive them from
+      latitude and date (NOAA solar calculator).
+- [ ] (Found along the way) `Trip.career_hours` is the raw career clock, so
+      weekend traffic and weekend scale closures follow a weekday that
+      matches neither calendar. Not spoken.
+- [ ] (Found along the way) Simulated work zones run the same in January as
+      July (northern DOTs build April to November); deer strikes have no
+      November peak (IIHS: twice the yearly average); holiday billboards use
+      loose windows ("Happy Thanksgiving" any day Nov 22-28).
 
 ## 2.0 planned -- the working week and home
 

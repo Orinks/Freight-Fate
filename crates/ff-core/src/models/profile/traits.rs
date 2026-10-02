@@ -40,6 +40,9 @@ impl StandingProfile for Profile {
     fn calendar_now_hours(&self) -> f64 {
         self.player_calendar_hours()
     }
+    fn calendar_is_live(&self) -> bool {
+        self.live_calendar
+    }
     fn driving_record(&self) -> Option<&DrivingRecord> {
         Some(&self.driving_record)
     }

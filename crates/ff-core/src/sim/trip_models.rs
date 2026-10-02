@@ -478,6 +478,15 @@ pub const PACE_CHANGE_MAX_MPH: f64 = 0.5;
 pub const PARKED_TIME_SCALE_MULT: f64 = 2.0;
 pub const CONSTRUCTION_ENFORCEMENT_GRACE_MI: f64 = 1.5;
 pub const CHAIN_LAW_MIN_GRADE: f64 = 0.05;
+/// States that post commercial chain controls on their mountain routes, so a
+/// sustained grade there can carry a chain law. READ, from each state's own
+/// program: CDOT's Commercial Vehicle Chain Law (I-70), WYDOT's chain law,
+/// Caltrans chain controls R-1 to R-3, ODOT snow zones, WSDOT chain
+/// requirements over 10,000 lb, and the Idaho, Montana, Nevada and Utah chain
+/// restrictions on their passes. Nowhere else runs a commercial chain-control
+/// program, so a steep mile in Texas or Wisconsin is only a steep mile
+/// (seasonal audit, 2026-10-01: 218 legs in 35 states had chain areas).
+pub const CHAIN_CONTROL_STATES: [&str; 9] = ["CA", "CO", "ID", "MT", "NV", "OR", "UT", "WA", "WY"];
 pub const CHAIN_LAW_MIN_RUN_MI: f64 = 1.0;
 pub const CHAIN_LAW_JOIN_GAP_MI: f64 = 2.0;
 pub const CHAIN_LAW_LEAD_MI: f64 = 0.5;

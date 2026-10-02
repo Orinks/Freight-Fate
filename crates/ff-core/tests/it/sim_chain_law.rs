@@ -13,15 +13,20 @@ use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::WeatherKind;
 
-/// A Chicago-Indianapolis trip; optionally with a synthetic grade profile
-/// baked onto leg 0 before construction so chain-law placement sees it.
+/// A Denver-Silverthorne trip on I-70, inside Colorado's chain-control
+/// program; optionally with a synthetic grade profile baked onto leg 0 before
+/// construction so chain-law placement sees it.
 ///
 /// Python monkeypatched `Trip.grade_at`; here the same shape comes from real
 /// grade segments on the leg, which is the only input `grade_at` reads before
 /// its flat-terrain fallback.
 fn trip(grade: Option<(f64, f64)>) -> Trip {
+    trip_on("Denver", "Silverthorne", grade)
+}
+
+fn trip_on(origin: &str, destination: &str, grade: Option<(f64, f64)>) -> Trip {
     let w = world();
-    let mut route = first_route_option(w, "Chicago", "Indianapolis");
+    let mut route = first_route_option(w, origin, destination);
     if let Some((start, end)) = grade {
         let edited = with_corridor(&route.legs[0], |detail| {
             detail.grade_segments = vec![GradeSegment {
@@ -63,6 +68,45 @@ fn test_chain_law_areas_sit_over_sustained_steep_grade() {
     assert!(end >= 14.0, "{end}");
     assert_eq!(trip.chain_law_area_at(12.0), Some(0));
     assert_eq!(trip.chain_law_area_at(5.0), None);
+}
+
+#[test]
+fn test_a_steep_mile_outside_the_chain_control_states_is_only_a_hill() {
+    // The same sustained 6 percent in Illinois: no state there posts
+    // commercial chain controls, so no chain law, no chain-up area and no
+    // chain-control post, whatever the weather (seasonal audit, 2026-10-01).
+    let mut trip = trip_on("Chicago", "Indianapolis", mountain_grade());
+    assert!(
+        trip.chain_law_areas.is_empty(),
+        "{:?}",
+        trip.chain_law_areas
+    );
+    trip.weather.current = WeatherKind::Snow;
+    trip.sync_chain_posts();
+    assert!(!trip.posts.iter().any(|p| p.kind == "chain_control"));
+}
+
+#[test]
+fn test_the_chain_control_post_stands_only_while_the_law_is_in_effect() {
+    // A chain control goes up when the law is posted. On dry pavement it is
+    // not there to call on the CB or to watch the truck (owner, October on
+    // I-94, 2026-10-01).
+    let mut trip = trip(mountain_grade());
+    trip.weather.current = WeatherKind::Clear;
+    trip.sync_chain_posts();
+    assert!(!trip.posts.iter().any(|p| p.kind == "chain_control"));
+    trip.weather.current = WeatherKind::Snow;
+    trip.sync_chain_posts();
+    assert_eq!(
+        trip.posts
+            .iter()
+            .filter(|p| p.kind == "chain_control")
+            .count(),
+        1
+    );
+    trip.weather.current = WeatherKind::Clear;
+    trip.sync_chain_posts();
+    assert!(!trip.posts.iter().any(|p| p.kind == "chain_control"));
 }
 
 #[test]

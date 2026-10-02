@@ -340,6 +340,11 @@ pub trait StandingProfile {
     /// The hour the player's own calendar reads now
     /// (`Profile::player_calendar_hours`): dates are spoken counted from it.
     fn calendar_now_hours(&self) -> f64;
+    /// Whether that calendar is the real one (live weather drives it), so a
+    /// spoken weekday comes from the real date.
+    fn calendar_is_live(&self) -> bool {
+        false
+    }
     /// `getattr(profile, "driving_record", None)`.
     fn driving_record(&self) -> Option<&DrivingRecord>;
     /// `profile.business_status`.
@@ -750,7 +755,12 @@ fn calendar_day_text<P: StandingProfile + ?Sized>(profile: &P, career_hours: f64
         1 => ", next year",
         _ => ", the year after next",
     };
-    format!("{}, {}{when}", weekday_name(at), date_text(at))
+    let weekday = if profile.calendar_is_live() {
+        crate::sim::season::real_weekday_name(at, None)
+    } else {
+        weekday_name(at)
+    };
+    format!("{weekday}, {}{when}", date_text(at))
 }
 
 /// The day the carrier's record review lets go: back under its floor.
