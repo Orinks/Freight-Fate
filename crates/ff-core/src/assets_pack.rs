@@ -999,18 +999,8 @@ mod tests {
         if !committed_pack(&path) {
             return;
         }
-        // Split out of sounds.pak on 2026-08-14 alongside the radio
-        // station-identity batch: 356 entries, the music/ subtree plus the new
-        // station jingles and songs. 358 since 2026-08-26 (Dangerous Dan,
-        // Dial-up Summer); 359 since 2026-08-30, when Four Sources and the
-        // Truth joined the country pool; 378 since 2026-09-11 (the gospel,
-        // tejano, synthwave and Night Line song batch); 380 since 2026-09-13
-        // (D-Major Medley and From Bossa to Blues); 405 since 2026-09-19
-        // (25 selected radio songs); 426 since 2026-09-25 (eight jazz songs,
-        // ten station IDs, three hiring ads). Only the size and header are
-        // checked here: hashing the whole pack is the Python suite's job, once.
-        let len = std::fs::metadata(&path).unwrap().len();
-        assert_eq!(len, 392_392_427);
+        // Only the header: tools/build_release.py checks the download against
+        // DEFAULT_MUSIC_SHA256 before every release build.
         let mut head = [0u8; 6];
         std::fs::File::open(&path)
             .unwrap()

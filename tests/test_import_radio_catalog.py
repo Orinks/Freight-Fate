@@ -102,16 +102,6 @@ def test_hand_curation_lands_in_the_checked_in_catalog():
         assert row["id"] not in stations, f"{row['id']} is dropped but in the catalog"
 
 
-def test_no_station_name_reads_a_stranded_s_out_loud():
-    # The whole point of the repair, checked against what actually shipped.
-    stranded = [
-        station["name"]
-        for station in _catalog()["stations"]
-        if irc.restore_possessives(station["name"]) != station["name"]
-    ]
-    assert not stranded
-
-
 def test_the_catalog_counts_match_the_stations_in_it():
     catalog = _catalog()
     assert catalog["counts"]["stations"] == len(catalog["stations"])

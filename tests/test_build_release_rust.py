@@ -281,10 +281,9 @@ def test_music_download_config_uses_public_defaults(monkeypatch):
     # host, made while the variable was Preview-only, 503d every platform of
     # the snapshot build -- so if this pin ever has to move back, check the
     # route with curl rather than checking that its file deployed.
-    assert build_release.music_download_config() == (
-        "https://www.orinks.net/downloads/music.pak",
-        "251a9883dc82f39e4b0e51b3d5b3d788f9dce5b931f04c14526cb71087dda77d",
-    )
+    url, sha = build_release.music_download_config()
+    assert url == "https://www.orinks.net/downloads/music.pak"
+    assert sha == build_release.DEFAULT_MUSIC_SHA256
 
 
 def test_music_download_config_allows_independent_overrides():

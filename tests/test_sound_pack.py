@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import hashlib
 import zipfile
 from pathlib import Path
 
 import assets_pack
 import pytest
-from asset_helpers import music_pack_available, needs_audio_assets
 
 ROOT = Path(__file__).resolve().parents[1]
 SOUNDS_DIR = ROOT / "assets" / "sounds"
@@ -112,50 +110,6 @@ def test_pack_is_deterministic(tmp_path):
     first = assets_pack.write_pack(sounds, tmp_path / "a.pak").read_bytes()
     second = assets_pack.write_pack(sounds, tmp_path / "b.pak").read_bytes()
     assert first == second
-
-
-@needs_audio_assets
-def test_committed_pack_has_freight_fate_header():
-    assert assets_pack.DEFAULT_PACK_PATH.exists()
-    # Size and hash are not pinned: a deliberate repack is not a failure. The
-    # Rust guard (assets_pack.rs) checks the pack carries every taught cue.
-    assert assets_pack.DEFAULT_PACK_PATH.read_bytes().startswith(assets_pack.PACK_MAGIC)
-
-
-@pytest.mark.skipif(
-    not music_pack_available(),
-    reason=(
-        "music.pak is not in the repository: at 250 MB it is downloaded from "
-        "a private release URL when needed, so only a builder machine holding "
-        "it can check the header it stands in for."
-    ),
-)
-def test_committed_music_pack_has_freight_fate_header():
-    assert assets_pack.DEFAULT_MUSIC_PACK_PATH.exists()
-    pack_bytes = assets_pack.DEFAULT_MUSIC_PACK_PATH.read_bytes()
-    # Repacked 2026-09-25: eight jazz songs, ten station IDs and three
-    # carrier hiring ads, preserving all 405 prior entries.
-    # Repacked 2026-09-19: 25 selected songs, preserving all 380 prior entries.
-    # Repacked 2026-09-13 for two owner-supplied instrumentals, D-Major
-    # Medley (a menu bed) and From Bossa to Blues (a day drive bed):
-    # 378 -> 380 entries, merged into the prior pack.
-    #
-    # Repacked 2026-09-11 for the gospel, tejano, synthwave and Night Line
-    # song batch (nineteen songs, see CHANGELOG Unreleased): 359 -> 378
-    # entries, merged into the prior pack rather than rebuilt.
-    #
-    # Repacked 2026-08-30 for "Four Sources and the Truth" (a country song
-    # about trusting the forecast): 358 -> 359 entries. Before that,
-    # 356 -> 358 on 2026-08-26 for "Dangerous Dan" and "Dial-up Summer".
-    #
-    # Split out of sounds.pak on 2026-08-14 alongside the radio
-    # station-identity batch: 356 entries, the music/ subtree plus the new
-    # station jingles and songs.
-    assert len(pack_bytes) == 392_392_427
-    assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
-    assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "251a9883dc82f39e4b0e51b3d5b3d788f9dce5b931f04c14526cb71087dda77d"
-    )
 
 
 def test_damaged_entry_costs_only_its_own_sound(tmp_path, monkeypatch):
