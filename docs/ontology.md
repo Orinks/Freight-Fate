@@ -330,7 +330,7 @@ from the words, and synonyms cost them a re-read.
 | The sticker a clean Level 1 earns, good for three months of being waved past open scales | inspection decal; "the decal on the windshield" | CVSA sticker, decal, bypass sticker | `DrivingRecord::decal_until_h`, `DECAL_VALID_HOURS` |
 | The driver's own pre-trip check of the same items | walk-around; "Walk around the truck" is the row | pre-trip, DVIR, pre-trip inspection, vehicle check | `roadside_inspection::walk_around`, `WALK_AROUND_MIN` |
 | The three days in May when every inspector is on the road | Roadcheck week | blitz, inspection blitz, Roadcheck event | `roadside_inspection::roadcheck_blitz`, `Trip::roadcheck_blitz` |
-| Drivers talking about enforcement on the radio | CB chatter | radio talk, scanner, traffic | `cb_patrol_message` |
+| Drivers talking about enforcement on the radio | CB chatter (the name in help and menus; the spoken report itself opens with the distance or "Somebody", never a "CB chatter" label -- the squelch marks it, owner 2026-10-01) | radio talk, scanner, traffic | `cb_patrol_message` |
 | A CB report nobody has verified | unconfirmed | rumor, maybe, possible, unreliable | `_cb_confidence` |
 | The last CB call said again because the driver asked for it | repeat the CB chatter | CB replay, rewind, play back the CB, last CB | `DrivingState::speak_last_cb_chatter` (Alt C) |
 | How much police activity you hear | it is not a setting -- the road's own presence, from region, road class and the clock | enforcement presence (the player setting, removed 2026-08-16), police density, patrol frequency, difficulty | `Trip._post_density_at`, `EnforcementWatchMixin._ambience_scale` |

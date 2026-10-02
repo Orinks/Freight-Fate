@@ -1,0 +1,15 @@
+{
+  "out_dir": "build/genny/cb_chatter",
+  "sounds": [
+    {
+      "out": "cb_squelch_tail.wav",
+      "layers": [
+        {"type": "sfx", "kind": "static", "params": {"dur": 0.14, "color": "white"}, "gain": 0.6,
+         "fx": [{"type": "bandpass", "center": 2000, "q": 0.8}, {"type": "lowpass", "cutoff": 3400},
+                {"type": "fade", "in": 0.002, "out": 0.09}]}
+      ],
+      "fx": [{"type": "mono"}],
+      "normalize": -6.0
+    }
+  ]
+}

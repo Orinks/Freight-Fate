@@ -941,8 +941,8 @@ impl Trip {
                 self.emit(
                     TripEventKind::Inspection,
                     SpokenMessage::new(
-                        "CB chatter: it is Roadcheck week. Inspectors are out in force for three \
-                         days, scales are open and troopers are checking paperwork.",
+                        "It is Roadcheck week. Inspectors are out in force for three days, \
+                         scales are open and troopers are checking paperwork.",
                     ),
                     TripEventData {
                         key: Some("roadcheck".to_string()),

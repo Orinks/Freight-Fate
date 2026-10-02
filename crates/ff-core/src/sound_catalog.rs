@@ -761,9 +761,10 @@ const ENFORCEMENT: SoundCategory = SoundCategory {
         SoundEntry::new(
             "CB chatter",
             &[Cue::new("events/cb_radio_chatter")],
-            "Other drivers passing on what they have seen: enforcement, \
-             wrecks, work zones. It says how sure it is, it is sometimes out \
-             of date, and it never claims the road is clear.",
+            "The squelch of a CB call ending, played with what another \
+             driver passed on: enforcement, wrecks, work zones. The report \
+             says how sure it is, it is sometimes out of date, and it never \
+             claims the road is clear.",
         ),
     ],
 };

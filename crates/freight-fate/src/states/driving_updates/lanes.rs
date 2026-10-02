@@ -912,8 +912,7 @@ impl DrivingState {
         }
         self.keep_right_nags += 1;
         if self.keep_right_nags == 1 {
-            let grumble = "CB chatter: you have been riding the left lane a while. Keep right \
-                           except to pass.";
+            let grumble = "You have been riding the left lane a while. Keep right except to pass.";
             // Repeatable with Alt C like any other CB call. No post and no
             // distance in it, so the repeat says it back word for word.
             self.last_cb_chatter = Some(CbChatterRecall {

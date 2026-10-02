@@ -134,7 +134,12 @@ fn test_bear_is_cb_voice_only_in_every_player_facing_string() {
             if !says_bear(&text) {
                 continue;
             }
-            if text.contains("CB") {
+            // CB voice is a line that says it is the CB, or that puts the
+            // word in another driver's mouth: the CB reports dropped their
+            // "CB chatter" opener for the squelch (owner, 2026-10-01).
+            let attributed =
+                text.contains("CB") || text.contains(" driver") || text.starts_with("Somebody");
+            if attributed {
                 cb_lines += 1;
             } else {
                 offenders.push(format!("{}: {literal}", path.display()));

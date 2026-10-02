@@ -1079,7 +1079,8 @@ Posted speed limits come from real map data and change along a corridor; a
 change is announced as reduced or raised, and named near a city. State troopers
 patrol some stretches, hotter on busy interstates, in construction, and at
 night. CB chatter may mention a bear ahead or drivers talking about enforcement
-near a construction zone. U reports the road ahead, not enforcement chatter. Speed
+near a construction zone. You hear the short squelch of a CB call ending, then
+the report itself: "2 miles: a driver reports a bear in the median." U reports the road ahead, not enforcement chatter. Speed
 badly inside a patrol and a trooper may pull you over: signal with X (the same
 key as an exit), brake to a stop on the shoulder, and sit through a license and
 logbook check that reads your recent duty entries before ending in an

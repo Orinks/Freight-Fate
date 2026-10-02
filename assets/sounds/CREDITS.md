@@ -105,7 +105,7 @@ not distributed in this repository.
 | Ramp light red | `events/ramp_light_red.ogg` | ElevenLabs-generated low two-tone stop cue for a red ramp-terminal light |
 | Ramp light green | `events/ramp_light_green.ogg` | ElevenLabs-generated go cue for a green ramp-terminal light, loudness-normalized |
 | Police siren | `events/police_siren.ogg` | ElevenLabs-generated trooper pull-over siren wail |
-| CB radio chatter | `events/cb_radio_chatter.ogg` | ElevenLabs-generated CB squelch and chatter for bear and enforcement heads-up cues |
+| CB radio chatter | `events/cb_radio_chatter.ogg` | Original synthesized CB squelch tail, the burst a receiver makes when the other driver lets go of the mic, rendered with the genny CLI from `sound-test/cb_squelch.json` (2026-10-01); replaced an ElevenLabs-generated squelch-and-chatter recording |
 | Spike strip | `events/spike_strip.ogg` | ElevenLabs-generated spike-strip puncture/air-hiss for felony stops |
 | Hazard clear | `events/hazard_clear.ogg` | ElevenLabs-generated confirmation cue when a hazard has been safely passed |
 | Rest stop at night | `poi/rest_stop_night.ogg` | Parked rest-stop ambience loop |

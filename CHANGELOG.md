@@ -65,6 +65,8 @@
 
 ### Changed
 
+- **CB reports now open with a short squelch and go straight to the news.** "CB chatter" is no longer said before each one.
+
 - **Lane keeping on full now passes slow vehicles.** You hear "Passing on the left", and the truck moves back right once past.
 
 - **Letting go of the steering keys now straightens the truck.** It stops drifting where you leave it, so there is no wheel to unwind after a turn.
