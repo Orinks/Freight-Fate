@@ -82,6 +82,8 @@ def sign_record(sign: dict) -> tuple[str, str, dict] | None:
         "at_mi": round(float(sign["at_mi"]), 1),
         "spoken": spoken,
     }
+    if sign.get("source"):
+        rec["source"] = sign["source"]
     return a, b, rec
 
 

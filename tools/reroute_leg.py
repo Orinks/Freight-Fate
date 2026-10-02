@@ -75,6 +75,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -139,6 +140,24 @@ SAMPLE_MI = 25.0
 
 STOP_MAX_OFF_MI = 3.0
 CURATED_LANDMARK_CATEGORIES = frozenset({"billboard_sign", "highway_marker"})
+
+
+def sampled_route_indices(
+    cumulative_m: list[float], adopted_miles: float
+) -> list[tuple[int, float]]:
+    raw_miles = cumulative_m[-1] / 1609.344
+    mile_scale = adopted_miles / raw_miles if raw_miles else 1.0
+    sampled: list[tuple[int, float]] = []
+    last = -1e9
+    last_index = len(cumulative_m) - 1
+    for index, distance_m in enumerate(cumulative_m):
+        at_mi = distance_m / 1609.344 * mile_scale
+        if at_mi - last < SAMPLE_MI and index not in (0, last_index):
+            continue
+        last = at_mi
+        sampled.append((index, min(at_mi, adopted_miles)))
+    return sampled
+
 
 # Layers keyed to the old polyline. After a reroute they describe a road the
 # truck no longer drives, so they are dropped rather than carried over.
@@ -243,6 +262,18 @@ def route_via_points(leg: dict) -> list[dict]:
         ):
             points.append({"lat": lat, "lon": lon})
     return points
+
+
+def has_osm_pinned_label_segment(leg: dict) -> bool:
+    highway = str(leg.get("highway", ""))
+    for point in leg.get("route_via") or []:
+        if not isinstance(point, dict):
+            continue
+        note = str(point.get("note", ""))
+        match = re.search(r"\bref\s+([^;]+)", note, re.IGNORECASE)
+        if match and scs.matches_shield(match.group(1), highway):
+            return True
+    return False
 
 
 def fetch_route(
@@ -548,13 +579,15 @@ def main() -> int:
         f"  the new route rides {leg.get('highway')} for {100 * share:.0f}% of its"
         f" matched miles (dominant road: {dominant})"
     )
-    if share < MIN_ON_LABEL:
+    if share < MIN_ON_LABEL and not has_osm_pinned_label_segment(leg):
         print()
         print(
             f"  REFUSING: a reroute is meant to put this leg back on "
             f"{leg.get('highway')}, and this route does not. Investigate the leg."
         )
         return 1
+    if share < MIN_ON_LABEL:
+        print("  the route's OSM-pinned highway segment uses signed connector roads")
 
     if not args.write:
         print("\n(dry run; pass --write)")
@@ -620,16 +653,9 @@ def main() -> int:
     # instead put the last route point at mile 140.16 of a 140-mile leg, and
     # the world refuses to load a position past the end of its own leg.
     adopted = float(leg["miles"])
-    raw_mi = cum[-1] / 1609.344
-    mile_scale = (adopted / raw_mi) if raw_mi else 1.0
     points, elevation = [], []
-    last = -1e9
-    for i, (lon, lat) in enumerate(shape):
-        at_mi = cum[i] / 1609.344 * mile_scale
-        if at_mi - last < SAMPLE_MI and i not in (0, len(shape) - 1):
-            continue
-        last = at_mi
-        at_mi = min(at_mi, adopted)
+    for i, at_mi in sampled_route_indices(cum, adopted):
+        lon, lat = shape[i]
         points.append({"at_mi": round(at_mi, 2), "lat": round(lat, 5), "lon": round(lon, 5)})
         elevation.append(
             {

@@ -1053,13 +1053,6 @@
             "spoken": "Passing Buckingham"
           },
           {
-            "name": "Estero River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.7,
-            "spoken": "Crossing the Estero River"
-          },
-          {
             "name": "San Carlos Park",
             "at_mi": 15.1,
             "off_mi": 1.41,
@@ -1138,7 +1131,7 @@
             "spoken": "Crossing the Imperial River",
             "lat": 26.33553,
             "lon": -81.75125,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160690925 (Imperial River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160690925 (Imperial River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Koreshan State Park (northbound)",
@@ -2636,7 +2629,7 @@
             "spoken": "Crossing the Peace River",
             "lat": 27.50446,
             "lon": -81.80026,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 84268256 (Peace River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 84268256 (Peace River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Charlie Creek",
@@ -4146,7 +4139,7 @@
             "spoken": "Crossing the Myakka River",
             "lat": 27.11141,
             "lon": -82.33959,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160476108 (Myakka River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160476108 (Myakka River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Plantation",
@@ -4269,7 +4262,7 @@
             "spoken": "Crossing the Braden River",
             "lat": 27.41262,
             "lon": -82.45505,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160578313 (Braden River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160578313 (Braden River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "The Ringling (southbound)",
@@ -4307,7 +4300,7 @@
             "spoken": "Crossing the Little Manatee River",
             "lat": 27.66623,
             "lon": -82.43218,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160578384 (Little Manatee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160578384 (Little Manatee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ruskin",
@@ -4360,9 +4353,9 @@
             "kind": "point",
             "at_mi": 120.5,
             "spoken": "Crossing the Alafia River",
-            "lat": 27.85767,
-            "lon": -82.34673,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160475197 (Alafia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "lat": 27.85757,
+            "lon": -82.34672,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 3008970 (Alafia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Riverview",
@@ -6253,20 +6246,6 @@
             "spoken": "Passing Tequesta"
           },
           {
-            "name": "South Fork Saint Lucie River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 71.9,
-            "spoken": "Crossing the South Fork Saint Lucie River"
-          },
-          {
-            "name": "North Fork Saint Lucie River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 71.9,
-            "spoken": "Crossing the North Fork Saint Lucie River"
-          },
-          {
             "name": "Stuart",
             "at_mi": 72.2,
             "off_mi": 4.1,
@@ -7378,7 +7357,7 @@
             "spoken": "Crossing the Shoal River",
             "lat": 30.7269,
             "lon": -86.52094,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160443051 (Shoal River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160443051 (Shoal River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lake DeFuniak (eastbound)",
@@ -7437,7 +7416,7 @@
             "spoken": "Crossing the Choctawhatchee River",
             "lat": 30.75537,
             "lon": -85.83003,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 235369525 (Choctawhatchee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 235369525 (Choctawhatchee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Bonifay",
@@ -8411,7 +8390,7 @@
             "spoken": "Crossing the Yellow River",
             "lat": 30.71624,
             "lon": -86.64861,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160443055 (Yellow River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160443055 (Yellow River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Milton (westbound)",
@@ -8440,7 +8419,7 @@
             "spoken": "Crossing the Blackwater River",
             "lat": 30.58431,
             "lon": -87.01331,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160443035 (Blackwater River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160443035 (Blackwater River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pace",
@@ -9494,7 +9473,7 @@
             "spoken": "Crossing the Saint Johns River",
             "lat": 28.83576,
             "lon": -81.31943,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 161904817 (Saint Johns River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 161904817 (Saint Johns River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Heathrow",
@@ -10547,7 +10526,7 @@
             "spoken": "Crossing the Tomoka River",
             "lat": 29.26293,
             "lon": -81.11782,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1209575295 (Tomoka River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1209575295 (Tomoka River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ormond Beach",
@@ -11497,7 +11476,7 @@
             "spoken": "Crossing the Imperial River",
             "lat": 26.33553,
             "lon": -81.75125,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160690925 (Imperial River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160690925 (Imperial River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Holocaust Museum of Southwest Florida",
@@ -11561,7 +11540,7 @@
             "spoken": "Crossing the Gordon River",
             "lat": 26.17362,
             "lon": -81.78436,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 329560159 (Gordon River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 329560159 (Gordon River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lely",
@@ -12815,7 +12794,7 @@
             "spoken": "Crossing the Cedar River",
             "lat": 30.31524,
             "lon": -81.75313,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 801737378 (Cedar River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 801737378 (Cedar River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Orange Park",
@@ -17404,7 +17383,7 @@
             "spoken": "Crossing the Trout River",
             "lat": 30.4006,
             "lon": -81.66521,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 913872034 (Trout River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 913872034 (Trout River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Jacksonville Zoo (southbound)",
@@ -17433,7 +17412,7 @@
             "spoken": "Crossing the Nassau River",
             "lat": 30.57575,
             "lon": -81.64569,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 84822427 (Nassau River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 84822427 (Nassau River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Callahan",
@@ -17490,7 +17469,7 @@
             "spoken": "Crossing the Saint Marys River",
             "lat": 30.74428,
             "lon": -81.65411,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 226307640 (Saint Marys River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 226307640 (Saint Marys River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Kings Bay Base",
@@ -17509,7 +17488,7 @@
             "spoken": "Crossing the Crooked River",
             "lat": 30.83896,
             "lon": -81.66935,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1100735505 (Crooked River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1100735505 (Crooked River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Woodbine",
@@ -17528,7 +17507,7 @@
             "spoken": "Crossing the Satilla River",
             "lat": 30.9553,
             "lon": -81.68264,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 570541516 (Satilla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 570541516 (Satilla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Waverly",
@@ -18510,7 +18489,7 @@
             "spoken": "Crossing the Cedar River",
             "lat": 30.31549,
             "lon": -81.75304,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 801737378 (Cedar River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 801737378 (Cedar River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Glen Saint Mary",
@@ -22198,7 +22177,7 @@
             "spoken": "Crossing the Tomoka River",
             "lat": 29.26272,
             "lon": -81.11805,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1209575295 (Tomoka River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1209575295 (Tomoka River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Tomoka Farms Village",
@@ -22402,7 +22381,7 @@
             "spoken": "Crossing the Loxahatchee River",
             "lat": 26.95423,
             "lon": -80.16564,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 684875337 (Loxahatchee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 684875337 (Loxahatchee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Morikami Gardens (southbound)",
@@ -22617,7 +22596,7 @@
             "spoken": "Crossing the Miami River",
             "lat": 25.7699,
             "lon": -80.19009,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 83150142 (Miami River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 83150142 (Miami River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -24177,7 +24156,7 @@
             "spoken": "Crossing the Cedar River",
             "lat": 30.31549,
             "lon": -81.75304,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 801737378 (Cedar River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 801737378 (Cedar River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Macclenny",
@@ -25358,9 +25337,9 @@
             "kind": "point",
             "at_mi": 16.8,
             "spoken": "Crossing the Suwannee River",
-            "lat": 30.34655,
-            "lon": -82.83284,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 84618313 (Suwannee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "lat": 30.34649,
+            "lon": -82.83279,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 3802814 (Suwannee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Live Oak",
@@ -25388,7 +25367,7 @@
             "spoken": "Crossing the Alapaha River",
             "lat": 30.49937,
             "lon": -83.04087,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 639447787 (Alapaha River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 639447787 (Alapaha River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Statenville",
@@ -29256,7 +29235,7 @@
             "spoken": "Crossing the Gordon River",
             "lat": 26.17346,
             "lon": -81.78446,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 329560159 (Gordon River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 329560159 (Gordon River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Skunk Ape Research Headquarters",
@@ -29605,7 +29584,7 @@
             "spoken": "Crossing the Miami River",
             "lat": 25.7699,
             "lon": -80.19009,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 83150142 (Miami River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 83150142 (Miami River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Coral Gables",
@@ -30570,7 +30549,7 @@
             "spoken": "Crossing the Peace River",
             "lat": 26.9668,
             "lon": -82.01974,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 936845798 (Peace River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 936845798 (Peace River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cleveland",
@@ -30669,7 +30648,7 @@
             "spoken": "Crossing the Caloosahatchee River",
             "lat": 26.69732,
             "lon": -81.79951,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 913943491 (Caloosahatchee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 913943491 (Caloosahatchee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "River Hall",
@@ -32012,7 +31991,7 @@
             "spoken": "Crossing the Withlacoochee River",
             "lat": 28.58015,
             "lon": -82.21743,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 84268243 (Withlacoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 84268243 (Withlacoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ridge Manor",
@@ -32184,7 +32163,7 @@
             "spoken": "Crossing the Hillsborough River",
             "lat": 28.02025,
             "lon": -82.45552,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160475431 (Hillsborough River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160475431 (Hillsborough River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "East Lake",
@@ -34621,7 +34600,7 @@
             "spoken": "Crossing the Saint Johns River",
             "lat": 28.83557,
             "lon": -81.319,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 161904817 (Saint Johns River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 161904817 (Saint Johns River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Central Florida Zoo (westbound)",
@@ -34714,7 +34693,7 @@
             "spoken": "Crossing the Tomoka River",
             "lat": 29.26294,
             "lon": -81.11782,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 1209575295 (Tomoka River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1209575295 (Tomoka River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ormond Beach",
@@ -38760,7 +38739,7 @@
             "spoken": "Crossing the Saint Johns River",
             "lat": 28.08506,
             "lon": -80.75154,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160860646 (Saint Johns River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160860646 (Saint Johns River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Harmony",
@@ -40068,13 +40047,6 @@
             "spoken": "Passing June Park"
           },
           {
-            "name": "Eau Gallie River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 8.6,
-            "spoken": "Crossing the Eau Gallie River"
-          },
-          {
             "name": "Palm Shores",
             "at_mi": 15.9,
             "off_mi": 3.0,
@@ -40204,7 +40176,7 @@
             "spoken": "Crossing the Saint Johns River",
             "lat": 28.45292,
             "lon": -80.89729,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 80151630 (Saint Johns River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 80151630 (Saint Johns River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Kennedy Space Center (eastbound)",
@@ -41001,7 +40973,7 @@
             "spoken": "Crossing the Saint Johns River",
             "lat": 30.323,
             "lon": -81.66487,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 913872037 (Saint Johns River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 913872037 (Saint Johns River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "interchanges": [
@@ -42364,27 +42336,6 @@
             ]
           },
           {
-            "name": "Choctawhatchee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 34.7,
-            "spoken": "Crossing the Choctawhatchee River"
-          },
-          {
-            "name": "Mitchell River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 34.7,
-            "spoken": "Crossing the Mitchell River"
-          },
-          {
-            "name": "Black River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 34.7,
-            "spoken": "Crossing the Black River"
-          },
-          {
             "name": "Seaside",
             "at_mi": 34.8,
             "off_mi": 2.57,
@@ -42467,7 +42418,7 @@
             "spoken": "Crossing the Shoal River",
             "lat": 30.72714,
             "lon": -86.5208,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160443051 (Shoal River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160443051 (Shoal River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -43976,7 +43927,7 @@
             "spoken": "Crossing the Chipola River",
             "lat": 30.72438,
             "lon": -85.19992,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160540244 (Chipola River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160540244 (Chipola River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Florida Caverns (westbound)",
@@ -44014,7 +43965,7 @@
             "spoken": "Crossing the Apalachicola River",
             "lat": 30.63343,
             "lon": -84.90431,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 137406516 (Apalachicola River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 137406516 (Apalachicola River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Chattahoochee",
@@ -44051,7 +44002,7 @@
             "spoken": "Crossing the Little River",
             "lat": 30.52889,
             "lon": -84.5168,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160457688 (Little River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160457688 (Little River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Havana",
@@ -44079,7 +44030,7 @@
             "spoken": "Crossing the Ochlockonee River",
             "lat": 30.48506,
             "lon": -84.39747,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 235373173 (Ochlockonee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 235373173 (Ochlockonee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Historic Capitol (eastbound)",
@@ -45078,7 +45029,7 @@
             "spoken": "Crossing the Perdido River",
             "lat": 30.57376,
             "lon": -87.41217,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160443049 (Perdido River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160443049 (Perdido River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Seminole",
@@ -45097,7 +45048,7 @@
             "spoken": "Crossing the Styx River",
             "lat": 30.58128,
             "lon": -87.50485,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 158936275 (Styx River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 158936275 (Styx River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Summerdale",
@@ -45145,6 +45096,17 @@
             "spoken": "Passing Stapleton"
           },
           {
+            "name": "USS Alabama (westbound I-10 approach)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.3,
+            "spoken": "Billboard: Mobile Bay is home to the battleship U S S Alabama, a steel giant of the Second World War. You can walk it from bow to gun turret.",
+            "source": "REVIEW-east-south-2026-10-01.md item 5; approved wording from processed/Batch3/Us45Mississippi.md; USS Alabama Battleship Memorial Park at 30.6818,-88.0142 projected to archived I-10 geometry.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Daphne",
             "at_mi": 49.5,
             "off_mi": 3.65,
@@ -45170,14 +45132,7 @@
             "spoken": "Crossing the Blakeley River",
             "lat": 30.65592,
             "lon": -87.92573,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 159818581 (Blakeley River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
-          },
-          {
-            "name": "Apalache River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 52.1,
-            "spoken": "Crossing the Apalache River"
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 159818581 (Blakeley River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Tensaw River",
@@ -45187,7 +45142,7 @@
             "spoken": "Crossing the Tensaw River",
             "lat": 30.68623,
             "lon": -88.00509,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 163641016 (Tensaw River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163641016 (Tensaw River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Spanish River",
@@ -45197,7 +45152,7 @@
             "spoken": "Crossing the Spanish River",
             "lat": 30.68671,
             "lon": -88.0067,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 159818593 (Spanish River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 159818593 (Spanish River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Mobile River",
@@ -45207,7 +45162,7 @@
             "spoken": "Crossing the Mobile River",
             "lat": 30.69006,
             "lon": -88.03583,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 163640970 (Mobile River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163640970 (Mobile River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Chickasaw",
@@ -48015,7 +47970,7 @@
             "spoken": "Crossing the Loxahatchee River",
             "lat": 26.95425,
             "lon": -80.16562,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 684875337 (Loxahatchee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 684875337 (Loxahatchee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Tequesta",
@@ -48354,7 +48309,7 @@
             "spoken": "Crossing the Miami River",
             "lat": 25.7699,
             "lon": -80.19009,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 83150142 (Miami River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 83150142 (Miami River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -49987,7 +49942,7 @@
             "spoken": "Crossing the Myakka River",
             "lat": 27.04512,
             "lon": -82.29288,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160476108 (Myakka River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160476108 (Myakka River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Murdock",
@@ -51017,7 +50972,7 @@
             "spoken": "Crossing the Withlacoochee River",
             "lat": 28.57996,
             "lon": -82.21728,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 84268243 (Withlacoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 84268243 (Withlacoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Webster",
@@ -52090,9 +52045,9 @@
             "kind": "point",
             "at_mi": 49.1,
             "spoken": "Crossing the Hillsborough River",
-            "lat": 27.95613,
-            "lon": -82.46453,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 162075174 (Hillsborough River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "lat": 27.95612,
+            "lon": -82.4646,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon way 190126126 (Hillsborough River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "East Lake",
@@ -53431,7 +53386,7 @@
             "spoken": "Crossing the Ochlockonee River",
             "lat": 30.48531,
             "lon": -84.39748,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 282986040 (Ochlockonee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 282986040 (Ochlockonee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Havana",
@@ -53450,7 +53405,7 @@
             "spoken": "Crossing the Little River",
             "lat": 30.52913,
             "lon": -84.51666,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160457688 (Little River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160457688 (Little River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Quincy",
@@ -53487,7 +53442,7 @@
             "spoken": "Crossing the Apalachicola River",
             "lat": 30.63372,
             "lon": -84.90425,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 137406516 (Apalachicola River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 137406516 (Apalachicola River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Sneads",
@@ -53582,7 +53537,7 @@
             "spoken": "Crossing the Choctawhatchee River",
             "lat": 30.75554,
             "lon": -85.83029,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 235369525 (Choctawhatchee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 235369525 (Choctawhatchee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ponce de Leon Springs (westbound)",
@@ -53632,7 +53587,7 @@
             "spoken": "Crossing the Shoal River",
             "lat": 30.72714,
             "lon": -86.5208,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160443051 (Shoal River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160443051 (Shoal River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -56232,8 +56187,11 @@
             "name": "Saint Marks River",
             "category": "river",
             "kind": "point",
-            "at_mi": 11.57,
-            "spoken": "Crossing the Saint Marks River"
+            "at_mi": 17.6,
+            "spoken": "Crossing the Saint Marks River",
+            "lat": 30.47807,
+            "lon": -84.10311,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 729172621 (Saint Marks River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Wacissa",
@@ -56261,7 +56219,7 @@
             "spoken": "Crossing the Aucilla River",
             "lat": 30.44543,
             "lon": -83.72439,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160552659 (Aucilla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160552659 (Aucilla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Greenville (eastbound)",
@@ -57409,8 +57367,11 @@
             "name": "Saint Marks River",
             "category": "river",
             "kind": "point",
-            "at_mi": 11.8,
-            "spoken": "Crossing the Saint Marks River"
+            "at_mi": 17.5,
+            "spoken": "Crossing the Saint Marks River",
+            "lat": 30.47807,
+            "lon": -84.10311,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 729172621 (Saint Marks River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Wacissa",
@@ -57438,7 +57399,7 @@
             "spoken": "Crossing the Aucilla River",
             "lat": 30.44543,
             "lon": -83.72439,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160552659 (Aucilla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160552659 (Aucilla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Greenville (eastbound)",
@@ -57509,9 +57470,9 @@
             "kind": "point",
             "at_mi": 73.5,
             "spoken": "Crossing the Suwannee River",
-            "lat": 30.35778,
-            "lon": -83.19341,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 84618543 (Suwannee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "lat": 30.35777,
+            "lon": -83.19335,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 3802814 (Suwannee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Live Oak",
@@ -60186,9 +60147,9 @@
             "kind": "point",
             "at_mi": 28.9,
             "spoken": "Crossing the Little Manatee River",
-            "lat": 27.6662,
-            "lon": -82.43274,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160578384 (Little Manatee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "lat": 27.66613,
+            "lon": -82.43279,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 3008993 (Little Manatee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Manatee River",
@@ -60198,7 +60159,7 @@
             "spoken": "Crossing the Manatee River",
             "lat": 27.52538,
             "lon": -82.50649,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 958855721 (Manatee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 958855721 (Manatee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Memphis",
@@ -60226,7 +60187,7 @@
             "spoken": "Crossing the Myakka River",
             "lat": 27.34404,
             "lon": -82.1568,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160476203 (Myakka River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160476203 (Myakka River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Myakka City",
@@ -60245,7 +60206,7 @@
             "spoken": "Crossing the Peace River",
             "lat": 27.22101,
             "lon": -81.87643,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 84268250 (Peace River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 84268250 (Peace River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lake Okeechobee (southbound)",
@@ -61327,7 +61288,7 @@
             "spoken": "Crossing the Alafia River",
             "lat": 27.85752,
             "lon": -82.34707,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160475197 (Alafia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160475197 (Alafia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Gibsonton",
@@ -61389,9 +61350,9 @@
             "kind": "point",
             "at_mi": 28.9,
             "spoken": "Crossing the Little Manatee River",
-            "lat": 27.6662,
-            "lon": -82.43276,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160578384 (Little Manatee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "lat": 27.66613,
+            "lon": -82.4328,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 3008993 (Little Manatee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Florida Gulf Coast Railroad Museum",
@@ -61426,7 +61387,7 @@
             "spoken": "Crossing the Manatee River",
             "lat": 27.52536,
             "lon": -82.50656,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 958855721 (Manatee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 958855721 (Manatee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "South Bradenton",
@@ -61455,7 +61416,7 @@
             "spoken": "Crossing the Braden River",
             "lat": 27.41272,
             "lon": -82.45567,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 160578313 (Braden River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160578313 (Braden River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Skye Ranch",
@@ -63179,7 +63140,7 @@
             "spoken": "Crossing the Orange River",
             "lat": 26.68803,
             "lon": -81.79183,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 162054082 (Orange River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 162054082 (Orange River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Suncoast Estates",
@@ -63225,7 +63186,7 @@
             "spoken": "Crossing the Caloosahatchee River",
             "lat": 26.60102,
             "lon": -81.90073,
-            "source": "derived 2026-10-01: crossing of OSM waterway way 164124997 (Caloosahatchee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 164124997 (Caloosahatchee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Shell Point Retirement Community",
@@ -64651,20 +64612,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154298102, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lazy Lake"
-          },
-          {
-            "name": "New River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 45.0,
-            "spoken": "Crossing the New River"
-          },
-          {
-            "name": "South Fork Middle River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 45.0,
-            "spoken": "Crossing the South Fork Middle River"
           },
           {
             "name": "Dania Beach",

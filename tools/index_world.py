@@ -80,6 +80,8 @@ def build_country_files(data: dict[str, Any], index: dict[str, Any]) -> dict[Pat
         code = _country_of(from_city, single)
         if _country_of(to_city, single) != code:
             raise SystemExit(f"Cross-country leg {leg['from']}->{leg['to']} is not supported.")
+        # Keep complete leg records intact so optional corridor fields such as
+        # billboard_bans pass through to the indexed shards unchanged.
         by_country[code]["legs"].append(leg)
 
     files: dict[Path, str] = {}

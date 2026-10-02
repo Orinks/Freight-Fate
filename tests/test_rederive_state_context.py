@@ -114,6 +114,31 @@ def test_existing_state_pair_keeps_its_curated_crossing_place(monkeypatch):
     assert leg["corridor"]["state_crossings"][0]["place"] == "the Colorado River near Blythe"
 
 
+def test_highway_ref_pbf_is_filtered_and_cached(monkeypatch, tmp_path):
+    source = tmp_path / "us.osm.pbf"
+    source.write_bytes(b"source")
+    commands = []
+
+    monkeypatch.setattr(rsc.shutil, "which", lambda _name: "/usr/bin/osmium")
+
+    def run(command, check):
+        assert check
+        commands.append(command)
+        output = Path(command[command.index("--output") + 1])
+        output.write_bytes(b"filtered")
+
+    monkeypatch.setattr(rsc.subprocess, "run", run)
+
+    first = rsc._highway_ref_pbf(source)
+    second = rsc._highway_ref_pbf(source)
+
+    assert first == second
+    assert first.read_bytes() == b"filtered"
+    assert len(commands) == 1
+    assert all(expression in commands[0] for expression in rsc.ROAD_REF_FILTERS)
+    assert "--remove-tags" not in commands[0]
+
+
 def test_sequence_equal_boundary_below_minimum_shift_is_not_updated(monkeypatch):
     leg = _leg()
     before = copy.deepcopy(leg["corridor"])
@@ -349,6 +374,7 @@ def test_nearest_road_lookup_skips_nodes_and_reads_way_ref(monkeypatch):
         filter=SimpleNamespace(KeyFilter=lambda *_args: None),
     )
     monkeypatch.setitem(sys.modules, "osmium", fake_osmium)
+    monkeypatch.setattr(rsc, "_highway_ref_pbf", lambda pbf_path: pbf_path)
 
     result = rsc.nearest_osm_highway_refs(Path("roads.osm.pbf"), [[-75.0, 42.0]])
 

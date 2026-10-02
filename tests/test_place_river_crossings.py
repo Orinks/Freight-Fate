@@ -1,4 +1,5 @@
 import copy
+from pathlib import Path
 
 import place_river_crossings as prc
 import pytest
@@ -39,8 +40,20 @@ def _install_geometry(monkeypatch, max_off_mi=0.0):
 
 def _two_crossings():
     return [
-        {"way_id": 10, "name": "River", "coords": [[1.0, -1.0], [1.0, 1.0]]},
-        {"way_id": 11, "name": "River", "coords": [[3.0, -1.0], [3.0, 1.0]]},
+        {
+            "geometry": "line",
+            "feature_type": "waterway way",
+            "feature_id": 10,
+            "name": "River",
+            "coords": [[1.0, -1.0], [1.0, 1.0]],
+        },
+        {
+            "geometry": "line",
+            "feature_type": "waterway way",
+            "feature_id": 11,
+            "name": "River",
+            "coords": [[3.0, -1.0], [3.0, 1.0]],
+        },
     ]
 
 
@@ -54,9 +67,33 @@ def test_route_point_max_off_uses_archived_lon_lat_segments():
     assert prc.lg.route_point_max_off_mi({"corridor": {}}, coords) is None
 
 
-def test_places_nearest_crossing_and_leaves_unmatched_and_other_categories_untouched(
-    monkeypatch,
-):
+def test_filtered_water_feature_pbf_is_cached(monkeypatch, tmp_path):
+    source = tmp_path / "us.osm.pbf"
+    source.write_bytes(b"source")
+    cache_dir = tmp_path / "cache"
+    commands = []
+
+    monkeypatch.setattr(prc.shutil, "which", lambda _name: "/usr/bin/osmium")
+
+    def run(command, check):
+        assert check
+        commands.append(command)
+        output = Path(command[command.index("--output") + 1])
+        output.write_bytes(b"filtered")
+
+    monkeypatch.setattr(prc.subprocess, "run", run)
+
+    first = prc._water_feature_pbf(source, cache_dir)
+    second = prc._water_feature_pbf(source, cache_dir)
+
+    assert first == second
+    assert first.read_bytes() == b"filtered"
+    assert len(commands) == 1
+    assert all(expression in commands[0] for expression in prc.WATER_FEATURE_FILTERS)
+    assert "--remove-tags" not in commands[0]
+
+
+def test_places_nearest_crossing_and_removes_unmatched_river_only(monkeypatch):
     river = {"name": "River", "category": "river", "at_mi": 30.0, "spoken": "say river"}
     unmatched = {"name": "Missing", "category": "river", "at_mi": 44.0, "rank": 2}
     billboard = {"name": "Sign", "category": "billboard_sign", "at_mi": 20.0}
@@ -72,31 +109,105 @@ def test_places_nearest_crossing_and_leaves_unmatched_and_other_categories_untou
     assert river["at_mi"] == 25.0
     assert (river["lat"], river["lon"]) == (0.0, 1.0)
     assert river["spoken"] == "say river"
+    assert "tools/place_river_crossings.py" in river["source"]
     assert "way 10 (River)" in river["source"]
     assert "nearest the previous at_mi" in river["source"]
     assert "2026-09-30" in river["source"]
     assert unmatched == before[3]
-    for original, snapshot in zip(untouched, before, strict=True):
+    assert unmatched not in leg["corridor"]["landmarks"]
+    for original, snapshot in zip(untouched[:3], before[:3], strict=True):
         assert original == snapshot
         assert any(item is original for item in leg["corridor"]["landmarks"])
-    assert report["rivers_moved"] == 1
+    assert report["rivers_placed"] == 1
     assert report["unmatched"] == [{"leg": "a_tx_us:b_tx_us", "name": "Missing", "at_mi": 44.0}]
+    assert report["changed_legs"] == 1
     assert report["histogram"]["5-10"] == 1
 
 
-def test_route_point_disagreement_skips_all_landmark_changes(monkeypatch):
+def test_stitches_empty_role_members_into_outer_ring_only():
+    ways = {
+        1: [[0.0, 0.0], [1.0, 0.0]],
+        2: [[1.0, 0.0], [1.0, 1.0]],
+        3: [[1.0, 1.0], [0.0, 1.0]],
+        4: [[0.0, 1.0], [0.0, 0.0]],
+        5: [[0.2, 0.2], [0.8, 0.2]],
+        6: [[0.8, 0.2], [0.8, 0.8]],
+        7: [[0.8, 0.8], [0.2, 0.8]],
+        8: [[0.2, 0.8], [0.2, 0.2]],
+    }
+    members = [
+        {"way_id": way_id, "role": role}
+        for way_id, role in [
+            (1, ""),
+            (2, ""),
+            (3, ""),
+            (4, ""),
+            (5, "inner"),
+            (6, "inner"),
+            (7, "inner"),
+            (8, "inner"),
+        ]
+    ]
+
+    outer, inner = prc._stitch_rings(members, ways)
+
+    assert len(outer) == len(inner) == 1
+    assert outer[0][0] == outer[0][-1]
+    assert inner[0][0] == inner[0][-1]
+
+
+def test_waterway_relation_name_applies_to_member_way_without_waterway_tag():
+    relation_names = {123: {"St. Francis River"}}
+
+    assert prc._waterway_names_for_way(123, "", None, relation_names, {"st. francis river"}) == [
+        "St. Francis River"
+    ]
+
+
+@pytest.mark.parametrize("waterway_type", sorted(prc.WATERWAY_TYPES))
+def test_named_waterway_types_match_named_river_landmarks(waterway_type):
+    assert prc._waterway_names_for_way(
+        123, "St. Francis River", waterway_type, {}, {"st. francis river"}
+    ) == ["St. Francis River"]
+
+
+def test_unlisted_waterway_types_do_not_match_by_way_name():
+    assert (
+        prc._waterway_names_for_way(123, "St. Francis River", "ditch", {}, {"st. francis river"})
+        == []
+    )
+
+
+def test_river_polygon_uses_midpoint_of_route_span_inside_area(monkeypatch):
+    _install_geometry(monkeypatch)
+    polygon = {
+        "geometry": "polygon",
+        "feature_type": "river polygon way",
+        "feature_id": 12,
+        "name": "River",
+        "outer": [[[1.0, -0.5], [3.0, -0.5], [3.0, 0.5], [1.0, 0.5], [1.0, -0.5]]],
+        "inner": [],
+    }
+    route = [(0.0, 0.0), (0.0, 4.0)]
+    cum = [0.0, 100.0]
+
+    crossings = prc._crossings_for_name(
+        route, cum, "River", {"river": [polygon]}, prc._route_segment_grid(route)
+    )
+
+    assert crossings == [(50.0, 0.0, 2.0, 12, "River", "river polygon way")]
+
+
+def test_uses_archived_geometry_when_route_points_disagree(monkeypatch):
     river = {"name": "River", "category": "river", "at_mi": 30.0}
     leg = _leg([river])
-    before = copy.deepcopy(river)
-    _install_geometry(monkeypatch, max_off_mi=5.01)
+    _install_geometry(monkeypatch, max_off_mi=10.01)
 
     report = prc.process_world({"legs": [leg]}, _two_crossings(), pbf_date="2026-09-30")
 
-    assert river == before
-    assert report["legs_scanned"] == 0
-    assert report["guard_skipped"] == [
-        "a_tx_us:b_tx_us: route_points are 5.01 mi from archive (limit 5.00)"
-    ]
+    assert river["at_mi"] == 25.0
+    assert report["legs_scanned"] == 1
+    assert report["geometry_skipped"] == []
 
 
 def test_reports_legs_without_river_landmarks():
@@ -123,7 +234,7 @@ def test_only_dry_run_uses_mocked_pbf_extraction_and_reports_old_to_new(
         assert names == {"river"}
         return _two_crossings()
 
-    monkeypatch.setattr(prc, "load_or_extract_river_lines", extract)
+    monkeypatch.setattr(prc, "load_or_extract_river_features", extract)
     monkeypatch.setattr(prc, "save_world", saved.append)
     _install_geometry(monkeypatch)
 
@@ -133,3 +244,16 @@ def test_only_dry_run_uses_mocked_pbf_extraction_and_reports_old_to_new(
     assert "a_tx_us:b_tx_us River: 30.0 -> 25.0" in output
     assert "Dry run only" in output
     assert not saved
+
+
+def test_archived_river_landmarks_have_crossing_tool_provenance():
+    data = prc.load_world()
+
+    for leg in data["legs"]:
+        if not prc.lg.archived_polyline(prc.lg.leg_id_of(leg), prc.lg.state_code_of(leg)):
+            continue
+        for landmark in (leg.get("corridor") or {}).get("landmarks", ()):
+            if landmark.get("category") == "river":
+                assert "tools/place_river_crossings.py" in landmark.get("source", ""), (
+                    f"{prc._leg_id(leg)} {landmark.get('name')}"
+                )

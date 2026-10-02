@@ -12,7 +12,10 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import re
+import shutil
+import subprocess
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
@@ -37,6 +40,7 @@ PARALLEL_EPSILON = 1e-16
 ROAD_CLASSES = {"motorway", "trunk", "primary"}
 ROAD_MATCH_M = 150.0
 ROAD_GRID_CELL_DEG = 0.01
+ROAD_REF_FILTERS = ("w/highway=motorway,trunk,primary",)
 REROUTED_LEGS = {
     "buffalo_ny_us:new_york_ny_us",
     "rochester_ny_us:new_york_ny_us",
@@ -47,6 +51,18 @@ REROUTED_LEGS = {
     "green_bay_wi_us:grand_rapids_mi_us",
     "harrisburg_pa_us:wilmington_de_us",
     "indianapolis_in_us:nashville_tn_us",
+    "sacramento_ca_us:portland_or_us",
+    "san_francisco_ca_us:portland_or_us",
+    "duluth_mn_us:fargo_nd_us",
+    "hibbing_mn_us:minneapolis_mn_us",
+    "norfolk_va_us:raleigh_nc_us",
+    "virginia_beach_va_us:raleigh_nc_us",
+    "burlington_vt_us:albany_ny_us",
+    "clarksville_tn_us:huntsville_al_us",
+    "washington_dc_us:philadelphia_pa_us",
+    "charlotte_nc_us:lumberton_nc_us",
+    "allentown_pa_us:bridgeport_ct_us",
+    "durango_co_us:moab_ut_us",
 }
 STALE_PUBLICAMUNDI_SOURCE = (
     "derived 2026-10-01: the leg's archived dense route geometry sampled against public U.S. "
@@ -354,6 +370,37 @@ def _matching_road_ref(value: str, highway: str) -> str:
     return refs[0] if refs else ""
 
 
+def _highway_ref_pbf(pbf_path: Path) -> Path:
+    stat = pbf_path.stat()
+    filtered_path = pbf_path.parent / (
+        f"road-ref-ways-v1-{stat.st_size}-{stat.st_mtime_ns}.osm.pbf"
+    )
+    if filtered_path.exists():
+        return filtered_path
+
+    osmium = shutil.which("osmium")
+    if osmium is None:
+        raise RuntimeError("the osmium command is required to filter highway refs from the PBF")
+    temporary_path = filtered_path.with_name(f".{filtered_path.name}.tmp")
+    subprocess.run(
+        [
+            osmium,
+            "tags-filter",
+            "--no-progress",
+            "--output",
+            str(temporary_path),
+            "--overwrite",
+            "--output-format",
+            "pbf",
+            str(pbf_path),
+            *ROAD_REF_FILTERS,
+        ],
+        check=True,
+    )
+    os.replace(temporary_path, filtered_path)
+    return filtered_path
+
+
 def nearest_osm_highway_refs(
     pbf_path: Path, points: list[list[float]]
 ) -> dict[int, tuple[int, str, float]]:
@@ -372,13 +419,14 @@ def nearest_osm_highway_refs(
             )
         ].append(point_id)
 
+    pbf_path = _highway_ref_pbf(pbf_path)
     best: dict[int, tuple[float, int, str]] = {}
     processor = (
         osmium.FileProcessor(
             str(pbf_path),
             entities=osmium.osm.osm_entity_bits.NODE | osmium.osm.osm_entity_bits.WAY,
         )
-        .with_locations("sparse_file_array")
+        .with_locations("flex_mem")
         .with_filter(osmium.filter.KeyFilter("highway"))
     )
     for way in processor:

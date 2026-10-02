@@ -37,14 +37,31 @@ const REPAIRED_LEGS: &[&str] = &[
     INDIANAPOLIS_IN_TO_NASHVILLE,
 ];
 
-// checkpoints that disagree with the leg's own geometry; listed in ROADMAP.md
-const KNOWN_STATE_LINE_DISAGREEMENTS: &[&str] = &[
-    "atlanta_ga_us:birmingham_al_us",
-    "burlington_vt_us:albany_ny_us",
-    "cumberland_md_us:winchester_va_us",
+const ROADMAP_ALIGNMENT_LEGS: &[&str] = &[
+    "sacramento_ca_us:portland_or_us",
     "san_francisco_ca_us:portland_or_us",
+    "duluth_mn_us:fargo_nd_us",
+    "hibbing_mn_us:minneapolis_mn_us",
+    "norfolk_va_us:raleigh_nc_us",
+    "virginia_beach_va_us:raleigh_nc_us",
+    "burlington_vt_us:albany_ny_us",
+    "clarksville_tn_us:huntsville_al_us",
+    "washington_dc_us:philadelphia_pa_us",
     "tulsa_ok_us:kansas_city_mo_us",
-    "winona_mn_us:la_crosse_wi_us",
+    "charlotte_nc_us:lumberton_nc_us",
+    "roanoke_va_us:greensboro_nc_us",
+    "allentown_pa_us:bridgeport_ct_us",
+    "providence_ri_us:new_york_ny_us",
+    "lynchburg_va_us:richmond_va_us",
+    "hartford_ct_us:new_york_ny_us",
+    "albany_ny_us:bridgeport_ct_us",
+    "detroit_mi_us:chicago_il_us",
+    "durango_co_us:moab_ut_us",
+];
+
+const UNRESOLVED_ALIGNMENT_LEGS: &[&str] = &[
+    "allentown_pa_us:bridgeport_ct_us",
+    "albany_ny_us:bridgeport_ct_us",
 ];
 
 const EARTH_RADIUS_MILES: f64 = 3958.7613;
@@ -344,21 +361,9 @@ fn checkpoints_sit_in_the_state_the_game_announces() {
             }
         }
     }
-    let stale_allowlist: Vec<_> = KNOWN_STATE_LINE_DISAGREEMENTS
-        .iter()
-        .filter(|known| !failures.iter().any(|failure| failure.0.as_str() == **known))
-        .collect();
     assert!(
-        stale_allowlist.is_empty(),
-        "fixed legs still on KNOWN_STATE_LINE_DISAGREEMENTS: {stale_allowlist:?}"
-    );
-    let unexpected: Vec<_> = failures
-        .iter()
-        .filter(|failure| !KNOWN_STATE_LINE_DISAGREEMENTS.contains(&failure.0.as_str()))
-        .collect();
-    assert!(
-        unexpected.is_empty(),
-        "checkpoint state disagreements: {unexpected:?}"
+        failures.is_empty(),
+        "checkpoint state disagreements: {failures:?}"
     );
 }
 
@@ -468,6 +473,55 @@ fn repaired_legs_keep_their_records_on_their_road() {
     }
 }
 
+/// Roadmap route points and coordinate-bearing checkpoints stay near geometry.
+#[test]
+fn roadmap_route_points_and_checkpoints_stay_near_geometry() {
+    let mut route_point_failures = Vec::new();
+    let mut checkpoint_failures = Vec::new();
+    for id in ROADMAP_ALIGNMENT_LEGS {
+        if UNRESOLVED_ALIGNMENT_LEGS.contains(id) {
+            continue;
+        }
+        let leg = leg(id);
+        let geometry = data()
+            .geometry
+            .get(*id)
+            .unwrap_or_else(|| panic!("missing archived geometry for {id}"));
+        for route_point in corridor_records(leg, "route_points") {
+            let Some((lat, lon)) = coordinates(route_point) else {
+                route_point_failures.push(format!("{id}: route point has no coordinates"));
+                continue;
+            };
+            let (_, off_mi) = project(geometry, lat, lon);
+            if off_mi > 10.0 {
+                route_point_failures.push(format!("{id}: route point {off_mi:.2} mi off"));
+            }
+        }
+        for checkpoint in corridor_records(leg, "checkpoints") {
+            let Some((lat, lon)) = coordinates(checkpoint) else {
+                continue;
+            };
+            let (_, off_mi) = project(geometry, lat, lon);
+            if off_mi > 3.0 {
+                checkpoint_failures.push(format!(
+                    "{id}: {:?} is {off_mi:.2} mi off",
+                    text(checkpoint, "name")
+                ));
+            }
+        }
+    }
+    assert!(
+        route_point_failures.is_empty(),
+        "route points over 10 mi from archived geometry ({}): {route_point_failures:?}",
+        route_point_failures.len()
+    );
+    assert!(
+        checkpoint_failures.is_empty(),
+        "checkpoints over 3 mi from archived geometry ({}): {checkpoint_failures:?}",
+        checkpoint_failures.len()
+    );
+}
+
 /// The Dallas–St. Louis trip stays on I-44 through Oklahoma, not Arkansas.
 #[test]
 fn dallas_st_louis_rides_i44() {
@@ -515,13 +569,17 @@ fn river_callouts_sit_on_the_crossing() {
             continue;
         };
         for landmark in corridor_records(leg, "landmarks") {
-            if text(landmark, "category") != Some("river")
-                || !text(landmark, "source").is_some_and(|source| {
-                    source.starts_with("derived 2026-10-01: crossing of OSM waterway")
-                })
-            {
+            if text(landmark, "category") != Some("river") {
                 continue;
             }
+            let source = text(landmark, "source").unwrap_or_default();
+            assert!(
+                source.starts_with("derived ")
+                    && source.contains("tools/place_river_crossings.py")
+                    && source.contains("at the crossing of OSM "),
+                "{id}: {} lacks place_river_crossings provenance: {source}",
+                text(landmark, "name").unwrap_or_default()
+            );
             let Some((lat, lon)) = coordinates(landmark) else {
                 continue;
             };

@@ -1481,11 +1481,8 @@ fn test_trip_uses_only_curated_pois_at_runtime() {
     assert!(route.raw_stop_details().iter().all(|s| s.curated()));
     assert!(!route.stop_details().is_empty());
     assert!(!trip.stops.is_empty());
-    let curated: HashSet<&str> = route
-        .stop_details()
-        .iter()
-        .map(|s| s.name.as_str())
-        .collect();
+    let route_stops = route.stop_details();
+    let curated: HashSet<&str> = route_stops.iter().map(|s| s.name.as_str()).collect();
     assert!(trip.stops.iter().all(|s| curated.contains(s.name.as_str())));
 }
 

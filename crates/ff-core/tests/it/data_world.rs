@@ -725,22 +725,43 @@ fn test_southern_hos_pressure_corridors_have_added_safe_stops() {
 }
 
 #[test]
+fn route_stop_details_map_reversed_leg_miles() {
+    let route = supported(world(), "Dallas", "St. Louis");
+    let (index, leg, source_stop) = route
+        .legs
+        .iter()
+        .enumerate()
+        .find_map(|(index, leg)| {
+            if index == 0 || route.cities[index] != leg.b {
+                return None;
+            }
+            leg.stops
+                .iter()
+                .find(|stop| stop.curated())
+                .map(|stop| (index, leg, stop))
+        })
+        .expect("a reversed supported-route leg with a curated stop");
+    let route_offset: f64 = route.legs[..index].iter().map(|leg| leg.miles).sum();
+    let expected_mi = route_offset + leg.miles - source_stop.at_mi;
+    let route_stop = route
+        .stop_details()
+        .into_iter()
+        .find(|stop| stop.name == source_stop.name && (stop.at_mi - expected_mi).abs() < 1e-9)
+        .expect("the reversed stop is positioned from the route start");
+    assert!((route_stop.at_mi - expected_mi).abs() < 1e-9);
+}
+
+#[test]
 fn test_southern_sleep_stop_gaps_are_no_longer_extreme() {
     let world = world();
     let max_sleep_gap = |start: &str, end: &str| -> f64 {
-        let route = if start == "Dallas" && end == "St. Louis" {
-            world
-                .route_from_cities(&["Dallas", "St. Louis"])
-                .expect("Dallas-St. Louis direct corridor")
-        } else {
-            supported(world, start, end)
-        };
+        let route = supported(world, start, end);
         let mut points = vec![0.0];
         points.extend(
             route
-                .stop_details()
-                .iter()
-                .filter(|stop| stop.actions.iter().any(|a| a == "sleep"))
+                .raw_stop_details()
+                .into_iter()
+                .filter(|stop| stop.actions.iter().any(|action| action == "sleep"))
                 .map(|stop| stop.at_mi),
         );
         points.push(route.miles());

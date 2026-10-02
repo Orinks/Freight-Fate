@@ -64,6 +64,7 @@ Usage
 from __future__ import annotations
 
 import argparse
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -395,6 +396,18 @@ def grade_coverage_gaps(leg: dict[str, Any]) -> list[str]:
     return gaps
 
 
+def expected_layers_for_leg(leg: dict[str, Any], expect_interchanges: bool) -> list[str]:
+    expected = [layer for layer in REBUILT_LAYERS if expect_interchanges or layer not in NEEDS_PBF]
+    highway = str(leg.get("highway") or "").replace(",", "/").split("/")[0].strip()
+    if (
+        expect_interchanges
+        and not re.fullmatch(r"I-\d+", highway)
+        and not (leg.get("corridor") or {}).get("interchanges")
+    ):
+        expected = [layer for layer in expected if layer not in NEEDS_PBF]
+    return expected
+
+
 def report_completeness(
     before: dict[str, dict[str, int]], world: dict[str, Any], expect_interchanges: bool
 ) -> int:
@@ -413,9 +426,7 @@ def report_completeness(
         if leg is None:
             continue
         new = layer_sizes(leg)
-        expected = [
-            layer for layer in REBUILT_LAYERS if expect_interchanges or layer not in NEEDS_PBF
-        ]
+        expected = expected_layers_for_leg(leg, expect_interchanges)
         print(f"\n{wanted}  ({leg.get('highway')}, {leg['miles']} mi)")
         for layer in sorted(set(old) | set(new) | set(expected)):
             was, now = old.get(layer, 0), new.get(layer, 0)

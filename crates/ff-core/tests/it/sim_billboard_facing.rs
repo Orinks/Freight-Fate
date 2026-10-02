@@ -6,11 +6,11 @@
 //! after leaving Meridian. These drive each direction through the two
 //! countdowns and check every sign is read on the way to its attraction.
 
-use ff_core::data::world_models::Route;
+use ff_core::data::world_models::{Landmark, Route};
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::vehicle::TruckState;
 
-use crate::sim_support::{route_from_cities, weather, world};
+use crate::sim_support::{route_from_cities, weather, with_corridor, world};
 
 fn trip_with(opts: TripOptions, route: Route) -> Trip {
     let mut truck = TruckState::default();
@@ -163,8 +163,7 @@ fn test_moved_pool_lines_are_heard_at_their_place_both_ways() {
 
 /// A placed billboard the landmark spacing thins away is authored copy nobody
 /// ever hears. Every one must survive a drive down its own leg in the
-/// direction it faces, and none may stand in the four states that ban
-/// commercial billboards.
+/// direction it faces unless its leg-mile falls inside a statutory scenic ban.
 #[test]
 fn test_every_placed_billboard_is_heard_on_its_own_leg() {
     let codes: std::collections::HashMap<_, _> = world()
@@ -176,11 +175,18 @@ fn test_every_placed_billboard_is_heard_on_its_own_leg() {
     let mut banned = Vec::new();
     for leg in &world().legs {
         for forward in [true, false] {
-            let names: Vec<&str> = leg
+            let names: Vec<(String, bool)> = leg
                 .landmarks()
                 .iter()
                 .filter(|l| l.category == "billboard_sign" && l.applies_to_direction(forward))
-                .map(|l| l.name.as_str())
+                .map(|l| {
+                    (
+                        l.name.clone(),
+                        leg.billboard_bans()
+                            .iter()
+                            .any(|ban| ban.from_mi <= l.at_mi && l.at_mi < ban.to_mi),
+                    )
+                })
                 .collect();
             if names.is_empty() {
                 continue;
@@ -191,8 +197,15 @@ fn test_every_placed_billboard_is_heard_on_its_own_leg() {
                 (&leg.b, &leg.a)
             };
             let trip = trip_on(Route::new(vec![a.clone(), b.clone()], vec![leg.clone()]));
-            for name in names {
+            for (name, scenic_ban) in names {
                 let suffix = format!(":{name}");
+                if scenic_ban {
+                    assert!(
+                        trip.landmarks.iter().all(|c| !c.key.ends_with(&suffix)),
+                        "{a} -> {b}: scenic-banned sign {name} was heard"
+                    );
+                    continue;
+                }
                 match trip.landmarks.iter().find(|c| c.key.ends_with(&suffix)) {
                     None => silent.push(format!("{a} -> {b}: {name}")),
                     Some(callout) => {
@@ -217,6 +230,79 @@ fn test_every_placed_billboard_is_heard_on_its_own_leg() {
         "billboards in ban states:\n{}",
         banned.join("\n")
     );
+}
+
+#[test]
+fn test_washington_i90_scenic_span_silences_billboards() {
+    let leg = world()
+        .legs
+        .iter()
+        .find(|leg| {
+            [leg.a.as_str(), leg.b.as_str()].contains(&"seattle_wa_us")
+                && [leg.a.as_str(), leg.b.as_str()].contains(&"spokane_wa_us")
+        })
+        .expect("Seattle–Spokane I-90 leg");
+    let ban = leg
+        .billboard_bans()
+        .iter()
+        .find(|ban| ban.name.contains("East Sunset Way") && ban.name.contains("Thorp Road"))
+        .expect("Washington I-90 scenic span");
+    assert!(
+        ban.source.contains("RCW 47.39.020"),
+        "scenic span needs its statutory source: {}",
+        ban.source
+    );
+    let scenic_sign = with_corridor(leg, |detail| {
+        detail.landmarks.push(Landmark {
+            name: "Scenic span test sign".to_string(),
+            at_mi: (ban.from_mi + ban.to_mi) / 2.0,
+            category: "billboard_sign".to_string(),
+            kind: "point".to_string(),
+            spoken: "test sign".to_string(),
+            ..Landmark::default()
+        });
+    });
+
+    for forward in [true, false] {
+        let (from, to, span_from, span_to) = if forward {
+            (leg.a.clone(), leg.b.clone(), ban.from_mi, ban.to_mi)
+        } else {
+            (
+                leg.b.clone(),
+                leg.a.clone(),
+                leg.miles - ban.to_mi,
+                leg.miles - ban.from_mi,
+            )
+        };
+        let trip = trip_on(Route::new(
+            vec![from.clone(), to.clone()],
+            vec![scenic_sign.clone().into()],
+        ));
+        let in_span = |at_mi: f64| span_from <= at_mi && at_mi < span_to;
+        assert!(
+            trip.billboards.iter().any(|callout| !in_span(callout.at_mi)),
+            "{from} -> {to}: seeded trip should still schedule pool billboards outside the scenic span"
+        );
+        assert!(
+            trip.billboards
+                .iter()
+                .all(|callout| !in_span(callout.at_mi)),
+            "{from} -> {to}: random-pool billboard landed inside {span_from}/{span_to} miles"
+        );
+        assert!(
+            trip.landmarks
+                .iter()
+                .filter(|callout| callout.category == "billboard_sign")
+                .all(|callout| !in_span(callout.at_mi)),
+            "{from} -> {to}: placed billboard landed inside {span_from}/{span_to} miles"
+        );
+        assert!(
+            trip.landmarks
+                .iter()
+                .all(|callout| !callout.key.ends_with(":Scenic span test sign")),
+            "{from} -> {to}: placed scenic-banned test sign was heard"
+        );
+    }
 }
 
 /// Bowlin's The Thing counts down from both sides of Exit 322, and a rig with

@@ -32,3 +32,15 @@ def test_pending_legs_uses_missing_grade_profile_not_empty_interchanges():
             ]
         }
     ) == [pending_without_grade_profile]
+
+
+def test_interchanges_are_only_expected_for_eligible_local_routes():
+    assert "interchanges" not in re.expected_layers_for_leg(
+        {"highway": "US-10", "corridor": {"interchanges": []}}, True
+    )
+    assert "interchanges" in re.expected_layers_for_leg(
+        {"highway": "I-5", "corridor": {"interchanges": []}}, True
+    )
+    assert "interchanges" not in re.expected_layers_for_leg(
+        {"highway": "I-5", "corridor": {"interchanges": []}}, False
+    )
