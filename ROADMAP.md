@@ -406,48 +406,31 @@ Everything found before 2026-09-25 moved to
       Kentucky exits were rebuilt; every river callout was placed on its
       crossing of the leg's geometry; and state lines across the world were
       re-derived from OpenStreetMap state boundaries.
-- [x] Supported route data now agrees with archived geometry. Ten Class A
-      legs were rerouted to their labelled roads: Sacramento–Portland,
-      San Francisco–Portland, Duluth–Fargo, Hibbing–Minneapolis,
-      Norfolk–Raleigh, Virginia Beach–Raleigh, Burlington–Albany,
-      Clarksville–Huntsville, Washington–Philadelphia and
-      Charlotte–Lumberton. Route points and checkpoints were rebuilt on the
-      six Class B legs: Tulsa–Kansas City, Providence–New York,
-      Hartford–New York, Roanoke–Greensboro, Lynchburg–Richmond and
-      Detroit–Chicago. Durango–Moab now follows US-160/US-491/US-191 via
-      Cortez and Monticello. Allentown–Bridgeport remains unsupported
-      (Valhalla 442) and Albany–Bridgeport remains ambiguous; neither was
-      forced. Their largest remaining route-point offsets are 15.1 and 10.9
-      miles; Allentown checkpoints are 9.4, 19.5 and 7.8 miles off, and
-      Albany's Valatie checkpoint is 4.6 miles off.
-- [x] Wrong-state checkpoints repaired. Reroutes fixed Burlington–Albany,
-      San Francisco–Portland and Tulsa–Kansas City; the remaining four now
-      announce Tallapoosa at mile 53.7 in Georgia, Oldtown at mile 14.8 in
-      Maryland, Dakota at mile 18.4 in Minnesota and South Point at mile 7.1
-      in Ohio. A route-wide regression also corrected Hope Valley on
-      Providence–New York to Rhode Island at mile 31.1. State context now
-      comes from OpenStreetMap boundaries, and the checkpoint/state regression
-      runs without an allowlist.
-- [x] River callouts were re-derived across 1,099 legs: 2,879 placements
-      were made at named-water crossings, and 240 callouts whose named water
-      the route never crosses were removed. Every archived-leg river callout
-      now has crossing provenance; the removed records are inventoried at
-      `/home/ubuntu/.devin-files/roadmap-rivers-removed.json`.
-- [x] The Dallas–St. Louis supported chain spans 711 miles across five legs
-      and has 23 stops, 19 sleep-capable; route-oriented sleep-stop mileposts
-      put its largest gap at 109.2 miles, not 496. No stops needed adding;
-      the HOS test covers the direct I-44 route, while the sleep-gap test
-      measures the supported chain.
-- [x] Four approved approach signs were added: USS Alabama on I-10 at miles
-      49.3 from Pensacola and 66.5 from Gulfport, and Madison on I-20 at miles
-      83.5 from Augusta and 49.5 from Atlanta. The existing US-45 and US-129
-      signs remain; billboard comparison found only these four additions.
-- [x] Billboard speech is suppressed across Washington's scenic-system
-      spans on I-90, US-101 and US-195, and Colorado's CDOT-listed scenic
-      byways, including America's Byways. The 118 leg-local spans include
-      both added US-101 segments; random-pool and placed signs are muted in
-      either direction, and no existing placed sign currently falls within
-      a span.
+- [x] Legs off their own geometry: Sacramento and San Francisco to Portland,
+      Duluth to Fargo, Hibbing to Minneapolis, Norfolk and Virginia Beach to
+      Raleigh, Burlington to Albany, Clarksville to Huntsville, Washington to
+      Philadelphia and Charlotte to Lumberton were rerouted onto their
+      labelled roads; the other eight kept their road and had route points
+      and checkpoints rebuilt on it. Durango to Moab now runs US 160, US 491
+      and US 191 through Cortez and Monticello. Every leg's route points now
+      lie within 10 miles of its geometry and its checkpoints within 3.
+- [x] Checkpoints announced in the wrong state: Tallapoosa (Georgia),
+      Oldtown (Maryland), Dakota (Minnesota), South Point (Ohio) and Hope
+      Valley (Rhode Island) replace the misplaced towns, and the rerouted
+      legs' checkpoints follow their new roads. State lines come from
+      OpenStreetMap state boundaries.
+- [x] River callouts: 2,880 callouts across 1,070 legs now sit on the road's
+      crossing of the named water, and 240 that named water the road never
+      crosses were removed.
+- [x] Dallas to St. Louis sleep stops were never missing: the planner read
+      each leg's stop miles as route miles and did not turn them around on
+      reversed legs. The chain's largest gap between curated sleep stops is
+      now 178.8 miles.
+- [x] The USS Alabama now has signs on I-10 in both directions and Madison,
+      Georgia on I-20 in both directions; the US 45 and US 129 signs stay.
+- [x] Billboards stay silent on Washington's scenic system (I-90 Issaquah
+      to Thorp, US 195, US 101 around the Olympic Peninsula) and Colorado's
+      scenic and historic byways, in both directions.
 - [ ] Big Buck's never plays: its twenty-four approach billboards, the
       brisket plate, the gate turn-away lines and the landmark loyalty rate
       are all written, and the world has no Big Buck's stop. Needs a stop,
