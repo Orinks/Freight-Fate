@@ -35,6 +35,8 @@
 
 - **Dodge Radio is on the dial.** A United Kingdom station playing a bit of everything, and it comes in anywhere you drive.
 
+- **Six AFN 360 channels are back on the dial for players outside the United States.** AFN blocks them inside the US, so they won't play there.
+
 - **X Transmission FM is on the dial.** Rock, metal and country from live DJs, and it names the song playing.
 
 - **Music source can be set to Synthesized, music the game makes with no AI.** Menus and the Roadhouse play it, with no voiced breaks.
@@ -64,6 +66,8 @@
 - **A career balance edited outside the game stays marked.** Money changed by a memory tool saves with the modified flag.
 
 ### Changed
+
+- **Radio stations whose name already includes the call sign say it once.** Tuning now says "KXLU 88.9", not "KXLU, KXLU 88.9".
 
 - **CB reports now open with a short squelch and go straight to the news.** "CB chatter" is no longer said before each one.
 
@@ -194,6 +198,8 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **Radio stations that were silent, gone, listed twice or playing a different station are fixed or off the dial.** Stations that moved play from their new address.
 
 - **Your Discord status keeps up on long sessions.** If Discord turns down an update, the game reconnects and sends it again instead of leaving the old status showing.
 

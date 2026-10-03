@@ -55,14 +55,14 @@
       "source": "Radio Browser checked AFN 360 Global Gravity entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://13743.live.streamtheworld.com:3690/AFN_GRV_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFN_GRV.mp3",
       "stream_format": "streamtheworld-resolved",
       "codec": "mp3",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+      "supported": true,
+      "notes": "Sweep 2026-10-03: back on the dial at the owner's word. StreamTheWorld geo-blocks the AFN 360 Global mounts to US addresses (HTTP 403 from the US sweep runners), but they play from Europe and other overseas regions, so players abroad hear them and a US player gets the ordinary dead-stream fallback. URL is assumed, not verified: the redirect endpoint form of the mount, so it re-resolves if Triton moves the edge host."
     },
     {
       "id": "afn-global-country",
@@ -72,14 +72,14 @@
       "source": "Radio Browser checked AFN 360 Global Country entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://16693.live.streamtheworld.com/AFN_CTY_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFN_CTY.mp3",
       "stream_format": "streamtheworld-resolved",
       "codec": "mp3",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+      "supported": true,
+      "notes": "Sweep 2026-10-03: back on the dial at the owner's word. StreamTheWorld geo-blocks the AFN 360 Global mounts to US addresses (HTTP 403 from the US sweep runners), but they play from Europe and other overseas regions, so players abroad hear them and a US player gets the ordinary dead-stream fallback. URL is assumed, not verified: the redirect endpoint form of the mount, so it re-resolves if Triton moves the edge host."
     },
     {
       "id": "afn-global-the-voice",
@@ -89,14 +89,14 @@
       "source": "Radio Browser checked AFN 360 Global The Voice entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://18253.live.streamtheworld.com/AFN_VCE_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFN_VCE.mp3",
       "stream_format": "streamtheworld-resolved",
       "codec": "mp3",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+      "supported": true,
+      "notes": "Sweep 2026-10-03: back on the dial at the owner's word. StreamTheWorld geo-blocks the AFN 360 Global mounts to US addresses (HTTP 403 from the US sweep runners), but they play from Europe and other overseas regions, so players abroad hear them and a US player gets the ordinary dead-stream fallback. URL is assumed, not verified: the redirect endpoint form of the mount, so it re-resolves if Triton moves the edge host."
     },
     {
       "id": "afn-freedom-rock",
@@ -113,7 +113,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": false,
-      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access. Sweep 2026-10-03: AFN reportedly retired Freedom Rock on 2025-05-01, so it stays off the dial."
     },
     {
       "id": "afn-tokyo",
@@ -758,14 +758,14 @@
       "source": "Radio Browser checked AFN 360 Global Fans entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://22213.live.streamtheworld.com:3690/AFN_FAN_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFN_FAN.mp3",
       "stream_format": "streamtheworld-resolved",
       "codec": "mp3",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+      "supported": true,
+      "notes": "Sweep 2026-10-03: back on the dial at the owner's word. StreamTheWorld geo-blocks the AFN 360 Global mounts to US addresses (HTTP 403 from the US sweep runners), but they play from Europe and other overseas regions, so players abroad hear them and a US player gets the ordinary dead-stream fallback. URL is assumed, not verified: the redirect endpoint form of the mount, so it re-resolves if Triton moves the edge host."
     },
     {
       "id": "afn-global-holiday",
@@ -775,14 +775,14 @@
       "source": "Radio Browser checked AFN 360 Global Holiday entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://27783.live.streamtheworld.com/AFN_SEA_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFN_SEA.mp3",
       "stream_format": "streamtheworld-resolved",
       "codec": "mp3",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+      "supported": true,
+      "notes": "Sweep 2026-10-03: back on the dial at the owner's word. StreamTheWorld geo-blocks the AFN 360 Global mounts to US addresses (HTTP 403 from the US sweep runners), but they play from Europe and other overseas regions, so players abroad hear them and a US player gets the ordinary dead-stream fallback. URL is assumed, not verified: the redirect endpoint form of the mount, so it re-resolves if Triton moves the edge host."
     },
     {
       "id": "afn-mach-5",
@@ -792,14 +792,14 @@
       "source": "Radio Browser checked AFN Go Mach 5 entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://player-redirect.streamtheworld.com/api/livestream-redirect/AFN04_S01.mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFN04_S01.mp3",
       "stream_format": "streamtheworld-resolved",
       "codec": "mp3",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+      "supported": true,
+      "notes": "Sweep 2026-10-03: back on the dial at the owner's word. StreamTheWorld geo-blocks the AFN 360 Global mounts to US addresses (HTTP 403 from the US sweep runners), but they play from Europe and other overseas regions, so players abroad hear them and a US player gets the ordinary dead-stream fallback. URL is assumed, not verified: the redirect endpoint form of the mount, so it re-resolves if Triton moves the edge host."
     },
     {
       "id": "afn-iwakuni",
@@ -1709,9 +1709,9 @@
       "source": "public station stream metadata",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KIOSFM.mp3",
-      "stream_format": "mp3",
-      "codec": "mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KIOSFMAAC.aac",
+      "stream_format": "aac",
+      "codec": "aac",
       "lat": 41.2565,
       "lon": -95.9345,
       "range_miles": 135,
@@ -1719,8 +1719,8 @@
       "region": "central_plains",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": false,
-      "notes": "Radio Browser checked entry: kios. BASS live smoke OK 2026-07-13. Stream dead on 2026-09-22 release sweep: HTTP 404."
+      "supported": true,
+      "notes": "Radio Browser checked entry: kios. BASS live smoke OK 2026-07-13. Stream dead on 2026-09-22 release sweep: HTTP 404. Sweep 2026-10-03: the mp3 mount is gone (404); the AAC mount answers as KIOS-FM."
     },
     {
       "id": "kbsx-boise",
@@ -1940,7 +1940,7 @@
       "source": "public station stream metadata",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "http://ypr-sc.streamguys.net/live",
+      "stream_url": "https://ypr.streamguys1.com/live",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 45.7833,
@@ -1951,7 +1951,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser checked entry: KEMC 91.7 \"Yellowstone Public Radio\" Billings, MT (MP3). BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map."
+      "notes": "Radio Browser checked entry: KEMC 91.7 \"Yellowstone Public Radio\" Billings, MT (MP3). BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map. Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "maine-public-bangor",
@@ -2087,7 +2087,7 @@
       "source": "public station stream metadata",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://kwmu1-ice.streamguys1.com/kwmu1.m3u",
+      "stream_url": "https://kwmu1-ice.streamguys1.com/kwmu1",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 38.627,
@@ -2098,7 +2098,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser checked entry: 90.7 FM KWMU-1. BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map."
+      "notes": "Radio Browser checked entry: 90.7 FM KWMU-1. BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map. Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "kuhf-houston",
@@ -2150,7 +2150,7 @@
       "source": "public station stream metadata",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KNAUFM_128.mp3",
+      "stream_url": "https://knau.streamguys1.com/knau-mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 35.1983,
@@ -2161,7 +2161,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser checked entry: KNAU 88.7 Arizona Public Radio. BASS live smoke OK 2026-07-14. Desert Southwest sweep. StreamTheWorld livestream-redirect URL on purpose: the numbered edge hosts Radio Browser caches (18233.live...) rotate and die."
+      "notes": "Radio Browser checked entry: KNAU 88.7 Arizona Public Radio. BASS live smoke OK 2026-07-14. Desert Southwest sweep. StreamTheWorld livestream-redirect URL on purpose: the numbered edge hosts Radio Browser caches (18233.live...) rotate and die. Sweep 2026-10-03: the StreamTheWorld mount is gone (404); KNAU streams from its own StreamGuys mount."
     },
     {
       "id": "kxci-tucson",
@@ -2805,7 +2805,8 @@
       "region": "gulf_coast",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true
+      "supported": false,
+      "notes": "Sweep 2026-10-03: KHID has been a Relevant Radio station since 2019, and the old address is UTRGV student radio, not KHID."
     },
     {
       "id": "wcbu-peoria",
@@ -2870,12 +2871,12 @@
     {
       "id": "whil-mobile",
       "call_sign": "WHIL",
-      "name": "Mobile",
+      "name": "Alabama Public Radio 91.3",
       "format": "public radio",
       "source": "WHIL 91.3 Mobile carries Alabama Public Radio. APR's main news mount (WUAL_HD1) was down at the 2026-07-22 smoke; this points at the live APR secondary service. Repoint to WUAL_HD1 when it recovers.",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WUAL_HD2.mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WUAL_HD1.mp3",
       "stream_format": "streamtheworld-redirect",
       "codec": "mp3-or-aac",
       "lat": 30.68,
@@ -2885,7 +2886,8 @@
       "region": "gulf_coast",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true
+      "supported": true,
+      "notes": "Sweep 2026-10-03: WHIL carries Alabama Public Radio full time; the old address was APR HD2, now the main APR feed."
     },
     {
       "id": "wmum-macon",
@@ -3275,7 +3277,7 @@
       "source": "Yellowstone Public Radio network feed (ypradio.org/listening-area), carried on FM translator K219FF 91.7 Havre (short range; KNMC 90.1 is separate MSU-Northern college radio)",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "http://ypr-sc.streamguys.net/live",
+      "stream_url": "https://ypr.streamguys1.com/live",
       "stream_format": "icecast",
       "codec": "mp3",
       "lat": 48.55,
@@ -3285,7 +3287,8 @@
       "region": "northern_rockies",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true
+      "supported": true,
+      "notes": "Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "abc-triple-j",
@@ -3295,14 +3298,14 @@
       "source": "ABC mediahub direct AAC (listen live)",
       "source_type": "international",
       "station_type": "international",
-      "stream_url": "https://live-radio01.mediahubaustralia.com/2TJW/aac/",
-      "stream_format": "aac",
+      "stream_url": "https://streaming.abc-cdn.net.au/audio/hls/triplejnsw.m3u8",
+      "stream_format": "hls",
       "codec": "aac",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "Stream dead on 2026-09-22 release sweep: HTTP 403."
+      "supported": true,
+      "notes": "Stream dead on 2026-09-22 release sweep: HTTP 403. Sweep 2026-10-03: the old address answers 403; the ABC moved its streams to HLS at streaming.abc-cdn.net.au, which decodes from a US runner."
     },
     {
       "id": "abc-jazz",
@@ -3312,14 +3315,14 @@
       "source": "ABC mediahub direct AAC (listen live)",
       "source_type": "international",
       "station_type": "international",
-      "stream_url": "https://live-radio01.mediahubaustralia.com/JAZW/aac/",
-      "stream_format": "aac",
+      "stream_url": "https://streaming.abc-cdn.net.au/audio/hls/abcjazz.m3u8",
+      "stream_format": "hls",
       "codec": "aac",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "Stream dead on 2026-09-22 release sweep: HTTP 403."
+      "supported": true,
+      "notes": "Stream dead on 2026-09-22 release sweep: HTTP 403. Sweep 2026-10-03: the old address answers 403; the ABC moved its streams to HLS at streaming.abc-cdn.net.au, which decodes from a US runner."
     },
     {
       "id": "abc-classic",
@@ -3329,14 +3332,14 @@
       "source": "ABC mediahub direct AAC (listen live)",
       "source_type": "international",
       "station_type": "international",
-      "stream_url": "https://live-radio01.mediahubaustralia.com/2FMW/aac/",
-      "stream_format": "aac",
+      "stream_url": "https://streaming.abc-cdn.net.au/audio/hls/classicnsw.m3u8",
+      "stream_format": "hls",
       "codec": "aac",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "Stream dead on 2026-09-22 release sweep: HTTP 403."
+      "supported": true,
+      "notes": "Stream dead on 2026-09-22 release sweep: HTTP 403. Sweep 2026-10-03: the old address answers 403; the ABC moved its streams to HLS at streaming.abc-cdn.net.au, which decodes from a US runner."
     },
     {
       "id": "abc-double-j",
@@ -3346,14 +3349,14 @@
       "source": "ABC mediahub direct AAC (listen live)",
       "source_type": "international",
       "station_type": "international",
-      "stream_url": "https://live-radio01.mediahubaustralia.com/DJDW/aac/",
-      "stream_format": "aac",
+      "stream_url": "https://streaming.abc-cdn.net.au/audio/hls/doublejnsw.m3u8",
+      "stream_format": "hls",
       "codec": "aac",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "Stream dead on 2026-09-22 release sweep: HTTP 403."
+      "supported": true,
+      "notes": "Stream dead on 2026-09-22 release sweep: HTTP 403. Sweep 2026-10-03: the old address answers 403; the ABC moved its streams to HLS at streaming.abc-cdn.net.au, which decodes from a US runner."
     },
     {
       "id": "rte-radio-1",
@@ -3579,7 +3582,7 @@
       "source": "https://www.capradio.org/stream/listen-live/",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://22963.live.streamtheworld.com:443/KXPR.mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KXPR.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 38.5449,
@@ -3591,7 +3594,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Capital Public Radio classical. StreamTheWorld direct mount resolved from playerservices KXPR.mp3."
+      "notes": "Capital Public Radio classical. StreamTheWorld direct mount resolved from playerservices KXPR.mp3. Sweep 2026-10-03: the numbered StreamTheWorld server refused; the redirect hands out a live one."
     },
     {
       "id": "kalw-san-francisco",
@@ -4827,7 +4830,7 @@
       "source": "https://www.redriverradio.org/listen-live",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://18123.live.streamtheworld.com/KDAQFM.mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KDAQFM.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 31.338,
@@ -4839,7 +4842,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Red River Radio full station for Deep East Texas; carries the network news feed. Reaches Longview."
+      "notes": "Red River Radio full station for Deep East Texas; carries the network news feed. Reaches Longview. Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "ketr-paris",
@@ -5217,7 +5220,7 @@
     {
       "id": "wnxp-nashville",
       "call_sign": "WNXP",
-      "name": "WNXP 91.1 Nashville's Music Experience",
+      "name": "WNXP 91.1",
       "format": "adult album alternative",
       "source": "https://www.nashvillepublicradio.org/",
       "source_type": "local",
@@ -6358,7 +6361,7 @@
       "source": "https://www.cpr.org/streaming/",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "http://stream2.cprnetwork.org:8000/cpr1_lo",
+      "stream_url": "https://stream1.cprnetwork.org/cpr1_lo",
       "stream_format": "icecast",
       "codec": "mp3",
       "lat": 39.731,
@@ -6370,7 +6373,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Colorado Public Radio statewide news service."
+      "notes": "Colorado Public Radio statewide news service. Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "kanu-lawrence",
@@ -7656,7 +7659,7 @@
       "source": "https://www.mpbonline.org/radio",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMPNFMAAC.aac",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMPNHD3_128.mp3",
       "stream_format": "aac",
       "codec": "aac",
       "lat": 30.41,
@@ -7668,7 +7671,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "MPB statewide feed; WMAH (Biloxi) transmitter serves Gulfport."
+      "notes": "MPB statewide feed; WMAH (Biloxi) transmitter serves Gulfport. Sweep 2026-10-03: the old address is MPB's music service (icy-name 'WMPN-FM music'); Think Radio is the news feed, 'WMPN-FM-HD3 News', the same stream as the Jackson entry."
     },
     {
       "id": "mpb-tupelo-ms",
@@ -7678,7 +7681,7 @@
       "source": "https://www.mpbonline.org/radio",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMPNFMAAC.aac",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMPNHD3_128.mp3",
       "stream_format": "aac",
       "codec": "aac",
       "lat": 34.67,
@@ -7690,7 +7693,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "MPB statewide feed; WMAE (Booneville) transmitter serves the Tupelo area."
+      "notes": "MPB statewide feed; WMAE (Booneville) transmitter serves the Tupelo area. Sweep 2026-10-03: the old address is MPB's music service (icy-name 'WMPN-FM music'); Think Radio is the news feed, 'WMPN-FM-HD3 News', the same stream as the Jackson entry."
     },
     {
       "id": "mpb-meridian-ms",
@@ -7700,7 +7703,7 @@
       "source": "https://www.mpbonline.org/radio",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMPNFMAAC.aac",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMPNHD3_128.mp3",
       "stream_format": "aac",
       "codec": "aac",
       "lat": 32.42,
@@ -7712,7 +7715,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "MPB statewide feed; WMAW Meridian transmitter."
+      "notes": "MPB statewide feed; WMAW Meridian transmitter. Sweep 2026-10-03: the old address is MPB's music service (icy-name 'WMPN-FM music'); Think Radio is the news feed, 'WMPN-FM-HD3 News', the same stream as the Jackson entry."
     },
     {
       "id": "mpb-oxford-ms",
@@ -7722,7 +7725,7 @@
       "source": "https://www.mpbonline.org/radio",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMPNFMAAC.aac",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMPNHD3_128.mp3",
       "stream_format": "aac",
       "codec": "aac",
       "lat": 34.34,
@@ -7734,7 +7737,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "MPB statewide feed; WMAV Oxford transmitter."
+      "notes": "MPB statewide feed; WMAV Oxford transmitter. Sweep 2026-10-03: the old address is MPB's music service (icy-name 'WMPN-FM music'); Think Radio is the news feed, 'WMPN-FM-HD3 News', the same stream as the Jackson entry."
     },
     {
       "id": "mpb-columbus-ms",
@@ -7744,7 +7747,7 @@
       "source": "https://www.mpbonline.org/radio",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMPNFMAAC.aac",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMPNHD3_128.mp3",
       "stream_format": "aac",
       "codec": "aac",
       "lat": 33.436,
@@ -7756,7 +7759,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Mississippi Public Broadcasting statewide feed; WMAB (Mississippi State/Starkville) transmitter serves Columbus MS. Same MPB network feed as existing wmpn-jackson but distinct transmitter/call."
+      "notes": "Mississippi Public Broadcasting statewide feed; WMAB (Mississippi State/Starkville) transmitter serves Columbus MS. Same MPB network feed as existing wmpn-jackson but distinct transmitter/call. Sweep 2026-10-03: the old address is MPB's music service (icy-name 'WMPN-FM music'); Think Radio is the news feed, 'WMPN-FM-HD3 News', the same stream as the Jackson entry."
     },
     {
       "id": "wclk-atlanta",
@@ -8223,7 +8226,7 @@
     {
       "id": "kmcu-wichita-falls",
       "call_sign": "KMCU",
-      "name": "KMCU 88.7 (KCCU relay)",
+      "name": "KMCU 88.7",
       "format": "news and classical",
       "source": "https://onlineradiobox.com/us/kmcu/",
       "source_type": "local",
@@ -8289,7 +8292,7 @@
     {
       "id": "wmfe-orlando",
       "call_sign": "WMFE",
-      "name": "WMFE 90.7 (Central Florida Public Media)",
+      "name": "WMFE 90.7",
       "format": "news and information",
       "source": "https://www.cfpublic.org/",
       "source_type": "local",
@@ -8421,7 +8424,7 @@
     {
       "id": "wnhu-new-haven",
       "call_sign": "WNHU",
-      "name": "88.7 WNHU University of New Haven",
+      "name": "WNHU 88.7",
       "format": "college variety",
       "source": "https://www.wnhu.org/",
       "source_type": "local",
@@ -9580,7 +9583,7 @@
       "source": "https://www.hppr.org/listen",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://26153.live.streamtheworld.com/KANZFM_HPPR.mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KANZFM_HPPR.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 35.222,
@@ -9592,7 +9595,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "HPPR relay for Amarillo; carries the HPPR news/mix network feed. Reaches Panhandle towns (Dumas, Hereford, Pampa)."
+      "notes": "HPPR relay for Amarillo; carries the HPPR news/mix network feed. Reaches Panhandle towns (Dumas, Hereford, Pampa). Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "kut-austin",
@@ -9678,8 +9681,8 @@
       "state": "TX",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Central Texas College public radio; covers Killeen, Belton and Temple."
+      "supported": false,
+      "notes": "Central Texas College public radio; covers Killeen, Belton and Temple. Sweep 2026-10-03: no audio on three sweeps; no current address found."
     },
     {
       "id": "kvrt-victoria",
@@ -9843,7 +9846,7 @@
       "source": "https://www.mynspr.org/ways-to-listen",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://29325.live.streamtheworld.com:443/KCHOFM_64.mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KCHOFM_64.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 39.7596,
@@ -9855,7 +9858,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "North State Public Radio (Chico State). StreamTheWorld direct mount from playerservices KCHOFM_64.mp3."
+      "notes": "North State Public Radio (Chico State). StreamTheWorld direct mount from playerservices KCHOFM_64.mp3. Sweep 2026-10-03: the numbered StreamTheWorld server refused; the redirect hands out a live one."
     },
     {
       "id": "maine-public-portland",
@@ -9865,7 +9868,7 @@
       "source": "https://www.mainepublic.org/listen-live",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://17553.live.streamtheworld.com:443/WMEAFM.mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMEAFM.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 43.7268,
@@ -9877,7 +9880,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Maine Public news flagship for southern Maine (Portland/Lewiston); Falmouth transmitter. StreamTheWorld direct mount from playerservices WMEAFM.mp3."
+      "notes": "Maine Public news flagship for southern Maine (Portland/Lewiston); Falmouth transmitter. StreamTheWorld direct mount from playerservices WMEAFM.mp3. Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "maine-public-classical-portland",
@@ -9926,12 +9929,12 @@
     {
       "id": "wnpn-newport",
       "call_sign": "WNPN",
-      "name": "The Public's Radio 89.3 (Newport)",
+      "name": "Ocean State Media 89.3",
       "format": "news",
       "source": "https://thepublicsradio.org/",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://amber.streamguys1.com:5595/riprdeskweb",
+      "stream_url": "https://ripr-ice.streamguys1.com/ripr-mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 41.4901,
@@ -9943,7 +9946,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "WNPN 89.3 is licensed to Newport; same network stream as Providence entry"
+      "notes": "WNPN 89.3 is licensed to Newport; same network stream as Providence entry Sweep 2026-10-03: renamed with the Providence entry, which shares its stream."
     },
     {
       "id": "kuer-salt-lake-city",
@@ -10739,7 +10742,7 @@
       "source": "https://www.boisestatepublicradio.org/listen",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://boisestate.streamguys1.com/News1-aac-96k-icy.aac",
+      "stream_url": "https://boisestate.streamguys1.com/News1-aac-96k-icy",
       "stream_format": "aac",
       "codec": "aac",
       "lat": 42.563,
@@ -10751,7 +10754,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Boise State Public Radio news repeater serving the Magic Valley."
+      "notes": "Boise State Public Radio news repeater serving the Magic Valley. Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "krbx-boise",
@@ -10822,7 +10825,7 @@
     {
       "id": "whad-milwaukee",
       "call_sign": "WHAD",
-      "name": "Wisconsin Public Radio 90.7",
+      "name": "WPR Music 90.7",
       "format": "news and classical",
       "source": "https://www.wpr.org/ways-to-listen",
       "source_type": "local",
@@ -10839,7 +10842,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "WPR NPR News & Music (Delafield/Milwaukee); also covers Fond du Lac and Kenosha."
+      "notes": "WPR NPR News & Music (Delafield/Milwaukee); also covers Fond du Lac and Kenosha. Sweep 2026-10-03: named for the network its stream carries (icy-name 'WPR Music Network'); WPR renamed Ideas to WPR News and News and Classical to WPR Music on 2024-05-20."
     },
     {
       "id": "kenw-hobbs",
@@ -10975,12 +10978,12 @@
     {
       "id": "ripr-providence",
       "call_sign": "WNPN",
-      "name": "The Public's Radio 89.3",
+      "name": "Ocean State Media 89.3",
       "format": "news",
       "source": "https://thepublicsradio.org/",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://amber.streamguys1.com:5595/riprdeskweb",
+      "stream_url": "https://ripr-ice.streamguys1.com/ripr-mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 41.824,
@@ -10992,7 +10995,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Rhode Island's NPR news station (The Public's Radio network)"
+      "notes": "Rhode Island's NPR news station (The Public's Radio network) Sweep 2026-10-03: the station is Ocean State Media since The Public's Radio merged with Rhode Island PBS; the old address was a backup mount, now the main one."
     },
     {
       "id": "nwpb-news-tri-cities",
@@ -11239,7 +11242,7 @@
     {
       "id": "wshs-sheboygan",
       "call_sign": "WSHS",
-      "name": "Wisconsin Public Radio Ideas 91.7",
+      "name": "WPR News 91.7",
       "format": "news and talk",
       "source": "https://www.wpr.org/ways-to-listen",
       "source_type": "local",
@@ -11256,7 +11259,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "WPR Sheboygan transmitter (Sheboygan school district license)."
+      "notes": "WPR Sheboygan transmitter (Sheboygan school district license). Sweep 2026-10-03: named for the network its stream carries (icy-name 'WPR News Network'); WPR renamed Ideas to WPR News and News and Classical to WPR Music on 2024-05-20."
     },
     {
       "id": "kenw-roswell",
@@ -11459,7 +11462,7 @@
     {
       "id": "wlbl-wausau",
       "call_sign": "WLBL-FM",
-      "name": "Wisconsin Public Radio Ideas 91.9",
+      "name": "WPR News 91.9",
       "format": "news and talk",
       "source": "https://www.wpr.org/ways-to-listen",
       "source_type": "local",
@@ -11476,7 +11479,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "WPR Ideas Network (Auburndale/Wausau)."
+      "notes": "WPR Ideas Network (Auburndale/Wausau). Sweep 2026-10-03: named for the network its stream carries (icy-name 'WPR News Network'); WPR renamed Ideas to WPR News and News and Classical to WPR Music on 2024-05-20."
     },
     {
       "id": "kenw-clovis",
@@ -11569,7 +11572,7 @@
     {
       "id": "whrm-wausau",
       "call_sign": "WHRM",
-      "name": "Wisconsin Public Radio 90.9",
+      "name": "WPR Music 90.9",
       "format": "news and classical",
       "source": "https://www.wpr.org/ways-to-listen",
       "source_type": "local",
@@ -11585,7 +11588,8 @@
       "state": "WI",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true
+      "supported": true,
+      "notes": "Sweep 2026-10-03: named for the network its stream carries (icy-name 'WPR Music Network'); WPR renamed Ideas to WPR News and News and Classical to WPR Music on 2024-05-20."
     },
     {
       "id": "khcc-hutchinson",
@@ -11656,7 +11660,7 @@
     {
       "id": "w300bm-madison",
       "call_sign": "W300BM",
-      "name": "Wisconsin Public Radio Ideas 107.9",
+      "name": "WPR News 107.9",
       "format": "news and talk",
       "source": "https://www.wpr.org/ways-to-listen",
       "source_type": "local",
@@ -11673,7 +11677,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "WPR Ideas Network Madison translator (WHA-AM 970 is the primary Ideas signal)."
+      "notes": "WPR Ideas Network Madison translator (WHA-AM 970 is the primary Ideas signal). Sweep 2026-10-03: named for the network its stream carries (icy-name 'WPR News Network'); WPR renamed Ideas to WPR News and News and Classical to WPR Music on 2024-05-20."
     },
     {
       "id": "kcou-columbia-mo",
@@ -11743,7 +11747,7 @@
     {
       "id": "wern-madison",
       "call_sign": "WERN",
-      "name": "Wisconsin Public Radio 88.7",
+      "name": "WPR Music 88.7",
       "format": "news and classical",
       "source": "https://www.wpr.org/ways-to-listen",
       "source_type": "local",
@@ -11759,7 +11763,8 @@
       "state": "WI",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true
+      "supported": true,
+      "notes": "Sweep 2026-10-03: named for the network its stream carries (icy-name 'WPR Music Network'); WPR renamed Ideas to WPR News and News and Classical to WPR Music on 2024-05-20."
     },
     {
       "id": "wesn-bloomington-il",
@@ -11785,7 +11790,7 @@
     {
       "id": "whla-la-crosse",
       "call_sign": "WHLA",
-      "name": "Wisconsin Public Radio Ideas 90.3",
+      "name": "WPR News 90.3",
       "format": "news and talk",
       "source": "https://www.wpr.org/ways-to-listen",
       "source_type": "local",
@@ -11801,12 +11806,13 @@
       "state": "WI",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true
+      "supported": true,
+      "notes": "Sweep 2026-10-03: named for the network its stream carries (icy-name 'WPR News Network'); WPR renamed Ideas to WPR News and News and Classical to WPR Music on 2024-05-20."
     },
     {
       "id": "wlsu-la-crosse",
       "call_sign": "WLSU",
-      "name": "Wisconsin Public Radio 88.9",
+      "name": "WPR Music 88.9",
       "format": "news and classical",
       "source": "https://www.wpr.org/ways-to-listen",
       "source_type": "local",
@@ -11822,12 +11828,13 @@
       "state": "WI",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true
+      "supported": true,
+      "notes": "Sweep 2026-10-03: named for the network its stream carries (icy-name 'WPR Music Network'); WPR renamed Ideas to WPR News and News and Classical to WPR Music on 2024-05-20."
     },
     {
       "id": "whid-green-bay",
       "call_sign": "WHID",
-      "name": "Wisconsin Public Radio Ideas 88.1",
+      "name": "WPR News 88.1",
       "format": "news and talk",
       "source": "https://www.wpr.org/ways-to-listen",
       "source_type": "local",
@@ -11844,12 +11851,12 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "WPR Ideas Network; also covers Oshkosh."
+      "notes": "WPR Ideas Network; also covers Oshkosh. Sweep 2026-10-03: named for the network its stream carries (icy-name 'WPR News Network'); WPR renamed Ideas to WPR News and News and Classical to WPR Music on 2024-05-20."
     },
     {
       "id": "wpne-green-bay",
       "call_sign": "WPNE",
-      "name": "Wisconsin Public Radio 89.3",
+      "name": "WPR Music 89.3",
       "format": "news and classical",
       "source": "https://www.wpr.org/ways-to-listen",
       "source_type": "local",
@@ -11865,12 +11872,13 @@
       "state": "WI",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true
+      "supported": true,
+      "notes": "Sweep 2026-10-03: named for the network its stream carries (icy-name 'WPR Music Network'); WPR renamed Ideas to WPR News and News and Classical to WPR Music on 2024-05-20."
     },
     {
       "id": "whwc-eau-claire",
       "call_sign": "WHWC",
-      "name": "Wisconsin Public Radio Ideas 88.3",
+      "name": "WPR News 88.3",
       "format": "news and talk",
       "source": "https://www.wpr.org/ways-to-listen",
       "source_type": "local",
@@ -11887,12 +11895,12 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "WPR Ideas Network transmitter (Menomonie/Eau Claire); also covers Chippewa Falls and Rice Lake."
+      "notes": "WPR Ideas Network transmitter (Menomonie/Eau Claire); also covers Chippewa Falls and Rice Lake. Sweep 2026-10-03: named for the network its stream carries (icy-name 'WPR News Network'); WPR renamed Ideas to WPR News and News and Classical to WPR Music on 2024-05-20."
     },
     {
       "id": "wuec-eau-claire",
       "call_sign": "WUEC",
-      "name": "Wisconsin Public Radio 89.7",
+      "name": "WPR Music 89.7",
       "format": "news and classical",
       "source": "https://www.wpr.org/ways-to-listen",
       "source_type": "local",
@@ -11909,12 +11917,12 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "WPR NPR News & Music transmitter; also covers Chippewa Falls."
+      "notes": "WPR NPR News & Music transmitter; also covers Chippewa Falls. Sweep 2026-10-03: named for the network its stream carries (icy-name 'WPR Music Network'); WPR renamed Ideas to WPR News and News and Classical to WPR Music on 2024-05-20."
     },
     {
       "id": "sun-sounds-arizona-phoenix",
       "call_sign": "SUN-SOUNDS-AZ",
-      "name": "Sun Sounds of Arizona (Phoenix / Tempe)",
+      "name": "Sun Sounds of Arizona (Phoenix)",
       "format": "radio reading service",
       "source": "https://sunsounds.org/listen-live",
       "source_type": "local",
@@ -11983,7 +11991,7 @@
     {
       "id": "cris-radio-chicago",
       "call_sign": "CRIS-CHI",
-      "name": "Chicagoland Radio Information Service (CRIS Radio)",
+      "name": "CRIS Radio",
       "format": "radio reading service",
       "source": "https://chicagolighthouse.org/radio/",
       "source_type": "local",
@@ -12093,7 +12101,7 @@
       "real_stream": true,
       "supported": true,
       "reading_service": true,
-      "notes": "WUFT Radio Reading Service (on air since 1992) reads newspapers, magazines and books for blind and visually impaired listeners across north central Florida. Direct RRS mount published on wuft.org/rrs; plays over http on port 5230 (the https form on that port fails BASS, so keep http). BASS-passes 3/3 spaced 2026-07-23."
+      "notes": "WUFT Radio Reading Service (on air since 1992) reads newspapers, magazines and books for blind and visually impaired listeners across north central Florida. Direct RRS mount published on wuft.org/rrs; plays over http on port 5230 (the https form on that port fails BASS, so keep http). BASS-passes 3/3 spaced 2026-07-23. Sweep 2026-10-03: the address WUFT lists for its reading service plays Minnesota Radio Talking Book; kept, since that is what WUFT itself streams."
     },
     {
       "id": "iris-des-moines",
@@ -12167,7 +12175,7 @@
     {
       "id": "gpb-reading-radio-atlanta",
       "call_sign": "GPB-RR",
-      "name": "GPB Reading Radio (Vocal Point / SEEVP, formerly GaRRS)",
+      "name": "GPB Reading Radio",
       "format": "radio reading service",
       "source": "https://seevp.org/",
       "source_type": "local",
@@ -12206,9 +12214,9 @@
       "state": "FL",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
+      "supported": false,
       "reading_service": true,
-      "notes": "curl 302 -> 18323.live.streamtheworld.com/WQCSFM_RRS.mp3, then 200 Content-Type audio/mpeg, icy-name 'WQCSFM_HD3'. Treasure Coast reading service on WQCS HD3. StreamTheWorld/Triton redirect mount; BASS may need to follow the 302."
+      "notes": "curl 302 -> 18323.live.streamtheworld.com/WQCSFM_RRS.mp3, then 200 Content-Type audio/mpeg, icy-name 'WQCSFM_HD3'. Treasure Coast reading service on WQCS HD3. StreamTheWorld/Triton redirect mount; BASS may need to follow the 302. Sweep 2026-10-03: silent on three samples; the reading service lost its funding and the HD3 channel now carries music."
     },
     {
       "id": "vision-resources-harrisburg",
@@ -12988,8 +12996,8 @@
       "frequency_mhz": 88.5,
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "CSU Northridge AAA; own thesocalsound.org mount. Campus coords. Non-NPR community radio. BASS live 3/3 2026-07-27."
+      "supported": false,
+      "notes": "CSU Northridge AAA; own thesocalsound.org mount. Campus coords. Non-NPR community radio. BASS live 3/3 2026-07-27. Sweep 2026-10-03: no audio on three sweeps; no current address found."
     },
     {
       "id": "kpoo-san-francisco",
@@ -14034,7 +14042,7 @@
       "source": "community radio sweep 2026-07-27 (agent research); station-owned mount",
       "source_type": "local",
       "station_type": "community",
-      "stream_url": "http://radio.wesleyan.edu:8000/stream",
+      "stream_url": "http://listen.wesufm.org/stream",
       "stream_format": "mp3",
       "codec": "unknown",
       "lat": 41.5566,
@@ -14046,8 +14054,8 @@
       "frequency_mhz": 88.1,
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": false,
-      "notes": "Icecast on station domain radio.wesleyan.edu; GET 200. Coords = campus. Non-NPR community radio. BASS live 3/3 2026-07-27. Off the dial 2026-08-18: stream sweep got \"timed out\". Kept for the research in this row; flip supported back when the stream returns. A 5xx may be a bad day rather than a dead station -- recheck with tools/check_radio_streams.py --recheck-dead before removing the row."
+      "supported": true,
+      "notes": "Icecast on station domain radio.wesleyan.edu; GET 200. Coords = campus. Non-NPR community radio. BASS live 3/3 2026-07-27. Off the dial 2026-08-18: stream sweep got \"timed out\". Kept for the research in this row; flip supported back when the stream returns. A 5xx may be a bad day rather than a dead station -- recheck with tools/check_radio_streams.py --recheck-dead before removing the row. Sweep 2026-10-03: the old address no longer answers; this is the address on wesufm.org."
     },
     {
       "id": "wlfr-pomona",
@@ -14273,11 +14281,11 @@
       "market": "College Park",
       "region": "northeast",
       "state": "MD",
-      "frequency_mhz": 88.1,
+      "frequency_mhz": 90.5,
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "University of Maryland student freeform; only 10 watts so very small coverage. Mount on the university's own umd.edu domain (HTTP 200 audio/mpeg). Coords = UMD College Park. Non-NPR community radio. BASS live 3/3 2026-07-27."
+      "notes": "University of Maryland student freeform; only 10 watts so very small coverage. Mount on the university's own umd.edu domain (HTTP 200 audio/mpeg). Coords = UMD College Park. Non-NPR community radio. BASS live 3/3 2026-07-27. Sweep 2026-10-03: the station calls itself WMUC 90.5 FM now. The stream was silent at night; recheck in the day."
     },
     {
       "id": "ksvr-mount-vernon",
@@ -15736,7 +15744,7 @@
       "source": "community radio sweep 2026-07-27 (agent research); station-owned mount",
       "source_type": "local",
       "station_type": "community",
-      "stream_url": "http://cast1.my-control-panel.com:7999/stream",
+      "stream_url": "https://mira.streamerr.co/listen/wmmt_88.7fm/radio.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 37.119,
@@ -15749,7 +15757,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Appalshop community station 'Mountain Community Radio', Whitesburg KY. Mount on shared hosting (HTTP 200 audio/mpeg) -> station_owned=false. Coords = Whitesburg/Letcher Co. Non-NPR community radio. BASS live 3/3 2026-07-27."
+      "notes": "Appalshop community station 'Mountain Community Radio', Whitesburg KY. Mount on shared hosting (HTTP 200 audio/mpeg) -> station_owned=false. Coords = Whitesburg/Letcher Co. Non-NPR community radio. BASS live 3/3 2026-07-27. Sweep 2026-10-03: the old address now carries a different station (icy-name 'WUGM M106-FM'); this is the address appalshop.org/radio lists."
     },
     {
       "id": "wxyc-chapel-hill",
@@ -15863,8 +15871,8 @@
       "frequency_mhz": 89.3,
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Elon University student station; low power. Working mount audio-mp3.ibiblio.org (HTTP 200); the audio-ice2 mount onlineradiobox returned was down. Coords = Elon NC. Non-NPR community radio. BASS live 3/3 2026-07-27."
+      "supported": false,
+      "notes": "Elon University student station; low power. Working mount audio-mp3.ibiblio.org (HTTP 200); the audio-ice2 mount onlineradiobox returned was down. Coords = Elon NC. Non-NPR community radio. BASS live 3/3 2026-07-27. Sweep 2026-10-03: no audio on three sweeps; no current address found."
     },
     {
       "id": "wrek-atlanta",
