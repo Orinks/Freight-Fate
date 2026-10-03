@@ -356,7 +356,16 @@ The owner's:
       ([September 12](#september-12-long-sessions-and-speech)).
 - [x] The eight remaining jazz songs, in the pack and on Nashville After
       Hours since 2026-09-25 ([September 13](#september-13-driver-directory)).
-- [ ] The radio stream sweep (`--recheck-dead`) on release day.
+- [x] The radio stream sweep, 2026-10-03: every stream on the dial heard
+      twice from a GitHub runner (`tools/audit_radio_streams.py`, the
+      Radio stream sweep workflow), as the game's player asks for it.
+      Imported tier: 173 dead streams dropped, 28 moved to live addresses,
+      20 doubles and 9 streams of a different station removed. Curated:
+      about 40 stations moved, renamed to what they now are or pointed at
+      their network's one address (ABC on HLS, MPB Think Radio, Ocean State
+      Media, WPR News and WPR Music, WMMT, KNAU, KIOS, WESU), 5 retired,
+      7 wordy names shortened. Station names that already say the call
+      sign no longer have it spoken twice.
 - [ ] Push the `v1.9.0` tag on the commit to ship, last, after every other
       item here is closed.
 
@@ -370,6 +379,10 @@ into the release gate. Details stay in the linked dated sections, marked
 Everything found before 2026-09-25 moved to
 [2.0](#found-along-the-way-in-19-moved-to-20) that day.
 
+- [ ] Daytime recheck of the stations silent on every night sample
+      (KMSA, WMUC, WVOF and 25 imported); retire those still silent.
+- [ ] Restore the 189 earlier-dropped imported stations that answered the
+      2026-10-03 sweep; needs the importer's caches to rebuild.
 - [ ] New station IDs for the 16 stations still without them, moved out
       of the gate by the owner 2026-10-02 for a post-launch build. Made in
       Suno that day, waiting on downloads (none left until October 21): a

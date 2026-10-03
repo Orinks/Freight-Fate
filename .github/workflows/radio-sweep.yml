@@ -16,12 +16,6 @@ on:
       seconds:
         description: "seconds of audio to decode per station"
         default: "25"
-  push:
-    branches: [claude/project-thread-p7r8r9]
-    paths:
-      - tools/audit_radio_streams.py
-      - .github/workflows/radio-sweep.yml
-      - audit/candidates.json
 
 jobs:
   sweep:
@@ -33,21 +27,12 @@ jobs:
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 2
       - name: Install ffmpeg
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
       - name: Audit
-        # A pushed audit/candidates.json is a list of addresses to try for
-        # stations found dead or mislabelled; it is swept instead of the dial.
         run: |
-          if [ "${{ github.event_name }}" = push ] && [ -f audit/candidates.json ] && git diff --quiet HEAD~1 -- tools .github; then
-            SOURCE="--urls audit/candidates.json"
-          else
-            SOURCE="--only ${{ inputs.only || 'all' }} --recheck-dropped"
-          fi
-          python3 tools/audit_radio_streams.py $SOURCE \
-            --seconds "${{ inputs.seconds || '25' }}" \
+          python3 tools/audit_radio_streams.py --only "${{ inputs.only }}" --recheck-dropped \
+            --seconds "${{ inputs.seconds }}" \
             --shard ${{ matrix.shard }}/8 --workers 24 \
             --output radio-audit-${{ matrix.shard }}.json
       - uses: actions/upload-artifact@v7
@@ -59,10 +44,7 @@ jobs:
     needs: sweep
     if: always()
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@v6
       - uses: actions/download-artifact@v7
         with:
           pattern: radio-audit-*
@@ -80,21 +62,8 @@ jobs:
               counts[r["verdict"]] = counts.get(r["verdict"], 0) + 1
           print(counts)
           json.dump({"counts": counts, "results": results}, open("radio-audit.json", "w"), indent=1, ensure_ascii=False)
-          candidates = bool(results) and all(r["tier"] == "candidate" for r in results)
-          open("report-name", "w").write("candidates-audit.json" if candidates else "radio-audit.json")
           EOF
       - uses: actions/upload-artifact@v7
         with:
           name: radio-audit
           path: radio-audit.json
-      - name: Commit the report to the sweep branch
-        if: github.event_name == 'push'
-        run: |
-          NAME=$(cat report-name)
-          mkdir -p audit && mv radio-audit.json "audit/$NAME"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "audit/$NAME"
-          git commit -m "chore: radio sweep report [skip changelog] [skip ci]"
-          git pull --rebase origin "${GITHUB_REF_NAME}"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
