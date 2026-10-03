@@ -199,6 +199,8 @@
 
 ### Fixed
 
+- **On a Mac, the game no longer freezes at launch asking to control VoiceOver.** VoiceOver also speaks the first screen now. (Reported by Jason Harkness)
+
 - **Radio stations that were silent, gone, listed twice or playing a different station are fixed or off the dial.** Stations that moved play from their new address.
 
 - **Your Discord status keeps up on long sessions.** If Discord turns down an update, the game reconnects and sends it again instead of leaving the old status showing.

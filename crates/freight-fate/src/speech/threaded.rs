@@ -439,6 +439,14 @@ impl ThreadedSpeech {
                 let beat = || {
                     *worker_heartbeat.lock().expect("speech heartbeat lock") = Instant::now();
                 };
+                // Lines sent meanwhile wait in the queue and are coalesced
+                // like any other batch, so the player hears the screen that
+                // is current when the hold ends.
+                let hold = call!(inner.startup_hold());
+                if !after_wedge && !hold.is_zero() {
+                    beat();
+                    std::thread::sleep(hold);
+                }
                 let mut last_health_poll = Instant::now();
                 loop {
                     active!();
