@@ -10,6 +10,7 @@ use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
 use crate::app::{GameContext, SayEvent};
 use crate::discord_presence::{driving_presence, PresenceState};
+use crate::online_presence::RADIO_CLAUSE;
 use crate::states::base::TimedMessageState;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
@@ -568,7 +569,7 @@ impl DrivingState {
             .station_by_id(&self.radio_station_id)
             .cloned()
             .unwrap_or_else(|| self.radio.tuned_station());
-        let mut clause = format!("listening to {}", station.display_name());
+        let mut clause = format!("{RADIO_CLAUSE}{}", station.display_name());
         // And the song, when the stream says: broadcast metadata the station
         // itself publishes to every listener, so no more private than the
         // station name. The tick's copy, not a fresh read -- presence is

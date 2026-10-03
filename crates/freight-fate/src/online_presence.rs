@@ -105,6 +105,15 @@ pub const IDLE_SIGNOFF_S: f64 = 30.0 * 60.0;
 // Resuming is a change like any other and re-lists the driver in seconds.
 pub const PAUSED_ACTIVITY: &str = "Paused";
 
+// The drivers-board detail ends with what the cab radio is playing, opened by
+// this phrase. A live stream's song title changes every few minutes on its
+// own, so the idle clock reads the snapshot without it: a truck parked with
+// the radio on is as idle as one parked in silence, and used to beat (and
+// rewrite the board) all night, one song at a time (2026-10-03). The server
+// strips the same clause before dating a change (RADIO_CLAUSE in orinks-net's
+// freightFate.ts; keep the two strings equal).
+pub const RADIO_CLAUSE: &str = "listening to ";
+
 const WORKER_TICK_S: f64 = HEARTBEAT_INTERVAL_S;
 
 /// Overrides the Orinks site root, for development, tests and the staging
@@ -632,10 +641,13 @@ impl OnlinePresence {
             if state == st.desired {
                 return;
             }
-            st.desired = state;
             // Any genuine change restarts the idle clock; the dedupe above
-            // means a parked truck re-reporting the same snapshot does not.
-            st.desired_changed_t = Some((self.inner.clock)());
+            // means a parked truck re-reporting the same snapshot does not,
+            // and neither does the radio moving on to its next song.
+            if drive_key(state.as_ref()) != drive_key(st.desired.as_ref()) {
+                st.desired_changed_t = Some((self.inner.clock)());
+            }
+            st.desired = state;
             st.failed = false;
         }
         if self.inner.threaded {
@@ -654,9 +666,12 @@ impl OnlinePresence {
         self.inner.enabled.store(enabled, Ordering::SeqCst);
         if enabled {
             {
+                // Throwing the switch is proof the player is here, so the
+                // idle clock starts over rather than keeping them off.
                 let mut st = self.inner.state.lock().unwrap();
                 st.last_sent = None;
                 st.last_send_t = None;
+                st.desired_changed_t = Some((self.inner.clock)());
             }
             self.start();
         } else {
@@ -723,10 +738,11 @@ impl Inner {
             };
             return until_grace.max(until_retry).max(0.05);
         }
-        // Idle and already signed off: nothing to send until a change. (Idle
-        // but still on the board falls through, so the sign-off -- or a failed
-        // sign-off's retry -- runs on the heartbeat cadence like any post.)
-        if !pending && !st.on_board && idle_for(&st, now) >= self.idle_signoff {
+        // Idle and already signed off: nothing to send until a change, and a
+        // new song is not one. (Idle but still on the board falls through, so
+        // the sign-off -- or a failed sign-off's retry -- runs on the
+        // heartbeat cadence like any post.)
+        if !st.on_board && idle_for(&st, now) >= self.idle_signoff {
             return WORKER_TICK_S;
         }
         // Paused and listed as such: nothing to send until the idle sign-off.
@@ -804,11 +820,11 @@ impl Inner {
 
         self.state.lock().unwrap().none_since = None;
         let changed = Some(&desired) != last_sent.as_ref();
-        if !changed && idle >= self.idle_signoff {
-            // The same snapshot for this long means a parked truck and an
-            // absent player: leave the board and stop heartbeating. last_sent
-            // keeps the idle snapshot so the next real change is still
-            // detected and re-lists the driver.
+        if idle >= self.idle_signoff {
+            // The same drive for this long means a parked truck and an absent
+            // player: leave the board and stop heartbeating, whatever the
+            // radio has moved on to since. Any real change restarts the idle
+            // clock, so the next one re-lists the driver.
             if on_board {
                 if failed && since_send.is_some_and(|s| s < self.heartbeat) {
                     return;
@@ -908,7 +924,24 @@ impl Inner {
     }
 }
 
-/// Seconds the desired snapshot has gone unchanged.
+/// The part of a snapshot that says what the truck is doing: everything but
+/// the radio clause, which changes with every song on its own.
+fn drive_key(state: Option<&PresenceState>) -> Option<(&str, &str)> {
+    state.map(|s| (s.activity.as_str(), without_radio(&s.detail)))
+}
+
+/// `detail` with the trailing radio clause (see [`RADIO_CLAUSE`]) removed.
+pub fn without_radio(detail: &str) -> &str {
+    if detail.starts_with(RADIO_CLAUSE) {
+        return "";
+    }
+    match detail.find(&format!(", {RADIO_CLAUSE}")) {
+        Some(i) => &detail[..i],
+        None => detail,
+    }
+}
+
+/// Seconds the desired snapshot's drive has gone unchanged.
 fn idle_for(st: &PresenceState2, now: f64) -> f64 {
     match st.desired_changed_t {
         Some(t) => now - t,
