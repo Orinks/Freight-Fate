@@ -664,6 +664,13 @@ jobs:
             echo "Release $TAG already exists; refusing to replace a stable release." >&2
             exit 1
           fi
+          # Every stable updater on a Mac, 1.8's and 1.9's alike, looks for
+          # an asset ending `-macos.zip`; without this copy no Mac install is
+          # ever offered the release. The arm64 name stays for the snapshots.
+          for zip in release-assets/FreightFate-*-macos-arm64.zip; do
+            cp "$zip" "${zip%-macos-arm64.zip}-macos.zip"
+          done
+          (cd release-assets && sha256sum FreightFate-* > checksums.txt)
           gh release create "$TAG" release-assets/* --notes-file notes.md \
             --title "Freight Fate $VERSION" \
             --target "$COMMIT_SHA"

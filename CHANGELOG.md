@@ -146,8 +146,6 @@
 
 - **Quiet speaks short updates, including lane openings.** Urgent only keeps essential warnings and directions; suppressed speech stays out of the event buffer.
 
-- **A new install now starts on the Balanced assists.** The truck helps hold your lane and stops for you at the destination gate.
-
 - **Curve assistance now steers through a bend as well as slowing for it.** Lane keeping holds your line the rest of the time.
 
 - **Leave the wheel alone in a bend and the truck runs wide.** Steering turns the truck now instead of sliding it sideways.
@@ -597,6 +595,8 @@
 - **More truck stops announce their own exit number and the light or stop sign on their own ramp.** Many had a neighbouring exit's number.
 
 ### Compatibility
+
+- **Careers from 1.8 and earlier do not carry over; every driver starts a new career.** Old saves stay listed, untouched and playable in 1.8.
 
 - **On Linux, speech uses the Speech Dispatcher installed on your computer.** Without it the game still starts, but stays silent.
 
@@ -1776,10 +1776,6 @@
   next station, Page Up the previous, Control still jumps a category, and
   semicolon and apostrophe keep working.
 
-- **Careers from earlier versions stay in their own era.** A career from
-  Freight Fate 1.8 or earlier still shows in your list, labeled, and picking
-  it offers a new career instead; the old save is untouched.
-
 - **Every Freight Fate music station now plays everywhere.** The game's own
   stations no longer fade past their home cities, and they play in
   streamer-safe mode, in the Freight Fate stations category.
@@ -1999,7 +1995,7 @@
   with the truck they happened to, so swapping tractors no longer carries
   them onto the next one.
 
-- **Careers from earlier versions load unchanged: your current wear settles
+- **Careers from 1.9 test builds load unchanged: your current wear settles
   onto every truck you own.**
 
 - **Relaxed driving now leaves real breathing room without removing the
