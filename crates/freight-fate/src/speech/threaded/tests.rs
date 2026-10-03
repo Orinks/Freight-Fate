@@ -370,16 +370,19 @@ fn quit_lets_the_line_in_flight_finish_before_release() {
         clear.store(false, Ordering::SeqCst);
     });
     let started = Instant::now();
-    let mut pumps = 0u32;
-    sink.shutdown_pumping(&mut || pumps += 1);
+    let mut last_pump = Duration::ZERO;
+    sink.shutdown_pumping(&mut || last_pump = started.elapsed());
     assert!(
         started.elapsed() >= Duration::from_millis(250),
         "the line in flight was cut off: {:?}",
         started.elapsed()
     );
+    // When the last pump landed, not how many: a loaded macOS runner
+    // oversleeps each 10 ms slice several times over, so a count only
+    // measures the scheduler.
     assert!(
-        pumps >= 10,
-        "expected pumps through the finish-line wait, got {pumps}"
+        last_pump >= Duration::from_millis(150),
+        "events stopped being pumped during the finish-line wait: last pump at {last_pump:?}"
     );
     assert!(
         calls.lock().unwrap().iter().any(|c| c == "shutdown"),
