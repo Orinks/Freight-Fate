@@ -1082,9 +1082,8 @@ impl App {
         boot_timing::mark("quit: saved");
         // Pump SDL events through every bounded wait below: the window
         // stays up through quit so the screen reader keeps focus for
-        // "Installing the update...", and an unpumped window past about
-        // five seconds is what macOS reports as not responding
-        // (issue 266). Captures only `self.shell`, so the services borrow
+        // "Installing the update...", and macOS can report an unpumped
+        // window as not responding (issue 266). Captures only `self.shell`, so the services borrow
         // freely beside it.
         let shell = &mut self.shell;
         let mut pumps = 0u32;
