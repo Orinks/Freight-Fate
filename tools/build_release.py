@@ -812,10 +812,12 @@ def write_macos_info_plist(app: Path, label: str) -> None:
         "CFBundlePackageType": "APPL",
         "CFBundleShortVersionString": short_version,
         "CFBundleVersion": macos_bundle_version(label),
-        "NSAppleEventsUsageDescription": (
-            "Freight Fate uses VoiceOver to speak menus, driving information, and alerts."
-        ),
     }
+    # No NSAppleEventsUsageDescription, on purpose: without it macOS refuses
+    # Prism's AppleScript route to VoiceOver at once instead of asking. The
+    # question blocked the game's main thread until answered, freezing the
+    # game at launch (issue 266). Speech still reaches VoiceOver through
+    # accessibility announcements, which need no permission.
     info_path = app / "Contents" / "Info.plist"
     info_path.parent.mkdir(parents=True, exist_ok=True)
     with info_path.open("wb") as stream:

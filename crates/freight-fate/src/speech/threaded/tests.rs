@@ -15,6 +15,7 @@ struct StubSink {
     enumerations: Arc<AtomicUsize>,
     /// Flipped by a test to make the main voice read as a different one.
     renamed: Arc<AtomicBool>,
+    hold: Duration,
 }
 
 impl SpeechSink for StubSink {
@@ -123,6 +124,9 @@ impl SpeechSink for StubSink {
     fn shutdown(&mut self) {
         self.calls.lock().unwrap().push("shutdown".into());
     }
+    fn startup_hold(&self) -> Duration {
+        self.hold
+    }
 }
 
 type CallLog = Arc<Mutex<Vec<String>>>;
@@ -144,6 +148,10 @@ struct Rig {
 }
 
 fn rig() -> Rig {
+    rig_with_hold(Duration::ZERO)
+}
+
+fn rig_with_hold(hold: Duration) -> Rig {
     let calls: Arc<Mutex<Vec<String>>> = Arc::default();
     let wedge = Arc::new(AtomicBool::new(false));
     let entered_say = Arc::new(AtomicBool::new(false));
@@ -185,6 +193,7 @@ fn rig() -> Rig {
             available: available2.clone(),
             enumerations: enumerations2.clone(),
             renamed: renamed2.clone(),
+            hold,
         })
     });
     Rig {
@@ -463,6 +472,39 @@ fn queued_says_are_purged_by_a_later_interrupt_before_they_speak() {
         "the interrupting say itself was lost: {spoken:?}"
     );
     sink.shutdown();
+}
+
+/// VoiceOver reads the new game window aloud as the game opens and cuts off
+/// whatever was announced first, so the opening screen went unheard. The
+/// worker holds the first lines, then speaks the screen current at the end.
+#[test]
+fn a_startup_hold_delays_the_first_lines_and_keeps_the_current_screen() {
+    let hold = Duration::from_millis(400);
+    let Rig {
+        mut sink, calls, ..
+    } = rig_with_hold(hold);
+    let sent = Instant::now();
+    sink.say("loading", true);
+    sink.say("first screen", true);
+    sink.say("first option", false);
+    std::thread::sleep(Duration::from_millis(150));
+    assert!(
+        calls
+            .lock()
+            .unwrap()
+            .iter()
+            .all(|call| !call.starts_with("say ")),
+        "a line reached the voice during the start-up hold"
+    );
+    wait_for(&calls, 2);
+    assert!(sent.elapsed() >= hold);
+    assert_eq!(
+        *calls.lock().unwrap(),
+        vec![
+            "say first screen".to_string(),
+            "say first option".to_string()
+        ]
+    );
 }
 
 #[test]

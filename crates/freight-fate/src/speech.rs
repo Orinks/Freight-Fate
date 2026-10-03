@@ -267,6 +267,13 @@ pub trait SpeechSink {
         false
     }
 
+    /// How long the speech worker holds this sink's first lines after
+    /// start-up, so the screen reader's own announcement of the new window
+    /// cannot talk over the game's first screen. Most voices need none.
+    fn startup_hold(&self) -> std::time::Duration {
+        std::time::Duration::ZERO
+    }
+
     /// Release the backends and context. Safe to call more than once.
     fn shutdown(&mut self);
 
