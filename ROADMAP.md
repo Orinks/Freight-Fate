@@ -381,6 +381,12 @@ Everything found before 2026-09-25 moved to
       liners each; re-voice the liners with ElevenLabs after its
       October 6 reset if the Suno ones are not downloaded
       ([September 13](#september-13-driver-directory)).
+- [x] A truck parked with the cab radio on stayed on the live drivers
+      board all night: each new song counted as activity, so neither the
+      game's half-hour idle sign-off nor the site's idle filter fired
+      (2026-10-03, a driver at 0% for seven hours). Both now ignore the
+      radio clause; the site half is on orinks-net branch
+      claude/project-thread-ml6w19 awaiting deploy.
 - [ ] Simulated snow by region and month, not a hard Dec-Feb gate
       ([October 1](#october-1-seasons)).
 - [x] Updater, issue 266: after "Restarting to finish the update" the window
