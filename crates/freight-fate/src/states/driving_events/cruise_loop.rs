@@ -4,6 +4,7 @@
 use ff_core::sim::transmission::JAKE_MAX_RPM;
 use ff_core::sim::trip::LIMIT_WARNING_MAX_LEAD_MI;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
+use ff_core::speech_text::SpokenMessage;
 
 use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
@@ -427,7 +428,11 @@ impl DrivingState {
                     ),
                     _ => super::cruise::keeper_holding_line(&held, &zone_reason),
                 };
-                self.say_route_confirmation(ctx, &message);
+                let terse = format!(
+                    "Speed keeper holding {}.",
+                    ctx.settings.speed_value(self.keeper_mph.unwrap_or(0.0))
+                );
+                self.say_route_confirmation(ctx, SpokenMessage::with_terse(message, terse));
                 return;
             }
         }
@@ -594,7 +599,10 @@ impl DrivingState {
                 let eased = ctx.settings.speed_text(cap_mph);
                 self.say_route_confirmation(
                     ctx,
-                    &format!("{reason}; adaptive cruise easing to {eased}."),
+                    SpokenMessage::with_terse(
+                        format!("{reason}; adaptive cruise easing to {eased}."),
+                        format!("Cruise easing to {}.", ctx.settings.speed_value(cap_mph)),
+                    ),
                 );
                 // This line already named the number for a plain posted-limit
                 // drop; the arrival "Speed limit reduced to X" would otherwise
@@ -637,9 +645,16 @@ impl DrivingState {
                 let eased = ctx.settings.speed_text(safe_mph);
                 self.say_route_confirmation(
                     ctx,
-                    &format!(
-                        "{}; adaptive cruise easing to {eased}.",
-                        capitalize_first(kind)
+                    SpokenMessage::with_terse(
+                        format!(
+                            "{}; adaptive cruise easing to {eased}.",
+                            capitalize_first(kind)
+                        ),
+                        format!(
+                            "{}, cruise easing to {}.",
+                            capitalize_first(kind),
+                            ctx.settings.speed_value(safe_mph)
+                        ),
                     ),
                 );
             }
@@ -707,8 +722,14 @@ impl DrivingState {
         }
         if following && !self.acc_following && self.acc_follow_cue_s <= 0.0 {
             self.acc_follow_cue_s = ACC_FOLLOW_CUE_COOLDOWN_S;
-            ctx.audio.play_with("ui/notify", 0.55, 0.0);
-            self.say_route_confirmation(ctx, "Traffic ahead, adaptive cruise reducing speed.");
+            ctx.play_event_cue(Some(SpeechCategory::Traffic), "ui/notify", 0.55, 0.0);
+            // Settling in behind a slower vehicle is the assist doing its
+            // job, and the notify tone marks it: words at standard only.
+            self.say_route_line(
+                ctx,
+                "Traffic ahead, adaptive cruise reducing speed.",
+                SpeechCategory::Traffic,
+            );
         }
         self.acc_following = following;
         // Publish what cruise is really holding, for the status keys. The

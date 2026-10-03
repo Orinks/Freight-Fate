@@ -11,13 +11,10 @@
 //! [`IntoSpoken`].
 
 use ff_core::message_log::MessageCategory;
-use ff_core::sound_catalog::entry_by_name;
-use ff_core::speech_pacing::{
-    ladder_earcon, monotonic_seconds, Cut, Disposition, EventPriority, SpeechCategory, Valid,
-};
+use ff_core::speech_pacing::{Cut, Disposition, EventPriority, SpeechCategory, Valid};
 use ff_core::speech_text::SpokenMessage;
 
-use crate::audio::{EARCON_DUCK_S, SPEECH_DUCK_LEVEL};
+use crate::audio::SPEECH_DUCK_LEVEL;
 
 use super::GameContext;
 
@@ -234,32 +231,28 @@ impl GameContext {
             .is_none_or(|profile| profile.tutorial_done)
     }
 
-    /// Sound the cue standing in for a category the rung just cut.
-    ///
-    /// Only EARCON dispositions reach here; SILENT has no replacement sound.
-    /// Suppressed words stay out of message review; readout keys still answer.
-    /// `LADDER_EARCONS` names the cue by the catalog entry's canonical noun;
-    /// the entry itself is the one place its key, volume, and pan are
-    /// written down, so this resolves through it rather than keeping a
-    /// second copy that could drift.
-    ///
-    /// A category missing from the table, or a name the catalog does not
-    /// carry, is a data bug in that table -- not something to raise
-    /// mid-drive over, so it is skipped rather than crashing the game.
-    fn play_ladder_earcon(&mut self, category: Option<SpeechCategory>) {
-        let Some(category) = category else {
-            return;
-        };
-        let Some(name) = ladder_earcon(category) else {
-            return;
-        };
-        let Some(entry) = entry_by_name(name) else {
-            return;
-        };
-        let Some(cue) = entry.plays.first() else {
-            return;
-        };
-        self.audio.play_with(cue.key, cue.volume, cue.pan);
+    /// Whether a driving line of this category reaches the voice on the
+    /// player's rung.
+    pub fn event_speaks(&self, category: Option<SpeechCategory>) -> bool {
+        !self.ladder_applies() || self.settings.speaks(category)
+    }
+
+    /// Play the notification sound that announces a driving line, only if
+    /// the line itself will be spoken. The tone belongs to the words: a
+    /// rung that drops the words drops their tone too, so quiet and urgent
+    /// only are not a run of bloops announcing nothing (owner, 2026-10-03).
+    /// The road's own sounds -- traffic going by, the engine, a siren --
+    /// never go through here.
+    pub fn play_event_cue(
+        &mut self,
+        category: Option<SpeechCategory>,
+        key: &str,
+        volume: f64,
+        pan: f64,
+    ) {
+        if self.event_speaks(category) {
+            self.audio.play_with(key, volume, pan);
+        }
     }
 
     /// `say(text)`: interrupt, review, no category.
@@ -304,12 +297,6 @@ impl GameContext {
                 // already on file and go quiet for the sentence the rung now
                 // promises.
                 return;
-            }
-            if self.settings.speech_disposition(category) == Disposition::Earcon {
-                self.play_ladder_earcon(category);
-                // The cue is standing in for the words, so it gets the room
-                // the words would have had (see engage_earcon_duck).
-                self.engage_earcon_duck();
             }
             self.event_pacer.note_silenced(&text, None);
             transcript!(
@@ -596,9 +583,8 @@ impl GameContext {
         if !self.settings.speaks(category) && !force && self.ladder_applies() {
             // Suppressed categories stay out of message review. Status keys
             // still answer on demand. `force`
-            // is a line the player asked for and must hear. Where the rung's
-            // disposition is EARCON rather than SILENT, the sound layer marks
-            // the moment instead of the words.
+            // is a line the player asked for and must hear. Nothing sounds
+            // in place of the words (owner, 2026-10-03).
             let text = self.render_silenced(&spoken);
             if self.event_pacer.is_silenced_repeat(&text, key, None) {
                 // A keyed standing condition (an engine held at redline, a
@@ -619,12 +605,6 @@ impl GameContext {
                 // the player raised specifically to hear this condition going
                 // quiet instead.
                 return;
-            }
-            if self.settings.speech_disposition(category) == Disposition::Earcon {
-                self.play_ladder_earcon(category);
-                // The cue is standing in for the words, so it gets the room
-                // the words would have had (see engage_earcon_duck).
-                self.engage_earcon_duck();
             }
             self.event_pacer.note_silenced(&text, key);
             if receipt {
@@ -735,36 +715,6 @@ impl GameContext {
         }
     }
 
-    /// Step the mix back for an earcon, the way it steps back for words.
-    ///
-    /// Tester Shane, 2026-08-17: "some of the sounds when you put speech in
-    /// quiet mode have been significantly lowered." Measured absolutely they
-    /// were not -- the confirmation note came out about 4 dB LOUDER than the
-    /// chime it replaced, and a trooper pass never drops below its old
-    /// level. Both measurements missed the point, because a listener hears
-    /// a level RELATIVE to what is under it.
-    ///
-    /// A spoken line ducks engine, weather and radio to SPEECH_DUCK_LEVEL
-    /// while it talks. A silenced line returns from `say_event` before
-    /// reaching that duck, so its earcon played against the full road bed --
-    /// roughly 6 dB worse off than the words it stands in for, and quiet is
-    /// precisely the rung where confirmation, status and coaching ALL become
-    /// earcons. So the sound that carries the information was the one
-    /// competing hardest to be heard.
-    ///
-    /// The window is real seconds and short, because the cues are short: the
-    /// longest (the two-note coaching chime) runs 0.18 s. It is not the
-    /// pacer's projection, which describes a voice that in this case is
-    /// never going to speak.
-    fn engage_earcon_duck(&mut self) {
-        if !self.settings.duck_audio_for_speech {
-            return;
-        }
-        self.speech_ducked = true;
-        self.earcon_duck_until = monotonic_seconds() + EARCON_DUCK_S;
-        self.audio.set_speech_duck(SPEECH_DUCK_LEVEL);
-    }
-
     /// Step the game mix back while the event voice speaks (R13).
     ///
     /// XAG 105's guideline made a setting: engine, weather, and the radio
@@ -782,32 +732,20 @@ impl GameContext {
     }
 
     /// Per-frame: bring the mix back once the event voice falls silent.
-    ///
-    /// An earcon duck holds for its own short window instead, since the
-    /// pacer has nothing to project for a line that was never spoken.
     pub fn update_speech_duck(&mut self) {
         if !self.speech_ducked {
-            return;
-        }
-        if self.earcon_duck_until != 0.0 && monotonic_seconds() < self.earcon_duck_until {
             return;
         }
         if self.event_pacer.busy() {
             return;
         }
         self.speech_ducked = false;
-        self.earcon_duck_until = 0.0;
         self.audio.set_speech_duck(1.0);
     }
 
     /// Whether the mix is currently stepped back under speech.
     pub fn speech_ducked(&self) -> bool {
         self.speech_ducked
-    }
-
-    /// Test seam: move the earcon duck's deadline (real seconds).
-    pub fn set_earcon_duck_until(&mut self, until: f64) {
-        self.earcon_duck_until = until;
     }
 
     /// A standing condition has cleared; let it announce itself afresh.

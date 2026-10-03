@@ -248,7 +248,7 @@ impl DrivingState {
             if !rolled_here {
                 self.say_route_confirmation(
                     ctx,
-                    &format!("Route-transition assistance braking for the {what}."),
+                    format!("Route-transition assistance braking for the {what}."),
                 );
             }
         }
@@ -304,7 +304,7 @@ impl DrivingState {
         };
         self.say_route_confirmation(
             ctx,
-            &format!("Route-transition assistance slowing for the {what}."),
+            format!("Route-transition assistance slowing for the {what}."),
         );
     }
 
@@ -344,7 +344,7 @@ impl DrivingState {
             self.pause_speed_control(ctx, true);
             self.say_route_confirmation(
                 ctx,
-                &format!("Route-transition assistance slowing for {what}."),
+                format!("Route-transition assistance slowing for {what}."),
             );
         }
     }
@@ -819,7 +819,7 @@ impl DrivingState {
             } else {
                 " Stop at the entrance."
             };
-            self.say_route_confirmation(ctx, &format!("Through the {noun}, far too fast.{tail}"));
+            self.say_route_confirmation(ctx, format!("Through the {noun}, far too fast.{tail}"));
         } else {
             let message =
                 self.terminal_release_text(ctx, &format!("Through the {noun} in a gap."), false);

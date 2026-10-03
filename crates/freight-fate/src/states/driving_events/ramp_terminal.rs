@@ -10,7 +10,7 @@ use ff_core::sim::trip_route_helpers::INTERCHANGE_IDENTITY_MI;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use ff_core::units::spoken_feet_or_meters;
 
-use crate::app::{GameContext, SayEvent};
+use crate::app::{GameContext, IntoSpoken, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
@@ -969,12 +969,23 @@ impl DrivingState {
         ctx.say_event_with(message.to_string(), opts);
     }
 
-    /// One ROUTE-priority confirmation line.
-    pub(crate) fn say_route_confirmation(&self, ctx: &mut GameContext, message: &str) {
+    /// One ROUTE-priority confirmation line. A `SpokenMessage` pair gives
+    /// the quiet rungs its short form.
+    pub(crate) fn say_route_confirmation(&self, ctx: &mut GameContext, message: impl IntoSpoken) {
+        self.say_route_line(ctx, message, SpeechCategory::Confirmation);
+    }
+
+    /// One ROUTE-priority line in a category of the caller's choosing.
+    pub(crate) fn say_route_line(
+        &self,
+        ctx: &mut GameContext,
+        message: impl IntoSpoken,
+        category: SpeechCategory,
+    ) {
         self.refresh_live_facts();
         let mut opts = SayEvent::queued().priority(EventPriority::Route);
-        opts.category = Some(SpeechCategory::Confirmation);
-        ctx.say_event_with(message.to_string(), opts);
+        opts.category = Some(category);
+        ctx.say_event_with(message, opts);
     }
 
     /// A line about the truck held at the bar ("holding for your gap",

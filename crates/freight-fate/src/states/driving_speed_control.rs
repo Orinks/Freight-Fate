@@ -14,6 +14,7 @@
 use ff_core::sim::trip_route_helpers::zone_key;
 use ff_core::sim::vehicle::MIN_STOPPING_DECEL_MPS2;
 use ff_core::speech_pacing::SpeechCategory;
+use ff_core::speech_text::SpokenMessage;
 
 use crate::app::{GameContext, Say, SayEvent};
 use crate::states::driving::DrivingState;
@@ -442,9 +443,12 @@ impl DrivingState {
             self.engage_keeper(ctx, limit, KEEPER_OPEN_ROAD_BRIDGE, Some(limit), false);
             let floor = ctx.settings.speed_text(CRUISE_MIN_MPH);
             ctx.say_event_with(
-                format!(
-                    "Automatic speed control resuming. Speed keeper building speed; adaptive \
-                     cruise takes over at {floor}."
+                SpokenMessage::with_terse(
+                    format!(
+                        "Automatic speed control resuming. Speed keeper building speed; \
+                         adaptive cruise takes over at {floor}."
+                    ),
+                    "Speed control resuming.",
                 ),
                 SayEvent::queued()
                     .priority(EventPriority::Route)

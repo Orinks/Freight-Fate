@@ -383,6 +383,12 @@ into the release gate. Details stay in the linked dated sections, marked
 Everything found before 2026-09-25 moved to
 [2.0](#found-along-the-way-in-19-moved-to-20) that day.
 
+- [x] Driving speech audit (owner, 2026-10-03, from a player report): quiet
+      and urgent only no longer call out traffic, a line either rung leaves
+      out makes no sound, and quiet says cruise, keeper and work zone
+      updates short. Urgent only now says when a work zone turns cruise off.
+- [ ] A listening pass by the owner at quiet and urgent only, at the wheel.
+
 - [x] More music on the Terrestrial dial (owner, 2026-10-03, from player
       feedback): 156 commercial music stations in 35 states, each heard
       playing and naming itself from an open network before it went in.

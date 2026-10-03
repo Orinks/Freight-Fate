@@ -798,10 +798,7 @@ impl Settings {
 
     /// Whether this category reaches the voice at all on this rung.
     pub fn speaks(&self, category: Option<SpeechCategory>) -> bool {
-        !matches!(
-            self.speech_disposition(category),
-            Disposition::Earcon | Disposition::Silent
-        )
+        self.speech_disposition(category) != Disposition::Silent
     }
 
     /// Whether spoken lines take their terse rendering on this rung.
