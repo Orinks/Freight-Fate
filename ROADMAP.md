@@ -649,6 +649,13 @@ are in the [release gate](#release-gate-190).
         confirmation and a bend advisory only become a sound at Urgent
         only, so all four say Urgent only now.
 
+- [x] Mac installs are offered the stable release (2026-10-03). Every
+      stable updater on a Mac, 1.8.8.1's and 1.9's, picks the archive ending
+      `-macos.zip`, and the stable step published only `-macos-arm64.zip`;
+      it now publishes both, as the release-candidate bridge does. Stable
+      notes open with Compatibility, which says 1.8 careers do not carry
+      over.
+
 #### Player-impacting release blockers
 
 These items are part of the release-gate sweep:
