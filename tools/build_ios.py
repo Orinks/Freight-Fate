@@ -214,6 +214,7 @@ def info_plist(version: str, target: Target, build_number: str | None = None) ->
         "CFBundleSupportedPlatforms": [target.platform],
         "DTPlatformName": target.sdk,
         "LSRequiresIPhoneOS": True,
+        "UIRequiredDeviceCapabilities": ["arm64"],
         "MinimumOSVersion": MINIMUM_IOS,
         "UIDeviceFamily": [1, 2],
         "UILaunchScreen": {},
