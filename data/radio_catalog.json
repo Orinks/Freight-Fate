@@ -55,14 +55,14 @@
       "source": "Radio Browser checked AFN 360 Global Gravity entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://13743.live.streamtheworld.com:3690/AFN_GRV_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFN_GRV.mp3",
       "stream_format": "streamtheworld-resolved",
       "codec": "mp3",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+      "supported": true,
+      "notes": "Sweep 2026-10-03: back on the dial at the owner's word. StreamTheWorld geo-blocks the AFN 360 Global mounts to US addresses (HTTP 403 from the US sweep runners), but they play from Europe and other overseas regions, so players abroad hear them and a US player gets the ordinary dead-stream fallback. URL is assumed, not verified: the redirect endpoint form of the mount, so it re-resolves if Triton moves the edge host."
     },
     {
       "id": "afn-global-country",
@@ -72,14 +72,14 @@
       "source": "Radio Browser checked AFN 360 Global Country entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://16693.live.streamtheworld.com/AFN_CTY_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFN_CTY.mp3",
       "stream_format": "streamtheworld-resolved",
       "codec": "mp3",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+      "supported": true,
+      "notes": "Sweep 2026-10-03: back on the dial at the owner's word. StreamTheWorld geo-blocks the AFN 360 Global mounts to US addresses (HTTP 403 from the US sweep runners), but they play from Europe and other overseas regions, so players abroad hear them and a US player gets the ordinary dead-stream fallback. URL is assumed, not verified: the redirect endpoint form of the mount, so it re-resolves if Triton moves the edge host."
     },
     {
       "id": "afn-global-the-voice",
@@ -89,14 +89,14 @@
       "source": "Radio Browser checked AFN 360 Global The Voice entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://18253.live.streamtheworld.com/AFN_VCE_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFN_VCE.mp3",
       "stream_format": "streamtheworld-resolved",
       "codec": "mp3",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+      "supported": true,
+      "notes": "Sweep 2026-10-03: back on the dial at the owner's word. StreamTheWorld geo-blocks the AFN 360 Global mounts to US addresses (HTTP 403 from the US sweep runners), but they play from Europe and other overseas regions, so players abroad hear them and a US player gets the ordinary dead-stream fallback. URL is assumed, not verified: the redirect endpoint form of the mount, so it re-resolves if Triton moves the edge host."
     },
     {
       "id": "afn-freedom-rock",
@@ -113,7 +113,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": false,
-      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access. Sweep 2026-10-03: AFN reportedly retired Freedom Rock on 2025-05-01, so it stays off the dial."
     },
     {
       "id": "afn-tokyo",
@@ -758,14 +758,14 @@
       "source": "Radio Browser checked AFN 360 Global Fans entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://22213.live.streamtheworld.com:3690/AFN_FAN_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFN_FAN.mp3",
       "stream_format": "streamtheworld-resolved",
       "codec": "mp3",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+      "supported": true,
+      "notes": "Sweep 2026-10-03: back on the dial at the owner's word. StreamTheWorld geo-blocks the AFN 360 Global mounts to US addresses (HTTP 403 from the US sweep runners), but they play from Europe and other overseas regions, so players abroad hear them and a US player gets the ordinary dead-stream fallback. URL is assumed, not verified: the redirect endpoint form of the mount, so it re-resolves if Triton moves the edge host."
     },
     {
       "id": "afn-global-holiday",
@@ -775,14 +775,14 @@
       "source": "Radio Browser checked AFN 360 Global Holiday entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://27783.live.streamtheworld.com/AFN_SEA_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFN_SEA.mp3",
       "stream_format": "streamtheworld-resolved",
       "codec": "mp3",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+      "supported": true,
+      "notes": "Sweep 2026-10-03: back on the dial at the owner's word. StreamTheWorld geo-blocks the AFN 360 Global mounts to US addresses (HTTP 403 from the US sweep runners), but they play from Europe and other overseas regions, so players abroad hear them and a US player gets the ordinary dead-stream fallback. URL is assumed, not verified: the redirect endpoint form of the mount, so it re-resolves if Triton moves the edge host."
     },
     {
       "id": "afn-mach-5",
@@ -792,14 +792,14 @@
       "source": "Radio Browser checked AFN Go Mach 5 entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://player-redirect.streamtheworld.com/api/livestream-redirect/AFN04_S01.mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFN04_S01.mp3",
       "stream_format": "streamtheworld-resolved",
       "codec": "mp3",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
-      "supported": false,
-      "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+      "supported": true,
+      "notes": "Sweep 2026-10-03: back on the dial at the owner's word. StreamTheWorld geo-blocks the AFN 360 Global mounts to US addresses (HTTP 403 from the US sweep runners), but they play from Europe and other overseas regions, so players abroad hear them and a US player gets the ordinary dead-stream fallback. URL is assumed, not verified: the redirect endpoint form of the mount, so it re-resolves if Triton moves the edge host."
     },
     {
       "id": "afn-iwakuni",

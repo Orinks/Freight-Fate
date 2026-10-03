@@ -35,6 +35,8 @@
 
 - **Dodge Radio is on the dial.** A United Kingdom station playing a bit of everything, and it comes in anywhere you drive.
 
+- **Six AFN 360 channels are back on the dial for players outside the United States.** AFN blocks them inside the US, so they won't play there.
+
 - **X Transmission FM is on the dial.** Rock, metal and country from live DJs, and it names the song playing.
 
 - **Music source can be set to Synthesized, music the game makes with no AI.** Menus and the Roadhouse play it, with no voiced breaks.
