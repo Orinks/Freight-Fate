@@ -479,7 +479,7 @@ impl RadioState {
     /// frame, that clone was 2.4 ms per frame on a mountain drive: 97% of
     /// the entire frame, and fourteen per cent of the 60 Hz budget spent
     /// copying a catalog nobody read. See
-    /// `crates/freight-fate/tests/it/frame_time.rs`.
+    /// `crates/freight-fate/tests/frame_time/`.
     pub fn tuned_station(&self) -> RadioStation {
         if let Some(station) = self.station_by_id(&self.station_id).cloned() {
             if self.station_allowed(&station) {

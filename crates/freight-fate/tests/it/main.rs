@@ -5,7 +5,9 @@
 //! Files live in `tests/it/`, which cargo does not auto-discover, so this
 //! file is the only target and the `mod` lines below are what includes
 //! them. A new test file needs a line here. The exceptions:
-//! `tests/classic_startup.rs` needs a process nothing has touched yet, and
+//! `tests/classic_startup.rs` needs a process nothing has touched yet,
+//! `tests/frame_time/` times frames and must not share the CPU with
+//! sibling tests, and
 //! `tests/agent_server.rs` tests agent tooling rather than the game, so it
 //! is its own binary that a plain `cargo test` leaves out (see Cargo.toml).
 
@@ -59,7 +61,6 @@ mod cloud_backup_review;
 mod cloud_saves;
 mod discord_presence;
 mod duty_watch;
-mod frame_time;
 mod net;
 mod network_guard;
 mod online_activation;
