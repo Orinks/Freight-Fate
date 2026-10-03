@@ -46,7 +46,13 @@ CURATED_PATH = ROOT / "data" / "radio_catalog.json"
 IMPORTED_PATH = ROOT / "data" / "radio_imported.json"
 HEALTH_PATH = ROOT / "data" / "radio_stream_health.json"
 
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) FreightFate/1.9 stream check"
+# What the game sends: BASS's own default agent, since the game never sets
+# one. Shoutcast hosts answer a browser agent with their HTML status page
+# and a player agent with audio, so probing as a browser calls live
+# stations dead. A browser agent is tried second, and only reported.
+GAME_AGENT = "BASS/2.4"
+BROWSER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) FreightFate/1.9 stream check"
+LONG_SAMPLE_S = 60.0
 HEADER_SECONDS = 8
 DEFAULT_SAMPLE_S = 25.0
 # Dead air: a peak this low is a carrier with nothing on it, or a sign-off
@@ -121,7 +127,7 @@ def _playlist_target(body: bytes) -> str:
     return ""
 
 
-def curl_probe(url: str) -> dict:
+def curl_probe(url: str, agent: str = GAME_AGENT) -> dict:
     with tempfile.TemporaryDirectory() as tmp:
         head_path = Path(tmp) / "head"
         body_path = Path(tmp) / "body"
@@ -136,7 +142,7 @@ def curl_probe(url: str) -> dict:
                 "-m",
                 str(HEADER_SECONDS),
                 "-A",
-                USER_AGENT,
+                agent,
                 "-H",
                 "Icy-MetaData: 1",
                 "-D",
@@ -188,7 +194,7 @@ def curl_probe(url: str) -> dict:
 _FFMPEG_META = re.compile(r"^\s{4,}([A-Za-z_\-]+)\s*:\s(.*)$")
 
 
-def ffmpeg_sample(url: str, seconds: float) -> dict:
+def ffmpeg_sample(url: str, seconds: float, agent: str = GAME_AGENT) -> dict:
     cmd = [
         "ffmpeg",
         "-nostdin",
@@ -196,7 +202,7 @@ def ffmpeg_sample(url: str, seconds: float) -> dict:
         "-loglevel",
         "info",
         "-user_agent",
-        USER_AGENT,
+        agent,
         "-rw_timeout",
         "15000000",
         "-t",
@@ -264,33 +270,20 @@ def ffmpeg_sample(url: str, seconds: float) -> dict:
             for line in log.splitlines()
             if "rror" in line or "HTTP" in line or "failed" in line.lower()
         ]
-        result["ffmpeg_error"] = (
-            (errors[-1] if errors else log.strip().splitlines()[-1:] or [""])[0][:160]
-            if log.strip()
-            else "no output"
-        )
+        tail = errors or log.strip().splitlines() or ["no output"]
+        result["ffmpeg_error"] = tail[-1][:160]
     return result
 
 
-def audit(row: dict, seconds: float) -> dict:
-    url = row["stream_url"]
-    out = {
-        "id": row["id"],
-        "tier": row["_tier"],
-        "name": row.get("name", ""),
-        "call_sign": row.get("call_sign", ""),
-        "station_type": row.get("station_type", ""),
-        "source_type": row.get("source_type", ""),
-        "supported": row.get("supported", True),
-        "stream_url": url,
-    }
+def _listen(url: str, seconds: float, agent: str) -> dict:
+    out: dict = {}
     try:
-        out.update(curl_probe(url))
+        out.update(curl_probe(url, agent))
     except Exception as error:  # noqa: BLE001 -- a report row, never a crash
         out["curl_error"] = f"{type(error).__name__}: {error}"[:160]
     target = out.get("playlist_target") or url
     try:
-        out.update(ffmpeg_sample(target, seconds))
+        out.update(ffmpeg_sample(target, seconds, agent))
     except Exception as error:  # noqa: BLE001
         out["ffmpeg_error"] = f"{type(error).__name__}: {error}"[:160]
     decoded = out.get("decoded_s", 0.0)
@@ -305,6 +298,70 @@ def audit(row: dict, seconds: float) -> dict:
         out["verdict"] = "silent"
     else:
         out["verdict"] = "ok"
+    return out
+
+
+_STW_EDGE = re.compile(
+    r"^https?://\d+\.live\.streamtheworld\.com(?::\d+)?/([A-Za-z0-9_]+?)(?:_SC)?(?:\.(mp3|aac))?/?$"
+)
+
+
+def repair_candidates(url: str) -> list[str]:
+    """Addresses the same station is likely to answer at instead.
+
+    A StreamTheWorld numbered edge is one server of a pool that comes and
+    goes; the player-services redirect hands out a live one. A Shoutcast
+    root wants its ``/;`` mount. A host can drop one scheme and keep the
+    other.
+    """
+    out = []
+    match = _STW_EDGE.match(url)
+    if match:
+        mount, ext = match.group(1), match.group(2) or "mp3"
+        base = "https://playerservices.streamtheworld.com/api/livestream-redirect/"
+        bare = re.sub(r"_\d+$", "", mount)
+        for name in dict.fromkeys([mount, bare]):
+            out += [f"{base}{name}.{ext}", f"{base}{name}AAC.aac"]
+    if not url.rstrip("/").endswith(";"):
+        out.append(url.rstrip("/") + "/;")
+    if url.startswith("http://"):
+        out.append("https://" + url[len("http://") :])
+    elif url.startswith("https://"):
+        out.append("http://" + url[len("https://") :])
+    return out
+
+
+def audit(row: dict, seconds: float) -> dict:
+    url = row["stream_url"]
+    out = {
+        "id": row["id"],
+        "tier": row["_tier"],
+        "name": row.get("name", ""),
+        "call_sign": row.get("call_sign", ""),
+        "station_type": row.get("station_type", ""),
+        "source_type": row.get("source_type", ""),
+        "supported": row.get("supported", True),
+        "stream_url": url,
+    }
+    out.update(_listen(url, seconds, GAME_AGENT))
+    if out["verdict"] == "silent":
+        # Twenty-five quiet seconds can be a pause between programmes; a
+        # minute of it is dead air.
+        longer = _listen(url, LONG_SAMPLE_S, GAME_AGENT)
+        out["long_sample"] = {
+            k: longer.get(k) for k in ("verdict", "decoded_s", "max_volume", "silence_s")
+        }
+        out["verdict"] = longer["verdict"]
+    if out["verdict"] in {"dead", "dropped"}:
+        for candidate in repair_candidates(url):
+            tried = _listen(candidate, seconds, GAME_AGENT)
+            if tried["verdict"] == "ok":
+                out["repaired_url"] = candidate
+                out["repaired"] = tried
+                break
+        else:
+            browser = _listen(url, seconds, BROWSER_AGENT)
+            out["browser_verdict"] = browser["verdict"]
     return out
 
 
