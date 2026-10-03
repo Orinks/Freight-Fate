@@ -1,10 +1,10 @@
 {
  "counts": {
   "dropped_by_hand": 10,
-  "dropped_collisions": 2369,
+  "dropped_collisions": 2411,
   "dropped_unreachable": 1021,
   "fcc_placed": 648,
-  "stations": 5035
+  "stations": 4993
  },
  "notes": "Automated tier under the curated radio_catalog.json. Built by tools/import_radio_catalog.py from the PR #150 catalog (CatalystForChaos): Radio Browser stream URLs joined to Wikidata transmitter coordinates (CC0) on FCC call sign. Coverage radii are that catalog's per-band defaults, not FCC contours. Curated call signs win: collisions are dropped at build and load time. Streams tools/check_radio_streams.py could not reach are left out; see radio_stream_health.json. Names and formats a rule cannot derive, and stations the directory lists twice, come from radio_imported_overrides.json. Rows with id rb-fcc-* are Radio Browser stations placed at their FCC-licensed transmitter site, with coverage from licensed power rather than a per-band default.",
  "schema": 1,
@@ -18108,24 +18108,6 @@
    "supported": true
   },
   {
-   "call_sign": "WOLF FM",
-   "format": "country",
-   "frequency_mhz": 92.1,
-   "id": "rb-ac39082f-f735-4293-aa62-f2a8d4d6cdbf",
-   "lat": 43.17944,
-   "lon": -76.33861,
-   "name": "The 93.3",
-   "range_miles": 40.0,
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "imported",
-   "station_type": "imported",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc4101",
-   "supported": true
-  },
-  {
    "call_sign": "WOLV",
    "format": "classic hits,houghton",
    "frequency_mhz": 97.7,
@@ -26928,21 +26910,6 @@
    "always_available": true,
    "call_sign": "",
    "format": "web radio",
-   "id": "rb-web-6fe3eb2c-f2f2-45b0-98ea-d875d302a5c4",
-   "name": "104.5 Latino Hits",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc4051",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "web radio",
    "id": "rb-web-32811bda-1a78-40b5-a572-d3e17c055da3",
    "name": "The Blaze radio",
    "real_stream": true,
@@ -31787,21 +31754,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "country",
-   "id": "rb-web-14f8076d-409d-4cb5-8de4-90eee6297510",
-   "name": "92.5 and 93.3 The Bull",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc6168",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "oldies",
    "id": "rb-web-e32f0699-86cd-476b-82f3-13b27152292c",
    "name": "Cruisin' Oldies 94.7 FM & 1110 AM",
@@ -32747,21 +32699,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "alternative",
-   "id": "rb-web-06df8d64-facd-4e13-bfea-35e45a7bb779",
-   "name": "104.1 The Edge",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1397",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "christmas music, country, waynesboro",
    "id": "rb-web-9638cfa5-0601-11e8-ae97-52543be04c81",
    "name": "181.FM - Christmas Kountry",
@@ -32772,21 +32709,6 @@
    "station_type": "web",
    "stream_format": "mp3",
    "stream_url": "http://listen.181fm.com/181-xkkountry_128k.mp3",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "oldies",
-   "id": "rb-web-b662e02e-9b1a-41e7-bfd5-54ff1393c351",
-   "name": "95.7 BIG FM",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc2689",
    "supported": true
   },
   {
@@ -34112,21 +34034,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "adult contemporary",
-   "id": "rb-web-e3f8d228-1bb6-42b9-8771-18daad167de6",
-   "name": "Magic 107.7",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc597",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "great american songbook, jazz vocal, jazz vocal standards",
    "id": "rb-web-960b7447-0601-11e8-ae97-52543be04c81",
    "name": "WLML-FM - Legends Radio 100.3 FM Lake Park, FL",
@@ -34782,21 +34689,6 @@
    "station_type": "web",
    "stream_format": "aac",
    "stream_url": "https://ice2.somafm.com/gsclassic-64-aac",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "web radio",
-   "id": "rb-web-1e7dd438-eee2-41d1-bbd8-8b30fe32a657",
-   "name": "BIG 105.9 – South Florida's Classic Rock!",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc557",
    "supported": true
   },
   {
@@ -36482,21 +36374,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "country",
-   "id": "rb-web-e35c3d73-0d68-4d2c-90fc-c91466602f2e",
-   "name": "101.9 The Twister",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1913",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "web radio",
    "id": "rb-web-2090bf18-ee98-46c9-a795-917aa8eececf",
    "name": "Klove",
@@ -37382,21 +37259,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "adult hits",
-   "id": "rb-web-7a5aebf3-a427-4773-8d17-6bb6f842653c",
-   "name": "100.3 The Bus",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc2744",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "web radio",
    "id": "rb-web-e9e061c2-faa6-4387-8ce6-5e9b7e251111",
    "name": "Islamic Bulletin from San Francisco Inspirational Islamic Le",
@@ -37452,21 +37314,6 @@
    "station_type": "web",
    "stream_format": "aac+",
    "stream_url": "http://radiomilwaukee.streamguys.net/live",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "classic rock",
-   "id": "rb-web-d07e0953-3d05-411e-acae-cf9a521b2ee0",
-   "name": "Z106.7",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1245",
    "supported": true
   },
   {
@@ -37707,21 +37554,6 @@
    "station_type": "web",
    "stream_format": "aac",
    "stream_url": "https://stream.revma.ihrhls.com/zc4908",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "urban contemporary",
-   "id": "rb-web-178a9399-a2af-4c89-a5aa-81a399ed4a13",
-   "name": "K97.1",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc2141",
    "supported": true
   },
   {
@@ -38502,21 +38334,6 @@
    "station_type": "web",
    "stream_format": "mp3",
    "stream_url": "https://s6.yesstreaming.net:18000/listen",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "country",
-   "id": "rb-web-16a00067-0ac1-490d-81da-afedca205f73",
-   "name": "FM106.1",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc2677",
    "supported": true
   },
   {
@@ -39467,21 +39284,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "country",
-   "id": "rb-web-9274d251-de24-4c2d-a4bb-47776ca44e77",
-   "name": "95.5 The Bull",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1345",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "classic rock",
    "id": "rb-web-9aabd593-dc44-444f-bd00-e2cbed60760b",
    "name": "99.7 The Fox",
@@ -39902,21 +39704,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "hip hop",
-   "id": "rb-web-3d2a3432-4344-498b-a760-e084d8886a47",
-   "name": "Real 98.3",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc6944",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "ambient, electronic, space",
    "id": "rb-web-83accca7-b878-419d-a506-3d21ef2f250f",
    "name": "SomaFM Synphaera Radio",
@@ -40062,21 +39849,6 @@
    "station_type": "web",
    "stream_format": "mp3",
    "stream_url": "https://pureplay.cdnstream1.com/6034_128.mp3",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "classic rock",
-   "id": "rb-web-39d2cfa7-0a97-4e5d-b7a5-9af3ebf25a41",
-   "name": "103.5 & 102.9 The Vault",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac+",
-   "stream_url": "https://ice66.securenetsystems.net/WJKI",
    "supported": true
   },
   {
@@ -40817,21 +40589,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "adult contemporary",
-   "id": "rb-web-3b90e565-c730-4015-9b69-f3028c74fa63",
-   "name": "Power 102.1",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc3196",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "california, eclectic, free",
    "id": "rb-web-e33244cc-4fa9-11e8-a4d1-52543be04c81",
    "name": "Radio Paradise Main Mix (EU)",
@@ -40937,21 +40694,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "country",
-   "id": "rb-web-c93cdc4b-1f5b-4ffc-9636-3f1ba8929192",
-   "name": "103.3 The Range",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://nebcoradio.com:1010/KRAN",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "web radio",
    "id": "rb-web-b15add6d-bf7b-44c0-8583-6614a1f59b3f",
    "name": "DC Naat Radio",
@@ -41022,21 +40764,6 @@
    "station_type": "web",
    "stream_format": "aac",
    "stream_url": "https://stream.revma.ihrhls.com/zc857",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "country",
-   "id": "rb-web-413522ee-3277-4ac9-8f7c-ab8c90eeeb70",
-   "name": "106.7 The Bull",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc7784",
    "supported": true
   },
   {
@@ -41432,21 +41159,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "country",
-   "id": "rb-web-71497a35-4963-4171-b4fd-7410e366a027",
-   "name": "Kat 103.7",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1329",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "web radio",
    "id": "rb-web-6f6d1907-cc42-4824-99db-62683703e7aa",
    "name": "Seeburg 1000",
@@ -41517,21 +41229,6 @@
    "station_type": "web",
    "stream_format": "mp3",
    "stream_url": "http://listen.181fm.com/181-xpower_128k.mp3",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "country",
-   "id": "rb-web-64a0d04e-f798-46b9-a70a-27277955af90",
-   "name": "96.1 KXY",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1917",
    "supported": true
   },
   {
@@ -42227,21 +41924,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "rock",
-   "id": "rb-web-70da4b3c-d184-4f10-9434-334817f3a15a",
-   "name": "Rock 101",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1349",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "web radio",
    "id": "rb-web-d93d420f-23df-4c52-b093-8e8320015863",
    "name": "92.5 The Breeze",
@@ -42402,21 +42084,6 @@
    "station_type": "web",
    "stream_format": "mp3",
    "stream_url": "https://strm112.1.fm/praise_mobile_mp3?aw_0_req.gdpr=true",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "pop, top 40",
-   "id": "rb-web-a5b9da01-b675-4ecc-9e2a-435b00a1b886",
-   "name": "HITS 96.1",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1601",
    "supported": true
   },
   {
@@ -42642,21 +42309,6 @@
    "station_type": "web",
    "stream_format": "aac",
    "stream_url": "https://radio1.streamserver.link/radio/8010/100hit-aac",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "adult hits",
-   "id": "rb-web-eee38614-3c82-4525-8e6f-df5f3ba471ea",
-   "name": "102.9 The Lake",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1609",
    "supported": true
   },
   {
@@ -43292,36 +42944,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "adult contemporary",
-   "id": "rb-web-0d0a6d42-0789-43d2-b16a-6ffb72f7662d",
-   "name": "Sunny 106.5",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1341",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "urban adult contemporary",
-   "id": "rb-web-136568d4-345c-4eeb-b363-5616297156db",
-   "name": "V101",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc2121",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "web radio",
    "id": "rb-web-d99d16b0-8c8a-4756-8da9-39c10df0ba4e",
    "name": "Vivaldi Radio Art",
@@ -43617,21 +43239,6 @@
    "station_type": "web",
    "stream_format": "mp3",
    "stream_url": "http://streaming.kansaspublicradio.org:8000/kpr1",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "country",
-   "id": "rb-web-7ebfd78c-1722-47e8-89e1-4c25b12649b4",
-   "name": "Miss 103",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1241",
    "supported": true
   },
   {
@@ -44237,21 +43844,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "urban contemporary",
-   "id": "rb-web-5dc6b73f-99d4-4fde-a6cf-6b9b4febf621",
-   "name": "103 JAMZ",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc2453",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "alternative, ballads, chillout",
    "id": "rb-web-f5facbbd-fa35-4172-9384-bbbe7f2c07ca",
    "name": "94.7 KUMU",
@@ -44262,21 +43854,6 @@
    "station_type": "web",
    "stream_format": "aac+",
    "stream_url": "https://pacificmedia.cdnstream1.com/2783_64.aac",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "pop, top 40",
-   "id": "rb-web-cb9e32a8-f9ff-4660-8222-3e1ab7bff2e1",
-   "name": "Alice 95.5",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1269",
    "supported": true
   },
   {
@@ -44432,21 +44009,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "rock",
-   "id": "rb-web-00040070-0d24-4b22-b6b3-aa94ae4a8a0c",
-   "name": "105.9 The Brew",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc3540",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "adult contemporary",
    "id": "rb-web-fa5ec66b-175c-4506-9eea-77c76b08f67c",
    "name": "96-1 SRS",
@@ -44562,21 +44124,6 @@
    "station_type": "web",
    "stream_format": "mp3",
    "stream_url": "http://stream.radioparadise.com/mp3-128",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "country",
-   "id": "rb-web-06f4363d-4370-4074-a231-c55c34be3ad0",
-   "name": "Y96.9",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc349",
    "supported": true
   },
   {
@@ -45452,21 +44999,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "country",
-   "id": "rb-web-ef26a931-2e44-4428-9380-722ff1d24451",
-   "name": "96.9 The Kat",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1605",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "90's, alternative",
    "id": "rb-web-72dacd47-ed6c-4f6a-8854-87ab7efd8b16",
    "name": "BestNetRadio - 90's Alternative",
@@ -45882,21 +45414,6 @@
    "station_type": "web",
    "stream_format": "aac+",
    "stream_url": "https://ice3.securenetsystems.net/KLTA",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "country",
-   "id": "rb-web-9d2725b9-0bce-4a9f-a31d-b3c835ad94a3",
-   "name": "Big I 107.9",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1385",
    "supported": true
   },
   {
@@ -47552,21 +47069,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "country",
-   "id": "rb-web-21af9db9-a34b-49c7-8e6c-375bff8df933",
-   "name": "New Country 107.9 YYD - Amherst, VA",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "http://stream.revma.ihrhls.com/zc2385",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "alternative",
    "id": "rb-web-05db2bfe-b8a5-4b95-be13-7d98e2368243",
    "name": "Radio Heartland",
@@ -48287,21 +47789,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "rock",
-   "id": "rb-web-a56fe78e-d685-4b17-8da4-16ce1fcdb31c",
-   "name": "94 Rock",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1405",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "christian",
    "id": "rb-web-4eb5fd15-724d-4131-9905-95dbf5081e56",
    "name": "DCLM Radio - Spanish/Español",
@@ -48597,21 +48084,6 @@
    "station_type": "web",
    "stream_format": "mp3",
    "stream_url": "http://listen.livestreamingservice.com/181-90sdance_128k.mp3",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "classic rock",
-   "id": "rb-web-028657b1-0409-4255-b1af-21948da86a62",
-   "name": "95.7 QMF",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc3383",
    "supported": true
   },
   {
@@ -49277,21 +48749,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "pop, top 40",
-   "id": "rb-web-e84c7ef2-787b-49f3-bd0f-5b9b7ab91b25",
-   "name": "KJ103",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1905",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "local programming, talk, tucson",
    "id": "rb-web-96348567-0601-11e8-ae97-52543be04c81",
    "name": "KTDT-LP \"Downtown Radio\" Tucson 99.1 FM Tucson, AZ",
@@ -49827,21 +49284,6 @@
    "station_type": "web",
    "stream_format": "aac",
    "stream_url": "https://icecast.streammyflr.org/FLRstream",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "rock",
-   "id": "rb-web-6f4844b6-4eda-4a9b-bd2e-389dbf4391b1",
-   "name": "94.7 The Brew",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1901",
    "supported": true
   },
   {
@@ -50652,21 +50094,6 @@
    "station_type": "web",
    "stream_format": "mp3",
    "stream_url": "https://streaming.live365.com/a30884",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "adult contemporary",
-   "id": "rb-web-d3d2c839-82f1-4432-a467-af0cf8d81d24",
-   "name": "100.3 The Peak",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1389",
    "supported": true
   },
   {
@@ -51657,21 +51084,6 @@
    "station_type": "web",
    "stream_format": "aac+",
    "stream_url": "https://ice42.securenetsystems.net/WWUS",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "urban contemporary",
-   "id": "rb-web-44f7894f-cbce-45a7-8f52-d24074f5afaa",
-   "name": "V100.7",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc2673",
    "supported": true
   },
   {
@@ -58992,21 +58404,6 @@
    "station_type": "web",
    "stream_format": "mp3",
    "stream_url": "https://listen.radioking.com/radio/301204/stream/347869",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "adult album alternative, hot adult contemporary, modern adult contemporary",
-   "id": "rb-web-1ad5efaa-5c7c-4eb2-8f8e-8e2e18faccaf",
-   "name": "Cities 97.1",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1221",
    "supported": true
   },
   {
@@ -72062,21 +71459,6 @@
   {
    "always_available": true,
    "call_sign": "",
-   "format": "contemporary hits, top 40",
-   "id": "rb-web-4efa6d1d-4559-46b3-b8e9-d0cfc5e7cc74",
-   "name": "XL93 - The Forks Hit Music Station",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://stream.revma.ihrhls.com/zc1677",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
    "format": "web radio",
    "id": "rb-web-2fe62418-cb1c-4303-a217-890dcbad3e4d",
    "name": "XRDS.fm",
@@ -73077,21 +72459,6 @@
    "station_type": "web",
    "stream_format": "mp3",
    "stream_url": "https://play.radioking.io/indy-dancers-dancecast/345331",
-   "supported": true
-  },
-  {
-   "always_available": true,
-   "call_sign": "",
-   "format": "adult contemporary",
-   "id": "rb-web-ac721368-0ba0-4b89-b895-010b4dec5720",
-   "name": "K103",
-   "real_stream": true,
-   "safe_for_streaming": false,
-   "source": "community radio directory",
-   "source_type": "web",
-   "station_type": "web",
-   "stream_format": "aac",
-   "stream_url": "https://n01b-e2.revma.ihrhls.com/zc1957",
    "supported": true
   },
   {

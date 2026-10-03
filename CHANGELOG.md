@@ -33,6 +33,8 @@
 
 - **A new hidden achievement belongs to one week of the real year.**
 
+- **The Terrestrial dial has 156 more music stations.** Country, rock, hits, hip-hop and Spanish stations across 35 states.
+
 - **Dodge Radio is on the dial.** A United Kingdom station playing a bit of everything, and it comes in anywhere you drive.
 
 - **Six AFN 360 channels are back on the dial for players outside the United States.** AFN blocks them inside the US, so they won't play there.
