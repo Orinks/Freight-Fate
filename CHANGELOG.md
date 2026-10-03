@@ -71,6 +71,16 @@
 
 ### Changed
 
+- **Quiet and Urgent only driving speech no longer call out traffic.** Slow cars ahead, cruise settling in behind them and lane keeping passing are spoken only on Standard.
+
+- **Anything Quiet or Urgent only leaves out now makes no sound.** The stand-in notes and the notification tones of silenced lines are gone.
+
+- **Quiet driving speech says cruise, speed keeper, work zone and collision updates in a few words.** For example, Cruise easing to 50.
+
+- **Urgent only no longer announces achievements while you drive.** They wait in message review.
+
+- **Urgent only no longer speaks CB reports, toll heads-ups or traffic packs.** Lane closures and the directions you must act on still speak.
+
 - **Radio stations whose name already includes the call sign say it once.** Tuning now says "KXLU 88.9", not "KXLU, KXLU 88.9".
 
 - **CB reports now open with a short squelch and go straight to the news.** "CB chatter" is no longer said before each one.
@@ -202,6 +212,10 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **Urgent only now says when a work zone turns adaptive cruise off.** It used to let go of the pedals without a word.
+
+- **Quiet speaks every truck stop heads-up in its short form.** One that had to wait was read out in full.
 
 - **On a Mac, the game no longer freezes at launch asking to control VoiceOver.** VoiceOver also speaks the first screen now. (Reported by Jason)
 

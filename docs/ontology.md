@@ -423,10 +423,6 @@ from the words, and synonyms cost them a re-read.
 | The optional note that carries the lean instead of the engine, off by default; with it on the engine stays centered | Lane guide tone (the settings row is "Lane guide sound: engine" or "tone") | guide tone, steering tone, lean tone | `guide/lane_guide_tone`, `Settings.lane_guide_tone`, `DrivingState::lean_the_tone` |
 | The setting for which way to steer when the engine leans: toward the lean by default, or away from it | Steering guide (the settings row reads "steer toward the lean" or "steer away from the lean") | invert steering, reverse guide, flipped lean | `Settings.steering_guide_inverted`, `guide_sign` |
 | The one-time screen before the main menu that asks how much the truck should do, answered once by every player | Driving assistance (the same choice as the preset row in Settings) | setup wizard, onboarding, first-run screen | `states::assist_picker`, `Settings.assist_preset_chosen` |
-| The synthesized short high note standing in for a confirmation -- the assist acted, the setting took -- once the speech ladder stops speaking it | Confirmation note | confirmation earcon, acted tone | `ladder/confirmation_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS` |
-| The synthesized two falling notes standing in for a heads-up about what the road is about to do -- a bend, a merge, a stop still miles off -- once the speech ladder stops speaking them, at the Urgent only rung | Road ahead note | navigation advisory earcon, lead-cue tone | `ladder/road_ahead_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS`, `SpeechCategory.NAVIGATION_ADVISORY` |
-| The synthesized chime standing in for a driving tip once the speech ladder stops speaking coaching, at the Quiet rung | Coaching note | coaching earcon, tip chime | `ladder/coaching_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS` |
-| The synthesized tock standing in for a status update once the speech ladder stops speaking it, available in Learn game sounds; Quiet now speaks status | Status note | status earcon, state tock | `ladder/status_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS` |
 | Being looked at for something other than speed: damage, missing chains, following too close | Inspection warning | inspection cue, roadside-check tone | `events/inspection_warning` |
 | The earcon that fires with the open-scale approach notice, ahead of the ambient bed | Scale warning | weigh-station warning cue, scale earcon | `events/weigh_station_warning` |
 | The ambient bed that swells as the truck comes up on an open scale | Weigh station | scale bed, weigh-lane loop | `poi/weigh_station_lane` |
@@ -585,7 +581,7 @@ reader user a second noun for a thing that already had one.
 
 ### Driving speech rungs
 
-How much of the road's *information* speaks. Four rungs, cutting whole
+How much of the road's *information* speaks. Three rungs, cutting whole
 categories rather than shortening sentences; the player picks one and the
 delivery layer decides per category. "Terse" survives only as the internal
 name of the shorter rendering and is no longer a thing the player selects.
@@ -593,12 +589,17 @@ name of the shorter rendering and is no longer a thing the player selects.
 | Concept | Canonical spoken noun | Never say | Where |
 | --- | --- | --- | --- |
 | The working default | standard | normal, default | `DRIVING_SPEECH_MODES` |
-| Short confirmations, lane openings, and status updates | quiet | terse (that is the rendering, not the rung), minimal | `DRIVING_SPEECH_MODES` |
+| Short confirmations, lane openings, and status updates, without the traffic around the truck | quiet | terse (that is the rendering, not the rung), minimal | `DRIVING_SPEECH_MODES` |
 | Safety warnings and directions requiring action | urgent only | emergency mode, critical only | `DRIVING_SPEECH_MODES` |
 
 Roadside colour -- billboards, place names, landmarks -- is **not** governed
 by these rungs. It answers to the chatter switches and the place-callouts
 ladder, and a player may run the loudest colour with the quietest rung.
+
+A line a rung leaves out is silent: no stand-in sound, and no tone of its
+own (owner, 2026-10-03). The four ladder notes that used to stand in for
+cut lines are retired. The road's own sounds -- traffic going by, the
+engine, a siren -- are not announcements and always play.
 
 ### Terse speech grammar
 

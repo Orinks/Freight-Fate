@@ -572,7 +572,7 @@ pub fn open_default() -> Option<Arc<CombinedPack>> {
 // ---------------------------------------------------------------------------
 // Generated sounds
 //
-// Runtime-synthesized cues (the ladder earcons, the lane guide tone, the
+// Runtime-synthesized cues (the lane guide tone, the
 // enforcement signature) are published under ordinary sound keys and win
 // over every pack and loose file: `audio._asset_bytes` checks `_GENERATED`
 // first, so a synthesized cue plays through the same path as a packed asset
@@ -970,9 +970,8 @@ mod tests {
         // the incomplete loose tree dropping 60 effects. A deliberate swap of
         // one sound is not a failure, so size and hash are not pinned.
         let pack = SoundPack::open(&path).unwrap();
-        // Synthesized cues are not packed: these two publish themselves here,
-        // and enforcement/ is the game crate's siren signature.
-        crate::ladder_earcons::register_ladder_earcons();
+        // Synthesized cues are not packed: the guide tone publishes itself
+        // here, and enforcement/ is the game crate's siren signature.
         crate::lane_guide_tone::register_lane_guide_tone();
         let ships = |key: &str| {
             !key.is_empty()

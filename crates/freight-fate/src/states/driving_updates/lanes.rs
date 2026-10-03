@@ -530,6 +530,7 @@ impl DrivingState {
     /// The truck has just arrived in a new lane: check the space it moved
     /// into, resolve any dodgeable hazard, and reset keep-right pressure.
     pub fn finish_lane_change(&mut self, ctx: &mut GameContext, quiet: bool) {
+        let pass_return = std::mem::take(&mut self.pass_returning);
         self.left_lane_s = 0.0;
         self.keep_right_nags = 0;
         let lane_index = self.lane.lane;
@@ -594,6 +595,16 @@ impl DrivingState {
             self.finish_hazard_clear(ctx, &text);
             return;
         }
+        // Lane keeping back in its lane after going around traffic is the
+        // end of the pass, and the pass itself is TRAFFIC: words at
+        // standard only. At quiet "In the right lane." used to arrive on
+        // its own, about a pass nobody had mentioned (speech mode audit,
+        // 2026-10-03).
+        let category = if pass_return {
+            SpeechCategory::Traffic
+        } else {
+            SpeechCategory::Confirmation
+        };
         if !quiet {
             // ROUTE, not the ambient default: the driver's only confirmation
             // of where a lane change landed, same class as the lane-open
@@ -603,7 +614,7 @@ impl DrivingState {
                 format!("In {}.", lane_phrase(lane_index, lane_count)),
                 SayEvent::queued()
                     .priority(EventPriority::Route)
-                    .category(SpeechCategory::Confirmation),
+                    .category(category),
             );
         }
     }
@@ -922,14 +933,20 @@ impl DrivingState {
             self.speak_ambient_event(
                 ctx,
                 SpokenMessage::new(grumble),
-                Ambient::new().sound(Some("events/cb_radio_chatter")),
+                // Advice from the CB, not a rule the game enforces: a tip,
+                // said once a leg at standard and not at all quieter.
+                Ambient::new()
+                    .sound(Some("events/cb_radio_chatter"))
+                    .category(Some(SpeechCategory::Coaching)),
             );
         } else {
             ctx.audio.play_with("traffic/car_pass", 0.9, 0.5);
             self.speak_ambient_event(
                 ctx,
                 SpokenMessage::new("Traffic is stacking up and passing you on the right."),
-                Ambient::new().sound(Some("events/cb_radio_chatter")),
+                Ambient::new()
+                    .sound(Some("events/cb_radio_chatter"))
+                    .category(Some(SpeechCategory::Traffic)),
             );
         }
     }

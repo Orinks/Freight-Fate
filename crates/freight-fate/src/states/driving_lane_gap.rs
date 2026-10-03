@@ -178,7 +178,7 @@ impl DrivingState {
         } else {
             format!("Clear of the {vehicle}. {capitalized} lane open.")
         };
-        ctx.audio.play_with("ui/notify", 0.45, 0.0);
+        ctx.play_event_cue(Some(SpeechCategory::Status), "ui/notify", 0.45, 0.0);
         // ROUTE priority: "the lane you were boxed out of is open" is the
         // transition a driver is actively waiting on to merge back, and at
         // the ambient default it was dropped as stale behind the very
@@ -290,6 +290,7 @@ impl DrivingState {
         // "In the right lane." on arrival is the whole report; the blinker
         // says it is coming.
         self.begin_lane_change(home);
+        self.pass_returning = true;
     }
 
     /// Whether an armed exit is close enough that the truck should be
@@ -317,6 +318,7 @@ impl DrivingState {
     /// clearance reading has already passed.
     fn begin_lane_change(&mut self, target: i64) {
         self.lane_change_target = Some(target);
+        self.pass_returning = false;
         self.lane_change_timer = LANE_TAP_CHANGE_S;
         self.lane_signal_timer = 0.0;
     }

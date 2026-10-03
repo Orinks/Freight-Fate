@@ -158,21 +158,21 @@ impl DrivingState {
         );
         match kind {
             WeatherKind::Rain | WeatherKind::HeavyRain => {
-                ctx.award_achievement("rain_driver");
+                ctx.award_driving_achievement("rain_driver");
             }
             WeatherKind::Snow | WeatherKind::Ice | WeatherKind::Wind => {
-                ctx.award_achievement("winter_or_wind");
+                ctx.award_driving_achievement("winter_or_wind");
             }
             WeatherKind::Fog | WeatherKind::Thunderstorm => {
-                ctx.award_achievement("low_visibility");
+                ctx.award_driving_achievement("low_visibility");
             }
             _ => {}
         }
         if kind == WeatherKind::Thunderstorm {
-            ctx.award_achievement("storm_driving");
+            ctx.award_driving_achievement("storm_driving");
         }
         if seen >= WeatherKind::ALL.len() {
-            ctx.award_achievement("weather_collector");
+            ctx.award_driving_achievement("weather_collector");
         }
     }
 
@@ -274,7 +274,7 @@ impl DrivingState {
         if self.phase == DRIVE_PHASE_DELIVERY {
             self.record_weather_achievement(ctx);
             if !self.trip.truck.transmission.automatic {
-                ctx.award_achievement_with("manual_driver", false, true);
+                ctx.award_driving_achievement("manual_driver");
             }
         }
     }
