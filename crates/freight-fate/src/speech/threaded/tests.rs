@@ -295,6 +295,43 @@ fn shutdown_skips_the_queued_backlog_instead_of_speaking_it() {
     );
 }
 
+/// Quit keeps pumping events while an utterance is still in flight:
+/// the three-second wait for the backend to release is sliced, and the
+/// pump runs between slices, so macOS never reads the window as not
+/// responding (issue 266).
+#[test]
+fn shutdown_keeps_pumping_while_an_utterance_is_in_flight() {
+    let Rig {
+        mut sink,
+        calls,
+        entered_say,
+        slow,
+        ..
+    } = rig();
+    slow.store(true, Ordering::SeqCst);
+    sink.say("in flight", false);
+    for _ in 0..500 {
+        if entered_say.load(Ordering::SeqCst) {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    assert!(
+        entered_say.load(Ordering::SeqCst),
+        "say never reached the worker"
+    );
+    let mut pumps = 0u32;
+    sink.shutdown_pumping(&mut || pumps += 1);
+    assert!(
+        pumps >= 2,
+        "expected pumps between wait slices, got {pumps}"
+    );
+    assert!(
+        calls.lock().unwrap().iter().any(|c| c == "shutdown"),
+        "the backend was never released"
+    );
+}
+
 #[test]
 fn says_arrive_on_the_worker_in_send_order() {
     let Rig {

@@ -263,6 +263,15 @@ pub trait SpeechSink {
 
     /// Release the backends and context. Safe to call more than once.
     fn shutdown(&mut self);
+
+    /// Release the backends like [`shutdown`](SpeechSink::shutdown), calling
+    /// `pump` between wait slices so the caller can keep the window
+    /// answering the OS while an in-flight utterance finishes (issue 266).
+    /// Sinks whose shutdown never waits use the default.
+    fn shutdown_pumping(&mut self, pump: &mut dyn FnMut()) {
+        let _ = pump;
+        self.shutdown();
+    }
 }
 
 /// `GameContext.apply_speech`: reflect the speech settings on the sink.

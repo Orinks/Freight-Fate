@@ -172,6 +172,9 @@ impl SpeechSink for TeeSpeech {
     fn shutdown(&mut self) {
         self.inner.shutdown();
     }
+    fn shutdown_pumping(&mut self, pump: &mut dyn FnMut()) {
+        self.inner.shutdown_pumping(pump);
+    }
 }
 
 // -- the audio tee --------------------------------------------------------------------

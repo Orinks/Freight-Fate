@@ -841,6 +841,10 @@ impl SpeechSink for ThreadedSpeech {
     }
 
     fn shutdown(&mut self) {
+        self.shutdown_pumping(&mut || {});
+    }
+
+    fn shutdown_pumping(&mut self, pump: &mut dyn FnMut()) {
         // The flag first, then the command: the worker skips every say
         // still queued ahead of it, so the wait below covers one in-flight
         // utterance at most, not the whole backlog.
@@ -855,7 +859,20 @@ impl SpeechSink for ThreadedSpeech {
             // Give the backend a bounded chance to release cleanly; a
             // wedged one is abandoned, which is exactly what quitting a
             // frozen game by hand used to do -- minus freezing the game.
-            let _ = done_rx.recv_timeout(Duration::from_secs(3));
+            // The wait is sliced so quit can pump events between slices
+            // and macOS never reads the window as not responding.
+            let started = Instant::now();
+            loop {
+                match done_rx.recv_timeout(Duration::from_millis(10)) {
+                    Ok(()) | Err(RecvTimeoutError::Disconnected) => break,
+                    Err(RecvTimeoutError::Timeout) => {
+                        if started.elapsed() >= Duration::from_secs(3) {
+                            break;
+                        }
+                        pump();
+                    }
+                }
+            }
         }
     }
 }

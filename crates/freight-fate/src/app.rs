@@ -10,7 +10,7 @@
 //! * `app::logging` -- session log configuration.
 //! * `app::testing` -- the headless test rig later state ports reuse.
 
-use std::sync::{Arc, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock};
 use std::time::{Duration, Instant};
 
 use ff_core::assets_pack::prefetch_default as prefetch_sound_pack;
@@ -1080,27 +1080,108 @@ impl App {
             log::warn!("Could not save settings: {e}");
         }
         boot_timing::mark("quit: saved");
-        self.ctx.services.presence.shutdown();
-        boot_timing::mark("quit: rich presence");
-        self.ctx.services.online.shutdown();
-        boot_timing::mark("quit: drivers board");
-        self.ctx.services.duty.shutdown();
-        boot_timing::mark("quit: duty watch");
-        self.ctx.services.cloud.shutdown(); // flushes the final save's backup, bounded
-        boot_timing::mark("quit: cloud backup");
-        self.ctx.synth_worker.shutdown(Duration::from_millis(2500));
+        // Pump SDL events through every bounded wait below: the window
+        // stays up through quit so the screen reader keeps focus for
+        // "Installing the update...", and an unpumped window past about
+        // five seconds is what macOS reports as not responding
+        // (issue 266). Captures only `self.shell`, so the services borrow
+        // freely beside it.
+        let shell = &mut self.shell;
+        let mut pumps = 0u32;
+        let mut longest_gap = Duration::ZERO;
+        let mut last_pump = Instant::now();
+        let mut pump = || {
+            let now = Instant::now();
+            longest_gap = longest_gap.max(now - last_pump);
+            last_pump = now;
+            pumps += 1;
+            if let Some(shell) = shell.as_mut() {
+                shell.pump_during_quit();
+            }
+        };
+        let presence = self.ctx.services.presence.clone();
+        let online = self.ctx.services.online.clone();
+        let duty = self.ctx.services.duty.clone();
+        let cloud = self.ctx.services.cloud.clone();
+        run_while_pumping(
+            move || {
+                let started = Instant::now();
+                presence.shutdown();
+                log::info!(
+                    "quit: rich presence in {} ms",
+                    started.elapsed().as_millis()
+                );
+                let started = Instant::now();
+                online.shutdown();
+                log::info!(
+                    "quit: drivers board in {} ms",
+                    started.elapsed().as_millis()
+                );
+                let started = Instant::now();
+                duty.shutdown();
+                log::info!("quit: duty watch in {} ms", started.elapsed().as_millis());
+                let started = Instant::now();
+                cloud.shutdown(); // flushes the final save's backup, bounded
+                log::info!("quit: cloud backup in {} ms", started.elapsed().as_millis());
+            },
+            &mut pump,
+        );
+        boot_timing::mark("quit: online services");
+        self.ctx
+            .synth_worker
+            .shutdown_pumping(Duration::from_millis(2500), &mut pump);
         boot_timing::mark("quit: synthesized music");
         profile_module::set_save_listener(None);
         self.ctx.controller.shutdown();
         boot_timing::mark("quit: controller");
         self.ctx.audio.shutdown();
         boot_timing::mark("quit: audio");
-        self.ctx.speech.shutdown();
+        self.ctx.speech.shutdown_pumping(&mut pump);
         boot_timing::mark("quit: speech");
         if let Some(shell) = self.shell.take() {
             shell.shutdown_for_process_exit();
         }
         boot_timing::mark("quit: window");
+        log::info!(
+            "quit: pumped events {pumps} times, longest gap {} ms",
+            longest_gap.as_millis()
+        );
+    }
+}
+
+/// Run `work` off the calling thread while `pump` runs on it until the
+/// work finishes: each service shutdown keeps its own bound, but the
+/// window keeps answering the OS through the total (issue 266). Runs
+/// `work` inline when the helper thread cannot be spawned.
+fn run_while_pumping(work: impl FnOnce() + Send + 'static, pump: &mut dyn FnMut()) {
+    // `Builder::spawn` consumes the closure even when it fails, so hold it
+    // in a slot the spawned thread takes; a failed spawn leaves it for
+    // the inline fallback.
+    let slot = Arc::new(Mutex::new(Some(work)));
+    let in_thread = Arc::clone(&slot);
+    let handle = std::thread::Builder::new()
+        .name("quit-services".into())
+        .spawn(move || {
+            if let Some(work) = in_thread.lock().unwrap_or_else(|e| e.into_inner()).take() {
+                work();
+            }
+        });
+    match handle {
+        Ok(handle) => {
+            while !handle.is_finished() {
+                pump();
+                std::thread::sleep(Duration::from_millis(10));
+            }
+            if handle.join().is_err() {
+                log::warn!("quit: the services thread panicked");
+            }
+        }
+        Err(e) => {
+            log::warn!("quit: the services thread did not start ({e}); shutting down inline");
+            if let Some(work) = slot.lock().unwrap_or_else(|e| e.into_inner()).take() {
+                work();
+            }
+        }
     }
 }
 
@@ -1238,7 +1319,29 @@ fn run_game(options: &CliOptions) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use super::staged_road_handoff;
+    use super::{run_while_pumping, staged_road_handoff};
+    use std::sync::atomic::{AtomicBool, Ordering};
+    use std::sync::Arc;
+    use std::time::Duration;
+
+    #[test]
+    fn run_while_pumping_pumps_until_the_work_finishes() {
+        let done = Arc::new(AtomicBool::new(false));
+        let flag = Arc::clone(&done);
+        let mut pumps = 0u32;
+        run_while_pumping(
+            move || {
+                std::thread::sleep(Duration::from_millis(100));
+                flag.store(true, Ordering::SeqCst);
+            },
+            &mut || pumps += 1,
+        );
+        assert!(done.load(Ordering::SeqCst), "the work never ran");
+        assert!(
+            pumps >= 3,
+            "expected several pumps during 100 ms, got {pumps}"
+        );
+    }
 
     #[test]
     fn staged_handoff_does_not_invent_truck_state() {
