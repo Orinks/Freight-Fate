@@ -16653,6 +16653,23 @@
       "supported": true
     },
     {
+      "id": "truckers-radio-usa",
+      "call_sign": "",
+      "name": "Truckers Radio USA",
+      "format": "country",
+      "source": "http://www.truckersradiousa.com (the stream's own icy-url); mount from the community radio directory row it replaces",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_url": "https://streamer.radio.co/s81d30349a/listen",
+      "stream_format": "mp3",
+      "codec": "mp3",
+      "safe_for_streaming": false,
+      "always_available": true,
+      "real_stream": true,
+      "supported": true,
+      "notes": "Curated 2026-10-03 at the owner's ask: a station for truckers belongs on the curated web list. The 192k MP3 /listen mount played with the BASS user agent from a GitHub runner on 2026-10-03 and named itself 'Truckers Radio USA'. Replaces the directory row, which carried the 64k AAC /low mount."
+    },
+    {
       "id": "ktst-oklahoma-city",
       "call_sign": "KTST",
       "name": "101.9 The Twister",

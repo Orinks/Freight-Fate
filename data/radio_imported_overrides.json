@@ -49,6 +49,16 @@
    "id": "rb-web-a760fcbe-de29-4448-9595-05a061971cd8",
    "name": "Mountain Chill KRKQ - 95.5 FM",
    "why": "read: the same station as the FCC-placed KRKQ listing; the two addresses differ only in the case of the mount name. Checked 2026-10-03."
+  },
+  {
+   "id": "rb-web-ef54fc76-d141-11e9-a861-52543be04c81",
+   "name": "Truckers Radio USA",
+   "why": "read: the same station as the curated truckers-radio-usa, on the 64k /low mount where the curated row uses the 192k /listen mount; both answer with icy-name 'Truckers Radio USA'. Checked 2026-10-03."
+  },
+  {
+   "id": "rb-web-ac721368-0ba0-4b89-b895-010b4dec5720",
+   "name": "K103",
+   "why": "read: the same iHeart stream (zc1957) as the curated kkcw-portland (K103), on a pinned edge host the URL match does not fold. Checked 2026-10-03."
   }
  ],
  "notes": "Hand curation the importer cannot derive, applied by tools/import_radio_catalog.py on top of what it builds. Every entry carries a why, and each one is a judgement about a single station: a name the source mangled past any rule, a format its keyword tags do not give, or a station the directory lists twice. Rules that hold for many stations belong in the cleaners instead, not here. An id no longer in the build is an error, not a no-op: the tool says so, so a stale entry is noticed rather than silently ignored.",
