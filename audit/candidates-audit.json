@@ -1,0 +1,95 @@
+{
+ "counts": {
+  "ok": 3
+ },
+ "results": [
+  {
+   "id": "trucker#0",
+   "tier": "candidate",
+   "name": "Truckers Radio USA",
+   "call_sign": "",
+   "station_type": "",
+   "source_type": "",
+   "supported": true,
+   "stream_url": "https://streamer.radio.co/s81d30349a/listen",
+   "http": 200,
+   "final_url": "https://streamer.radio.co/s81d30349a/listen",
+   "content_type": "audio/mpeg",
+   "bytes": 229522,
+   "curl_error": "",
+   "icy_name": "Truckers Radio USA",
+   "icy_url": "http://www.truckersradiousa.com",
+   "icy_br": "192",
+   "stream_title": "k.d. lang - Constant Craving",
+   "codec": "mp3, 44100 Hz, stereo, fltp, 192 kb/s",
+   "ffmpeg_meta": {
+    "icy-name": "Truckers Radio USA",
+    "icy-url": "http://www.truckersradiousa.com",
+    "streamtitle": "k.d. lang - Constant Craving"
+   },
+   "decoded_s": 25.0,
+   "mean_volume": -15.5,
+   "max_volume": -1.8,
+   "silence_s": 0.0,
+   "verdict": "ok"
+  },
+  {
+   "id": "trucker#1",
+   "tier": "candidate",
+   "name": "Truckers Radio USA",
+   "call_sign": "",
+   "station_type": "",
+   "source_type": "",
+   "supported": true,
+   "stream_url": "https://streamer.radio.co/s81d30349a/low",
+   "http": 200,
+   "final_url": "https://streamer.radio.co/s81d30349a/low",
+   "content_type": "audio/aac",
+   "bytes": 120952,
+   "curl_error": "",
+   "icy_name": "Truckers Radio USA",
+   "icy_url": "http://www.truckersradiousa.com",
+   "icy_br": "64",
+   "stream_title": "k.d. lang - Constant Craving",
+   "codec": "aac (LC), 44100 Hz, stereo, fltp, 64 kb/s",
+   "ffmpeg_meta": {
+    "icy-name": "Truckers Radio USA",
+    "icy-url": "http://www.truckersradiousa.com"
+   },
+   "decoded_s": 25.0,
+   "mean_volume": -15.6,
+   "max_volume": 0.0,
+   "silence_s": 0.0,
+   "verdict": "ok"
+  },
+  {
+   "id": "trucker#2",
+   "tier": "candidate",
+   "name": "Truckers Radio USA",
+   "call_sign": "",
+   "station_type": "",
+   "source_type": "",
+   "supported": true,
+   "stream_url": "http://streamer.radio.co/s81d30349a/low",
+   "http": 200,
+   "final_url": "http://streamer.radio.co/s81d30349a/low",
+   "content_type": "audio/aac",
+   "bytes": 126239,
+   "curl_error": "",
+   "icy_name": "Truckers Radio USA",
+   "icy_url": "http://www.truckersradiousa.com",
+   "icy_br": "64",
+   "stream_title": "k.d. lang - Constant Craving",
+   "codec": "aac (LC), 44100 Hz, stereo, fltp, 63 kb/s",
+   "ffmpeg_meta": {
+    "icy-name": "Truckers Radio USA",
+    "icy-url": "http://www.truckersradiousa.com"
+   },
+   "decoded_s": 25.0,
+   "mean_volume": -15.7,
+   "max_volume": 0.0,
+   "silence_s": 0.0,
+   "verdict": "ok"
+  }
+ ]
+}
