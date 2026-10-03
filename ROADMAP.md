@@ -211,7 +211,8 @@ bookmarks usable.
       - [x] Typed-in music seeds: Enter on Music seed opens the text field
             and takes a whole number; Left and Right still roll one.
       - (Release gate) More synth voices per style: built and shipping; the
-            owner waived the listening pass 2026-10-03. A strummed guitar,
+            owner replaced the listening pass with an agent-server check
+            2026-10-03. A strummed guitar,
             drawbar organ, bell and reed, two or three per style (the higher
             rungs get three); the reed takes the B sections' tune.
 
@@ -335,10 +336,20 @@ Driving and platform:
 The owner's:
 
 - [x] Listening pass on the new synth voices per style: closed by owner
-      ruling 2026-10-03, no listen needed
+      ruling 2026-10-03, replaced by the agent-server check below
       ([above](#19-in-flight-featcareer-19)).
-- [ ] Listening pass and a longer drive over wear thresholds and
-      interrupted warnings ([September 11](#september-11-trucking-corrections)).
+- [x] Listening pass and a longer drive over wear thresholds and
+      interrupted warnings: closed by owner ruling 2026-10-03, replaced by
+      the agent-server check below
+      ([September 11](#september-11-trucking-corrections)).
+- [ ] Agent-server check of the synth voices (owner, 2026-10-03): with
+      Music source on Synthesized, step through the styles and confirm each
+      piece starts and the session log shows no audio error.
+- [ ] Agent-server drive over wear thresholds and interrupted warnings
+      (owner, 2026-10-03): `scenario` a truck near each tire, brake and
+      engine wear limit and confirm each warning is spoken once as it is
+      crossed; pause through an hours-of-service or rest-stop warning and
+      confirm it is spoken again after resume and not repeated after.
 - [x] The OneCore leak: closed by owner ruling 2026-09-24. The game-side
       workaround (enumerate voices only on a voice change) is the fix; any
       upstream report stays the owner's call
@@ -1062,9 +1073,9 @@ its status or release decision.
       announcing the defect before the walk-around its copy names, and
       "dropped_the_bad_one" read the origin yard's trailer, so a driver who
       refused it at pickup still earned it at the receiver.
-- (Release gate) Complete the owner's listening pass and longer gameplay verification
-      of wear thresholds and interrupted warnings. Captured live readouts and
-      successful native calls do not establish what the owner heard.
+- (Release gate) Verify wear thresholds and interrupted warnings over a
+      longer drive. The owner's listening pass was replaced 2026-10-03 by an
+      agent-server drive, which checks what is spoken and when.
 
 - [x] `--list-speech-backends` names every screen reader and voice Prism finds
       on the machine it runs on, says which can speak right now, and which one
