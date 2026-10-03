@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import importlib.util
 import io
+import json
 import plistlib
 import subprocess
 import urllib.error
@@ -1149,12 +1150,15 @@ def test_macos_uses_non_launch_verification_before_archive(tmp_path, monkeypatch
     monkeypatch.setattr(build_release, "smoke_check", lambda _app: events.append("smoke"))
     monkeypatch.setattr(build_release, "strip_user_data", lambda _app: events.append("strip"))
     monkeypatch.setattr(build_release, "sign_distribution", lambda _app: events.append("sign"))
+    monkeypatch.setattr(
+        build_release, "notarize_distribution", lambda _app: events.append("notarize")
+    )
     monkeypatch.setattr(build_release, "archive", lambda *_args: archive)
     monkeypatch.setattr(build_release, "verify_archive", lambda _archive: events.append("archive"))
 
     build_release.build_rust("test", None, False, macos_non_launch_verify=True)
 
-    assert events == ["stamp", "docs", "verify", "strip", "sign", "archive"]
+    assert events == ["stamp", "docs", "verify", "strip", "sign", "notarize", "archive"]
 
 
 def test_windows_keeps_packaged_process_smoke(tmp_path, monkeypatch):
@@ -1385,7 +1389,7 @@ def test_macos_signing_verifies_the_final_bundle(tmp_path, monkeypatch):
     )
     monkeypatch.setattr(build_release, "verify_macos_native_dependencies", lambda _app: None)
 
-    build_release.sign_distribution(app)
+    build_release.sign_distribution(app, environ={})
 
     assert calls == [
         (["codesign", "--force", "--deep", "--sign", "-", str(app)], {"check": True}),
@@ -1394,6 +1398,131 @@ def test_macos_signing_verifies_the_final_bundle(tmp_path, monkeypatch):
             {"check": True},
         ),
     ]
+
+
+def test_macos_developer_id_signing_seals_libraries_before_the_bundle(tmp_path, monkeypatch):
+    """Notarization rejects --deep: each dylib is signed alone, then the app."""
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    (app / "Contents" / "MacOS").mkdir(parents=True)
+    (app / "Contents" / "MacOS" / "FreightFate").write_bytes(b"")
+    frameworks = app / "Contents" / "Frameworks"
+    frameworks.mkdir()
+    for name in ("libbass.dylib", "libbassopus.dylib"):
+        (frameworks / name).write_bytes(b"")
+    calls = []
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+    monkeypatch.setattr(
+        build_release.subprocess, "run", lambda command, **_kwargs: calls.append(command)
+    )
+    monkeypatch.setattr(build_release, "verify_macos_native_dependencies", lambda _app: None)
+    identity = "Developer ID Application: Test (TEAM123456)"
+
+    build_release.sign_distribution(
+        app,
+        environ={"MACOS_SIGN_IDENTITY": identity, "MACOS_SIGN_KEYCHAIN": "/tmp/ci.keychain-db"},
+    )
+
+    def signed(target):
+        return [
+            "codesign",
+            "--force",
+            "--options",
+            "runtime",
+            "--timestamp",
+            "--keychain",
+            "/tmp/ci.keychain-db",
+            "--sign",
+            identity,
+            str(target),
+        ]
+
+    assert calls == [
+        signed(frameworks / "libbass.dylib"),
+        signed(frameworks / "libbassopus.dylib"),
+        signed(app),
+        ["codesign", "--verify", "--deep", "--strict", str(app)],
+    ]
+    assert not any("--deep" in command and "--sign" in command for command in calls)
+
+
+def test_macos_notarization_is_skipped_without_credentials(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    calls = []
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+    monkeypatch.setattr(build_release.subprocess, "run", lambda *args, **_kw: calls.append(args))
+
+    build_release.notarize_distribution(tmp_path / "FreightFate.app", environ={})
+
+    assert calls == []
+
+
+def test_macos_notarization_refuses_half_configured_credentials(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+
+    with pytest.raises(RuntimeError, match="MACOS_NOTARY_ISSUER_ID"):
+        build_release.notarize_distribution(
+            tmp_path / "FreightFate.app",
+            environ={
+                "MACOS_SIGN_IDENTITY": "Developer ID Application: Test (TEAM123456)",
+                "MACOS_NOTARY_KEY_PATH": "/tmp/AuthKey.p8",
+                "MACOS_NOTARY_KEY_ID": "ABC123DEFG",
+            },
+        )
+
+
+NOTARY_ENV = {
+    "MACOS_SIGN_IDENTITY": "Developer ID Application: Test (TEAM123456)",
+    "MACOS_NOTARY_KEY_PATH": "/tmp/AuthKey.p8",
+    "MACOS_NOTARY_KEY_ID": "ABC123DEFG",
+    "MACOS_NOTARY_ISSUER_ID": "00000000-0000-0000-0000-000000000000",
+}
+
+
+def fake_notary(monkeypatch, build_release, status):
+    calls = []
+
+    def run(command, **_kwargs):
+        calls.append(command)
+        stdout = ""
+        if command[:3] == ["xcrun", "notarytool", "submit"]:
+            stdout = json.dumps({"id": "sub-1", "status": status})
+        return subprocess.CompletedProcess(command, 0, stdout=stdout, stderr="")
+
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+    monkeypatch.setattr(build_release.subprocess, "run", run)
+    return calls
+
+
+def test_macos_notarization_staples_and_assesses_an_accepted_app(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    calls = fake_notary(monkeypatch, build_release, "Accepted")
+
+    build_release.notarize_distribution(app, environ=NOTARY_ENV)
+
+    tools = [command[:3] for command in calls]
+    assert tools[0][0] == "ditto"
+    assert tools[1] == ["xcrun", "notarytool", "submit"]
+    assert "--wait" in calls[1]
+    assert calls[2:] == [
+        ["xcrun", "stapler", "staple", str(app)],
+        ["xcrun", "stapler", "validate", str(app)],
+        ["spctl", "--assess", "--type", "execute", "--verbose=2", str(app)],
+    ]
+
+
+def test_macos_notarization_fails_the_build_when_apple_rejects(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    calls = fake_notary(monkeypatch, build_release, "Invalid")
+
+    with pytest.raises(RuntimeError, match="Invalid"):
+        build_release.notarize_distribution(app, environ=NOTARY_ENV)
+
+    assert calls[-1][:4] == ["xcrun", "notarytool", "log", "sub-1"]
+    assert not any(command[:2] == ["xcrun", "stapler"] for command in calls)
 
 
 def test_secret_scan_rejects_planted_credentials(tmp_path):

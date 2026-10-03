@@ -710,6 +710,14 @@ are in the [release gate](#release-gate-190).
       notes open with Compatibility, which says 1.8 careers do not carry
       over.
 
+- [x] The Mac app is Developer ID signed and notarized (2026-10-03). The
+      macOS job imports Joshua Tubbs's Developer ID Application certificate
+      into a throwaway keychain, signs each bundled library and then the app
+      under the hardened runtime, and notarizes and staples it with the App
+      Store Connect key before archiving; a stable build without the signing
+      secrets fails. Players no longer need Open Anyway. TestFlight for the
+      iOS port can reuse the same App Store Connect key.
+
 #### Player-impacting release blockers
 
 These items are part of the release-gate sweep:

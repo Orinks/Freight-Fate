@@ -71,6 +71,8 @@
 
 ### Changed
 
+- **The Mac app is signed and notarized by Apple, so it opens without the Open Anyway step.**
+
 - **Quiet and Urgent only driving speech no longer call out traffic.** Slow cars ahead, cruise settling in behind them and lane keeping passing are spoken only on Standard.
 
 - **Anything Quiet or Urgent only leaves out now makes no sound.** The stand-in notes and the notification tones of silenced lines are gone.
