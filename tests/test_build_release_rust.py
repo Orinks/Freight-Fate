@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import importlib.util
 import io
+import json
 import plistlib
 import subprocess
 import urllib.error
@@ -676,6 +677,8 @@ def test_macos_stage_is_a_player_ready_app_bundle(tmp_path, monkeypatch):
     ]
     resources = app / "Contents" / "Resources"
     build_release.stamp_build_info(app, "1.9-tester-20260830", resources)
+    stamp = json.loads((resources / "build_info.json").read_text(encoding="utf-8"))
+    assert stamp["commit"] == build_release.build_commit()
     build_release.stage_release_docs(app, resources)
     assert (resources / "freight_fate" / "data" / "world.ffdata").is_file()
     assert (resources / "freight_fate" / "sounds.pak").is_file()

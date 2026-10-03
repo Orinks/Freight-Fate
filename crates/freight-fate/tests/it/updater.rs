@@ -525,6 +525,37 @@ fn test_19_snapshot_offers_the_arm64_linux_tarball_to_an_arm64_process() {
 }
 
 #[test]
+fn test_19_snapshot_rebuilt_under_the_same_tag_is_offered_by_commit() {
+    // 2026-10-03: the release candidate re-cut 1.9-tester-20261003 in the
+    // afternoon; the copy from that morning's run carried the same tag and
+    // was told it was up to date. The stamped commit tells them apart.
+    const MORNING: &str = "be5c41eae0a4d45b9193c705e48185479756ea44";
+    const AFTERNOON: &str = "47df2cd3e0f2d61e8e06188e8267910cbb7b7db1";
+    let mut rebuilt = tester("1.9-tester-20261003");
+    rebuilt["target_commitish"] = json!(AFTERNOON);
+    let releases = vec![tester("1.9-tester-20261002"), rebuilt];
+    let mut build = BuildInfo::new("1.9-tester-20261003", "dev", "2026-10-03");
+
+    build.commit = MORNING.to_string();
+    let info = snapshot_update_from(&releases, Some(&build), "1.9.0", None, &env())
+        .expect("the rebuild is offered");
+    assert_eq!(info.tag, "1.9-tester-20261003");
+
+    build.commit = AFTERNOON.to_string();
+    assert!(snapshot_update_from(&releases, Some(&build), "1.9.0", None, &env()).is_none());
+
+    // A copy stamped before commits were recorded stays where it was.
+    build.commit = String::new();
+    assert!(snapshot_update_from(&releases, Some(&build), "1.9.0", None, &env()).is_none());
+
+    let stamped = build_info_from_dict(
+        &json!({"tag": "1.9-tester-20261003", "commit": AFTERNOON}),
+        "1.9.0",
+    );
+    assert_eq!(stamped.commit, AFTERNOON);
+}
+
+#[test]
 fn test_19_snapshot_channel_skips_newest_tester_without_windows_archive() {
     let releases = vec![
         release_with("1.9-tester-20260829", true, "", "", &["-macos.zip"]),

@@ -419,6 +419,12 @@ Everything found before 2026-09-25 moved to
       about twenty seconds), which macOS reports as not responding. Hide the
       window first, or pump events through the quit. Pumped through the quit
       (2026-10-03).
+- [x] A tester snapshot re-cut the same day (the 2026-10-03 release
+      candidate) kept that day's tag, so copies from the earlier run were
+      told they were up to date. Builds now record their commit and the
+      updater offers a same-tag rebuild on a different one (2026-10-03).
+      Copies built before this have no commit and still wait for the
+      next day's snapshot.
 - [ ] Updater, issue 266: a stalled download now fails after sixty idle
       seconds, but its blocked read thread and socket linger until that read
       returns or the game quits. A per-read socket timeout would end both.
