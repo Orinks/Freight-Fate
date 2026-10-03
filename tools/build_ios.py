@@ -13,7 +13,8 @@ target into an installable ``FreightFate.app``:
 * BASS and its add-ons as embedded frameworks under ``Frameworks/``,
   downloaded from un4seen and pinned by SHA-256 like ``fetch_bass.py``'s
   desktop libraries (BASS is proprietary and never committed);
-* an ``Info.plist`` declaring controller support;
+* an ``Info.plist`` declaring controller support, and the app icon compiled
+  from ``crates/freight-fate/ios/Assets.xcassets``;
 * a code signature: ad-hoc for the Simulator, or a real identity plus
   provisioning profile for a device.
 
@@ -24,6 +25,9 @@ Run from the repository root:
     uv run python tools/build_ios.py --device \\
         --sign-identity "Apple Development: ..." \\
         --provisioning-profile path/to/profile.mobileprovision
+    uv run python tools/build_ios.py --device --ipa --build-number 7 \\
+        --sign-identity "Apple Distribution: ..." \\
+        --provisioning-profile path/to/appstore.mobileprovision   # TestFlight
 
 The Simulator build targets Apple Silicon Macs (``aarch64-apple-ios-sim``).
 """
@@ -33,6 +37,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import importlib.util
+import itertools
 import os
 import plistlib
 import shutil
@@ -50,6 +55,7 @@ IOS_BUILD = BUILD / "ios"
 BASS_CACHE = IOS_BUILD / "bass"
 APP_NAME = "FreightFate"
 BUNDLE_ID = "net.orinks.freightfate"
+ASSET_CATALOG = ROOT / "crates" / "freight-fate" / "ios" / "Assets.xcassets"
 DISPLAY_NAME = "Freight Fate"
 # SDL2's UIKit backend and Prism's VoiceOver backend both run on iOS 12,
 # but GameController's extended-gamepad profile names and CoreHaptics need
@@ -183,7 +189,18 @@ def stage_bass_frameworks(frameworks_dir: Path, target: Target) -> list[Path]:
     return staged
 
 
-def info_plist(version: str, target: Target) -> dict:
+def store_version(version: str) -> str:
+    """``1.9.0.dev0`` -> ``1.9.0``: App Store Connect takes at most three integers."""
+    parts = []
+    for part in version.split(".")[:3]:
+        digits = "".join(itertools.takewhile(str.isdigit, part))
+        if not digits:
+            break
+        parts.append(digits)
+    return ".".join(parts) or "0"
+
+
+def info_plist(version: str, target: Target, build_number: str | None = None) -> dict:
     return {
         "CFBundleDevelopmentRegion": "en",
         "CFBundleDisplayName": DISPLAY_NAME,
@@ -192,8 +209,8 @@ def info_plist(version: str, target: Target) -> dict:
         "CFBundleInfoDictionaryVersion": "6.0",
         "CFBundleName": APP_NAME,
         "CFBundlePackageType": "APPL",
-        "CFBundleShortVersionString": version,
-        "CFBundleVersion": version,
+        "CFBundleShortVersionString": store_version(version),
+        "CFBundleVersion": build_number or version,
         "CFBundleSupportedPlatforms": [target.platform],
         "DTPlatformName": target.sdk,
         "LSRequiresIPhoneOS": True,
@@ -223,7 +240,65 @@ def info_plist(version: str, target: Target) -> dict:
         "NSBluetoothAlwaysUsageDescription": (
             "Freight Fate uses Bluetooth to talk to game controllers."
         ),
+        "ITSAppUsesNonExemptEncryption": False,
     }
+
+
+def sdk_info(target: Target) -> dict:
+    """The toolchain keys Xcode stamps into Info.plist; App Store Connect checks them."""
+
+    def run(*args: str) -> str:
+        return subprocess.run(args, check=True, capture_output=True, text=True).stdout.strip()
+
+    sdk_version = run("xcrun", "--sdk", target.sdk, "--show-sdk-version")
+    xcode = run("xcodebuild", "-version").splitlines()
+    xcode_version = xcode[0].split()[-1].split(".")
+    xcode_build = xcode[-1].split()[-1]
+    major = xcode_version[0]
+    minor = xcode_version[1] if len(xcode_version) > 1 else "0"
+    patch = xcode_version[2] if len(xcode_version) > 2 else "0"
+    return {
+        "DTCompiler": "com.apple.compilers.llvm.clang.1_0",
+        "DTPlatformBuild": run("xcrun", "--sdk", target.sdk, "--show-sdk-build-version"),
+        "DTPlatformVersion": sdk_version,
+        "DTSDKBuild": run("xcrun", "--sdk", target.sdk, "--show-sdk-build-version"),
+        "DTSDKName": f"{target.sdk}{sdk_version}",
+        "DTXcode": f"{int(major):02d}{minor}{patch}",
+        "DTXcodeBuild": xcode_build,
+        "BuildMachineOSBuild": run("sw_vers", "-buildVersion"),
+    }
+
+
+def compile_icon(app: Path, target: Target) -> dict:
+    """Compile the asset catalog into ``Assets.car``; return its Info.plist keys."""
+    partial = IOS_BUILD / "assets-info.plist"
+    subprocess.run(
+        [
+            "xcrun",
+            "actool",
+            "--compile",
+            str(app),
+            "--platform",
+            target.sdk,
+            "--minimum-deployment-target",
+            MINIMUM_IOS,
+            "--app-icon",
+            "AppIcon",
+            "--output-partial-info-plist",
+            str(partial),
+            "--target-device",
+            "iphone",
+            "--target-device",
+            "ipad",
+            "--output-format",
+            "human-readable-text",
+            str(ASSET_CATALOG),
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    with partial.open("rb") as f:
+        return plistlib.load(f)
 
 
 def cargo_build(target: Target, release: bool) -> Path:
@@ -269,6 +344,7 @@ def stage_app(
     label: str,
     build_release,
     music: bool,
+    build_number: str | None = None,
 ) -> tuple[Path, list[Path]]:
     app = IOS_BUILD / target.sdk / f"{APP_NAME}.app"
     if app.exists():
@@ -299,10 +375,29 @@ def stage_app(
     build_release.stamp_build_info(app, label, root=app)
 
     frameworks = stage_bass_frameworks(app / "Frameworks", target)
+    info = info_plist(build_release.project_version(), target, build_number)
+    info.update(compile_icon(app, target))
+    if not target.simulator:
+        info.update(sdk_info(target))
     with (app / "Info.plist").open("wb") as f:
-        plistlib.dump(info_plist(build_release.project_version(), target), f)
+        plistlib.dump(info, f)
     (app / "PkgInfo").write_text("APPL????", encoding="ascii")
     return app, frameworks
+
+
+def package_ipa(app: Path) -> Path:
+    """Zip the signed app as ``Payload/FreightFate.app`` for App Store Connect."""
+    ipa = IOS_BUILD / f"{APP_NAME}.ipa"
+    ipa.unlink(missing_ok=True)
+    with tempfile.TemporaryDirectory() as staging:
+        payload = Path(staging) / "Payload"
+        payload.mkdir()
+        subprocess.run(["ditto", str(app), str(payload / app.name)], check=True)
+        subprocess.run(
+            ["ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", str(payload), str(ipa)],
+            check=True,
+        )
+    return ipa
 
 
 def simctl(*args: str) -> None:
@@ -317,6 +412,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--no-music", action="store_true", help="skip downloading and staging music.pak"
     )
+    parser.add_argument(
+        "--build-number",
+        help="CFBundleVersion (default: the project version); must rise per upload",
+    )
+    parser.add_argument("--ipa", action="store_true", help="also package a device build as an .ipa")
     parser.add_argument("--sign-identity", help="codesign identity for a device build")
     parser.add_argument(
         "--provisioning-profile", type=Path, help="provisioning profile for a device build"
@@ -335,11 +435,15 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--device needs --sign-identity and --provisioning-profile")
     if args.device and (args.install or args.launch):
         parser.error("--install and --launch are for the Simulator")
+    if args.ipa and not args.device:
+        parser.error("--ipa is for a device build")
 
     build_release = load_build_release()
     label = args.tag or build_release.project_version()
     profile_dir = cargo_build(target, release=not args.debug)
-    app, frameworks = stage_app(profile_dir, target, label, build_release, not args.no_music)
+    app, frameworks = stage_app(
+        profile_dir, target, label, build_release, not args.no_music, args.build_number
+    )
 
     entitlements = None
     identity = "-"
@@ -351,6 +455,8 @@ def main(argv: list[str] | None = None) -> int:
             plistlib.dump(provisioning_entitlements(args.provisioning_profile), f)
     codesign(app, frameworks, identity, entitlements)
     print(f"Built {app}")
+    if args.ipa:
+        print(f"Packaged {package_ipa(app)}")
 
     if args.install or args.launch:
         simctl("install", args.simulator, str(app))
