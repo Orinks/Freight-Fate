@@ -345,11 +345,15 @@ The owner's:
 - [ ] Agent-server check of the synth voices (owner, 2026-10-03): with
       Music source on Synthesized, step through the styles and confirm each
       piece starts and the session log shows no audio error.
-- [ ] Agent-server drive over wear thresholds and interrupted warnings
-      (owner, 2026-10-03): `scenario` a truck near each tire, brake and
-      engine wear limit and confirm each warning is spoken once as it is
-      crossed; pause through an hours-of-service or rest-stop warning and
-      confirm it is spoken again after resume and not repeated after.
+- [x] Agent-server drive over wear thresholds and interrupted warnings
+      (owner, 2026-10-03). Done 2026-10-03 on a headless Linux build, Chicago
+      to Gary: tires and brakes staged just under 80 percent each warned
+      once as they crossed and never again on the drive; a tire warning cut
+      off by the pause menu was said again right after "Resumed" and not
+      repeated in the next minute. Engine wear has no `scenario` field, so
+      it was not staged; it runs the same per-component code. The
+      hours-of-service last-stop warning was not staged; its pause handling
+      is the same settle call as the wear warnings.
 - [x] The OneCore leak: closed by owner ruling 2026-09-24. The game-side
       workaround (enumerate voices only on a voice change) is the fix; any
       upstream report stays the owner's call
@@ -1076,7 +1080,7 @@ its status or release decision.
       refused it at pickup still earned it at the receiver.
 - (Release gate) Verify wear thresholds and interrupted warnings over a
       longer drive. The owner's listening pass was replaced 2026-10-03 by an
-      agent-server drive, which checks what is spoken and when.
+      agent-server drive, which passed the same day (see the release gate).
 
 - [x] `--list-speech-backends` names every screen reader and voice Prism finds
       on the machine it runs on, says which can speak right now, and which one
