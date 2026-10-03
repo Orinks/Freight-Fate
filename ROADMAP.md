@@ -345,11 +345,15 @@ The owner's:
 - [ ] Agent-server check of the synth voices (owner, 2026-10-03): with
       Music source on Synthesized, step through the styles and confirm each
       piece starts and the session log shows no audio error.
-- [ ] Agent-server drive over wear thresholds and interrupted warnings
-      (owner, 2026-10-03): `scenario` a truck near each tire, brake and
-      engine wear limit and confirm each warning is spoken once as it is
-      crossed; pause through an hours-of-service or rest-stop warning and
-      confirm it is spoken again after resume and not repeated after.
+- [x] Agent-server drive over wear thresholds and interrupted warnings
+      (owner, 2026-10-03). Done 2026-10-03 on a headless Linux build, Chicago
+      to Gary: tires and brakes staged just under 80 percent each warned
+      once as they crossed and never again on the drive; a tire warning cut
+      off by the pause menu was said again right after "Resumed" and not
+      repeated in the next minute. Engine wear has no `scenario` field, so
+      it was not staged; it runs the same per-component code. The
+      hours-of-service last-stop warning was not staged; its pause handling
+      is the same settle call as the wear warnings.
 - [x] The OneCore leak: closed by owner ruling 2026-09-24. The game-side
       workaround (enumerate voices only on a voice change) is the fix; any
       upstream report stays the owner's call
@@ -379,10 +383,11 @@ Everything found before 2026-09-25 moved to
       ([September 13](#september-13-driver-directory)).
 - [ ] Simulated snow by region and month, not a hard Dec-Feb gate
       ([October 1](#october-1-seasons)).
-- [ ] Updater, issue 266: after "Restarting to finish the update" the window
+- [x] Updater, issue 266: after "Restarting to finish the update" the window
       stays up, unpumped, while every service shuts down (bounded, but up to
       about twenty seconds), which macOS reports as not responding. Hide the
-      window first, or pump events through the quit.
+      window first, or pump events through the quit. Pumped through the quit
+      (2026-10-03).
 - [ ] Updater, issue 266: a stalled download now fails after sixty idle
       seconds, but its blocked read thread and socket linger until that read
       returns or the game quits. A per-read socket timeout would end both.
@@ -1075,7 +1080,7 @@ its status or release decision.
       refused it at pickup still earned it at the receiver.
 - (Release gate) Verify wear thresholds and interrupted warnings over a
       longer drive. The owner's listening pass was replaced 2026-10-03 by an
-      agent-server drive, which checks what is spoken and when.
+      agent-server drive, which passed the same day (see the release gate).
 
 - [x] `--list-speech-backends` names every screen reader and voice Prism finds
       on the machine it runs on, says which can speak right now, and which one

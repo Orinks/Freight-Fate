@@ -77,6 +77,14 @@ const HEALTH_POLL: Duration = Duration::from_secs(3);
 /// Bounded wait for the two calls that need an answer.
 const REPLY_WAIT: Duration = Duration::from_secs(2);
 
+/// How long a pumped quit lets the utterance in flight finish before the
+/// backend is released anyway: long enough for "Installing the update. The
+/// game closes and restarts by itself." to play out.
+const FINISH_LINE_BOUND: Duration = Duration::from_secs(5);
+/// The main-thread wait bound on a pumped shutdown: the line finishes,
+/// then the release itself gets the same three seconds it always had.
+const SHUTDOWN_PUMPED_BOUND: Duration = FINISH_LINE_BOUND.saturating_add(Duration::from_secs(3));
+
 enum Command {
     ReplayComplete,
     Say {
@@ -111,6 +119,13 @@ enum Command {
     },
     Shutdown {
         done: mpsc::Sender<()>,
+        /// Let the line in flight finish (bounded by
+        /// [`FINISH_LINE_BOUND`]) before releasing the backend. Only the
+        /// pumped quit path asks for it: an unpumped `stop()` used to
+        /// deadlock into the three-second timeout, which incidentally let
+        /// the line play out; now that the pump drains the main queue,
+        /// `stop()` lands immediately and would cut it off (issue 266).
+        finish_line: bool,
     },
 }
 
@@ -542,7 +557,15 @@ impl ThreadedSpeech {
                                     call!(inner.say_adjustment_preview(&setting, &text, interrupt));
                                 let _ = reply.send(spoke);
                             }
-                            Command::Shutdown { done } => {
+                            Command::Shutdown { done, finish_line } => {
+                                if finish_line {
+                                    let started = Instant::now();
+                                    while call!(inner.is_speaking())
+                                        && started.elapsed() < FINISH_LINE_BOUND
+                                    {
+                                        std::thread::sleep(Duration::from_millis(20));
+                                    }
+                                }
                                 call!(inner.shutdown());
                                 let _ = done.send(());
                                 return;
@@ -849,13 +872,52 @@ impl SpeechSink for ThreadedSpeech {
         let (done_tx, done_rx) = mpsc::channel();
         if self
             .commands
-            .try_send(Command::Shutdown { done: done_tx })
+            .try_send(Command::Shutdown {
+                done: done_tx,
+                finish_line: false,
+            })
             .is_ok()
         {
             // Give the backend a bounded chance to release cleanly; a
             // wedged one is abandoned, which is exactly what quitting a
             // frozen game by hand used to do -- minus freezing the game.
             let _ = done_rx.recv_timeout(Duration::from_secs(3));
+        }
+    }
+
+    fn shutdown_pumping(&mut self, pump: &mut dyn FnMut()) {
+        // The flag first, then the command: the worker skips every say
+        // still queued ahead of it, so the wait below covers the utterance
+        // in flight finishing (bounded by FINISH_LINE_BOUND), not the whole
+        // backlog.
+        self.shutting_down
+            .store(true, std::sync::atomic::Ordering::Relaxed);
+        let (done_tx, done_rx) = mpsc::channel();
+        if self
+            .commands
+            .try_send(Command::Shutdown {
+                done: done_tx,
+                finish_line: true,
+            })
+            .is_ok()
+        {
+            // Give the backend a bounded chance to release cleanly; a
+            // wedged one is abandoned, which is exactly what quitting a
+            // frozen game by hand used to do -- minus freezing the game.
+            // The wait is sliced so quit can pump events between slices
+            // and macOS never reads the window as not responding.
+            let started = Instant::now();
+            loop {
+                match done_rx.recv_timeout(Duration::from_millis(10)) {
+                    Ok(()) | Err(RecvTimeoutError::Disconnected) => break,
+                    Err(RecvTimeoutError::Timeout) => {
+                        if started.elapsed() >= SHUTDOWN_PUMPED_BOUND {
+                            break;
+                        }
+                        pump();
+                    }
+                }
+            }
         }
     }
 }
