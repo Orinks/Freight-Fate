@@ -669,6 +669,12 @@ impl SpeechSink for Speech {
         Self::stop_backend(self.event_backend.as_mut());
     }
 
+    fn is_speaking(&self) -> bool {
+        self.backend
+            .as_ref()
+            .is_some_and(|backend| backend.is_speaking().unwrap_or(false))
+    }
+
     fn shutdown(&mut self) {
         self.stop();
         self.backend = None;

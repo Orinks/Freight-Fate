@@ -197,7 +197,7 @@
 
 ### Fixed
 
-- **The game keeps answering your computer while it closes, after an update too.** macOS no longer reports it as not responding.
+- **The game keeps answering your computer while it closes, after an update too, and finishes its last sentence first.** macOS no longer reports it as not responding.
 
 - **A stalled update no longer freezes the download screen.** After a quiet minute the game says so and names where to download it yourself.
 

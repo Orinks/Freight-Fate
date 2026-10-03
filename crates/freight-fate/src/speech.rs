@@ -261,6 +261,12 @@ pub trait SpeechSink {
     /// the main voice changed; with `announce` the new voice says so.
     fn refresh(&mut self, announce: bool) -> bool;
 
+    /// Whether the main voice is still speaking a line. Sinks that cannot
+    /// answer it report `false`.
+    fn is_speaking(&self) -> bool {
+        false
+    }
+
     /// Release the backends and context. Safe to call more than once.
     fn shutdown(&mut self);
 

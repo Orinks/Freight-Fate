@@ -124,6 +124,12 @@ pub trait VoiceBackend {
     /// `features().supports_braille`; a backend without it answers `Err`.
     fn braille(&mut self, text: &str) -> Result<(), SpeechError>;
     fn stop(&mut self) -> Result<(), SpeechError>;
+    /// Whether the voice is still speaking a line. Backends that cannot
+    /// answer it report `false`; quit uses it to let the line in flight
+    /// finish before release (issue 266).
+    fn is_speaking(&self) -> Result<bool, SpeechError> {
+        Ok(false)
+    }
     fn set_rate(&mut self, rate: f64) -> Result<(), SpeechError>;
     fn set_pitch(&mut self, pitch: f64) -> Result<(), SpeechError>;
     fn set_volume(&mut self, volume: f64) -> Result<(), SpeechError>;
@@ -361,6 +367,10 @@ impl VoiceBackend for PrismVoice {
 
     fn stop(&mut self) -> Result<(), SpeechError> {
         self.backend.borrow().stop()
+    }
+
+    fn is_speaking(&self) -> Result<bool, SpeechError> {
+        self.backend.borrow().is_speaking()
     }
 
     fn set_rate(&mut self, rate: f64) -> Result<(), SpeechError> {
