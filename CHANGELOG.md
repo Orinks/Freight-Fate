@@ -201,6 +201,10 @@
 
 - **Radio stations that were silent, gone, listed twice or playing a different station are fixed or off the dial.** Stations that moved play from their new address.
 
+- **Your Discord status keeps up on long sessions.** If Discord turns down an update, the game reconnects and sends it again instead of leaving the old status showing.
+
+- **A truck parked with the radio on now leaves the live drivers board after half an hour.** A new song no longer counts as driving.
+
 - **The game keeps answering your computer while it closes, after an update too, and finishes its last sentence first.** macOS no longer reports it as not responding.
 
 - **A stalled update no longer freezes the download screen.** After a quiet minute the game says so and names where to download it yourself.
