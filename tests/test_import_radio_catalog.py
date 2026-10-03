@@ -69,11 +69,11 @@ def test_an_unclosed_bracket_is_a_note_that_got_away():
 def test_hand_curation_wins_over_what_the_build_derived():
     overrides, dropped = irc.hand_curation(OVERRIDES_PATH)
     station = irc.apply_overrides(
-        {"id": "rb-web-b4844481-c223-4fa0-9229-e0a19541c163", "name": "x", "format": "y"},
+        {"id": "rb-web-69e1e6ac-272f-4fb2-9f14-9bab8df14959", "name": "x", "format": "y"},
         overrides,
     )
-    assert station["name"] == "Country104 (Star104)"
-    assert station["format"] == "country"
+    assert station["name"] == "Star104 The 80s Channel"
+    assert station["format"] == "80s"
     # The reason each entry exists is for the reader, not the catalog.
     assert "why" not in station
 

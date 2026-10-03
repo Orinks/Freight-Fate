@@ -65,6 +65,8 @@
 
 ### Changed
 
+- **Radio stations whose name already includes the call sign say it once.** Tuning now says "KXLU 88.9", not "KXLU, KXLU 88.9".
+
 - **CB reports now open with a short squelch and go straight to the news.** "CB chatter" is no longer said before each one.
 
 - **Lane keeping on full now passes slow vehicles.** You hear "Passing on the left", and the truck moves back right once past.
@@ -194,6 +196,8 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **Radio stations that were silent, gone, listed twice or playing a different station are fixed or off the dial.** Stations that moved play from their new address.
 
 - **The game keeps answering your computer while it closes, after an update too, and finishes its last sentence first.** macOS no longer reports it as not responding.
 

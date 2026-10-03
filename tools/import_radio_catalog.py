@@ -174,7 +174,9 @@ def normalize_stream_url(url: str) -> str:
     different one. Live365 mounts fold further, onto the station id in the
     mount name: the directory carries the same station under several CDN
     edge hosts and bitrates, which put Radiostorm's At Work, Oldies and
-    Comedy channels on the web band twice each. Never stored or spoken --
+    Comedy channels on the web band twice each. A trailing ``;`` goes with
+    the slash: ``host/;`` is the Shoutcast mount of the stream ``host/``
+    serves a player. Never stored or spoken --
     comparison only. Mirrors ``ff_core::radio::normalize_stream_url`` so this build-time
     collision check and the game agree on what counts as "the same
     stream".
@@ -183,7 +185,7 @@ def normalize_stream_url(url: str) -> str:
     match = _URL_SCHEME_RE.match(url)
     if match:
         url = url[match.end() :]
-    url = url.rstrip("/")
+    url = url.rstrip("/;")
     host, _, rest = url.partition("/")
     host = host.lower()
     if _LIVE365_HOST_RE.match(host):

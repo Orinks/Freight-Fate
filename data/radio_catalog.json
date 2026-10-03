@@ -1940,7 +1940,7 @@
       "source": "public station stream metadata",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "http://ypr-sc.streamguys.net/live",
+      "stream_url": "https://ypr.streamguys1.com/live",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 45.7833,
@@ -1951,7 +1951,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser checked entry: KEMC 91.7 \"Yellowstone Public Radio\" Billings, MT (MP3). BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map."
+      "notes": "Radio Browser checked entry: KEMC 91.7 \"Yellowstone Public Radio\" Billings, MT (MP3). BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map. Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "maine-public-bangor",
@@ -2087,7 +2087,7 @@
       "source": "public station stream metadata",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://kwmu1-ice.streamguys1.com/kwmu1.m3u",
+      "stream_url": "https://kwmu1-ice.streamguys1.com/kwmu1",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 38.627,
@@ -2098,7 +2098,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser checked entry: 90.7 FM KWMU-1. BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map."
+      "notes": "Radio Browser checked entry: 90.7 FM KWMU-1. BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map. Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "kuhf-houston",
@@ -3275,7 +3275,7 @@
       "source": "Yellowstone Public Radio network feed (ypradio.org/listening-area), carried on FM translator K219FF 91.7 Havre (short range; KNMC 90.1 is separate MSU-Northern college radio)",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "http://ypr-sc.streamguys.net/live",
+      "stream_url": "https://ypr.streamguys1.com/live",
       "stream_format": "icecast",
       "codec": "mp3",
       "lat": 48.55,
@@ -3285,7 +3285,8 @@
       "region": "northern_rockies",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true
+      "supported": true,
+      "notes": "Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "abc-triple-j",
@@ -4827,7 +4828,7 @@
       "source": "https://www.redriverradio.org/listen-live",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://18123.live.streamtheworld.com/KDAQFM.mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KDAQFM.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 31.338,
@@ -4839,7 +4840,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Red River Radio full station for Deep East Texas; carries the network news feed. Reaches Longview."
+      "notes": "Red River Radio full station for Deep East Texas; carries the network news feed. Reaches Longview. Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "ketr-paris",
@@ -5217,7 +5218,7 @@
     {
       "id": "wnxp-nashville",
       "call_sign": "WNXP",
-      "name": "WNXP 91.1 Nashville's Music Experience",
+      "name": "WNXP 91.1",
       "format": "adult album alternative",
       "source": "https://www.nashvillepublicradio.org/",
       "source_type": "local",
@@ -6358,7 +6359,7 @@
       "source": "https://www.cpr.org/streaming/",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "http://stream2.cprnetwork.org:8000/cpr1_lo",
+      "stream_url": "https://stream1.cprnetwork.org/cpr1_lo",
       "stream_format": "icecast",
       "codec": "mp3",
       "lat": 39.731,
@@ -6370,7 +6371,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Colorado Public Radio statewide news service."
+      "notes": "Colorado Public Radio statewide news service. Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "kanu-lawrence",
@@ -8223,7 +8224,7 @@
     {
       "id": "kmcu-wichita-falls",
       "call_sign": "KMCU",
-      "name": "KMCU 88.7 (KCCU relay)",
+      "name": "KMCU 88.7",
       "format": "news and classical",
       "source": "https://onlineradiobox.com/us/kmcu/",
       "source_type": "local",
@@ -8289,7 +8290,7 @@
     {
       "id": "wmfe-orlando",
       "call_sign": "WMFE",
-      "name": "WMFE 90.7 (Central Florida Public Media)",
+      "name": "WMFE 90.7",
       "format": "news and information",
       "source": "https://www.cfpublic.org/",
       "source_type": "local",
@@ -8421,7 +8422,7 @@
     {
       "id": "wnhu-new-haven",
       "call_sign": "WNHU",
-      "name": "88.7 WNHU University of New Haven",
+      "name": "WNHU 88.7",
       "format": "college variety",
       "source": "https://www.wnhu.org/",
       "source_type": "local",
@@ -9580,7 +9581,7 @@
       "source": "https://www.hppr.org/listen",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://26153.live.streamtheworld.com/KANZFM_HPPR.mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KANZFM_HPPR.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 35.222,
@@ -9592,7 +9593,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "HPPR relay for Amarillo; carries the HPPR news/mix network feed. Reaches Panhandle towns (Dumas, Hereford, Pampa)."
+      "notes": "HPPR relay for Amarillo; carries the HPPR news/mix network feed. Reaches Panhandle towns (Dumas, Hereford, Pampa). Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "kut-austin",
@@ -9865,7 +9866,7 @@
       "source": "https://www.mainepublic.org/listen-live",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://17553.live.streamtheworld.com:443/WMEAFM.mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMEAFM.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 43.7268,
@@ -9877,7 +9878,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Maine Public news flagship for southern Maine (Portland/Lewiston); Falmouth transmitter. StreamTheWorld direct mount from playerservices WMEAFM.mp3."
+      "notes": "Maine Public news flagship for southern Maine (Portland/Lewiston); Falmouth transmitter. StreamTheWorld direct mount from playerservices WMEAFM.mp3. Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "maine-public-classical-portland",
@@ -10739,7 +10740,7 @@
       "source": "https://www.boisestatepublicradio.org/listen",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://boisestate.streamguys1.com/News1-aac-96k-icy.aac",
+      "stream_url": "https://boisestate.streamguys1.com/News1-aac-96k-icy",
       "stream_format": "aac",
       "codec": "aac",
       "lat": 42.563,
@@ -10751,7 +10752,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Boise State Public Radio news repeater serving the Magic Valley."
+      "notes": "Boise State Public Radio news repeater serving the Magic Valley. Sweep 2026-10-03: address matched to its sister sites, which carry the same stream, so the dial lists the network once."
     },
     {
       "id": "krbx-boise",
@@ -11914,7 +11915,7 @@
     {
       "id": "sun-sounds-arizona-phoenix",
       "call_sign": "SUN-SOUNDS-AZ",
-      "name": "Sun Sounds of Arizona (Phoenix / Tempe)",
+      "name": "Sun Sounds of Arizona (Phoenix)",
       "format": "radio reading service",
       "source": "https://sunsounds.org/listen-live",
       "source_type": "local",
@@ -11983,7 +11984,7 @@
     {
       "id": "cris-radio-chicago",
       "call_sign": "CRIS-CHI",
-      "name": "Chicagoland Radio Information Service (CRIS Radio)",
+      "name": "CRIS Radio",
       "format": "radio reading service",
       "source": "https://chicagolighthouse.org/radio/",
       "source_type": "local",
@@ -12167,7 +12168,7 @@
     {
       "id": "gpb-reading-radio-atlanta",
       "call_sign": "GPB-RR",
-      "name": "GPB Reading Radio (Vocal Point / SEEVP, formerly GaRRS)",
+      "name": "GPB Reading Radio",
       "format": "radio reading service",
       "source": "https://seevp.org/",
       "source_type": "local",
