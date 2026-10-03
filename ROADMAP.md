@@ -379,10 +379,11 @@ Everything found before 2026-09-25 moved to
       ([September 13](#september-13-driver-directory)).
 - [ ] Simulated snow by region and month, not a hard Dec-Feb gate
       ([October 1](#october-1-seasons)).
-- [ ] Updater, issue 266: after "Restarting to finish the update" the window
+- [x] Updater, issue 266: after "Restarting to finish the update" the window
       stays up, unpumped, while every service shuts down (bounded, but up to
       about twenty seconds), which macOS reports as not responding. Hide the
-      window first, or pump events through the quit.
+      window first, or pump events through the quit. Pumped through the quit
+      (2026-10-03).
 - [ ] Updater, issue 266: a stalled download now fails after sixty idle
       seconds, but its blocked read thread and socket linger until that read
       returns or the game quits. A per-read socket timeout would end both.
