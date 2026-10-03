@@ -376,6 +376,11 @@ def main(argv: list[str] | None = None) -> int:
         help="also audit imported rows the health file dropped",
     )
     parser.add_argument("--ids", default="", help="comma-separated ids to audit (overrides --only)")
+    parser.add_argument(
+        "--urls",
+        type=Path,
+        help="a JSON list of {id, stream_url} to audit instead of the catalogs (candidate addresses)",
+    )
     parser.add_argument("--shard", default="1/1", help="audit part K of N, e.g. 2/4")
     parser.add_argument("--workers", type=int, default=24)
     parser.add_argument("--seconds", type=float, default=DEFAULT_SAMPLE_S)
@@ -386,6 +391,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.ids:
         wanted = set(args.ids.split(","))
         rows = [r for r in rows if r["id"] in wanted]
+    if args.urls:
+        rows = [
+            {**row, "_tier": "candidate"}
+            for row in json.loads(args.urls.read_text(encoding="utf-8"))
+        ]
     part, total = (int(x) for x in args.shard.split("/"))
     rows = rows[part - 1 :: total]
     print(f"Auditing {len(rows)} streams with {args.workers} workers...", flush=True)
