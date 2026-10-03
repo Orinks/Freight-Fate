@@ -387,6 +387,11 @@ Everything found before 2026-09-25 moved to
       (2026-10-03, a driver at 0% for seven hours). Both now ignore the
       radio clause; the site half is on orinks-net branch
       claude/project-thread-ml6w19 awaiting deploy.
+- [x] Discord status could freeze on a long session: the IPC crate never
+      read Discord's reply to a status change, so replies piled up unread
+      and a refused change went unnoticed. The game now reads each reply
+      and reconnects on a refusal (2026-10-03). Whether the unread pile
+      was what froze it is inferred, not reproduced.
 - [ ] Simulated snow by region and month, not a hard Dec-Feb gate
       ([October 1](#october-1-seasons)).
 - [x] Updater, issue 266: after "Restarting to finish the update" the window
