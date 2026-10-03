@@ -17,6 +17,8 @@
 //! Presence is not difficulty: placement and staffing read nothing from
 //! `hazard_scale`, and there is no player setting here any more.
 
+use std::fmt::Write;
+
 use crate::pyfmt::{fmt_f, round_py_n};
 use crate::pyrandom::PyRandom;
 use crate::sim::season::day_of_week;
@@ -333,12 +335,24 @@ impl EnforcementPost {
     }
 
     pub fn id(&self) -> String {
-        format!(
-            "post:{}:{}:{}",
-            self.leg_index,
-            fmt_f(self.at_mi, 1),
-            self.kind
-        )
+        let mut id = String::new();
+        self.write_id(&mut id);
+        id
+    }
+
+    /// [`EnforcementPost::id`] written into `out` (cleared first), so a
+    /// per-frame caller can reuse one buffer instead of allocating per post.
+    pub fn write_id(&self, out: &mut String) {
+        out.clear();
+        out.push_str("post:");
+        let _ = write!(out, "{}:", self.leg_index);
+        if self.at_mi.is_nan() {
+            out.push_str("nan");
+        } else {
+            let _ = write!(out, "{:.1}", self.at_mi);
+        }
+        out.push(':');
+        out.push_str(&self.kind);
     }
 
     /// Short internal context label, interpolated into spoken lines.
@@ -539,7 +553,9 @@ impl Trip {
         posts.extend(self.work_zone_posts());
         posts.extend(self.scale_posts());
         posts.extend(self.urban_posts());
-        posts.extend(self.chain_posts());
+        if self.chain_law_level() > 0 {
+            posts.extend(self.chain_posts());
+        }
         // A stable sort, as Python's is.
         posts.sort_by(|a, b| a.at_mi.partial_cmp(&b.at_mi).expect("finite mileposts"));
         for post in posts.iter_mut() {
@@ -663,6 +679,30 @@ impl Trip {
         posts
     }
 
+    /// A chain control is set up when the law is posted and packed away when
+    /// it lifts (Caltrans: controls go up "when conditions require"), so its
+    /// post is on the route only while `chain_law_level` says the law is in
+    /// effect. It used to stand at every chain-up area all year: a CB call
+    /// about the chain control checking rigs, and its trooper watching for
+    /// anything else, on dry October pavement (owner, 2026-10-01). Re-placed
+    /// from the seed, so a post that comes back is the same post, and one the
+    /// CB already called is not called again.
+    pub fn sync_chain_posts(&mut self) {
+        let in_effect = self.chain_law_level() > 0;
+        let placed = self.posts.iter().any(|post| post.kind == KIND_CHAIN);
+        if in_effect && !placed {
+            let chain = self.chain_posts();
+            if chain.is_empty() {
+                return;
+            }
+            self.posts.extend(chain);
+            self.posts
+                .sort_by(|a, b| a.at_mi.partial_cmp(&b.at_mi).expect("finite mileposts"));
+        } else if !in_effect && placed {
+            self.posts.retain(|post| post.kind != KIND_CHAIN);
+        }
+    }
+
     // -- lookup ----------------------------------------------------------------
 
     /// The staffed post watching this mile, most attentive first.
@@ -711,7 +751,11 @@ impl Trip {
     /// A mutable handle on one post by id, for the driving layer's
     /// `declined`/`announced` bookkeeping.
     pub fn post_mut(&mut self, post_id: &str) -> Option<&mut EnforcementPost> {
-        self.posts.iter_mut().find(|p| p.id() == post_id)
+        let mut id = String::new();
+        self.posts.iter_mut().find(|p| {
+            p.write_id(&mut id);
+            id == post_id
+        })
     }
 }
 

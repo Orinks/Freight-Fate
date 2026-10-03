@@ -50,9 +50,9 @@ SOURCES = [
     LV / "SemiTruckAirBrake_BWU.95.wav",
     IND / "AirBrake_BW.20321.wav",
 ]
-CLUNK_BODY_MIN = 1.5   # below this a "hit" is really an airy tick, not a thunk
-CLUNK_KEEP = 14        # cap the clunk bank; Norm's ear culls the survivors
-HISS_KEEP = 20         # cap the hiss bank the same way
+CLUNK_BODY_MIN = 1.5  # below this a "hit" is really an airy tick, not a thunk
+CLUNK_KEEP = 14  # cap the clunk bank; Norm's ear culls the survivors
+HISS_KEEP = 20  # cap the hiss bank the same way
 
 
 def hp(x: np.ndarray, fc: float = 200.0) -> np.ndarray:
@@ -62,13 +62,15 @@ def hp(x: np.ndarray, fc: float = 200.0) -> np.ndarray:
 
 def write(name: str, x: np.ndarray, target_rms: float = 0.10) -> None:
     x = np.nan_to_num(np.asarray(x, float))
-    x = x * (target_rms / (float(np.sqrt(np.mean(x ** 2))) or 1.0))
+    x = x * (target_rms / (float(np.sqrt(np.mean(x**2))) or 1.0))
     p = float(np.max(np.abs(x))) or 1.0
     if p > 0.97:
         x = x * (0.97 / p)
     OUT.mkdir(parents=True, exist_ok=True)
     with wave.open(str(OUT / name), "wb") as fh:
-        fh.setnchannels(1); fh.setsampwidth(2); fh.setframerate(C.SR)
+        fh.setnchannels(1)
+        fh.setsampwidth(2)
+        fh.setframerate(C.SR)
         fh.writeframes((x * 32767).astype("<i2").tobytes())
 
 
@@ -90,18 +92,18 @@ def onset(x: np.ndarray, hpfc: float = 110.0) -> int:
 
 def clunk_hit(seg: np.ndarray, win_s: float = 0.09) -> np.ndarray:
     """Short percussive thunk: onset window, gentle HP to keep body, hit envelope."""
-    seg = hp(seg[:int(win_s * C.SR)].copy(), 110.0)
+    seg = hp(seg[: int(win_s * C.SR)].copy(), 110.0)
     if len(seg) < 8:
         return seg
     atk = int(0.002 * C.SR)
     seg[:atk] *= np.linspace(0, 1, atk)
-    seg *= np.linspace(1, 0, len(seg)) ** 1.8   # decays to a hit, not a tone
+    seg *= np.linspace(1, 0, len(seg)) ** 1.8  # decays to a hit, not a tone
     return seg
 
 
 def chuff(seg: np.ndarray, max_s: float = 0.55) -> np.ndarray:
     """Longer airy release: HP 200 to drop hum, eased tail so no endless sssh."""
-    seg = hp(seg[:int(max_s * C.SR)].copy())
+    seg = hp(seg[: int(max_s * C.SR)].copy())
     if len(seg) < 8:
         return seg
     atk = int(0.008 * C.SR)
@@ -121,22 +123,25 @@ def bantam_events(x: np.ndarray, max_events: int = 24) -> list[int]:
     out: list[int] = []
     i = 0
     while i < len(env) - int(0.55 * C.SR) and len(out) < max_events:
-        if env[i] > thr and env[i] >= env[max(0, i - win):i + win].max() - 1e-9:
-            out.append(max(0, i - int(0.006 * C.SR))); i += gap
+        if env[i] > thr and env[i] >= env[max(0, i - win) : i + win].max() - 1e-9:
+            out.append(max(0, i - int(0.006 * C.SR)))
+            i += gap
         else:
             i += 1
     return out
 
 
-def bantam_press_positions(x: np.ndarray, hop_s: float = 0.02, win_s: float = 0.09,
-                           min_gap_s: float = 0.18) -> list[int]:
+def bantam_press_positions(
+    x: np.ndarray, hop_s: float = 0.02, win_s: float = 0.09, min_gap_s: float = 0.18
+) -> list[int]:
     """Find the PRESS moments: windows whose thunk is body-heavy, not the loud
     airy releases the amplitude detector catches. Greedy-pick the highest-body
     windows that are also audible, spaced so we don't re-cut one press twice."""
-    win = int(win_s * C.SR); hop = int(hop_s * C.SR)
+    win = int(win_s * C.SR)
+    hop = int(hop_s * C.SR)
     pos = np.arange(0, max(1, len(x) - win), hop)
-    bod = np.array([bodyness(clunk_hit(x[p:p + win])) for p in pos])
-    amp = np.array([float(np.sqrt(np.mean(hp(x[p:p + win], 110.0) ** 2))) for p in pos])
+    bod = np.array([bodyness(clunk_hit(x[p : p + win])) for p in pos])
+    amp = np.array([float(np.sqrt(np.mean(hp(x[p : p + win], 110.0) ** 2))) for p in pos])
     ok = (bod > CLUNK_BODY_MIN) & (amp > 2e-3)
     order = np.argsort(bod)[::-1]
     picked: list[int] = []
@@ -150,13 +155,13 @@ def bantam_press_positions(x: np.ndarray, hop_s: float = 0.02, win_s: float = 0.
 
 
 def loud_enough(x: np.ndarray) -> bool:
-    return float(np.sqrt(np.mean(x ** 2))) > 1e-3
+    return float(np.sqrt(np.mean(x**2))) > 1e-3
 
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     for stale in list(OUT.glob("brake_clunk_*.wav")) + list(OUT.glob("brake_hiss_*.wav")):
-        stale.unlink()   # banks are rebuilt whole; drop old numbering first
+        stale.unlink()  # banks are rebuilt whole; drop old numbering first
 
     clunk_cands: list[tuple[float, np.ndarray]] = []
     hiss_cands: list[tuple[float, np.ndarray]] = []
@@ -189,8 +194,8 @@ def main() -> None:
         if loud_enough(tail):
             hiss_cands.append((bodyness(tail), tail))
 
-    clunk_cands.sort(key=lambda t: t[0], reverse=True)   # thunkiest first
-    hiss_cands.sort(key=lambda t: t[0])                  # airiest first
+    clunk_cands.sort(key=lambda t: t[0], reverse=True)  # thunkiest first
+    hiss_cands.sort(key=lambda t: t[0])  # airiest first
     # Only keep genuine thunks -- an honest small bank beats one padded with
     # airy ticks. Norm's ear culls what survives the bodyness gate.
     clunks = [c for b, c in clunk_cands if b >= CLUNK_BODY_MIN][:CLUNK_KEEP]
@@ -206,8 +211,10 @@ def main() -> None:
         if not bank:
             return np.zeros(1)
         gap = np.zeros(int(gap_s * C.SR))
-        return np.concatenate([np.concatenate([b / (np.abs(b).max() or 1) * 0.7, gap])
-                               for b in bank])
+        return np.concatenate(
+            [np.concatenate([b / (np.abs(b).max() or 1) * 0.7, gap]) for b in bank]
+        )
+
     write("brake_clunk_demo.wav", demo(clunks, 0.35))
     write("brake_hiss_demo.wav", demo(hisses, 0.4))
 
@@ -215,16 +222,18 @@ def main() -> None:
     if BANTAM.exists():
         x = C.load_wav(BANTAM)
         mid = len(x) // 2
-        eb = hp(x[mid:mid + int(2.5 * C.SR)]).copy()
-        atk = int(0.02 * C.SR); eb[:atk] *= np.linspace(0, 1, atk)
-        eb[-int(0.2 * C.SR):] *= np.linspace(1, 0, int(0.2 * C.SR))
+        eb = hp(x[mid : mid + int(2.5 * C.SR)]).copy()
+        atk = int(0.02 * C.SR)
+        eb[:atk] *= np.linspace(0, 1, atk)
+        eb[-int(0.2 * C.SR) :] *= np.linspace(1, 0, int(0.2 * C.SR))
         write("ebrake_full.wav", eb)
 
     survivors = [b for b, _ in clunk_cands if b >= CLUNK_BODY_MIN][:CLUNK_KEEP]
-    print(f"  clunk bank: {len(clunks)} genuine thunks (bodyness >= {CLUNK_BODY_MIN})   "
-          f"hiss bank: {len(hisses)}   + ebrake_full.wav")
-    print("  clunk bodyness (thunkiest first): "
-          + ", ".join(f"{b:.1f}" for b in survivors))
+    print(
+        f"  clunk bank: {len(clunks)} genuine thunks (bodyness >= {CLUNK_BODY_MIN})   "
+        f"hiss bank: {len(hisses)}   + ebrake_full.wav"
+    )
+    print("  clunk bodyness (thunkiest first): " + ", ".join(f"{b:.1f}" for b in survivors))
     print(f"  wrote banks + brake_clunk_demo / brake_hiss_demo to {OUT}")
 
 

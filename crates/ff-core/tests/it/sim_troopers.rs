@@ -109,7 +109,7 @@ fn test_cb_radio_warns_before_an_upcoming_post() {
         .collect();
     assert!(!cb_events.is_empty());
     assert_eq!(cb_events[0].kind, TripEventKind::GpsCue);
-    assert!(cb_events[0].text().contains("CB chatter"));
+    assert!(!cb_events[0].text().contains("CB chatter"));
     assert!(cb_events[0].text().contains("bear"));
 }
 

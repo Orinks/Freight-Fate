@@ -71,6 +71,33 @@ fn window_handle(window: &sdl2::video::Window) -> Option<isize> {
 }
 
 #[cfg(target_os = "windows")]
+fn window_is_visible(handle: isize) -> bool {
+    // SAFETY: IsWindowVisible only reads the WS_VISIBLE style of the window
+    // and returns FALSE for a handle that is not a window; the handle came
+    // from SDL's own window, which this shell keeps alive.
+    unsafe { windows_sys::Win32::UI::WindowsAndMessaging::IsWindowVisible(handle as _) != 0 }
+}
+
+/// Run `force_show` when the window is not really on screen; returns
+/// whether it had to.
+///
+/// A parent that launches with STARTUPINFO `wShowWindow = SW_HIDE` (Node's
+/// `windowsHide`, which is how the Claude desktop app spawns MCP servers)
+/// turns the process's FIRST `ShowWindow` into a hide, whatever it asked for
+/// (Win32 `ShowWindow`: "nCmdShow is ignored the first time ... if the
+/// program that launched the application provides a STARTUPINFO"). SDL's
+/// initial show becomes that hide, SDL still believes the window is shown,
+/// and its restore and raise are then no-ops: an operator-keys agent server
+/// came up with no window at all, not even in Alt+Tab.
+#[cfg(target_os = "windows")]
+fn force_show_if_hidden(visible: bool, force_show: impl FnOnce()) -> bool {
+    if !visible {
+        force_show();
+    }
+    !visible
+}
+
+#[cfg(target_os = "windows")]
 fn release_at_process_exit<T>(resource: T) {
     // SDL_DestroyRenderer/SDL_DestroyWindow can synchronously wait in the
     // Windows window stack after a long, frequently Alt-Tabbed session. The
@@ -114,6 +141,13 @@ impl SdlShell {
         } else {
             window_handle(canvas.window())
         };
+        #[cfg(target_os = "windows")]
+        if let Some(handle) = window_handle {
+            log::info!(
+                "window visible after startup: {}",
+                window_is_visible(handle)
+            );
+        }
         let pump = sdl.event_pump()?;
         // pygame delivered event.unicode for every key; SDL needs text
         // input running for TextInput events.
@@ -146,10 +180,34 @@ impl SdlShell {
     }
 
     /// Bring a minimized window back and ask for focus, so the operator's
-    /// keyboard lands in the game again.
+    /// keyboard lands in the game again. A window the launcher's
+    /// STARTUPINFO kept hidden is shown first (see [`force_show_if_hidden`]).
     pub fn restore(&mut self) {
+        #[cfg(target_os = "windows")]
+        self.ensure_visible();
         self.canvas.window_mut().restore();
         self.canvas.window_mut().raise();
+    }
+
+    /// Show the window if Windows is keeping it hidden behind SDL's back.
+    /// Hide first so SDL's shown flag is cleared and its show is not skipped;
+    /// by now the launcher's one-time override is spent, so the show is
+    /// honoured. Returns whether a show was forced; `None` without a native
+    /// window (the dummy driver).
+    #[cfg(target_os = "windows")]
+    fn ensure_visible(&mut self) -> Option<bool> {
+        let handle = self.window_handle?;
+        let visible = window_is_visible(handle);
+        let window = self.canvas.window_mut();
+        let forced = force_show_if_hidden(visible, || {
+            window.hide();
+            window.show();
+        });
+        log::info!(
+            "window visible: {visible}, forced show: {}",
+            if forced { "yes" } else { "no" }
+        );
+        Some(forced)
     }
 
     /// Hand desktop focus back immediately and finish SDL at process exit.
@@ -208,13 +266,17 @@ pub fn translate_events(raw: Vec<Event>) -> Vec<InputEvent> {
     for event in raw {
         match event {
             Event::KeyDown {
-                keycode, keymod, ..
+                keycode,
+                keymod,
+                repeat,
+                ..
             } => {
                 let key = keycode.map(key_from_keycode).unwrap_or(Key::Other(0));
                 out.push(InputEvent::KeyDown {
                     key,
                     mods: mods_from(keymod),
                     text: None,
+                    repeat,
                 });
                 pending_text = Some(out.len() - 1);
                 continue;
@@ -427,7 +489,8 @@ mod tests {
                 InputEvent::KeyDown {
                     key: Key::A,
                     mods: Mods::SHIFT,
-                    text: Some('A')
+                    text: Some('A'),
+                    repeat: false
                 },
                 InputEvent::key(Key::Left),
             ]
@@ -474,5 +537,124 @@ mod tests {
         });
 
         assert!(async_hide_called.get());
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn only_a_window_windows_kept_hidden_is_force_shown() {
+        use std::cell::Cell;
+
+        let shows = Cell::new(0);
+        assert!(!force_show_if_hidden(true, || shows.set(shows.get() + 1)));
+        assert_eq!(shows.get(), 0, "a visible window was hidden and shown");
+        assert!(force_show_if_hidden(false, || shows.set(shows.get() + 1)));
+        assert_eq!(shows.get(), 1, "a hidden window was left hidden");
+    }
+
+    #[cfg(target_os = "windows")]
+    const HIDDEN_LAUNCH_REPORT: &str = "FREIGHT_FATE_HIDDEN_LAUNCH_REPORT";
+
+    /// The child half of [`a_hidden_launch_still_ends_with_a_visible_window`];
+    /// does nothing unless that test launched it.
+    #[cfg(target_os = "windows")]
+    #[test]
+    #[ignore = "child process of a_hidden_launch_still_ends_with_a_visible_window"]
+    fn hidden_launch_child() {
+        let Some(report) = std::env::var_os(HIDDEN_LAUNCH_REPORT) else {
+            return;
+        };
+        let mut shell = SdlShell::new("Freight Fate - hidden launch check").expect("window");
+        let handle = shell.window_handle.expect("a native window");
+        let created = window_is_visible(handle);
+        // The forced show goes without activation, so the check never takes
+        // the desktop's focus from whoever is using it. Not before creation:
+        // the launch override applies to SDL's plain first show.
+        sdl2::hint::set("SDL_WINDOW_NO_ACTIVATION_WHEN_SHOWN", "1");
+        let forced = shell.ensure_visible() == Some(true);
+        let now = window_is_visible(handle);
+        std::fs::write(report, format!("{created} {forced} {now}")).expect("report");
+        shell.shutdown_for_process_exit();
+    }
+
+    /// Launch the way the desktop app launches an MCP server (STARTUPINFO
+    /// `SW_HIDE`; std's `Command` cannot set `wShowWindow` on stable) and
+    /// check SDL's window is hidden by it and shown again by the fix.
+    #[cfg(target_os = "windows")]
+    #[test]
+    #[ignore = "opens a real window on the desktop for a moment; run by name"]
+    fn a_hidden_launch_still_ends_with_a_visible_window() {
+        use std::os::windows::ffi::OsStrExt;
+        use windows_sys::Win32::Foundation::CloseHandle;
+        use windows_sys::Win32::System::Threading::{
+            CreateProcessW, GetExitCodeProcess, WaitForSingleObject, CREATE_UNICODE_ENVIRONMENT,
+            PROCESS_INFORMATION, STARTF_USESHOWWINDOW, STARTUPINFOW,
+        };
+        use windows_sys::Win32::UI::WindowsAndMessaging::SW_HIDE;
+
+        let dir = tempfile::tempdir().expect("temp dir");
+        let report = dir.path().join("report.txt");
+        let exe = std::env::current_exe().expect("test exe");
+        let mut command_line: Vec<u16> = format!(
+            "\"{}\" app::sdl_shell::tests::hidden_launch_child --exact --ignored --test-threads=1",
+            exe.display()
+        )
+        .encode_utf16()
+        .chain([0])
+        .collect();
+        // The inherited environment, minus a headless run's dummy video
+        // driver, plus where to write the report.
+        let mut environment: Vec<u16> = Vec::new();
+        for (key, value) in std::env::vars_os() {
+            if key.eq_ignore_ascii_case("SDL_VIDEODRIVER") {
+                continue;
+            }
+            environment.extend(key.encode_wide());
+            environment.push(u16::from(b'='));
+            environment.extend(value.encode_wide());
+            environment.push(0);
+        }
+        environment.extend(HIDDEN_LAUNCH_REPORT.encode_utf16());
+        environment.push(u16::from(b'='));
+        environment.extend(report.as_os_str().encode_wide());
+        environment.extend([0, 0]);
+
+        // SAFETY: STARTUPINFOW and PROCESS_INFORMATION are plain C structs
+        // of integers and pointers, for which all-zero is the documented
+        // empty value. The command line and environment buffers are
+        // NUL-terminated and outlive the call; the process and thread
+        // handles are closed exactly once below.
+        let exit_code = unsafe {
+            let mut startup: STARTUPINFOW = std::mem::zeroed();
+            startup.cb = std::mem::size_of::<STARTUPINFOW>() as u32;
+            startup.dwFlags = STARTF_USESHOWWINDOW;
+            startup.wShowWindow = SW_HIDE as u16;
+            let mut process: PROCESS_INFORMATION = std::mem::zeroed();
+            let created = CreateProcessW(
+                std::ptr::null(),
+                command_line.as_mut_ptr(),
+                std::ptr::null(),
+                std::ptr::null(),
+                0,
+                CREATE_UNICODE_ENVIRONMENT,
+                environment.as_ptr().cast(),
+                std::ptr::null(),
+                &startup,
+                &mut process,
+            );
+            assert_ne!(created, 0, "CreateProcessW failed");
+            WaitForSingleObject(process.hProcess, 60_000);
+            let mut code = u32::MAX;
+            GetExitCodeProcess(process.hProcess, &mut code);
+            CloseHandle(process.hThread);
+            CloseHandle(process.hProcess);
+            code
+        };
+        assert_eq!(exit_code, 0, "the child test failed");
+        let report = std::fs::read_to_string(&report).expect("child report");
+        assert_eq!(
+            report, "false true true",
+            "expected: hidden by the launch, forced, then visible \
+             (created visible, forced, visible now)"
+        );
     }
 }

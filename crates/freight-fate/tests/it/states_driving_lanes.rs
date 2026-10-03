@@ -1263,7 +1263,9 @@ fn test_camping_the_left_lane_draws_a_cb_nag() {
         .expect("the nag is repeatable")
         .clone();
     assert!(
-        recalled.text.starts_with("CB chatter:"),
+        recalled
+            .text
+            .starts_with("You have been riding the left lane"),
         "{}",
         recalled.text
     );
@@ -1319,7 +1321,7 @@ fn test_left_lane_is_fine_when_the_right_lane_is_coned_off() {
 fn test_exit_readiness_requires_the_right_lane() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);
-    d.exit_lane_alignment = 1.0; // fully aligned in-lane
+    d.exit_lane_entered = true;
     assert!(d.exit_lane_ready());
     d.lane.lane = 1;
     assert!(!d.exit_lane_ready());

@@ -1248,16 +1248,18 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
     // run -- so a quiet rung reported "quiet" and changed nothing, and every
     // rung sounded identical (owner, 2026-08-17).
     profile.tutorial_done = true;
-    // A scenario staged before this carries its truck and its record into
-    // the drive: `start_at` after `scenario` keeps the damage, the wear and
-    // the citations that were asked for, so an inspection has something to
-    // find. A fresh process has no profile and gets the sound bench truck.
+    // A scenario staged before this carries its truck, driving record, and
+    // HOS state into the drive. Otherwise `start_at` silently replaces a
+    // staged short-rest or near-limit clock with a fully rested bench driver.
+    // A fresh process has no profile and gets the sound bench truck.
     if let Some(previous) = ctx.profile.as_ref() {
         profile.truck = previous.truck.clone();
         profile.truck_conditions = previous.truck_conditions.clone();
         profile.driving_record = previous.driving_record.clone();
         profile.out_of_service_events = previous.out_of_service_events;
         profile.career.reputation = previous.career.reputation;
+        profile.hos = previous.hos.clone();
+        profile.fatigue = previous.fatigue;
         // A slip-seating driver's yard spares are drawn from the career's
         // own name, so this bench career's pool is not the scenario's: the
         // record the scenario set would sit under keys this drive never
@@ -1365,6 +1367,24 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
     let total = driving.trip.total_miles();
     let start_mi = (hit.at_mi - lead_mi).clamp(0.0, (total - 1.0).max(0.0));
     driving.trip.position_mi = start_mi;
+    // The road behind the start is driven, not passed on the first frame:
+    // unset, the jump from mile 0 spoke every state line and toll on the way
+    // and played a trooper pass for every post (agent drives, 2026-09-23).
+    driving.trip.settle_road_behind();
+    driving.enforcement_prev_mi = start_mi;
+    // And a post wholly behind the start has nothing left to watch, so it is
+    // heard-and-passed without its marker: every one of them played at once.
+    // Not `announced` -- that stays "this post made a noise" -- and a post
+    // whose reach covers the start still sounds, since it can act.
+    let behind: Vec<String> = driving
+        .trip
+        .posts
+        .iter()
+        .filter(|post| post.at_mi + post.reach_mi < start_mi)
+        .map(|post| post.id())
+        .collect();
+    driving.marked_post_ids.extend(behind.iter().cloned());
+    driving.passed_post_ids.extend(behind);
     if let Some((kind, ahead_mi)) = &opts.unit {
         // Staffed and alert, but not yet announced: the marker cue still
         // has to play before it may look, the same contract every seeded
@@ -1400,6 +1420,10 @@ pub fn build_driving(ctx: &mut GameContext, hit: &Hit, opts: &RoadOptions) -> (D
         driving.truck_mut().transmission.gear = gears;
         driving.truck_mut().grade = grade;
     }
+    // A bend whose call window the drop landed inside was heard before the
+    // handoff; a departure start at 0 mph calls nothing, so this is a no-op
+    // there but keeps the two paths identical.
+    driving.trip.settle_calls_in_hand();
     if !departure && opts.cruise > 0.0 {
         // Engage the way K does, so the session is armed exactly as a
         // player's would be rather than a hand-set field the rest of the

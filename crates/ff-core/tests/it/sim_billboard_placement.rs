@@ -176,10 +176,13 @@ const PLACE_CLAIMS: &[(&str, &[&str])] = &[
     // Named regional travel plazas -- honest footprints, not national Anywhere.
     ("Sheetz", &["PA", "OH", "WV", "MD", "VA", "NC", "MI"]),
     ("Wawa", &["FL", "NJ", "PA", "VA", "MD", "DE"]),
+    // RaceTrac-branded stores, 2026 (company expansion news in cstoredive:
+    // Indianapolis, Findlay, Ohio, and North Carolina are new; Arkansas has
+    // only its RaceWay franchise brand).
     (
         "RaceTrac",
         &[
-            "AL", "AR", "FL", "GA", "KY", "LA", "MS", "NC", "SC", "TN", "TX", "VA",
+            "AL", "FL", "GA", "IN", "KY", "LA", "MS", "NC", "OH", "SC", "TN", "TX",
         ],
     ),
     (
@@ -553,7 +556,7 @@ fn test_wall_drug_never_reads_in_montana() {
     );
 }
 
-/// The two Wall Drug lines must still speak on the South Dakota I-90 run,
+/// The Wall Drug pool line must still speak on the South Dakota I-90 run,
 /// or pulling Montana has traded a wrong sign for silence.
 #[test]
 fn test_wall_drug_still_reads_in_south_dakota() {

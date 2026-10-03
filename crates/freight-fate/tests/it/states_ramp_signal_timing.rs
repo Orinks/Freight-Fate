@@ -84,9 +84,11 @@ fn terminal_signals_keep_one_slow_varied_plan_per_seeded_intersection() {
         .collect();
     assert_eq!(
         exact_profiles,
-        vec![(30, 26, 60), (34, 28, 66), (38, 30, 72), (42, 32, 78)]
+        vec![(30, 26, 62), (34, 28, 68), (38, 30, 74), (42, 32, 80)]
     );
-    assert_eq!(RAMP_LIGHT_YELLOW_S, 4.0);
+    // The MUTCD ceiling: a yellow a truck driver learns of by ear has to
+    // outlast its own spoken call (owner, exit 286A, 2026-09-23).
+    assert_eq!(RAMP_LIGHT_YELLOW_S, 6.0);
 
     for mile in 20..36 {
         let terminal = stop(f64::from(mile));
@@ -108,7 +110,7 @@ fn terminal_signals_keep_one_slow_varied_plan_per_seeded_intersection() {
         assert_eq!(first, second, "mile {mile} changed its timing plan");
         assert!((30.0..=42.0).contains(&first.0), "red {}", first.0);
         assert!((26.0..=32.0).contains(&first.1), "green {}", first.1);
-        assert!((60.0..=78.0).contains(&first.2), "cycle {}", first.2);
+        assert!((62.0..=80.0).contains(&first.2), "cycle {}", first.2);
         assert!(first.3 >= 0.0 && first.3 < first.2, "offset {}", first.3);
         plans.insert((first.0 as i64, first.1 as i64));
     }

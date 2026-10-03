@@ -110,7 +110,7 @@ ADULT: Grok Build rewrite, 22 lines, Anywhere invented brands, opaque Lion's Den
 | FAITH | Eternity is a long haul. Pack accordingly. | Anywhere | church-sign / gospel bulletin genre (CAM-style interstate presence) |
 | FAITH | Blessed are the peacemakers, and the folks who stay out of the left lane. | Anywhere | church-sign / gospel bulletin genre (CAM-style interstate presence) |
 | FAITH | Got faith? Keep both hands on the wheel anyway. | Anywhere | church-sign / gospel bulletin genre (CAM-style interstate presence) |
-| ODDITIES | World's largest rocking chair. You may not sit in it. Next exit. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
+| PLACED | World's largest rocking chair. You may not sit in it. Next exit. | Before Casey, Illinois, I-70 Exit 129, both ways (placed 2026-09-30) | Casey's chair, the Guinness record holder |
 | ODDITIES | See the albino alligator. He is on break. The gift shop is not. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
 | ODDITIES | Gravity hill ahead. Your truck already knew. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
 | ODDITIES | Mystery house. Crooked floors. Straight prices. Nine ninety-five. | Anywhere | mystery-spot / giant-object / reptile-farm tourist-trap boards |
@@ -208,11 +208,11 @@ ADULT: Grok Build rewrite, 22 lines, Anywhere invented brands, opaque Lion's Den
 | CORRIDOR I-35 | Fort Worth ahead. Billy Bob's Texas is a real honky-tonk with a zip code. Bob Wills already got the other board. | Approaching ['fort_worth_tx_us'] | Billy Bob's Texas, Fort Worth — paying honky-tonk |
 | CORRIDOR I-35 | Waco ahead. West, Texas, is kolache country. The bakery has been stopping traffic since the interstate was new. | Approaching ['waco_tx_us'] | West TX kolache stands on I-35 (Czech Stop genre); original copy |
 | CORRIDOR I-5 | Seattle ahead. The museum of pop culture is the colorful blob by the Needle. Jimi Hendrix is inside; the rain is not. | Approaching ['seattle_wa_us'] | MoPOP Seattle — paying museum by Space Needle |
-| CORRIDOR I-5 | Buck Owens' Crystal Palace is a real room in Bakersfield. The Sound was born here. The freight just passes through. | States ['CA'] | Buck Owens' Crystal Palace, Bakersfield — paying venue |
+| CORRIDOR I-5 | Bakersfield. Buck Owens' Crystal Palace closed its doors in twenty twenty-five, but the Bakersfield Sound still plays. The freight just passes through. | States ['CA'] | Buck Owens' Crystal Palace, Bakersfield — closed August 2025, for sale |
 | CORRIDOR I-65 | Nashville, Music City. The Ryman Auditorium is the mother church. Hats off, then back on the interstate. | Approaching ['nashville_tn_us'] | ticketed Memphis/Nashville music tourism (not Music Highway state signs) |
 | CORRIDOR I-75 | Georgia peaches, next few exits. The stands are real. The claims about whose are best are advertising. | States ['GA'] | produce-stand interstate boards (not See Rock City) |
 | CORRIDOR I-75 | Florida citrus, next few exits. The bags are heavy. The claims about fresh are mostly true. | States ['FL'] | produce-stand interstate boards (not See Rock City) |
-| CORRIDOR I-75 | Horse country. The Kentucky Horse Park is a real farm with a hall of fame. Your trailer is not invited to the paddock. | States ['KY'] | Kentucky Horse Park — paying attraction north of Lexington on I-75 |
+| CORRIDOR I-75 | Horse country. The Kentucky Horse Park is a real farm with a Hall of Champions. Your trailer is not invited to the paddock. | States ['KY'] | Kentucky Horse Park — paying attraction north of Lexington on I-75 |
 | CORRIDOR I-94 | Wisconsin. Cheese, really good cheese, and a dairy billboard that has been up since your last inspection. | States ['WI'] | I-94 corridor paying board / tourism or genre OOH |
 | CORRIDOR I-94 | Milwaukee ahead. The Harley-Davidson Museum is a real building. The bikes inside are not street-legal, and neither is your trailer in the lobby. | Approaching ['milwaukee_wi_us'] | Harley-Davidson Museum, Milwaukee — paying, I-94 |
 | CORRIDOR I-81 | Bristol, on the state line. The Birthplace of Country Music Museum is a real hall. Carter Family country starts here. | States ['TN', 'VA'] | Birthplace of Country Music Museum, Bristol TN/VA — Smithsonian affiliate |

@@ -1,5 +1,6 @@
 //! Game screens (port of `freight_fate/states/`).
 pub mod account_achievements;
+pub mod assist_picker;
 pub mod base;
 pub mod career_setback;
 pub mod career_stats;
@@ -25,6 +26,7 @@ pub mod driving_pause_states;
 pub mod driving_pickup;
 pub mod driving_radio_app;
 pub mod driving_rest_states;
+pub mod driving_rollover;
 pub mod driving_school;
 pub mod driving_siren;
 pub mod driving_speed_control;

@@ -71,16 +71,21 @@ impl Trip {
                 if side.is_some() && !self.span_is_multilane(taper_start, end) {
                     side = None;
                 }
+                // A work zone steps the limit down, never up: through a town
+                // posted 35 the fixed 55 and 45 raised it (2026-09-28).
+                let road = self.lowest_limit_over(taper_start, end);
                 zones.push(
                     Zone::new(
                         taper_start,
                         at,
-                        CONSTRUCTION_TAPER_LIMIT_MPH,
+                        CONSTRUCTION_TAPER_LIMIT_MPH.min(road),
                         "construction merge",
                     )
                     .with_closed_side(side),
                 );
-                zones.push(Zone::new(at, end, 45.0, "construction").with_closed_side(side));
+                zones.push(
+                    Zone::new(at, end, 45.0_f64.min(road), "construction").with_closed_side(side),
+                );
                 spans.push((taper_start, end));
             }
         }
@@ -189,10 +194,15 @@ impl Trip {
         let gate_start =
             (total - FACILITY_GATE_ZONE_MI.min(total * FACILITY_GATE_MAX_SHARE)).max(0.0);
         if self.is_facility_approach_route() {
-            // ONE posted limit for the whole chain, and the gate at the end
-            // (owner playtest, 2026-08-21): the access road takes the state's
-            // own statutory business-district limit, else the highest limit
-            // the legs offer.
+            if self.has_street_detail() {
+                // Every street at its own posted limit, and the yard past the
+                // driveway (`street_zones`).
+                return self.street_zones();
+            }
+            // A chain baked before the street detail: ONE posted limit for
+            // the whole chain, and the gate at the end (owner playtest,
+            // 2026-08-21): the access road takes the state's own statutory
+            // business-district limit, else the highest limit the legs offer.
             if self.route.legs.iter().any(|leg| leg.local_speed_mph > 0.0) {
                 let chain_limit = self.statutory_street_mph().unwrap_or_else(|| {
                     self.route
@@ -301,9 +311,21 @@ impl Trip {
         ]
     }
 
-    /// Stretches under a winter chain law: sustained steep grade, fixed in
+    /// Stretches under a winter chain law: sustained steep grade in a state
+    /// that runs commercial chain controls (`CHAIN_CONTROL_STATES`), fixed in
     /// space at trip build. Whether the law is *active* follows the weather.
     pub fn place_chain_law_areas(&self) -> Vec<(f64, f64)> {
+        self.steep_runs()
+            .into_iter()
+            .filter(|&(start, end)| {
+                self.state_code_at((start + end) / 2.0)
+                    .is_some_and(|code| CHAIN_CONTROL_STATES.contains(&code.as_str()))
+            })
+            .collect()
+    }
+
+    /// Every sustained steep run on the route, joined across short gaps.
+    fn steep_runs(&self) -> Vec<(f64, f64)> {
         if self.is_facility_approach_route() {
             return Vec::new();
         }

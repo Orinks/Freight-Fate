@@ -226,7 +226,7 @@ fn the_warning_stays_off_the_owners_i70_run() {
     let mut descents = 0usize;
     let mut braked_frames = 0usize;
     let mut was_active = false;
-    for _ in 0..40_000 {
+    for _ in 0..200_000 {
         let before = harness.app.speech().lines().len();
         frame(&mut harness, DT);
         let lines = harness.app.speech().lines();

@@ -48,6 +48,11 @@ impl DrivingState {
         let Some((key, mods, text)) = event.key_down() else {
             return;
         };
+        // OS key-repeat must not walk the cruise dial: a held Plus used to
+        // race the open-road target (and the live adaptive-cruise set speed)
+        // to the ceiling in about a second and a half. Discrete presses keep
+        // the old +5 / Ctrl+1 step; repeats are ignored.
+        let repeat = event.key_repeat();
 
         let automatic = self.trip.truck.transmission.automatic;
         if !automatic && mods.shift {
@@ -69,13 +74,20 @@ impl DrivingState {
             return;
         }
         if let Some(action) = ctx.bindings.action_for(key, mods) {
+            if repeat && matches!(action, Action::CruiseUp | Action::CruiseDown) {
+                return;
+            }
             self.run_key_action(ctx, action);
             return;
         }
         if plus {
-            self.adjust_cruise(ctx, 1, mods.ctrl);
+            if !repeat {
+                self.adjust_cruise(ctx, 1, mods.ctrl);
+            }
         } else if minus {
-            self.adjust_cruise(ctx, -1, mods.ctrl);
+            if !repeat {
+                self.adjust_cruise(ctx, -1, mods.ctrl);
+            }
         } else if matches!(key, Key::Return | Key::KpEnter) {
             if self.assisted_facility_confirmation_ready(ctx) {
                 self.open_ready_facility_arrival(ctx);
@@ -241,7 +253,7 @@ impl DrivingState {
             Action::RadioFavorite => self.toggle_radio_favorite(ctx),
             Action::RadioNowPlaying => self.speak_radio_now_playing(ctx),
             Action::RadioStatus => self.speak_radio_status(ctx),
-            Action::Accelerate | Action::Brake | Action::EmergencyBrake => {}
+            Action::Accelerate | Action::Brake | Action::EmergencyBrake | Action::Straighten => {}
         }
     }
 

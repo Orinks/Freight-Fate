@@ -21,10 +21,6 @@
 //! function used to push, and is kept only for a screen no port has claimed
 //! yet; nothing in this module reaches for it now.
 
-use std::collections::HashMap;
-use std::sync::Mutex;
-
-use once_cell::sync::Lazy;
 use serde_json::{Map, Value};
 
 use ff_core::data::world::World;
@@ -37,16 +33,18 @@ use ff_core::models::career_training::{
 use ff_core::models::enforcement;
 use ff_core::models::jobs::relay::{relay_load, RelayRequest};
 use ff_core::models::jobs::{
-    board_offer_count, job_from_payload, job_payload, normalize_job_cities, Job, JobBoard,
-    OfferOptions,
+    board_offer_count, dispatch_deadline_hours, job_from_payload, job_payload,
+    normalize_job_cities, plan_hos, Job, JobBoard, OfferOptions, ACTIVE_TRIP_FAIRNESS_SLACK,
 };
 use ff_core::models::profile::Profile;
 use ff_core::models::start_options::option_for_profile;
 use ff_core::music::crc32;
 use ff_core::playtest_levers::{forced_dispatch_destination, resolve_city_forgiving};
-use ff_core::pyfmt::{fmt_grouped, py_int};
+use ff_core::pyfmt::{fmt_f, fmt_grouped, py_int, round_py_n};
+use ff_core::sim::hos::limits;
 
 use crate::app::{GameContext, Say};
+use crate::bindings::Action;
 use crate::states::base::{InputEvent, Key, Menu, MenuItem, SimpleMenuState};
 use crate::states::driving::DrivingState;
 
@@ -107,6 +105,16 @@ pub(crate) fn home_terminal(ctx: &GameContext) -> HomeTerminal {
 /// Python `str.capitalize()`: first character upper, the rest lower.
 pub(crate) fn py_capitalize(text: &str) -> String {
     ff_core::data::world_models::py_capitalize(text)
+}
+
+/// First character upper, the rest as written: a sentence opening on a
+/// street or city name keeps "US 83" and "Abilene" as they are spelled.
+pub(crate) fn upper_first(text: &str) -> String {
+    let mut chars = text.chars();
+    match chars.next() {
+        Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
+        None => String::new(),
+    }
 }
 
 pub(crate) fn record_city_duty(
@@ -183,9 +191,9 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
     // Company Yard in the chicago_il_us service area" (found by the first
     // agent-driven playtest, 2026-08-30).
     let location = format!(
-        "{} in the {} service area",
+        "{} in {} service area",
         terminal.spoken_name(),
-        ctx.world.spoken_city(&p.current_city, None)
+        ff_core::speech_text::the_city(&ctx.world.spoken_city(&p.current_city, None))
     );
     if option.is_owner_operator() {
         return vec![
@@ -296,10 +304,7 @@ pub fn dispatch_cache_key(p: &Profile) -> Value {
     );
     // A board cached before dispatch lost faith in you must not outlive
     // the trust that built it.
-    key.insert(
-        "trust".into(),
-        Value::from(enforcement::trust_band(p.standing())),
-    );
+    key.insert("trust".into(), Value::from(enforcement::standing_band(p)));
     key.insert(
         "force_dest".into(),
         Value::from(forced_dispatch_destination()),
@@ -413,11 +418,12 @@ pub fn open_freight_market(ctx: &mut GameContext) -> Vec<Job> {
                     &endorsements,
                     OfferOptions {
                         // How much freight dispatch will show you is a matter of
-                        // trust, and trust slides with reputation the whole way
-                        // down.
-                        count: enforcement::board_offers_for_reputation(
+                        // trust: the band the dispatch trust line speaks, so a
+                        // record or debt holding it down holds the board down
+                        // too (owner, 2026-09-28).
+                        count: enforcement::board_offers_for_band(
                             board_offer_count(p.career.level()) as i64,
-                            p.standing(),
+                            enforcement::standing_band(p),
                         )
                         .max(0) as usize,
                         level: p.career.level(),
@@ -472,47 +478,36 @@ pub(crate) fn sort_by_distance(jobs: &mut [Job]) {
 }
 
 /// `(city key, miles, leg count)` for every city reachable from `city` on a
-/// supported route, the way `JobBoard._candidates` computed it.
-// TODO(lead): belongs in ff_core::models::jobs::JobBoard -- `candidates` is
-// private there; make it pub and delete this copy.
+/// supported route: the board's own shared cache, so the relay and the
+/// bobtail list never compute it twice.
 pub(crate) fn board_candidates(world: &World, city: &str) -> Vec<(String, f64, usize)> {
-    type CandidateCache = HashMap<usize, HashMap<String, Vec<(String, f64, usize)>>>;
-    static CACHE: Lazy<Mutex<CandidateCache>> = Lazy::new(|| Mutex::new(HashMap::new()));
-    let city = world.resolve_city_key(city);
-    let world_id = world as *const World as usize;
-    if let Some(cached) = CACHE
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .get(&world_id)
-        .and_then(|per| per.get(&city))
-    {
-        return cached.clone();
+    ff_core::models::jobs::reachable_cities(world, city)
+}
+
+/// Build the route lists a board in `city` needs on a background thread,
+/// while the driver is still at the terminal: the first board in a new city
+/// computed a route to every city on the map, then again from each relay
+/// town, all on Enter (2026-09-28). The thread only fills shared caches, so
+/// there is nothing to join; a board opened before it finishes computes what
+/// it still needs itself.
+pub(crate) fn warm_dispatch_board(world: &'static World, city: &str) {
+    let city = city.to_string();
+    let spawned = std::thread::Builder::new()
+        .name("dispatch-warm".to_string())
+        .spawn(move || ff_core::models::jobs::relay::warm_dispatch_routes(world, &city));
+    if let Err(err) = spawned {
+        log::warn!("Could not start the dispatch warm-up thread: {err}");
     }
-    let mut computed: Vec<(String, f64, usize)> = Vec::new();
-    for dest in world.city_names() {
-        if dest == city {
-            continue;
-        }
-        if let Ok(Some(route)) = world.supported_route(&city, &dest, None) {
-            computed.push((dest, route.miles(), route.legs.len()));
-        }
-    }
-    CACHE
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .entry(world_id)
-        .or_default()
-        .insert(city, computed.clone());
-    computed
 }
 
 /// The load dispatch relays onto a company driver's board when the board
 /// here is thin (`ff_core::models::jobs::relay`): a load from one of the
-/// nearest freight towns, its deadhead paid at the empty-mile rate and
-/// counted in the deadline, offered as one assignment. None when the board
-/// here is good enough, for an owner-operator (their own "Bobtail to a
-/// nearby city" is how they reposition, on their own fuel), and for a brand
-/// new hire, whose first dispatch is always freight from this yard.
+/// nearest freight towns, its deadhead paid at the empty-mile rate (the
+/// delivery clock starts at the shipper), offered as one assignment. None
+/// when the board here is good enough, for an owner-operator (their own
+/// "Bobtail to a nearby city" is how they reposition, on their own fuel),
+/// and for a brand new hire, whose first dispatch is always freight from
+/// this yard.
 ///
 /// Seeded off the board's own cache key so the same board relays the same
 /// load every time it is reopened, exactly like the rest of the cached
@@ -714,7 +709,7 @@ pub fn loaded_departure_line(
 /// Python did.
 pub fn launch_driving(ctx: &mut GameContext, launch: DrivingLaunch) {
     let DrivingLaunch {
-        job,
+        mut job,
         route,
         trip_seed,
         phase,
@@ -722,6 +717,48 @@ pub fn launch_driving(ctx: &mut GameContext, launch: DrivingLaunch) {
         resume,
         announcement,
     } = launch;
+    // The board may have been cached before this shift's hours were spent,
+    // and the pickup or deadhead can consume a duty window after acceptance.
+    // Reconcile the deadline once, at the loaded departure, against the route
+    // and legal hours the driver actually has. Resuming a snapshot does not
+    // pass through this function, so a save cannot grant a fresh deadline.
+    let deadline_note = if phase == DRIVE_PHASE_DELIVERY {
+        let clock = limits(&ctx.settings.hos_mode)
+            .is_some()
+            .then(|| &profile(ctx).hos);
+        let fair = dispatch_deadline_hours(
+            route.miles(),
+            ACTIVE_TRIP_FAIRNESS_SLACK,
+            Some(&route),
+            Some(ctx.world),
+            clock,
+        );
+        let fair = round_py_n(fair, 1);
+        if fair > job.deadline_game_h {
+            let extra_rest = clock.is_some_and(|clock| {
+                plan_hos(route.miles(), Some(&route), Some(ctx.world), Some(clock)).sleeps
+                    > plan_hos(route.miles(), Some(&route), Some(ctx.world), None).sleeps
+            });
+            job.deadline_game_h = fair;
+            job.deadline_covers_rest |= extra_rest;
+            if extra_rest {
+                format!(
+                    " Dispatch adjusted the delivery deadline to {} hours. Your current hours require a 10-hour sleep en route. {} selects a rest stop.",
+                    fmt_f(job.deadline_game_h, 1),
+                    ctx.control_name(Action::Rest)
+                )
+            } else {
+                format!(
+                    " Dispatch adjusted the delivery deadline to {} hours for this route and your current legal hours.",
+                    fmt_f(job.deadline_game_h, 1)
+                )
+            }
+        } else {
+            String::new()
+        }
+    } else {
+        String::new()
+    };
     // The line needs the route, and the drive takes it by value, so build
     // what the summary reads before handing the route over.
     let route_for_line = route.clone();
@@ -757,7 +794,7 @@ pub fn launch_driving(ctx: &mut GameContext, launch: DrivingLaunch) {
             loaded_departure_line(ctx, &lead, &route_for_line, engine_on, &next_context)
         }
     };
-    ctx.say(&line);
+    ctx.say(&format!("{line}{deadline_note}"));
     ctx.push_state(driving);
 }
 

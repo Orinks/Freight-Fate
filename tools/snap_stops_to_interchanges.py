@@ -77,8 +77,9 @@ service area. Rest areas, weigh stations, truck parking lots and turnpike
 plazas have ramps of their own.
 
 Development-time only. Reads the cached Geofabrik state extracts one at a
-time (``~/.cache/freight-fate-osm/regions``), caches each state's junction
-list beside it, and never touches the network.
+time (``~/.cache/freight-fate-osm/regions``), or explicit local OSM extracts
+passed with ``--pbf``. It caches each extract's junction list beside it and
+never touches the network.
 
 Measured 2026-09-17 on the 3,936 stops reached by an exit, before and after:
 
@@ -120,7 +121,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import leg_geometry as lg  # noqa: E402
-from build_interchanges_base import LOCAL_CORRIDOR_M  # noqa: E402
+from build_interchanges_base import LOCAL_CORRIDOR_M, select_only  # noqa: E402
 from build_interchanges_maxspeed import (  # noqa: E402
     OSM_REGION_CACHE_DIR,
     _leg_states,
@@ -129,7 +130,7 @@ from build_interchanges_maxspeed import (  # noqa: E402
 from reverse_pair_stops import TWIN_STOP_MILES, _same_chain_store  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
 
-ACCESSED_DATE = "2026-09-17"
+DEFAULT_PBF_DATE = "2026-09-17"
 SNAP_CUT_MI = 0.6
 RECORD_MATCH_MAX_MI = 5.0
 NAMED_EXIT_MAX_MI = 5.3
@@ -251,6 +252,17 @@ def load_junctions(pbf_paths: list[Path], rebuild: bool = False) -> list[Junctio
             for r in rows
         )
     return out
+
+
+def _input_pbf_paths(
+    states: set[str], region_dir: Path, explicit_paths: list[Path] | None
+) -> list[Path]:
+    if explicit_paths:
+        missing = [path for path in explicit_paths if not path.is_file()]
+        if missing:
+            raise FileNotFoundError(f"Explicit OSM PBF does not exist: {missing[0]}")
+        return explicit_paths
+    return _pbf_for_states(states, region_dir)
 
 
 # ------------------------------------------------------------------ geometry
@@ -401,6 +413,7 @@ def first_evidence(
     grid: dict[tuple[int, int], list[int]],
     fabricated: set[int],
     report: Report,
+    pbf_date: str = DEFAULT_PBF_DATE,
 ) -> LegWork:
     """Evidence 1 and 2: what a stop's own record says about where it is."""
     stops = [s for s in leg.get("stops", ()) if reached_by_an_exit(s)]
@@ -457,7 +470,7 @@ def first_evidence(
         how = (
             f"exit_ref read: ref tag of the nearest OpenStreetMap highway=motorway_junction "
             f"node on {road}, {dist:.2f} mi from the stop's read coordinates (derived snap, "
-            f"cut {SNAP_CUT_MI} mi), local Geofabrik extract accessed {ACCESSED_DATE}"
+            f"cut {SNAP_CUT_MI} mi), local OpenStreetMap PBF dated {pbf_date}"
         )
         # A record with this number beyond the bound is another state's exit
         # of the same number, so the stop keeps the number and takes no link.
@@ -531,10 +544,11 @@ def snap_world(
     grid: dict[tuple[int, int], list[int]],
     fabricated: set[int],
     report: Report,
+    pbf_date: str = DEFAULT_PBF_DATE,
 ) -> dict[int, Snap]:
     snaps: dict[int, Snap] = {}
     for leg in legs:
-        work = first_evidence(leg, junctions, grid, fabricated, report)
+        work = first_evidence(leg, junctions, grid, fabricated, report, pbf_date)
         inherit_from_twin(work)
         account(work, report)
         snaps.update(work.snaps)
@@ -725,9 +739,27 @@ def print_report(
 # ---------------------------------------------------------------------- main
 
 
+def _selected_legs(legs: list[dict[str, Any]], only: str | None) -> list[dict[str, Any]]:
+    return select_only(legs, only) if only else legs
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--write", action="store_true", help="update the world source")
+    parser.add_argument(
+        "--only",
+        help="one or more legs, 'from_slug->to_slug' separated by semicolons",
+    )
+    parser.add_argument(
+        "--pbf",
+        action="append",
+        type=Path,
+        help="use this local OSM PBF instead of cached per-state extracts; may be repeated",
+    )
+    parser.add_argument(
+        "--pbf-date",
+        help="date of the OSM snapshot in the explicit PBF input, required with --pbf",
+    )
     parser.add_argument("--osm-region-dir", type=Path, default=OSM_REGION_CACHE_DIR)
     parser.add_argument("--rebuild-junctions", action="store_true")
     parser.add_argument(
@@ -736,20 +768,26 @@ def main(argv: list[str] | None = None) -> int:
         help="list every stop that names an exit it is not at",
     )
     args = parser.parse_args(argv)
+    if args.pbf and not args.pbf_date:
+        parser.error("--pbf-date is required with --pbf")
+    if args.pbf_date and not args.pbf:
+        parser.error("--pbf-date can only be used with --pbf")
 
     data = load_world()
-    legs = data["legs"]
+    all_legs = data["legs"]
+    legs = _selected_legs(all_legs, args.only)
     states = set().union(*(_leg_states(data, leg) for leg in legs))
-    pbf_paths = _pbf_for_states(states, args.osm_region_dir)
+    pbf_paths = _input_pbf_paths(states, args.osm_region_dir, args.pbf)
     if not pbf_paths:
         raise SystemExit(f"No state extracts in {args.osm_region_dir}; nothing to snap against.")
     junctions = load_junctions(pbf_paths, rebuild=args.rebuild_junctions)
-    print(f"{len(junctions):,} junction nodes from {len(pbf_paths)} state extracts.")
+    input_kind = "explicit OSM PBFs" if args.pbf else "state extracts"
+    print(f"{len(junctions):,} junction nodes from {len(pbf_paths)} {input_kind}.")
     grid: dict[tuple[int, int], list[int]] = collections.defaultdict(list)
     for i, junction in enumerate(junctions):
         grid[(int(math.floor(junction.lat * 10)), int(math.floor(junction.lon * 10)))].append(i)
 
-    fabricated = fabricated_coordinates(legs)
+    fabricated = fabricated_coordinates(all_legs)
     print(
         f"{len(fabricated)} copied stops carry coordinates no original backs; ignored as evidence."
     )
@@ -758,22 +796,27 @@ def main(argv: list[str] | None = None) -> int:
     report = Report([], [], [], [], [], collections.Counter())
     kinds: collections.Counter[str] = collections.Counter()
     changed = 0
-    snaps = snap_world(legs, junctions, grid, fabricated, report)
+    snaps = snap_world(legs, junctions, grid, fabricated, report, args.pbf_date or DEFAULT_PBF_DATE)
     for leg in legs:
         for stop in leg.get("stops", ()):
             old = {key: stop.get(key) for key in FIELDS}
-            for key in FIELDS:
-                stop.pop(key, None)
+            new: dict[str, Any] = {}
             snap = snaps.get(id(stop))
             if snap is not None:
                 kinds[
                     snap.kind
                     + (" with a record" if snap.interchange_mi is not None else ", number only")
                 ] += 1
-                stop["exit_ref"] = snap.exit_ref
+                new["exit_ref"] = snap.exit_ref
                 if snap.interchange_mi is not None:
-                    stop["interchange_mi"] = snap.interchange_mi
-                stop["exit_source"] = snap.source
+                    new["interchange_mi"] = snap.interchange_mi
+                new["exit_source"] = snap.source
+            # A key already there keeps its place, so a stop the run does not
+            # change is not rewritten in a different order.
+            for key in FIELDS:
+                if key not in new:
+                    stop.pop(key, None)
+            stop.update(new)
             changed += old != {key: stop.get(key) for key in FIELDS}
     after = measure(legs, use_fields=True)
 

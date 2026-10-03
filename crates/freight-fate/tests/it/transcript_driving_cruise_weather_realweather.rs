@@ -747,3 +747,86 @@ fn test_old_but_freshly_fetched_weather_is_live_across_v_status_and_tablet() {
     assert_eq!(rows[1], "Observation age: 12 minutes old.");
     assert!(!rows.join(" ").to_lowercase().contains("updating"));
 }
+
+#[test]
+fn test_persistent_weather_fallback_is_said_once_and_recovery_once() {
+    // Agent drive, 2026-09-24: with the route cell's station failing, "Live
+    // weather unavailable. Simulated weather in use." came back after every
+    // failed retry, once a minute. A fallback that persists is said once;
+    // live weather coming back is said once.
+    use ff_core::sim::real_weather::{Observation, RealWeatherProvider, RETRY_AFTER_S};
+    use std::sync::{mpsc, Arc, Mutex};
+    use std::time::Duration;
+
+    let mut harness = a_live_weather_drive("Fallback Once");
+    let clock = Arc::new(Mutex::new(0.0_f64));
+    let live = Arc::new(Mutex::new(false));
+    let (started_tx, started_rx) = mpsc::channel::<()>();
+    let (release_tx, release_rx) = mpsc::channel::<()>();
+    let release_rx = Mutex::new(release_rx);
+    let live_for_fetch = Arc::clone(&live);
+    let clock_for_provider = Arc::clone(&clock);
+    let provider = RealWeatherProvider::new(Arc::new(move |_, _| {
+        started_tx.send(()).unwrap();
+        release_rx
+            .lock()
+            .unwrap()
+            .recv_timeout(Duration::from_secs(5))
+            .expect("released");
+        if *live_for_fetch.lock().unwrap() {
+            Ok(Observation::new("Clear", 0.0, Some(20.0), Some(10.0)))
+        } else {
+            Err("The server answered with error 404.".to_string())
+        }
+    }))
+    .with_clock(Arc::new(move || *clock_for_provider.lock().unwrap()));
+    install_provider(&mut harness, Box::new(provider));
+    harness.clear_speech();
+
+    // One fetch: a frame starts it, frames run while it is in flight, it
+    // answers, and the provider's clock moves on to the next retry.
+    let fetch = |harness: &mut PlaytestHarness| {
+        frames(harness, 1, DT);
+        started_rx
+            .recv_timeout(Duration::from_secs(5))
+            .expect("a fetch started");
+        frames(harness, 30, DT);
+        release_tx.send(()).unwrap();
+        for _ in 0..500 {
+            let busy = harness.with_drive(|d, _| {
+                let city = d.weather().city.clone().expect("a weather cell");
+                d.weather_mut()
+                    .provider
+                    .as_deref_mut()
+                    .expect("a provider")
+                    .refreshing(&city)
+            });
+            if !busy {
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        frames(harness, 30, DT);
+        *clock.lock().unwrap() += RETRY_AFTER_S + 1.0;
+    };
+
+    // Thirty failed retries, one a minute: half an hour of fallback.
+    for _ in 0..30 {
+        fetch(&mut harness);
+    }
+    let unavailable: Vec<String> = spoken(&harness)
+        .into_iter()
+        .filter(|line| line.contains("unavailable"))
+        .collect();
+    assert_eq!(unavailable.len(), 1, "{:#?}", spoken(&harness));
+
+    *live.lock().unwrap() = true;
+    harness.with_drive(|d, _| d.weather_mut().current = WeatherKind::Clear);
+    fetch(&mut harness);
+    frames(&mut harness, 120, DT);
+    let ready = spoken(&harness)
+        .into_iter()
+        .filter(|line| line.contains("Live weather ready"))
+        .count();
+    assert_eq!(ready, 1, "{:#?}", spoken(&harness));
+}

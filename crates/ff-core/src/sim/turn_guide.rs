@@ -53,7 +53,7 @@
 use crate::data::curves::{min_radius_ft, HAIRPIN_TURN_MAX_MPH};
 
 use super::lane::{tracking_steer_rad, MAX_STEER_RAD};
-use super::lane_guidance::{DRIFT_SLEEP, DRIFT_WAKE};
+use super::lane_guidance::{drift_speaks, settled_offset};
 
 /// Below this the lean is centred: a hair of residual demand is not worth
 /// moving the engine for, and it would chatter around the null.
@@ -216,6 +216,11 @@ pub struct TurnInput {
     /// deepens instead of sitting still. Without this the guide went quiet
     /// about the one mistake it exists to catch.
     pub lane_offset: f64,
+    /// The truck's heading against the road, radians, positive right: where
+    /// `lane_offset` is GOING. The drift half leans on where the truck will
+    /// settle, not where it is (see [`settled_offset`]), so it swings to
+    /// "straighten" before the truck overshoots centre, not after.
+    pub lane_heading_rad: f64,
 }
 
 // There is deliberately no `inverted` flag here. The guide always answers in
@@ -284,21 +289,13 @@ impl TurnGuide {
 
     /// The drift half of the lean, asleep until the wander is a real drift.
     ///
-    /// Hysteresis, not a single threshold: woken at `DRIFT_WAKE` and only
-    /// quiet again back inside `DRIFT_SLEEP`, so a truck sitting on the wake
-    /// line does not switch the correction on and off.
-    fn drift_correction(&mut self, lane_offset: f64) -> f64 {
-        let offset = lane_offset.clamp(-1.0, 1.0);
-        let away = offset.abs();
+    /// Hysteresis, not a single threshold, and the same rule the lane guide
+    /// uses: see [`drift_speaks`].
+    fn drift_correction(&mut self, input: &TurnInput) -> f64 {
+        let settled = settled_offset(input.lane_offset, input.lane_heading_rad, input.speed_mph);
+        self.drift_awake = drift_speaks(self.drift_awake, input.lane_offset, settled);
         if self.drift_awake {
-            if away < DRIFT_SLEEP {
-                self.drift_awake = false;
-            }
-        } else if away >= DRIFT_WAKE {
-            self.drift_awake = true;
-        }
-        if self.drift_awake {
-            -offset * LANE_TERM
+            -settled.clamp(-1.0, 1.0) * LANE_TERM
         } else {
             0.0
         }
@@ -311,9 +308,7 @@ impl TurnGuide {
             // on a straight road with a centred truck is silence.
             self.open = None;
             self.steered = 0.0;
-            return self
-                .drift_correction(input.lane_offset)
-                .clamp(-MAX_LEAN, MAX_LEAN);
+            return self.drift_correction(&input).clamp(-MAX_LEAN, MAX_LEAN);
         };
         // A turn the guide was not already leaning for starts from nothing
         // steered. Keyed on the turn's identity and not on a gap in the road:
@@ -354,7 +349,7 @@ impl TurnGuide {
         let owed = shape.side.sign() * shape.lean_depth() * approach * remaining;
         // The lane error rides on top, pointing the way that corrects it --
         // once the drift is worth reporting at all.
-        let correction = self.drift_correction(input.lane_offset);
+        let correction = self.drift_correction(&input);
         (owed + correction).clamp(-MAX_LEAN, MAX_LEAN)
     }
 }
@@ -362,6 +357,7 @@ impl TurnGuide {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::sim::lane_guidance::DRIFT_SLEEP;
 
     fn a_corner(side: TurnSide) -> TurnShape {
         TurnShape {
@@ -379,6 +375,7 @@ mod tests {
             steering,
             speed_mph: 9.0,
             lane_offset: 0.0,
+            lane_heading_rad: 0.0,
             turn_id: 0,
             progress: 0.0,
         }
@@ -553,6 +550,7 @@ mod tests {
                     steering: 0.0,
                     speed_mph: 55.0,
                     lane_offset: offset,
+                    lane_heading_rad: 0.0,
                     turn_id: 0,
                     progress: 0.0,
                 },
@@ -572,6 +570,7 @@ mod tests {
             steering: 0.0,
             speed_mph: 55.0,
             lane_offset: 0.0,
+            lane_heading_rad: 0.0,
             turn_id: 0,
             progress: 0.0,
         };
@@ -622,6 +621,7 @@ mod tests {
                 steering: 0.0,
                 speed_mph: 55.0,
                 lane_offset: 0.5, // drifted right
+                lane_heading_rad: 0.0,
                 turn_id: 0,
                 progress: 0.0,
             },
@@ -644,6 +644,7 @@ mod tests {
                 steering: 0.0,
                 speed_mph: 9.0,
                 lane_offset: 0.0,
+                lane_heading_rad: 0.0,
                 turn_id: 0,
                 progress: 0.0,
             },
@@ -664,6 +665,7 @@ mod tests {
                 steering: 0.0,
                 speed_mph: 55.0,
                 lane_offset: 0.0,
+                lane_heading_rad: 0.0,
                 turn_id: 0,
                 progress: 0.0,
             },
@@ -836,6 +838,95 @@ mod tests {
         let before = guide.steered();
         run(&mut guide, approaching(shape, -0.02, 0.0), 0.5);
         assert_eq!(guide.steered(), before);
+    }
+
+    /// Bring a drifting truck back by following the lean and nothing else:
+    /// hold the key toward it a two-choice reaction time after hearing it,
+    /// let go when it is centred. Returns how far past centre the truck
+    /// swings on the way back.
+    fn swing_past_centre_following_the_lean(offset: f64, yaw_rad: f64, hear_heading: bool) -> f64 {
+        use crate::sim::lane::{LaneKeeping, RoadConditions, MPH_PER_MPS};
+        const MPH: f64 = 55.0;
+        let dt = 1.0 / 60.0;
+        let mut lane = LaneKeeping::new(Some(1));
+        lane.offset = offset;
+        lane.yaw_rad = yaw_rad;
+        let mut guide = TurnGuide::new();
+        let mut heard = std::collections::VecDeque::from(vec![0.0; (0.3 / dt) as usize]);
+        let mut crossed = false;
+        let mut swing = 0.0f64;
+        for _ in 0..((20.0 / dt) as i64) {
+            let pan = guide.update(
+                TurnInput {
+                    shape: None,
+                    turn_id: 0,
+                    to_start_mi: f64::INFINITY,
+                    past: false,
+                    steering: lane.steering,
+                    speed_mph: MPH,
+                    lane_offset: lane.offset,
+                    lane_heading_rad: if hear_heading { lane.yaw_rad } else { 0.0 },
+                    progress: 0.0,
+                },
+                dt,
+            );
+            heard.push_back(pan);
+            let acted_on = heard.pop_front().unwrap_or(0.0);
+            lane.steering = if acted_on == 0.0 {
+                0.0
+            } else {
+                acted_on.signum()
+            };
+            lane.update(
+                dt,
+                MPH / MPH_PER_MPS,
+                RoadConditions::default(),
+                "off",
+                false,
+            );
+            crossed |= lane.offset < 0.0;
+            if crossed {
+                swing = swing.max(-lane.offset);
+            }
+        }
+        swing
+    }
+
+    #[test]
+    fn following_the_lean_out_of_a_drift_does_not_overshoot_centre() {
+        // Flight, 2026-09-22: the lean followed lane position, so it said
+        // "keep steering" until the truck was back in the middle -- still
+        // pointing across the lane -- and a driver following it swung out
+        // the other side every time. Leaning on where the truck will settle
+        // lets it call the straighten-up in time.
+        // Drifted right and still heading right.
+        let by_position = swing_past_centre_following_the_lean(0.6, 0.01, false);
+        let by_heading = swing_past_centre_following_the_lean(0.6, 0.01, true);
+        assert!(
+            by_heading < DRIFT_SLEEP,
+            "the truck left the centred band on the far side: {by_heading}"
+        );
+        assert!(
+            by_heading < by_position,
+            "heading made it no better: {by_heading} against {by_position}"
+        );
+    }
+
+    #[test]
+    fn a_truck_crossing_back_fast_is_told_to_straighten_before_it_is_centred() {
+        // The agent drive that checked the fix above, 2026-09-23: back from
+        // the right edge with a lot of heading still on, the lean went
+        // quiet at the moment the settled point reached the centred band --
+        // but that point assumes the driver takes the heading out, and a
+        // quiet lean never asks for it. The truck carried on across to the
+        // far side before the lean woke again. Heading alone must keep it
+        // awake. Staged at that moment: inside the band, quiet, still
+        // pointing left.
+        let swing = swing_past_centre_following_the_lean(0.2, -0.03, true);
+        assert!(
+            swing < DRIFT_SLEEP,
+            "the truck left the centred band on the far side: {swing}"
+        );
     }
 
     #[test]

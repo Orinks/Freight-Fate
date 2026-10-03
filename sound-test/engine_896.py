@@ -39,11 +39,11 @@ SRC = C.LICENSED["ext_range_a"]  # SemiTruckMac_S08IN.896, interior (per Norm's 
 # FOUR-STROKE CYCLES (so the half-order lope closes, not just the firing cycle);
 # pulls -> one-shots. Windows off the low-pass map; pull timestamps are Norm's ear.
 PIECES = [
-    ("idle_680",        2.8,   6.3, "loop", 680.0),  # shifted +1s: first second still settling (Norm's ear)
-    ("cruise_mid_1150", 8.0,  13.6, "loop", 1150.0),
+    ("idle_680", 2.8, 6.3, "loop", 680.0),  # shifted +1s: first second still settling (Norm's ear)
+    ("cruise_mid_1150", 8.0, 13.6, "loop", 1150.0),
     ("cruise_high_1800", 109.0, 120.5, "loop", 1800.0),
-    ("rev_launch",      18.5,  27.5, "pull", 0.0),
-    ("rev_load",        84.0, 100.0, "pull", 0.0),
+    ("rev_launch", 18.5, 27.5, "pull", 0.0),
+    ("rev_load", 84.0, 100.0, "pull", 0.0),
 ]
 
 
@@ -72,39 +72,44 @@ def cycle_loop(x: np.ndarray, rpm: float) -> tuple[np.ndarray, float]:
     L = k * period
     loop = x[:L].copy()
     w = np.linspace(0.0, 1.0, xf)
-    loop[:xf] = x[:xf] * w + x[L:L + xf] * (1.0 - w)
+    loop[:xf] = x[:xf] * w + x[L : L + xf] * (1.0 - w)
     return loop, period / C.SR
 
 
 def write(name: str, x: np.ndarray, target_rms: float = 0.12, peak_ceiling: float = 0.97) -> None:
     x = np.nan_to_num(np.asarray(x, float))
-    x = x * (target_rms / (float(np.sqrt(np.mean(x ** 2))) or 1.0))
+    x = x * (target_rms / (float(np.sqrt(np.mean(x**2))) or 1.0))
     p = float(np.max(np.abs(x))) or 1.0
     if p > peak_ceiling:
         x = x * (peak_ceiling / p)
     OUT.mkdir(parents=True, exist_ok=True)
     with wave.open(str(OUT / name), "wb") as fh:
-        fh.setnchannels(1); fh.setsampwidth(2); fh.setframerate(C.SR)
+        fh.setnchannels(1)
+        fh.setsampwidth(2)
+        fh.setframerate(C.SR)
         fh.writeframes((x * 32767).astype("<i2").tobytes())
 
 
 def main() -> None:
     x = C.load_wav(SRC)
     SR = C.SR
-    print(f"896: {len(x)/SR:.1f}s interior\n")
+    print(f"896: {len(x) / SR:.1f}s interior\n")
     for name, a, b, kind, rpm in PIECES:
-        seg = x[int(a * SR):int(b * SR)].copy()
+        seg = x[int(a * SR) : int(b * SR)].copy()
         if kind == "loop":
             loop, cyc = cycle_loop(seg, rpm)
             out = C.tile(loop, 6.0)
             write(f"{name}.wav", out)
-            print(f"  {name:18s} loop {len(loop)/SR:4.2f}s  cycle {cyc*1000:3.0f}ms x{round(len(loop)/SR/cyc)}"
-                  f"  seam {C.seam_check(loop):4.2f}  fullness {C.fullness(loop):.2f}")
+            print(
+                f"  {name:18s} loop {len(loop) / SR:4.2f}s  cycle {cyc * 1000:3.0f}ms x{round(len(loop) / SR / cyc)}"
+                f"  seam {C.seam_check(loop):4.2f}  fullness {C.fullness(loop):.2f}"
+            )
         else:
             fi = int(0.04 * SR)
-            seg[:fi] *= np.linspace(0, 1, fi); seg[-fi:] *= np.linspace(1, 0, fi)
+            seg[:fi] *= np.linspace(0, 1, fi)
+            seg[-fi:] *= np.linspace(1, 0, fi)
             write(f"{name}.wav", seg)
-            print(f"  {name:18s} pull {len(seg)/SR:4.1f}s  ({a}-{b}s of 896)")
+            print(f"  {name:18s} pull {len(seg) / SR:4.1f}s  ({a}-{b}s of 896)")
     print(f"\nwrote the 896 voice set to {OUT}")
 
 

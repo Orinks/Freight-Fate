@@ -34,10 +34,9 @@ from __future__ import annotations
 import wave
 from pathlib import Path
 
+import engine_v1 as E
 import numpy as np
 import soundfile as sf
-
-import engine_v1 as E
 from pulse_synth import RNG, SR, bank_ir, convolve, grain, pulse_train
 
 # --- paths -------------------------------------------------------------------
@@ -53,9 +52,9 @@ IDLE_RPM = 647.0
 
 # --- the game's mix levels (audio.py) ----------------------------------------
 
-ENGINE_VOL = 0.55   # _PygameBackend.engine_volume / BASS engine_volume
-ROAD_VOL = 0.80     # road loop is CH_ROAD -> "sfx" -> sfx_volume
-WIND_VOL = 0.65     # wind loop is CH_WEATHER_B -> "weather" -> weather_volume
+ENGINE_VOL = 0.55  # _PygameBackend.engine_volume / BASS engine_volume
+ROAD_VOL = 0.80  # road loop is CH_ROAD -> "sfx" -> sfx_volume
+WIND_VOL = 0.65  # wind loop is CH_WEATHER_B -> "weather" -> weather_volume
 
 
 def load_gain(throttle: float) -> float:
@@ -75,9 +74,36 @@ def wind_intensity(speed_mps: float) -> float:
 
 # --- measurement (unchanged: confirm every tuning against ground truth) ------
 
-THIRD_OCT = np.array([20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250,
-                      315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500,
-                      3150, 4000, 5000, 6300.0])
+THIRD_OCT = np.array(
+    [
+        20,
+        25,
+        31.5,
+        40,
+        50,
+        63,
+        80,
+        100,
+        125,
+        160,
+        200,
+        250,
+        315,
+        400,
+        500,
+        630,
+        800,
+        1000,
+        1250,
+        1600,
+        2000,
+        2500,
+        3150,
+        4000,
+        5000,
+        6300.0,
+    ]
+)
 MATCH_LO, MATCH_HI = 200.0, 1000.0
 
 
@@ -93,9 +119,10 @@ def load_wav(path: Path) -> np.ndarray:
 def band_power(x: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     S = np.abs(np.fft.rfft(x * np.hanning(len(x))))
     f = np.fft.rfftfreq(len(x), 1.0 / SR)
-    p = S ** 2
-    out = np.array([p[(f >= fc / 2 ** (1 / 6)) & (f < fc * 2 ** (1 / 6))].sum()
-                    for fc in THIRD_OCT])
+    p = S**2
+    out = np.array(
+        [p[(f >= fc / 2 ** (1 / 6)) & (f < fc * 2 ** (1 / 6))].sum() for fc in THIRD_OCT]
+    )
     return THIRD_OCT, out, S
 
 
@@ -113,8 +140,10 @@ def show(name: str, synth: np.ndarray, real: np.ndarray) -> np.ndarray:
     mid = d[(THIRD_OCT >= 200) & (THIRD_OCT <= 1000)].mean()
     high = d[(THIRD_OCT >= 2500) & (THIRD_OCT <= 5000)].mean()
     boom = d[THIRD_OCT == 100][0]
-    print(f"  {name:<24} low{low:+5.1f} mid{mid:+5.1f} 100Hz{boom:+5.1f} high{high:+5.1f}"
-          f"   fullness {E.fullness(synth):.2f}")
+    print(
+        f"  {name:<24} low{low:+5.1f} mid{mid:+5.1f} 100Hz{boom:+5.1f} high{high:+5.1f}"
+        f"   fullness {E.fullness(synth):.2f}"
+    )
     return d
 
 
@@ -144,9 +173,15 @@ def smooth_env(x: np.ndarray, frac_oct: float = 1 / 6) -> tuple[np.ndarray, np.n
 KNOCK = [(1150.0, 0.006, 1.00), (1820.0, 0.004, 0.55), (2900.0, 0.003, 0.30)]
 
 
-def excite(rate: np.ndarray, load: np.ndarray, bright: np.ndarray,
-           circular: bool, torque_mix: float = 0.8, stroke_frac: float = 0.5,
-           air_mix: float = 1.0) -> np.ndarray:
+def excite(
+    rate: np.ndarray,
+    load: np.ndarray,
+    bright: np.ndarray,
+    circular: bool,
+    torque_mix: float = 0.8,
+    stroke_frac: float = 0.5,
+    air_mix: float = 1.0,
+) -> np.ndarray:
     """Raw source: firing comb + sustained torque push + knock clatter + air.
 
     NO block resonators baked in -- that was the +18 dB boom at 100 Hz, an
@@ -185,13 +220,15 @@ def excite(rate: np.ndarray, load: np.ndarray, bright: np.ndarray,
     # rate is the per-cylinder CYCLE rate (rpm/120); idle is ~5.4 Hz. Air rush
     # rises with revs, referenced so it sits near unity at idle.
     air = RNG.standard_normal(n) * (0.06 + 0.05 * load) * np.sqrt(np.maximum(rate, 0.1) / 5.39)
-    return (torque_mix * torque + comb
-            + (0.25 + 0.9 * load) * (0.4 + bright) * knock
-            + air_mix * (0.5 + bright) * air)
+    return (
+        torque_mix * torque
+        + comb
+        + (0.25 + 0.9 * load) * (0.4 + bright) * knock
+        + air_mix * (0.5 + bright) * air
+    )
 
 
-def shape(raw: np.ndarray, env_f: np.ndarray, env_m: np.ndarray,
-          bright: float) -> np.ndarray:
+def shape(raw: np.ndarray, env_f: np.ndarray, env_m: np.ndarray, bright: float) -> np.ndarray:
     """Apply the fixed measured filter, with a brightness tilt for high anchors.
 
     bright lifts the top and lightens the very bottom, standing in for the fact
@@ -205,15 +242,24 @@ def shape(raw: np.ndarray, env_f: np.ndarray, env_m: np.ndarray,
     H = np.interp(f, env_f, env_m, left=env_m[0], right=env_m[-1])
     H = H / (H.max() or 1.0)
     if bright:
-        tilt = 1.0 + bright * (np.clip((f - 900.0) / 4000.0, 0.0, 1.0)
-                               - 0.4 * np.clip((160.0 - f) / 130.0, 0.0, 1.0))
+        tilt = 1.0 + bright * (
+            np.clip((f - 900.0) / 4000.0, 0.0, 1.0) - 0.4 * np.clip((160.0 - f) / 130.0, 0.0, 1.0)
+        )
         H = H * tilt
     return np.fft.irfft(S * H, n)
 
 
-def voice_loop(rpm: float, load: float, env_f, env_m, bright: float = 0.0,
-               cycles: int = 12, torque_mix: float = 0.4, stroke_frac: float = 0.5,
-               air_mix: float = 2.5) -> np.ndarray:
+def voice_loop(
+    rpm: float,
+    load: float,
+    env_f,
+    env_m,
+    bright: float = 0.0,
+    cycles: int = 12,
+    torque_mix: float = 0.4,
+    stroke_frac: float = 0.5,
+    air_mix: float = 2.5,
+) -> np.ndarray:
     """One seamless fixed-formant loop at a steady rpm."""
     # Hold a whole number of four-stroke cycles and solve the rate back from the
     # buffer length, so the firing phase closes exactly and the loop is seamless.
@@ -221,13 +267,21 @@ def voice_loop(rpm: float, load: float, env_f, env_m, bright: float = 0.0,
     # Per-cylinder CYCLE rate (rpm/120): each cylinder fires once per four-stroke
     # cycle, staggered slot/6, so six of them sum to the rpm/20 engine firing.
     rate = np.full(n, cycles * SR / n)
-    raw = excite(rate, np.full(n, load), np.full(n, bright), circular=True,
-                 torque_mix=torque_mix, stroke_frac=stroke_frac, air_mix=air_mix)
+    raw = excite(
+        rate,
+        np.full(n, load),
+        np.full(n, bright),
+        circular=True,
+        torque_mix=torque_mix,
+        stroke_frac=stroke_frac,
+        air_mix=air_mix,
+    )
     return shape(raw, env_f, env_m, bright)
 
 
-def voice_sweep(rpm_curve: np.ndarray, load_curve: np.ndarray,
-                env_f, env_m, bright_curve: np.ndarray) -> np.ndarray:
+def voice_sweep(
+    rpm_curve: np.ndarray, load_curve: np.ndarray, env_f, env_m, bright_curve: np.ndarray
+) -> np.ndarray:
     """A continuous pull: rate follows rpm, formants fixed. One-shot, not looped."""
     raw = excite(rpm_curve / 120.0, load_curve, bright_curve, circular=False)
     # Time-invariant filter = fixed formants. bright varies slowly, so applying
@@ -245,7 +299,7 @@ def bed(path: Path, n: int, seed: int) -> np.ndarray:
     if len(src) < n:
         src = np.tile(src, int(np.ceil(n / len(src))))
     start = seed % max(1, len(src) - n)
-    return src[start:start + n]
+    return src[start : start + n]
 
 
 def mix(engine: np.ndarray, speed_mps: float, throttle: float) -> np.ndarray:
@@ -275,7 +329,7 @@ def write_raw(name: str, x: np.ndarray, peak: float = 0.9) -> None:
 
 # rpm -> a plausible top-gear road speed, for the bed level at that point.
 POINTS = [
-    ("idle", 647, 0.10, 2.0),      # rpm, throttle, m/s
+    ("idle", 647, 0.10, 2.0),  # rpm, throttle, m/s
     ("low_1000", 1000, 0.45, 16.0),
     ("cruise_1500", 1500, 0.55, 27.0),
     ("high_1900", 1900, 0.70, 31.0),
@@ -289,7 +343,7 @@ def brightness_for(rpm: float) -> float:
 def main() -> None:
     real = load_wav(REF_IDLE)
     env_f, env_m = smooth_env(real)
-    print(f"reference idle {len(real)/SR:.2f}s  fullness {E.fullness(real):.2f}")
+    print(f"reference idle {len(real) / SR:.2f}s  fullness {E.fullness(real):.2f}")
     print("filter = real idle's octave-smoothed envelope (fixed formants)\n")
 
     print("FILL sweep -- steady filtered air fills troughs without re-booming:")
@@ -304,12 +358,12 @@ def main() -> None:
     show("engine_v1 baseline", base, real)
 
     def tile_to(x: np.ndarray, secs: float) -> np.ndarray:
-        return np.tile(x, int(np.ceil(secs * SR / len(x))))[:int(secs * SR)]
+        return np.tile(x, int(np.ceil(secs * SR / len(x))))[: int(secs * SR)]
 
     print("\nSTEADY POINTS -- new voice solo + in mix, and engine_v1 in the same bed:")
     for tag, rpm, thr, spd in POINTS:
         if tag == "idle":
-            solo = tile_to(real, 4.0)          # idle ships the REAL sample
+            solo = tile_to(real, 4.0)  # idle ships the REAL sample
         else:
             solo = tile_to(voice_loop(rpm, thr, env_f, env_m, bright=brightness_for(rpm)), 4.0)
         write_raw(f"solo_{tag}.wav", solo)
@@ -320,12 +374,14 @@ def main() -> None:
             write_raw(f"mixOLD_{tag}.wav", mix(tile_to(old, 4.0), spd, thr))
         rg, wg = road_gain(spd) * ROAD_VOL, wind_intensity(spd) * WIND_VOL
         eg = ENGINE_VOL * load_gain(thr)
-        print(f"    {tag:12} engine {eg:.2f}  road {rg:.2f}  wind {wg:.2f}  "
-              f"({'road>engine' if rg > eg else 'engine>road'})")
+        print(
+            f"    {tag:12} engine {eg:.2f}  road {rg:.2f}  wind {wg:.2f}  "
+            f"({'road>engine' if rg > eg else 'engine>road'})"
+        )
 
     print("\nTRANSITION -- real idle, then pull to highway (no micro-engine):")
     fs = SR
-    idle_hold = np.tile(real, int(np.ceil(2 * fs / len(real))))[:2 * fs]
+    idle_hold = np.tile(real, int(np.ceil(2 * fs / len(real))))[: 2 * fs]
     pull_s = 7.0
     n = int(pull_s * fs)
     t = np.arange(n) / fs
@@ -341,8 +397,8 @@ def main() -> None:
     xf = int(0.4 * fs)
     fade = np.linspace(0, 1, xf)
     engine_line = np.concatenate([idle_hold, pull])
-    engine_line[2 * fs - xf:2 * fs] *= np.cos(fade * np.pi / 2)   # idle tail out
-    engine_line[2 * fs:2 * fs + xf] *= np.sin(fade * np.pi / 2)   # pull head in
+    engine_line[2 * fs - xf : 2 * fs] *= np.cos(fade * np.pi / 2)  # idle tail out
+    engine_line[2 * fs : 2 * fs + xf] *= np.sin(fade * np.pi / 2)  # pull head in
     # build the bed along the whole line
     full_n = len(engine_line)
     speed_full = np.concatenate([np.full(2 * fs, 2.0), speed_curve])
@@ -364,8 +420,10 @@ def main() -> None:
         hi = centers[i + 1] if i + 1 < len(centers) else c
         span_lo = (lo + c) / 2 / c if i else 600 / c
         span_hi = (hi + c) / 2 / c if i + 1 < len(centers) else 2200 / c
-        print(f"    anchor {c:5} rpm covers ~{span_lo:.2f}x..{span_hi:.2f}x "
-              f"(max formant shift {max(abs(1-span_lo), abs(1-span_hi))*100:.0f}%)")
+        print(
+            f"    anchor {c:5} rpm covers ~{span_lo:.2f}x..{span_hi:.2f}x "
+            f"(max formant shift {max(abs(1 - span_lo), abs(1 - span_hi)) * 100:.0f}%)"
+        )
 
     print(f"\nwrote to {OUT_DIR}")
 

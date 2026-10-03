@@ -20,7 +20,8 @@ use crate::models::save_migration::{json_f64, json_i64};
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct RecordEntry {
-    /// `RECORD_CITATION`, `RECORD_SERIOUS`, `RECORD_MAJOR` or `RECORD_FATIGUE`.
+    /// `RECORD_CITATION`, `RECORD_SERIOUS`, `RECORD_MAJOR`, `RECORD_FATIGUE`
+    /// or `RECORD_CRASH`.
     pub kind: String,
     pub reason: String,
     pub fine: f64,
@@ -32,6 +33,8 @@ pub const RECORD_CITATION: &str = "citation";
 pub const RECORD_SERIOUS: &str = "serious";
 pub const RECORD_MAJOR: &str = "major";
 pub const RECORD_FATIGUE: &str = "fatigue";
+/// A crash on the accident register (49 CFR 390.15), such as a rollover.
+pub const RECORD_CRASH: &str = "crash";
 
 /// How many explained entries the record keeps; the oldest fall off first.
 pub const RECORD_ENTRIES_KEPT: usize = 60;
@@ -68,6 +71,18 @@ pub struct DrivingRecord {
     pub fines_paid: f64,
     /// Times this driver ran off the road asleep.
     pub fatigue_events: i64,
+    /// Career game hours of each fatigue event since this field existed.
+    /// `fatigue_events` stays the lifetime tally; the safety record a scale
+    /// reads counts a window, like a real carrier score.
+    pub fatigue_times: Vec<f64>,
+    /// Career game hours of each out-of-service order since this field
+    /// existed. The lifetime count is `Profile::out_of_service_events`.
+    pub out_of_service_times: Vec<f64>,
+    /// Crashes on the accident register (49 CFR 390.15), lifetime.
+    pub crashes: i64,
+    /// Career game hours of each crash, newest last: the safety record and
+    /// reputation count a window, like the other serious events.
+    pub crash_times: Vec<f64>,
     /// The trust band the driver has already been told about, so a change is
     /// spoken once when it happens and never repeated on a timer.
     pub trust_band_heard: String,
@@ -134,22 +149,29 @@ impl DrivingRecord {
         (game_hours - days as f64 * HOURS_PER_DAY).max(self.review_started_h)
     }
 
+    fn count_within(&self, times: &[f64], game_hours: f64, days: i64) -> i64 {
+        let cutoff = self.cutoff_days_back(game_hours, days);
+        times.iter().filter(|&&at| at >= cutoff).count() as i64
+    }
+
     /// Citations inside the last `days`, since the review began.
     pub fn citations_within(&self, game_hours: f64, days: i64) -> i64 {
-        let cutoff = self.cutoff_days_back(game_hours, days);
-        self.citation_times
-            .iter()
-            .filter(|&&at| at >= cutoff)
-            .count() as i64
+        self.count_within(&self.citation_times, game_hours, days)
     }
 
     /// Serious violations inside the last `days`, since the review began.
     pub fn serious_within(&self, game_hours: f64, days: i64) -> i64 {
-        let cutoff = self.cutoff_days_back(game_hours, days);
-        self.serious_violations
-            .iter()
-            .filter(|&&at| at >= cutoff)
-            .count() as i64
+        self.count_within(&self.serious_violations, game_hours, days)
+    }
+
+    /// Fatigue events inside the last `days`, since the review began.
+    pub fn fatigue_within(&self, game_hours: f64, days: i64) -> i64 {
+        self.count_within(&self.fatigue_times, game_hours, days)
+    }
+
+    /// Out-of-service orders inside the last `days`, since the review began.
+    pub fn out_of_service_within(&self, game_hours: f64, days: i64) -> i64 {
+        self.count_within(&self.out_of_service_times, game_hours, days)
     }
 
     /// Citations still inside the window a carrier reviews.
@@ -165,21 +187,42 @@ impl DrivingRecord {
         self.serious_within(game_hours, REVIEW_WINDOW_DAYS)
     }
 
-    /// The career hour at which the oldest citation or serious violation
-    /// still in the window leaves it, or `None` when the window is empty.
-    /// This is the date a record-based hold can honestly promise.
-    pub fn window_ages_out_at(&self, game_hours: f64) -> Option<f64> {
+    /// The career hour at which the window stops meeting `holds(citations,
+    /// serious)`, with nothing new added, or `None` when it already does not.
+    /// Each event leaves the window a year after it, so walk the expiries in
+    /// order. This is the date a record-based hold can honestly promise: the
+    /// oldest event leaving is not it when the rest still meet the floor.
+    pub fn window_clears_at(
+        &self,
+        game_hours: f64,
+        holds: impl Fn(i64, i64) -> bool,
+    ) -> Option<f64> {
         let window = REVIEW_WINDOW_DAYS as f64 * HOURS_PER_DAY;
         let cutoff = self.review_cutoff(game_hours);
-        self.citation_times
+        let mut events: Vec<(f64, bool)> = self
+            .citation_times
             .iter()
-            .chain(self.serious_violations.iter())
-            .filter(|&&at| at >= cutoff)
-            .copied()
-            .fold(None, |oldest: Option<f64>, at| {
-                Some(oldest.map_or(at, |o| o.min(at)))
-            })
-            .map(|oldest| oldest + window)
+            .map(|&at| (at, false))
+            .chain(self.serious_violations.iter().map(|&at| (at, true)))
+            .filter(|&(at, _)| at >= cutoff)
+            .collect();
+        events.sort_by(|a, b| a.0.total_cmp(&b.0));
+        let mut citations = events.iter().filter(|e| !e.1).count() as i64;
+        let mut serious = events.len() as i64 - citations;
+        if !holds(citations, serious) {
+            return None;
+        }
+        for (at, is_serious) in events {
+            if is_serious {
+                serious -= 1;
+            } else {
+                citations -= 1;
+            }
+            if !holds(citations, serious) {
+                return Some(at + window);
+            }
+        }
+        None
     }
 
     pub fn suspended(&self, game_hours: f64) -> bool {
@@ -242,7 +285,7 @@ impl DrivingRecord {
         let explained = self
             .entries
             .iter()
-            .filter(|e| e.kind != RECORD_FATIGUE)
+            .filter(|e| e.kind != RECORD_FATIGUE && e.kind != RECORD_CRASH)
             .count() as i64;
         (self.citations - explained).max(0)
     }
@@ -278,6 +321,21 @@ impl DrivingRecord {
         count
     }
 
+    /// Book a crash at career hour `game_hours`: the accident register a
+    /// motor carrier keeps under 49 CFR 390.15, which lists every accident
+    /// (390.5: an occurrence involving a commercial vehicle on a highway that
+    /// results in a fatality, an injury treated away from the scene, or a
+    /// vehicle towed away). A truck that rolls over is towed away.
+    pub fn record_crash(&mut self, game_hours: f64) {
+        self.crashes += 1;
+        self.crash_times.push(game_hours);
+    }
+
+    /// Crashes inside the last `days`, since the review began.
+    pub fn crashes_within(&self, game_hours: f64, days: i64) -> i64 {
+        self.count_within(&self.crash_times, game_hours, days)
+    }
+
     /// Log running off the road asleep. Returns (fatigue events, serious).
     ///
     /// The first one is a preventable safety incident: it costs standing but
@@ -286,6 +344,7 @@ impl DrivingRecord {
     /// serious-violation ladder like any other.
     pub fn record_fatigue_event(&mut self, game_hours: f64) -> (i64, i64) {
         self.fatigue_events += 1;
+        self.fatigue_times.push(game_hours);
         let mut serious = 0;
         if self.fatigue_events >= FATIGUE_EVENTS_BEFORE_SERIOUS {
             serious = self.record_serious_violation(game_hours);

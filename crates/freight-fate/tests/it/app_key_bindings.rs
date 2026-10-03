@@ -5,6 +5,7 @@
 use crate::states_driving_menus_support::{a_drive, key as key_event, last, with_drive};
 use crate::states_main_menu_support::*;
 use ff_core::input_hints::CONTROLLER;
+#[cfg(feature = "agent-server")]
 use freight_fate::agent_server::{build_command, Command, KeySpec};
 use freight_fate::app::testing::TestApp;
 use freight_fate::bindings::Action;
@@ -479,6 +480,7 @@ fn test_help_pages_follow_the_controller_when_it_is_in_use() {
 
 // -- the agent server presses a control by name ------------------------------------------
 
+#[cfg(feature = "agent-server")]
 #[test]
 fn test_press_tool_resolves_a_control_through_the_players_table() {
     let mut app = TestApp::new();

@@ -15,11 +15,18 @@ an exit whose every ramp chain merges back onto a motorway bakes an explicit
 touches a surface road bakes ``ramp_far_end: surface`` so the runtime stops
 guessing free flow off signage. Only exits neither half could judge are left
 to the runtime's seeded heuristic.
+
+The same walk measures each exit's ramp length per direction (gore to
+terminal, along the link ways; see the ramp-length section below for where it
+starts and what the screen drops).
 """
 
 from __future__ import annotations
 
+import bisect
+
 from build_interchanges_base import *
+from exit_position_screen import leg_position_drift_mi
 from build_interchanges_maxspeed import (
     OSM_REGION_CACHE_DIR,
     _interpolated_geometry,
@@ -308,11 +315,18 @@ def load_or_build_ramp_control_index(
 def _exit_location(
     geom: list[tuple[float, float, float]], at_mi: float, leg_miles: float
 ) -> tuple[float, float]:
-    """Geometry vertex at an interchange's leg-frame milepost."""
+    """The point on the polyline at an interchange's leg-frame milepost,
+    interpolated between vertices: the archive thins straights to a vertex
+    every few miles, so the nearest vertex could be miles from the exit."""
     total = geom[-1][2] or leg_miles
     target = at_mi / leg_miles * total if leg_miles else 0.0
-    best = min(geom, key=lambda p: abs(p[2] - target))
-    return best[0], best[1]
+    i = bisect.bisect_left([p[2] for p in geom], target)
+    if i <= 0 or i >= len(geom):
+        end = geom[0] if i <= 0 else geom[-1]
+        return end[0], end[1]
+    (a_lat, a_lon, a_mi), (b_lat, b_lon, b_mi) = geom[i - 1], geom[i]
+    t = (target - a_mi) / (b_mi - a_mi) if b_mi > a_mi else 0.0
+    return a_lat + (b_lat - a_lat) * t, a_lon + (b_lon - a_lon) * t
 
 
 def load_junction_ref_map(path: Path) -> dict[str, list[tuple[float, float]]]:
@@ -366,10 +380,10 @@ def bake_ramp_controls_for_leg(
     leg: dict[str, Any],
     points: list[RampControlPoint],
     rate_limit: float,
-    force: bool = False,
     junction_refs: dict[str, list[tuple[float, float]]] | None = None,
     topo: dict[str, Any] | None = None,
     stats: dict[str, int] | None = None,
+    withhold_unpinned: bool = False,
 ) -> int:
     """Set ``ramp_control`` and ``ramp_far_end`` on the leg's interchanges.
 
@@ -386,6 +400,18 @@ def bake_ramp_controls_for_leg(
     roundabout entry is the roundabout's own furniture, and a signalized
     roundabout or terminal is worked as its light.
 
+    Every exit this call reaches is judged afresh from the evidence alone,
+    whatever the record held before: until 2026-09-24 a run without
+    ``--force`` kept any exit that already had a control and a far end, so a
+    verdict from an older topology or older precedence rule survived beside
+    fresh ones, and ``--force`` disagreed with the saved data on 40 exits
+    across 10 legs. ``--force`` now only chooses which LEGS a run visits.
+
+    ``withhold_unpinned``: the leg's exit mileage disagrees with its polyline
+    (``exit_position_screen``), so an exit not pinned to its own junction
+    node would be judged at the wrong place. Such an exit keeps whatever it
+    holds and gets no new verdict.
+
     Returns how many interchanges got a control or a far end."""
     interchanges = list(leg.get("corridor", {}).get("interchanges", ()))
     if not interchanges:
@@ -397,29 +423,21 @@ def bake_ramp_controls_for_leg(
     stats = stats if stats is not None else {}
     baked = 0
     for ix in interchanges:
-        had_control = bool(ix.get("ramp_control"))
-        had_far_end = bool(ix.get("ramp_far_end"))
-        if had_control and had_far_end and not force:
-            continue
         estimate = _exit_location(geom, float(ix.get("at_mi", 0.0)), leg_miles)
         (lat, lon), radius_m = _pinned_exit_location(ix, estimate, junction_refs or {})
+        if withhold_unpinned and radius_m != RAMP_CONTROL_NEAR_JUNCTION_M:
+            stats["withheld"] = stats.get("withheld", 0) + 1
+            continue
         touched = False
-        if force:
-            # Re-judging: clear anything a previous run derived so a changed
-            # verdict cannot leave a contradictory record behind. Reads are
-            # re-derived below from the same evidence, so clearing them only
-            # ever swaps them for equal or better provenance.
-            if str(ix.get("ramp_control_source", "")).startswith("derived from ramp_far_end"):
-                ix.pop("ramp_control", None)
-                ix.pop("ramp_control_source", None)
-            ix.pop("ramp_far_end", None)
-            ix.pop("ramp_far_end_source", None)
+        before = (ix.get("ramp_control"), ix.get("ramp_control_source"))
+        for key in ("ramp_control", "ramp_control_source", "ramp_far_end", "ramp_far_end_source"):
+            ix.pop(key, None)
 
         # -- walked topology first: it decides both the far end and where a
         # control could stand.
         far_end = ""
         terminal_kinds: set[str] = set()
-        if topo is not None and (not had_far_end or force):
+        if topo is not None:
             # The gore sits at the junction itself, so the search is tighter
             # than the control radius by design.
             far_radius = (
@@ -437,7 +455,7 @@ def bake_ramp_controls_for_leg(
                     stats["yieldish_terminals"] = stats.get("yieldish_terminals", 0) + 1
 
         # -- the control, best evidence first.
-        wide_read = "motorway_link way at this exit" in str(ix.get("ramp_control_source", ""))
+        wide_read = "motorway_link way at this exit" in str(before[1] or "")
         precise = (
             "signal"
             if "signal" in terminal_kinds
@@ -449,25 +467,26 @@ def bake_ramp_controls_for_leg(
             if "give_way" in terminal_kinds
             else ""
         )
-        if precise and (not ix.get("ramp_control") or force):
-            if wide_read and ix.get("ramp_control") not in ("", precise, None):
+        if precise:
+            if wide_read and before[0] not in ("", precise, None):
                 stats["wide_read_corrected"] = stats.get("wide_read_corrected", 0) + 1
             ix["ramp_control"] = precise
             ix["ramp_control_source"] = RAMP_CONTROL_TERMINAL_SOURCE
             stats["precise_reads"] = stats.get("precise_reads", 0) + 1
             touched = True
-        elif not precise and far_end == "motorway" and force and wide_read:
+        elif far_end == "motorway" and wide_read:
             # An exit-wide match on a topology-proven merge with nothing at
-            # any walked terminal: that is the neighbor's control. Drop it
-            # and let the merge bake ``none`` below.
-            ix.pop("ramp_control", None)
-            ix.pop("ramp_control_source", None)
+            # any walked terminal was the neighbor's control. It is not
+            # re-read; the merge bakes ``none`` below.
             stats["wide_read_dropped_at_merge"] = stats.get("wide_read_dropped_at_merge", 0) + 1
-        elif not precise and not far_end and (not ix.get("ramp_control") or force):
-            # The walk could not judge this exit; the exit-wide radius match
-            # is the only read available and stays, contamination risk and
-            # all -- it is still a real control nearby, and the alternative
-            # is the dice.
+        elif far_end != "motorway":
+            # Nothing at a walked terminal (or no walk at all): the exit-wide
+            # radius match is the only read available and stays,
+            # contamination risk and all -- it is still a real control on
+            # this exit's ramp links, often at a terminal the walk from the
+            # nearest gore did not reach, and the alternative is the dice.
+            # (Until 2026-09-24 a surface exit kept such a read only because
+            # no run ever cleared it; re-judging now re-reads it.)
             kinds = {
                 kind
                 for plat, plon, kind in points
@@ -483,8 +502,8 @@ def bake_ramp_controls_for_leg(
         # -- the far end, and the derived ``none`` it can carry.
         if far_end == "motorway" and ix.get("ramp_control") in ("signal", "stop"):
             # Still contradictory after the precise pass: a control read AT
-            # a terminal of a proven merge, or a non-force run keeping an
-            # old wide read. Trust the reading, bake no far end, count it.
+            # a terminal of a proven merge. Trust the reading, bake no far
+            # end, count it.
             stats["contradictions"] = stats.get("contradictions", 0) + 1
         elif far_end:
             stats[f"far_{far_end}"] = stats.get(f"far_{far_end}", 0) + 1
@@ -517,7 +536,10 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
         if not corridor.get("interchanges") or len(corridor.get("route_points", ())) < 2:
             continue
         if not args.force and all(
-            ix.get("ramp_control") and ix.get("ramp_far_end") and ix.get("ramp_advisory_source")
+            ix.get("ramp_control")
+            and ix.get("ramp_far_end")
+            and ix.get("ramp_advisory_source")
+            and ix.get("ramp_length_source")
             for ix in corridor["interchanges"]
         ):
             continue
@@ -573,6 +595,7 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
         junction_refs = load_junction_ref_map(JUNCTION_INDEX_DEFAULT)
 
     stats: dict[str, int] = {}
+    drifted: list[dict[str, Any]] = []
     baked_total = 0
     baked_legs = 0
     processed = 0
@@ -583,27 +606,45 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
             flush=True,
         )
         try:
+            geom = leg_corridor_geometry(leg, args.rate_limit)
+            drift = leg_position_drift_mi(
+                geom or [],
+                leg["corridor"]["interchanges"],
+                float(leg["miles"]),
+                junction_refs,
+                RAMP_FAR_END_NEAR_JUNCTION_M,
+            )
+            withhold = drift is not None and drift * 1609.34 > RAMP_FAR_END_NEAR_GEOM_M
+            if withhold:
+                drifted.append(
+                    {"leg": f"{leg['from']}->{leg['to']}", "median_gap_mi": round(drift, 2)}
+                )
+                print(f"    exit mileage off its polyline by a median {drift:.2f} mi", flush=True)
             baked = bake_ramp_controls_for_leg(
                 leg,
                 points,
                 args.rate_limit,
-                force=args.force,
                 junction_refs=junction_refs,
                 topo=topo,
                 stats=stats,
+                withhold_unpinned=withhold,
             )
             advisories = bake_ramp_advisories_for_leg(leg, topo.get("advisory_observations", []))
+            lengths = bake_ramp_lengths_for_leg(
+                leg, topo, geom, junction_refs, stats, withhold_unpinned=withhold
+            )
         except Exception as exc:  # noqa: BLE001 - one bad leg must not abort the batch
             print(f"    skipped: {type(exc).__name__}: {exc}", flush=True)
             baked = 0
             advisories = 0
+            lengths = 0
         total_ix = len(leg.get("corridor", {}).get("interchanges", ()))
         print(
             f"    {baked}/{total_ix} interchanges given a control; "
-            f"{advisories} given observed ramp advisory speeds",
+            f"{advisories} given observed ramp advisory speeds; {lengths} given ramp lengths",
             flush=True,
         )
-        if baked or advisories:
+        if baked or advisories or lengths:
             baked_total += baked
             stats["advisory_interchanges"] = stats.get("advisory_interchanges", 0) + advisories
             baked_legs += 1
@@ -661,6 +702,31 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
                 f"{judged:,} judged exits "
                 f"({100.0 * stats.get('via_disagrees', 0) / judged:.1f}%)."
             )
+    meta = ramp_length_meta(data["legs"], stats)
+    # The screen counts are this run's alone; an --only run judges few legs.
+    meta["screen"]["legs_this_run"] = processed
+    meta["position_screen"] = {
+        "rule": (
+            "derived: per leg, the median gap between each labelled exit's at_mi and "
+            "the nearest same-ref OSM junction node on the leg's own polyline. Wider "
+            f"than the {RAMP_FAR_END_NEAR_GEOM_M:.0f} m far-end search radius, an exit "
+            "not pinned to its own junction is not judged: it keeps its saved control "
+            "and far end and gets no length or terminal. The fix is re-deriving the "
+            "leg's interchange mileage, not this bake."
+        ),
+        "legs_this_run": sorted(drifted, key=lambda row: -row["median_gap_mi"]),
+        "exits_withheld": stats.get("withheld", 0),
+    }
+    print(
+        f"Position screen: {len(drifted)} legs with exit mileage off their polyline; "
+        f"{stats.get('withheld', 0):,} unpinned exits on them withheld."
+    )
+    data["ramp_length_bake"] = meta
+    print(
+        f"Ramp length (derived from OSM geometry): {meta['exits_with_length']:,} of "
+        f"{meta['exits']:,} exits ({100.0 * meta['coverage_ratio']:.1f}%), "
+        f"percentiles {meta['percentiles_ft']}; screen {meta['screen']}"
+    )
     if args.write and baked_legs:
         save_world(data)
         print(f"Wrote {WORLD_SOURCE_PATH}")
@@ -685,32 +751,54 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
 # far end, so the match radii are much tighter than the control pass's.
 RAMP_FAR_END_NEAR_JUNCTION_M = 500.0
 RAMP_FAR_END_NEAR_GEOM_M = 1200.0
-RAMP_TOPO_CACHE_VERSION = 5
+# 6: node_locs for every walkable node (ramp length); 7: public crossroads only
+RAMP_TOPO_CACHE_VERSION = 7
 RAMP_TOPO_WALK_CAP = 600  # visited nodes per gore; a real ramp complex is far smaller
-# Ways that can meet a ramp at a node without being a road the ramp ends at:
-# a marked footpath crossing a system ramp is not a terminal, and counting it
-# as one turned real freeway-to-freeway merges into "surface" verdicts on the
-# first national run. Vehicular service ways stay in -- a ramp meeting a
-# frontage or access road at grade genuinely is a controllable terminal.
-NON_VEHICULAR_HIGHWAYS = frozenset(
+# The road classes a ramp can END at mid-link: the public street network the
+# facility chains are routed over (build_local_geometry.ROUTABLE_HIGHWAYS,
+# less service). Until 2026-09-24 any vehicular way stopped the walk, so a
+# two-node service stub touching a ramp before its real terminal (Baltimore,
+# node 9879536272) became "the terminal": the ramp length stopped short there
+# and the street chain from it had no street to start on. A ramp that ENDS
+# on a service way still ends there -- the walk stops at a dead end whatever
+# meets it -- so a frontage road drawn as service keeps its terminal.
+PUBLIC_CROSSROAD_HIGHWAYS = frozenset(
     (
-        "footway",
-        "cycleway",
-        "path",
-        "steps",
-        "pedestrian",
-        "bridleway",
-        "corridor",
-        "platform",
-        "crossing",
-        "elevator",
-        "escape",
-        "proposed",
-        "construction",
-        "abandoned",
-        "razed",
+        "trunk",
+        "trunk_link",
+        "primary",
+        "primary_link",
+        "secondary",
+        "secondary_link",
+        "tertiary",
+        "tertiary_link",
+        "unclassified",
+        "residential",
+        "living_street",
     )
 )
+# READ from OSM access=*: a way closed to a truck that has not been let in
+# (the same list as build_local_geometry.CLOSED_ACCESS).
+CLOSED_ACCESS = frozenset(
+    (
+        "private",
+        "no",
+        "military",
+        "permit",
+        "residents",
+        "employees",
+        "emergency",
+        "agricultural",
+        "forestry",
+    )
+)
+
+
+def is_public_crossroad(highway: str, access: str = "") -> bool:
+    """Whether a way meeting a ramp mid-link is a public road it can end at."""
+    return highway in PUBLIC_CROSSROAD_HIGHWAYS and access.strip().lower() not in CLOSED_ACCESS
+
+
 RAMP_FAR_END_SOURCE = (
     "derived: this exit's motorway_link chains walked from the gore in a "
     f"local Geofabrik extract, accessed {ACCESSED_DATE}. 'motorway' means "
@@ -936,12 +1024,265 @@ def controls_at_terminals(
     junction=roundabout way."""
     kinds: set[str] = set()
     for tid in terminal_ids:
-        loc = topo["terminal_locs"].get(tid)
+        loc = topo["node_locs"].get(tid)
         if loc is not None:
             kinds.update(topo["control_grid"].near(loc[0], loc[1], radius_m))
         if tid in topo["roundabout"]:
             kinds.add("roundabout")
     return kinds
+
+
+# --- Ramp length: gore to terminal, measured along the link ways ---------
+#
+# READ-derived geometry: the sum of great-circle distances between
+# consecutive OSM node locations along the motorway_link way(s), from the
+# gore (the mainline node the exit ramp leaves) to the nearest node where
+# the ramp ends -- a surface-road crossroad or a dead end, else (system
+# ramps) the merge onto another motorway. A surface end is preferred when
+# both are reachable, because that is where the runtime's exit ends.
+#
+# WHERE IT STARTS: at the OSM node where the motorway_link way leaves the
+# motorway way. OSM maps the diverge where the ramp lane separates from the
+# through lanes -- at or near the gore (mapper practice varies between the
+# start of the painted gore and the physical nose). A deceleration lane, or
+# a taper, is mapped as part of the motorway way before that split, so it is
+# NOT inside this length: the length is gore to terminal, and a consumer
+# modelling the deceleration lane adds it in front.
+#
+# Screened for self-contradiction, never clamped: a ramp under 300 ft is too
+# short to hold even the GB 2018 Table 10-6 taper, so the "gore" is a
+# mapping split rather than a diverge; one over 1.5 mi has walked onto a
+# collector road or a neighbor's chain. Both drop to no value and are
+# counted in the layer meta.
+RAMP_LENGTH_MIN_FT = 300.0
+RAMP_LENGTH_MAX_FT = 1.5 * 5280.0
+RAMP_LENGTH_SOURCE = (
+    "derived from OpenStreetMap geometry: summed node-to-node distance along "
+    "this exit's motorway_link way(s), from the gore node where the ramp "
+    "leaves the motorway to the nearest node where it ends (a public road -- "
+    "trunk to residential, not a service or private way -- or a dead end, else "
+    "a motorway merge). Starts at the OSM diverge, at or near "
+    "the gore, so any deceleration lane before it is not included; direction "
+    "from the ramp's first edge "
+    "against the leg. Screened: under 300 ft or over 1.5 mi dropped, not "
+    f"clamped. Local Geofabrik extract accessed {ACCESSED_DATE}: "
+    "https://www.openstreetmap.org/"
+)
+RAMP_TERMINAL_SOURCE = (
+    "read from OpenStreetMap topology: the node where the same walk that "
+    "measures ramp_length ends (the public crossroad or dead end the "
+    "motorway_link way reaches), per direction of travel. Only baked beside a "
+    "length that passed its screen, and never for a ramp that ends in a merge. "
+    f"Local Geofabrik extract accessed {ACCESSED_DATE}: https://www.openstreetmap.org/"
+)
+M_TO_FT = 3.28084
+
+
+def ramp_length_m(
+    graph: dict[str, Any], locs: dict[int, tuple[float, float]], gore: int
+) -> float | None:
+    """Along-way distance from ``gore`` to where its ramp ends, or None."""
+    end = ramp_end(graph, locs, gore)
+    return None if end is None else end[0]
+
+
+def ramp_end(
+    graph: dict[str, Any], locs: dict[int, tuple[float, float]], gore: int
+) -> tuple[float, int | None] | None:
+    """(along-way metres, surface terminal node) from ``gore`` to where its
+    ramp ends, or None. The node is None when the ramp ends in a merge.
+
+    Dijkstra over the directed link graph. Terminals are the same ones
+    ``walk_far_ends`` stops at; the nearest surface terminal wins over the
+    nearest merge. Edges with an unknown endpoint location are skipped."""
+    import heapq
+
+    out = graph["out"]
+    mainline = graph["mainline"]
+    crossroad = graph.get("crossroad", frozenset())
+    best = {gore: 0.0}
+    heap = [(0.0, gore)]
+    merge: tuple[float, None] | None = None
+    popped = 0
+    while heap and popped <= RAMP_TOPO_WALK_CAP:
+        dist, node = heapq.heappop(heap)
+        if dist > best.get(node, math.inf):
+            continue
+        popped += 1
+        if node != gore:
+            if node in mainline:
+                merge = (dist, None) if merge is None else merge
+                continue
+            if node in crossroad or not out.get(node):
+                return dist, node
+        a = locs.get(node)
+        for nxt in out.get(node, ()):
+            b = locs.get(nxt)
+            if a is None or b is None:
+                continue
+            nd = dist + _gore_distance_m(a[0], a[1], b[0], b[1])
+            if nd < best.get(nxt, math.inf):
+                best[nxt] = nd
+                heapq.heappush(heap, (nd, nxt))
+    return merge
+
+
+def screen_ramp_length_ft(length_ft: float | None, stats: dict[str, int]) -> float | None:
+    """The screen above: keep a plausible length, count and drop the rest."""
+    if length_ft is None:
+        stats["length_unmeasured"] = stats.get("length_unmeasured", 0) + 1
+        return None
+    if length_ft < RAMP_LENGTH_MIN_FT:
+        stats["length_too_short"] = stats.get("length_too_short", 0) + 1
+        return None
+    if length_ft > RAMP_LENGTH_MAX_FT:
+        stats["length_too_long"] = stats.get("length_too_long", 0) + 1
+        return None
+    return length_ft
+
+
+def bake_ramp_lengths_for_leg(
+    leg: dict[str, Any],
+    topo: dict[str, Any],
+    geom: list[tuple[float, float, float]],
+    junction_refs: dict[str, list[tuple[float, float]]] | None = None,
+    stats: dict[str, int] | None = None,
+    withhold_unpinned: bool = False,
+) -> int:
+    """Set ``ramp_length_ft_forward/backward`` on the leg's interchanges.
+
+    With ``withhold_unpinned`` (see ``bake_ramp_controls_for_leg``) an exit
+    not pinned to its own junction gets no length or terminal: read at the
+    wrong place they would describe some other ramp.
+
+    The candidate gores are exactly the ones the far-end walk judges for
+    the exit (same radii). Each is assigned to the leg's A->B or B->A
+    direction by its first ramp edge, the same rule the advisory bake uses,
+    and the gore nearest the exit wins its direction. Every run re-derives
+    the fields from the topology, so a length the screen now rejects
+    cannot survive from an earlier run. Returns interchanges given a length."""
+    stats = stats if stats is not None else {}
+    interchanges = list(leg.get("corridor", {}).get("interchanges", ()))
+    if not interchanges or not geom:
+        return 0
+    graph, locs = topo["graph"], topo["node_locs"]
+    leg_miles = float(leg["miles"])
+    touched = 0
+    for ix in interchanges:
+        for key in (
+            "ramp_length_ft_forward",
+            "ramp_length_ft_backward",
+            "ramp_length_source",
+            "ramp_terminal_forward",
+            "ramp_terminal_backward",
+            "ramp_terminal_source",
+        ):
+            ix.pop(key, None)
+        estimate = _exit_location(geom, float(ix.get("at_mi", 0.0)), leg_miles)
+        (lat, lon), radius_m = _pinned_exit_location(ix, estimate, junction_refs or {})
+        if withhold_unpinned and radius_m != RAMP_CONTROL_NEAR_JUNCTION_M:
+            continue
+        far_radius = (
+            RAMP_FAR_END_NEAR_JUNCTION_M
+            if radius_m == RAMP_CONTROL_NEAR_JUNCTION_M
+            else RAMP_FAR_END_NEAR_GEOM_M
+        )
+        nearest_i = min(range(len(geom)), key=lambda i: _gore_distance_m(lat, lon, *geom[i][:2]))
+        before = geom[max(0, nearest_i - 1)]
+        after = geom[min(len(geom) - 1, nearest_i + 1)]
+        leg_dx = (after[1] - before[1]) * math.cos(math.radians(lat))
+        leg_dy = after[0] - before[0]
+        nearest: dict[str, tuple[float, int]] = {}
+        for gore in topo["grid"].near(lat, lon, far_radius):
+            g = locs.get(gore)
+            nxt = next((n for n in graph["out"].get(gore, ()) if n in locs), None)
+            if g is None or nxt is None:
+                continue
+            n = locs[nxt]
+            ramp_dx = (n[1] - g[1]) * math.cos(math.radians(g[0]))
+            ramp_dy = n[0] - g[0]
+            direction = "forward" if leg_dx * ramp_dx + leg_dy * ramp_dy >= 0 else "backward"
+            dist = _gore_distance_m(lat, lon, g[0], g[1])
+            if direction not in nearest or dist < nearest[direction][0]:
+                nearest[direction] = (dist, gore)
+        measured = False
+        terminal = False
+        for direction, (_, gore) in sorted(nearest.items()):
+            stats["length_gores"] = stats.get("length_gores", 0) + 1
+            end = ramp_end(graph, locs, gore)
+            length_ft = screen_ramp_length_ft(None if end is None else end[0] * M_TO_FT, stats)
+            if length_ft is not None:
+                ix[f"ramp_length_ft_{direction}"] = round(length_ft, 1)
+                measured = True
+                # Only a surface end whose walk the length screen trusts: a
+                # merge has no street to hand over to, and a dropped length
+                # means the walk itself is in doubt.
+                node = end[1] if end is not None else None
+                if node is not None and node in locs:
+                    lat, lon = locs[node]
+                    ix[f"ramp_terminal_{direction}"] = {
+                        "node": int(node),
+                        "lat": round(lat, 7),
+                        "lon": round(lon, 7),
+                    }
+                    terminal = True
+        if measured:
+            ix["ramp_length_source"] = RAMP_LENGTH_SOURCE
+            touched += 1
+        if terminal:
+            ix["ramp_terminal_source"] = RAMP_TERMINAL_SOURCE
+    return touched
+
+
+def ramp_length_meta(legs: list[dict[str, Any]], stats: dict[str, int]) -> dict[str, Any]:
+    """The loud accounting for the layer meta: coverage over every baked
+    exit, the length distribution, and what the screen dropped this run."""
+    exits = [ix for leg in legs for ix in leg.get("corridor", {}).get("interchanges", ())]
+    lengths = sorted(
+        ix[key]
+        for ix in exits
+        for key in ("ramp_length_ft_forward", "ramp_length_ft_backward")
+        if key in ix
+    )
+    covered = sum(1 for ix in exits if "ramp_length_source" in ix)
+
+    def pct(p: float) -> float | None:
+        return lengths[min(len(lengths) - 1, int(p / 100 * len(lengths)))] if lengths else None
+
+    return {
+        "kind": "derived",
+        "measure": RAMP_LENGTH_SOURCE,
+        "starts_at": (
+            "the OSM node where the motorway_link way leaves the motorway way: "
+            "at or near the gore (painted-gore start to physical nose, by "
+            "mapper). The deceleration lane or taper lies before it and is "
+            "not included."
+        ),
+        "ends_at": (
+            "the nearest surface-road node or dead end along the link ways, "
+            "else the merge onto another motorway"
+        ),
+        "exits": len(exits),
+        "exits_with_length": covered,
+        "coverage_ratio": round(covered / len(exits), 4) if exits else 0.0,
+        # Surface terminal nodes (read), per direction; a merge has none.
+        "directional_terminals": sum(
+            1
+            for ix in exits
+            for key in ("ramp_terminal_forward", "ramp_terminal_backward")
+            if key in ix
+        ),
+        "directional_lengths": len(lengths),
+        "percentiles_ft": {f"p{p}": pct(p) for p in (5, 25, 50, 75, 95)},
+        "screen": {
+            "min_ft": RAMP_LENGTH_MIN_FT,
+            "max_ft": RAMP_LENGTH_MAX_FT,
+            "gores_measured": stats.get("length_gores", 0),
+            "dropped_too_short": stats.get("length_too_short", 0),
+            "dropped_too_long": stats.get("length_too_long", 0),
+            "no_terminal_reached": stats.get("length_unmeasured", 0),
+        },
+    }
 
 
 def _build_ramp_topo_from_pbf(
@@ -1025,14 +1366,17 @@ def _build_ramp_topo_from_pbf(
             self.ways_seen += 1
             progress.maybe(f"crossroads: {self.ways_seen:,} ways; {len(self.crossroad):,} nodes")
             highway = ""
+            access = ""
             roundabout = False
             for k, v in way.tags:
                 key = str(k)
                 if key == "highway":
                     highway = str(v)
+                elif key == "access":
+                    access = str(v)
                 elif key == "junction" and str(v) in ("roundabout", "circular"):
                     roundabout = True
-            if highway in ("motorway", "motorway_link") or highway in NON_VEHICULAR_HIGHWAYS:
+            if not is_public_crossroad(highway, access):
                 return
             for node_ref in way.nodes:
                 ref = getattr(node_ref, "ref", None)
@@ -1165,28 +1509,24 @@ def _build_ramp_topo_from_pbf(
                         frontier.append(nxt)
         reachable |= seen
     out_pruned = {n: targets for n, targets in graph["out"].items() if n in reachable}
-    # Locations for the walkable terminal candidates: crossroad touches and
-    # dead ends. These are where walked chains stop, so a control read wants
-    # their coordinates.
-    terminal_candidates = {
-        n for n in reachable if n in graph["crossroad"] or not graph["out"].get(n)
-    }
-    terminal_locs: dict[int, tuple[float, float]] = {}
-    if terminal_candidates:
+    # Locations for every walkable node: terminals (where a control read
+    # looks) and everything between, which the ramp-length measure sums.
+    node_locs: dict[int, tuple[float, float]] = {}
+    if reachable:
 
-        class TerminalLocationHandler(osmium.SimpleHandler):  # type: ignore[name-defined]
+        class NodeLocationHandler(osmium.SimpleHandler):  # type: ignore[name-defined]
             def node(self, node: Any) -> None:
                 if node.location.valid():
-                    terminal_locs[int(node.id)] = (
+                    node_locs[int(node.id)] = (
                         float(node.location.lat),
                         float(node.location.lon),
                     )
 
-        TerminalLocationHandler().apply_file(
+        NodeLocationHandler().apply_file(
             str(pbf_path),
             filters=[
                 osmium.filter.EntityFilter(osmium.osm.NODE),
-                osmium.filter.IdFilter(sorted(terminal_candidates)),
+                osmium.filter.IdFilter(sorted(reachable)),
             ],
         )
     print(
@@ -1205,7 +1545,7 @@ def _build_ramp_topo_from_pbf(
         "toll": sorted(tagged.toll & reachable),
         "give_way": sorted(tagged.give_way & reachable),
         "control_points": tagged.control_points,
-        "terminal_locs": {str(k): v for k, v in terminal_locs.items()},
+        "node_locs": {str(k): v for k, v in node_locs.items()},
         "gores": gore_points,
         "advisory_observations": advisory_observations,
         "untagged_oneway_ways": graph["untagged_oneway_ways"],
@@ -1259,16 +1599,35 @@ def load_or_build_ramp_topo_index(
             "toll": [],
             "give_way": [],
             "control_points": [],
-            "terminal_locs": {},
+            "node_locs": {},
             "gores": [],
             "advisory_observations": [],
             "untagged_oneway_ways": 0,
             "link_way_count": 0,
         }
         for i, pbf_path in enumerate(pbf_paths, start=1):
-            part = _build_ramp_topo_from_pbf(pbf_path, bounds, label=f"{i}/{len(pbf_paths)}")
+            # Each extract's part is cached on its own too, so a national
+            # build (~30 min) can be done a few states at a time and resumed.
+            part_path = _ramp_topo_cache_path([pbf_path])
+            key = {
+                "version": RAMP_TOPO_CACHE_VERSION,
+                "pbfs": _pbf_set_metadata([pbf_path]),
+                "bounds_digest": _bounds_digest(bounds),
+            }
+            part = None
+            if not rebuild and part_path.exists() and len(pbf_paths) > 1:
+                try:
+                    payload = json.loads(part_path.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError):
+                    payload = {}
+                if all(payload.get(k) == v for k, v in key.items()):
+                    part = payload["topo"]
+            if part is None:
+                part = _build_ramp_topo_from_pbf(pbf_path, bounds, label=f"{i}/{len(pbf_paths)}")
+                if len(pbf_paths) > 1:
+                    part_path.write_text(json.dumps({**key, "topo": part}) + "\n", encoding="utf-8")
             merged["out"].update({str(k): v for k, v in part["out"].items()})
-            merged["terminal_locs"].update(part["terminal_locs"])
+            merged["node_locs"].update(part["node_locs"])
             for key in (
                 "mainline",
                 "trunk",
@@ -1308,7 +1667,7 @@ def load_or_build_ramp_topo_index(
         "give_way": set(merged["give_way"]),
         "roundabout": set(merged["roundabout"]),
         "control_grid": _GoreGrid([(c[0], c[1], str(c[2])) for c in merged["control_points"]]),
-        "terminal_locs": {int(k): (v[0], v[1]) for k, v in merged["terminal_locs"].items()},
+        "node_locs": {int(k): (v[0], v[1]) for k, v in merged["node_locs"].items()},
         "grid": _GoreGrid([(p[0], p[1], int(p[2])) for p in merged["gores"]]),
         "advisory_observations": [tuple(p) for p in merged.get("advisory_observations", [])],
         "untagged_oneway_ways": merged["untagged_oneway_ways"],

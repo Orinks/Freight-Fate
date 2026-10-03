@@ -19,9 +19,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import numpy as np
-
 import cand_common as C
+import numpy as np
 
 KEY = "msint"
 RNG = np.random.default_rng(7)
@@ -37,11 +36,11 @@ RNG = np.random.default_rng(7)
 ANCHOR_PLAN = [
     (650.0, "int_idle_low", 3.0),
     (820.0, "int_idle_low", 2.5),
-    (1000.0, "int_mid", 1.4),     # clean short dwell ~940
-    (1150.0, "int_mid", 2.0),     # clean dwell ~1170
-    (1300.0, "int_mid", 2.0),     # clean dwell ~1290
-    (1470.0, "int_mid", 2.5),     # rock-steady ~1470
-    (1880.0, "int_high", 3.0),    # clean ~1915, the top of the pull
+    (1000.0, "int_mid", 1.4),  # clean short dwell ~940
+    (1150.0, "int_mid", 2.0),  # clean dwell ~1170
+    (1300.0, "int_mid", 2.0),  # clean dwell ~1290
+    (1470.0, "int_mid", 2.5),  # rock-steady ~1470
+    (1880.0, "int_high", 3.0),  # clean ~1915, the top of the pull
 ]
 
 
@@ -77,20 +76,22 @@ def cut_anchor(take_key: str, target: float, dur_s: float = 2.5):
         need = int(dur_s / hop)
         best, bdev = 0, 1e9
         for i in range(0, max(1, len(r) - need)):
-            seg = r[i:i + need]
+            seg = r[i : i + need]
             if np.any(seg <= 0):
                 continue
             d = float(seg.std())
             if d < bdev:
                 bdev, best = d, i
-        win = x[int(t[best] * C.SR):int(t[best] * C.SR) + int(dur_s * C.SR)]
+        win = x[int(t[best] * C.SR) : int(t[best] * C.SR) + int(dur_s * C.SR)]
         fell_back = True
     actual, spread = _true_rpm(win)
     actual = actual or target
     loop = C.make_seamless_loop(win)
     note = "FALLBACK" if fell_back else f"tol={used_tol}"
-    print(f"  anchor hint {target:>5.0f} <- {take_key:<13} TRUE {actual:6.0f} rpm "
-          f"(spread {spread:4.0f}) [{note}]  loop {len(loop)/C.SR:.2f}s")
+    print(
+        f"  anchor hint {target:>5.0f} <- {take_key:<13} TRUE {actual:6.0f} rpm "
+        f"(spread {spread:4.0f}) [{note}]  loop {len(loop) / C.SR:.2f}s"
+    )
     return loop, actual
 
 
@@ -119,7 +120,7 @@ def build_rev(anchors, rpm0=650.0, rpm1=1800.0, dur_s=7.0, band=0.5) -> np.ndarr
     ease = t * t * (3.0 - 2.0 * t)
     r = rpm0 + (rpm1 - rpm0) * ease
 
-    a = np.array([ar for _, ar in anchors])          # measured rpm, ascending
+    a = np.array([ar for _, ar in anchors])  # measured rpm, ascending
     loops = [lp for lp, _ in anchors]
     m = len(a)
 
@@ -143,9 +144,9 @@ def build_rev(anchors, rpm0=650.0, rpm1=1800.0, dur_s=7.0, band=0.5) -> np.ndarr
     for k in range(m):
         wk = np.zeros(n)
         mlo = seg == k
-        wk[mlo] += w_lo[mlo]           # anchor k is the lower bracket
+        wk[mlo] += w_lo[mlo]  # anchor k is the lower bracket
         mhi = seg == (k - 1)
-        wk[mhi] += w_hi[mhi]           # anchor k is the upper bracket
+        wk[mhi] += w_hi[mhi]  # anchor k is the upper bracket
         if not wk.any():
             continue
         sig = vari_read(loops[k], r / a[k])
@@ -156,7 +157,7 @@ def build_rev(anchors, rpm0=650.0, rpm1=1800.0, dur_s=7.0, band=0.5) -> np.ndarr
     # low anchors crowd together. Flatten only the SLOW envelope (~0.3 s), never
     # the firing ripple, so loudness holds constant without pumping the texture.
     w = int(0.30 * C.SR)
-    env = np.sqrt(np.convolve(out ** 2, np.ones(w) / w, "same"))
+    env = np.sqrt(np.convolve(out**2, np.ones(w) / w, "same"))
     tgt = float(np.median(env[env > 0])) or 1.0
     out = out * np.clip(tgt / np.maximum(env, tgt * 0.35), 0.6, 1.8)
     return out
@@ -196,7 +197,7 @@ def main() -> None:
 
     for tag, p in (("idle", p_idle), ("rev", p_rev), ("cruise", p_cruise)):
         x = C.load_wav(p)
-        print(f"  {tag:<6} {p}  rms {np.sqrt(np.mean(x**2)):.3f}  {len(x)/C.SR:.2f}s")
+        print(f"  {tag:<6} {p}  rms {np.sqrt(np.mean(x**2)):.3f}  {len(x) / C.SR:.2f}s")
 
     metrics = C.score(idle_loop, rev)
     print(f"[{KEY}] score:", metrics)

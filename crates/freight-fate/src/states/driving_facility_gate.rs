@@ -20,8 +20,8 @@
 //! running through every loop; the lost time is the consequence, never a fine.
 
 use ff_core::sim::trip_models::{
-    APPROACH_DECEL_MPS2, FACILITY_ACCESS_TAIL_MI, FACILITY_GATE_LIMIT_MPH, FACILITY_GATE_ZONE_MI,
-    METERS_PER_MILE, MPH_PER_MPS,
+    APPROACH_DECEL_MPS2, APPROACH_REACTION_S, FACILITY_ACCESS_TAIL_MI, FACILITY_GATE_LIMIT_MPH,
+    FACILITY_GATE_ZONE_MI, METERS_PER_MILE, MPH_PER_MPS,
 };
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
@@ -51,12 +51,7 @@ impl DrivingState {
     /// is the number in force -- and a facility with a street chain never
     /// reaches here, because its chain builds a gate zone of its own.
     pub fn post_gate_zone(&mut self, ctx: &GameContext) {
-        if self
-            .trip
-            .zones
-            .iter()
-            .any(|zone| zone.reason == "facility gate")
-        {
+        if self.trip.gate_zone().is_some() {
             return;
         }
         if self.surface_chain_route(ctx).is_some() {
@@ -89,25 +84,41 @@ impl DrivingState {
     /// 2026-09-03). Hearing time is the reaction window's job, not the
     /// distance's: the window runs on the real clock from the line, and the
     /// gate holds the truck while it runs.
+    ///
+    /// Behind a driveway the window is the yard's alone. Up to the driveway
+    /// the street keeps its own limit and the driveway is a turn, judged at
+    /// its corner speed by its own call; "slow to 15" on the street before it
+    /// was the old gate zone's number posted on a public road.
     pub fn gate_warning_window_mi(&self) -> f64 {
         let zone_mi = self.gate_zone_length_mi().min(GATE_WARNING_MAX_MI);
         let speed = self.trip.truck.speed_mph().max(FACILITY_GATE_LIMIT_MPH) / MPH_PER_MPS;
         let gate = FACILITY_GATE_LIMIT_MPH / MPH_PER_MPS;
         let braking_mi = ((speed * speed - gate * gate) / (2.0 * APPROACH_DECEL_MPS2)).max(0.0)
             / METERS_PER_MILE;
-        (zone_mi + braking_mi).min(GATE_WARNING_MAX_MI)
+        // Never less than the seconds it takes to hear the line and act on
+        // it at this speed: with no signed stretch in front of a street gate,
+        // a truck barely over its number was told "Gate in 0.0 miles".
+        let braking_mi = if zone_mi > 0.0 {
+            braking_mi
+        } else {
+            braking_mi.max(APPROACH_REACTION_S * speed * MPH_PER_MPS / 3600.0)
+        };
+        let window = (zone_mi + braking_mi).min(GATE_WARNING_MAX_MI);
+        match self.trip.driveway_mi() {
+            Some(driveway) => window.min((self.trip.total_miles() - driveway).max(0.0)),
+            None => window,
+        }
     }
 
-    /// The length of the road signed at the gate speed: the trip's own gate
-    /// zone once posted, else the one the run would post.
+    /// The length of the road signed at the gate speed: the trip's own yard
+    /// or gate zone once posted, else the one the run would post. None at all
+    /// on a street chain whose gate stands on the street itself.
     fn gate_zone_length_mi(&self) -> f64 {
-        let zone = self
-            .trip
-            .zones
-            .iter()
-            .find(|zone| zone.reason == "facility gate")
-            .cloned()
-            .unwrap_or_else(|| self.trip.facility_gate_zone());
+        let zone = match self.trip.gate_zone() {
+            Some(zone) => zone.clone(),
+            None if self.trip.has_street_detail() => return 0.0,
+            None => self.trip.facility_gate_zone(),
+        };
         (zone.end_mi - zone.start_mi).max(0.0)
     }
 
@@ -169,10 +180,28 @@ impl DrivingState {
         if remaining > self.gate_warning_window_mi() {
             return;
         }
+        let keeper_holds_the_gate = self.keeper_mph.is_some()
+            && self
+                .keeper_held_mph
+                .is_some_and(|held| held <= FACILITY_GATE_LIMIT_MPH);
+        if ctx.settings.destination_approach_assist || keeper_holds_the_gate {
+            // Facility stopping assistance takes the truck to the gate, or
+            // the keeper is already holding the gate's number: the warning
+            // and its tone told a driver to do what an assist was doing
+            // (agent drive A, 2026-09-24). No warning means no miss clock
+            // either; a driver who takes over and runs the gate still gets
+            // the gate's own window (`seed_gate_grace_at_gate`).
+            return;
+        }
         self.gate_speed_warned = true;
         self.gate_warning_spoken = true;
         let target = ctx.settings.speed_text(FACILITY_GATE_LIMIT_MPH);
-        let distance = ctx.settings.distance_text(remaining, true);
+        // In feet close in: a tenth of a mile and under read "0.0 miles".
+        let distance = if remaining < 0.1 {
+            self.short_distance_text(ctx, remaining)
+        } else {
+            ctx.settings.distance_text(remaining, true)
+        };
         let message = if self.terse_speech(ctx) {
             format!("Gate in {distance}. Slow to {target}.")
         } else {
@@ -231,7 +260,8 @@ impl DrivingState {
             || self.destination_exit_taken
             || self.surface_chain
             || self.trip.is_facility_approach_route();
-        if !approaching_gate || self.trip.finished {
+        // A road stop's streets end at its lot, not at a gate.
+        if !approaching_gate || self.trip.finished || self.stop_chain.is_some() {
             return None;
         }
         let remaining = self.trip.remaining_miles();

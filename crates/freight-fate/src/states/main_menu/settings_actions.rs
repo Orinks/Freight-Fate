@@ -16,6 +16,8 @@ use super::settings::{save_settings, SettingsCategoryState};
 use super::settings_items::assist_flag;
 use crate::app::{version, GameContext, Say};
 use crate::audio::VolumeUpdate;
+use crate::bindings::Action;
+use crate::states::text_entry::TextEntryState;
 use crate::updater;
 
 /// Python `f"{x:g}"` for the values these rows read (whole numbers bare,
@@ -174,8 +176,11 @@ impl SettingsCategoryState {
         self.announce(ctx);
         if ctx.settings.lane_keeping != lane_before {
             let note = if ctx.settings.lane_is_automated() {
-                "Lane keeping full: the truck holds the lane, tap Left or Right to change lanes."
-                    .to_string()
+                format!(
+                    "Lane keeping full: the truck holds the lane, tap {} or {} to change lanes.",
+                    ctx.control_name(Action::SteerLeft),
+                    ctx.control_name(Action::SteerRight)
+                )
             } else {
                 format!(
                     "Lane keeping back to {}.",
@@ -345,6 +350,11 @@ impl SettingsCategoryState {
         self.announce(ctx);
     }
 
+    pub(super) fn toggle_hos_planning_hints(&mut self, ctx: &mut GameContext, _d: i64) {
+        ctx.settings.hos_planning_hints = !ctx.settings.hos_planning_hints;
+        self.announce(ctx);
+    }
+
     pub(super) fn toggle_steering_guide_inverted(&mut self, ctx: &mut GameContext, _d: i64) {
         ctx.settings.steering_guide_inverted = !ctx.settings.steering_guide_inverted;
         save_settings(&ctx.settings);
@@ -422,6 +432,33 @@ impl SettingsCategoryState {
         ctx.say(&format!(
             "New music seed, {seed}. Every synthesized piece is new."
         ));
+    }
+
+    /// The field Enter on Music seed opens: digits only, so a shared seed
+    /// can be typed back in. Confirming returns to the row, which the menu
+    /// reads again with the new seed.
+    pub(super) fn music_seed_entry() -> TextEntryState {
+        let mut entry = TextEntryState::new("Music seed", "Seed", |ctx, text| {
+            let text = text.trim();
+            // 18 digits always fit an i64.
+            let seed = text
+                .parse::<i64>()
+                .ok()
+                .filter(|_| text.bytes().all(|b| b.is_ascii_digit()));
+            let Some(seed) = seed else {
+                ctx.audio.play("ui/error");
+                ctx.say_with("Type a whole number.", Say::new().review(false));
+                return;
+            };
+            if seed != ctx.settings.music_seed {
+                ctx.settings.music_seed = seed;
+                save_settings(&ctx.settings);
+                ctx.restart_music();
+            }
+            ctx.pop_state();
+        });
+        entry.entry.max_len = 18;
+        entry
     }
 
     pub(super) fn toggle_radio_streamer_safe(&mut self, ctx: &mut GameContext, _d: i64) {
@@ -540,6 +577,13 @@ impl SettingsCategoryState {
                 Say::queued(),
             );
         }
+    }
+
+    /// Faster or default JAWS arrow keys. The work runs on its own thread and
+    /// the app loop speaks the result, so this row says nothing itself.
+    pub(super) fn toggle_jaws_arrow_script(&mut self, ctx: &mut GameContext, _d: i64) {
+        let install = !ctx.services.jaws_script.installed();
+        ctx.services.jaws_script.request(install);
     }
 
     pub(super) fn adjust_speech(&mut self, ctx: &mut GameContext, attr: &str, delta: f64) {

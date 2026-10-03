@@ -118,6 +118,65 @@ fn test_manual_downshift_with_clutch_in_does_not_overrev_or_damage_engine() {
     assert!(approx(truck.damage_pct, 0.0));
 }
 
+/// A manual downshift with the clutch held matches revs like the automatic:
+/// the engine climbs to the new gear's road speed and follows it, so letting
+/// the clutch out lands without a jump (tester request, 2026-09-28).
+#[test]
+fn test_manual_downshift_with_clutch_held_matches_revs() {
+    let mut truck = TruckState::default();
+    truck.start_engine();
+    truck.set_air_ready(false);
+    truck.velocity_mps = 15.0;
+    truck.transmission.gear = 8;
+    truck.rpm = truck.coupled_rpm(None);
+    truck.transmission.clutch = 1.0;
+    assert!(truck.transmission.request_gear(7).ok);
+
+    for _ in 0..(0.4 / DT) as usize {
+        truck.update(DT);
+    }
+    let sync = truck.coupled_rpm(None);
+    assert!(
+        approx_rel(truck.rpm, sync, 0.03),
+        "engine {:.0} vs the new gear's {sync:.0} with the clutch held",
+        truck.rpm
+    );
+
+    truck.transmission.clutch = 0.0;
+    let before = truck.rpm;
+    truck.update(DT);
+    assert!(
+        (truck.rpm - before).abs() < 100.0,
+        "letting the clutch out must not jump the engine: {before:.0} -> {:.0}",
+        truck.rpm
+    );
+    assert!(
+        !truck.transmission.rev_match,
+        "the match ends with the clutch out"
+    );
+}
+
+/// Braking a manual to a stop in a tall gear holds idle; off the brake, the
+/// same gear at a standstill stalls (owner ruling, 2026-09-28).
+#[test]
+fn test_manual_braking_in_a_tall_gear_holds_idle_until_the_brake_lifts() {
+    let mut truck = TruckState::default();
+    truck.start_engine();
+    truck.set_air_ready(false);
+    truck.transmission.gear = 7;
+    truck.velocity_mps = 1.0;
+    truck.brake = 1.0;
+    for _ in 0..(3.0 / DT) as usize {
+        truck.update(DT);
+    }
+    assert!(truck.engine_on && !truck.stalled, "braking must not stall");
+    assert!(truck.velocity_mps.abs() < 0.1, "the truck came to rest");
+
+    truck.brake = 0.0;
+    truck.update(DT);
+    assert!(truck.stalled, "off the brake in seventh at a standstill");
+}
+
 fn loaded_automatic_avoids_steep_grade_shift_hunting(grade: f64) {
     let mut truck = make_auto_truck();
     truck.set_air_ready(false);
@@ -1594,6 +1653,33 @@ fn test_coasting_into_a_bar_without_braking_is_still_the_drivers_fault() {
     assert!(!truck.pushed_through_by_surge());
 }
 
+#[test]
+fn test_a_slug_that_reaches_the_head_stops_there_and_does_not_feed_itself() {
+    // Bend sweep, 2026-09-24: the slug rebounded off a head at nearly the
+    // speed it arrived with AND handed that speed to the truck, whose lurch
+    // threw it back harder. Kicked once, a half-full smooth bore ran itself up
+    // to 18 m/s end to end and cost the load with no pedal touched.
+    // At the game's own frame, the slug kicked hard enough to reach a head:
+    // what a throttle swinging from nothing to full, or a stab of the brake,
+    // leaves in the tank.
+    const DT: f64 = 1.0 / 30.0;
+    let mut truck = tank_truck(Some(LiquidLoad::new(0.5, false)), 20.0);
+    let axis = &mut truck.liquid.as_mut().unwrap().longitudinal;
+    let peak = axis.peak_v();
+    axis.v = 1.5 * peak;
+    let mut fastest = 0.0f64;
+    for _ in 0..1800 {
+        // A minute of coasting.
+        truck.update(DT);
+        fastest = fastest.max(truck.liquid.as_ref().unwrap().longitudinal.v.abs());
+    }
+    assert!(
+        fastest <= 1.5 * peak + 1e-9,
+        "the slug ran at {fastest:.1} m/s, a full swing is {peak:.1}"
+    );
+    assert_eq!(truck.cargo_damage_pct, 0.0);
+}
+
 // `test_liquid_freight_is_hard_to_ruin_because_liquid_does_not_break` and
 // `test_a_tank_load_is_described_in_words_that_fit_a_tank` are the
 // cargo-condition half of `tests/test_tanker_surge.py`; they live with the
@@ -1922,4 +2008,56 @@ fn test_a_stronger_engine_rev_matches_faster() {
         strong.rpm,
         base.rpm
     );
+}
+
+/// Floor a loaded automatic from rest on the flat at time compression `pace`
+/// until it reaches `to_mph`. Returns (real seconds, upshifts, downshifts).
+fn loaded_launch(pace: f64, to_mph: f64) -> (f64, u32, u32) {
+    let mut truck = TruckState {
+        fuel_burn_mult: pace,
+        cargo_kg: 18_000.0,
+        ..Default::default()
+    };
+    truck.transmission.automatic = true;
+    truck.set_air_ready(false);
+    truck.start_engine();
+    truck.throttle = 1.0;
+    let (mut real_s, mut up, mut down) = (0.0, 0, 0);
+    while truck.speed_mph() < to_mph {
+        assert!(real_s < 600.0, "{pace}x never reached {to_mph} mph");
+        let before = truck.transmission.gear;
+        if let Some(gear) = truck.auto_shift() {
+            if gear > before {
+                up += 1;
+            } else if gear < before {
+                down += 1;
+            }
+        }
+        truck.update(DT);
+        real_s += DT;
+    }
+    (real_s, up, down)
+}
+
+#[test]
+fn test_a_loaded_truck_builds_speed_in_real_seconds_at_every_pace() {
+    // Speed builds on the real clock whatever the pace: a loaded tractor
+    // takes most of a minute to reach 50, and the box shifts through its
+    // gears once each. On the game clock it reached 50 in a few real seconds
+    // at standard pace and rattled through the gears.
+    let (real_s, real_up, real_down) = loaded_launch(1.0, 50.0);
+    assert!(real_s > 30.0, "a loaded truck reached 50 in {real_s:.1} s");
+    assert_eq!(real_down, 0, "the real-time launch must not hunt");
+    for pace in [4.0, 14.0, 20.0] {
+        let (s, up, down) = loaded_launch(pace, 50.0);
+        assert!(
+            (s - real_s).abs() < 0.5,
+            "{pace}x reached 50 in {s:.1} real s where real time takes {real_s:.1}"
+        );
+        assert_eq!(
+            (up, down),
+            (real_up, real_down),
+            "{pace}x shifted differently"
+        );
+    }
 }

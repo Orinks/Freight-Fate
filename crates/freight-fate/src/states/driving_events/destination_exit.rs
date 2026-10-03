@@ -149,25 +149,27 @@ impl DrivingState {
             // The signal first, because it is the gate: the lane and the ramp
             // speed are both wasted if it is never set. See
             // `DrivingState::exit_signal_instruction`.
+            // Then the right lane, only if the truck is not in it; the exit
+            // lane itself is called where it opens.
             let signal = self.exit_signal_instruction();
-            return format!("{core} {signal} Move right for the exit lane.");
+            let lane = if self.in_right_lane_for_exit() {
+                ""
+            } else {
+                " Move to the right lane."
+            };
+            return format!("{core} {signal}{lane}");
         }
         // Lane keeping takes this exit with no signal and no lane work, so
         // the one thing the driver must not have to infer is that it is
         // happening at all. Said once per run, and terse keeps it: a
         // consequence is exactly what terse verbosity holds on to.
+        // No "slow down for the ramp": the ramp is braked for past the gore,
+        // where taking the exit names its speed (realistic exit, 2026-09-24).
         if self.lane_keeping_takes_exit_said {
-            return if self.terse_speech(ctx) {
-                core
-            } else {
-                format!("{core} Slow down for the ramp.")
-            };
+            return core;
         }
         self.lane_keeping_takes_exit_said = true;
-        if self.terse_speech(ctx) {
-            return format!("{core} Lane keeping will take this exit.");
-        }
-        format!("{core} Lane keeping will take this exit. Slow down for the ramp.")
+        format!("{core} Lane keeping will take this exit.")
     }
 
     /// `_check_destination_exit()`.
@@ -209,8 +211,7 @@ impl DrivingState {
             self.exit_signal_canceled = false;
             self.reset_exit_lane_state();
             if ctx.settings.lane_is_automated() {
-                self.exit_lane_alignment = EXIT_LANE_READY;
-                self.exit_lane_ready_said = true;
+                self.exit_lane_entered = true;
             }
         }
     }
@@ -284,6 +285,11 @@ pub fn scan_destination_exit(
             Some(false),
         )
         .to_lowercase();
+    let mainline_cities: Vec<String> = route
+        .cities
+        .iter()
+        .map(|c| world.spoken_city(c, Some(false)))
+        .collect();
     let scan_floor = trip.total_miles() - DESTINATION_EXIT_SCAN_WINDOW_MI;
     // (legs from the end, distance from the leg's destination end, whether
     // the sign does NOT name the destination, route mile, label, phrase)
@@ -319,13 +325,19 @@ pub fn scan_destination_exit(
                 .destinations
                 .iter()
                 .any(|part| part.to_lowercase().contains(&destination));
+            let siblings: Vec<String> = leg
+                .interchanges()
+                .iter()
+                .filter(|other| other.at_mi != ix.at_mi)
+                .flat_map(|other| other.destinations.iter().cloned())
+                .collect();
             candidates.push((
                 route.legs.len() - 1 - i,
                 dist_from_destination,
                 !matches_destination,
                 route_mile,
                 exit_label,
-                ix.spoken_phrase(),
+                ix.spoken_phrase_on(&leg.highway, &mainline_cities, &siblings),
             ));
         }
     }

@@ -24,6 +24,15 @@ fn company(level: usize) -> FakeProfile {
 }
 
 #[test]
+fn test_a_senior_driver_dispatch_stopped_trusting_is_not_told_they_choose_freight() {
+    let mut slipped = company(SENIOR_LOAD_CHOICE_LEVEL as usize + 1);
+    slipped.career.reputation = 5.0;
+    let guidance = career_level_guidance(&slipped);
+    assert_eq!(guidance.title, "Earn back your load choice");
+    assert!(!guidance.spoken_summary().contains("trusts you"));
+}
+
+#[test]
 fn test_company_level_guidance_moves_from_regional_to_senior_to_business_prep() {
     let regional = career_level_guidance(&company(4));
     assert_eq!(regional.title, "Build a regional service record");

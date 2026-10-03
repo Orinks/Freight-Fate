@@ -4,7 +4,7 @@
 //! `trip.py`).
 
 use crate::data::billboards::{corridor_signs, random_billboard, regional_genre_signs, SignAnchor};
-use crate::data::curves::{route_curves, RouteCurve};
+use crate::data::curves::{bend_bank, route_curves, superelevation_at, RouteCurve};
 use crate::pyfmt::{fmt_f, py_str_float};
 use crate::pyrandom::PyRandom;
 use crate::sim::road_event_pacing::CHATTER_GAP_REAL_S;
@@ -155,6 +155,12 @@ impl Trip {
     pub fn build_navigation_cues(&self) -> Vec<NavigationCue> {
         let mut cues: Vec<NavigationCue> = Vec::new();
         let facility_route = self.is_facility_approach_route();
+        let mainline_cities: Vec<String> = self
+            .route
+            .cities
+            .iter()
+            .map(|c| self.world.spoken_city(c, Some(false)))
+            .collect();
         for (i, (start, leg)) in self
             .leg_starts
             .iter()
@@ -325,13 +331,23 @@ impl Trip {
                 ));
             }
             for ix in leg.interchanges() {
+                // Destinations the leg's other exits sign too are the
+                // mainline's own promise, not this exit's: on I-35 south the
+                // merge put "Dallas" on exit 31B while three other exits
+                // signed it for the road the driver is already on.
+                let siblings: Vec<String> = leg
+                    .interchanges()
+                    .iter()
+                    .filter(|other| other.at_mi != ix.at_mi)
+                    .flat_map(|other| other.destinations.iter().cloned())
+                    .collect();
                 let offset = stop_offset_for_direction(ix.at_mi, leg.miles, forward);
                 cues.push(NavigationCue::new(
                     &format!("interchange:{i}:{}:{}", py_str_float(ix.at_mi), ix.exit_ref),
                     "interchange",
                     start + offset,
-                    &ix.spoken_phrase(),
-                    &ix.near_phrase(),
+                    &ix.spoken_phrase_on(&leg.highway, &mainline_cities, &siblings),
+                    &ix.near_phrase_on(&leg.highway, &mainline_cities, &siblings),
                 ));
             }
             for stop in &leg.stops {
@@ -376,14 +392,23 @@ impl Trip {
         {
             let forward = self.route.cities[i] == leg.a;
             for landmark in leg.landmarks() {
+                if !landmark.applies_to_direction(forward) {
+                    continue;
+                }
                 let offset = stop_offset_for_direction(landmark.at_mi, leg.miles, forward);
+                let at_mi = start + offset;
+                if landmark.category == "billboard_sign"
+                    && self.commercial_billboards_banned_at(at_mi)
+                {
+                    continue;
+                }
                 let mut callout = RoadsideCallout::new(
                     &format!(
                         "landmark:{i}:{}:{}",
                         py_str_float(landmark.at_mi),
                         landmark.name
                     ),
-                    start + offset,
+                    at_mi,
                     &landmark.category,
                     &format!("{}.", landmark.spoken),
                 );
@@ -404,9 +429,10 @@ impl Trip {
         let mut spaced = Self::thin_villages(villages);
         callouts.sort_by(|a, b| a.at_mi.partial_cmp(&b.at_mi).expect("finite mileposts"));
         for callout in callouts {
-            if spaced
-                .iter()
-                .any(|kept| (callout.at_mi - kept.at_mi).abs() < LANDMARK_MIN_SPACING_MI)
+            if callout.category != "billboard_sign"
+                && spaced
+                    .iter()
+                    .any(|kept| (callout.at_mi - kept.at_mi).abs() < LANDMARK_MIN_SPACING_MI)
             {
                 continue;
             }
@@ -560,17 +586,31 @@ impl Trip {
     }
 
     /// Maine, Vermont, Alaska, and Hawaii ban commercial billboards (Scenic
-    /// America / FHWA). Pool jokes and corridor ads stay silent there.
+    /// America / FHWA). Scenic-byway spans are stored in each leg's own
+    /// direction and are mirrored for reverse travel.
     fn commercial_billboards_banned_at(&self, at: f64) -> bool {
-        matches!(
+        if matches!(
             self.state_code_at(at).as_deref(),
             Some("ME") | Some("VT") | Some("AK") | Some("HI")
-        )
+        ) {
+            return true;
+        }
+        let (leg_index, leg_start) = self.leg_at_mile(at);
+        let leg = &self.route.legs[leg_index];
+        let local_mi = at - leg_start;
+        let local_mi = if self.route.cities[leg_index] == leg.a {
+            local_mi
+        } else {
+            leg.miles - local_mi
+        };
+        leg.billboard_bans()
+            .iter()
+            .any(|ban| ban.from_mi <= local_mi && local_mi < ban.to_mi)
     }
 
     /// The two-letter state code at a trip milepost, or None where the bake is
     /// silent and the route names no city we can fall back on.
-    fn state_code_at(&self, at: f64) -> Option<String> {
+    pub(crate) fn state_code_at(&self, at: f64) -> Option<String> {
         let name = self.state_at(Some(at));
         if !name.is_empty() {
             if let Some(code) = self.state_codes.get(&name) {
@@ -663,7 +703,50 @@ impl Trip {
         None
     }
 
-    /// The next curve ahead that deserves a spoken approach warning.
+    /// The fastest the truck takes this bend before it costs anything
+    /// (`TruckState::curve_safe_mph`: the load, with the bank the bend's sign
+    /// was priced with, and the lane, with the bank the lane model credits).
+    pub fn bend_costs_above_mph(&self, cr: &RouteCurve) -> f64 {
+        let radius_ft = (cr.min_radius_ft as f64).max(1.0);
+        let design = self.leg_design_speed_mph();
+        self.truck.curve_safe_mph(
+            radius_ft,
+            bend_bank(radius_ft, Some(design)),
+            superelevation_at(radius_ft, design),
+            self.lane_steers,
+        )
+    }
+
+    /// The speed past which a bend is called, and the speed the call's lead
+    /// is sized to shed to.
+    ///
+    /// The sign plus a margin, so the words stay quiet on bends an ordinary
+    /// truck takes at road speed -- but never past where the bend starts
+    /// costing THIS load. The margins predate the rollover model: a full
+    /// trailer goes over 1.2 mph past a 15 mph sign and about 4 past a 65
+    /// (`roll.rs`), so a sharp bend's 3 and a gentle one's 8 let it roll
+    /// without a word, and a driver obeying every number the cab spoke went
+    /// over on US-550 and the Salt River Canyon (bend sweep, 2026-09-24).
+    pub fn curve_call_mph(&self, cr: &RouteCurve) -> (f64, f64) {
+        let margin = if cr.severity() == "gentle" {
+            PACENOTE_GENTLE_MARGIN_MPH
+        } else {
+            PACENOTE_MARGIN_MPH
+        };
+        let advisory = cr.advisory_mph as f64;
+        let costs = self.bend_costs_above_mph(cr);
+        ((advisory + margin).min(costs), advisory.min(costs))
+    }
+
+    /// The next curve ahead that deserves a spoken approach warning and has
+    /// not had it.
+    ///
+    /// Not had it: a bend already called (or riding the last call's "then"
+    /// tail) used to be returned here too, and `check_curves` stopped at it,
+    /// so in a dense run every bend behind it waited until the truck was past
+    /// it. On US-62's esses a 25 mph bend was never called at all: the
+    /// called bends ahead of it masked it until the truck was in it (bend
+    /// sweep, 2026-09-24).
     pub fn next_curve_approach(&self) -> Option<RouteCurve> {
         let speed = self.truck.speed_mph();
         for cr in &self.curves {
@@ -674,19 +757,14 @@ impl Trip {
             if ahead > PACENOTE_MAX_LEAD_MI {
                 break;
             }
-            if cr.connector {
+            if cr.connector || self.curve_called(cr) {
                 continue;
             }
-            let margin = if cr.severity() == "gentle" {
-                PACENOTE_GENTLE_MARGIN_MPH
-            } else {
-                PACENOTE_MARGIN_MPH
-            };
-            let advisory = cr.advisory_mph as f64;
-            if speed <= advisory + margin {
+            let (call_above, target) = self.curve_call_mph(cr);
+            if speed <= call_above {
                 continue;
             }
-            if ahead > Self::curve_pacenote_lead_mi(speed, advisory) {
+            if ahead > Self::curve_pacenote_lead_mi(speed, target) {
                 continue;
             }
             return Some(*cr);
@@ -710,16 +788,11 @@ impl Trip {
             if cr.connector {
                 continue;
             }
-            let margin = if cr.severity() == "gentle" {
-                PACENOTE_GENTLE_MARGIN_MPH
-            } else {
-                PACENOTE_MARGIN_MPH
-            };
-            let advisory = cr.advisory_mph as f64;
-            if speed <= advisory + margin {
+            let (call_above, target) = self.curve_call_mph(cr);
+            if speed <= call_above {
                 continue;
             }
-            let window = Self::curve_pacenote_lead_mi(speed, advisory) * 1.5;
+            let window = Self::curve_pacenote_lead_mi(speed, target) * 1.5;
             if ahead <= window {
                 return true;
             }
@@ -757,6 +830,13 @@ impl Trip {
         PACENOTE_MAX_LEAD_MI.min(floor_mi.max(react_mi + brake_mi))
     }
 
+    /// Whether this bend's approach call has gone out (or it is behind the
+    /// truck): the point from which the clock runs real for it.
+    pub fn curve_called(&self, curve: &RouteCurve) -> bool {
+        let key = format!("curve:{}:{}", fmt_f(curve.start_mi, 3), curve.direction);
+        self.announced_curves.contains(&key)
+    }
+
     /// Emit a CURVE event when approaching a meaningful curve.
     pub fn check_curves(&mut self) {
         if self.is_facility_approach_route() {
@@ -767,9 +847,6 @@ impl Trip {
         };
         let ahead = cr.start_mi - self.position_mi;
         let key = format!("curve:{}:{}", fmt_f(cr.start_mi, 3), cr.direction);
-        if self.announced_curves.contains(&key) {
-            return;
-        }
         self.announced_curves.insert(key);
         // The immediate follower rides this call's "then ..." tail.
         let linked = self.curves.iter().find(|c| {

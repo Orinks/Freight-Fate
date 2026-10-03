@@ -14,7 +14,8 @@ use crate::bindings::Action;
 use crate::impl_state_for_menu;
 use crate::states::base::{Menu, MenuCore, MenuItem};
 use crate::states::driving_core::{
-    clock_text, deadline_appointment, hos_of, join_phrase, poi_offers_text, profile_of, KG_PER_TON,
+    clock_text, deadline_appointment, hos_of, join_phrase, poi_offers_text, profile_of,
+    unique_consecutive, KG_PER_TON,
 };
 use crate::states::driving_menu_states::apps::DriverAppsState;
 use crate::states::driving_menu_states::DriveRef;
@@ -260,11 +261,13 @@ impl DrivingStatusScreenState {
                 let route = &d.route;
                 let mut rows: Vec<MapRow> = Vec::new();
                 // route.cities holds slug keys; speak the composed names instead.
-                let cities: Vec<String> = route
-                    .cities
-                    .iter()
-                    .map(|c| ctx.world.spoken_city(c, None))
-                    .collect();
+                let cities: Vec<String> = unique_consecutive(
+                    &route
+                        .cities
+                        .iter()
+                        .map(|c| ctx.world.spoken_city(c, None))
+                        .collect::<Vec<_>>(),
+                );
                 rows.push(MapRow::Say(format!("Route: {}", cities.join(" to "))));
                 rows.push(MapRow::Say(format!(
                     "Highways: {}",
@@ -425,12 +428,13 @@ impl DrivingStatusScreenState {
                                 .to_string(),
                         );
                     }
-                    lines.push(
+                    lines.push(format!(
                         "Page Down and Page Up tune stations, or semicolon and apostrophe. With \
                          Control they jump categories. With Shift they change radio volume by \
-                         10 percent. O saves the station as a favorite. M toggles the radio."
-                            .to_string(),
-                    );
+                         10 percent. {} saves the station as a favorite. {} toggles the radio.",
+                        ctx.bindings.spoken(Action::RadioFavorite),
+                        ctx.bindings.spoken(Action::Radio)
+                    ));
                 }
                 if !locked && !d.radio.favorite_ids.is_empty() {
                     lines.push(format!("Favorites saved: {}.", d.radio.favorite_ids.len()));

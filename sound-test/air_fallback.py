@@ -27,13 +27,7 @@ import numpy as np
 SR = 44100
 LOOP_S = 6.0
 N = int(SR * LOOP_S)
-OUT = (
-    Path(__file__).resolve().parents[1]
-    / "assets"
-    / "sounds"
-    / "vehicle"
-    / "air_pressurize.ogg"
-)
+OUT = Path(__file__).resolve().parents[1] / "assets" / "sounds" / "vehicle" / "air_pressurize.ogg"
 
 # Pump wobble: ~2.2 Hz compressor rhythm, snapped to whole cycles per loop.
 PUMP_CYCLES = round(2.2 * LOOP_S)

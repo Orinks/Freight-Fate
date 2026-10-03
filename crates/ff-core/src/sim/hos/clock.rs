@@ -274,9 +274,7 @@ impl HosClock {
     pub fn sleeper(&mut self, minutes: f64) {
         let minutes = positive_minutes(minutes);
         self.record_event("sleeper_berth", minutes, "normal");
-        if !pauses_duty_window("sleeper_berth", minutes, "normal") {
-            self.duty_min += minutes;
-        }
+        self.advance_window_for_berth(minutes);
         self.status = "sleeper_berth".to_string();
         self.record_non_driving(minutes);
         self.off_duty_min += minutes;
@@ -324,6 +322,32 @@ impl HosClock {
     }
 
     fn record_event(&mut self, status: &str, minutes: f64, source: &str) {
+        // One unbroken rest is one period, however many menu picks it took:
+        // 3 hours in the berth and then 3 more is a 6-hour berth period, as
+        // an ELD logs it, not two 3-hour ones (tester report, 2026-09-23).
+        let continues = source == "normal"
+            && (status == "off_duty" || status == "sleeper_berth")
+            && self
+                .history
+                .last()
+                .is_some_and(|prev| prev.source == "normal" && prev.status == status);
+        if continues {
+            let Some(prev) = self.history.last_mut() else {
+                return;
+            };
+            let was_split_rest = prev.minutes >= SPLIT_SHORT_MIN;
+            prev.minutes += minutes;
+            let period = prev.clone();
+            if was_split_rest {
+                if let Some(last) = self.split_rest_history.last_mut() {
+                    *last = period;
+                }
+            } else if period.minutes >= SPLIT_SHORT_MIN {
+                self.split_rest_history.push(period);
+                keep_last(&mut self.split_rest_history, HOS_SPLIT_REST_HISTORY_MAX);
+            }
+            return;
+        }
         let event = HosEvent::new(
             status,
             minutes,
@@ -343,6 +367,25 @@ impl HosClock {
             self.split_rest_history.push(event);
             keep_last(&mut self.split_rest_history, HOS_SPLIT_REST_HISTORY_MAX);
         }
+    }
+
+    /// The window runs through a berth rest until the period it belongs to
+    /// reaches 7 hours; from then the whole period is off the window, from
+    /// its first minute, however many picks it took to get there.
+    fn advance_window_for_berth(&mut self, minutes: f64) {
+        match self.history.last() {
+            Some(period) if pauses_duty_window(&period.status, period.minutes, &period.source) => {
+                self.duty_min = period.duty_before;
+            }
+            _ => self.duty_min += minutes,
+        }
+    }
+
+    /// Minutes still owed on a 10-hour reset already under way: resting
+    /// since the wheel, and not yet ten hours of it.
+    pub fn reset_minutes_left(&self) -> Option<f64> {
+        (self.off_duty_min > 0.0 && self.off_duty_min < SLEEP_MIN)
+            .then_some(SLEEP_MIN - self.off_duty_min)
     }
 
     fn key_is_credited(&self, first: usize, second: usize) -> bool {
@@ -456,9 +499,7 @@ impl HosClock {
     pub fn sleeper_split_rest_from(&mut self, minutes: f64, source: &str) -> bool {
         let minutes = positive_minutes(minutes);
         self.record_event("sleeper_berth", minutes, source);
-        if !pauses_duty_window("sleeper_berth", minutes, source) {
-            self.duty_min += minutes;
-        }
+        self.advance_window_for_berth(minutes);
         self.status = "sleeper_berth".to_string();
         self.record_non_driving(minutes);
         self.off_duty_min += minutes;

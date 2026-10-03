@@ -26,6 +26,7 @@ use crate::cloud_saves::{BackupAnnouncements, CloudSaves, CloudSavesOptions};
 use crate::controller::ControllerManager;
 use crate::discord_presence::{DiscordPresence, DiscordPresenceOptions};
 use crate::duty_watch::{DutyWatch, DutyWatchOptions};
+use crate::jaws_script::JawsScript;
 use crate::online_journal::JournalOutbox;
 use crate::online_presence::{IdentityStore, OnlinePresence, OnlinePresenceOptions};
 use crate::speech::{NullSpeech, SpeechSink};
@@ -36,6 +37,7 @@ use crate::states::main_menu::ConfirmQuitState;
 pub mod boot_timing;
 pub mod context;
 pub mod held_keys;
+pub mod key_probe;
 pub mod logging;
 pub mod sdl_shell;
 pub mod speech_delivery;
@@ -46,6 +48,7 @@ pub use context::{
     share, Clipboard, ContextParts, GameContext, MemoryClipboard, Services, SharedState,
 };
 pub use held_keys::HeldKeys;
+use key_probe::KeyProbe;
 pub use logging::{active_log_path, configure_logging};
 pub use speech_delivery::{IntoSpoken, Say, SayEvent, Spoken, TRANSCRIPT_TARGET};
 
@@ -115,7 +118,12 @@ impl FrameClock {
 /// the headless loop have a screen to stand on.
 pub type InitialState = Box<dyn FnOnce(&mut GameContext) -> SharedState>;
 
-fn placeholder_main_menu(_ctx: &mut GameContext) -> SharedState {
+fn placeholder_main_menu(ctx: &mut GameContext) -> SharedState {
+    use crate::states::assist_picker::AssistPickerState;
+    // The one-time Driving assistance picker goes first until it is answered.
+    if AssistPickerState::is_owed(ctx) {
+        return share(AssistPickerState::new());
+    }
     share(crate::states::main_menu::MainMenuState::new())
 }
 
@@ -134,6 +142,12 @@ pub struct App {
     /// (2026-09-01); the agent's own keys come in through
     /// `queue_player_input`, which this never touches.
     operator_keys_ignored: bool,
+    /// Set by an input policy for one frame: the frame runs with no time
+    /// passing. The agent server's lockstep uses it so the road waits while
+    /// the agent decides.
+    world_held: bool,
+    /// The key probe, while one is running (see `app::key_probe`).
+    key_probe: Option<KeyProbe>,
 }
 
 /// Read-only driving facts available to a normal-input policy.
@@ -196,6 +210,40 @@ impl PlayerInputFrame<'_> {
 
     pub fn event_speech_busy(&mut self) -> bool {
         self.app.ctx.event_voice_busy()
+    }
+
+    /// Run this frame with no time passing: events still pump and queued
+    /// input still lands, but nothing in the world moves.
+    pub fn hold_world(&mut self) {
+        self.app.world_held = true;
+    }
+
+    /// The agent server's `key_probe` tool: start recording what the
+    /// keyboard delivers, or stop and report it (see `app::key_probe`).
+    pub fn key_probe(&mut self, start: bool) -> String {
+        if start {
+            self.app.start_key_probe();
+            let shut_out = self.app.operator_keys_ignored;
+            return format!(
+                "Key probe recording.{} Have the operator hold the arrow keys for several \
+                 seconds, then call key_probe with action report. Do not press keys \
+                 yourself meanwhile: they would be measured too.",
+                if shut_out {
+                    " The operator's keyboard is shut out, so call operator_keys live true first."
+                } else {
+                    ""
+                }
+            );
+        }
+        match self.app.stop_key_probe() {
+            Some(report) => report.text(),
+            None => "No key probe is running. Call key_probe with action start.".to_string(),
+        }
+    }
+
+    /// Whether this frame will run with no time passing.
+    pub fn world_is_held(&self) -> bool {
+        self.app.world_held
     }
 
     /// Hand the keyboard to the operator (`live`) or take it back: the
@@ -283,8 +331,9 @@ impl PlayerInputFrame<'_> {
             .world
             .spoken_city(&profile.current_city, Some(true));
         let mut text = format!(
-            "Scenario staged: {} at the {where_now} terminal, level {}, {} deliveries, {} dollars, {}.",
+            "Scenario staged: {} at {} terminal, level {}, {} deliveries, {} dollars, {}.",
             profile.name,
+            ff_core::speech_text::the_city(&where_now),
             profile.career.level(),
             profile.career.deliveries,
             ff_core::pyfmt::fmt_grouped(profile.money(), 0),
@@ -485,6 +534,7 @@ impl App {
                 presence,
                 online,
                 duty,
+                jaws_script: JawsScript::new(),
                 cloud,
                 journal,
                 mastodon,
@@ -500,7 +550,39 @@ impl App {
             initial_state: None,
             queued_player_input: Vec::new(),
             operator_keys_ignored: false,
+            world_held: false,
+            key_probe: None,
         }
+    }
+
+    /// Start recording what the keyboard delivers (see `app::key_probe`).
+    pub fn start_key_probe(&mut self) {
+        self.key_probe = Some(KeyProbe::new(&self.ctx.input));
+    }
+
+    /// Stop the probe and hand back its report, if one was running.
+    pub fn stop_key_probe(&mut self) -> Option<key_probe::Report> {
+        self.key_probe.take().map(|probe| probe.report())
+    }
+
+    /// `freightfate --key-probe`: an inert screen, the probe on it, for
+    /// `seconds` or until Escape. No services start, no career is touched.
+    pub fn run_key_probe(&mut self, seconds: u64) -> key_probe::Report {
+        self.ctx.running = true;
+        self.push_shared(share(key_probe::KeyProbeState::new(seconds)));
+        self.start_key_probe();
+        while self.ctx.running {
+            let dt = self.clock.tick(FPS);
+            self.frame(dt);
+            let done = self.key_probe.as_ref().is_none_or(|probe| {
+                probe.escape_seen() || probe.elapsed_ms(&self.ctx.input) >= seconds * 1000
+            });
+            if done {
+                break;
+            }
+        }
+        self.stop_key_probe()
+            .unwrap_or_else(|| KeyProbe::new(&self.ctx.input).report())
     }
 
     /// Choose the screen `run` starts on (the main menu, once ported).
@@ -815,15 +897,35 @@ impl App {
         for line in self.ctx.services.duty.take_announcements() {
             self.ctx.say_with(line, Say::queued());
         }
+        // The JAWS arrow-key script finishing on its own thread.
+        for line in self.ctx.services.jaws_script.take_announcements() {
+            self.ctx.say_with(line, Say::queued());
+        }
         self.ctx.audio.update(dt); // advance time-based audio fades
         self.ctx.update_speech_duck(); // restore the mix after speech
+
+        // Which calendar the player hears, for every date the career speaks.
+        let live_calendar =
+            self.ctx.settings.real_weather && self.ctx.settings.live_weather_controls_calendar;
+        if let Some(profile) = self.ctx.profile.as_mut() {
+            profile.live_calendar = live_calendar;
+        }
         if let Some(state) = self.ctx.state() {
             state.borrow_mut().update(&mut self.ctx, dt);
             self.ctx.run_deferred();
-            let (presence, online) = {
-                let s = state.borrow();
-                (s.presence(&self.ctx), s.online_presence(&self.ctx))
-            };
+            // A screen with no presence of its own (Settings, help, the
+            // drivers list over the pause menu) is still wherever the state
+            // under it is. Reading the top alone signed a paused driver off
+            // the duty board 20 seconds into a sub-screen (2026-09-28).
+            let states = self.ctx.states();
+            let presence = states
+                .iter()
+                .rev()
+                .find_map(|s| s.try_borrow().ok()?.presence(&self.ctx));
+            let online = states
+                .iter()
+                .rev()
+                .find_map(|s| s.try_borrow().ok()?.online_presence(&self.ctx));
             self.ctx.services.presence.update(presence);
             self.ctx.services.online.update(online);
         }
@@ -888,8 +990,20 @@ impl App {
         // reader's re-injected press-and-release pairs are told apart from a
         // finger by which frame they land in (see `app::held_keys`).
         self.ctx.input.begin_frame(dt);
+        self.ctx
+            .input
+            .set_bridge(self.ctx.speech.backend_name().eq_ignore_ascii_case("jaws"));
+        if let Some(probe) = self.key_probe.as_mut() {
+            probe.begin_frame(&self.ctx.input);
+        }
         for event in &events {
             self.handle_event(event);
+            if let Some(probe) = self.key_probe.as_mut() {
+                probe.note(&self.ctx.input, event);
+            }
+        }
+        if let Some(probe) = self.key_probe.as_mut() {
+            probe.end_frame(&self.ctx.input);
         }
         self.tick(dt);
         self.render();
@@ -933,6 +1047,11 @@ impl App {
                 self.ctx.running = false;
                 break;
             }
+            let dt = if std::mem::take(&mut self.world_held) {
+                0.0
+            } else {
+                dt
+            };
             self.frame(dt);
             frames += 1;
             if frames == 1 {
@@ -1154,6 +1273,7 @@ mod operator_keys_tests {
                 key: Key::Space,
                 mods: Mods::NONE,
                 text: Some(' '),
+                repeat: false,
             },
             InputEvent::KeyUp {
                 key: Key::Space,

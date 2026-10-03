@@ -12,9 +12,9 @@ use crate::data::world_constants::{
     lookup, set_contains, RAW_POI_TEXT_MARKERS, STOP_DIRECTIONS, TOLL_METHOD_LABELS,
 };
 use crate::data::world_models::{
-    DataError, ElevationSample, GradeSegment, HpmsTerrain, Interchange, Landmark, LaneSegment,
-    RouteCheckpoint, RoutePoint, RouteRestriction, StateCrossing, StateMileage, TollEvent,
-    TrafficVolumeSample,
+    BillboardBan, DataError, ElevationSample, GradeSegment, HpmsTerrain, Interchange, Landmark,
+    LaneSegment, RouteCheckpoint, RoutePoint, RouteRestriction, StateCrossing, StateMileage,
+    TollEvent, TrafficVolumeSample,
 };
 use crate::pyfmt::{fmt_f, py_str_float};
 
@@ -273,6 +273,53 @@ pub fn parse_restrictions(
     Ok(samples)
 }
 
+pub fn parse_billboard_bans(
+    raw_samples: &[Value],
+    leg_miles: f64,
+    from_city: &str,
+    to_city: &str,
+) -> Result<Vec<BillboardBan>, DataError> {
+    let mut bans = raw_samples
+        .iter()
+        .map(|raw| {
+            let raw = object(raw, from_city, to_city, "billboard ban")?;
+            let from_mi = req_float(raw, "from_mi")?;
+            let to_mi = req_float(raw, "to_mi")?;
+            if from_mi < 0.0 || to_mi <= from_mi || to_mi > leg_miles {
+                return Err(DataError::value(format!(
+                    "{from_city} to {to_city} billboard ban has invalid range {}-{}",
+                    py_str_float(from_mi),
+                    py_str_float(to_mi)
+                )));
+            }
+            let name = get_str(raw, "name");
+            let source = get_str(raw, "source");
+            if name.trim().is_empty() || source.trim().is_empty() {
+                return Err(DataError::value(format!(
+                    "{from_city} to {to_city} billboard ban needs a name and source"
+                )));
+            }
+            Ok(BillboardBan {
+                from_mi,
+                to_mi,
+                name,
+                source,
+            })
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    bans.sort_by(|a, b| {
+        a.from_mi
+            .partial_cmp(&b.from_mi)
+            .expect("finite billboard-ban mileposts")
+            .then_with(|| {
+                a.to_mi
+                    .partial_cmp(&b.to_mi)
+                    .expect("finite billboard-ban mileposts")
+            })
+    });
+    Ok(bans)
+}
+
 pub fn parse_traffic_volume(
     raw: &Value,
     leg_miles: f64,
@@ -499,6 +546,23 @@ pub fn parse_landmark(
             "{from_city} to {to_city} landmark {rname} has a negative off_mi"
         )));
     }
+    // A billboard faces the traffic it was written for; see `Landmark`.
+    let directions: Vec<String> = if raw.contains_key("directions") {
+        get_str_list(raw, "directions")
+    } else if category == "billboard_sign" {
+        vec!["forward".to_string()]
+    } else {
+        vec!["both".to_string()]
+    };
+    if directions.is_empty()
+        || directions.iter().any(|d| !set_contains(STOP_DIRECTIONS, d))
+        || (directions.iter().any(|d| d == "both") && directions.len() > 1)
+    {
+        return Err(DataError::value(format!(
+            "{from_city} to {to_city} landmark {rname} has invalid directions {}",
+            py_repr_list(&directions)
+        )));
+    }
     Ok(Landmark {
         name,
         at_mi,
@@ -506,6 +570,7 @@ pub fn parse_landmark(
         kind,
         spoken,
         off_mi,
+        directions,
     })
 }
 
@@ -814,6 +879,37 @@ pub fn parse_interchange(
             "{from_city} to {to_city} {label} has an observed ramp advisory without a source"
         )));
     }
+    let ramp_length_ft = |key: &str| {
+        raw.get(key)
+            .and_then(Value::as_f64)
+            .filter(|ft| ft.is_finite() && *ft > 0.0)
+    };
+    let ramp_length_ft_forward = ramp_length_ft("ramp_length_ft_forward");
+    let ramp_length_ft_backward = ramp_length_ft("ramp_length_ft_backward");
+    let ramp_length_source = get_str(raw, "ramp_length_source");
+    if (ramp_length_ft_forward.is_some() || ramp_length_ft_backward.is_some())
+        && ramp_length_source.is_empty()
+    {
+        return Err(DataError::value(format!(
+            "{from_city} to {to_city} {label} has a ramp length without a source"
+        )));
+    }
+    let ramp_terminal_node = |key: &str| {
+        raw.get(key)
+            .and_then(|terminal| terminal.get("node"))
+            .and_then(Value::as_i64)
+            .filter(|node| *node > 0)
+    };
+    let ramp_terminal_node_forward = ramp_terminal_node("ramp_terminal_forward");
+    let ramp_terminal_node_backward = ramp_terminal_node("ramp_terminal_backward");
+    let ramp_terminal_source = get_str(raw, "ramp_terminal_source");
+    if (ramp_terminal_node_forward.is_some() || ramp_terminal_node_backward.is_some())
+        && ramp_terminal_source.is_empty()
+    {
+        return Err(DataError::value(format!(
+            "{from_city} to {to_city} {label} has a ramp terminal without a source"
+        )));
+    }
     Ok(Interchange {
         at_mi,
         exit_ref,
@@ -827,6 +923,12 @@ pub fn parse_interchange(
         ramp_advisory_mph_forward,
         ramp_advisory_mph_backward,
         ramp_advisory_source,
+        ramp_length_ft_forward,
+        ramp_length_ft_backward,
+        ramp_length_source,
+        ramp_terminal_node_forward,
+        ramp_terminal_node_backward,
+        ramp_terminal_source,
     })
 }
 

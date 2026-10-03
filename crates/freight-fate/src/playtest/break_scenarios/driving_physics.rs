@@ -113,21 +113,28 @@ pub fn hairpin_at_70_no_assists() -> Outcome {
         DT,
         Some(&move |rig: &Rig| rig.drive.trip.position_mi >= start + 2.0),
     );
-    if rig.said("too fast, drifting to the outside") == 0 {
-        findings.push("no drifting-outside warning through a hairpin taken 45 over".to_string());
+    if rig.said(", too fast. Slow to") == 0 {
+        findings.push("no too-fast warning through a hairpin taken 45 over".to_string());
     }
     let min_speed = rig.drive.truck().speed_mph();
     let damage_delta = rig.drive.truck().damage_pct - damage_before;
-    if damage_delta == 0.0 {
+    // 70 into a 25 hairpin asks far more than a loaded truck stays upright
+    // at, so it goes over and the run carries on through road service.
+    let rolled = rig.said("rolled over") > 0;
+    if !rolled && damage_delta == 0.0 {
         findings.push(
             "blew a 25-advisory hairpin at 70 (assists and lane drift off): zero damage, no \
              crash, no spoken consequence beyond the warning -- the bend cannot hurt you"
                 .to_string(),
         );
     }
-    let note = format!(
-        "hairpin punished the overspeed (damage +{damage_delta:.0}, min {min_speed:.0} mph)"
-    );
+    let note = if rolled {
+        "hairpin at 70 rolled the truck over, after the warning".to_string()
+    } else {
+        format!(
+            "hairpin punished the overspeed (damage +{damage_delta:.0}, min {min_speed:.0} mph)"
+        )
+    };
     outcome("hairpin_at_70_no_assists", &rig, findings, &note)
 }
 

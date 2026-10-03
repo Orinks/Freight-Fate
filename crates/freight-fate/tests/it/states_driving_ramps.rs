@@ -34,9 +34,11 @@ use ff_core::models::enforcement::{citation_fine, RED_LIGHT_FINE, STOP_SIGN_FINE
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
 use ff_core::pyrandom::PyRandom;
-use ff_core::sim::trip_models::{RoadStop, Zone};
+use ff_core::sim::cross_traffic::{CrossTraffic, CrossVehicle};
+use ff_core::sim::trip_models::{RoadStop, TripEvent, TripEventData, TripEventKind, Zone};
 use ff_core::sim::weather::WeatherKind;
 use ff_core::speech_pacing::EventPriority;
+use ff_core::speech_text::SpokenMessage;
 
 use freight_fate::app::testing::{FakeClock, TestApp};
 use freight_fate::audio::{
@@ -607,8 +609,9 @@ fn test_stopped_short_of_the_light_gets_creep_guidance() {
     d.update_ramp_light(&mut app.ctx, 0.1);
     assert_eq!(said_count(&app, "short of the light"), 1);
 
-    // Rolling re-arms the prompt; the next stop short prompts again -- and
-    // within a couple hundred feet the wording drops to a creep.
+    // A stop somewhere nearer prompts again, still with its distance: under
+    // two hundred feet it used to drop the number, and the driver had to ask
+    // for it (agent drive B, 2026-09-24).
     settle(&clock);
     d.trip.truck.velocity_mps = mph_to_mps(10.0);
     d.update_ramp_light(&mut app.ctx, 0.1);
@@ -623,7 +626,7 @@ fn test_stopped_short_of_the_light_gets_creep_guidance() {
         spoken(&app)
     );
     assert!(
-        said_any(&app, "Stopped short of the light."),
+        said_any(&app, "Stopped 100 feet short of the light."),
         "{:?}",
         spoken(&app)
     );
@@ -671,6 +674,10 @@ fn test_every_light_change_is_spoken_on_the_approach() {
     // The silent flip back to red between a spoken green and the stop bar
     // cost a real playtester trailer damage; every phase change must speak.
     let mut app = TestApp::new();
+    // The voice's clock runs with the light's: frozen, every phase line was
+    // still "speaking" when the next arrived, and the last red passed only
+    // because a replay of the first one landed in the transcript.
+    let clock = app.fake_pacer_clock();
     let mut d = a_drive(&mut app);
     on_ramp(&mut d, "signal", true, 10.0);
     d.ramp_mi = Some(RAMP_ACCESS_MI + 0.3); // still descending the ramp
@@ -681,6 +688,7 @@ fn test_every_light_change_is_spoken_on_the_approach() {
 
     let cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S;
     for _ in 0..((cycle * 10.0) as i32 + 5) {
+        clock.advance(0.1);
         d.update_ramp_light(&mut app.ctx, 0.1);
     }
 
@@ -915,6 +923,304 @@ fn test_the_bar_tone_ends_when_the_bar_is_behind_the_truck() {
         d.update_ramp_light(&mut app.ctx, 0.05);
         assert_eq!(alert_holds(&log, "vehicle/bar_solid"), 0, "{control}");
     }
+}
+
+/// Agent drives A, D and E (2026-09-24): after "Light green." the stop-bar
+/// ticks and then the held "you must be stopping" tone played all the way to
+/// the bar, telling a driver without the assist, by sound, to stop on green.
+#[test]
+fn test_the_bar_says_nothing_to_stop_for_on_a_green() {
+    let approach = |red: bool| {
+        let mut app = TestApp::new();
+        let mut d = a_drive(&mut app);
+        on_ramp(&mut d, "signal", red, 15.0);
+        let log = record_audio(&mut app);
+        for feet in [250.0, 150.0, 60.0, 20.0] {
+            d.ramp_mi = Some(RAMP_ACCESS_MI + feet / 5280.0);
+            for _ in 0..30 {
+                d.update_ramp_bar_ticks(&mut app.ctx, 0.05);
+            }
+        }
+        let ticks = played_keys(&log)
+            .iter()
+            .filter(|key| *key == "vehicle/curve_bink")
+            .count();
+        (ticks, alert_holds(&log, "vehicle/bar_solid"))
+    };
+    assert_eq!(
+        approach(false),
+        (0, 0),
+        "a green still counted the bar down"
+    );
+    // The same approach on a red still has the whole instrument.
+    let (ticks, holds) = approach(true);
+    assert!(ticks > 0 && holds > 0, "red: {ticks} ticks, {holds} holds");
+}
+
+/// One frame of the ramp's terminal work, in the frame's own order.
+fn terminal_frame(d: &mut DrivingState, app: &mut TestApp, clock: &FakeClock) {
+    clock.advance(0.05);
+    d.update_ramp_light(&mut app.ctx, 0.05);
+    d.update_exit(&mut app.ctx, 0.0, 0.05);
+}
+
+/// Agent drive B (2026-09-24): the driver stopped where the held tone began,
+/// about fifty feet out, and heard "Stopped short of the stop sign." twice
+/// with no distance. The tone is where to be stopped, so a stop inside it is
+/// a stop at the sign, said once.
+#[test]
+fn test_a_stop_where_the_tone_says_is_a_stop_at_the_sign() {
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.route_transition_assist = false;
+    on_ramp(&mut d, "stop", false, 0.0);
+    d.cross_bubble = None; // an empty crossroad
+    d.ramp_mi = Some(RAMP_ACCESS_MI + 50.0 / 5280.0);
+    app.clear_speech();
+    for _ in 0..20 {
+        terminal_frame(&mut d, &mut app, &clock);
+    }
+    assert!(!said_any(&app, "short of"), "{:?}", spoken(&app));
+    assert_eq!(
+        said_count(&app, "Stopped at the sign."),
+        1,
+        "{:?}",
+        spoken(&app)
+    );
+    assert!(d.ramp_terminal_done);
+}
+
+/// Short of the tone it is a stop short, said once for the stop and with its
+/// distance, however the crawl bobs across the stopped line on the way down.
+#[test]
+fn test_stopped_short_is_said_once_with_its_distance() {
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.route_transition_assist = false;
+    on_ramp(&mut d, "stop", false, 0.0);
+    d.ramp_mi = Some(RAMP_ACCESS_MI + 150.0 / 5280.0);
+    app.clear_speech();
+    for mph in [2.0, 3.5, 2.5, 3.2, 0.5, 0.0, 0.0] {
+        d.trip.truck.velocity_mps = mph_to_mps(mph);
+        settle(&clock);
+        terminal_frame(&mut d, &mut app, &clock);
+    }
+    assert_eq!(said_count(&app, "short of"), 1, "{:?}", spoken(&app));
+    assert!(
+        said_any(&app, "Stopped 150 feet short of the stop sign."),
+        "{:?}",
+        spoken(&app)
+    );
+}
+
+/// Agent drives D and E (2026-09-24): "Exit speed 49. You take exit 113 ..."
+/// then "(interrupting) Exit speed 49 ..." -- the next route line flushed the
+/// take line and had it said again from the top; and "Light red." cut it off
+/// instead. The terminal's callout waits behind the take line.
+#[test]
+fn test_the_take_line_is_heard_once_with_the_terminal_behind_it() {
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = ready_to_exit(&mut app, 45.0);
+    take_the_exit(&mut d, &mut app, "signal", None);
+    clock.advance(0.6);
+    d.announce_ramp_terminal(&mut app.ctx);
+    let lines = spoken(&app);
+    let take = lines
+        .iter()
+        .position(|line| line.contains("You take"))
+        .expect("the take line");
+    let light = lines
+        .iter()
+        .position(|line| line.starts_with("Light "))
+        .expect("the terminal callout");
+    assert_eq!(said_count(&app, "You take"), 1, "{lines:?}");
+    assert!(take < light, "{lines:?}");
+    assert!(
+        app.ctx.handed_back_count("You take") == 0,
+        "the take line was cut and replayed: {lines:?}"
+    );
+}
+
+fn a_limit_change(text: &str) -> TripEvent {
+    TripEvent {
+        kind: TripEventKind::GpsCue,
+        message: SpokenMessage::new(text),
+        data: TripEventData {
+            limit_change: Some(true),
+            ..Default::default()
+        },
+    }
+}
+
+/// Agent drive, Silverthorne to Edwards (2026-09-24): "Speed limit raised to
+/// 75." before AND after "Exit speed 52. You take exit 167" -- a limit on the
+/// mainline the truck was leaving. At the gore it is not said; said just
+/// before the gore and cut by the take line, it is not handed back.
+#[test]
+fn test_the_mainline_limit_stays_off_the_take_line() {
+    let raised = "Speed limit raised to 75.";
+
+    // At the gore of an exit being taken: nothing to say about the mainline.
+    let mut app = TestApp::new();
+    let mut d = ready_to_exit(&mut app, 45.0);
+    let stop = a_stop(d.trip.position_mi);
+    bake_ramp_control(&mut d, stop.at_mi, "signal");
+    d.exit_stop = Some(stop.clone());
+    d.exit_signal_on = true;
+    d.exit_lane_entered = true;
+    d.lane.lane = 0;
+    d.trip.position_mi = stop.at_mi;
+    d.handle_trip_event(&mut app.ctx, &a_limit_change(raised));
+    assert_eq!(said_count(&app, raised), 0, "{:?}", spoken(&app));
+    drop(d);
+    drop(app);
+
+    // Just before it: heard, then cut by the take line, and gone.
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = ready_to_exit(&mut app, 45.0);
+    let stop = a_stop(d.trip.position_mi + 0.1);
+    d.handle_trip_event(&mut app.ctx, &a_limit_change(raised));
+    clock.advance(0.3);
+    take_the_exit(&mut d, &mut app, "signal", Some(stop));
+    assert_eq!(said_count(&app, raised), 1, "{:?}", spoken(&app));
+    assert!(said_any(&app, "You take"), "{:?}", spoken(&app));
+}
+
+/// Agent drive B (2026-09-24): a billboard read 0.3 miles before the gore,
+/// over the countdown. Roadside colour waits out the last mile of an exit
+/// being taken.
+#[test]
+fn test_roadside_chatter_waits_out_the_exit_approach() {
+    let billboard = TripEvent {
+        kind: TripEventKind::Billboard,
+        message: SpokenMessage::new("The Thing? Mystery of the desert, next exit."),
+        data: TripEventData::default(),
+    };
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = ready_to_exit(&mut app, 55.0);
+    d.exit_stop = Some(a_stop(d.trip.position_mi + 0.3));
+    d.exit_signal_on = true;
+    d.exit_signal_canceled = false;
+    d.handle_trip_event(&mut app.ctx, &billboard);
+    assert!(!said_any(&app, "The Thing"), "{:?}", spoken(&app));
+    // The signal cancelled: the exit is not being taken, and the road talks.
+    d.exit_signal_canceled = true;
+    settle(&clock);
+    d.handle_trip_event(&mut app.ctx, &billboard);
+    assert!(said_any(&app, "The Thing"), "{:?}", spoken(&app));
+}
+
+/// A car standing in the crossroad: no gap until it is gone.
+fn a_car_in_the_crossroad() -> CrossTraffic {
+    let mut bubble = CrossTraffic::new(1, "yield", false);
+    bubble.vehicles = vec![CrossVehicle {
+        position_mi: 0.0,
+        speed_mph: 0.0,
+        target_mph: 0.0,
+        vehicle_class: "car",
+        length_mi: 15.0 / 5280.0,
+        from_side: "left",
+        crossed: false,
+        committed: false,
+        sound_started: false,
+    }];
+    bubble
+}
+
+/// Agent drive, yield at exit 255 (2026-09-24): "assistance is holding for
+/// your gap" was replayed 0.35 s before "Gap in traffic. Clear; pull ahead"
+/// -- the gap had come, and the hold line said the opposite.
+#[test]
+fn test_the_hold_line_is_not_replayed_once_the_gap_comes() {
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.route_transition_assist = true;
+    on_ramp(&mut d, "yield", false, 0.0);
+    d.cross_bubble = Some(a_car_in_the_crossroad());
+    app.clear_speech();
+    d.update_ramp_terminal_assist(&mut app.ctx);
+    assert!(said_any(&app, "holding for your gap"), "{:?}", spoken(&app));
+    clock.advance(0.3);
+    if let Some(bubble) = d.cross_bubble.as_mut() {
+        bubble.vehicles.clear(); // the car is through
+    }
+    d.update_ramp_terminal_assist(&mut app.ctx);
+    let lines = spoken(&app);
+    assert_eq!(said_count(&app, "holding for your gap"), 1, "{lines:?}");
+    assert!(
+        lines
+            .last()
+            .is_some_and(|line| line.starts_with("Gap in traffic.")),
+        "{lines:?}"
+    );
+}
+
+/// Agent drive, yield at exit 255 (2026-09-24): "Stopped at the yield. A car
+/// crossing from the left" was said at 4 miles per hour while the car and
+/// pickup holding the truck crossed in the right ear. The wait names the
+/// vehicle it is waiting on, and a yield is not called a stop.
+#[test]
+fn test_the_yield_wait_names_the_car_it_is_waiting_on() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.route_transition_assist = true;
+    on_ramp(&mut d, "yield", false, 0.0);
+    let mut bubble = a_car_in_the_crossroad();
+    let in_the_crossroad = &mut bubble.vehicles[0];
+    in_the_crossroad.from_side = "right";
+    in_the_crossroad.position_mi = 5.0 / 5280.0; // past the centre, still in it
+    in_the_crossroad.speed_mph = 4.0; // creeping through: there when the truck would be
+    in_the_crossroad.sound_started = true; // already heard, in the right ear
+    let mut coming = in_the_crossroad.clone();
+    coming.from_side = "left";
+    coming.position_mi = -0.03; // about three and a half seconds out
+    coming.speed_mph = 30.0;
+    coming.sound_started = false;
+    bubble.vehicles.push(coming);
+    d.cross_bubble = Some(bubble);
+    app.clear_speech();
+    d.update_ramp_terminal_assist(&mut app.ctx);
+    let lines = spoken(&app);
+    assert!(
+        lines.iter().any(|line| line
+            == "At the yield. A car crossing from the right; assistance is holding for your gap."),
+        "{lines:?}"
+    );
+}
+
+/// Same drive: "Route-transition assistance slowing." then "Route-transition
+/// assistance braking for the yield." a second later -- one assist, one act,
+/// two lines. The lift names the yield and the terminal's braking is silent.
+#[test]
+fn test_one_assist_line_for_the_yield_approach() {
+    let mut app = TestApp::new();
+    let clock = app.fake_pacer_clock();
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.route_transition_assist = true;
+    on_ramp(&mut d, "yield", false, 55.0);
+    d.cross_bubble = Some(a_car_in_the_crossroad());
+    d.ramp_mi = Some(RAMP_ACCESS_MI + 0.1);
+    app.clear_speech();
+    for _ in 0..10 {
+        clock.advance(0.05);
+        d.update_lane(&mut app.ctx, 0.05);
+        d.update_ramp_terminal_assist(&mut app.ctx);
+    }
+    assert!(d.ramp_assist_brake > 0.0, "the terminal is braking");
+    let assist: Vec<String> = spoken(&app)
+        .into_iter()
+        .filter(|line| line.contains("Route-transition assistance"))
+        .collect();
+    assert_eq!(
+        assist,
+        vec!["Route-transition assistance slowing for the yield.".to_string()]
+    );
 }
 
 #[test]
@@ -1308,7 +1614,7 @@ fn take_the_exit(
     d.exit_stop = Some(stop.clone());
     d.exit_signal_on = true;
     d.exit_signal_canceled = false;
-    d.exit_lane_alignment = 1.0;
+    d.exit_lane_entered = true;
     d.lane.lane = 0;
     d.trip.position_mi = stop.at_mi;
     d.update_exit(&mut app.ctx, 0.0, 0.0);
@@ -1728,6 +2034,87 @@ fn test_route_transition_assistance_stops_at_the_sign_on_the_air_it_has() {
 }
 
 #[test]
+fn test_route_transition_assistance_lets_go_when_the_terminal_ends() {
+    // The frame holds the pedal at the terminal servo's last press, so a
+    // press left behind when the terminal ended -- crossed or run -- held the
+    // truck on its brakes for good (merge bench, 2026-09-23).
+    let mut harness = approaching_a_terminal("Ramps", "signal", 30.0);
+    for _ in 0..(60 * 120) {
+        frame(&mut harness, DT);
+        if harness.read_drive(|d| d.ramp_assist_brake > 0.0) {
+            break;
+        }
+    }
+    assert!(
+        harness.read_drive(|d| d.ramp_assist_brake > 0.0),
+        "the assist never braked for the red"
+    );
+    harness.with_drive(|d, _| d.ramp_terminal_done = true);
+    for _ in 0..60 {
+        frame(&mut harness, DT);
+    }
+    harness.read_drive(|d| {
+        assert_eq!(d.ramp_assist_brake, 0.0);
+        assert!(d.truck().brake < 0.05, "held at {:.2}", d.truck().brake);
+    });
+}
+
+#[test]
+fn test_route_transition_assistance_brakes_to_the_sign_without_slamming() {
+    // Agent drive into Abilene, 2026-09-23: 25 mph and a thousand feet from
+    // a stop sign. The terminal's servo pressed AFTER physics had run and
+    // was left out of the frame's assist floor, so the pedal decayed under
+    // it every frame: the truck slowed at about 0.43 m/s2 against the 0.6
+    // planned, reached the bar at 15 mph with "released" said over it, and
+    // slammed the rest. The plan is one steady application to the bar.
+    let mut harness = approaching_a_terminal("Ramps", "stop", 25.0);
+    harness.with_drive(|d, _| {
+        d.ramp_mi = Some(0.19 + RAMP_ACCESS_MI);
+        d.ramp_stop = Some(a_stop(d.trip.position_mi + 0.19 + RAMP_ACCESS_MI));
+    });
+    let mut hardest_mps2: f64 = 0.0;
+    let mut previous_mps = harness.read_drive(|d| d.truck().velocity_mps);
+    let mut mph_at_60_ft: Option<f64> = None;
+    for _ in 0..(60 * 120) {
+        frame(&mut harness, DT);
+        let (mps, done) = harness.read_drive(|d| (d.truck().velocity_mps, d.ramp_terminal_done));
+        let gap_ft = harness.read_drive(|d| (d.ramp_mi.unwrap_or(0.0) - RAMP_ACCESS_MI) * 5280.0);
+        if mph_at_60_ft.is_none() && gap_ft <= 60.0 {
+            mph_at_60_ft = Some(mps * MPH_PER_MPS);
+        }
+        // The final hold at a crawl is a parking application, not the stop.
+        if previous_mps * MPH_PER_MPS > 5.0 {
+            hardest_mps2 = hardest_mps2.max((previous_mps - mps) / DT);
+        }
+        previous_mps = mps;
+        if done {
+            break;
+        }
+    }
+    let lines = spoken(&harness.app);
+    assert!(
+        lines
+            .iter()
+            .any(|line| line.starts_with("Stopped at the sign")),
+        "{lines:?}"
+    );
+    // On the profile, 60 feet out is about 5 mph; the decaying pedal reached
+    // it at 13 and stopped the rest on half a pedal.
+    let at_60 = mph_at_60_ft.expect("the truck reached the bar");
+    assert!(at_60 < 8.0, "{at_60:.1} mph 60 feet from the bar");
+    assert!(
+        hardest_mps2 < 1.0,
+        "the stop peaked at {hardest_mps2:.2} m/s2: {lines:?}"
+    );
+    assert!(
+        !lines
+            .iter()
+            .any(|line| line == "Route-transition assistance released."),
+        "released while still braking for the sign: {lines:?}"
+    );
+}
+
+#[test]
 fn test_route_transition_assistance_lifts_for_the_ramp_cap_before_the_stop() {
     // The ramp cap is sustained speed control, not the terminal stop. A
     // service-brake floor here held the drums for the whole ramp (and the
@@ -2004,7 +2391,7 @@ fn test_route_transition_assistance_brakes_for_a_late_yellow_on_the_tyler_ramp()
         d.truck_mut().velocity_mps = 60.0 * MPS_PER_MPH;
         d.engage_cruise(ctx, 65.0, false);
         d.exit_stop = Some(exit);
-        d.exit_lane_alignment = 1.0;
+        d.exit_lane_entered = true;
         d.exit_signal_on = true;
     });
     let mut forced = false;
@@ -2062,11 +2449,15 @@ fn test_route_transition_assistance_brakes_for_a_late_yellow_on_the_tyler_ramp()
     eprintln!("{}", trace.join("\n"));
     eprintln!("{lines:#?}");
     assert!(forced, "never reached the ramp light");
-    // Twice: the seeded red on the way down, and again for the yellow after
-    // the green stood the assist down. The second take used to be silent.
+    // Twice: for the first yellow on the way down, and again for the late
+    // yellow after the green stood the assist down. The second take used to
+    // be silent. A line a flush cut before its first word is handed straight
+    // back to the voice, so the pair it leaves is one occurrence.
+    let braking = "Route-transition assistance braking for the light.";
     let announced = lines
         .iter()
-        .filter(|line| *line == "Route-transition assistance braking for the light.")
+        .enumerate()
+        .filter(|(i, line)| *line == braking && (*i == 0 || lines[i - 1] != braking))
         .count();
     assert_eq!(announced, 2, "{lines:?}");
     assert!(!lines.iter().any(|line| line.contains("ran the red light")));

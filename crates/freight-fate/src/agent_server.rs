@@ -73,7 +73,7 @@ mod protocol;
 pub use ears::{install_ears, Ears, SharedEars};
 pub use protocol::{build_command, serve_lines};
 
-use ears::drain_ears;
+use ears::{drain_ears, CAB_CUT_IN};
 use protocol::{discover, serve};
 // -- commands between the MCP thread and the game loop --------------------------------
 
@@ -159,6 +159,15 @@ pub enum Command {
     OperatorKeys {
         live: bool,
     },
+    /// Freeze the world between tool calls, so time passes only inside
+    /// `wait`, `pedal`, `wait_for` and the frames a call scripts.
+    Lockstep {
+        on: bool,
+    },
+    /// Start the key probe, or stop it and report (`app::key_probe`).
+    KeyProbe {
+        start: bool,
+    },
     Listen,
     Menu,
     Observe,
@@ -197,10 +206,12 @@ enum Until {
 struct Waiting {
     remaining: f64,
     until: Until,
-    /// Where in the ears the scan for `Heard` resumes.
+    /// Where in the ears the scan resumes.
     scanned: usize,
-    /// False for a plain `wait`; true for the tools whose reply should say
-    /// when the clock, not the thing waited for, ended the wait.
+    /// True for `wait_for`: it also stops when the cab cuts in, and says
+    /// when the clock, not the thing waited for, ended the wait. A blind
+    /// wait_for drove past "Exit lane opening. Steer right into it." and
+    /// missed the exit (agent drive, Dallas, 2026-09-25).
     reports_timeout: bool,
     reply: Reply,
 }
@@ -281,6 +292,13 @@ pub struct AgentPolicy {
     /// toggled the parking brake against the approach assist (found live,
     /// 2026-09-01). No finger taps inside a frame, so the agent must not.
     scripted: std::collections::VecDeque<Vec<InputEvent>>,
+    /// The world waits while no call is working. A client round trip is a
+    /// second or two of thinking, and with lane keeping off at highway speed
+    /// that is the truck across half a lane before the answer to a cue
+    /// lands (agent drive, 2026-09-23): every correction arrived late
+    /// whatever the guide said. Off by default, so an owner driving
+    /// alongside with operator keys keeps a live road.
+    lockstep: bool,
     quit: bool,
 }
 
@@ -294,8 +312,12 @@ impl AgentPolicy {
 
     /// Script a finger tap: down on one frame, up on the next.
     fn tap(&mut self, key: Key, text: Option<char>, mods: Mods) {
-        self.scripted
-            .push_back(vec![InputEvent::KeyDown { key, mods, text }]);
+        self.scripted.push_back(vec![InputEvent::KeyDown {
+            key,
+            mods,
+            text,
+            repeat: false,
+        }]);
         self.scripted
             .push_back(vec![InputEvent::KeyUp { key, mods }]);
     }
@@ -449,26 +471,36 @@ impl AgentPolicy {
         if let Some(mut waiting) = self.waiting.take() {
             waiting.remaining -= dt;
             let out_of_time = waiting.remaining <= 0.0;
-            let released = match &waiting.until {
-                Until::Elapsed => out_of_time,
-                Until::Heard(needle) => {
-                    let ears = self.ears.borrow();
-                    let from = waiting.scanned.min(ears.lines.len());
-                    let heard = ears.lines[from..]
+            let (heard, cut_in) = {
+                let ears = self.ears.borrow();
+                let fresh = &ears.lines[waiting.scanned.min(ears.lines.len())..];
+                let heard = match &waiting.until {
+                    Until::Heard(needle) => fresh
                         .iter()
-                        .any(|line| line.to_lowercase().contains(needle.as_str()));
-                    waiting.scanned = ears.lines.len();
-                    heard || out_of_time
-                }
-                Until::Menu => input.menu_rows().is_some() || out_of_time,
+                        .any(|line| line.to_lowercase().contains(needle.as_str())),
+                    _ => false,
+                };
+                let cut_in =
+                    waiting.reports_timeout && fresh.iter().any(|l| l.starts_with(CAB_CUT_IN));
+                waiting.scanned = ears.lines.len();
+                (heard, cut_in)
             };
-            if !released {
+            let arrived = match &waiting.until {
+                Until::Elapsed => false,
+                Until::Heard(_) => heard,
+                Until::Menu => input.menu_rows().is_some(),
+            };
+            if !(arrived || cut_in || out_of_time) {
                 self.waiting = Some(waiting);
                 return true;
             }
             let mut text = drain_ears(&self.ears);
-            if out_of_time && waiting.reports_timeout && !matches!(waiting.until, Until::Elapsed) {
-                text.push_str("\n(the clock ran out before that arrived)");
+            if !arrived && waiting.reports_timeout && !matches!(waiting.until, Until::Elapsed) {
+                text.push_str(if cut_in {
+                    "\n(the cab cut in before that arrived)"
+                } else {
+                    "\n(the clock ran out before that arrived)"
+                });
             }
             let _ = waiting.reply.send(Ok(text));
         }
@@ -501,8 +533,12 @@ impl AgentPolicy {
                         alt: mods.alt || chord_mods.alt,
                     };
                     for _ in 0..times.clamp(1, 50) {
-                        self.scripted
-                            .push_back(vec![InputEvent::KeyDown { key, mods, text }]);
+                        self.scripted.push_back(vec![InputEvent::KeyDown {
+                            key,
+                            mods,
+                            text,
+                            repeat: false,
+                        }]);
                         self.scripted
                             .push_back(vec![InputEvent::KeyUp { key, mods }]);
                     }
@@ -527,6 +563,7 @@ impl AgentPolicy {
                         key,
                         mods: Mods::NONE,
                         text,
+                        repeat: false,
                     });
                     let _ = reply.send(Ok("held down.".to_string()));
                 }
@@ -571,6 +608,7 @@ impl AgentPolicy {
                         key,
                         mods: Mods::NONE,
                         text,
+                        repeat: false,
                     });
                     let seconds = seconds.clamp(0.05, MAX_PEDAL_SECONDS);
                     self.timed_hold = Some((key, seconds));
@@ -730,12 +768,26 @@ impl AgentPolicy {
                 Command::OperatorKeys { live } => {
                     let _ = reply.send(Ok(input.set_operator_keys(live)));
                 }
+                Command::Lockstep { on } => {
+                    self.lockstep = on;
+                    let _ = reply.send(Ok(protocol::lockstep_reply(on)));
+                }
+                Command::KeyProbe { start } => {
+                    let _ = reply.send(Ok(input.key_probe(start)));
+                }
                 Command::Quit => {
                     let _ = reply.send(Ok("Quitting the game.".to_string()));
                     self.quit = true;
                     return false;
                 }
             }
+        }
+        let working = self.waiting.is_some()
+            || self.timed_hold.is_some()
+            || self.cruise_plan.is_some()
+            || !self.scripted.is_empty();
+        if self.lockstep && !working {
+            input.hold_world();
         }
         true
     }
@@ -766,6 +818,7 @@ pub fn policy(
         timed_hold: None,
         cruise_plan: None,
         scripted: std::collections::VecDeque::new(),
+        lockstep: false,
         quit: false,
     }
 }
@@ -776,7 +829,7 @@ pub fn policy(
 /// stays up and the operator's keyboard reaches the game, so a human can
 /// take the wheel alongside the agent; off, the keys are dropped at the
 /// door (see [`run_with_staged`]).
-pub fn run(reset: bool, launch: Option<LaunchAt>, operator_keys: bool, online: bool) -> i32 {
+pub fn run(reset: bool, launch: Option<LaunchAt>, operator_keys: bool, staging: bool) -> i32 {
     // Discover BEFORE the window opens: pure world data, and a failed
     // search should refuse cleanly rather than boot a game.
     let staged = match launch {
@@ -792,7 +845,7 @@ pub fn run(reset: bool, launch: Option<LaunchAt>, operator_keys: bool, online: b
             }
         },
     };
-    run_with_staged(reset, staged, operator_keys, online)
+    run_with_staged(reset, staged, operator_keys, staging)
 }
 
 fn run_with_staged(
@@ -802,7 +855,7 @@ fn run_with_staged(
         crate::playtest::road::RoadOptions,
     )>,
     operator_keys: bool,
-    online: bool,
+    staging: bool,
 ) -> i32 {
     use crate::playtest::sandbox;
     let (requests, rx) = mpsc::channel();
@@ -816,7 +869,7 @@ fn run_with_staged(
             finish_serving(&server);
             return 0;
         };
-        let (mut app, mut guard) = match boot(reset, online) {
+        let (mut app, mut guard) = match boot(reset, staging) {
             Ok(booted) => booted,
             Err(text) => {
                 // Answered, not fatal: "already running" clears when the
@@ -833,8 +886,11 @@ fn run_with_staged(
         // dropped at the door as well. `--operator-keys` is the owner's
         // opt-in to play alongside the agent (asked for 2026-09-11): the
         // window stays up and every key counts, so the keyboard belongs to
-        // the game for the whole session.
+        // the game for the whole session. Restoring shows a window the
+        // launcher's STARTUPINFO kept hidden (the desktop app spawns MCP
+        // servers that way) and gives it focus.
         if operator_keys {
+            app.restore_window();
             eprintln!("Operator keys are live: the keyboard reaches the game.");
         } else {
             app.minimize_window();
@@ -877,24 +933,28 @@ fn finish_serving(server: &std::thread::JoinHandle<()>) {
 /// An error leaves nothing held, so the next play request can try again.
 fn boot(
     reset: bool,
-    online: bool,
+    staging: bool,
 ) -> Result<(App, crate::single_instance::SingleInstanceGuard), String> {
     use crate::playtest::sandbox;
     let source = sandbox::real_saves();
-    let dir = if online {
-        sandbox::online_sandbox()
+    let dir = if staging {
+        sandbox::staging_sandbox()
     } else {
         sandbox::default_sandbox()
     };
-    if online {
-        sandbox::prepare_online(&dir, reset, &source)
-            .map_err(|e| format!("Could not prepare the online agent session: {e}"))?;
-        eprintln!("ONLINE: cloud backups reach the site as the real driver.");
+    if staging {
+        sandbox::prepare_staging(&dir, reset, &source)
+            .map_err(|e| format!("Could not prepare the staging agent session: {e}"))?;
+        eprintln!(
+            "STAGING: this session's own driver backs up to {}; connect it from the \
+             Online menu the first time.",
+            sandbox::STAGING_URL
+        );
     } else {
         sandbox::prepare(&dir, reset, true, &source)
             .map_err(|e| format!("Could not prepare the agent sandbox: {e}"))?;
     }
-    let problems = if online {
+    let problems = if staging {
         Vec::new()
     } else {
         sandbox::audit(&dir)

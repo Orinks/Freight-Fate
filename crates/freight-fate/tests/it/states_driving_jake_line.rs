@@ -485,11 +485,20 @@ fn test_a_quarter_mile_pitch_is_not_a_sustained_descent() {
 }
 
 #[test]
-fn test_a_shallow_descent_is_still_held_and_still_spoken() {
+fn test_a_shallow_descent_is_still_held_and_not_restated() {
     // The fix must not trade a barking retarder for a truck that runs away
     // quietly. On a three percent grade -- squarely inside what the owner
-    // reported as over-served -- the retarder stays out of it, the DRUMS keep
-    // the number, and the automation still says what it is doing.
+    // reported as over-served -- the retarder stays out of it and the DRUMS
+    // keep the number.
+    //
+    // What descent control does NOT do any more is announce the driver's own
+    // set speed back to them. This line used to require "Descent control
+    // holding 60" here; since 2026-09-25 descent control names only a number
+    // of its own -- the hill's safe descent speed, interactive's ceiling, a
+    // brake's capture -- because the set speed, or the limit plus five, was
+    // exactly what it said on I-70's seven percent while the hill needed 45
+    // (owner's drive into Denver, 2026-09-24), and a three percent grade
+    // needs no number of its own (silence over redundant speech, 2026-09-21).
     let set_mph = 60.0;
     let mut harness = loaded_run("Shallow", -3.0, set_mph, 30.0, true);
     let mut retarder_frames = 0usize;
@@ -526,18 +535,18 @@ fn test_a_shallow_descent_is_still_held_and_still_spoken() {
         "the truck sagged to {low:.1} mph holding a three percent descent on the drums"
     );
 
-    // And it still SAYS so. Going quiet where it used to speak is its own
-    // fault, and this is the line a blind driver navigates the hill by.
-    let held = harness
-        .app
-        .ctx
-        .settings
-        .speed_text(harness.read_drive(|d| d.descent_hold_mph()));
-    let expected = format!("Descent control holding {held}.");
+    // Held at the driver's own number, so nothing to say about it.
+    assert_eq!(
+        harness.read_drive(|d| (d.descent_hold_mph(), d.descent_safe_mph)),
+        (set_mph, None),
+        "a three percent grade has no safe descent speed of its own"
+    );
     let lines = spoken(&harness);
     assert!(
-        lines.iter().any(|line| line == &expected),
-        "the descent-control line went missing; heard: {:#?}",
+        !lines
+            .iter()
+            .any(|line| line.contains("Descent control holding")),
+        "descent control restated the set speed; heard: {:#?}",
         lines
             .iter()
             .filter(|l| l.contains("escent"))

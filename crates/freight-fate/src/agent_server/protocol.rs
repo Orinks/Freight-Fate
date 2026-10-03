@@ -18,6 +18,17 @@ fn respond_raw(out: &mut dyn Write, value: &Value) {
     let _ = out.flush();
 }
 
+/// The `lockstep` tool's reply.
+pub(super) fn lockstep_reply(on: bool) -> String {
+    if on {
+        "Lockstep is on: the world waits between tool calls. Time passes only inside \
+         wait, pedal, wait_for, and the frames a call scripts."
+    } else {
+        "Lockstep is off: the road runs on the wall clock again."
+    }
+    .to_string()
+}
+
 fn tool_text(text: String) -> Value {
     json!({"content": [{"type": "text", "text": text}]})
 }
@@ -131,9 +142,12 @@ fn tools_list() -> Value {
             "Let the game run until something arrives: a spoken line or sound whose \
              text contains `text` (case-insensitive), or a menu on screen when `menu` \
              is true, or `seconds` of real time (max 300), whichever comes first. \
-             Anything heard since the last listen counts, so a line already spoken \
-             answers at once. Replies with everything heard, and says if the clock \
-             ran out. Use it to drive to the next event instead of waiting blind.",
+             It also stops early whenever the cab cuts in on the driving channel \
+             (an interrupting instruction or warning), so it can be answered: act \
+             on it, then wait again. Anything heard since the last listen counts, \
+             so a line already spoken answers at once. Replies with everything \
+             heard, and says if the cab or the clock ended it first. Use it to \
+             drive to the next event instead of waiting blind.",
             json!({
                 "text": {"type": "string", "description": "text to listen for"},
                 "menu": {"type": "boolean", "description": "return as soon as a menu is on screen"},
@@ -221,9 +235,10 @@ fn tools_list() -> Value {
              credential keys bought outright, replacing what was held), hour (local \
              clock 0 to 24, moved forward to), fuel_pct, damage_pct, tire_wear_pct and \
              brake_wear_pct (0 to 100, what a roadside inspection reads), citations and \
-             out_of_service_events (counts on the record; with damage they set the \
+             out_of_service_events (counts on the record, dated now; with damage they set the \
              safety band that decides who is pulled into the inspection lane), \
-             rested (true takes a full sleep), clear_load (true drops a load in \
+             rested (true takes a full sleep), hos_driving_min, hos_duty_min and \
+             hos_since_break_min (sandbox HOS counters in game minutes), clear_load (true drops a load in \
              progress first), market_seed and board_seed (the dispatch board rolls \
              from them), settings (an object of setting name to value, for this \
              session), and name (the career created when none is loaded; default \
@@ -246,6 +261,9 @@ fn tools_list() -> Value {
                 "citations": {"type": "integer"},
                 "out_of_service_events": {"type": "integer"},
                 "rested": {"type": "boolean"},
+                "hos_driving_min": {"type": "number"},
+                "hos_duty_min": {"type": "number"},
+                "hos_since_break_min": {"type": "number"},
                 "clear_load": {"type": "boolean"},
                 "market_seed": {"type": "integer"},
                 "board_seed": {"type": "integer"},
@@ -265,6 +283,34 @@ fn tools_list() -> Value {
                 "live": {"type": "boolean", "description": "true to let the operator's keyboard in, false to shut it out again"},
             }),
             &["live"],
+        ),
+        tool(
+            "key_probe",
+            "Measure what the operator's keyboard delivers to the game, screen reader and \
+             all -- for a JAWS machine, where held arrows arrive as instant press-and-\
+             release pairs. Needs operator_keys live true. Call with action start, ask \
+             the operator to hold each arrow key for several seconds, then call with \
+             action report: it says how the keys arrived, how long the game read each \
+             one held against how long the keyboard did, and how many re-sent pairs the \
+             held-key tracker missed and why (a slow frame, or a pair split across two \
+             frames).",
+            json!({
+                "action": {"type": "string", "enum": ["start", "report"]},
+            }),
+            &["action"],
+        ),
+        tool(
+            "lockstep",
+            "Freeze the world between tool calls (on true), so the road waits while you \
+             think: time passes only inside wait, pedal and wait_for, and for the few \
+             frames a press or cruise call scripts. Use it to answer a cue in time \
+             where a round trip would otherwise cost road -- steering with lane keeping \
+             off, braking for a hazard. Off (false) runs the road on the wall clock \
+             again, which is the default and what an owner driving alongside needs.",
+            json!({
+                "on": {"type": "boolean", "description": "true to freeze the world between calls, false for the live road"},
+            }),
+            &["on"],
         ),
         tool(
             "quit_game",
@@ -549,6 +595,15 @@ pub fn build_command(name: &str, args: &Map<String, Value>) -> Result<Command, S
         "operator_keys" => match args.get("live").and_then(Value::as_bool) {
             Some(live) => Ok(Command::OperatorKeys { live }),
             None => Err("operator_keys needs live: true or false".to_string()),
+        },
+        "key_probe" => match args.get("action").and_then(Value::as_str) {
+            Some("start") => Ok(Command::KeyProbe { start: true }),
+            Some("report") => Ok(Command::KeyProbe { start: false }),
+            _ => Err("key_probe needs action: \"start\" or \"report\"".to_string()),
+        },
+        "lockstep" => match args.get("on").and_then(Value::as_bool) {
+            Some(on) => Ok(Command::Lockstep { on }),
+            None => Err("lockstep needs on: true or false".to_string()),
         },
         "quit_game" => Ok(Command::Quit),
         other => Err(format!("unknown tool {other}")),

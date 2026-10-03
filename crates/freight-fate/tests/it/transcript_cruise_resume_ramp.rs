@@ -47,7 +47,7 @@ use ff_core::sim::weather::{WeatherKind, WeatherSystem};
 use freight_fate::playtest::harness::{PlaytestHarness, StartDelivery};
 use freight_fate::states::base::{Key, Mods};
 use freight_fate::states::driving::DrivingState;
-use freight_fate::states::driving_core::RAMP_MAX_MPH;
+use freight_fate::states::driving_core::{EXIT_MAINLINE_EASE_MPH, RAMP_MAX_MPH};
 
 const MPS_PER_MPH: f64 = 1.0 / 2.23694;
 
@@ -170,6 +170,7 @@ fn arm_high_target(opts: HighTarget) -> PlaytestHarness {
                 key: Key::K,
                 mods: Mods::SHIFT,
                 text: None,
+                repeat: false,
             },
         )
     });
@@ -455,10 +456,15 @@ fn test_shane_2026_08_15_the_ramp_cap_no_longer_lands_miles_from_the_exit() {
     // while there is plenty, and never sits below the speed the ramp needs
     // until the ramp is genuinely close.
     let (mut harness, _stop) = armed_exit_at(4.5, 1.0, "off");
-    // The ramp's own number now, not one constant for every exit in the
+    // The exit's own floor now, not one constant for every exit in the
     // country -- Shane's point was that the cap must not land miles from the
-    // exit, and that is what this asserts (owner, 2026-08-21).
-    let armed_ramp = harness.read_drive(|d| d.armed_ramp_cruise_mph(None));
+    // exit, and that is what this asserts (owner, 2026-08-21). Ten under road
+    // speed at most, since the realistic exit (2026-09-24).
+    let armed_ramp = harness.with_drive(|d, _| d.exit_approach_floor_mph(None));
+    assert!(
+        approx(armed_ramp, 65.0 - EXIT_MAINLINE_EASE_MPH),
+        "{armed_ramp}"
+    );
     assert!(approx(
         harness.read_drive(|d| d.cruise_exit_mph).expect("a cap"),
         armed_ramp
@@ -496,7 +502,9 @@ fn test_shane_2026_08_15_the_ramp_cap_no_longer_lands_miles_from_the_exit() {
 #[test]
 fn test_the_ramp_cap_glides_down_as_the_exit_closes() {
     // Measured off the distance, the way the report asked: the cap comes down
-    // smoothly with the road left, and lands on the ramp target at the gore.
+    // smoothly with the road left, and lands on the exit floor at the gore --
+    // ten under road speed, never the ramp's number (realistic exit,
+    // 2026-09-24).
     let (mut harness, stop) = armed_exit_at(4.5, 1.0, "off");
     let mut caps = Vec::new();
     for ahead in [4.5, 2.0, 1.0, 0.6, 0.4, 0.2, 0.05] {
@@ -510,7 +518,8 @@ fn test_the_ramp_cap_glides_down_as_the_exit_closes() {
     let mut sorted = caps.clone();
     sorted.sort_by(|a, b| b.total_cmp(a));
     assert_eq!(caps, sorted, "{caps:?}");
-    let ramp_cruise = harness.read_drive(|d| d.armed_ramp_cruise_mph(None));
+    let ramp_cruise = harness.with_drive(|d, _| d.exit_approach_floor_mph(None));
+    assert!(approx(ramp_cruise, 65.0 - EXIT_MAINLINE_EASE_MPH));
     assert!(approx(*caps.last().expect("caps"), ramp_cruise));
     assert!(caps.iter().cloned().fold(f64::INFINITY, f64::min) >= ramp_cruise);
 }
@@ -536,9 +545,9 @@ fn test_shane_2026_08_15_signalling_nine_miles_out_sheds_nothing() {
             let cap = cap_at(&mut harness, &stop, ahead);
             assert!(cap > cruise, "{time_scale} {ahead} {cap} {cruise}");
         }
-        // Half a mile out is where a driver would really lift; the shed runs
-        // from there, not from the moment the signal went on.
-        assert!(cap_at(&mut harness, &stop, 0.5) <= cruise);
+        // A quarter mile out the ten-mile ease is under way; it runs from
+        // there, not from the moment the signal went on.
+        assert!(cap_at(&mut harness, &stop, 0.25) <= cruise);
     }
 }
 
@@ -653,7 +662,18 @@ fn test_the_truck_still_makes_the_ramp_at_every_pacing() {
         );
         let entry = entry.unwrap_or_else(|| panic!("never took the exit at {time_scale}x: pos={:.2} stop={:.2} speed={:.1} signal={} exit={:?}
 {}", harness.read_drive(|d| d.trip.position_mi), stop.at_mi, harness.read_drive(|d| d.truck().speed_mph()), harness.read_drive(|d| d.exit_signal_on), harness.read_drive(|d| d.exit_stop.as_ref().map(|s| s.name.clone())), harness.transcript_text()));
-        assert!(entry <= RAMP_MAX_MPH, "{time_scale} {entry}");
+        // Slow enough for the gore, which accepts road speed plus the posts'
+        // leeway -- and NOT shed to ramp speed in the through lane: the most
+        // automatic control takes off on the mainline is ten under the road's
+        // 65 (realistic exit, 2026-09-24). The ramp's number is braked for in
+        // the deceleration lane, past the gore.
+        let accepted = harness.with_drive(move |d, _| d.gore_acceptance_mph(Some(&stop)));
+        assert!(entry <= accepted, "{time_scale} {entry} over {accepted}");
+        assert!(
+            entry >= 65.0 - EXIT_MAINLINE_EASE_MPH - 2.5,
+            "{time_scale}: shed to {entry} on the mainline"
+        );
+        assert!(entry > RAMP_MAX_MPH, "{time_scale}: {entry}");
     }
 }
 

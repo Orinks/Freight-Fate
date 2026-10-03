@@ -14,7 +14,7 @@ use crate::models::save_migration::json_f64;
 use crate::models::start_options::pay_plan_for_key;
 use crate::models::trailers::{required_program_text, trailer_keys_for_cargo};
 use crate::pyfmt::{fmt_f, fmt_grouped, py_str_float, round_py_n};
-use crate::speech_text::typed_name;
+use crate::speech_text::{the_city, typed_name};
 
 mod board;
 mod deadline;
@@ -23,15 +23,16 @@ pub mod relay;
 #[cfg(test)]
 mod tests;
 
-pub use board::{JobBoard, OfferOptions};
+pub use board::{reachable_cities, JobBoard, OfferOptions};
 pub use deadline::{
     curve_ceilings, dispatch_deadline_hours, fair_active_deadline, minimum_pay_for_level, plan_hos,
-    required_hours, route_drive_hours, route_drive_hours_over, route_planning_limit,
-    route_required_hours, segment_hours, CurveBand, HosPlan, ACTIVE_TRIP_FAIRNESS_SLACK,
-    DEADLINE_AVG_MPH, DEADLINE_DISPATCH_MIN_SLACK_H, DEADLINE_DISPATCH_SLACK_RANGE,
-    DEADLINE_MIN_SEGMENT_MPH, DEADLINE_PLANNING_SPEED_FACTOR, DEADLINE_SAMPLE_MI,
-    DISPATCH_FLAT_MINIMUM_BY_LEVEL, HOOKUP_FEE, LONG_HAUL_MINIMUM_RATE_BY_LEVEL,
-    SHORT_HAUL_FULL_PREMIUM_MI, SHORT_HAUL_RATE_BY_LEVEL, SHORT_HAUL_TAPER_END_RATE_BY_LEVEL,
+    remaining_route_hos_plan, required_hours, route_drive_hours, route_drive_hours_over,
+    route_planning_limit, route_required_hours, segment_hours, CurveBand, HosPlan,
+    ACTIVE_TRIP_FAIRNESS_SLACK, DEADLINE_AVG_MPH, DEADLINE_DISPATCH_MIN_SLACK_H,
+    DEADLINE_DISPATCH_SLACK_RANGE, DEADLINE_MIN_SEGMENT_MPH, DEADLINE_PLANNING_SPEED_FACTOR,
+    DEADLINE_SAMPLE_MI, DISPATCH_FLAT_MINIMUM_BY_LEVEL, HOOKUP_FEE,
+    LONG_HAUL_MINIMUM_RATE_BY_LEVEL, SHORT_HAUL_FULL_PREMIUM_MI, SHORT_HAUL_RATE_BY_LEVEL,
+    SHORT_HAUL_TAPER_END_RATE_BY_LEVEL,
 };
 
 mod catalog;
@@ -54,7 +55,7 @@ pub fn facility_text(
     locality: &str,
 ) -> String {
     if location_type == "metro_market" || is_legacy_facility_name(city, location_name) {
-        return format!("the {city} metro freight market");
+        return format!("{} metro freight market", the_city(city));
     }
     let place = if !locality.is_empty() && !location_name.contains(locality) {
         format!(" near {locality}")
@@ -77,7 +78,7 @@ pub fn facility_offer_text(
     locality: &str,
 ) -> String {
     if location_type == "metro_market" || is_legacy_facility_name(city, location_name) {
-        return format!("the {city} metro freight market");
+        return format!("{} metro freight market", the_city(city));
     }
     let place = if !locality.is_empty() && !location_name.contains(locality) {
         format!(" near {locality}")

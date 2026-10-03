@@ -1,7 +1,7 @@
 //! Terminal garage fuel and repair menu (port of
 //! `freight_fate/states/city_garage.py`).
 
-use ff_core::models::business::player_pays_operating_costs;
+use ff_core::models::business::{is_owner_operator, player_pays_operating_costs};
 use ff_core::models::economy::{damage_severity_mult, Economy, REPAIR_COST_PER_PCT};
 use ff_core::models::profile::Profile;
 use ff_core::pyfmt::{fmt_f, fmt_grouped, round_py_n};
@@ -873,8 +873,8 @@ impl Menu for GarageState {
         &mut self.menu
     }
 
-    fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
-        vec![
+    fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
+        let mut items = vec![
             MenuItem::new(
                 Label::dynamic(|_s: &Self, ctx| Self::fuel_label(ctx)),
                 |s: &mut Self, ctx| s.refuel(ctx),
@@ -896,14 +896,24 @@ impl Menu for GarageState {
                 "Worn tires grip less. Company drivers bill the carrier, owner-operators pay \
                  the shop.",
             ),
-            MenuItem::new(
-                Label::dynamic(|_s: &Self, ctx| Self::tire_swap_label(ctx)),
-                |s: &mut Self, ctx| s.swap_tire_compound(ctx),
-            )
-            .help(
-                "Winter tires bite harder on snow and ice, wear faster, and grip a little \
-                 less on warm dry pavement. Company tractors run what the carrier specs.",
-            ),
+        ];
+        // Tires, upgrades, trucks and trailers are the owner's to choose; a
+        // company driver's are the carrier's, so those rows stay off the menu
+        // until the buy-in (owner, 2026-09-28).
+        let owner = is_owner_operator(&profile(ctx).business_status);
+        if owner {
+            items.push(
+                MenuItem::new(
+                    Label::dynamic(|_s: &Self, ctx| Self::tire_swap_label(ctx)),
+                    |s: &mut Self, ctx| s.swap_tire_compound(ctx),
+                )
+                .help(
+                    "Winter tires bite harder on snow and ice, wear faster, and grip a little \
+                     less on warm dry pavement.",
+                ),
+            );
+        }
+        items.extend([
             MenuItem::new(
                 Label::dynamic(|_s: &Self, ctx| Self::chains_label(ctx)),
                 |s: &mut Self, ctx| s.buy_chains(ctx),
@@ -933,18 +943,24 @@ impl Menu for GarageState {
                 |s: &mut Self, ctx| s.wash_truck(ctx),
             )
             .help("Company drivers bill the carrier, owner-operators pay."),
-            MenuItem::new("Upgrades", |s: &mut Self, ctx| s.upgrades(ctx)).help(
-                "Performance upgrades for owned tractors: more torque, less drag, a bigger \
-                 tank, stronger brakes.",
-            ),
-            MenuItem::new("Trucks", |s: &mut Self, ctx| s.trucks(ctx))
-                .help("Owner-operators can buy a new truck, or switch between trucks they own."),
-            MenuItem::new("Trailer programs", |s: &mut Self, ctx| s.trailers(ctx)).help(
-                "Owner-operators add specialty trailer programs. Own authority buys trailers.",
-            ),
+        ]);
+        if owner {
+            items.extend([
+                MenuItem::new("Upgrades", |s: &mut Self, ctx| s.upgrades(ctx)).help(
+                    "Performance upgrades for owned tractors: more torque, less drag, a bigger \
+                     tank, stronger brakes.",
+                ),
+                MenuItem::new("Trucks", |s: &mut Self, ctx| s.trucks(ctx))
+                    .help("Buy a new truck, or switch between trucks you own."),
+                MenuItem::new("Trailer programs", |s: &mut Self, ctx| s.trailers(ctx))
+                    .help("Add specialty trailer programs. Own authority buys trailers."),
+            ]);
+        }
+        items.push(
             MenuItem::new("Back", |s: &mut Self, ctx| s.go_back(ctx))
                 .help("Return to the terminal menu."),
-        ]
+        );
+        items
     }
 }
 

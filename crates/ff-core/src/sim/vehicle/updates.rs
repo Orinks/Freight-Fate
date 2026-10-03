@@ -5,12 +5,12 @@ use std::f64::consts::PI;
 
 use super::{
     TruckState, AMBIENT_C, BRAKE_COOL_BASE_PER_S, BRAKE_COOL_SPEED_PER_S, BRAKE_WEAR_HOT_MULT,
-    BRAKE_WEAR_PCT_PER_MJ, CARGO_BRAKE_PCT_PER_G_S, CARGO_CORNER_LAT_G, CARGO_CORNER_PCT_PER_G_S,
-    CARGO_HARD_BRAKE_G, CHAIN_SAFE_MPH, CHAIN_SNAP_DAMAGE_PCT, CHAIN_WEAR_BARE_MULT,
-    CHAIN_WEAR_OVERSPEED_MULT, CHAIN_WEAR_PCT_PER_MILE, ENGINE_MOTORING_DRAG_FRACTION,
-    ENGINE_ROTATING_INERTIA_KG_M2, ENGINE_WEAR_FUEL_PENALTY, ENGINE_WEAR_LUG_PCT_PER_S,
-    ENGINE_WEAR_OVER_REV_PCT_PER_S, ENGINE_WEAR_PCT_PER_H_FULL_LOAD, ENGINE_WEAR_PCT_PER_H_IDLE, G,
-    LUG_RPM_FRACTION, LUG_THROTTLE, MAX_REVERSE_MPS, OVER_REV_RPM_MULT, ROAD_OVERSPEED_RPM_MULT,
+    BRAKE_WEAR_PCT_PER_MJ, CARGO_BRAKE_PCT_PER_G_S, CARGO_CORNER_PCT_PER_G_S, CARGO_HARD_BRAKE_G,
+    CHAIN_SAFE_MPH, CHAIN_SNAP_DAMAGE_PCT, CHAIN_WEAR_BARE_MULT, CHAIN_WEAR_OVERSPEED_MULT,
+    CHAIN_WEAR_PCT_PER_MILE, ENGINE_MOTORING_DRAG_FRACTION, ENGINE_ROTATING_INERTIA_KG_M2,
+    ENGINE_WEAR_FUEL_PENALTY, ENGINE_WEAR_LUG_PCT_PER_S, ENGINE_WEAR_OVER_REV_PCT_PER_S,
+    ENGINE_WEAR_PCT_PER_H_FULL_LOAD, ENGINE_WEAR_PCT_PER_H_IDLE, G, LUG_RPM_FRACTION, LUG_THROTTLE,
+    MAX_REVERSE_MPS, OVER_REV_RPM_MULT, ROAD_OVERSPEED_RPM_MULT, ROLL_WARN_SHARE,
     RUNAWAY_DAMAGE_PCT_PER_S, RUNAWAY_SPEED_MPH, SHIFT_SYNC_BRAKE_FRACTION,
     SHIFT_SYNC_FUEL_FRACTION, TIRE_WEAR_BRAKING_PCT, TIRE_WEAR_PCT_PER_MILE, TIRE_WINTER,
     WINTER_TREAD_WEAR_MULT,
@@ -82,7 +82,17 @@ impl TruckState {
             0.0
         };
         let coupled = ratio != 0.0 && tr.clutch <= 0.5 && !tr.shifting();
-        if tr.automatic && tr.shifting() && ratio != 0.0 {
+        // A manual downshift with the clutch held matches revs the way the
+        // automatic does, so the engine follows the braking truck down
+        // instead of dropping straight to idle (tester request, 2026-09-28).
+        // The driver's own blip still free-revs, and a missed shift into a
+        // gear the road would over-rev is never blipped past the governor.
+        let manual_rev_match = !tr.automatic
+            && tr.rev_match
+            && !coupled
+            && self.throttle <= 0.05
+            && self.coupled_rpm(None) <= s.max_rpm;
+        if ((tr.automatic && tr.shifting()) || manual_rev_match) && ratio != 0.0 {
             // Rev-match through the torque interrupt: head for the NEW
             // gear's synchronous speed in both directions, at the rate the
             // engine's spare torque over its inertia allows, and hold there
@@ -133,15 +143,21 @@ impl TruckState {
                 let gear = tr.gear;
                 let automatic = tr.automatic;
                 if gear >= 4 && road_rpm < s.idle_rpm * 0.5 {
+                    let braking = self.brake > 0.01 || self.emergency_brake;
                     if !automatic {
-                        self.stall();
-                        return;
-                    }
-                    // A real automatic kicks down rather than lugging to a
-                    // stall while still rolling. The RPM-threshold downshift
-                    // can be outrun by a hard deceleration during the shift
-                    // delay, so force the drop here.
-                    if self.brake <= 0.01 && !self.emergency_brake {
+                        // Braking to a stop in a tall gear holds idle rather
+                        // than stalling, so a manual driver can gear down and
+                        // brake for traffic at once (owner ruling,
+                        // 2026-09-28). Off the brake it still stalls.
+                        if !braking {
+                            self.stall();
+                            return;
+                        }
+                    } else if !braking {
+                        // A real automatic kicks down rather than lugging to
+                        // a stall while still rolling. The RPM-threshold
+                        // downshift can be outrun by a hard deceleration
+                        // during the shift delay, so force the drop here.
                         self.transmission.kickdown();
                     }
                 }
@@ -362,7 +378,10 @@ impl TruckState {
         if over_brake > 0.0 && self.speed_mph() > 5.0 {
             rate += over_brake * CARGO_BRAKE_PCT_PER_G_S;
         }
-        let over_corner = self.corner_lateral_g() - CARGO_CORNER_LAT_G;
+        // From the roll model's warning share of this load's threshold, as
+        // it stands this moment: a tank's wave running past its steady place
+        // brings the line down with the threshold (the surge tier).
+        let over_corner = self.roll_lateral_g() - ROLL_WARN_SHARE * self.live_roll_threshold_g();
         if over_corner > 0.0 {
             rate += over_corner * CARGO_CORNER_PCT_PER_G_S;
         }

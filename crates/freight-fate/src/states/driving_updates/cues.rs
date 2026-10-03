@@ -3,14 +3,13 @@
 //! strips, the locator and steering tocks, and the guidance director.
 
 use crate::states::driving_turns::{TURN_COMMIT_TAIL_MI, TURN_GUIDE_LEAD_MI};
-use ff_core::data::corners::{corner_radius_ft, ASSUMED_TURN_DEG};
-use ff_core::data::curves::RouteCurve;
+use ff_core::data::curves::{min_radius_ft, RouteCurve};
 use ff_core::lane_guide_tone::LANE_GUIDE_TONE_KEY;
-use ff_core::sim::lane::OFF_ROAD;
+use ff_core::sim::lane::{CROSS_AT, OFF_ROAD};
 use ff_core::sim::lane_guidance::{
     classify_boundaries, cue_loudness, edge_rung, GuidanceFrame, CURVE_LEAD_MI, TRANSVERSE_KEY,
 };
-use ff_core::sim::trip_models::highway_class;
+use ff_core::sim::trip_models::{highway_class, RAMP_CURVE_DEFLECTION_RAD};
 use ff_core::sim::turn_guide::{
     TurnInput, TurnShape, TurnSide, SLEW_PER_S as TURN_GUIDE_SLEW_PER_S,
 };
@@ -26,6 +25,9 @@ use crate::states::driving_updates::LANE_GUIDE_TONE_VOLUME;
 /// `TurnInput::turn_id`. A bend's id is the bits of its start milepost, which
 /// is never negative, so an f64's sign bit is the one bit no bend can set.
 const CORNER_ID_BIT: u64 = 1 << 63;
+/// The exit ramp's curve: a corner-side id no street corner's leg index
+/// reaches.
+const RAMP_CURVE_TURN_ID: u64 = CORNER_ID_BIT | (1 << 62);
 
 impl DrivingState {
     /// Stereo pan for the rumble strip: it comes from the side you have
@@ -93,6 +95,13 @@ impl DrivingState {
     /// classifier's honest inference (interstates are divided by
     /// definition; one lane per side means a centerline).
     pub fn edge_boundary(&self) -> &'static str {
+        // An exit ramp is one way: both of its edges are road edges. Read
+        // off the mainline's divided flag, a truck running wide on the ramp
+        // off an undivided road was told it was "in the oncoming lane"
+        // (every-assist audit, 2026-09-24).
+        if self.on_laid_out_ramp() {
+            return "shoulder";
+        }
         let baked = self.trip.lanes_at(None);
         let leg = &self.trip.route.legs[self.trip.current_leg_index()];
         let divided = match baked {
@@ -247,21 +256,19 @@ impl DrivingState {
         ctx.audio.play_with("vehicle/lane_locator", volume, pan);
     }
 
-    /// How far along the exit-lane position is, 0 to 1.
-    ///
-    /// Either route to ready counts, the same two the exit itself accepts:
-    /// the commitment built by holding Right, and simply sitting far enough
-    /// over. Whichever is further along is what the driver is hearing.
+    /// How far across into the exit lane the truck is, 0 to 1: nothing
+    /// until the lane opens at its taper, then the way to its line.
     pub fn exit_alignment_progress(&self) -> f64 {
         if self.exit_stop.is_none() || !self.exit_signal_on {
             return 0.0;
         }
-        if self.lane.lane != 0 && self.lane_change_target != Some(0) {
-            return 0.0; // ramps peel off the right lane; in-lane position cannot help
+        if self.exit_lane_ready() {
+            return 1.0;
         }
-        (self.exit_lane_alignment / EXIT_LANE_READY)
-            .max(self.lane.offset / EXIT_LANE_OFFSET_READY)
-            .clamp(0.0, 1.0)
+        if !self.lane.exit_lane_open {
+            return 0.0;
+        }
+        (self.lane.offset / CROSS_AT).clamp(0.0, 1.0)
     }
 
     /// Is a lane move underway that the driver should hear their position for?
@@ -286,6 +293,12 @@ impl DrivingState {
         if ctx.settings.lane_is_automated() {
             return false; // the truck holds the lane and takes the exit itself
         }
+        if self.lane.is_following() {
+            // A hold taking a turn keeps the lane, so there is no move across
+            // it to hear -- and the relay at every corner read as a blinker
+            // nobody switched on (owner, 2026-09-30).
+            return false;
+        }
         if self.trip.truck.speed_mph() < STEER_CUE_MIN_MPH {
             return false;
         }
@@ -296,7 +309,7 @@ impl DrivingState {
     ///
     /// The lane locator answers "where am I" on demand. This answers it for
     /// the length of a move being made right now, with no key to remember:
-    /// a panned relay-click recording, keeping time from the moment the wheel goes
+    /// a panned turn-signal relay, keeping time from the moment the wheel goes
     /// over until the move is done.
     ///
     /// An exit signal has a steady beat on the right, independent of steering
@@ -331,8 +344,8 @@ impl DrivingState {
             if ctx.audio.cue_held(STEER_CUE_HOLD) {
                 ctx.audio.release_cue(STEER_CUE_HOLD);
                 let volume = 1.0f64.min(STEER_CUE_CANCEL_VOL * self.cue_loudness(ctx));
-                // centred and quieter: the signal off, not the signal on
-                ctx.audio.play_with("vehicle/signal_tone", volume, 0.0);
+                // centred and quieter: the stalk clicking back, not the signal on
+                ctx.audio.play_with("vehicle/turn_signal_off", volume, 0.0);
             }
             return;
         }
@@ -362,8 +375,21 @@ impl DrivingState {
         ctx.audio.play_if_idle("vehicle/turn_signal", volume, pan);
     }
 
+    /// Whether the turn signal is clicking for an exit.
+    ///
+    /// Signalled with X, or taken by lane keeping on full, and only from
+    /// `EXIT_BLINKER_MI` out. X commits the truck wherever it is pressed, but
+    /// a real driver flicks the signal on a quarter to half a mile out; eight
+    /// miles of blinker is what gets a trucker flashed (owner ruling,
+    /// 2026-09-24, after agent drives that blinked 7.3 miles to the gore).
     pub fn exit_blinker_on(&self) -> bool {
-        self.exit_signal_on && self.exit_stop.is_some() && self.ramp_mi.is_none()
+        let Some(stop) = self.exit_stop.as_ref() else {
+            return false;
+        };
+        self.ramp_mi.is_none()
+            && !self.exit_signal_canceled
+            && (self.exit_signal_on || self.exit_lane_entered)
+            && stop.at_mi - self.trip.position_mi <= EXIT_BLINKER_MI
     }
 
     /// Run the edge-boundary ladder: structural loops, not louder beeps.
@@ -500,6 +526,7 @@ impl DrivingState {
         // the guide moved to the engine the drift half came along ungated and
         // kept correcting a driver who had declined it (review I10).
         let lane_offset = if hear_drift { self.lane.offset } else { 0.0 };
+        let lane_heading_rad = if hear_drift { self.lane.yaw_rad } else { 0.0 };
         // `(claim, distance to its start, identity, shape, progress)`.
         let mut best: Option<(f64, f64, u64, TurnShape, f64)> = None;
         let mut consider = |to_start_mi: f64, turn_id: u64, shape: TurnShape, progress: f64| {
@@ -558,6 +585,31 @@ impl DrivingState {
             }
         }
 
+        // And the exit ramp's curve, which is a turn like any bend: its lean
+        // leads in from the deceleration lane and closes as the curve is used
+        // up. It rode only the lane guide's fallback, which the
+        // lane-departure warning switches off, so with the warning off a
+        // truck running wide on a ramp curve heard a centred engine (agent
+        // drive, 2026-09-24); a turn's lean is never gated ("turns yes, drift
+        // no", 2026-09-19). It claims the engine over a street turn waiting
+        // past the ramp's end by the same claim a bend makes.
+        if let (Some(layout), Some(travelled)) = (self.ramp_layout, self.ramp_travelled_mi()) {
+            let into_mi = travelled - layout.decel_mi;
+            let in_play = -into_mi <= TURN_GUIDE_LEAD_MI && into_mi < layout.curve_mi;
+            if !self.surface_chain && in_play && layout.curve_mi > 0.0 {
+                consider(
+                    -into_mi,
+                    RAMP_CURVE_TURN_ID,
+                    TurnShape {
+                        side: TurnSide::Right,
+                        deflection_deg: RAMP_CURVE_DEFLECTION_RAD.to_degrees(),
+                        radius_ft: min_radius_ft(layout.curve_mph).max(1.0),
+                    },
+                    (into_mi / layout.curve_mi).clamp(0.0, 1.0),
+                );
+            }
+        }
+
         // And the street corner the route is asking for -- once it is inside
         // the lead. `turn_cue_in_play` has no upper bound, so a corner two
         // miles off used to count as a turn in play for the whole approach;
@@ -570,14 +622,6 @@ impl DrivingState {
         if let Some(cue) = corner {
             if let Some(side) = TurnSide::parse(&cue.direction) {
                 let index = self.turn_leg_index(&cue);
-                let measured = self
-                    .trip
-                    .route
-                    .legs
-                    .get(index)
-                    .map(|leg| leg.local_turn_deg)
-                    .filter(|deg| *deg > 0.0);
-                let degrees = measured.unwrap_or(ASSUMED_TURN_DEG);
                 // A street corner has no footprint of its own, so it is
                 // taken as used up across the commit tail past its milepost --
                 // the same stretch `turn_cues_in_play` keeps it alive for.
@@ -587,11 +631,7 @@ impl DrivingState {
                     // A corner is its leg of the street chain, which is what
                     // its cue key already ends in.
                     CORNER_ID_BIT | index as u64,
-                    TurnShape {
-                        side,
-                        deflection_deg: degrees,
-                        radius_ft: corner_radius_ft(degrees),
-                    },
+                    self.corner_shape(&cue, side),
                     through,
                 );
             }
@@ -606,6 +646,7 @@ impl DrivingState {
                 steering,
                 speed_mph: speed,
                 lane_offset,
+                lane_heading_rad,
                 progress,
             },
             None => TurnInput {
@@ -616,6 +657,7 @@ impl DrivingState {
                 steering,
                 speed_mph: speed,
                 lane_offset,
+                lane_heading_rad,
                 progress: 1.0,
             },
         }
@@ -640,19 +682,33 @@ impl DrivingState {
     /// have.
     pub fn update_lane_guidance_audio(&mut self, ctx: &mut GameContext, dt: f64) {
         let warned = ctx.settings.lane_departure_warning;
-        let curve_steer = if warned {
+        // The lean asks for the wheel only where the wheel is the driver's
+        // (owner, 2026-09-30). With curve assistance or partial lane keeping
+        // steering the road's turns, a lean into them asked for the same
+        // steering a second time, and a driver who followed it changed lanes
+        // into the bend (owner's drive on US-83). There it carries the
+        // driver's own drift and nothing else.
+        let road_steers = ctx.settings.lane_is_manual() && ctx.settings.road_steers_the_bend();
+        let curve_steer = if warned && !road_steers {
             self.curve_steer_demand()
         } else {
             0.0
         };
         let frame = if !warned {
-            self.lane_guidance.update(&self.lane, dt, false, 0.0, None)
+            self.lane_guidance
+                .update(&self.lane, 0.0, dt, false, 0.0, None)
         } else {
             let assist_on =
                 ctx.settings.lane_is_manual() && self.trip.truck.speed_mph() >= LANE_MIN_MPH;
             let curve_ahead_mi = self.trip.curve_ahead_mi(CURVE_LEAD_MI);
-            self.lane_guidance
-                .update(&self.lane, dt, assist_on, curve_steer, curve_ahead_mi)
+            self.lane_guidance.update(
+                &self.lane,
+                self.trip.truck.speed_mph(),
+                dt,
+                assist_on,
+                curve_steer,
+                curve_ahead_mi,
+            )
         };
         // The turn's own lean comes first: it is the one the owner asked for,
         // and it says how much wheel is still owed rather than how far off
@@ -660,13 +716,17 @@ impl DrivingState {
         // driver who is holding the lane themselves AND left the
         // lane-departure warning on ("turns yes, drift no", 2026-09-19).
         let hear_drift = warned && ctx.settings.lane_is_manual();
-        let turn_input = self.turn_guide_input(hear_drift);
+        let mut turn_input = self.turn_guide_input(hear_drift);
+        if road_steers {
+            turn_input.shape = None;
+            turn_input.past = true;
+        }
         let turn_pan = self.turn_guide.update(turn_input, dt);
-        // The engine pans whether or not the driver is the one steering
-        // (owner, 2026-09-18): with every assist on, the curve and turn
-        // assists take the turns and the lean still reports the road's shape,
-        // closing as the turn is used up rather than as a wheel answers it.
-        // Only the opt-in tone, which leans instead of the engine, silences it.
+        // On full lane keeping the engine still pans for the road's shape
+        // (owner, 2026-09-18): its keys change lanes and never steer, so the
+        // lean cannot be followed into a bend, and it closes as the turn is
+        // used up rather than as a wheel answers it. Only the opt-in tone,
+        // which leans instead of the engine, silences it.
         //
         // WHO owns the engine is decided by whether a turn is in play, never
         // by whether its lean happens to read zero. The selector used to be

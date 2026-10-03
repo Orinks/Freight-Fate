@@ -1,5 +1,5 @@
 # The game is Rust. Ruff covers the Python build and data tooling under
-# tools/ and its tests. The Rust world loader still reads the indexed
+# tools/, its tests, and the sound-test/ audition scripts. The Rust world loader still reads the indexed
 # world_data tree derived from world_source, so keep that check here.
 repos:
   - repo: local
@@ -16,16 +16,12 @@ repos:
         entry: uv run ruff check --fix
         language: system
         types_or: [python, pyi]
-        # sound-test/ holds audition scratch scripts outside CI's lint scope
-        # (`ruff check tests tools`); a path fix there must not reformat them.
-        exclude: ^sound-test/
         stages: [pre-commit]
       - id: ruff-format
         name: Ruff format
         entry: uv run ruff format
         language: system
         types_or: [python, pyi]
-        exclude: ^sound-test/
         stages: [pre-commit]
       - id: world-data-index
         name: world_data is in sync with world_source

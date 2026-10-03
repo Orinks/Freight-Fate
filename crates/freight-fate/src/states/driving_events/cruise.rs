@@ -105,7 +105,7 @@ impl DrivingState {
             if let Some(stop) = self.exit_stop.clone() {
                 let ahead = stop.at_mi - self.trip.position_mi;
                 if ahead > 0.0 && (self.exit_signal_on || ctx.settings.lane_is_automated()) {
-                    self.cruise_exit_mph = Some(set.min(self.armed_ramp_cruise_mph(None)));
+                    self.cruise_exit_mph = Some(set.min(self.exit_approach_floor_mph(None)));
                 }
             }
         }
@@ -131,8 +131,11 @@ impl DrivingState {
             Some(exit) => set.min(exit),
             None => set,
         };
+        // "for the exit", not "for the ramp": the cap is the mainline's exit
+        // floor, ten under road speed at most, and the ramp's own number is
+        // braked for past the gore (realistic exit, 2026-09-24).
         let mut exit_note = if self.cruise_exit_mph.is_some() {
-            " for the ramp".to_string()
+            " for the exit".to_string()
         } else {
             String::new()
         };
@@ -210,8 +213,12 @@ impl DrivingState {
                 return;
             }
         }
-        if self.cruise_mph.is_none() && self.keeper_mph.is_none() {
-            self.say_plain(ctx, "Adaptive cruise off. Press K to set it.");
+        // A paused session is not off: the dial sets the speed it resumes at
+        // below. Telling a paused driver to press K sent them to the key that
+        // switches it off (2026-09-28).
+        if self.cruise_mph.is_none() && self.keeper_mph.is_none() && !self.speed_control_armed {
+            let key = ctx.control_name(crate::bindings::Action::Cruise);
+            self.say_plain(ctx, format!("Adaptive cruise off. Press {key} to set it."));
             return;
         }
         let base = match self.speed_control_target_mph {
@@ -297,11 +304,16 @@ impl DrivingState {
             // exactly the thing that holds speed here, and a driver who has
             // never turned it on hears only that cruise "is not available"
             // and concludes the ramp kills speed control (Shane, 2026-08-15).
+            let place = if ff_core::sim::trip::is_street_zone_reason(zone_reason) {
+                "on city streets".to_string()
+            } else {
+                format!("in a {zone_reason} zone")
+            };
             self.say_plain(
                 ctx,
                 format!(
-                    "No adaptive cruise in a {zone_reason} zone. The speed keeper holds speed \
-                     here; turn it on in Settings, Controls."
+                    "No adaptive cruise {place}. The speed keeper holds speed here; turn it on \
+                     in Settings, Controls."
                 ),
             );
             return;
@@ -327,10 +339,7 @@ impl DrivingState {
         if announce {
             ctx.audio.play_with("ui/notify", 0.5, 0.0);
             let held = ctx.settings.speed_text(self.keeper_mph.unwrap_or(0.0));
-            self.say_plain(
-                ctx,
-                format!("Speed keeper holding {held} through the {zone_reason} zone."),
-            );
+            self.say_plain(ctx, keeper_holding_line(&held, zone_reason));
         }
     }
 
@@ -453,9 +462,17 @@ impl DrivingState {
         match ahead.as_ref() {
             Some((ahead_mph, ahead_reason)) if *ahead_mph < target_mph => {
                 target_mph = KEEPER_MIN_MPH.max(*ahead_mph - KEEPER_EASE_UNDERSHOOT_MPH);
-                let fresh = self
-                    .keeper_ease_said
-                    .is_none_or(|said| *ahead_mph < said - 0.5);
+                // "Easing" is a line about slowing down. A truck already
+                // under the number, building speed from a stop, is not being
+                // eased: it heard "speed keeper easing to 15" while climbing
+                // from 9 (agent drive A, 2026-09-24). Nor is one inside the
+                // keeper's own ripple over it, which the snub threshold
+                // polices. Left unmarked, so the line still comes if the
+                // truck does get well above it.
+                let fresh = self.trip.truck.speed_mph() > *ahead_mph + KEEPER_SNUB_OVER_MPH
+                    && self
+                        .keeper_ease_said
+                        .is_none_or(|said| *ahead_mph < said - 0.5);
                 // A mapped bend is the curve call's to name, like a corner
                 // is the approach call's: the pacenote already carried the
                 // number and the assist clause.
@@ -703,7 +720,7 @@ impl DrivingState {
         } else if zone_reason == KEEPER_OPEN_ROAD_BRIDGE {
             format!("Speed keeper building to {held}.")
         } else {
-            format!("Speed keeper holding {held} through the {zone_reason} zone.")
+            keeper_holding_line(&held, zone_reason)
         };
         self.say_route_confirmation(ctx, &spoken);
     }
@@ -812,5 +829,14 @@ impl DrivingState {
         }
         self.trip.truck.throttle = 0.0; // never brake against our own throttle
         self.trip.truck.brake = self.trip.truck.brake.max(self.keeper_snub);
+    }
+}
+
+/// "Speed keeper holding 30 miles per hour through the work zone", or no
+/// zone at all on a street, which is just a street (`spoken_zone`).
+pub(crate) fn keeper_holding_line(held: &str, zone_reason: &str) -> String {
+    match ff_core::sim::trip::spoken_zone(zone_reason) {
+        Some(zone) => format!("Speed keeper holding {held} through {zone}."),
+        None => format!("Speed keeper holding {held}."),
     }
 }

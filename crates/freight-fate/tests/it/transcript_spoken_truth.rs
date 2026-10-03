@@ -133,6 +133,7 @@ fn ask_alt(harness: &mut PlaytestHarness, key: Key) -> String {
                 key,
                 mods: Mods::ALT,
                 text: None,
+                repeat: false,
             },
         )
     });
@@ -585,11 +586,13 @@ fn test_the_status_readout_names_the_speed_cruise_is_actually_holding_on_a_ramp(
         cap = harness
             .read_drive(|d| d.ramp_approach_cap_mph())
             .expect("an armed exit caps cruise");
-        if cap < 50.0 {
+        // The exit floor, ten under road speed at most, well under the 80
+        // the driver set (realistic exit, 2026-09-24).
+        if cap < 75.0 {
             break;
         }
     }
-    assert!(cap < 50.0, "the ramp cap never bound: {cap}");
+    assert!(cap < 75.0, "the exit cap never bound: {cap}");
     let violations = audit(&mut harness);
     assert!(violations.is_empty(), "{}", report(&violations));
 
@@ -606,6 +609,7 @@ fn test_the_status_readout_names_the_speed_cruise_is_actually_holding_on_a_ramp(
                     key: Key::K,
                     mods: Mods::SHIFT,
                     text: None,
+                    repeat: false,
                 },
             )
         });
@@ -615,8 +619,8 @@ fn test_the_status_readout_names_the_speed_cruise_is_actually_holding_on_a_ramp(
         harness.transcript().join(" | ")
     };
     assert!(
-        resumed.contains("for the ramp"),
-        "the resume never named the ramp -- {resumed}"
+        resumed.contains("for the exit"),
+        "the resume never named the exit -- {resumed}"
     );
     let ramp_number = number_after(&resumed, r"Adaptive cruise resuming at (\d+)")
         .expect("the resume names a number");
@@ -628,7 +632,7 @@ fn test_the_status_readout_names_the_speed_cruise_is_actually_holding_on_a_ramp(
     // neither is the 80 the driver used to be told.
     assert!(
         holding >= ramp_number - 1.0 && holding < 79.0,
-        "the resume said {ramp_number} for the ramp and Space said {holding} -- {space}"
+        "the resume said {ramp_number} for the exit and Space said {holding} -- {space}"
     );
     assert!(
         space.contains("set 80 miles per hour"),
@@ -705,6 +709,7 @@ fn test_the_readouts_stay_true_while_the_speed_keeper_has_the_truck() {
                 key: Key::K,
                 mods: Mods::SHIFT,
                 text: None,
+                repeat: false,
             },
         )
     });
@@ -860,7 +865,8 @@ fn test_the_exit_calls_name_the_road_that_is_really_left() {
     let calls: Vec<Regex> = [
         format!(r"at exit \S+ in {DIST}"),
         format!(r"In {DIST}, [^.]*exit"),
-        format!(r"[Ee]xit lane in {DIST}"),
+        // The countdown anchors: "Exit for truck stop: ... in 2 miles."
+        format!(r"[Ee]xit for [^.]* in {DIST}"),
     ]
     .iter()
     .map(|p| Regex::new(p).expect("a valid call pattern"))

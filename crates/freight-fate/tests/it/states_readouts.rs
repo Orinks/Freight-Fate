@@ -74,10 +74,7 @@ fn test_trip_status_is_a_screen_of_lines() {
     let lines = with_drive(&drive, |d| trip_status_lines(d, &app.ctx));
     assert!(lines[0].starts_with("Hauling "), "{lines:?}");
     assert!(lines[0].contains(" to "), "{lines:?}");
-    assert!(
-        lines.iter().any(|l| l.contains("hours used of")),
-        "{lines:?}"
-    );
+    assert!(lines.iter().any(|l| l.contains(" used of ")), "{lines:?}");
     assert_eq!(lines.len(), 4, "{lines:?}");
     for line in &lines {
         assert!(line.ends_with('.'), "{line}");

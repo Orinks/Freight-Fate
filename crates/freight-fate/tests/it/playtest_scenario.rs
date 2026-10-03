@@ -7,6 +7,7 @@ use ff_core::models::business_constants::{COMPANY_DRIVER, LEASED_OWNER_OPERATOR}
 use ff_core::models::profile::Profile;
 
 use freight_fate::app::testing::TestApp;
+use freight_fate::playtest::road::{build_driving, find_feature, RoadOptions};
 use freight_fate::playtest::scenario::{apply, Scenario};
 
 fn scenario(json: Value) -> Scenario {
@@ -33,6 +34,9 @@ fn test_a_scenario_creates_a_bench_career_and_sets_every_part_asked_for() {
             "fuel_pct": 25,
             "damage_pct": 10,
             "rested": true,
+            "hos_driving_min": 300,
+            "hos_duty_min": 340,
+            "hos_since_break_min": 300,
             "market_seed": 99,
             "board_seed": 3,
             "settings": {"real_traffic": true, "time_scale": 1.0}
@@ -54,6 +58,9 @@ fn test_a_scenario_creates_a_bench_career_and_sets_every_part_asked_for() {
     assert_eq!(app.ctx.dispatch_board_seed, Some(3));
     assert!(app.ctx.settings.real_traffic);
     assert_eq!(app.ctx.settings.time_scale, 1.0);
+    assert_eq!(p.hos.driving_min, 300.0);
+    assert_eq!(p.hos.duty_min, 340.0);
+    assert_eq!(p.hos.since_break_min, 300.0);
     let mut truck = ff_core::sim::vehicle::TruckState::new(p.truck_specs());
     p.load_truck_condition(&mut truck);
     assert!((truck.fuel_gal - truck.specs.fuel_tank_gal * 0.25).abs() < 0.01);
@@ -63,6 +70,10 @@ fn test_a_scenario_creates_a_bench_career_and_sets_every_part_asked_for() {
     assert!(said.contains("Level 5."), "{said}");
     assert!(said.contains("Fuel 25 percent."), "{said}");
     assert!(said.contains("real_traffic"), "{said}");
+    assert!(
+        said.contains("HOS since-break counter: 300 minutes"),
+        "{said}"
+    );
 }
 
 #[test]
@@ -124,4 +135,34 @@ fn test_staging_leaves_the_title_screen_under_the_terminal_and_the_game_running(
     );
     assert!(text.contains("Tonopah, Nevada terminal"), "{text}");
     assert!(text.contains("level 3"), "{text}");
+}
+
+#[test]
+fn road_staging_keeps_the_sandbox_driver_hours_and_fatigue() {
+    let mut app = TestApp::new();
+    apply(
+        &mut app.ctx,
+        &scenario(json!({"city": "Buffalo", "rested": true})),
+    )
+    .unwrap();
+    let p = app.ctx.profile.as_mut().unwrap();
+    p.hos.on_duty(760.0);
+    p.hos.drive(20.0);
+    p.fatigue = 67.0;
+
+    let opts = RoadOptions {
+        feature: "stop".to_string(),
+        trip_seed: Some(7),
+        ..Default::default()
+    };
+    let pairs = vec![("Buffalo".to_string(), "Albany".to_string())];
+    let hit = find_feature(app.ctx.world, &pairs, "stop", &opts, Some(7))
+        .into_iter()
+        .next()
+        .expect("a stop on the test corridor");
+    let _ = build_driving(&mut app.ctx, &hit, &opts);
+    let staged = app.ctx.profile.as_ref().unwrap();
+    assert_eq!(staged.hos.duty_min, 780.0);
+    assert_eq!(staged.hos.driving_min, 20.0);
+    assert_eq!(staged.fatigue, 67.0);
 }

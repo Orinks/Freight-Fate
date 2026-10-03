@@ -27,6 +27,61 @@
 //! Port of `freight_fate/sim/cross_traffic.py`.
 
 use crate::pyrandom::PyRandom;
+use crate::sim::trip_models::{TRUCK_ACCEL_ALPHA_FPS2, TRUCK_ACCEL_BETA};
+
+// -- Where the truck crosses, measured from the yield line --------------------
+// A yield is judged where the truck actually meets cross traffic: the
+// crossroad, a few feet past the line, for as long as the truck takes to get
+// its whole length across it. It used to be judged at an arbitrary point about
+// a hundred feet past the line, so a gap that was clear at the line and held
+// through the crossing could still read as forced (fix/yield-at-the-line,
+// 2026-09-24).
+
+/// READ: MUTCD 11th ed. (2023) Section 3B.19 paragraph 13 -- "the stop line or
+/// yield line should be placed at the desired stopping or yielding point, but
+/// should not be placed more than 30 feet or less than 4 feet from the nearest
+/// edge of the intersecting traveled way".
+pub const YIELD_LINE_MIN_TO_CROSSROAD_FT: f64 = 4.0;
+pub const YIELD_LINE_MAX_TO_CROSSROAD_FT: f64 = 30.0;
+/// ASSUMED: where this line sits in that band, the middle of it. No ramp
+/// terminal's markings are baked.
+pub const YIELD_LINE_TO_CROSSROAD_FT: f64 =
+    (YIELD_LINE_MIN_TO_CROSSROAD_FT + YIELD_LINE_MAX_TO_CROSSROAD_FT) / 2.0;
+/// ASSUMED: the crossroad the truck crosses, two 12-foot lanes. Both of this
+/// model's streams pass the one conflict point, so the truck clears both.
+pub const CROSSROAD_WIDTH_FT: f64 = 24.0;
+/// READ: the WB-67 design vehicle's overall length, 73.5 ft (AASHTO Green
+/// Book 2018 Table 2-1a), the tractor-semitrailer `data::corners` already
+/// turns.
+pub const COMBINATION_LENGTH_FT: f64 = 73.5;
+/// ASSUMED: a tractor running bobtail, cab to rear bumper.
+pub const TRACTOR_LENGTH_FT: f64 = 25.0;
+
+/// Seconds for a truck doing `speed_mph` to cover `feet`, pulling through on
+/// a loaded truck's own acceleration (Long, TRR 1737, the model the
+/// acceleration lane uses): `a = ALPHA - BETA * v` in feet and seconds.
+pub fn truck_time_to_cover_s(speed_mph: f64, feet: f64) -> f64 {
+    const DT: f64 = 0.05;
+    let mut v = speed_mph.max(0.0) * 5280.0 / 3600.0;
+    let mut covered = 0.0;
+    let mut t = 0.0;
+    while covered < feet && t < 120.0 {
+        let a = (TRUCK_ACCEL_ALPHA_FPS2 - TRUCK_ACCEL_BETA * v).max(0.0);
+        covered += v * DT + 0.5 * a * DT * DT;
+        v += a * DT;
+        t += DT;
+    }
+    t
+}
+
+/// When a truck `to_line_ft` short of the yield line (negative once past it)
+/// enters the crossroad and when its rear clears it, in seconds from now.
+pub fn yield_crossing_times_s(speed_mph: f64, to_line_ft: f64, length_ft: f64) -> (f64, f64) {
+    let to_edge = (to_line_ft + YIELD_LINE_TO_CROSSROAD_FT).max(0.0);
+    let enter = truck_time_to_cover_s(speed_mph, to_edge);
+    let exit = truck_time_to_cover_s(speed_mph, to_edge + CROSSROAD_WIDTH_FT + length_ft);
+    (enter, exit)
+}
 
 /// The simulated stretch: a third of a mile each side of the conflict point.
 pub const CROSS_EXTENT_MI: f64 = 0.35;
@@ -416,7 +471,45 @@ impl CrossTraffic {
     /// The gap-acceptance answer: nothing in the window, nothing about
     /// to arrive in it.
     pub fn clear_to_cross(&self) -> bool {
-        !self.occupied() && self.approaching(4.0).is_none()
+        self.blocker().is_none()
+    }
+
+    /// The vehicle that makes `clear_to_cross` false: the one in the window,
+    /// else the one about to arrive. The wait names this one, so the words
+    /// and the crossing sound are about the same car.
+    pub fn blocker(&self) -> Option<&CrossVehicle> {
+        self.occupant().or_else(|| self.approaching(4.0))
+    }
+
+    /// The first vehicle that will be in the conflict window at any moment
+    /// between `enter_s` and `exit_s` from now, at its current speed: the one
+    /// a truck crossing over that interval would meet.
+    ///
+    /// A vehicle occupies the window from the moment its front reaches the
+    /// window's near edge until its rear passes the far edge. One already
+    /// inside counts from now; one already through never does.
+    pub fn conflict_between(&self, enter_s: f64, exit_s: f64) -> Option<&CrossVehicle> {
+        let mut best: Option<(&CrossVehicle, f64)> = None;
+        for v in &self.vehicles {
+            let rear_clear_mi = CONFLICT_WINDOW_MI - v.position_mi;
+            if rear_clear_mi <= 0.0 {
+                continue; // through already
+            }
+            let front_to_window_mi = (-CONFLICT_WINDOW_MI - v.front_mi()).max(0.0);
+            let (arrive_s, leave_s) = if v.speed_mph <= 0.1 {
+                if front_to_window_mi > 0.0 {
+                    continue; // standing clear of the window
+                }
+                (0.0, f64::INFINITY)
+            } else {
+                let fps = v.speed_mph / 3600.0;
+                (front_to_window_mi / fps, rear_clear_mi / fps)
+            };
+            if arrive_s < exit_s && leave_s > enter_s && best.is_none_or(|(_, t)| arrive_s < t) {
+                best = Some((v, arrive_s));
+            }
+        }
+        best.map(|(v, _)| v)
     }
 
     /// `(vehicle_class, side_now, pan, closeness 0..1)` per vehicle worth
@@ -680,4 +773,51 @@ mod tests {
     #[test]
     #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- needs states::driving_events (DrivingEventMixin._update_ramp_terminal)"]
     fn test_blowing_an_occupied_stop_sign_still_clips() {}
+
+    /// One car on an empty crossroad, `ft` short of the conflict point.
+    fn one_car(ft_short: f64, mph: f64) -> CrossTraffic {
+        let mut bubble = CrossTraffic::new(1, "yield", false);
+        bubble.vehicles = vec![CrossVehicle {
+            position_mi: -(ft_short + 15.0) / 5280.0,
+            speed_mph: mph,
+            target_mph: mph,
+            vehicle_class: "car",
+            length_mi: 15.0 / 5280.0,
+            from_side: "left",
+            crossed: false,
+            committed: false,
+            sound_started: false,
+        }];
+        bubble
+    }
+
+    #[test]
+    fn test_the_crossing_is_timed_from_the_line_to_the_trucks_rear() {
+        // 17 ft of the READ 4 to 30 to the crossroad, then 24 ft of it and
+        // a 73.5 ft combination: at a steady-ish 12 mph that is a few seconds.
+        let (enter, exit) = yield_crossing_times_s(12.0, 0.0, COMBINATION_LENGTH_FT);
+        assert!(enter > 0.5 && enter < 1.5, "{enter}");
+        assert!(exit > 4.0 && exit < 6.5, "{exit}");
+        // From a stand it is much longer: a loaded truck pulls away slowly.
+        let (_, from_stop) = yield_crossing_times_s(0.0, 0.0, COMBINATION_LENGTH_FT);
+        assert!(from_stop > 9.0, "{from_stop}");
+        // Past the line the entry is now.
+        assert_eq!(
+            yield_crossing_times_s(12.0, -30.0, COMBINATION_LENGTH_FT).0,
+            0.0
+        );
+    }
+
+    #[test]
+    fn test_a_gap_is_judged_over_the_trucks_crossing_not_a_fixed_look() {
+        // A car 400 ft out at 45 mph (66 ft/s) is at the window in about
+        // five seconds: after a truck that clears in four, inside one that
+        // clears in eight.
+        let bubble = one_car(400.0, 45.0);
+        assert!(bubble.conflict_between(0.0, 4.0).is_none());
+        assert!(bubble.conflict_between(0.0, 8.0).is_some());
+        // And already gone is never a conflict.
+        let gone = one_car(-200.0, 45.0);
+        assert!(gone.conflict_between(0.0, 60.0).is_none());
+    }
 }

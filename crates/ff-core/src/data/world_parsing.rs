@@ -678,6 +678,22 @@ pub fn parse_stop(
     } else {
         None
     };
+    // The streets from each of that exit's ramp terminals to the stop's
+    // driveway (`tools/build_stop_approaches.py`), validated like a
+    // facility's exit chains; none for a stop on the mainline.
+    let approach_chains = match raw.get("approach_chains") {
+        None => Vec::new(),
+        Some(value) => {
+            let chains =
+                super::world_local_data::parse_exit_chains(&format!("stop {rname}"), value)?;
+            if !chains.is_empty() && get_str(raw, "approach_source").is_empty() {
+                return Err(err(format!(
+                    "stop {rname} has approach chains without a source"
+                )));
+            }
+            chains
+        }
+    };
     Ok(Stop {
         name,
         at_mi,
@@ -692,6 +708,7 @@ pub fn parse_stop(
         vehicle_access,
         exit_ref: get_str(raw, "exit_ref"),
         interchange_mi,
+        approach_chains,
     })
 }
 

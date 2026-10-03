@@ -41,11 +41,11 @@ import cand_common as C  # noqa: E402
 OUT = Path(r"C:\temp\ffsound\air")
 LV = Path(r"C:\temp\ffsound\splice\Samples\packs\Large Vehicles")
 IND = Path(r"C:\temp\ffsound\splice\Samples\packs\Industry Vol. 1")
-HISS_SRC = LV / "SemiTruckAirBrake_BWU.95.wav"     # real air spectrum to resynthesize
-PUMP_SRC = IND / "BantamBrakeMach_S08IN.62.wav"    # rhythmic pneumatic pump
+HISS_SRC = LV / "SemiTruckAirBrake_BWU.95.wav"  # real air spectrum to resynthesize
+PUMP_SRC = IND / "BantamBrakeMach_S08IN.62.wav"  # rhythmic pneumatic pump
 LOOP_S = 2.5
-SEED = 20260721   # deterministic phase, so the render reproduces
-PUMP_WHISPER = 0.08   # compressor pump mixed UNDER the hiss, ~-22 dB: a faint tick
+SEED = 20260721  # deterministic phase, so the render reproduces
+PUMP_WHISPER = 0.08  # compressor pump mixed UNDER the hiss, ~-22 dB: a faint tick
 
 
 def hp(x: np.ndarray, fc: float) -> np.ndarray:
@@ -56,13 +56,15 @@ def hp(x: np.ndarray, fc: float) -> np.ndarray:
 def write(name: str, x: np.ndarray, target_rms: float = 0.045) -> None:
     # Soft by default: this is a background layer under the idle, not a feature.
     x = np.nan_to_num(np.asarray(x, float))
-    x = x * (target_rms / (float(np.sqrt(np.mean(x ** 2))) or 1.0))
+    x = x * (target_rms / (float(np.sqrt(np.mean(x**2))) or 1.0))
     p = float(np.max(np.abs(x))) or 1.0
     if p > 0.97:
         x = x * (0.97 / p)
     OUT.mkdir(parents=True, exist_ok=True)
     with wave.open(str(OUT / name), "wb") as fh:
-        fh.setnchannels(1); fh.setsampwidth(2); fh.setframerate(C.SR)
+        fh.setnchannels(1)
+        fh.setsampwidth(2)
+        fh.setframerate(C.SR)
         fh.writeframes((x * 32767).astype("<i2").tobytes())
 
 
@@ -75,10 +77,12 @@ def air_shape(x: np.ndarray, nfft: int = 8192) -> tuple[np.ndarray, np.ndarray]:
     """Average magnitude spectrum of the real air, de-whistled by a frequency
     median filter (narrow tonal peaks removed, broadband air shape kept)."""
     x = hp(x, 220.0)
-    frames = [np.abs(np.fft.rfft(x[i:i + nfft] * np.hanning(nfft)))
-              for i in range(0, len(x) - nfft, nfft // 2)]
+    frames = [
+        np.abs(np.fft.rfft(x[i : i + nfft] * np.hanning(nfft)))
+        for i in range(0, len(x) - nfft, nfft // 2)
+    ]
     mag = np.mean(frames, axis=0)
-    mag = medfilt(mag, 41)                     # kill narrow whistles (~2.7 kHz)
+    mag = medfilt(mag, 41)  # kill narrow whistles (~2.7 kHz)
     f = np.fft.rfftfreq(nfft, 1.0 / C.SR)
     return f, mag
 
@@ -91,11 +95,11 @@ def synth_loop(f_src: np.ndarray, mag_src: np.ndarray, len_s: float) -> np.ndarr
     mag = np.interp(f, f_src, mag_src)
     rng = np.random.default_rng(SEED)
     phase = rng.uniform(0.0, 2.0 * np.pi, len(mag))
-    phase[0] = 0.0                              # DC real
+    phase[0] = 0.0  # DC real
     if n % 2 == 0:
-        phase[-1] = 0.0                         # Nyquist real
+        phase[-1] = 0.0  # Nyquist real
     y = np.fft.irfft(mag * np.exp(1j * phase), n)
-    return hp(y, 200.0)                         # drop any sub-bass rumble
+    return hp(y, 200.0)  # drop any sub-bass rumble
 
 
 def flatten(x: np.ndarray, w_s: float, floor_frac: float = 0.3) -> np.ndarray:
@@ -110,9 +114,9 @@ def loop_xfade(x: np.ndarray, xfade_s: float = 0.2) -> np.ndarray:
     xf = int(xfade_s * C.SR)
     if len(x) < 2 * xf:
         return x
-    body = x[:len(x) - xf].copy()
+    body = x[: len(x) - xf].copy()
     w = np.linspace(0.0, 1.0, xf)
-    body[:xf] = x[:xf] * np.sqrt(w) + x[len(x) - xf:] * np.sqrt(1.0 - w)
+    body[:xf] = x[:xf] * np.sqrt(w) + x[len(x) - xf :] * np.sqrt(1.0 - w)
     return body
 
 
@@ -123,12 +127,12 @@ def steady_window(x: np.ndarray, len_s: float) -> np.ndarray:
     env = smooth_env(x, 0.05)
     csum = np.cumsum(env)
     best = int(np.argmax(csum[n:] - csum[:-n]))
-    return x[best:best + n]
+    return x[best : best + n]
 
 
 def tiled(loop: np.ndarray, secs: float) -> np.ndarray:
     reps = int(np.ceil(secs * C.SR / len(loop)))
-    out = np.tile(loop, reps)[:int(secs * C.SR)]
+    out = np.tile(loop, reps)[: int(secs * C.SR)]
     fade = int(0.15 * C.SR)
     out[:fade] *= np.linspace(0, 1, fade)
     out[-fade:] *= np.linspace(1, 0, fade)
@@ -136,7 +140,7 @@ def tiled(loop: np.ndarray, secs: float) -> np.ndarray:
 
 
 def rms(x: np.ndarray) -> float:
-    return float(np.sqrt(np.mean(x ** 2))) or 1.0
+    return float(np.sqrt(np.mean(x**2))) or 1.0
 
 
 def main() -> None:
@@ -147,24 +151,26 @@ def main() -> None:
     # 1) Continuous fill: resynthesize the de-whistled air spectrum as a
     #    perfectly periodic loop -- no whine, no seam, constant level.
     f, mag = air_shape(C.load_wav(HISS_SRC))
-    hiss_loop = synth_loop(f, mag, LOOP_S)                       # exactly n samples
+    hiss_loop = synth_loop(f, mag, LOOP_S)  # exactly n samples
 
     # 2) Compressor pump, crossfade-looped to exactly n samples so it aligns
     #    with the hiss (take n+xf, the crossfade drops back to n).
     pump = hp(C.load_wav(PUMP_SRC), 160.0)
     pump = flatten(steady_window(pump, LOOP_S + 0.4), w_s=0.35)
-    pump_loop = loop_xfade(pump[:n + xf], xfade_s=0.12)          # -> n samples
+    pump_loop = loop_xfade(pump[: n + xf], xfade_s=0.12)  # -> n samples
 
     # Mix the pump UNDER the hiss at a whisper: a real build is a smooth air
     # hiss with a faint mechanical compressor tick beneath it.
     m = min(len(hiss_loop), len(pump_loop))
     fill = hiss_loop[:m] + pump_loop[:m] * (PUMP_WHISPER * rms(hiss_loop) / rms(pump_loop))
-    write("pressurize_hiss.wav", fill)                           # keeper: hiss + whisper pump
+    write("pressurize_hiss.wav", fill)  # keeper: hiss + whisper pump
     write("pressurize_hiss_11s.wav", tiled(fill, 11.0))
-    write("pressurize_pump.wav", pump_loop)                      # standalone, reference only
+    write("pressurize_pump.wav", pump_loop)  # standalone, reference only
 
-    print(f"  pressurize_hiss.wav = de-whistled hiss + whisper pump "
-          f"({PUMP_WHISPER:.0%} under), seamless {LOOP_S:.1f}s")
+    print(
+        f"  pressurize_hiss.wav = de-whistled hiss + whisper pump "
+        f"({PUMP_WHISPER:.0%} under), seamless {LOOP_S:.1f}s"
+    )
     print("  + pressurize_hiss_11s demo (game fires air_dryer_purge at ready)")
     print(f"  wrote to {OUT}")
 

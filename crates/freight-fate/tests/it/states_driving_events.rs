@@ -117,6 +117,28 @@ fn test_heuristic_control_is_deterministic_and_valid() {
 }
 
 #[test]
+fn test_every_stop_off_one_exit_meets_the_same_ramp_end() {
+    // Exit 286A into Abilene has no recorded control, and the dice were
+    // seeded by each stop's own mile: the delivery heard a stop sign and the
+    // truck stop 0.1 mile on a traffic light, for one ramp (agent drive,
+    // 2026-09-23). Seeded by the exit, they agree on every trip.
+    let mut app = TestApp::new();
+    let mut d = a_real_drive(&mut app);
+    let mut delivery = a_stop(30.0);
+    delivery.interchange_mi = Some(30.0);
+    let mut truck_stop = a_stop(30.1);
+    truck_stop.interchange_mi = Some(30.0);
+    for seed in 0..40 {
+        d.trip_seed = seed;
+        assert_eq!(
+            d.ramp_control_for(&app.ctx, &delivery, None),
+            d.ramp_control_for(&app.ctx, &truck_stop, None),
+            "trip seed {seed}"
+        );
+    }
+}
+
+#[test]
 fn test_a_scale_ramp_never_grows_a_terminal_control() {
     let mut app = TestApp::new();
     let d = a_real_drive(&mut app);
@@ -524,7 +546,7 @@ fn test_the_ramp_cap_is_the_number_once_on_the_ramp() {
 fn test_the_exit_lane_is_never_ready_from_the_left_lane() {
     let mut app = TestApp::new();
     let mut d = a_real_drive(&mut app);
-    d.exit_lane_alignment = 1.0;
+    d.exit_lane_entered = true;
     d.lane.lane = 1;
     d.lane_change_target = None;
     assert!(!d.exit_lane_ready());
@@ -538,20 +560,18 @@ fn test_the_exit_lane_is_never_ready_from_the_left_lane() {
 fn test_resetting_the_exit_lane_clears_every_latch() {
     let mut app = TestApp::new();
     let mut d = a_real_drive(&mut app);
-    d.exit_lane_alignment = 1.0;
-    d.exit_lane_prompt_said = true;
-    d.exit_lane_ready_said = true;
-    d.exit_commit_said = true;
+    d.exit_lane_entered = true;
+    d.exit_taper_said = true;
+    d.lane.exit_lane_open = true;
     d.exit_cancel_armed = true;
     d.exit_right_taps = 3;
     d.exit_countdown_said.push(2.0);
 
     d.reset_exit_lane_state();
 
-    assert_eq!(d.exit_lane_alignment, 0.0);
-    assert!(!d.exit_lane_prompt_said);
-    assert!(!d.exit_lane_ready_said);
-    assert!(!d.exit_commit_said);
+    assert!(!d.exit_lane_entered);
+    assert!(!d.exit_taper_said);
+    assert!(!d.lane.exit_lane_open);
     assert!(!d.exit_cancel_armed);
     assert_eq!(d.exit_right_taps, 0);
     assert!(d.exit_countdown_said.is_empty());
@@ -619,13 +639,19 @@ fn test_capping_cruise_for_a_ramp_says_when_not_just_what() {
     let mut app = TestApp::new();
     let mut d = a_real_drive(&mut app);
     let stop = a_stop(d.trip.position_mi + 5.0);
-    d.cruise_mph = Some(65.0);
-    d.trip.truck.velocity_mps = mph_to_mps(65.0);
+    let (road, _) = d.trip.speed_limit_at(stop.at_mi);
+    d.cruise_mph = Some(road);
+    d.trip.truck.velocity_mps = mph_to_mps(road);
 
+    // And where it lets go: speed control pauses on the ramp, where the
+    // exit speed is braked for (realistic exit, 2026-09-24).
     let text = d.cap_cruise_for_ramp(&app.ctx, Some(&stop));
-    assert!(text.contains("holds road speed, then eases to"), "{text}");
+    assert!(
+        text.contains("holds road speed, eases to") && text.ends_with("and pauses on the ramp."),
+        "{text}"
+    );
 
-    // Already at the ramp number: the plain holding line.
+    // Already at the exit floor: the plain holding line.
     d.cruise_exit_mph = None;
     d.trip.truck.velocity_mps = mph_to_mps(20.0);
     let text = d.cap_cruise_for_ramp(&app.ctx, Some(&stop));
@@ -1046,6 +1072,29 @@ fn test_a_limit_change_cue_is_the_roads_state_not_a_turn() {
         DrivingState::event_category(&event),
         Some(SpeechCategory::Status)
     );
+}
+
+#[test]
+fn test_a_limit_change_may_never_age_out() {
+    // Each limit is said once: the advance "drops to 55" marks it announced,
+    // so a dropped advance left the boundary silent and the truck in a 55 it
+    // never heard of (agent drive, exit 286A into Abilene, 2026-09-23).
+    let mut app = TestApp::new();
+    let d = a_real_drive(&mut app);
+    for text in [
+        "Speed limit drops to 55 in half a mile.",
+        "Speed limit reduced to 55.",
+    ] {
+        let event = an_event(
+            TripEventKind::GpsCue,
+            text,
+            TripEventData {
+                limit_change: Some(true),
+                ..Default::default()
+            },
+        );
+        assert_eq!(d.event_priority(&event), EventPriority::Route, "{text}");
+    }
 }
 
 #[test]
@@ -1555,8 +1604,12 @@ fn test_a_truck_up_to_speed_gets_the_plain_merge_line() {
 
     d.update_departure_ramp(&mut app.ctx, 0.10);
 
+    // Said as done: the truck is already in the mainline's right lane, and
+    // "Merge left" sent a driver who obeyed it into the passing lane (agent
+    // drives out of Aberdeen, 2026-09-23).
     let spoken = app.event_lines().join(" ");
-    assert!(spoken.contains("Lane ending. Merge left."), "{spoken}");
+    assert!(spoken.contains("Lane ended."), "{spoken}");
+    assert!(!spoken.contains("Merge left"), "{spoken}");
 }
 
 // -- arrival and the gate (test_facility_overshoot.py) --------------------------------
@@ -1769,6 +1822,32 @@ fn test_the_upcoming_readout_never_says_zero_miles() {
     let line = said.last().expect("U said nothing at all");
     assert!(!line.contains("0 miles"), "{line:?}");
     assert!(line.contains("0.4 miles"), "{line:?}");
+}
+
+#[test]
+fn test_the_upcoming_readout_leaves_highway_stops_on_the_highway() {
+    // Agent drive, exit 286A into Abilene, 2026-09-23: stopped at the ramp's
+    // stop sign, U said "Coming up: Flying J Travel Center Abilene in 0.1
+    // miles, where the ramp ends at a traffic light" -- a highway stop the
+    // truck had left the road for, and a ramp end it was already at.
+    let mut app = TestApp::new();
+    let mut d = a_real_drive(&mut app);
+    app.ctx.settings.imperial_units = true;
+    d.trip.position_mi = 50.0;
+    d.trip.zones.clear();
+    d.trip.curves.clear();
+    let pos = d.trip.position_mi;
+    d.trip.stops = vec![RoadStop::new("Flying J", pos + 0.1, "travel_center")];
+    d.ramp_mi = Some(0.02);
+    app.clear_speech();
+
+    d.speak_upcoming(&mut app.ctx, 15.0);
+
+    let said = app.main_lines();
+    assert!(
+        !said.iter().any(|line| line.contains("Flying J")),
+        "{said:?}"
+    );
 }
 
 #[test]

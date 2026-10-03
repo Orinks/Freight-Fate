@@ -25,6 +25,7 @@ fn test_shift_modified_manual_downshift_uses_clutch_before_next_update() {
             key: Key::Q,
             mods: Mods::SHIFT,
             text: Some('q'),
+            repeat: false,
         },
     );
 
@@ -74,6 +75,73 @@ fn test_the_dial_also_answers_the_typed_plus_and_minus() {
     assert_eq!(d.cruise_mph, Some(40.0));
     d.handle_key_event(&mut app.ctx, &InputEvent::key_text(Key::Other(0x2d), '-'));
     assert_eq!(d.cruise_mph, Some(35.0));
+}
+
+#[test]
+fn test_os_key_repeat_does_not_race_the_cruise_target_up() {
+    // Holding Plus used to fire OS auto-repeat KeyDowns every ~30 ms and walk
+    // the live adaptive-cruise set speed to the ceiling in about a second.
+    // Repeats are ignored; only a fresh press steps.
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.trip.truck.set_air_ready(false);
+    cruise_at(&mut d, &mut app, 25.0);
+
+    d.handle_key_event(&mut app.ctx, &InputEvent::key_text(Key::Equals, '='));
+    assert_eq!(d.cruise_mph, Some(30.0));
+    for _ in 0..20 {
+        d.handle_key_event(
+            &mut app.ctx,
+            &InputEvent::KeyDown {
+                key: Key::Equals,
+                mods: Mods::NONE,
+                text: Some('='),
+                repeat: true,
+            },
+        );
+    }
+    assert_eq!(
+        d.cruise_mph,
+        Some(30.0),
+        "OS key-repeat must not advance the cruise target"
+    );
+    assert_eq!(d.speed_control_target_mph, Some(30.0));
+}
+
+#[test]
+fn test_os_key_repeat_does_not_race_the_cruise_target_down() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.trip.truck.set_air_ready(false);
+    cruise_at(&mut d, &mut app, 55.0);
+
+    d.handle_key_event(&mut app.ctx, &InputEvent::key_text(Key::Minus, '-'));
+    assert_eq!(d.cruise_mph, Some(50.0));
+    for _ in 0..20 {
+        d.handle_key_event(
+            &mut app.ctx,
+            &InputEvent::KeyDown {
+                key: Key::Minus,
+                mods: Mods::NONE,
+                text: Some('-'),
+                repeat: true,
+            },
+        );
+    }
+    assert_eq!(d.cruise_mph, Some(50.0));
+}
+
+#[test]
+fn test_discrete_plus_presses_still_step_five_each() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.trip.truck.set_air_ready(false);
+    cruise_at(&mut d, &mut app, 25.0);
+
+    for expected in [30.0, 35.0, 40.0] {
+        d.handle_key_event(&mut app.ctx, &InputEvent::key_text(Key::Equals, '='));
+        assert_eq!(d.cruise_mph, Some(expected));
+    }
 }
 
 #[test]
@@ -200,6 +268,17 @@ fn test_resume_refuses_without_a_remembered_speed_or_an_engine() {
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &InputEvent::key_mods(Key::K, Mods::SHIFT));
     assert_eq!(last(&app), "Automatic speed control is already on.");
+}
+
+#[test]
+fn resume_refusal_names_a_moved_cruise_key() {
+    let mut app = TestApp::new();
+    app.ctx.settings.key_bindings = "cruise=f7".into();
+    app.ctx.apply_bindings();
+    let mut d = a_drive(&mut app);
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &InputEvent::key_mods(Key::K, Mods::SHIFT));
+    assert_eq!(last(&app), "No remembered cruise speed yet. F7 sets one.");
 }
 
 #[test]

@@ -42,7 +42,7 @@ pub const SIGNATURE_SERVICE_LABELS: &[(&str, &str)] = &[
     ("souvenirs", "souvenirs and road snacks"),
     ("coffee", "five-cent coffee"),
     ("ice_water", "free ice water"),
-    ("cat_scale", "a Cat certified weigh scale"),
+    ("cat_scale", "a CAT Scale"),
     ("laundry", "public laundry facilities"),
     ("game_room", "a game room"),
     ("barber", "a barber shop"),
@@ -119,13 +119,10 @@ pub const BRANDS: &[Brand] = &[
         key: "flying_j",
         spoken: "Flying J",
         tier: "travel_center",
-        signature: &[
-            "showers",
-            "cat_scale",
-            "laundry",
-            "premium_wifi",
-            "game_room",
-        ],
+        // No CAT Scale here or at Pilot: a stop's own listed services say
+        // whether it has one, so a brand-wide claim could name a scale the
+        // stop's menu does not offer.
+        signature: &["showers", "laundry", "premium_wifi", "game_room"],
         keywords: &["flying j"],
         bans_big_rigs: false,
     },
@@ -133,7 +130,7 @@ pub const BRANDS: &[Brand] = &[
         key: "pilot",
         spoken: "Pilot",
         tier: "travel_center",
-        signature: &["showers", "cat_scale", "laundry", "premium_wifi"],
+        signature: &["showers", "laundry", "premium_wifi"],
         keywords: &["pilot"],
         bans_big_rigs: false,
     },
@@ -340,21 +337,16 @@ mod tests {
     #[test]
     fn test_pilot_has_enhanced_amenities() {
         let pilot = classify_brand("Pilot Travel Center").unwrap();
-        for key in ["showers", "cat_scale", "laundry", "premium_wifi"] {
+        for key in ["showers", "laundry", "premium_wifi"] {
             assert!(pilot.signature.contains(&key));
         }
+        assert!(!pilot.signature.contains(&"cat_scale"));
     }
 
     #[test]
     fn test_flying_j_has_enhanced_amenities() {
         let flying_j = classify_brand("Flying J Travel Center").unwrap();
-        for key in [
-            "showers",
-            "cat_scale",
-            "laundry",
-            "premium_wifi",
-            "game_room",
-        ] {
+        for key in ["showers", "laundry", "premium_wifi", "game_room"] {
             assert!(flying_j.signature.contains(&key));
         }
     }

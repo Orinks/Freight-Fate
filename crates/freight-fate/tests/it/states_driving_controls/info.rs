@@ -158,7 +158,6 @@ fn test_alt_c_repeats_the_cb_call_at_the_distance_it_is_now() {
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &alt(Key::C));
     let said = last(&app);
-    assert!(said.starts_with("CB chatter"), "{said}");
     assert_eq!(said, d.trip.cb_patrol_message(&post, 2.0));
     assert_ne!(said, first_heard, "the distance went stale");
 }
@@ -203,11 +202,11 @@ fn test_a_later_announcement_takes_the_a_key_but_not_the_cb_repeat() {
 
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &key(Key::A));
-    assert!(!last(&app).contains("CB chatter"), "{}", last(&app));
+    assert!(!last(&app).contains("in the median"), "{}", last(&app));
 
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &alt(Key::C));
-    assert!(last(&app).starts_with("CB chatter"), "{}", last(&app));
+    assert!(last(&app).contains("in the median"), "{}", last(&app));
 }
 
 #[test]
@@ -223,7 +222,7 @@ fn test_alt_c_brings_back_the_voice_and_not_the_squelch() {
     let audio = app.record_audio();
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &alt(Key::C));
-    assert!(last(&app).starts_with("CB chatter"), "{}", last(&app));
+    assert!(last(&app).contains("in the median"), "{}", last(&app));
     assert!(
         !audio
             .borrow()
@@ -330,6 +329,75 @@ fn test_upcoming_key_handles_a_clear_road() {
     assert!(last(&app).contains("Nothing notable"), "{}", last(&app));
 }
 
+/// Agent drives A and B (2026-09-24): "Nothing notable in the next 15
+/// miles." 1.2 and 3.5 miles before the destination exit.
+#[test]
+fn test_upcoming_key_names_the_destination_exit() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.trip.zones.clear();
+    d.trip.stops.clear();
+    d.trip.curves.clear();
+    d.trip.position_mi = 0.0;
+    let exit = d
+        .destination_exit_stop(&mut app.ctx)
+        .expect("the delivery has a destination exit");
+    d.trip.position_mi = exit.at_mi - 1.2;
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &key(Key::U));
+    let report = last(&app);
+    assert!(!report.contains("Nothing notable"), "{report}");
+    assert!(report.contains("destination exit"), "{report}");
+    assert!(
+        report.contains(&app.ctx.settings.distance_text(1.2, true)),
+        "{report}"
+    );
+}
+
+/// Agent drive A (2026-09-24): U said "facility gate in 0.3 miles" -- where
+/// the gate's 15 zone starts -- while R said "three quarters of a mile to the
+/// gate". Both read the gate now.
+#[test]
+fn test_upcoming_key_reads_the_gate_where_route_status_does() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.trip.stops.clear();
+    d.trip.curves.clear();
+    d.destination_exit_taken = true;
+    d.ramp_mi = Some(0.75);
+    let pos = d.trip.position_mi;
+    d.trip.zones = vec![Zone::new(pos + 0.25, pos + 0.75, 15.0, "facility gate")];
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &key(Key::U));
+    let report = last(&app);
+    let gate = app.ctx.settings.distance_text(0.75, true);
+    assert!(report.contains(&format!("facility gate in {gate}")), "{report}");
+    d.handle_key_event(&mut app.ctx, &key(Key::R));
+    let status = last(&app).to_lowercase();
+    assert!(
+        status.contains(&spoken_closing_distance(0.75, true).to_lowercase()),
+        "{status}"
+    );
+}
+
+/// Agent drive B (2026-09-24): stopped at the ramp's stop bar two miles from
+/// the gate, C said "arrival in 8.6 hours at a typical highway pace".
+#[test]
+fn test_clock_key_estimates_the_approach_from_the_road_left_to_the_gate() {
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.destination_exit_taken = true;
+    d.ramp_mi = Some(2.0);
+    d.trip.truck.velocity_mps = 0.0;
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &key(Key::C));
+    let report = last(&app);
+    assert!(
+        report.contains("arrival in 0.1 hours at a typical street pace"),
+        "{report}"
+    );
+}
+
 #[test]
 fn test_upcoming_key_stays_a_couple_of_sentences() {
     let mut app = TestApp::new();
@@ -401,7 +469,29 @@ fn test_safe_speed_key_answers_for_the_ramp() {
     d.ramp_mi = Some(d.trip.position_mi); // on the ramp now
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &key(Key::D));
-    assert_eq!(last(&app), "Safe speed 45 miles per hour for the ramp.");
+    assert_eq!(last(&app), "Safe speed 45 miles per hour, the exit speed.");
+}
+
+#[test]
+fn test_safe_speed_key_says_nothing_of_the_ramp_before_the_gore() {
+    // The gore takes road speed; the exit speed is braked for past it, so an
+    // armed exit ahead does not lower the mainline answer (realistic exit,
+    // 2026-09-24).
+    let mut app = TestApp::new();
+    let mut d = a_drive(&mut app);
+    d.trip.weather.current = WeatherKind::Clear;
+    d.trip.position_mi = d.trip.total_miles() / 2.0;
+    d.exit_stop = Some(ff_core::sim::trip_models::RoadStop::new(
+        "Test Plaza",
+        d.trip.position_mi + 1.0,
+        "truck_stop",
+    ));
+    d.exit_signal_on = true;
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &key(Key::D));
+    let said = last(&app);
+    assert!(!said.contains("ramp") && !said.contains("exit"), "{said}");
+    assert!(said.starts_with("Safe speed "), "{said}");
 }
 
 #[test]
@@ -472,6 +562,24 @@ fn real_time_clock_names_the_synchronized_value_truthfully() {
 
     assert!(report.starts_with("3 PM local game time"), "{report}");
     assert!(report.contains("deadline in"), "{report}");
+}
+
+/// Real time chosen while rolling waits for the next stop, so until then the
+/// clock is still the route's and keeps the route's zone name.
+#[test]
+fn pending_real_time_keeps_the_running_clocks_zone_name() {
+    let mut app = TestApp::new();
+    app.ctx.settings.time_scale = 20.0;
+    let mut d = a_drive(&mut app);
+    app.ctx.settings.time_scale = 1.0;
+    let zone = d.trip.current_timezone().name;
+
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &key(Key::C));
+    let report = last(&app);
+
+    assert!(!report.contains("local game time"), "{report}");
+    assert!(report.contains(zone), "{report}");
 }
 
 #[test]

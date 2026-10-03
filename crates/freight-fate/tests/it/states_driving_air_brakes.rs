@@ -384,3 +384,113 @@ fn test_setting_the_parking_brake_at_speed_dynamites_the_brakes() {
     let last = main_lines(&harness).last().cloned().unwrap_or_default();
     assert!(last.starts_with("Parking brake set."), "{last}");
 }
+
+// -- the assists spend air like a driver would ---------------------------------------
+
+#[test]
+fn test_cruise_easing_for_an_exit_keeps_the_air_up() {
+    // Agent drive D, 2026-09-24: I-20 into Birmingham on the realistic
+    // preset, cruise set at 70, and air ready went false at 62 mph on the
+    // mainline. Cruise was gliding its target down for the exit; the service
+    // trim switched on at 2 over at a fifteenth of the pedal, so the truck
+    // rode that edge and cruise pumped the brake about fifteen times a
+    // second. Air is charged per application, and the tanks lost to the
+    // compressor. Pinned on the pedal's total rise as well as on the gauge,
+    // so the mechanism fails the test and not only its worst case.
+    let mut harness = PlaytestHarness::new();
+    assert!(harness
+        .app
+        .ctx
+        .settings
+        .apply_driving_assistance_preset("realistic"));
+    harness.start_route(
+        "Tuscaloosa",
+        "Birmingham",
+        freight_fate::playtest::harness::RouteSetup::seeded(7).named("Air Glide"),
+    );
+    harness.with_drive(|d, ctx| {
+        if let Some(profile) = ctx.profile.as_mut() {
+            profile.tutorial_done = true;
+        }
+        d.tutorial = None;
+        d.departure_checked = true;
+        d.weather_mut().current = WeatherKind::Clear;
+        d.trip.position_mi = 19.9;
+        d.truck_mut().start_engine();
+        d.truck_mut().set_air_ready(false);
+        d.truck_mut().transmission.automatic = true;
+        d.truck_mut().transmission.gear = 10;
+        d.truck_mut().rpm = 1500.0;
+        d.truck_mut().velocity_mps = 62.0 / MPH_PER_MPS;
+    });
+    press(&mut harness, Key::K);
+    harness.with_drive(|d, _| d.cruise_mph = Some(70.0));
+
+    let mut min_psi = f64::MAX;
+    let mut rises = 0.0;
+    let mut last_brake = 0.0;
+    let mut eased_for_the_exit = false;
+    for _ in 0..(60 * 60 * 8) {
+        frame(&mut harness);
+        harness.finish_timed_state();
+        if !harness.has_drive() {
+            break;
+        }
+        let (psi, brake, cruising, exit) = harness.read_drive(|d| {
+            (
+                d.truck().air_pressure_psi(),
+                d.truck().brake,
+                d.cruise_mph.is_some(),
+                d.cruise_held_reason == "for the exit",
+            )
+        });
+        if !cruising {
+            break; // off the mainline: the exit's own assists own the pedals
+        }
+        eased_for_the_exit |= exit;
+        rises += (brake - last_brake).max(0.0);
+        last_brake = brake;
+        min_psi = min_psi.min(psi);
+    }
+    assert!(eased_for_the_exit, "the drive never reached its exit glide");
+    assert!(rises < 2.0, "the pedal rose {rises:.2} full applications");
+    assert!(min_psi > 110.0, "the tanks fell to {min_psi:.1} psi");
+}
+
+#[test]
+fn test_exit_speed_assist_does_not_pump_on_a_downgrade() {
+    // The same class, in the exit speed assist with nobody else on the
+    // pedals: it pressed a full 0.35 the moment the truck crossed what the
+    // gore accepts, so down a grade gravity put the truck straight back over
+    // after every application and the pedal pumped.
+    use crate::transcript_cruise_support::bench_road;
+    use ff_core::sim::trip_models::RoadStop;
+
+    let mut harness = a_drive("Exit Edge");
+    harness.app.ctx.settings.exit_speed_assist = true;
+    harness.with_drive(|d, _| {
+        bench_road(d, 60.0, -4.0, 1.0);
+        d.trip.position_mi = 200.0;
+        d.truck_mut().start_engine();
+        d.truck_mut().set_air_ready(false);
+        d.truck_mut().transmission.automatic = true;
+        d.truck_mut().transmission.gear = 10;
+        let stop = RoadStop::new("Downgrade Travel Plaza", 201.5, "truck_stop");
+        let gate = d.gore_acceptance_mph(Some(&stop));
+        d.exit_stop = Some(stop);
+        d.exit_signal_on = true;
+        d.truck_mut().velocity_mps = (gate - 0.5) / MPH_PER_MPS;
+    });
+    let mut rises = 0.0;
+    let mut last_brake = 0.0;
+    for _ in 0..(60 * 20) {
+        frame(&mut harness);
+        let brake = harness.read_drive(|d| d.truck().brake);
+        rises += (brake - last_brake).max(0.0);
+        last_brake = brake;
+    }
+    let (ahead, braked) = harness.read_drive(|d| (201.5 - d.trip.position_mi, d.truck().brake));
+    assert!(ahead > 0.0, "the bench ran past its exit");
+    assert!(braked > 0.0, "the assist never held the grade");
+    assert!(rises < 2.0, "the pedal rose {rises:.2} full applications");
+}

@@ -73,7 +73,9 @@ impl DrivingState {
         // The switch alone is not the offense; the bark is. The vehicle already
         // knows whether the retarder is genuinely retarding (stage selected,
         // engine on, off the fuel, in gear), so ask it rather than re-deriving.
-        let barking = self.trip.truck.jake_retard_torque_nm() > 0.0
+        // Force at the wheels, not torque at the crank: with the clutch in,
+        // the jake retards nothing and the game plays no bark for it.
+        let barking = self.trip.truck.jake_brake_force() > 0.0
             && self.trip.truck.speed_mph() >= JAKE_ZONE_MIN_MPH;
         // Cruise and the curve assist raise the retarder themselves and release
         // it themselves -- and inside a zone they have just released it above,

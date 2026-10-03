@@ -1,5 +1,6 @@
-//! Score to PCM with the 1.5 voice set: soft pad, plucked string, electric
-//! keys, sine bass, noise brushes and a small kit, through a light reverb.
+//! Score to PCM with the 1.5 voice set (soft pad, plucked string, electric
+//! keys, sine bass, noise brushes and a small kit) plus a strummed guitar,
+//! drawbar organ, bell and reed, through a light reverb.
 //! Pure and deterministic: the pluck's noise comes from the score's own seed.
 
 use super::compose::{Note, Score, Voice};
@@ -24,7 +25,28 @@ fn pan(voice: Voice) -> (f64, f64) {
         Voice::Keys => (0.95, 0.65),
         Voice::Bass | Voice::Kick | Voice::Snare => (0.9, 0.9),
         Voice::Hat => (0.6, 0.9),
+        Voice::Strum => (0.95, 0.6),
+        Voice::Organ => (0.75, 0.75),
+        Voice::Bell => (0.6, 0.95),
+        Voice::Reed => (0.85, 0.75),
     }
+}
+
+/// Karplus-Strong: a noise burst in a delay line, averaged each pass.
+/// `damping` under 1 sets how fast the string dies.
+fn karplus(f: f64, v: f64, len_s: f64, damping: f64, gain: f64, rng: &mut Rng) -> Vec<f64> {
+    let sr = SAMPLE_RATE as f64;
+    let period = (sr / f).max(2.0) as usize;
+    let mut line: Vec<f64> = (0..period).map(|_| rng.unit() * 2.0 - 1.0).collect();
+    let n = (len_s * sr) as usize;
+    let mut out = Vec::with_capacity(n);
+    for i in 0..n {
+        let a = line[i % period];
+        let b = line[(i + 1) % period];
+        line[i % period] = damping * 0.5 * (a + b);
+        out.push(v * a * gain);
+    }
+    out
 }
 
 /// One note into a mono scratch buffer starting at frame 0.
@@ -52,20 +74,65 @@ fn voice_samples(note: &Note, dur_s: f64, rng: &mut Rng) -> Vec<f64> {
                 })
                 .collect()
         }
-        Voice::Pluck => {
-            // Karplus-Strong: a noise burst in a delay line, averaged each pass.
-            let period = (sr / f).max(2.0) as usize;
-            let mut line: Vec<f64> = (0..period).map(|_| rng.unit() * 2.0 - 1.0).collect();
-            let n = ((dur_s + 0.6) * sr) as usize;
-            let mut out = Vec::with_capacity(n);
-            for i in 0..n {
-                let a = line[i % period];
-                let b = line[(i + 1) % period];
-                let next = 0.996 * 0.5 * (a + b);
-                line[i % period] = next;
-                out.push(v * a * 0.8);
-            }
-            out
+        Voice::Pluck => karplus(f, v, dur_s + 0.6, 0.996, 0.8, rng),
+        // A shorter, duller string, cut off the way a strummed chop is muted.
+        Voice::Strum => karplus(f, v, dur_s + 0.15, 0.985, 0.6, rng),
+        Voice::Organ => {
+            // Drawbars at 8', 4', 2 2/3' and 2', with a slow tremolo.
+            let release = 0.15;
+            let n = ((dur_s + release) * sr) as usize;
+            (0..n)
+                .map(|i| {
+                    let t = i as f64 / sr;
+                    let env = (t / 0.03).min(1.0)
+                        * if t > dur_s {
+                            (1.0 - (t - dur_s) / release).max(0.0)
+                        } else {
+                            1.0
+                        };
+                    let wave = (TAU * f * t).sin()
+                        + 0.5 * (TAU * 2.0 * f * t).sin()
+                        + 0.3 * (TAU * 3.0 * f * t).sin()
+                        + 0.15 * (TAU * 4.0 * f * t).sin();
+                    let tremolo = 1.0 - 0.1 * (0.5 + 0.5 * (TAU * 6.0 * t).sin());
+                    v * env * tremolo * wave * 0.35
+                })
+                .collect()
+        }
+        Voice::Bell => {
+            // FM at an inharmonic 3.5 ratio: the partials of a struck bar.
+            let n = ((dur_s + 1.5) * sr) as usize;
+            (0..n)
+                .map(|i| {
+                    let t = i as f64 / sr;
+                    let decay = (-t * 1.4).exp();
+                    let index = 2.0 * (-t * 3.0).exp();
+                    v * decay * (TAU * f * t + index * (TAU * 3.5 * f * t).sin()).sin() * 0.5
+                })
+                .collect()
+        }
+        Voice::Reed => {
+            // Odd harmonics (a soft square) with a gentle vibrato.
+            let release = 0.1;
+            let n = ((dur_s + release) * sr) as usize;
+            let mut phase = 0.0;
+            (0..n)
+                .map(|i| {
+                    let t = i as f64 / sr;
+                    let env = (t / 0.05).min(1.0)
+                        * if t > dur_s {
+                            (1.0 - (t - dur_s) / release).max(0.0)
+                        } else {
+                            1.0
+                        };
+                    phase += TAU * f * (1.0 + 0.004 * (TAU * 5.0 * t).sin()) / sr;
+                    let wave = phase.sin()
+                        + (3.0 * phase).sin() / 3.0
+                        + (5.0 * phase).sin() / 5.0
+                        + (7.0 * phase).sin() / 7.0;
+                    v * env * wave * 0.4
+                })
+                .collect()
         }
         Voice::Keys => {
             let n = ((dur_s + 0.8) * sr) as usize;
@@ -179,7 +246,10 @@ fn mix(score: &Score, cancel: &AtomicBool) -> Option<Mix> {
         let start = (note.start_beat * beat_s * sr) as usize;
         let samples = voice_samples(note, note.beats * beat_s, &mut rng);
         let (gl, gr) = pan(note.voice);
-        let wet = matches!(note.voice, Voice::Pad | Voice::Pluck | Voice::Keys);
+        let wet = !matches!(
+            note.voice,
+            Voice::Bass | Voice::Kick | Voice::Snare | Voice::Hat
+        );
         for (i, s) in samples.iter().enumerate() {
             let at = start + i;
             if at >= frames {

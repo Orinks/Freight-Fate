@@ -47,6 +47,8 @@ from typing import Any
 from ffworld.world import get_world
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import chain_match  # noqa: E402
+import street_chain  # noqa: E402
 from facility_endpoint_screen import NAME_MATCHED_TYPES, screen_endpoint  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -186,11 +188,17 @@ def build_facility_approaches(
     endpoint_screen: bool = True,
     truck_legal: bool = True,
     only_ids: set[str] | None = None,
+    town_judge: street_chain.TownJudge | None = None,
 ) -> dict[str, Any]:
     """Route the batch and return the payload to write.
 
     ``only_ids`` narrows the batch to those facilities; with a merge every
     other row keeps its record.
+
+    ``town_judge`` says whether a street is in town, for its limit fill.
+    None is the real bake: the judge is built from the Census boundaries,
+    and the run is refused without them (``street_chain.census_town_judge``).
+    Tests hand in a fixture judge.
 
     With ``endpoint_screen`` (the default) a target is only routed when its
     endpoint's own OSM object reads as a freight site; see
@@ -202,8 +210,10 @@ def build_facility_approaches(
     :func:`merge_existing` for the rules. Without it the payload is a whole
     rebuild in which every facility outside the batch is a fallback record.
     """
+    town_judge = town_judge or street_chain.census_town_judge()
     local_geometry = _load_local_geometry_tool()
     targets = collect_targets()
+    terminals = city_exit_terminals()
     state_set = set(states)
     eligible_types = HIGH_CONFIDENCE_TYPES | (NAME_MATCHED_TYPES if endpoint_screen else set())
     routable = [
@@ -218,6 +228,12 @@ def build_facility_approaches(
     ]
     row_refusals = endpoint_row_refusals()
     routed: dict[str, Any] = {}
+    # (facility id, terminal node) -> the path from that ramp terminal, or
+    # the failure code, for every terminal a delivery can arrive at.
+    exit_routes: dict[tuple[str, int], Any] = {}
+    exit_attempted: set[str] = set()
+    legacy = chain_match.legacy_chains(existing)
+    matched: dict[str, Any] = {}
     # Why each unrouted target failed, straight from the path search.
     failures: dict[str, str] = {}
     # Facilities a state extract was actually searched for; a missing extract
@@ -228,6 +244,7 @@ def build_facility_approaches(
         extract = local_geometry.state_extract_path(cache_dir, state)
         sources.append(local_geometry.source_record(state, extract))
         in_state = [target for target in routable if target.state == state]
+        screened_in_state = in_state
         refused = 0
         if extract.exists() and in_state and endpoint_screen:
             tags = local_geometry.read_object_tags(
@@ -256,17 +273,44 @@ def build_facility_approaches(
             + ("" if extract.exists() else " (extract missing, skipped)"),
             flush=True,
         )
-        if extract.exists() and state_targets:
+        # Chains baked before the street detail are read back off the same
+        # graphs; one refused by today's endpoint screen is still a chain the
+        # merge keeps, so it gets a graph for the match alone.
+        routed_ids = {target.facility_id for target in in_state}
+        match_only = [
+            _geometry_target(local_geometry, target)
+            for target in screened_in_state
+            if target.facility_id in legacy and target.facility_id not in routed_ids
+        ]
+        if extract.exists() and (state_targets or match_only):
             attempted.update(target.target_id for target in state_targets)
-            routed.update(
-                local_geometry.route_state_targets(
-                    extract,
-                    state_targets,
-                    failures,
-                    yard_roads=True,
-                    truck_legal=truck_legal,
+            exit_attempted.update(target.target_id for target in state_targets)
+            starts = {
+                target.target_id: street_chain.exit_starts(
+                    target.lat, target.lon, terminals.get(target.city, ()), max_route_mi
                 )
+                for target in state_targets
+            }
+            batch_failures: dict[str, str] = {}
+            fresh = local_geometry.route_state_targets(
+                extract,
+                state_targets + match_only,
+                batch_failures,
+                yard_roads=True,
+                truck_legal=truck_legal,
+                street_detail=True,
+                exit_starts=starts,
+                exit_routes=exit_routes,
+                match_chains={
+                    target.target_id: legacy[target.target_id]
+                    for target in state_targets + match_only
+                    if target.target_id in legacy
+                },
+                matched=matched,
+                town_judge=town_judge,
             )
+            routed.update({k: v for k, v in fresh.items() if k in routed_ids})
+            failures.update({k: v for k, v in batch_failures.items() if k in routed_ids})
             for target in state_targets:
                 path = routed.get(target.target_id)
                 if path is not None and path.yard_miles:
@@ -286,6 +330,20 @@ def build_facility_approaches(
         )
         for target in targets
     }
+    for target in targets:
+        if target.facility_id in exit_attempted:
+            owner_allowed = target.facility_id in OWNER_ALLOWED_LONG_YARD_ROADS
+            approaches[target.facility_id].update(
+                street_chain.exit_chain_records(
+                    target.facility_id,
+                    terminals.get(target.city, ()),
+                    exit_routes,
+                    clean_segment,
+                    float("inf") if owner_allowed else MAX_YARD_STRETCH_MI,
+                )
+            )
+    for facility_id, found in matched.items():
+        approaches[facility_id]["_matched"] = chain_match.detail_of(found, clean_segment)
     payload = {
         "version": 1,
         "generated": {
@@ -303,12 +361,15 @@ def build_facility_approaches(
                 "No gate, yard, dock, driveway, or private entrance is claimed unless "
                 "future source data explicitly proves it."
             ),
+            "street_sources": street_chain.street_sources(local_geometry.MAX_SPOKEN_SEGMENTS),
         },
         "sources": sources,
         "coverage": coverage_summary(approaches),
         "approaches": approaches,
     }
     if existing is None:
+        for record in approaches.values():
+            record.pop("_matched", None)
         return payload
     return merge_existing(existing, payload, attempted, accessed=accessed)
 
@@ -346,6 +407,7 @@ def merge_existing(
     rebuilt = stale = demoted = 0
     approaches: dict[str, Any] = {}
     for facility_id, record in fresh["approaches"].items():
+        match = record.pop("_matched", None)
         old = prior.get(facility_id)
         if old is None:
             approaches[facility_id] = record
@@ -376,6 +438,16 @@ def merge_existing(
                     },
                 }
                 stale += 1
+            if "exit_chains" in record:
+                # The chains from the ramp terminals are this run's own
+                # reading whatever became of the city-centre chain.
+                old = {
+                    **old,
+                    "exit_chains": record["exit_chains"],
+                    "exit_chains_failed": record["exit_chains_failed"],
+                }
+            if match is not None:
+                old = chain_match.apply_match(old, match)
             approaches[facility_id] = old
             summary["kept_turn_level"] += 1
         elif facility_id in attempted or (
@@ -393,8 +465,16 @@ def merge_existing(
 
     batch_states = list(fresh["generated"]["states"])
     generated = dict(existing.get("generated") or {})
-    for key in ("family", "source_policy", "road_policy", "gate_policy", "max_route_mi"):
-        generated[key] = fresh["generated"][key]
+    for key in (
+        "family",
+        "source_policy",
+        "road_policy",
+        "gate_policy",
+        "street_sources",
+        "max_route_mi",
+    ):
+        if key in fresh["generated"]:
+            generated[key] = fresh["generated"][key]
     generated["states"] = sorted(set(generated.get("states") or []) | set(batch_states))
     generated["merge"] = {"accessed": accessed, "batch_states": batch_states, **summary}
     if rebuilt or stale:
@@ -498,6 +578,14 @@ def collect_targets() -> list[FacilityTarget]:
                 )
             )
     return targets
+
+
+def city_exit_terminals() -> dict[str, list[dict[str, Any]]]:
+    """City key -> the ramp terminals deliveries into it arrive at, read from
+    the world source's baked interchanges (``street_chain.exit_terminals``)."""
+    from world_source import load_world
+
+    return street_chain.exit_terminals(load_world()["legs"])
 
 
 def routed_approach_miles(target: FacilityTarget) -> float:
@@ -633,8 +721,14 @@ def approach_record(
         if turn_level and yard_miles
         else {}
     )
+    street = {}
+    if turn_level and geometry.street_counts is not None:
+        street["street_counts"] = geometry.street_counts
+        if geometry.driveway:
+            street["driveway"] = geometry.driveway
     return {
         **yard_road,
+        **street,
         "target_type": "facility",
         "facility_id": target.facility_id,
         "city": target.city,
@@ -734,7 +828,15 @@ def clean_segment(segment: dict[str, Any]) -> dict[str, Any]:
     # blank here means the segment carried no road at all.
     road = clean_text(str(segment["road"])) or "a side street"
     cue = clean_text(str(segment["cue"])) or f"Use {road} for the facility approach."
+    # The street detail `street_chain.annotate` measured, where it did: the
+    # posted limit with its kind, and the READ controls along the street.
+    street = {
+        key: segment[key]
+        for key in ("limit_mph", "limit_source", "limit_basis", "controls")
+        if key in segment
+    }
     return {
+        **street,
         "road": road,
         "miles": round(float(segment["miles"]), 2),
         "cue": cue,
@@ -805,6 +907,7 @@ def coverage_summary(records: dict[str, dict[str, Any]]) -> dict[str, Any]:
             for item in records.values()
             if item["gate_hint"] or item["yard_hint"] or item["dock_hint"]
         ),
+        "streets": street_chain.street_coverage(records),
     }
 
 

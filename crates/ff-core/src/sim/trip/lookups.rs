@@ -209,6 +209,19 @@ impl Trip {
         self.lane_count_at(Some(stop)) >= 2
     }
 
+    /// The lowest posted limit across a span, sampled the way
+    /// `span_is_multilane` samples lanes. A work zone steps down from it.
+    pub fn lowest_limit_over(&self, start_mi: f64, end_mi: f64) -> f64 {
+        let stop = self.total_miles().min(start_mi.max(end_mi));
+        let mut mile = 0.0_f64.max(start_mi.min(stop));
+        let mut lowest = self.corridor_limit_at(stop);
+        while mile < stop {
+            lowest = lowest.min(self.corridor_limit_at(mile));
+            mile += LANE_CLOSURE_SAMPLE_MI;
+        }
+        lowest
+    }
+
     /// The state the truck is in, or empty where the bake is silent.
     pub fn state_at(&self, mile: Option<f64>) -> String {
         let sample_mile = mile.unwrap_or(self.position_mi);
@@ -432,9 +445,9 @@ impl Trip {
 
     pub fn ramp_advisory_at(&self, route_mile: f64) -> RampAdvisorySpeed {
         let interchange = self.interchange_with_direction_at(route_mile, 2.0);
-        let directional = interchange.is_some_and(|(ix, _)| ix.ramp_far_end == "motorway");
+        let directional = interchange.is_some_and(|(ix, _, _)| ix.ramp_far_end == "motorway");
         let calculated_mph = ramp_speed_mph(self.corridor_limit_at(route_mile), directional);
-        if let Some((ix, forward)) = interchange {
+        if let Some((ix, forward, _)) = interchange {
             let observed = if forward {
                 ix.ramp_advisory_mph_forward
             } else {
@@ -456,19 +469,55 @@ impl Trip {
         self.ramp_advisory_at(route_mile).mph()
     }
 
+    /// OSM-derived length in miles of the exit ramp nearest a route mile
+    /// (within 2 miles, like `ramp_advisory_at`), for this trip's direction
+    /// of travel; None when that exit has no baked length that way.
+    pub fn ramp_length_mi_at(&self, route_mile: f64) -> Option<f64> {
+        let (ix, forward, _) = self.interchange_with_direction_at(route_mile, 2.0)?;
+        let feet = if forward {
+            ix.ramp_length_ft_forward
+        } else {
+            ix.ramp_length_ft_backward
+        };
+        feet.map(|ft| ft / 5280.0)
+    }
+
+    /// The OSM node the exit ramp nearest a route mile ends at, for this
+    /// trip's direction of travel -- the key of the facility street chain
+    /// that starts there (`World::facility_exit_route`). None for a ramp
+    /// ending in a merge, or with no baked terminal that way.
+    pub fn ramp_terminal_node_at(&self, route_mile: f64) -> Option<i64> {
+        let (ix, forward, _) = self.interchange_with_direction_at(route_mile, 2.0)?;
+        if forward {
+            ix.ramp_terminal_node_forward
+        } else {
+            ix.ramp_terminal_node_backward
+        }
+    }
+
     /// The baked interchange nearest a route mile, or None.
     pub fn interchange_at(&self, route_mile: f64, tol_mi: f64) -> Option<&Interchange> {
         self.interchange_with_direction_at(route_mile, tol_mi)
-            .map(|(ix, _)| ix)
+            .map(|(ix, _, _)| ix)
+    }
+
+    /// The route mile of the baked interchange nearest `route_mile`: the
+    /// frame a stop's `interchange_mi` is in. The record's own `at_mi` is
+    /// counted from the start of its leg, and matches only on a first leg
+    /// driven forward.
+    pub fn interchange_mile_at(&self, route_mile: f64, tol_mi: f64) -> Option<f64> {
+        self.interchange_with_direction_at(route_mile, tol_mi)
+            .map(|(_, _, at)| at)
     }
 
     fn interchange_with_direction_at(
         &self,
         route_mile: f64,
         tol_mi: f64,
-    ) -> Option<(&Interchange, bool)> {
+    ) -> Option<(&Interchange, bool, f64)> {
         let mut best: Option<&Interchange> = None;
         let mut best_forward = true;
+        let mut best_at = 0.0;
         let mut best_dist = tol_mi;
         for (i, (start, leg)) in self
             .leg_starts
@@ -478,16 +527,17 @@ impl Trip {
         {
             let forward = self.route.cities[i] == leg.a;
             for ix in leg.interchanges() {
-                let offset = stop_offset_for_direction(ix.at_mi, leg.miles, forward);
-                let dist = (start + offset - route_mile).abs();
+                let at = start + stop_offset_for_direction(ix.at_mi, leg.miles, forward);
+                let dist = (at - route_mile).abs();
                 if dist <= best_dist {
                     best_dist = dist;
                     best = Some(ix);
                     best_forward = forward;
+                    best_at = at;
                 }
             }
         }
-        best.map(|ix| (ix, best_forward))
+        best.map(|ix| (ix, best_forward, best_at))
     }
 
     /// The live traffic speed of a congestion zone here, or None when it

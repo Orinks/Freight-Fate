@@ -18,7 +18,7 @@ use ff_core::models::profile::{data_dir, LegacyCareerError, LoadError, Profile};
 use ff_core::models::start_options::option_for_profile;
 use ff_core::music::{select_menu_music_sequence, MenuMusicProfile};
 use ff_core::playtest_levers::apply_continue_levers;
-use ff_core::pyfmt::fmt_grouped;
+use ff_core::pyfmt::{fmt_f, fmt_grouped};
 
 use crate::app::{share, version, GameContext, Say, SharedState};
 use crate::browser::open_url;
@@ -219,8 +219,8 @@ pub fn first_day_orientation_message(ctx: &GameContext, prefix: &str) -> String 
     let option = option_for_profile(p);
     // Spoken city, never the map key (same fix as the states::city copy).
     let location = format!(
-        "{terminal} in the {} service area",
-        ctx.world.spoken_city(&p.current_city, None)
+        "{terminal} in {} service area",
+        ff_core::speech_text::the_city(&ctx.world.spoken_city(&p.current_city, None))
     );
     if option.is_owner_operator() {
         return format!(
@@ -295,6 +295,17 @@ pub fn world_entry_state(ctx: &mut GameContext, queue_entry_announcement: bool) 
             );
             return share(CityMenuState::new(ctx, true));
         }
+        // A trip saved on a CDL that has since been pulled -- quit on the
+        // roadside screen that pulled it, or a save from before a mid-drive
+        // suspension ended the run -- does not resume: it closes out the
+        // way the roadside does, and the terminal says the CDL status.
+        if close_out_pulled_licence_trip(ctx) {
+            ctx.say(
+                "Your saved run cannot go on: dispatch cancels it, and a relief driver brings \
+                 the truck back.",
+            );
+            return share(CityMenuState::new(ctx, true));
+        }
         let snapshot = ctx
             .profile
             .as_ref()
@@ -310,9 +321,32 @@ pub fn world_entry_state(ctx: &mut GameContext, queue_entry_announcement: bool) 
                         .borrow()
                         .as_any()
                         .downcast_ref::<DrivingState>()
-                        .map(|drive| drive.job.deadline_game_h);
-                    if let Some(deadline) = deadline {
-                        persist_deadline_migration(ctx, deadline);
+                        .map(|drive| (drive.job.deadline_game_h, drive.job.deadline_covers_rest));
+                    if let Some((deadline, covers_rest)) = deadline {
+                        let before = snapshot
+                            .get("job")
+                            .and_then(|job| job.get("deadline_game_h"))
+                            .and_then(serde_json::Value::as_f64);
+                        let prior_model = snapshot
+                            .get("deadline_model")
+                            .and_then(serde_json::Value::as_i64)
+                            .unwrap_or(0);
+                        if persist_deadline_migration(ctx, deadline, covers_rest)
+                            && before.is_some_and(|old| deadline > old)
+                        {
+                            let reason = if prior_model == 1 && covers_rest {
+                                " The adjusted time covers the 10-hour sleep your current legal hours require."
+                            } else {
+                                " The adjusted time covers the route's legal driving plan."
+                            };
+                            ctx.say_with(
+                                format!(
+                                    "Dispatch adjusted this saved delivery deadline to {} hours.{reason}",
+                                    fmt_f(deadline, 1)
+                                ),
+                                Say::queued(),
+                            );
+                        }
                     }
                 })
         };
@@ -330,10 +364,25 @@ pub fn world_entry_state(ctx: &mut GameContext, queue_entry_announcement: bool) 
     share(CityMenuState::new(ctx, queue_entry_announcement))
 }
 
-/// Write the one-time fair-deadline floor back into the saved active trip.
+/// Clear and save a saved trip the CDL no longer allows. False (nothing
+/// touched) while the CDL is clear.
+fn close_out_pulled_licence_trip(ctx: &mut GameContext) -> bool {
+    let Some(p) = ctx.profile.as_mut() else {
+        return false;
+    };
+    if !p.driving_record.suspended(p.game_hours) {
+        return false;
+    }
+    p.active_trip = None;
+    p.pay_advance_used_for_load = false;
+    ctx.save_profile();
+    true
+}
+
+/// Write a one-time fair-deadline repair back into the saved active trip.
 ///
-/// `DrivingState::from_snapshot` applies the floor to a snapshot written
-/// before the deadline model existed, but it reads a `&Value` and so cannot
+/// `DrivingState::from_snapshot` repairs snapshots written under an earlier
+/// deadline model, but it reads a `&Value` and so cannot
 /// record that it did. That signature is deliberate: the pause menu and the
 /// snapshot round-trip tests hand it detached snapshots which must not reach
 /// into the career at all. Python got the write-back for free because its
@@ -351,7 +400,11 @@ pub fn world_entry_state(ctx: &mut GameContext, queue_entry_announcement: bool) 
 /// is where Python left it: a session that ends without one would re-apply
 /// the floor on the next launch, which is the same exploit through a slower
 /// door.
-fn persist_deadline_migration(ctx: &mut GameContext, deadline_game_h: f64) {
+fn persist_deadline_migration(
+    ctx: &mut GameContext,
+    deadline_game_h: f64,
+    deadline_covers_rest: bool,
+) -> bool {
     let migrated = ctx
         .profile
         .as_mut()
@@ -373,6 +426,10 @@ fn persist_deadline_migration(ctx: &mut GameContext, deadline_game_h: f64) {
                     "deadline_game_h".to_string(),
                     serde_json::json!(deadline_game_h),
                 );
+                job.insert(
+                    "deadline_covers_rest".to_string(),
+                    serde_json::json!(deadline_covers_rest),
+                );
             }
             trip.insert(
                 "deadline_model".to_string(),
@@ -383,6 +440,7 @@ fn persist_deadline_migration(ctx: &mut GameContext, deadline_game_h: f64) {
     if migrated {
         ctx.save_profile();
     }
+    migrated
 }
 
 // -- career summaries ---------------------------------------------------------------
@@ -599,12 +657,12 @@ impl MainMenuState {
             ));
             return;
         }
-        ctx.say(
+        ctx.say(&format!(
             "Opening the bug report page in your web browser. Attach your game \
-             log: game.log in the logs folder next to the game. If you restarted \
-             the game after the problem, attach game.prev.log, the previous \
-             run's log.",
-        );
+             log: game.log in {}. If you restarted the game after the problem, \
+             attach game.prev.log, the previous run's log.",
+            crate::app::logging::log_folder_words()
+        ));
     }
 }
 

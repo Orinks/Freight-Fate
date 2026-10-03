@@ -394,7 +394,7 @@ repository root; Markdown links are relative to this document.
       voice. A probe that fails arms the silence notice, which the main
       menu now also speaks from `update` when it lands late.
 - [x] **Rust port: drive-time frame cost is measured, and one bug found by
-      measuring it (2026-08-24).** `crates/freight-fate/tests/it/frame_time.rs`
+      measuring it (2026-08-24).** `crates/freight-fate/tests/frame_time/`
       drives a seeded, weather-pinned I-70 run out of Denver through the whole
       per-frame path the shipped loop runs (`App::tick` plus the line build)
       and reports mean/median/p95/p99/max, the split between the sim step, the
@@ -1158,7 +1158,7 @@ repository root; Markdown links are relative to this document.
       stretch. On a ramp with no terminal control (`ramp_control == "none"`:
       every scale ramp, a freeway-to-freeway ramp, or the dice) the
       `facility_final_approach` bypass latches at the TOP of the ramp, so the
-      truck crawled the entire `RAMP_LENGTH_MI` at 12 with the lane posted
+      truck crawled the entire ramp (then a flat half mile) at 12 with the lane posted
       at 15 or more. Second edge: `loop_back_to_destination_terminal` reset
       the pull-ahead but not `destination_arrival_active`, so the retry after
       a blown gate was held at the walk from the turnaround on and the
@@ -2592,7 +2592,7 @@ repository root; Markdown links are relative to this document.
       measurably sparser than a busy freeway at the hour it is quieter. The
       ORDER is real; the absolute COUNT still is not, because the bubble
       caps at `MAX_BUBBLE_VEHICLES` (~5/mile) while a median road at peak
-      wants thirteen in your direction. Lifting that cap is 1.10 work with a
+      wants thirteen in your direction. Lifting that cap is 2.0 work with a
       performance question attached.
 
 - [ ] **Congestion queue re-pacing when the clock moves the zone.** The
@@ -3768,10 +3768,10 @@ repository root; Markdown links are relative to this document.
       spoken approach target is `min(cruise, exit cap)`. The ramp number is
       a ceiling, not a demand.
 
-      Still open from this: `deceleration_lane_mi` is modelled but unused.
-      The ramp is a flat `RAMP_LENGTH_MI` of 0.5 that stands in for the
-      deceleration lane plus the ramp proper; sizing the shed from the real
-      lane length (and its downhill multiplier) is the next slice.
+      Closed 2026-09-24 by the realistic exit: the flat half-mile ramp is
+      gone. `Trip::ramp_length_mi` lays each ramp out as a Green Book
+      deceleration lane (with the book's own grade factors), the ramp curve,
+      and the run to the bar, and the shed happens in that lane.
 
 - [x] **The reverse trap: the throttle latch ate the shift out of reverse
       (FIXED 2026-08-21).** Owner hit it at the I-40 scale mid-playtest --
@@ -6017,16 +6017,18 @@ repository root; Markdown links are relative to this document.
       NVDA and SAPI voice combination and collect the next session log; the
       deterministic recovery tests cannot reproduce his native stall or prove
       the reported wider computer lockup is resolved.
-- [ ] **The frame-time p99 budget test is load-sensitive (found
-      2026-08-30, pre-existing).** `frame_time::a_driven_frame_stays_
-      well_inside_the_sixty_hertz_budget` fails inside a full
+- [x] **The frame-time p99 budget test is no longer load-sensitive
+      (found 2026-08-30, fixed 2026-10-02).** `a_driven_frame_stays_
+      well_inside_the_sixty_hertz_budget` failed inside a full
       `cargo test -p freight-fate --test it` run on the dev machine
-      (p99 6.7-9.6 ms against the 4.2 ms debug ceiling, median a
-      healthy 107 us) and passes comfortably run solo (0.72 s).
-      Verified on the untouched branch too -- identical failure -- so
-      it is the parallel test binary's load, not a regression. Either
-      isolate the bench from sibling test threads or gate the p99
-      assertion on an idle-machine check; do NOT loosen the budget.
+      (p99 6.7-9.6 ms against the 4.2 ms ceiling, median a healthy
+      107 us) and passed solo. Reproduced on Linux by oversubscribing
+      the `it` binary (`--test-threads 16` and 32 on four cores: p99
+      7.4 and 10.1 ms, median 65 us); the scheduler's per-thread stats
+      put almost all of each slow frame in waiting for a CPU, not in
+      the frame. The file is now its own test binary, which cargo runs
+      after `it` rather than alongside it, and its gates hold a lock so
+      they never time over each other. The budget is unchanged.
 - [ ] **Jail for a pursuit, not a three-hour "processing" fee.** Owner
       question 2026-08-10, roadmapped rather than built. Speeding is a
       citation even at the extreme end, so no change there -- but fleeing

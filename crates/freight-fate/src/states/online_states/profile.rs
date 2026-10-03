@@ -80,6 +80,20 @@ fn safety_record_text(record: &Value) -> String {
             "major offenses",
         ),
     ];
+    // Public by owner ruling 2026-09-24 (FMCSA publishes inspection
+    // out-of-service results); the reason behind an order stays private.
+    if let Some(orders) = num(record, "outOfServiceOrders") {
+        parts.push(counted(
+            orders,
+            "out-of-service order",
+            "out-of-service orders",
+        ));
+    }
+    // A crash on the accident register (49 CFR 390.15), such as a rollover:
+    // read when the site sends it, like the out-of-service count.
+    if let Some(crashes) = num(record, "crashes") {
+        parts.push(counted(crashes, "crash", "crashes"));
+    }
     if let Some(claims) = num(record, "cargoClaims") {
         parts.push(counted(claims, "cargo claim", "cargo claims"));
     }

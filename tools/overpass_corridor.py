@@ -23,16 +23,22 @@ from __future__ import annotations
 
 import http.client
 import json
+import os
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Any
 
-MIRRORS = (
+DEFAULT_MIRRORS = (
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
     "https://overpass.private.coffee/api/interpreter",
+)
+# OVERPASS_URLS lets a bake choose reachable Overpass mirrors.
+MIRRORS = (
+    tuple(url.strip() for url in os.environ.get("OVERPASS_URLS", "").split(",") if url.strip())
+    or DEFAULT_MIRRORS
 )
 USER_AGENT = "Freight-Fate world bake (https://github.com/Orinks/Freight-Fate)"
 
@@ -52,6 +58,8 @@ MAX_SPAN_DEG = 0.25
 PAD_DEG = 0.02
 
 DELAY_S = 2.0  # between calls: a free community service, not a firehose
+ATTEMPT_TIMEOUT_S = 300
+RESPONSE_CHUNK_SIZE = 64 * 1024
 # Overpass runs a small number of slots and says so (``/api/status``: "Rate
 # limit: 2"). Over that line it answers 429, and under load 500 or 504 -- all
 # three mean "later", not "no such data". So a refusal waits minutes rather
@@ -94,8 +102,20 @@ def post(query: str, urls: tuple[str, ...] = MIRRORS) -> dict[str, Any]:
         for url in urls:
             request = urllib.request.Request(url, data=data, headers={"User-Agent": USER_AGENT})
             try:
-                with urllib.request.urlopen(request, timeout=300) as response:
-                    body = response.read().decode("utf-8", "replace")
+                # Bound the full attempt even when the server trickles response bytes.
+                deadline = time.monotonic() + ATTEMPT_TIMEOUT_S
+                with urllib.request.urlopen(request, timeout=ATTEMPT_TIMEOUT_S) as response:
+                    chunks = []
+                    while True:
+                        if time.monotonic() >= deadline:
+                            raise TimeoutError("Overpass attempt exceeded its wall-clock deadline")
+                        chunk = response.read1(RESPONSE_CHUNK_SIZE)
+                        if time.monotonic() >= deadline:
+                            raise TimeoutError("Overpass attempt exceeded its wall-clock deadline")
+                        if not chunk:
+                            break
+                        chunks.append(chunk)
+                body = b"".join(chunks).decode("utf-8", "replace")
                 payload = _parse(body)
                 time.sleep(DELAY_S)
                 return payload

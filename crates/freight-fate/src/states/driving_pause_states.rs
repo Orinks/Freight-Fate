@@ -2,7 +2,7 @@
 //! `freight_fate/states/driving_pause_states.py`).
 
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
-use ff_core::sim::hos::HosClock;
+use ff_core::sim::hos::{duration_text, HosClock};
 
 use crate::app::{GameContext, Say};
 use crate::controller::{ControllerAction, ControllerButton};
@@ -85,9 +85,7 @@ impl PauseMenuState {
         driving.prepare_warning_speech_pause(ctx);
         ctx.pause_event_speech();
         driving.pending_ambient_events.clear();
-        driving.reverse_cue_active = false;
-        driving.air_cue_active = false;
-        driving.jake_cue_key = None;
+        driving.forget_stopped_loops();
         let items = self.rows(ctx, driving);
         self.menu.items = items;
         self.menu.index = self.menu.index.min(self.menu.items.len().saturating_sub(1));
@@ -144,7 +142,15 @@ impl PauseMenuState {
                 )
                 .help("Chains grind apart fast on bare pavement."),
             );
-        } else if profile_of(ctx).chains_owned() && profile_of(ctx).chain_wear_pct() < 100.0 {
+        } else if profile_of(ctx).chains_owned()
+            && profile_of(ctx).chain_wear_pct() < 100.0
+            // Offered only where chains would matter: snow or ice under the
+            // truck, or a chain law posted on the run. Every pause in an
+            // October in Chicago used to offer them (owner, 2026-10-01); the
+            // help already says they ride in the side box until a pass calls.
+            && (matches!(d.trip.truck.surface.as_str(), "snow" | "ice")
+                || d.trip.chain_law_level() > 0)
+        {
             items.push(
                 MenuItem::new(install_chains_label(d), |s: &mut Self, ctx| {
                     s.install_chains(ctx)
@@ -550,7 +556,7 @@ pub fn trip_status_lines(d: &DrivingState, ctx: &GameContext) -> Vec<String> {
                 d.job.spoken_destination()
             ),
             d.pickup_progress_summary(ctx),
-            format!("{} hours used.", fmt_f(hours_used, 1)),
+            format!("{} used.", duration_text(hours_used)),
             format!("{}.", d.air_status_text(false)),
         ];
     }
@@ -563,9 +569,9 @@ pub fn trip_status_lines(d: &DrivingState, ctx: &GameContext) -> Vec<String> {
         ),
         d.trip.progress_summary(ctx.settings.imperial_units),
         format!(
-            "{} hours used of {}.",
-            fmt_f(hours_used, 1),
-            fmt_f(d.job.deadline_game_h, 0)
+            "{} used of {}.",
+            duration_text(hours_used),
+            duration_text(d.job.deadline_game_h)
         ),
         format!("{}.", d.air_status_text(false)),
     ]
@@ -595,9 +601,7 @@ impl Menu for PauseMenuState {
         ctx.pause_event_speech();
         self.driving.read(|d| {
             d.pending_ambient_events.clear();
-            d.reverse_cue_active = false;
-            d.air_cue_active = false;
-            d.jake_cue_key = None;
+            d.forget_stopped_loops();
         });
         let items = self.build_items(ctx);
         self.menu.items = items;

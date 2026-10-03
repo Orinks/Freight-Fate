@@ -50,6 +50,7 @@ impl DrivingState {
             && hos_of(ctx).in_violation(&mode);
         if moving && self.hazard_deadline.is_none() {
             self.warn_last_hos_stop(ctx);
+            self.maybe_hos_planning_hint(ctx);
         }
 
         let night = is_night(self.trip.local_hour());
@@ -268,6 +269,9 @@ impl DrivingState {
                 SayEvent::new().category(SpeechCategory::Safety),
             );
         }
+        // A second run-off on top of a serious violation just suspended the
+        // CDL: the drive ends here instead of carrying on.
+        self.end_drive_if_licence_pulled(ctx);
     }
 
     /// Book a run-off-road fatigue event and say what it cost.

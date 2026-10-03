@@ -253,6 +253,7 @@ from the words, and synonyms cost them a re-read.
 | Vehicles around you now | traffic | NPCs, cars | `TrafficManager` |
 | Room adaptive cruise leaves to the vehicle ahead | following gap, always with its seconds ("close, two and a half seconds") | following distance, headway, gap on its own (bare "gap" is the lane row below, and the two are different things) | `settings.acc_following_gap`, `ACC_GAP_CHOICES` |
 | Room to move into the next lane over | the lane is open ("right lane open"); held by somebody, it is blocked ("right lane blocked by a semi"); at a hazard call the same words name the side a dodge can go ("Left lane open.", "Either lane open.", "No lane open.") | clear (that is what the truck is clear OF -- the vehicle passed), safe, free, gap, "open lane on the left" | `Trip::open_side_at`, `Trip::lane_blocker_at`, `states/driving_lane_gap.rs` |
+| Lane keeping on full moving into the open lane around a slow vehicle the hazard call named, and back to the right lane once it is behind | passing ("Passing on the left.", "In the left lane, passing the slow car.") | overtaking, going around, swerving (the driver's own dodge), dodge | `DrivingState::pass_for_hazard`, `update_pass_return`, `passing_hazard_call` |
 | Incidents reported ahead | delays, road reports | traffic (unqualified) | `RealTrafficProvider` |
 | A parking space at a stop | parking | slot, spot | `TruckParkingLocation` |
 | The trailer liquid bulk rides in | tank trailer | tanker (as a noun for the trailer), tank truck | `TRAILER_CATALOG["tank"]` |
@@ -272,10 +273,18 @@ from the words, and synonyms cost them a re-read.
 | When the load is due | deadline | due time, drop time (the appointment is the named hour) | `Job.deadline_game_h` |
 | The retarder | engine brake; "jake" in short control feedback ("Jake on, stage two") | retarder | `TruckState.engine_brake_stage` |
 | A stretch of road where a town bans the engine brake | no engine brake zone | jake brake zone, engine brake restriction, quiet zone | `Trip.engine_brake_ban_at` |
+| The speed this truck, at its weight, can hold a steep downgrade at without overheating its brakes ("Descent control holding 45 miles per hour." / D: "Safe speed 45 miles per hour for the grade.") | the number descent control holds; "safe speed ... for the grade" on D | weight-specific speed, grade speed, runaway speed, descent speed | `TruckState::safe_descent_mph`, `DrivingState::descent_safe_mph` |
 | A posted height restriction on the corridor | low bridge | low clearance, height limit, clearance restriction | `RouteRestriction.kind_label` |
 | A posted weight restriction on the corridor | weight limit | max weight, tonnage limit, weight restriction | `RouteRestriction.kind_label` |
 | The facility entrance where a drive ends | facility gate; "gate" in short cues | entrance (as the noun for the thing), dock gate | `_handle_arrival_gate` |
 | The highway exit for the delivery | destination exit | final exit, last exit, your exit | `_destination_exit_stop` |
+| The driver's commitment to an exit, made with X wherever it is pressed; the gate a manual exit checks ("Signal set for exit 42", said farther out than the blinker runs; "Signal on for exit 42" once it clicks) | the signal: set, then on | exit armed, intent, confirm (there is no confirm action) | `exit_signal_on`, `exit_blinker_on`, `EXIT_BLINKER_MI` |
+| The auxiliary lane with no through traffic that opens beside the right lane at its taper, just before the gore, and that a truck steers into and brakes in from road speed for the ramp ("Exit lane opening. Steer right into it.") | exit lane (the manual may add, once, that road engineers call it the deceleration lane) | deceleration lane (as the spoken noun), slip lane, off lane, exit lane for the right travel lane on the approach (that is "the right lane"; changed 2026-09-24) | `LaneKeeping::exit_lane_open`, `DrivingState::exit_lane_entered`, `driving_events/decel_lane.rs`, `ExitRampLayout::decel_mi`, `EXIT_TAPER_MI` |
+| The bend at the end of the exit lane that the exit speed is for ("Ramp curve, too fast. Slow to 30 miles per hour.") | ramp curve | ramp bend, loop, the curve (unqualified, on a ramp) | `DrivingState::ramp_curve_radius_ft`, `ExitRampLayout::curve_mi` |
+| The warning that a bend or ramp curve is being taken, or approached, faster than this load and this lane keeping take it at no cost, with the speed that does ("Sharp left, too fast. Slow to 37 miles per hour.") | too fast; slow to (the number) | drifting to the outside (the old line, retired 2026-09-24), rollover warning, safe speed, advisory (the number is not the sign's) | `driving_rollover::update_curve_warning`, `curve_safe_mph` |
+| A truck going over on its side in a bend because the bend pulled harder than the load's rollover threshold ("The truck rolled over in the bend.") | rolled over | tipped over, flipped, jackknifed (a different crash), overturned, wreck | `DrivingState::roll_over`, `TruckState::roll_share`, `vehicle/roll.rs` |
+| An accident on the driving record, such as a rollover: counted on the safety record and reputation like a serious violation, public as a count ("It goes on your driving record as a crash.") | crash | accident (the regulation's word, never spoken), wreck, incident, collision (that is the traffic hit) | `RECORD_CRASH`, `DrivingRecord::crashes`, `crash_times`, `crashes` on the public profile |
+| The ramp's advisory, the speed its curve is built for, said once as the truck enters the exit lane ("Exit speed 45.") | exit speed | ramp speed, ramp limit, safe ramp speed, advisory (as the spoken noun) | `armed_ramp_mph`, `take_the_ramp`, `ExitRampLayout::curve_mph` |
 | The assist that brakes and creeps the truck to the facility entrance, and, from a cleared ramp-end stop, drives it there hands off | Facility stopping assistance (the settings row's own name) | destination approach assistance (the setting's code name only), arrival assist, approach assist | `destination_approach_assist`, `update_destination_approach_assist`, `terminal_release_text` |
 | The assist that takes a mapped bend for the driver: brakes to its advisory on the approach, holds that speed through it, brakes inside a bend entered too fast, and steers the wheel the bend wants | Curve assistance (the settings row's own name); "slowing" when it takes the brakes, "released" when it lets go | curve speed assistance (its name before it steered), turn assist, corner assist, curve braking, bend assist, the servo (code only) | `curve_speed_assist`, `driving_updates/curve_servo.rs`, `sim::lane::tracking_steer_rad`, `update_lane` |
 | A driveway, delivery lane or parking aisle OSM holds no name for, and the approach to a facility the world generated rather than surveyed | a service road | unnamed public road, access road, service way, private road, local facility access road | `build_local_geometry.UNNAMED_SERVICE`, `build_local_approaches.fallback_road` |
@@ -285,6 +294,15 @@ from the words, and synonyms cost them a re-read.
 | The loop-back after missing the destination exit, the facility gate, the stop at the end of the destination ramp, or a turn | safe turnaround | U-turn, turnaround point, loop | `_handle_missed_destination_exit`, `_handle_missed_facility_gate`, `_loop_back_to_destination_terminal`, `_handle_missed_turn` |
 | The give-way control at a ramp terminal: slow for the gap, stop only if the road is not clear | yield ("Yield at ramp end", "Through the yield in a gap") | give way (the OSM tag, not a spoken word), yield sign as the noun in short cues | `_ramp_control == "yield"`, `YIELD_ROLL_MPH` |
 | The circular terminal a ramp can end at, played by yield rules against circulating traffic | roundabout | traffic circle, rotary, circle | `_ramp_control == "roundabout"` |
+| A signal OSM maps at an intersection on a facility's streets, played by the ramp terminal's rules (off in 1.9, `STREET_CONTROLS_IN_PLAY`) | traffic light ("Traffic light ahead. Light red.") | signal, stoplight, street light, ramp light | `driving_events/street_controls.rs`, `street_control_kind == "signal"` |
+| A public street between a ramp and a facility's or road stop's driveway, each at its own posted limit. Spoken by its own name, from the turn-by-turn, or not at all: a street is not a zone ("Speed limit 55.", "Speed keeper holding 40 miles per hour.") | the street's name | facility access road, access road, access road zone, facility access road zone (the zone reasons `STREET_ZONE` and `STOP_STREET_ZONE`, never spoken) | `spoken_zone`, `is_street_zone_reason`, `Trip::street_zones` |
+| A stop sign every approach to the intersection stops at: the truck's turn comes after its own stop, with no gap to wait for | all-way stop ("All-way stop ahead.") | four-way stop, 4-way, multiway stop | `street_control_kind == "all_way_stop"` |
+| Where a facility's streets leave the public road for its own service or private way (the manual's word; the drive names the turn onto it) | driveway | entrance, property line, gate (that is the check-in stop at the end of the yard) | `Driveway`, `Trip::driveway_mi`, `Leg::local_yard` |
+| The facility's own way past the driveway, up to the check-in stop at the gate | the yard ("Into the yard.") | lot, facility grounds, premises, private road | `YARD_ZONE`, `Trip::street_zones` |
+| The speed limit inside the yard: the operator's rule, not a law | yard limit ("Yard limit 15.") | gate speed, facility limit, lot limit (that is a road stop's) | `YARD_LIMIT_MPH` |
+| The public road from a road stop's exit ramp to its driveway, in the manual and the docs; spoken by the street's own name, like a facility's (the row above). Off in 1.9 (`STOP_STREETS_IN_PLAY`): the stop's entrance is the ramp's end | access road | frontage road (unless the road is named one), service road (that is the driveway's), approach, access road zone | `STOP_STREET_ZONE`, `begin_stop_chain` |
+| A truck stop's, travel center's or fuel station's own grounds past its driveway | the lot ("Into the lot.") | yard (that is a facility's), property, parking area | `LOT_ZONE`, `DrivingState::stop_chain` |
+| The speed limit inside a road stop's lot: the same rule as a yard | lot limit ("Lot limit 15.") | yard limit (a facility's), parking lot speed | `LOT_ZONE`, `YARD_LIMIT_MPH` |
 | The vehicles crossing in front of a stopped truck at a ramp terminal | cross traffic | crossing cars, the crossroad's traffic | `CrossTraffic`, `sim/cross_traffic.py` |
 | The opening in cross traffic a driver pulls out into | gap, always yours ("wait for your gap", "Gap in traffic") | window, opening, break | `CrossTraffic.clear_to_cross` |
 | The fine for engine braking in one | engine brake citation | jake ticket, noise fine | `EngineBrakeZoneMixin._fine_engine_braking` |
@@ -298,6 +316,9 @@ from the words, and synonyms cost them a re-read.
 | Being pulled to the shoulder by one | pull-over | stop (already the POI, the act of stopping, and the command) | `_pull_over` |
 | The checkpoint watching for chain-law compliance on a graded climb | chain control | chain checkpoint, chain law stop, chain station | `EnforcementPost` (`KIND_CHAIN`), `REASON_BY_KIND` |
 | The inspection facility | weigh station; "the scale" in short cues | scale house, weigh point, chicken coop | `RoadStop(type="weigh_station")` |
+| The certified commercial scale on a truck stop's lot a driver pays to weigh on | CAT Scale; always named, never "the scale" | truck scale, Cat scale, public scale, weighbridge | `RoadStop.services` `scale`, `rest_stop/cat_scale.rs`, `tools/cat_scales.py` |
+| The printed result of a weigh, read aloud | CAT Scale ticket | weight ticket, scale ticket, weigh slip | `AxleLoads::ticket_text` |
+| The axle groups a ticket names | steer axle, drive axles, trailer axles, gross | front axle, drives, tandems, rear axles, GVW | `TruckState::axle_loads`, `AxleLoads` |
 | Whether it is working today | open / closed | active, manned, staffed, live | `KIND_FIXED_SCALE` vs `KIND_SCALE_APRON` |
 | The fleet or self-purchased equipment that gets a weigh-in-motion verdict before an open scale, instead of every truck being demanded in | transponder | PrePass, bypass reader, weigh-in-motion unit | `business.has_weigh_station_transponder`, `business.WEIGH_STATION_TRANSPONDER_LEVEL` |
 | The transponder's verdict clearing a truck to keep rolling past an open scale | Scale green light | bypass cleared, waved through | `events/scale_green`, `_resolve_transponder_verdict` |
@@ -305,10 +326,11 @@ from the words, and synonyms cost them a re-read.
 | An officer going over the truck, the driver's papers, or both, at a scale or on the shoulder | roadside inspection; "Level 1 full inspection", "Level 2 walk-around inspection", "Level 3 driver inspection" for the kind | DOT inspection, safety check, CVSA inspection, audit | `sim/roadside_inspection::InspectionLevel`, `DrivingState::settle_inspection` |
 | The item an inspector writes up | written up for ...; the finding itself is the noun ("brakes out of adjustment") | violation, defect code, OOS item | `roadside_inspection::Finding` |
 | A critical item that parks the truck until it is fixed | out of service until repaired | OOS, red-tagged, grounded | `Finding::out_of_service`, `Repair` |
+| An officer's order parking the driver, served in full on the spot and counted on the safety record (public as a count, never its reason) | out-of-service order | OOS, OOS order, put out of service | `Profile::out_of_service_events`, `DrivingRecord::out_of_service_times`, `outOfServiceOrders` on the public profile |
 | The sticker a clean Level 1 earns, good for three months of being waved past open scales | inspection decal; "the decal on the windshield" | CVSA sticker, decal, bypass sticker | `DrivingRecord::decal_until_h`, `DECAL_VALID_HOURS` |
 | The driver's own pre-trip check of the same items | walk-around; "Walk around the truck" is the row | pre-trip, DVIR, pre-trip inspection, vehicle check | `roadside_inspection::walk_around`, `WALK_AROUND_MIN` |
 | The three days in May when every inspector is on the road | Roadcheck week | blitz, inspection blitz, Roadcheck event | `roadside_inspection::roadcheck_blitz`, `Trip::roadcheck_blitz` |
-| Drivers talking about enforcement on the radio | CB chatter | radio talk, scanner, traffic | `cb_patrol_message` |
+| Drivers talking about enforcement on the radio | CB chatter (the name in help and menus; the spoken report itself opens with the distance or "Somebody", never a "CB chatter" label -- the squelch marks it, owner 2026-10-01) | radio talk, scanner, traffic | `cb_patrol_message` |
 | A CB report nobody has verified | unconfirmed | rumor, maybe, possible, unreliable | `_cb_confidence` |
 | The last CB call said again because the driver asked for it | repeat the CB chatter | CB replay, rewind, play back the CB, last CB | `DrivingState::speak_last_cb_chatter` (Alt C) |
 | How much police activity you hear | it is not a setting -- the road's own presence, from region, road class and the clock | enforcement presence (the player setting, removed 2026-08-16), police density, patrol frequency, difficulty | `Trip._post_density_at`, `EnforcementWatchMixin._ambience_scale` |
@@ -355,20 +377,21 @@ from the words, and synonyms cost them a re-read.
 | The receiver refusing a load outright | the receiver refused the load | bounced, returned, kicked back | `CARGO_OUTCOME_REJECTED` |
 | Damage a safety committee rules the driver's fault | preventable damage | at-fault, chargeable, negligence | `TruckState.preventable_damage_pct` |
 | The polling secret bound to this device | never spoken -- internal only | activation code | `Activation.device_code` |
-| The engine leaning the way the wheel should go -- into a bend or a street corner, and, with lane keeping on partial or off and lane-departure warning on, back toward lane center on a drift. The one panned cue a driver steers TOWARD; the rumble strip is the opposite and is steered away from | The engine lean | the road lean (what it was called while it rode the road bed, before 2026-09-18), engine pan, steering lean, drift beep (that is the rumble strip, and it means the other direction) | `sim/turn_guide.rs`, `DrivingState::update_lane_guidance_audio`, `sim/lane_guidance.rs` |
+| The engine leaning the way the wheel should go -- into a bend or a street corner only when that steering is the driver's (lane keeping off and curve assistance off; on full, for the road's shape), and, with lane keeping on partial or off and lane-departure warning on, back toward lane center on a drift. The one panned cue a driver steers TOWARD; the rumble strip is the opposite and is steered away from | The engine lean | the road lean (what it was called while it rode the road bed, before 2026-09-18), engine pan, steering lean, drift beep (that is the rumble strip, and it means the other direction) | `sim/turn_guide.rs`, `DrivingState::update_lane_guidance_audio`, `sim/lane_guidance.rs` |
 | Where the truck is sitting across its lane, reported by panning the road noise; centered whenever lane keeping is doing the steering. A position readout, never a direction to steer | Where you sit in the lane | the road lean (that is the engine now), road bed, ambient road, tire hiss | `vehicle/road`, `DrivingState::update_lane_guidance_audio` |
 | A tire just catching the edge line, still fully inside the lane | Rumble strip, clipped | edge clip, low rung of the edge ladder | `vehicle/edge_clip`, `sim/lane_guidance.EDGE_CLIP_KEY` |
 | The whole tire riding the rumble strip on one side | Rumble strip | edge strip, full rumble, middle rung of the edge ladder | `vehicle/edge_strip`, `sim/lane_guidance.EDGE_STRIP_KEY` |
 | Gravel under a tire that has left the road surface | Off the pavement | shoulder gravel, run-off, top rung of the edge ladder | `vehicle/edge_shoulder`, `sim/lane_guidance.EDGE_SHOULDER_KEY` |
 | The soft chime confirming the truck is centered again after a drift | Back in the lane | lane-centered chime, drift recovered, all-clear | `vehicle/lane_centered` |
 | Tires rolling over a painted line's raised markers, meaning a lane change happened whether meant or not | Lane line crossed | line cross, lane-change bump | `vehicle/lane_line_cross` |
+| The held control that steers out the truck's heading so it points down the road, without moving it back to lane center; does nothing on full lane keeping | Straighten up (the shortcuts row), "hold slash" by default | center steering, recenter, auto-straighten, lane keeping (it is not: it leaves the lane position alone) | `Action::Straighten`, `LaneKeeping::straighten` |
 | The tock that pans to where the truck sits inside its lane, toggled with I | Lane locator | position tick, lane ping, centering assist | `vehicle/lane_locator` |
-| Mechanical relay clicks following steering position or assisted lane-change direction; an armed exit repeats on the right until ramp entry, cancellation, or a missed exit | Mechanical blinker | indicator tick, automatic locator | `vehicle/turn_signal` |
+| A turn signal relay's tick and softer tock, one flasher cycle per 0.9 s beat, following steering position or assisted lane-change direction; an armed exit repeats on the right from half a mile out (`EXIT_BLINKER_MI`) until ramp entry, cancellation, or a missed exit | Mechanical blinker | indicator tick, automatic locator | `vehicle/turn_signal` |
+| The turn signal stalk clicking back, centred and quieter, when the steering cue ends, the exit position is set, or a running exit blinker is canceled; assisted lane changes instead finish with Lane line crossed | Blinker off | signal tone (a different sound since 2026-09-29), cancel chime, all-clear, "exit lane set" tone | `vehicle/turn_signal_off` |
 | One rumble hit with nothing held after it, unattached to a steering correction -- fatigue or a momentary catch | Rumble strip, single hit | single tap, fatigue rumble | `vehicle/rumble_strip` |
 | Grouped bars cut across a whole lane, placed only ahead of a curve that has killed people | Transverse strips | rumble bars, wake-up strips, dead-man's-curve strips | `vehicle/transverse_strips`, `sim/lane_guidance.TRANSVERSE_KEY` |
 | The tick that speeds up as the truck closes on a ramp's stop bar, handing over to the stop bar tone once the bar is close enough that the truck must already be stopping | Stop bar countdown | curve chime (retired 2026-09-18 -- the bend chime no longer exists, and this sound is all that still uses the key), curve bink, bend warning, bar tick | `vehicle/curve_bink`, `DrivingState::update_ramp_bar_audio` |
 | A short confirmation from the side of a deliberate lane crossing, shoulder pull-over, ramp merge, or route exit | Signal tone | confirmation tone, manoeuvre tone | `vehicle/signal_tone` |
-| A quieter centered confirmation when the steering cue ends or the exit position is set; assisted lane changes instead finish with Lane line crossed | Signal tone (the treatment marks cancellation) | cancel chime, all-clear, "exit lane set" tone | `vehicle/signal_tone` |
 | The compressor filling the air tanks before the truck can move | Air building | air pressurize, tank fill | `vehicle/air_pressurize` |
 | The short sharp pop when the tanks reach full and the compressor cuts out | Air dryer purge | dryer pop, compressor cutout | `vehicle/air_dryer_purge` |
 | Air pressure fallen too low to brake safely | Low air buzzer | low-pressure alarm, air warning | `vehicle/low_air_buzzer` |
@@ -399,6 +422,7 @@ from the words, and synonyms cost them a re-read.
 | The driver's own yawn as fatigue builds | Yawn | fatigue sound, drowsy cue | `driver/yawn` |
 | The optional note that carries the lean instead of the engine, off by default; with it on the engine stays centered | Lane guide tone (the settings row is "Lane guide sound: engine" or "tone") | guide tone, steering tone, lean tone | `guide/lane_guide_tone`, `Settings.lane_guide_tone`, `DrivingState::lean_the_tone` |
 | The setting for which way to steer when the engine leans: toward the lean by default, or away from it | Steering guide (the settings row reads "steer toward the lean" or "steer away from the lean") | invert steering, reverse guide, flipped lean | `Settings.steering_guide_inverted`, `guide_sign` |
+| The one-time screen before the main menu that asks how much the truck should do, answered once by every player | Driving assistance (the same choice as the preset row in Settings) | setup wizard, onboarding, first-run screen | `states::assist_picker`, `Settings.assist_preset_chosen` |
 | The synthesized short high note standing in for a confirmation -- the assist acted, the setting took -- once the speech ladder stops speaking it | Confirmation note | confirmation earcon, acted tone | `ladder/confirmation_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS` |
 | The synthesized two falling notes standing in for a heads-up about what the road is about to do -- a bend, a merge, a stop still miles off -- once the speech ladder stops speaking them, at the Urgent only rung | Road ahead note | navigation advisory earcon, lead-cue tone | `ladder/road_ahead_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS`, `SpeechCategory.NAVIGATION_ADVISORY` |
 | The synthesized chime standing in for a driving tip once the speech ladder stops speaking coaching, at the Quiet rung | Coaching note | coaching earcon, tip chime | `ladder/coaching_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS` |
@@ -551,11 +575,11 @@ the CB, spoken by a driver on the radio. It is trade slang, and it is flavour.
 In a warning, a menu item, a status readout, or anything the game says in its
 own voice, the word is "trooper".
 
-The Python game enforced this with a sweep of every player-facing string
-that failed if the word appeared outside a CB clause. The Rust port has no
-equivalent yet (`test_bear_is_cb_voice_only_in_every_player_facing_string`
-in `crates/ff-core/tests/it/sim_enforcement_presence.rs` is an ignored
-placeholder), so for now it is a review rule. The check exists because slang leaks: the word is
+A sweep of every string literal in both crates' sources fails if the word
+appears outside a CB clause
+(`test_bear_is_cb_voice_only_in_every_player_facing_string` in
+`crates/ff-core/tests/it/sim_enforcement_vocabulary.rs`); the song title
+"Black Bear Road" is its one exception. The check exists because slang leaks: the word is
 evocative, it reads well in a sentence, and one careless line teaches a screen
 reader user a second noun for a thing that already had one.
 
@@ -633,8 +657,14 @@ synonym for the game's most safety-critical cue and is exactly what this
 table exists to prevent. The lane change leads the braking (owner,
 2026-08-17): both actions stay on offer, because a driver who cannot see the
 gap may reasonably prefer to slow, but at a hazard the first word is the one
-that gets acted on. Lane changes stay driver-initiated: one tap of the arrow
-the call named, with adaptive cruise riding through the dodge.
+that gets acted on. On partial or off, lane changes stay driver-initiated:
+one tap of the arrow the call named, with adaptive cruise riding through the
+dodge. On full, a slow VEHICLE ahead is passed by the truck itself (owner,
+2026-10-01): the call drops the opener and the lane answer and says what the
+truck is doing, "Slow car right ahead. Passing on the left.", the arrival is
+"In the left lane, passing the slow car.", and the move back is reported by
+"In the right lane." alone. "Passing" is the canonical word for it -- never
+overtaking or going around. Objects in the lane keep the driver's call.
 
 ## Open naming decisions
 

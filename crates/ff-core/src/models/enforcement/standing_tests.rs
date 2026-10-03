@@ -94,3 +94,44 @@ fn the_save_carries_the_standing_for_the_public_profile() {
     assert_eq!(d["career"]["reputation"], 98.0);
     assert_eq!(d["career"]["standing"], 88.0);
 }
+
+#[test]
+fn a_crash_counts_as_a_serious_event_and_ages_out_like_one() {
+    // Owner ruling 2026-09-24: a rollover goes on the record as a crash (the
+    // 49 CFR 390.15 accident register), weighing as a serious event does.
+    use crate::models::safety_record::{score_for_profile, SAFETY_RECORD_WINDOW_DAYS};
+    let mut p = a_driver_at(98.0);
+    let before = score_for_profile(&p, 0.0);
+    let now = p.game_hours;
+    p.driving_record.record_crash(now);
+    p.driving_record.note(
+        RECORD_CRASH,
+        "Rolled the truck over in a bend",
+        0.0,
+        now,
+        "I-40",
+    );
+    assert_eq!(p.driving_record.crashes, 1);
+    assert_eq!(p.standing(), 98.0 - RECORD_SERIOUS_REPUTATION);
+    let mut serious = a_driver_at(98.0);
+    serious.driving_record.record_serious_violation(now);
+    assert_eq!(
+        score_for_profile(&p, 0.0),
+        score_for_profile(&serious, 0.0),
+        "a crash weighs on the safety record as a serious violation does"
+    );
+    assert!(score_for_profile(&p, 0.0) > before);
+    // Not a citation, and not a serious violation on the licence ladder.
+    assert_eq!(p.driving_record.unexplained_citations(), 0);
+    assert!(p.driving_record.serious_violations.is_empty());
+    // A year on, it has aged out of both windows.
+    p.game_hours =
+        now + (SAFETY_RECORD_WINDOW_DAYS.max(REPUTATION_WINDOW_DAYS) as f64 + 1.0) * HOURS_PER_DAY;
+    assert_eq!(p.standing(), 98.0);
+    assert_eq!(p.driving_record.crashes, 1, "the lifetime count stays");
+    // And it rides the save inside the driving record, not as a new
+    // top-level field the cloud validator would refuse.
+    let d = p.to_unsigned_dict();
+    assert_eq!(d["driving_record"]["crashes"], 1);
+    assert_eq!(d["driving_record"]["crash_times"][0], now);
+}

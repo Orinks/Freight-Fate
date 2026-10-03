@@ -21,19 +21,19 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import numpy as np
-
 import cand_common as C
+import numpy as np
 
 KEY = "psgran"
 RNG = np.random.default_rng(7)
 
 IDLE_RPM = 647.0
-FIRING_HZ = IDLE_RPM / 20.0                 # 32.35 Hz firing rate at idle
-T_IDLE = C.SR / FIRING_HZ                    # ~1484 samples per firing
+FIRING_HZ = IDLE_RPM / 20.0  # 32.35 Hz firing rate at idle
+T_IDLE = C.SR / FIRING_HZ  # ~1484 samples per firing
 
 
 # --- build the grain pool from a steady interior idle window -----------------
+
 
 def _envelope(x: np.ndarray, ms: float = 2.0) -> np.ndarray:
     w = max(4, int(ms * 1e-3 * C.SR))
@@ -93,12 +93,13 @@ def build_grains(overlap: float = 2.0):
     for m in marks:
         if m - half < 0 or m + half >= len(win):
             continue
-        g = win[m - half:m + half] * hann
+        g = win[m - half : m + half] * hann
         grains.append(g.astype(float))
     return grains, L
 
 
 # --- granular resynthesis ----------------------------------------------------
+
 
 def _draw(grains: list[np.ndarray]) -> np.ndarray:
     return grains[int(RNG.integers(len(grains)))]
@@ -143,7 +144,7 @@ def synth_rev(grains, L, f0, f1, dur_s, hold_lo=0.5, hold_hi=0.5, jitter=0.03):
         lo = max(0, a)
         gi0 = lo - a
         hi = min(len(out), a + L)
-        out[lo:hi] += g[gi0:gi0 + (hi - lo)]
+        out[lo:hi] += g[gi0 : gi0 + (hi - lo)]
     return out[:n]
 
 
@@ -164,7 +165,7 @@ def main():
 
     # --- cruise: steady 1500 rpm loop, ~4 s ----------------------------------
     f_cruise = 1500.0 / 20.0
-    cruise_periods = int(round(2.0 * f_cruise))       # ~2 s buffer
+    cruise_periods = int(round(2.0 * f_cruise))  # ~2 s buffer
     cruise_loop = synth_loop(grains, L, f_cruise, cruise_periods, jitter=0.03)
     cruise_loop = C.make_seamless_loop(cruise_loop)
     cruise_out = C.tile(cruise_loop, 4.0)

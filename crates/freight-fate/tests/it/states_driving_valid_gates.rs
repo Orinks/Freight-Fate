@@ -274,14 +274,14 @@ fn the_exit_confirmation_is_not_handed_back_past_the_gore() {
     app.clear_speech();
 
     d.toggle_exit_signal(&mut app.ctx);
-    assert_eq!(heard(&app, "Signal on for"), 1);
+    assert_eq!(heard(&app, "Signal set for"), 1);
 
     d.trip.position_mi = stop.at_mi + 0.5; // the gore is behind the truck
     d.refresh_live_facts();
     app.ctx.say_event(CUTTER);
 
     assert_eq!(
-        heard(&app, "Signal on for"),
+        heard(&app, "Signal set for"),
         1,
         "the exit confirmation was handed back past the gore: {:?}",
         app.event_lines()
@@ -302,7 +302,7 @@ fn the_exit_confirmation_is_still_handed_back_before_the_gore() {
     app.ctx.say_event(CUTTER);
 
     assert_eq!(
-        heard(&app, "Signal on for"),
+        heard(&app, "Signal set for"),
         2,
         "an exit still ahead must survive being cut: {:?}",
         app.event_lines()
@@ -349,4 +349,43 @@ fn the_hold_prompt_is_not_handed_back_once_the_dock_menu_is_open() {
         "the hold prompt asked again for a press that had already happened: {:?}",
         app.event_lines()
     );
+}
+
+// -- the brake lockout ----------------------------------------------------------------
+
+#[test]
+fn the_parking_brake_lockout_comes_back_only_while_the_brake_is_set() {
+    // Agent drive out of Aberdeen Company Yard, 2026-09-30: throttle against
+    // a set parking brake, release it, roll -- and "Parking brake set. Press
+    // P to release it." came back interrupting, twice, with the truck moving.
+    // Pressing P there sets the spring brakes at speed.
+    for released in [true, false] {
+        let mut app = TestApp::new();
+        let _clock = app.fake_pacer_clock();
+        let mut d = a_drive(&mut app);
+        d.trip.truck.set_air_ready(true);
+        d.trip.truck.parking_brake = true;
+        app.clear_speech();
+        d.maybe_say_air_brake_lockout(&mut app.ctx);
+        assert_eq!(
+            heard(&app, "Parking brake set"),
+            1,
+            "{:?}",
+            app.event_lines()
+        );
+
+        if released {
+            d.trip.truck.parking_brake = false;
+        }
+        d.refresh_live_facts();
+        app.ctx.say_event(CUTTER);
+
+        let expected = if released { 1 } else { 2 };
+        assert_eq!(
+            heard(&app, "Parking brake set"),
+            expected,
+            "released {released}: {:?}",
+            app.event_lines()
+        );
+    }
 }

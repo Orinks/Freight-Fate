@@ -47,14 +47,16 @@
 //! direction, radius, or lane ordinal, and `docs/nav-phrasing-brief.md` forbids
 //! speaking a lane ordinal that was never harvested.
 
-use ff_core::data::corners::corner_speed_mph;
+use ff_core::data::corners::{corner_radius_ft, corner_speed_mph, ASSUMED_TURN_DEG};
 use ff_core::data::curves::RouteCurve;
 use ff_core::sim::trip_models::{NavigationCue, FACILITY_ACCESS_LIMIT_MPH};
+use ff_core::sim::turn_guide::{TurnShape, TurnSide};
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
 use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
+use crate::states::driving_speed_control::{KEEPER_EASE_REAL_S, KEEPER_SETTLE_REAL_S};
 
 /// The approach call is sized in REAL seconds of hearing-and-braking time, the
 /// same budget the exit callout gets, then converted to game miles at the
@@ -70,6 +72,9 @@ pub const TURN_WINDOW_MAX_MI: f64 = 2.0;
 /// A crawling truck still gets a window sized as if it were doing twenty, so
 /// the call arrives with road left to brake in rather than on top of the turn.
 pub const TURN_CORNER_MAX_MPH: f64 = 20.0;
+/// Real seconds the clock takes to slide from the trip's pacing down to real
+/// time ahead of a corner's brake point: the exit release, run the other way.
+pub const TURN_CLOCK_EASE_REAL_S: f64 = ff_core::sim::trip::EXIT_APPROACH_RELEASE_S;
 /// Brake deadband: the truck may be a few mph over without failing, the same
 /// forgiveness the curve assist's hysteresis grants.
 pub const TURN_SPEED_MARGIN_MPH: f64 = 3.0;
@@ -95,7 +100,7 @@ pub const TURN_NOW_MI: f64 = 0.05;
 pub const TURN_GUIDE_LEAD_MI: f64 = ff_core::sim::turn_guide::LEAD_MI;
 pub const TURN_GUIDE_DEMAND: f64 = 0.9;
 /// An exit ramp peels right; the lane model already pushes the truck that way,
-/// so the road bed leans with it instead of sitting dead centre.
+/// so the engine leans with it instead of sitting dead centre.
 pub const RAMP_GUIDE_DEMAND: f64 = 0.45;
 
 /// `_is_judged_turn(cue)`: a baked street maneuver with a real side to it.
@@ -122,6 +127,7 @@ impl DrivingState {
         self.turn_missed.clear();
         self.turn_resolved.clear();
         self.turn_announced.clear();
+        self.turn_called_now.clear();
         self.turn_grace_s = 0.0;
         self.trip.controlled_turn = false;
     }
@@ -182,6 +188,105 @@ impl DrivingState {
             .cloned()
     }
 
+    /// A street corner's shape: the angle the map measured at the junction
+    /// (a square corner when it could not) and the WB-67 design radius for
+    /// it from `data::corners`, the same geometry that sets its advise speed.
+    pub fn corner_shape(&self, cue: &NavigationCue, side: TurnSide) -> TurnShape {
+        let degrees = self
+            .trip
+            .route
+            .legs
+            .get(self.turn_leg_index(cue))
+            .map(|leg| leg.local_turn_deg)
+            .filter(|deg| *deg > 0.0)
+            .unwrap_or(ASSUMED_TURN_DEG);
+        TurnShape {
+            side,
+            deflection_deg: degrees,
+            radius_ft: corner_radius_ft(degrees),
+        }
+    }
+
+    /// The road's own bend at a street corner the truck is inside, as the
+    /// lane model takes it: one over the radius, positive turning right, over
+    /// the arc the corner sweeps. Zero anywhere else.
+    ///
+    /// The lane had no corners in it. The engine leaned into one and asked
+    /// for a turn's worth of wheel, but the road under the truck ran straight
+    /// on, so a driver who steered as asked only drove across their own lane
+    /// and then heard the lean point back the other way (forum report 448,
+    /// 2026-09-30). A corner bends the lane's road like a mapped bend now:
+    /// nothing steering it runs wide, and curve assistance takes it.
+    ///
+    /// Read from the cues directly rather than the corner judging, whose
+    /// latches can close a corner before the truck is through its arc.
+    pub fn street_corner_curvature(&self) -> f64 {
+        let into = |cue: &NavigationCue| self.trip.position_mi - cue.at_mi;
+        self.trip
+            .navigation_cues
+            .iter()
+            .filter(|cue| is_judged_turn(cue) && into(cue) >= 0.0)
+            .find_map(|cue| {
+                let side = TurnSide::parse(&cue.direction)?;
+                let shape = self.corner_shape(cue, side);
+                let arc_mi = shape.radius_ft * shape.deflection_deg.to_radians() / 5280.0;
+                (into(cue) < arc_mi).then(|| side.sign() / shape.radius_ft)
+            })
+            .unwrap_or(0.0)
+    }
+
+    /// The side a hold toward follows the road for (`LaneKeeping::
+    /// turn_in_play`): the turn the engine leans for, or failing that the
+    /// nearest turn ahead the driver has already been told about.
+    ///
+    /// From the call, not from the lean's lead. The instinct is to hold the
+    /// moment the game says turn, and "Right turn onto South Dakota Street,
+    /// one mile" held right steered a truck a mile short of the corner off the
+    /// road; "Sharp left, half a mile" held left changed lanes into the
+    /// median (owner's drives, 2026-09-30). Called, the hold waits straight
+    /// on in its lane until the turn arrives.
+    pub fn hold_turn_side(&mut self) -> f64 {
+        if let Some(shape) = self.turn_guide_input(false).shape {
+            return shape.side.sign();
+        }
+        let position = self.trip.position_mi;
+        let (limit, _) = self.trip.speed_limit_at(position);
+        let mut nearest: Option<(f64, f64)> = None;
+        let mut consider = |ahead: f64, side: Option<TurnSide>| {
+            if let Some(side) = side.filter(|_| ahead > 0.0) {
+                if nearest.is_none_or(|(held, _)| ahead < held) {
+                    nearest = Some((ahead, side.sign()));
+                }
+            }
+        };
+        for cue in self
+            .trip
+            .navigation_cues
+            .iter()
+            .filter(|cue| is_judged_turn(cue))
+        {
+            let called = self.turn_advised.contains(&cue.key)
+                || ["advance", "near"].iter().any(|half| {
+                    self.trip
+                        .announced_navigation
+                        .contains(&format!("{}:{half}", cue.key))
+                });
+            if called {
+                consider(cue.at_mi - position, TurnSide::parse(&cue.direction));
+            }
+        }
+        for bend in self.trip.curves.iter().filter(|bend| !bend.connector) {
+            // A bend the road warns about, whose call has gone out.
+            if (bend.advisory_mph as f64) < limit && self.trip.curve_called(bend) {
+                consider(
+                    bend.start_mi - position,
+                    TurnSide::parse(&bend.direction.to_string()),
+                );
+            }
+        }
+        nearest.map_or(0.0, |(_, sign)| sign)
+    }
+
     /// `_turn_leg_index(cue)`.
     pub fn turn_leg_index(&self, cue: &NavigationCue) -> usize {
         cue.key
@@ -218,7 +323,11 @@ impl DrivingState {
     pub fn turn_speed_mph(&self, cue: &NavigationCue) -> f64 {
         let index = self.turn_leg_index(cue);
         let leg = self.trip.route.legs.get(index);
-        let posted = leg.map(|leg| leg.local_speed_mph).unwrap_or(0.0);
+        // The street's own posted limit where the chain carries it -- the
+        // same number its zone posts -- else the bake's street speed.
+        let posted = leg
+            .map(|leg| leg.street_limit_mph().unwrap_or(leg.local_speed_mph))
+            .unwrap_or(0.0);
         let street = if posted != 0.0 {
             posted
         } else {
@@ -264,6 +373,46 @@ impl DrivingState {
             || self.arrival_menu_open
     }
 
+    /// `ahead` at which the corner's clock is real time: reaction seconds
+    /// plus the shed down to the advise speed, both on the real clock, so
+    /// everything a driver does about the corner is plannable by ear.
+    ///
+    /// It used to go real at the approach CALL, which is sized in real
+    /// seconds on the compressed clock and so opened up to two miles out: a
+    /// 30 mph approach then crawled for four real minutes (flight, and the
+    /// agent drive into Abilene, 2026-09-23). The call stays time-based; only
+    /// the clock waits for the brake point.
+    pub fn turn_brake_point_mi(&self, cue: &NavigationCue) -> f64 {
+        let speed = self.trip.truck.speed_mph().max(1.0);
+        let reaction_mi = (KEEPER_EASE_REAL_S + KEEPER_SETTLE_REAL_S) * speed / 3600.0;
+        reaction_mi + self.keeper_shed_mi(self.turn_speed_mph(cue), 1.0)
+    }
+
+    /// Whether a facility street chain has reached the brake point for the
+    /// stop at its end: reaction seconds plus the shed to a standstill, on
+    /// the real clock, the same rule a turn keeps.
+    pub fn at_the_gates_brake_point(&self) -> bool {
+        let speed = self.trip.truck.speed_mph().max(1.0);
+        let reaction_mi = (KEEPER_EASE_REAL_S + KEEPER_SETTLE_REAL_S) * speed / 3600.0;
+        self.trip.remaining_miles() <= reaction_mi + self.keeper_shed_mi(0.0, 1.0)
+    }
+
+    /// Pace the clock for a corner `ahead` miles off: real time inside the
+    /// brake point, sliding down to it over `TURN_CLOCK_EASE_REAL_S` before.
+    pub(crate) fn pace_clock_for_turn(&mut self, cue: &NavigationCue, ahead: f64) {
+        let brake_mi = self.turn_brake_point_mi(cue);
+        self.trip.controlled_turn = ahead <= brake_mi;
+        if self.trip.controlled_turn {
+            return;
+        }
+        // The trip's own pacing here, since the turn clock was cleared at the
+        // top of the frame: the ease is sized on the mean of the two ends.
+        let paced = self.trip.effective_time_scale();
+        let speed = self.trip.truck.speed_mph().max(1.0);
+        let ease_mi = TURN_CLOCK_EASE_REAL_S * speed * (paced + 1.0) / 2.0 / 3600.0;
+        self.trip.turn_clock = ((brake_mi + ease_mi - ahead) / ease_mi).clamp(0.0, 1.0);
+    }
+
     // -- spoken text ----------------------------------------------------------
 
     /// `_turn_approach_text(cue, ahead_mi)`: the approach call, in the pacenote
@@ -281,8 +430,7 @@ impl DrivingState {
         let settings = &ctx.settings;
         let direction = cue.direction.trim().to_lowercase();
         let street = self.turn_street_text(cue);
-        let target = settings.speed_text(self.turn_speed_mph(cue));
-        let mut call = if ahead_mi <= TURN_NOW_MI {
+        let call = if ahead_mi <= TURN_NOW_MI {
             format!("Turn {direction} now onto {street}.")
         } else {
             let distance = settings.short_distance_text(ahead_mi);
@@ -291,14 +439,25 @@ impl DrivingState {
         if self.terse_speech(ctx) {
             return call;
         }
-        call = format!("{call} Advise {target}.");
+        format!("{call} {}", self.turn_advice_text(ctx, cue))
+    }
+
+    /// The approach call's advisory half alone: "Advise 11 miles per hour.",
+    /// with the keeper's own line when it is taking the corner. Empty in
+    /// terse, which drops the advisory.
+    pub fn turn_advice_text(&self, ctx: &GameContext, cue: &NavigationCue) -> String {
+        if self.terse_speech(ctx) {
+            return String::new();
+        }
+        let target = ctx.settings.speed_text(self.turn_speed_mph(cue));
+        let mut advice = format!("Advise {target}.");
         if self.keeper_mph.is_some() && self.trip.truck.speed_mph() > self.turn_speed_mph(cue) {
             // The keeper sheds this corner's speed itself, so say so here
             // rather than as a second utterance on top of the corner call --
             // and so nobody reaches for the brake, which cancels the session.
-            call = format!("{call} Speed keeper easing.");
+            advice = format!("{advice} Speed keeper easing.");
         }
-        call
+        advice
     }
 
     // -- the frame ------------------------------------------------------------
@@ -310,6 +469,8 @@ impl DrivingState {
         if self.turn_grace_s > 0.0 {
             self.turn_grace_s = 0.0f64.max(self.turn_grace_s - dt);
         }
+        // Re-decided every frame from where the corner is now.
+        self.trip.turn_clock = 0.0;
         let Some(cue) = cue else {
             self.trip.controlled_turn = false;
             return;
@@ -330,24 +491,56 @@ impl DrivingState {
                 // Being slow enough to MAKE a corner is not being given time
                 // to HEAR about it, and the route's own maneuver cue -- the
                 // whole story here, by the comment above -- still has to
-                // arrive far enough ahead to be acted on.
+                // arrive far enough ahead to be acted on. That time is the
+                // brake point's reaction seconds, on the real clock.
                 if ahead <= 0.0 {
                     self.resolve_turn(ctx, &cue);
                 } else if ahead <= self.turn_window_mi() {
-                    self.trip.controlled_turn = true;
+                    self.pace_clock_for_turn(&cue, ahead);
                 }
                 return;
             }
             if ahead > self.turn_window_mi() {
                 return;
             }
+            if ahead > 0.0 && self.trip.turning_through_corner() {
+                // Still round the last corner, whose chime has just sounded:
+                // this call waits for the rear to clear it, or the words name
+                // one side over the other side's chime.
+                self.pace_clock_for_turn(&cue, ahead);
+                return;
+            }
             // Either the window opened, or a resumed save arrived at the
             // corner cold. Both start the clock with the corner's own advice;
             // neither may latch a miss on first contact.
             self.turn_advised.insert(cue.key.clone());
-            self.trip.controlled_turn = true;
-            let message = self.turn_approach_text(ctx, &cue, 0.0f64.max(ahead));
-            self.turn_grace_s = self.turn_grace_seconds(ctx, &message);
+            self.pace_clock_for_turn(&cue, ahead);
+            let full = self.turn_approach_text(ctx, &cue, 0.0f64.max(ahead));
+            self.turn_grace_s = self.turn_grace_seconds(ctx, &full);
+            // The route's own lead ("In a quarter mile, turn left onto a side
+            // street") may have just named this corner. Then the call keeps
+            // only what the lead did not say, the advise speed, instead of the
+            // whole corner again seconds later (owner, Abilene streets,
+            // 2026-09-23). A "now" call is the instruction itself and stays
+            // whole -- unless the route's own act-now call ("Turn right onto
+            // a service road.") already gave it, which it does for a turn
+            // right at the gate: then "Turn right now onto a service road"
+            // was the same turn said twice (agent drive, Aberdeen yard).
+            let heard = |drive: &Self, half: &str, category: SpeechCategory| {
+                drive
+                    .trip
+                    .announced_navigation
+                    .contains(&format!("{}:{half}", cue.key))
+                    && (ctx.settings.speaks(Some(category)) || !ctx.ladder_applies())
+            };
+            let lead_heard = (ahead > TURN_NOW_MI
+                && heard(self, "advance", SpeechCategory::NavigationAdvisory))
+                || heard(self, "near", SpeechCategory::Navigation);
+            let message = if lead_heard {
+                self.turn_advice_text(ctx, &cue)
+            } else {
+                full
+            };
             // The earcon waits for the corner itself. It used to sound
             // here, on the approach, whether or not the words that go with
             // it were ever spoken -- so a rung that silenced the lead left a
@@ -374,7 +567,12 @@ impl DrivingState {
             // West Main Avenue" was dropped twice on one arrival and never
             // once heard (owner, Spokane, 2026-08-22). ROUTE, like the
             // trip's own near call.
-            if 0.0f64.max(ahead) <= TURN_NOW_MI {
+            if !lead_heard && 0.0f64.max(ahead) <= TURN_NOW_MI {
+                self.turn_called_now.insert(cue.key.clone());
+            }
+            if message.is_empty() {
+                // Terse, with the lead already heard: nothing new to say.
+            } else if 0.0f64.max(ahead) <= TURN_NOW_MI {
                 ctx.say_event_with(
                     message,
                     SayEvent::queued()
@@ -390,6 +588,21 @@ impl DrivingState {
             return;
         }
         if ahead > 0.0 {
+            self.pace_clock_for_turn(&cue, ahead);
+            return;
+        }
+        let too_fast =
+            self.trip.truck.speed_mph() > self.turn_speed_mph(&cue) + TURN_SPEED_MARGIN_MPH;
+        if !too_fast {
+            // Taken under its speed: settled here, its tone now. The grace
+            // below only keeps a corner from being FAILED while its own cue
+            // is still speaking. It used to hold a corner taken cleanly too,
+            // for as long as the off-the-ramp line took at the slowest
+            // modelled voice -- 71 seconds for the Ardmore yard's -- while
+            // the truck drove through the next two corners, whose calls came
+            // late and whose tones all sounded together at the end of it
+            // (live drive into Ardmore, 2026-09-24).
+            self.resolve_turn(ctx, &cue);
             return;
         }
         if self.turn_grace_s > 0.0 {
@@ -399,11 +612,7 @@ impl DrivingState {
             self.resolve_turn(ctx, &cue);
             return;
         }
-        if self.trip.truck.speed_mph() > self.turn_speed_mph(&cue) + TURN_SPEED_MARGIN_MPH {
-            self.handle_missed_turn(ctx, &cue);
-        } else {
-            self.resolve_turn(ctx, &cue);
-        }
+        self.handle_missed_turn(ctx, &cue);
     }
 
     /// `_resolve_turn(cue)`: this corner is settled; the clock goes back to
@@ -438,6 +647,7 @@ impl DrivingState {
         }
         self.trip.position_mi = floor.max(cue.at_mi - self.turn_window_mi());
         self.turn_advised.remove(&cue.key);
+        self.turn_called_now.remove(&cue.key);
         self.turn_grace_s = 0.0;
         self.trip.controlled_turn = false;
         // The trip's own GPS maneuver announcements latch per cue key; without
@@ -538,7 +748,26 @@ impl DrivingState {
             };
         }
         if self.ramp_mi.is_some() {
-            return RAMP_GUIDE_DEMAND;
+            // The exit ramp bends only in its curve now (realistic exit,
+            // 2026-09-24), so the engine leans for the curve, leading into it
+            // the way it leads into a street turn, and rides centred down the
+            // deceleration lane and the run to the bar. A lean for the whole
+            // ramp asked a driver steering for themselves to turn on straight
+            // road. A ramp the game put the truck on with no layout behind it
+            // (the loop-back to a missed terminal) keeps the old whole-ramp
+            // lean.
+            if self.ramp_layout.is_none() {
+                return RAMP_GUIDE_DEMAND;
+            }
+            if self.ramp_curve_radius_ft().is_some() {
+                return RAMP_GUIDE_DEMAND;
+            }
+            return match self.deceleration_lane_left_mi() {
+                Some(left) if left < TURN_GUIDE_LEAD_MI => {
+                    RAMP_GUIDE_DEMAND * (1.0 - left / TURN_GUIDE_LEAD_MI)
+                }
+                _ => 0.0,
+            };
         }
         let Some(cue) = self.turn_cue_in_play_read() else {
             return 0.0;

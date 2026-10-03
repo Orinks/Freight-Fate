@@ -56,7 +56,15 @@ impl DrivingState {
         let visibility = self.trip.weather.effects().visibility_mi;
         let visibility = if visibility == 0.0 { 10.0 } else { visibility };
         let gap_s = self.trip.traffic_context().map(|c| c.gap_seconds());
-        let chain_level = self.trip.chain_law_level();
+        // The law binds on the posted grade and nowhere else: the same test
+        // the entry citation makes (`update_chain_law`). Snow anywhere used
+        // to let a scale or a patrol in Chicago write "running the chain
+        // control without chains" (seasonal audit, 2026-10-01).
+        let chain_level = if self.trip.chain_law_area_at(position).is_some() {
+            self.trip.chain_law_level()
+        } else {
+            0
+        };
         let night = is_night(self.trip.local_hour());
         let pack_neighbours = self.trip.traffic_manager.pack_neighbours(
             position,
@@ -87,7 +95,7 @@ impl DrivingState {
             in_left_lane: self.lane.lane > 0,
             pack_neighbours,
             crest_between,
-            paced_mi: self.pacing_mi.get(&post.id()).copied().unwrap_or(0.0),
+            paced_mi: self.paced_mi(post),
             over_limit_mi: self.over_limit_mi,
             tire_wear_pct: self.trip.truck.tire_wear_pct,
             trailer_defect: self.visible_trailer_defect.0.clone(),
@@ -196,13 +204,18 @@ impl DrivingState {
             self.update_marked_unit_passes(ctx, previous_mi);
             self.update_tableaus(ctx, previous_mi);
         }
-        let audible: Vec<String> = self
-            .trip
-            .posts
-            .iter()
-            .filter(|post| post.staffed && position >= post.watch_start_mi() - POST_MARKER_LEAD_MI)
-            .map(|post| post.id())
-            .collect();
+        let mut id = std::mem::take(&mut self.post_id_scratch);
+        let mut audible: Vec<String> = Vec::new();
+        for post in &self.trip.posts {
+            if !(post.staffed && position >= post.watch_start_mi() - POST_MARKER_LEAD_MI) {
+                continue;
+            }
+            post.write_id(&mut id);
+            if !self.marked_post_ids.contains(id.as_str()) {
+                audible.push(id.clone());
+            }
+        }
+        self.post_id_scratch = id;
         for post_id in audible {
             self.mark_post_audible(ctx, &post_id);
         }
@@ -303,20 +316,38 @@ impl DrivingState {
     /// (measured 2026-08-16: 315 looks, zero catches over 2,000 miles).
     pub fn track_pacing(&mut self, moved: f64) {
         let position = self.trip.position_mi;
-        let behinds: Vec<(String, f64)> = self
-            .trip
-            .posts
-            .iter()
-            .filter(|post| post.method == METHOD_PACING && post.staffed)
-            .map(|post| (post.id(), position - post.at_mi))
-            .collect();
-        for (id, behind) in behinds {
+        let mut id = std::mem::take(&mut self.post_id_scratch);
+        for post in &self.trip.posts {
+            if !(post.method == METHOD_PACING && post.staffed) {
+                continue;
+            }
+            let behind = position - post.at_mi;
             if 0.0 < behind && behind <= PACING_WINDOW_MI {
-                *self.pacing_mi.entry(id).or_insert(0.0) += moved;
-            } else if behind > PACING_WINDOW_MI {
-                self.pacing_mi.remove(&id);
+                post.write_id(&mut id);
+                match self.pacing_mi.get_mut(id.as_str()) {
+                    Some(paced) => *paced += moved,
+                    None => {
+                        self.pacing_mi.insert(id.clone(), 0.0 + moved);
+                    }
+                }
+            } else if behind > PACING_WINDOW_MI && !self.pacing_mi.is_empty() {
+                post.write_id(&mut id);
+                self.pacing_mi.remove(id.as_str());
             }
         }
+        self.post_id_scratch = id;
+    }
+
+    /// Road `post` has paced the truck over, from [`Self::track_pacing`].
+    pub fn paced_mi(&mut self, post: &EnforcementPost) -> f64 {
+        if self.pacing_mi.is_empty() {
+            return 0.0;
+        }
+        post.write_id(&mut self.post_id_scratch);
+        self.pacing_mi
+            .get(self.post_id_scratch.as_str())
+            .copied()
+            .unwrap_or(0.0)
     }
 
     /// Take this mile's look and act on it.

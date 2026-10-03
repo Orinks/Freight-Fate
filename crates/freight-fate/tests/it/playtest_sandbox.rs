@@ -104,6 +104,35 @@ fn test_seeding_carries_careers_but_never_the_identity() {
     assert!(sandbox::audit(&sandbox).is_empty());
 }
 
+/// The agent's online session reaches staging with a driver of its own. The
+/// retired `--online` mode copied the real `online.json` in; a source build
+/// then handed anyone an agent that backed up to production as themselves.
+#[test]
+fn test_the_staging_session_takes_no_identity_and_talks_only_to_staging() {
+    let _guard = sandbox_env();
+    let previous_url = std::env::var_os("FREIGHT_FATE_ONLINE_URL");
+    let root = TempDir::new("ff-sandbox");
+    let source = fake_real_saves(root.path());
+    let staging = root.path().join("staging");
+
+    sandbox::prepare_staging(&staging, false, &source).unwrap();
+    let url = freight_fate::online_presence::base_url();
+    match previous_url {
+        Some(old) => std::env::set_var("FREIGHT_FATE_ONLINE_URL", old),
+        None => std::env::remove_var("FREIGHT_FATE_ONLINE_URL"),
+    }
+
+    assert_eq!(url, sandbox::STAGING_URL);
+    assert!(!staging.join("online.json").exists());
+    assert!(!staging.join("online.token").exists());
+    assert!(!staging.join("cloud_saves.json").exists());
+    assert!(!staging.join("profiles").exists());
+    assert_eq!(
+        read_settings(&staging.join("settings.json"))["cloud_saves"],
+        true
+    );
+}
+
 #[test]
 fn test_the_seeded_settings_have_every_publishing_switch_off() {
     let _guard = sandbox_env();

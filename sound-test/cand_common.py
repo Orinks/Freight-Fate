@@ -42,34 +42,60 @@ _LV = Path(r"C:\temp\ffsound\splice\Samples\packs\Large Vehicles")
 LICENSED = {
     # INTERIOR cab -- the driver's seat POV, the primary stock. Together these
     # cover idle -> redline from inside the cab.
-    "int_idle_low": _LV / "SemiTruck_S08IN.859.wav",       # 104s INT, 645-1275 rpm
-    "int_mid":      _LV / "SemiTruckMac_S08IN.909.wav",    # 70s  INT, 630-1470 rpm
-    "int_high":     _LV / "SemiTruckEngine_BW.60624.wav",  # 176s INT, 1440-2175 rpm
+    "int_idle_low": _LV / "SemiTruck_S08IN.859.wav",  # 104s INT, 645-1275 rpm
+    "int_mid": _LV / "SemiTruckMac_S08IN.909.wav",  # 70s  INT, 630-1470 rpm
+    "int_high": _LV / "SemiTruckEngine_BW.60624.wav",  # 176s INT, 1440-2175 rpm
     # EXTERIOR Mac takes -- richer rev/range material; interiorize() to bring
     # them into the cab. Long steady ones make the cleanest high-rpm loops.
-    "ext_hi_a":     _LV / "SemiTruckMac_S08IN.904.wav",    # 76s  EXT, ~1900 steady
-    "ext_hi_b":     _LV / "SemiTruckMac_S08IN.905.wav",    # 80s  EXT, ~1900 steady
-    "ext_range_a":  _LV / "SemiTruckMac_S08IN.896.wav",    # 124s EXT, 525-1350 wide
-    "ext_range_b":  _LV / "SemiTruckMac_S08IN.907.wav",    # 84s  EXT, 715-2105 wide
-    "ext_range_c":  _LV / "SemiTruckMac_S08IN.908.wav",    # 49s  EXT, 505-1895 wide
-    "ext_rev_a":    _LV / "SemiTruckMac_S08IN.886.wav",    # 7s   EXT, hard rev to 2195
-    "ext_rev_b":    _LV / "SemiTruckMac_S08IN.889.wav",    # 6s   EXT, rev 1565-2175
-    "ext_idle":     _LV / "SemiTruckStartIdle_SFXB.264.wav",  # 91s EXT idle ~500-670
+    "ext_hi_a": _LV / "SemiTruckMac_S08IN.904.wav",  # 76s  EXT, ~1900 steady
+    "ext_hi_b": _LV / "SemiTruckMac_S08IN.905.wav",  # 80s  EXT, ~1900 steady
+    "ext_range_a": _LV / "SemiTruckMac_S08IN.896.wav",  # 124s EXT, 525-1350 wide
+    "ext_range_b": _LV / "SemiTruckMac_S08IN.907.wav",  # 84s  EXT, 715-2105 wide
+    "ext_range_c": _LV / "SemiTruckMac_S08IN.908.wav",  # 49s  EXT, 505-1895 wide
+    "ext_rev_a": _LV / "SemiTruckMac_S08IN.886.wav",  # 7s   EXT, hard rev to 2195
+    "ext_rev_b": _LV / "SemiTruckMac_S08IN.889.wav",  # 6s   EXT, rev 1565-2175
+    "ext_idle": _LV / "SemiTruckStartIdle_SFXB.264.wav",  # 91s EXT idle ~500-670
 }
 # UNLICENSED shipped idle -- Duff's real in-cab idle (~800 rpm). For COMPARISON
 # of character only; it is being removed and must never be a source or shipped.
-COMPARE_IDLE = (Path(__file__).resolve().parents[1] / "assets" / "sounds" / "engine" / "idle.ogg")
+COMPARE_IDLE = Path(__file__).resolve().parents[1] / "assets" / "sounds" / "engine" / "idle.ogg"
 
 IDLE_RPM = 647.0
-FIRING_HZ = IDLE_RPM / 20.0          # 32.35 Hz -- the engine firing rate at idle
-FIRING_PERIOD_S = 20.0 / IDLE_RPM     # 30.9 ms between firings
-CYCLE_PERIOD_S = 120.0 / IDLE_RPM     # 185.5 ms per four-stroke cycle
+FIRING_HZ = IDLE_RPM / 20.0  # 32.35 Hz -- the engine firing rate at idle
+FIRING_PERIOD_S = 20.0 / IDLE_RPM  # 30.9 ms between firings
+CYCLE_PERIOD_S = 120.0 / IDLE_RPM  # 185.5 ms per four-stroke cycle
 
 # 1/3-octave centres for all spectral scoring.
-THIRD_OCT = np.array([25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315,
-                      400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150,
-                      4000, 5000, 6300.0])
-MATCH_LO, MATCH_HI = 200.0, 1000.0    # energy-match band (the part that agrees)
+THIRD_OCT = np.array(
+    [
+        25,
+        31.5,
+        40,
+        50,
+        63,
+        80,
+        100,
+        125,
+        160,
+        200,
+        250,
+        315,
+        400,
+        500,
+        630,
+        800,
+        1000,
+        1250,
+        1600,
+        2000,
+        2500,
+        3150,
+        4000,
+        5000,
+        6300.0,
+    ]
+)
+MATCH_LO, MATCH_HI = 200.0, 1000.0  # energy-match band (the part that agrees)
 
 
 # --- I/O ---------------------------------------------------------------------
@@ -85,8 +111,9 @@ def load_wav(path: Path | str) -> np.ndarray:
     return mono
 
 
-def write_wav(name: str, x: np.ndarray, target_rms: float = 0.12,
-              peak_ceiling: float = 0.97) -> str:
+def write_wav(
+    name: str, x: np.ndarray, target_rms: float = 0.12, peak_ceiling: float = 0.97
+) -> str:
     """Loudness-match to a common RMS and write 16-bit mono to CAND_DIR.
 
     Matching RMS (not peak) is what makes the menu a fair A/B: a candidate does
@@ -94,7 +121,7 @@ def write_wav(name: str, x: np.ndarray, target_rms: float = 0.12,
     odd transient from clipping. Returns the full path written.
     """
     x = np.nan_to_num(np.asarray(x, dtype=float))
-    r = float(np.sqrt(np.mean(x ** 2))) or 1.0
+    r = float(np.sqrt(np.mean(x**2))) or 1.0
     x = x * (target_rms / r)
     p = float(np.max(np.abs(x))) or 1.0
     if p > peak_ceiling:
@@ -123,8 +150,9 @@ def tile(x: np.ndarray, seconds: float) -> np.ndarray:
 def band_power(x: np.ndarray) -> np.ndarray:
     S = np.abs(np.fft.rfft(x * np.hanning(len(x)))) ** 2
     f = np.fft.rfftfreq(len(x), 1.0 / SR)
-    return np.array([S[(f >= fc / 2 ** (1 / 6)) & (f < fc * 2 ** (1 / 6))].sum()
-                     for fc in THIRD_OCT])
+    return np.array(
+        [S[(f >= fc / 2 ** (1 / 6)) & (f < fc * 2 ** (1 / 6))].sum() for fc in THIRD_OCT]
+    )
 
 
 def diff_curve(cand: np.ndarray, real: np.ndarray) -> np.ndarray:
@@ -145,8 +173,7 @@ def diff_summary(cand: np.ndarray, real: np.ndarray) -> dict:
         # candidate's 200-1500 Hz CONTOUR departs from the real one (RMS dB,
         # after the energy match). Near 0 = same broad shape as the real idle;
         # large = a resonant box. This is the number that tracks Norm's "boxy".
-        "mid_shape_dev": float(np.sqrt(np.mean(
-            d[(THIRD_OCT >= 200) & (THIRD_OCT <= 1500)] ** 2))),
+        "mid_shape_dev": float(np.sqrt(np.mean(d[(THIRD_OCT >= 200) & (THIRD_OCT <= 1500)] ** 2))),
     }
 
 
@@ -195,9 +222,11 @@ def formant_centroid(x: np.ndarray, lo: float = 150.0, hi: float = 2200.0) -> fl
 def score(idle_loop: np.ndarray, rev: np.ndarray | None = None) -> dict:
     """The guardrail metrics for one candidate. Ear still judges; this gates."""
     real = load_wav(REF_IDLE)
-    out = {"fullness": round(fullness(idle_loop), 3),
-           "real_fullness": round(fullness(real), 3),
-           "seam": round(seam_check(idle_loop), 2)}
+    out = {
+        "fullness": round(fullness(idle_loop), 3),
+        "real_fullness": round(fullness(real), 3),
+        "seam": round(seam_check(idle_loop), 2),
+    }
     out.update({k: round(v, 2) for k, v in diff_summary(idle_loop, real).items()})
     if rev is not None and len(rev) > SR:
         # formant drift from the first second (near idle) to the last (revved)
@@ -219,7 +248,9 @@ def load_real_idle_source() -> np.ndarray:
 # --- real-material helpers (shared so the fan-out is consistent) --------------
 
 
-def rpm_track(x: np.ndarray, hop_s: float = 0.25, win_s: float = 0.5) -> tuple[np.ndarray, np.ndarray]:
+def rpm_track(
+    x: np.ndarray, hop_s: float = 0.25, win_s: float = 0.5
+) -> tuple[np.ndarray, np.ndarray]:
     """Firing frequency -> rpm across a file, by harmonic sum (octave-robust).
 
     Plain autocorrelation octave-errors on engines; scoring each candidate f0 by
@@ -230,10 +261,13 @@ def rpm_track(x: np.ndarray, hop_s: float = 0.25, win_s: float = 0.5) -> tuple[n
     cand = np.arange(500.0, 2200.0, 5.0) / 20.0
     times, rpm = [], []
     for i in range(0, max(1, len(x) - w), hop):
-        seg = x[i:i + w] * np.hanning(w)
-        if np.sqrt(np.mean(seg ** 2)) < 1e-4:
-            times.append(i / SR); rpm.append(0.0); continue
-        S = np.abs(np.fft.rfft(seg)); f = np.fft.rfftfreq(w, 1.0 / SR)
+        seg = x[i : i + w] * np.hanning(w)
+        if np.sqrt(np.mean(seg**2)) < 1e-4:
+            times.append(i / SR)
+            rpm.append(0.0)
+            continue
+        S = np.abs(np.fft.rfft(seg))
+        f = np.fft.rfftfreq(w, 1.0 / SR)
         scores = np.zeros(len(cand))
         for ci, f0 in enumerate(cand):
             acc = 0.0
@@ -245,12 +279,14 @@ def rpm_track(x: np.ndarray, hop_s: float = 0.25, win_s: float = 0.5) -> tuple[n
                 if hi > lo:
                     acc += S[lo:hi].max()
             scores[ci] = acc
-        times.append(i / SR); rpm.append(cand[int(np.argmax(scores))] * 20.0)
+        times.append(i / SR)
+        rpm.append(cand[int(np.argmax(scores))] * 20.0)
     return np.array(times), np.array(rpm)
 
 
-def find_steady_window(x: np.ndarray, target_rpm: float, dur_s: float = 2.5,
-                       tol: float = 70.0) -> np.ndarray | None:
+def find_steady_window(
+    x: np.ndarray, target_rpm: float, dur_s: float = 2.5, tol: float = 70.0
+) -> np.ndarray | None:
     """The steadiest dur_s slice whose rpm sits within tol of target_rpm.
 
     Returns None if the take never dwells near that rpm -- the caller then falls
@@ -263,7 +299,7 @@ def find_steady_window(x: np.ndarray, target_rpm: float, dur_s: float = 2.5,
     need = int(dur_s / hop)
     best, best_dev = None, 1e9
     for i in range(0, len(r) - need):
-        seg = r[i:i + need]
+        seg = r[i : i + need]
         if np.any(seg <= 0) or abs(seg.mean() - target_rpm) > tol:
             continue
         dev = float(seg.std())
@@ -272,11 +308,12 @@ def find_steady_window(x: np.ndarray, target_rpm: float, dur_s: float = 2.5,
     if best is None:
         return None
     a = int(t[best] * SR)
-    return x[a:a + int(dur_s * SR)]
+    return x[a : a + int(dur_s * SR)]
 
 
-def make_seamless_loop(x: np.ndarray, xfade_s: float = 0.012,
-                       max_trim_s: float = 0.16) -> np.ndarray:
+def make_seamless_loop(
+    x: np.ndarray, xfade_s: float = 0.012, max_trim_s: float = 0.16
+) -> np.ndarray:
     """Loop with no click AND no phasing, by landing the join on a real period.
 
     The old version overlapped ~120 ms of the wrapped tail onto the head. The
@@ -289,14 +326,14 @@ def make_seamless_loop(x: np.ndarray, xfade_s: float = 0.012,
     comb. Trims at most one cycle, so the loop stays the length it was meant to.
     """
     n = len(x)
-    xf = min(int(xfade_s * SR), int(0.015 * SR))   # cap: long fades are the bug
-    C = int(0.006 * SR)                             # 6 ms match context
+    xf = min(int(xfade_s * SR), int(0.015 * SR))  # cap: long fades are the bug
+    C = int(0.006 * SR)  # 6 ms match context
     if n <= 2 * (C + xf):
         return x
     head = x[:C]
-    seg2 = np.convolve(x ** 2, np.ones(C), "valid")          # sum x[j:j+C]^2
-    cc = np.correlate(x, head, "valid")                      # sum x[j:j+C]*head
-    ssd = seg2[:len(cc)] - 2.0 * cc + float(np.dot(head, head))
+    seg2 = np.convolve(x**2, np.ones(C), "valid")  # sum x[j:j+C]^2
+    cc = np.correlate(x, head, "valid")  # sum x[j:j+C]*head
+    ssd = seg2[: len(cc)] - 2.0 * cc + float(np.dot(head, head))
     e_hi = n - C
     e_lo = max(C + xf + 1, n - int(max_trim_s * SR))
     idx = np.arange(len(ssd))
@@ -304,7 +341,7 @@ def make_seamless_loop(x: np.ndarray, xfade_s: float = 0.012,
     e = int(idx[m][np.argmin(ssd[m])])
     y = x[:e].copy()
     w = np.linspace(0.0, 1.0, xf)
-    y[:xf] = x[:xf] * w + x[e:e + xf] * (1.0 - w)   # blends two matched segments
+    y[:xf] = x[:xf] * w + x[e : e + xf] * (1.0 - w)  # blends two matched segments
     return y
 
 

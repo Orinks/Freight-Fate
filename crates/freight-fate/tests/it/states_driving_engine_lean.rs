@@ -23,11 +23,14 @@ use ff_core::sim::weather::WeatherKind;
 
 use freight_fate::app::testing::TestApp;
 use freight_fate::audio::CH_LANE_GUIDE;
+use freight_fate::states::base::{Key, Mods};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::*;
+use freight_fate::states::driving_menu_states::DriveRef;
+use freight_fate::states::driving_pause_states::PauseMenuState;
 use freight_fate::states::driving_turns::TURN_COMMIT_TAIL_MI;
 
-use super::states_driving_engine_audio::{Calls, Log, TrackingAudio};
+use super::states_driving_engine_audio::{Calls, Log, LoopCall, TrackingAudio};
 
 // -- rigging -------------------------------------------------------------------------
 
@@ -78,10 +81,13 @@ fn a_drive(app: &mut TestApp) -> (DrivingState, Log) {
     (drive, log)
 }
 
-/// A driver holding the lane themselves, with the warning on: the mode in
-/// which every half of the lean may speak.
+/// A driver holding the lane AND taking the turns themselves, with the
+/// warning on: the mode in which every half of the lean may speak. Curve
+/// assistance steers the turns when it is on, and the lean then carries drift
+/// alone (owner, 2026-09-30).
 fn by_hand(app: &mut TestApp) {
     app.ctx.settings.lane_keeping = "off".into();
+    app.ctx.settings.curve_speed_assist = false;
     app.ctx.settings.lane_departure_warning = true;
     app.ctx.settings.lane_guide_tone = false;
     app.ctx.settings.steering_guide_inverted = false;
@@ -304,6 +310,38 @@ fn test_the_inverted_guide_reverses_the_opt_in_tone_too() {
     );
 }
 
+#[test]
+fn test_the_opt_in_tone_comes_back_after_the_pause_menu() {
+    // The pause silences the tone with the rest of the world, but the tone
+    // starts on a latch. Left set, a truck still drifting after Resume got
+    // silence, which is the tone saying "centred" to a driver who was not.
+    let tone_starts = |log: &Log| {
+        log.borrow()
+            .loops
+            .iter()
+            .filter(
+                |call| matches!(call, LoopCall::Start(channel, ..) if *channel == CH_LANE_GUIDE),
+            )
+            .count()
+    };
+    let mut app = TestApp::new();
+    by_hand(&mut app);
+    app.ctx.settings.lane_guide_tone = true;
+    let (mut drive, log) = a_drive(&mut app);
+    drive.lane.offset = 0.8;
+    lean_for(&mut app, &mut drive, 2.0);
+    assert_eq!(tone_starts(&log), 1, "the drift never woke the tone");
+
+    PauseMenuState::with_drive(DriveRef::empty()).enter_over_drive(&mut app.ctx, &mut drive);
+    // Resume only pops the menu: the drive's next frame is what runs next.
+    drive.update_lane_guidance_audio(&mut app.ctx, DT);
+    assert_eq!(
+        tone_starts(&log),
+        2,
+        "the tone stayed silent after the pause while the truck was still off centre"
+    );
+}
+
 // -- turns yes, drift no ------------------------------------------------------------------
 
 #[test]
@@ -432,13 +470,15 @@ fn test_a_bend_still_being_taken_keeps_the_engine_from_the_bend_after_it() {
 
 /// The drive the owner reported, on the real map: AZ-260 from Camp Verde to
 /// Payson at thirty-seven miles an hour, nobody touching the wheel, and the
-/// assists a fresh install ships with.
+/// assists a fresh install ships with: full lane keeping since 2026-09-30,
+/// the one mode where the engine leans for the road's shape with the truck
+/// doing the steering.
 ///
 /// The route's own bends are the whole subject here, so unlike [`a_drive`]
 /// nothing is cleared: what this pins is what fifty-eight miles of baked
 /// mountain highway do to the lean.
 fn on_az260(app: &mut TestApp, start_mi: f64) -> (DrivingState, Log) {
-    app.ctx.settings.lane_keeping = "partial".into();
+    app.ctx.settings.lane_keeping = "full".into();
     app.ctx.settings.lane_departure_warning = true;
     app.ctx.settings.curve_speed_assist = true;
     app.ctx.settings.lane_guide_tone = false;
@@ -560,4 +600,185 @@ fn test_a_bend_the_road_warns_about_still_takes_the_engine_and_gives_it_back() {
         "the engine never came back to centre after the bend: {:?}",
         tail.last()
     );
+}
+
+// -- the lean asks for the wheel only where the wheel is yours --------------------------
+
+#[test]
+fn test_with_the_road_steering_the_turn_the_engine_leans_only_for_drift() {
+    // The owner's drive on US-83, 2026-09-30: curve assistance was steering
+    // a sharp left, the engine leaned left, he held left as the lean asked,
+    // and the truck changed lanes into the median. The turn was already
+    // being taken; the lean asked for it twice.
+    for (lane_keeping, curve_assistance) in [("off", true), ("partial", false)] {
+        let mut app = TestApp::new();
+        by_hand(&mut app);
+        app.ctx.settings.lane_keeping = lane_keeping.into();
+        app.ctx.settings.curve_speed_assist = curve_assistance;
+        let (mut drive, log) = a_drive(&mut app);
+        drive.trip.curves.push(a_bend(30.02, 0.3, 'L'));
+        drive.trip.navigation_cues.push(a_corner(30.05, "right"));
+        lean_for(&mut app, &mut drive, 2.0);
+        let case = format!("{lane_keeping}, curve assistance {curve_assistance}");
+        assert!(
+            engine_pans(&log).iter().all(|pan| *pan == 0.0),
+            "{case}: the engine leaned for a turn the truck is taking: {:?}",
+            engine_pans(&log)
+        );
+        // A drift is still the driver's, and still leans back to centre.
+        drive.lane.offset = 0.9;
+        drive.lane.yaw_rad = 0.02;
+        lean_for(&mut app, &mut drive, 2.0);
+        assert!(
+            last_engine_pan(&log) < -0.1,
+            "{case}: a drift to the right never leaned the engine left"
+        );
+    }
+}
+
+#[test]
+fn test_on_full_lane_keeping_the_engine_still_leans_for_the_road() {
+    // The one mode where the arrows change lanes and never steer, so the
+    // road's shape is information and nothing a driver can follow into a
+    // bend (owner, 2026-09-18).
+    let mut app = TestApp::new();
+    by_hand(&mut app);
+    app.ctx.settings.lane_keeping = "full".into();
+    app.ctx.settings.curve_speed_assist = true;
+    let (mut drive, log) = a_drive(&mut app);
+    let bend = a_bend(30.02, 0.3, 'L');
+    drive.trip.curves.push(bend);
+    lean_for(&mut app, &mut drive, 2.0);
+    assert!(
+        last_engine_pan(&log) < -bend_depth(&bend) * 0.5,
+        "full lane keeping lost the road's shape: {}",
+        last_engine_pan(&log)
+    );
+}
+
+#[test]
+fn test_a_street_corner_bends_the_lane_and_curve_assistance_takes_it() {
+    // Forum report 448, 2026-09-30: "the game tells you to turn one direction,
+    // but you have to steer the opposite direction ... through streets". The
+    // lane had no corners in it, so steering into one as the lean asked only
+    // drove the truck across its own lane. A corner bends the lane's road now.
+    let radius_ft = ff_core::data::corners::corner_radius_ft(90.0);
+    let arc_mi = radius_ft * std::f64::consts::FRAC_PI_2 / 5280.0;
+    let mph = 10.0;
+    for curve_assistance in [false, true] {
+        let mut app = TestApp::new();
+        by_hand(&mut app);
+        app.ctx.settings.curve_speed_assist = curve_assistance;
+        let (mut drive, _log) = a_drive(&mut app);
+        drive.trip.truck.velocity_mps = mph / 2.23694;
+        drive.trip.navigation_cues.push(a_corner(30.0, "left"));
+        let step_mi = mph / 3600.0 * DT;
+        let mut deepest: f64 = 0.0;
+        let mut widest: f64 = 0.0;
+        while drive.trip.position_mi < 30.0 + arc_mi {
+            drive.trip.position_mi += step_mi;
+            drive.update_lane(&mut app.ctx, DT);
+            deepest = deepest.max(drive.lane.yaw_rad.abs());
+            widest = widest.max(drive.lane.offset.abs());
+        }
+        if curve_assistance {
+            assert!(
+                deepest < 0.05 && widest < 0.25,
+                "curve assistance let the corner turn away: heading {deepest}, offset {widest}"
+            );
+        } else {
+            // Nobody steering and nothing taking it: the road turns away
+            // beneath the truck and it runs wide. Letting go only squares the
+            // heading, so a turn still needs a hold or curve assistance.
+            assert!(deepest > 0.1, "the corner never turned the road: {deepest}");
+        }
+    }
+}
+
+#[test]
+fn test_holding_right_into_a_right_turn_takes_it_and_stays_on_the_road() {
+    // The owner's second drive, 2026-09-30: "I was making a right turn,
+    // hold right, go off the road." Held from the call, through the corner
+    // and past it, the truck follows the street and keeps its lane, with
+    // curve assistance on or off.
+    let radius_ft = ff_core::data::corners::corner_radius_ft(90.0);
+    let arc_mi = radius_ft * std::f64::consts::FRAC_PI_2 / 5280.0;
+    let mph = 10.0;
+    for curve_assistance in [true, false] {
+        let mut app = TestApp::new();
+        by_hand(&mut app);
+        app.ctx.settings.curve_speed_assist = curve_assistance;
+        let (mut drive, log) = a_drive(&mut app);
+        drive.trip.truck.velocity_mps = mph / 2.23694;
+        drive.trip.navigation_cues.push(a_corner(30.02, "right"));
+        app.ctx.input.press(Key::Right, Mods::NONE);
+        let step_mi = mph / 3600.0 * DT;
+        let mut widest: f64 = 0.0;
+        while drive.trip.position_mi < 30.02 + arc_mi + 0.01 {
+            drive.trip.position_mi += step_mi;
+            drive.update_lane(&mut app.ctx, DT);
+            drive.update_steering_lane_cue(&mut app.ctx, DT);
+            widest = widest.max(drive.lane.offset.abs());
+        }
+        app.ctx.input.release(Key::Right, Mods::NONE);
+        assert!(
+            widest < 0.25,
+            "curve assistance {curve_assistance}: the hold took the truck {widest} of the \
+             way to the line"
+        );
+        // And no lane-move relay: the hold keeps the lane, and a relay at
+        // every corner read as a blinker nobody switched on (owner, same day).
+        assert!(
+            !log.borrow()
+                .played
+                .iter()
+                .any(|(key, _)| key == "vehicle/turn_signal"),
+            "curve assistance {curve_assistance}: the relay ticked through the corner"
+        );
+    }
+}
+
+#[test]
+fn test_a_hold_at_the_call_waits_for_the_turn_a_mile_off() {
+    // The owner's drives, 2026-09-30: "Right turn onto South Dakota Street,
+    // one mile" held right steered the truck off the road a mile short of the
+    // corner, and "Sharp left, half a mile" held left changed lanes into the
+    // median. Once a turn is called, a hold toward it waits straight on in
+    // its lane; a turn nobody has called is still a steer.
+    let mph = 25.0;
+    for called in [true, false] {
+        for bend in [false, true] {
+            let mut app = TestApp::new();
+            by_hand(&mut app);
+            let (mut drive, _log) = a_drive(&mut app);
+            drive.trip.truck.velocity_mps = mph / 2.23694;
+            let (key, turn) = if bend {
+                let curve = a_bend(30.5, 0.2, 'R');
+                drive.trip.curves.push(curve);
+                let key = format!("curve:{}:R", ff_core::pyfmt::fmt_f(30.5, 3));
+                (key, "the bend")
+            } else {
+                drive.trip.navigation_cues.push(a_corner(31.0, "right"));
+                ("local:turn:1:advance".to_string(), "the corner")
+            };
+            if called {
+                drive.trip.announced_navigation.insert(key.clone());
+                drive.trip.announced_curves.insert(key);
+            }
+            app.ctx.input.press(Key::Right, Mods::NONE);
+            let step_mi = mph / 3600.0 * DT;
+            let mut widest: f64 = 0.0;
+            for _ in 0..(8.0 / DT) as usize {
+                drive.trip.position_mi += step_mi;
+                drive.update_lane(&mut app.ctx, DT);
+                widest = widest.max(drive.lane.offset.abs());
+            }
+            app.ctx.input.release(Key::Right, Mods::NONE);
+            if called {
+                assert!(widest < 0.25, "{turn}, called: the hold steered {widest}");
+            } else {
+                assert!(widest > 0.5, "{turn}, uncalled: the hold never steered");
+            }
+        }
+    }
 }

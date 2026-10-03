@@ -7,7 +7,7 @@ use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
-use crate::states::driving_updates::{OVERREV_GRACE_S, OVERREV_REPEAT_S};
+use crate::states::driving_updates::{live, OVERREV_GRACE_S, OVERREV_REPEAT_S};
 
 impl DrivingState {
     pub fn maybe_say_air_brake_lockout(&mut self, ctx: &mut GameContext) {
@@ -32,11 +32,18 @@ impl DrivingState {
         // advisory and an achievement ahead of it in the same channel, and
         // the lockout lost a race it had never been in. Same call as the toll
         // charge and the adaptive-cruise lines: a consequence is not colour.
-        let opts = || {
+        //
+        // And each is spoken only while its own reason still holds: queued
+        // behind other speech, the parking-brake line once spoke after the
+        // brake was released and the truck was rolling (see
+        // `live::set_move_lockout`).
+        self.refresh_live_facts();
+        let opts = |reason: u8| {
             SayEvent::queued()
                 .priority(EventPriority::Route)
                 .key("air_brake_lockout")
                 .category(SpeechCategory::Status)
+                .valid(move || live::move_lockout() == reason)
         };
         if !self.trip.truck.engine_on {
             self.set_status("Start the engine before releasing the brakes.");
@@ -45,7 +52,7 @@ impl DrivingState {
             } else {
                 "Engine off. Start the engine first.".to_string()
             };
-            ctx.say_event_with(message, opts());
+            ctx.say_event_with(message, opts(live::LOCKOUT_ENGINE_OFF));
         } else if !self.trip.truck.air_ready() {
             self.set_status("Waiting for air pressure before the truck can move.");
             let psi = self.trip.truck.air_pressure_psi();
@@ -57,7 +64,7 @@ impl DrivingState {
                     ctx.control_hint("parking_brake")
                 )
             };
-            ctx.say_event_with(message, opts());
+            ctx.say_event_with(message, opts(live::LOCKOUT_AIR));
         } else if self.trip.truck.parking_brake {
             let brake_hint = ctx.control_hint("parking_brake");
             self.set_status(format!(
@@ -68,7 +75,7 @@ impl DrivingState {
             } else {
                 format!("Parking brake set. Press {brake_hint} to release it.")
             };
-            ctx.say_event_with(message, opts());
+            ctx.say_event_with(message, opts(live::LOCKOUT_PARKING_BRAKE));
         }
     }
 

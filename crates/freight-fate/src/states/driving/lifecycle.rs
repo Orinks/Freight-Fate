@@ -283,6 +283,12 @@ impl DrivingState {
     /// radio's dial written to settings, the world's audio silenced.
     pub fn exit_drive(&mut self, ctx: &mut GameContext) {
         ctx.audio.horn_stop();
+        // The siren's dead-man's switch only ticks from inside update(), so
+        // once this state stops running it can never time itself out --
+        // leave to the menu mid pull-over and it outlived every drive that
+        // followed, until the game closed. Stop it explicitly, the same call
+        // a resolved stop already makes (`end_stop_audio`).
+        self.siren.stop(ctx.audio.as_mut());
         self.stop_liquid_cues(ctx);
         {
             let mut settings = RadioSettingsMut(&mut ctx.settings);
@@ -298,8 +304,24 @@ impl DrivingState {
         self.engine_guide_pan_applied = None;
         self.road_pan_applied = None;
         ctx.audio.stop_world();
+        self.forget_stopped_loops();
         ctx.audio.stop_music_with(600);
         ctx.apply_volumes();
+    }
+
+    /// Clear the latches of every cue loop `stop_world` just silenced.
+    ///
+    /// Each of these loops starts once on its latch rather than every frame,
+    /// so a latch left set kept its sound off after the world came back: the
+    /// lane guide tone stayed silent through the next drift after a pause,
+    /// which is the tone saying "centred" to a driver who was not. Every
+    /// place that stops the world under a live drive calls this after it.
+    pub fn forget_stopped_loops(&mut self) {
+        self.reverse_cue_active = false;
+        self.air_cue_active = false;
+        self.jake_cue_key = None;
+        self.lane_guide_tone_on = false;
+        self.lane_guide_pan_applied = 0.0;
     }
 
     /// `is_night(self.trip.local_hour)`: the drive's own day/night flag, for

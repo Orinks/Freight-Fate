@@ -20,6 +20,19 @@ use regex::Regex;
 /// tells the runtime NOT to guess free flow off the exit's `via` signage,
 /// which points where the exit is signed toward, not at the road the ramp
 /// lands on.
+///
+/// `ramp_length_ft_forward/backward` is the exit ramp's length for travel
+/// along the leg A->B or B->A, derived from OSM geometry: summed along the
+/// link way(s) from the gore to the node where the ramp ends. It starts where
+/// the OSM ramp way leaves the motorway, at or near the gore, so a
+/// deceleration lane before the gore is NOT included. `None` when no
+/// gore matched in that direction or the bake's screen dropped the value.
+///
+/// `ramp_terminal_node_forward/backward` is the OSM node id where that same
+/// walk ends on a surface road (read from link topology), per direction: the
+/// crossroad the ramp hands the truck to, and the key of the facility street
+/// chain that starts there (`World::facility_exit_route`). `None` for a ramp
+/// ending in a merge, or where no length survived the screen.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Interchange {
     pub at_mi: f64,
@@ -34,38 +47,100 @@ pub struct Interchange {
     pub ramp_advisory_mph_forward: Option<f64>,
     pub ramp_advisory_mph_backward: Option<f64>,
     pub ramp_advisory_source: String,
+    pub ramp_length_ft_forward: Option<f64>,
+    pub ramp_length_ft_backward: Option<f64>,
+    pub ramp_length_source: String,
+    pub ramp_terminal_node_forward: Option<i64>,
+    pub ramp_terminal_node_backward: Option<i64>,
+    pub ramp_terminal_source: String,
 }
 
 impl Interchange {
     /// Lower-case lead phrase for GPS announcements.
     pub fn spoken_phrase(&self) -> String {
+        self.phrase(Some(&self.via), &self.destinations)
+    }
+
+    /// True when `via` names the same route the leg runs on -- the bake merged
+    /// a mainline entrance ramp's signage into this exit's record, so the via
+    /// and any mainline destinations are the driver's own road, not the
+    /// exit's. Requires a cardinal word (an unsigned "I 35" could still be the
+    /// exit's real signage) and refuses route modifiers (a "Business" loop is
+    /// a different road that happens to share the number).
+    pub fn via_is_mainline(&self, leg_highway: &str) -> bool {
+        let via_token = route_token(&self.via);
+        if via_token.is_empty() || via_token != route_token(leg_highway) {
+            return false;
+        }
+        if !has_cardinal(&self.via) {
+            return false;
+        }
+        !has_modifier(&self.via) && !has_modifier(leg_highway)
+    }
+
+    /// `spoken_phrase` aware of the leg's own highway: when `via` is just the
+    /// mainline (see `via_is_mainline`), the "for {via}" part is dropped and
+    /// so is every destination that names the mainline's own signage: the
+    /// leg's route token, any city on the driver's own route
+    /// (`mainline_cities`), and any destination the leg's other exits also
+    /// sign (`sibling_destinations`) -- a destination re-signed down the same
+    /// road is the mainline's promise, not this exit's.
+    pub fn spoken_phrase_on(
+        &self,
+        leg_highway: &str,
+        mainline_cities: &[String],
+        sibling_destinations: &[String],
+    ) -> String {
+        if !self.via_is_mainline(leg_highway) {
+            return self.spoken_phrase();
+        }
+        let leg_token = route_token(leg_highway);
+        let dests: Vec<String> = self
+            .destinations
+            .iter()
+            .filter(|d| {
+                route_token(d) != leg_token
+                    && !mainline_cities.iter().any(|c| c == *d)
+                    && !sibling_destinations.iter().any(|c| c == *d)
+            })
+            .cloned()
+            .collect();
+        self.phrase(None, &dests)
+    }
+
+    pub fn near_phrase(&self) -> String {
+        near_from(&self.spoken_phrase())
+    }
+
+    pub fn near_phrase_on(
+        &self,
+        leg_highway: &str,
+        mainline_cities: &[String],
+        sibling_destinations: &[String],
+    ) -> String {
+        near_from(&self.spoken_phrase_on(leg_highway, mainline_cities, sibling_destinations))
+    }
+
+    fn phrase(&self, via: Option<&str>, destinations: &[String]) -> String {
         let head = if self.exit_ref.is_empty() {
             "exit".to_string()
         } else {
             format!("exit {}", self.exit_ref)
         };
         let mut parts = vec![head];
-        let via = format_route_ref(&self.via);
-        if !via.is_empty() {
-            parts.push(format!("for {via}"));
+        if let Some(via) = via {
+            let via = format_route_ref(via);
+            if !via.is_empty() {
+                parts.push(format!("for {via}"));
+            }
         }
-        let dest = join_destinations(&destinations_without_via(&self.via, &self.destinations));
+        let dest = join_destinations(&destinations_without_via(via.unwrap_or(""), destinations));
         if !dest.is_empty() {
             parts.push(format!("toward {dest}"));
         } else if !self.name.is_empty() && self.exit_ref.is_empty() {
             parts.push(format!("for {}", self.name));
         }
         parts.join(" ")
-    }
-
-    pub fn near_phrase(&self) -> String {
-        let phrase = self.spoken_phrase();
-        let mut chars = phrase.chars();
-        let head: String = chars
-            .next()
-            .map(|c| c.to_uppercase().collect())
-            .unwrap_or_default();
-        format!("{head}{} now.", chars.as_str())
     }
 
     pub fn exit_label(&self) -> String {
@@ -75,6 +150,38 @@ impl Interchange {
             format!("exit {}", self.exit_ref)
         }
     }
+}
+
+fn near_from(phrase: &str) -> String {
+    let mut chars = phrase.chars();
+    let head: String = chars
+        .next()
+        .map(|c| c.to_uppercase().collect())
+        .unwrap_or_default();
+    format!("{head}{} now.", chars.as_str())
+}
+
+/// Whole-word, case-insensitive cardinal check: 'I 35 North' yes, 'Northern
+/// Avenue' no.
+fn has_cardinal(value: &str) -> bool {
+    value.split_whitespace().any(|w| {
+        matches!(
+            w.to_ascii_lowercase().as_str(),
+            "north" | "south" | "east" | "west"
+        )
+    })
+}
+
+/// Whole-word, case-insensitive route-modifier check ('Business', 'Spur',
+/// ...). A modified route is a different road that shares the number, never
+/// the mainline.
+fn has_modifier(value: &str) -> bool {
+    value.split_whitespace().any(|w| {
+        matches!(
+            w.to_ascii_lowercase().as_str(),
+            "business" | "bypass" | "loop" | "spur" | "alt" | "alternate" | "truck"
+        )
+    })
 }
 
 /// "US 31 South;US 280" -> "US-31 South and US-280".
@@ -143,5 +250,69 @@ pub fn join_destinations(destinations: &[String]) -> String {
                 .join(", "),
             items[n - 1]
         ),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn ix(exit_ref: &str, via: &str, destinations: &[&str]) -> Interchange {
+        Interchange {
+            exit_ref: exit_ref.to_string(),
+            via: via.to_string(),
+            destinations: destinations.iter().map(|d| d.to_string()).collect(),
+            ..Interchange::default()
+        }
+    }
+
+    #[test]
+    fn mainline_via_is_dropped_from_the_exit_label() {
+        // us/oklahoma: oklahoma_city_ok_us -> ardmore_ok_us at_mi 97.1 -- the
+        // bake merged the I-35 North entrance ramp's signage into exit 31B.
+        let record = ix("31B", "I 35 North", &["Oklahoma City", "Dallas", "Waurika"]);
+        let cities: Vec<String> = ["Oklahoma City", "Ardmore", "Dallas"]
+            .iter()
+            .map(|c| c.to_string())
+            .collect();
+        assert!(record.via_is_mainline("I-35"));
+        assert_eq!(
+            record.spoken_phrase_on("I-35", &cities, &[]),
+            "exit 31B toward Waurika"
+        );
+        // And when the route does not pass through a signed city, the
+        // destinations the leg's other exits also sign still drop out
+        // (Dallas is re-signed down I-35 on exits 108B and 86).
+        let cities: Vec<String> = ["Oklahoma City", "Ardmore"]
+            .iter()
+            .map(|c| c.to_string())
+            .collect();
+        let siblings: Vec<String> = vec!["Dallas".to_string()];
+        assert_eq!(
+            record.spoken_phrase_on("I-35", &cities, &siblings),
+            "exit 31B toward Waurika"
+        );
+        // The leg-agnostic phrase keeps the old wording.
+        assert_eq!(
+            record.spoken_phrase(),
+            "exit 31B for I-35 North toward Oklahoma City, Dallas, and Waurika"
+        );
+    }
+
+    #[test]
+    fn a_real_exit_via_is_untouched() {
+        let record = ix("42", "OK 53 West", &["Comanche"]);
+        let cities: Vec<String> = Vec::new();
+        assert!(!record.via_is_mainline("I-35"));
+        assert_eq!(
+            record.spoken_phrase_on("I-35", &cities, &[]),
+            "exit 42 for OK-53 West toward Comanche"
+        );
+    }
+
+    #[test]
+    fn a_business_route_is_not_the_mainline() {
+        let record = ix("10", "I 40 Business", &["Shamrock"]);
+        assert!(!record.via_is_mainline("I-40"));
     }
 }

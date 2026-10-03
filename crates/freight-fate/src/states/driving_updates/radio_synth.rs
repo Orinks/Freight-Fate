@@ -5,7 +5,7 @@
 //! all of them.
 
 use ff_core::music_synth::{select_synth_drive_sequence, track_title};
-use ff_core::radio::{RadioStation, SAFE_ROUTE_PLAYLIST};
+use ff_core::radio::RadioStation;
 use ff_core::radio_content::content_duration_s;
 
 use crate::app::GameContext;
@@ -37,9 +37,12 @@ impl DrivingState {
         ))
     }
 
-    /// The playlist entry at `index`, resolved in place: an unrendered piece
-    /// becomes its place's classic, so the length check reads what is really
-    /// playing. The entry after it is queued for rendering -- asked for
+    /// The playlist entry at `index`, resolved: an unrendered piece plays as
+    /// its place's classic, kept in `radio_playing_key` so the length check
+    /// and Now playing read what is really on. The playlist keeps the piece,
+    /// so the next pass plays it; resolving in place swapped it for the
+    /// classic for the rest of the drive (2026-09-28). The entry after it
+    /// is queued for rendering -- asked for
     /// before this one, since this one already has a classic to fall back on
     /// and the worker's queue is small enough that the wrong order can starve
     /// the piece the next track change actually needs. Anything that is not
@@ -55,8 +58,16 @@ impl DrivingState {
             ctx.request_synth(&next);
         }
         let key = ctx.resolve_synth(&entry);
-        self.radio_playlist[index % len] = key.clone();
+        self.radio_playing_key = key.clone();
         key
+    }
+
+    /// The track the rotation is on, as it is really playing.
+    pub(crate) fn current_station_track(&self) -> String {
+        if !self.radio_playing_key.is_empty() {
+            return self.radio_playing_key.clone();
+        }
+        self.radio_playlist[self.radio_track_index % self.radio_playlist.len()].clone()
     }
 
     /// How long the playlist entry `current` runs. A synthesized piece's
@@ -92,7 +103,7 @@ impl DrivingState {
             return None;
         }
         let current = if self.radio_station_id == station.id && !self.radio_playlist.is_empty() {
-            self.radio_playlist[self.radio_track_index % self.radio_playlist.len()].clone()
+            self.current_station_track()
         } else {
             // The rotation has not started yet: name what the station is on.
             let pool = self
@@ -110,11 +121,15 @@ impl DrivingState {
     /// What a Roadhouse rotation started now would be built from: whether it
     /// is synthesized, and the seed when it is. The seed only matters while
     /// it is synthesized, so a roll in Original mode changes nothing.
+    ///
+    /// Read off the setting alone, never off `self.radio`: a rotation starts
+    /// inside `with_radio_backend`, which has swapped `self.radio` for an
+    /// empty stand-in, so looking the Roadhouse up there recorded Original
+    /// under a Synthesized playlist. A switch to Original then compared equal
+    /// and never restarted it (agent drive, 2026-09-23). The Roadhouse is the
+    /// one route-playlist station, so the setting is the whole answer.
     pub(crate) fn roadhouse_synth_state(&self, ctx: &GameContext) -> (bool, i64) {
-        let synth = self
-            .radio
-            .station_by_id(SAFE_ROUTE_PLAYLIST)
-            .is_some_and(|roadhouse| self.synth_roadhouse(ctx, roadhouse));
+        let synth = ctx.settings.synth_music;
         (synth, if synth { ctx.settings.music_seed } else { 0 })
     }
 

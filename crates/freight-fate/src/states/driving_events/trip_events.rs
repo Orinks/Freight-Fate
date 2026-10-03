@@ -50,7 +50,35 @@ impl DrivingState {
         if self.should_ignore_unsignalled_exit_pressure(ctx, event) {
             return;
         }
+        if self.corner_already_called(event) {
+            return;
+        }
+        if self.limit_change_of_road_left(ctx, event) {
+            return;
+        }
+        if matches!(
+            event.kind,
+            TripEventKind::Billboard | TripEventKind::Landmark
+        ) && self.in_exit_approach()
+        {
+            // Roadside colour waits out the last mile to an exit being taken:
+            // a billboard read 0.3 miles before the gore talked over the
+            // countdown and the take line (agent drive B, 2026-09-24).
+            return;
+        }
         let kind = event.kind;
+        // The route's own call counts as telling the driver about the turn,
+        // so the turn chimes as the truck takes it. Only the turn's approach
+        // call used to count, and a truck already under a turn's speed never
+        // gets one: every turn taken at a crawl went by without its chime
+        // (agent drive, Aberdeen yard, 2026-09-23).
+        if kind == TripEventKind::GpsCue
+            && (ctx.settings.speaks(Self::event_category(event)) || !ctx.ladder_applies())
+        {
+            if let Some(cue) = event.data.cue.as_ref().filter(|cue| is_judged_turn(cue)) {
+                self.turn_announced.insert(cue.key.clone());
+            }
+        }
         let sound = route_event_sound(event);
         let mut message = event.message.clone();
         // Cue strings stay "billed to carrier settlement" so trip-cue tests
@@ -174,6 +202,8 @@ impl DrivingState {
             }
             TripEventKind::Curve => self.handle_curve_event(ctx, event, message, category),
             TripEventKind::Landmark | TripEventKind::Billboard => {
+                let sign = event.data.category.as_deref().unwrap_or_default();
+                let message = self.billboard_message(ctx, sign, message);
                 self.speak_ambient_event(ctx, message, Ambient::new().category(category));
             }
             TripEventKind::Lane => {
@@ -332,6 +362,12 @@ impl DrivingState {
         // repeats are done" -- Shane, 2026-08-21, and that is the loop.
         // The lane belongs to the hazard, not to the truck.
         self.hazard_slow_hint_said = false;
+        // Lane keeping on full answers a slow vehicle by passing it, and the
+        // call says so instead of asking the driver to change lanes.
+        let message = match event.data.pass_message.clone() {
+            Some(pass) if self.hazard_dodgeable && self.pass_for_hazard(ctx, event) => pass,
+            _ => message,
+        };
         // A dodgeable hazard leaves the wheel alone: adaptive cruise or
         // the keeper stays armed through the lane change that answers it,
         // and only braking -- the driver's own, or the automatic brake
@@ -428,7 +464,14 @@ impl DrivingState {
                 }
             }
         }
-        self.speak_ambient_event(ctx, message, Ambient::new().sound(sound).category(category));
+        self.speak_ambient_event(
+            ctx,
+            message,
+            Ambient::new()
+                .sound(sound)
+                .category(category)
+                .priority(EventPriority::Route),
+        );
         ctx.award_achievement("state_crossing");
     }
 
@@ -452,8 +495,13 @@ impl DrivingState {
         // 31 percent across two bends before anyone knew (agent drive,
         // 2026-09-01, the owner's own settings).
         let announce = ctx.settings.curve_callouts;
-        let advisory = event.data.advisory_mph.unwrap_or(0.0);
         let curve = event.data.curve;
+        // The number spoken for this load, as the pacenote speaks it.
+        let advisory = curve
+            .as_ref()
+            .map_or(event.data.advisory_mph.unwrap_or(0.0), |c| {
+                self.spoken_advisory_mph(c) as f64
+            });
         let ahead = event.data.ahead_mi.unwrap_or(0.0);
         let speed = self.trip.truck.speed_mph();
         let message = match curve.as_ref() {
@@ -482,11 +530,20 @@ impl DrivingState {
         // saying anything, and the driver still has the whole bend to steer.
         // The engine's lean carries that continuously now, so the chime was
         // noise stacked in front of the guide rather than help.
-        let say_curve = |ctx: &mut GameContext, text: SpokenMessage, interrupt: bool| {
+        //
+        // A call cuts chatter, never a warning or another call still being
+        // spoken: it falls in behind them. Cutting, a run of esses played
+        // backwards -- the next bend's call over this one's, this one handed
+        // back after it -- and a too-fast warning cut by a call came back
+        // after the call, late (bend sweep, US-62, 2026-09-24).
+        let say_curve = |ctx: &mut GameContext, text: SpokenMessage| {
             if !announce {
                 return;
             }
-            let mut opts = SayEvent::new().interrupt(interrupt);
+            let interrupt = !ctx.event_voice_critical();
+            let mut opts = SayEvent::new()
+                .interrupt(interrupt)
+                .priority(EventPriority::Critical);
             opts.category = category;
             if let Some(valid) = curve_valid {
                 opts = opts.valid(move || valid.holds());
@@ -504,11 +561,17 @@ impl DrivingState {
         // 30 the whole time: the words were right and the assist was
         // not. The cruise pause below keys its resume to the same extent,
         // and the approach servo holds to it.
+        //
+        // And never faster than the bend lets THIS load through at no cost:
+        // an advisory is built for a full trailer at 0.30 g, so on a bend
+        // whose sign rounds up, or with a part-filled tank, the sign asks more
+        // than the load can give (`driving_rollover`). A servo band under it,
+        // so the hold's own band stays clear too (`curve_hold_mph`).
         let chain = curve.as_ref().map(|curve| {
-            let mut hold_mph = advisory;
+            let mut hold_mph = self.curve_hold_mph(ctx, curve);
             let mut hold_to_mi = curve.start_mi.max(curve.end_mi);
             if let Some(linked) = self.pacenote_linked(curve) {
-                hold_mph = hold_mph.min(linked.advisory_mph as f64);
+                hold_mph = hold_mph.min(self.curve_hold_mph(ctx, &linked));
                 hold_to_mi = hold_to_mi.max(linked.start_mi).max(linked.end_mi);
             }
             (hold_mph, hold_to_mi)
@@ -557,7 +620,7 @@ impl DrivingState {
                 // the number cruise is easing to, and the deceleration
                 // itself is audible (R4's curve-composite row).
                 let text = cruise_curve_easing(&message, &ctx.settings.speed_text(advisory));
-                say_curve(ctx, text, true);
+                say_curve(ctx, text);
             } else {
                 // Under cruise's floor (or with the assist off): the bend is
                 // the driver's, but the SESSION is not over. This used to
@@ -584,14 +647,14 @@ impl DrivingState {
                 } else {
                     cruise_curve_paused(&message)
                 };
-                say_curve(ctx, text, true);
+                say_curve(ctx, text);
             }
         } else {
-            // Interrupt, always: a pacenote queued behind landmark chatter
+            // Interrupting chatter: a pacenote queued behind landmark chatter
             // arrived with the bend three seconds away instead of a
             // quarter mile (owner's AZ-260 log, 2026-07-19 -- the words
             // were honest when emitted and stale when finally spoken).
-            // Ambient lines can wait; the road cannot.
+            // Ambient lines can wait; the road cannot (`say_curve`).
             //
             // Manual pedals or the speed keeper: the pacenote carries the
             // assist clause in the same breath, never as a second line.
@@ -600,7 +663,7 @@ impl DrivingState {
             } else {
                 message
             };
-            say_curve(ctx, text, true);
+            say_curve(ctx, text);
         }
         // Open the re-arm window: if Ctrl silences this call before it
         // finishes, it gets one refreshed re-speak (owner worry,
@@ -717,12 +780,43 @@ impl DrivingState {
         }
         let mut opts = SayEvent::queued().priority(priority);
         opts.category = category;
+        if event.data.limit_change.unwrap_or(false) {
+            // A mainline limit cut by the take line is about a road the truck
+            // has just left: "Speed limit raised to 75." came back after "You
+            // take exit 167" (agent drive, Edwards, 2026-09-24).
+            self.refresh_live_facts();
+            opts = opts.valid(|| !live::on_ramp());
+        }
         ctx.say_event_with(message, opts);
         // Any spoken route line pushes spaced ambient chatter back, so
         // an informational notice never lands on top of a navigation
         // instruction the player needs to act on.
         self.ambient_event_cooldown_s =
             tuning_for_time_scale(self.trip.time_scale).ambient_spacing_s;
+    }
+
+    /// The route's quarter-mile lead for a street turn whose own approach
+    /// call has already been spoken: that call named the side, the street,
+    /// the distance and the advise speed, so the lead only says the same
+    /// thing again a few seconds later (owner, Abilene streets, 2026-09-23:
+    /// "announced at least twice before the turn. Necessary?").
+    ///
+    /// And the route's call AT the turn, when the turn's own call already
+    /// said "now": the street chain's briefing ends "Then turn left now onto
+    /// North 1st Street", and "Turn left onto North 1st Street" followed it
+    /// straight away (agent drive, exit 286A, 2026-09-23).
+    fn corner_already_called(&self, event: &TripEvent) -> bool {
+        if event.kind != TripEventKind::GpsCue {
+            return false;
+        }
+        let Some(cue) = event.data.cue.as_ref().filter(|cue| is_judged_turn(cue)) else {
+            return false;
+        };
+        if event.data.advance.unwrap_or(false) {
+            self.turn_advised.contains(&cue.key)
+        } else {
+            self.turn_called_now.contains(&cue.key)
+        }
     }
 
     /// `_should_ignore_destination_exit_gps_cue(event)`.
@@ -932,6 +1026,14 @@ impl DrivingState {
             if event.data.zone.is_some() {
                 return EventPriority::Route;
             }
+            // A limit change is what enforcement reads, and each one is said
+            // once: the advance "drops to 55" marks 55 as announced, so when
+            // the pacer dropped it as stale chatter the boundary stayed silent
+            // too and the truck ran a 55 it never heard of (agent drive, exit
+            // 286A into Abilene, 2026-09-23).
+            if event.data.limit_change.unwrap_or(false) {
+                return EventPriority::Route;
+            }
             let cue_kind = event
                 .data
                 .cue
@@ -975,7 +1077,7 @@ impl DrivingState {
         };
         matches!(
             zone.reason.as_str(),
-            "destination approach" | "facility access road" | "facility gate"
+            "destination approach" | "facility access road" | "facility gate" | "yard"
         )
     }
 
@@ -1143,7 +1245,8 @@ impl DrivingState {
                 return_message,
                 &lights,
             );
-            record_inspection(ctx);
+            // A failed log check is not a passed inspection: no badge, and
+            // no clean-inspection credit on the safety record (2026-09-28).
             return;
         }
         {
@@ -1162,7 +1265,6 @@ impl DrivingState {
         let mut opts = SayEvent::queued().priority(EventPriority::Route);
         opts.category = Self::event_category(event);
         ctx.say_event_with(message, opts);
-        record_inspection(ctx);
     }
 
     /// `_place_out_of_service()`. A full 10-hour reset: fatigue, drive, or
@@ -1174,6 +1276,10 @@ impl DrivingState {
     /// Park for `minutes`. A full 10-hour order resets the clock and fatigue;
     /// a 30-minute break order only takes the missed break.
     pub fn place_out_of_service_minutes(&mut self, ctx: &mut GameContext, minutes: f64) {
+        // Written now, served in full below before this returns: the truck is
+        // never under an order it could drive on, so driving under one (49 CFR
+        // 383.51 Table 4) has no path in the game.
+        let written_h = crate::states::driving_rest_states::record_hours(ctx, self);
         advance_rest_clock(self, ctx, minutes, None, "");
         if minutes >= hos::SLEEP_MIN {
             hos_mut_of(ctx).sleep();
@@ -1189,7 +1295,9 @@ impl DrivingState {
         // OUT_OF_SERVICE_WEIGHT). The trip tally above was the only one ever
         // kept, in Python and in the port, so no order ever reached the
         // record and the scale kept waving the driver through.
-        profile_mut_of(ctx).out_of_service_events += 1;
+        let profile = profile_mut_of(ctx);
+        profile.out_of_service_events += 1;
+        profile.driving_record.out_of_service_times.push(written_h);
         let snapshot = self.snapshot(ctx);
         profile_mut_of(ctx).active_trip = Some(snapshot);
         ctx.save_profile();

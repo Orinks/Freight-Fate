@@ -68,6 +68,10 @@ impl DrivingState {
         self.exit_stop = None;
         self.exit_signal_on = false;
         self.exit_signal_canceled = false;
+        // A cancel belongs to the approach it was made on. Left standing, the
+        // rebuilt exit carries the same key, the scanner skips it, and lane
+        // keeping never takes the exit this loop-back says it will.
+        self.canceled_exit_key = None;
         self.cancel_cruise(ctx, false);
         let exit_at = match exit_details {
             Some(details) => details.0,
@@ -176,7 +180,14 @@ impl DrivingState {
         if self.arrival_menu_open {
             return true;
         }
-        self.cancel_cruise(ctx, false);
+        // An arrival pause, held until the departure resumes it. Ending the
+        // session here lost the driver's set speed at every assisted pickup
+        // (tester report, 2026-09-28).
+        if self.speed_control_armed {
+            self.pause_speed_control(ctx, false);
+        } else {
+            self.cancel_cruise(ctx, false);
+        }
         self.trip.truck.throttle = 0.0;
         self.trip.truck.brake = 1.0;
         if self.trip.truck.speed_mph() <= 0.5 && !self.arrival_full_stop_said {
@@ -345,7 +356,11 @@ impl DrivingState {
     /// Mirrors the update loop's gate dispatch so the info keys agree with
     /// what the gate handlers are actually waiting for.
     pub fn arrival_gate_query_text(&self, ctx: &GameContext) -> Option<String> {
-        if !self.trip.finished || self.arrival_menu_open || self.departure_chain {
+        if !self.trip.finished
+            || self.arrival_menu_open
+            || self.departure_chain
+            || self.stop_chain.is_some()
+        {
             return None;
         }
         if self.phase == DRIVE_PHASE_PICKUP {

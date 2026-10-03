@@ -10,7 +10,6 @@
 use std::{env, fs, path::PathBuf};
 
 fn main() {
-    delay_load_prism_backends();
     link_prism_system_libraries();
     let manifest = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
     let root = manifest.ancestors().nth(2).unwrap().to_path_buf();
@@ -43,43 +42,15 @@ fn main() {
     }
 }
 
-/// Delay-load the DLLs behind Prism's Windows backends (NVDA, JAWS, ...).
-///
-/// prismer links Prism statically and publishes the list, but a link flag
-/// only takes effect on the final link, which happens here. Without it every
-/// screen reader client DLL becomes a hard import and the game will not start
-/// on a machine missing any of them.
-fn delay_load_prism_backends() {
-    println!("cargo:rerun-if-env-changed=DEP_PRISMER_DELAY_LOAD_DLLS");
-    if env::var("CARGO_CFG_TARGET_ENV").as_deref() != Ok("msvc") {
-        return;
-    }
-    let Ok(dlls) = env::var("DEP_PRISMER_DELAY_LOAD_DLLS") else {
-        return;
-    };
-    for dll in dlls.split(';').filter(|dll| !dll.is_empty()) {
-        println!("cargo:rustc-link-arg=/DELAYLOAD:{dll}");
-    }
-}
-
 /// Link what Prism's macOS and Linux backends import.
 ///
 /// prism-sys names these for Windows only, and a static library leaves them
 /// to the final link. macOS: the frameworks its CMake links (AVSpeech,
-/// VoiceOver, power management). Linux: whichever of speech-dispatcher and
-/// glibmm and giomm (Orca) pkg-config finds -- the same test Prism's CMake used to
-/// decide whether to build those backends at all.
+/// VoiceOver, power management). Linux: glibmm and giomm (Orca) when
+/// pkg-config finds them -- the same test Prism's CMake uses to decide
+/// whether to build that backend. Speech Dispatcher is not linked: Prism
+/// opens it at run time, so a machine without it still starts.
 fn link_prism_system_libraries() {
-    let os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
-    if os == "linux" || os == "macos" {
-        // Each backend registers itself from a static initializer in its own
-        // object, which nothing references, so a plain static link drops
-        // every one and Prism starts with an empty registry. Prism anchors
-        // them for MSVC only (`/include:`); GCC and Clang need the whole
-        // archive. `-bundle` defers this to the final link, where prism-sys's
-        // search path finds libprism.a.
-        println!("cargo:rustc-link-lib=static:+whole-archive,-bundle=prism");
-    }
     match env::var("CARGO_CFG_TARGET_OS").as_deref() {
         Ok("macos") => {
             for framework in [
@@ -95,7 +66,7 @@ fn link_prism_system_libraries() {
         }
         Ok("linux") => {
             link_libstdcxx_statically();
-            for module in ["speech-dispatcher", "glibmm-2.68", "giomm-2.68"] {
+            for module in ["glibmm-2.68", "giomm-2.68"] {
                 let Ok(out) = std::process::Command::new("pkg-config")
                     .args(["--libs", module])
                     .output()

@@ -8,12 +8,15 @@
 
 use ff_core::models::enforcement;
 use ff_core::sim::hos;
+use ff_core::sim::trip_models::Zone;
 
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::Menu;
+use freight_fate::states::city::CityMenuState;
+use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::{DRIVE_PHASE_DELIVERY, FAILURE_TO_STOP_DAMAGE_PCT};
 use freight_fate::states::driving_rest_states::{
-    EnforcementStopState, FelonyStopState, TrafficStopState,
+    EnforcementStopState, FelonyStopState, LicencePulledState, TrafficStopState,
 };
 use freight_fate::states::driving_updates::pending::EnforcementStopParams;
 
@@ -81,6 +84,36 @@ fn test_a_serious_stop_writes_the_ticket_once_and_charges_it_on_the_spot() {
     );
     assert_eq!(with_drive(&drive, |d| d.speeding_tickets), 1);
     assert_eq!(with_drive(&drive, |d| d.ticket_fines_paid), expected);
+}
+
+/// The ticket's reputation hit comes off the delivery ledger. It used to
+/// write back the shown standing (ledger minus record), so a driver with a
+/// record lost the record's points from the ledger for good (2026-09-28).
+#[test]
+fn test_a_ticket_takes_its_hit_from_the_ledger_not_the_shown_standing() {
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    {
+        let p = app.ctx.profile.as_mut().expect("a career");
+        p.career.reputation = 60.0;
+        p.driving_record.citations = 3;
+        p.driving_record.citation_times = vec![p.game_hours; 3];
+        assert!(p.standing() < 60.0, "the record must show in the standing");
+    }
+    drive_and_ctx(&drive, &mut app, |d, ctx| {
+        TrafficStopState::new(ctx, d, false, 24.0, 65.0, false, false, false)
+    });
+    let ledger = app
+        .ctx
+        .profile
+        .as_ref()
+        .expect("a career")
+        .career
+        .reputation;
+    assert!(
+        (ledger - (60.0 - hos::HOS_REPUTATION_HIT)).abs() < 1e-9,
+        "ledger {ledger}"
+    );
 }
 
 #[test]
@@ -384,4 +417,163 @@ fn test_fleeing_a_stop_is_a_major_offense_on_the_licence() {
     assert!(record.suspended(app.ctx.profile.as_ref().expect("a career").game_hours));
     // The line is restated at settlement, so it goes on the trip record too.
     assert_eq!(with_drive(&drive, |d| d.record_events.len()), 1);
+}
+
+// -- a CDL pulled at speed ---------------------------------------------------------------
+
+/// Two serious violations right now: the CDL is suspended.
+fn suspend_the_cdl(app: &mut TestApp) {
+    let p = app.ctx.profile.as_mut().expect("a career");
+    let now = p.game_hours;
+    p.driving_record.record_serious_violation(now);
+    p.driving_record.record_serious_violation(now);
+    assert!(p.driving_record.suspended(now));
+}
+
+#[test]
+fn test_a_run_off_that_suspends_the_cdl_ends_the_drive() {
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    let home = {
+        // One serious violation and one run-off already on the record, so
+        // the next run-off is the second serious violation.
+        let p = app.ctx.profile.as_mut().expect("a career");
+        let now = p.game_hours;
+        p.driving_record.record_serious_violation(now);
+        p.driving_record.record_fatigue_event(now);
+        assert!(!p.driving_record.suspended(now));
+        p.current_city.clone()
+    };
+    with_drive(&drive, |d| d.trip.truck.velocity_mps = 27.0);
+    drive_and_ctx(&drive, &mut app, |d, ctx| {
+        d.microsleep_misses = 0;
+        d.microsleep_drift_off_road(ctx);
+    });
+    {
+        let p = app.ctx.profile.as_ref().expect("a career");
+        assert!(p.driving_record.suspended(p.game_hours));
+    }
+    assert!(top_is::<LicencePulledState>(&app), "the drive carried on");
+    assert_eq!(with_drive(&drive, |d| d.trip.truck.velocity_mps), 0.0);
+    assert!(with_drive(&drive, |d| d.trip.truck.parking_brake));
+    let text = with_top::<LicencePulledState, _>(&app, |s| s.outcome_text().to_string());
+    assert!(
+        text.starts_with(
+            "You pull onto the shoulder and stop. The licence is pulled as of now, so the truck \
+             stays here."
+        ),
+        "{text}"
+    );
+    let rows = with_top_ctx::<LicencePulledState, _>(&mut app, build_labels);
+    assert_eq!(rows, vec!["Return to terminal"]);
+
+    // Escape never drives on: it closes the run out like the row does.
+    with_top_ctx::<LicencePulledState, _>(&mut app, |s, ctx| s.go_back(ctx));
+    assert!(top_is::<CityMenuState>(&app));
+    let p = app.ctx.profile.as_ref().expect("a career");
+    assert!(p.active_trip.is_none());
+    assert_eq!(p.current_city, home);
+}
+
+#[test]
+fn test_a_run_off_that_leaves_the_cdl_clear_drives_on() {
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    drive_and_ctx(&drive, &mut app, |d, ctx| {
+        d.microsleep_misses = 0;
+        d.microsleep_drift_off_road(ctx);
+    });
+    assert!(top_is::<DrivingState>(&app));
+}
+
+#[test]
+fn test_the_barrels_that_suspend_the_cdl_end_the_drive() {
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    {
+        let p = app.ctx.profile.as_mut().expect("a career");
+        let now = p.game_hours;
+        p.driving_record.record_serious_violation(now);
+    }
+    let zone = Zone::new(5.0, 9.0, 45.0, "construction").with_closed_lane(Some(0));
+    drive_and_ctx(&drive, &mut app, |d, ctx| {
+        d.trip.position_mi = 6.0;
+        d.trip.zones.push(zone.clone());
+        d.lane.set_lane_count(2);
+        d.cite_barrel_strike(ctx, &zone);
+    });
+    let p = app.ctx.profile.as_ref().expect("a career");
+    assert!(p.driving_record.suspended(p.game_hours));
+    assert!(top_is::<LicencePulledState>(&app), "the drive carried on");
+}
+
+#[test]
+fn test_a_debug_hours_mode_never_ends_a_run_on_a_pulled_cdl() {
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    suspend_the_cdl(&mut app);
+    app.ctx.settings.hos_mode = hos::HOS_NON_ENFORCED_MODES[0].to_string();
+    drive_and_ctx(&drive, &mut app, |d, ctx| {
+        d.end_drive_if_licence_pulled(ctx)
+    });
+    assert!(top_is::<DrivingState>(&app));
+}
+
+#[test]
+fn test_escape_on_a_traffic_stop_that_pulled_the_licence_ends_the_run() {
+    // Escape used to pull back onto the highway, and the drive went on
+    // with the CDL suspended.
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    suspend_the_cdl(&mut app);
+    let state = drive_and_ctx(&drive, &mut app, |d, ctx| {
+        TrafficStopState::new(ctx, d, false, 24.0, 65.0, false, false, false)
+    });
+    app.ctx
+        .push_shared_with(freight_fate::app::share(state), false);
+    with_top_ctx::<TrafficStopState, _>(&mut app, |s, ctx| s.go_back(ctx));
+    assert!(top_is::<CityMenuState>(&app), "the traffic stop drove on");
+}
+
+#[test]
+fn test_escape_on_an_enforcement_stop_that_pulled_the_licence_ends_the_run() {
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    suspend_the_cdl(&mut app);
+    let state = drive_and_ctx(&drive, &mut app, |d, ctx| {
+        EnforcementStopState::new(ctx, d, params("Lane misuse", false, false))
+    });
+    app.ctx
+        .push_shared_with(freight_fate::app::share(state), false);
+    with_top_ctx::<EnforcementStopState, _>(&mut app, |s, ctx| s.go_back(ctx));
+    assert!(
+        top_is::<CityMenuState>(&app),
+        "the enforcement stop drove on"
+    );
+}
+
+#[test]
+fn test_a_saved_trip_on_a_pulled_cdl_closes_out_instead_of_resuming() {
+    let mut app = TestApp::new();
+    let drive = a_drive(&mut app);
+    let snapshot = drive_and_ctx(&drive, &mut app, |d, ctx| d.snapshot(ctx));
+    app.ctx.profile.as_mut().expect("a career").active_trip = Some(snapshot);
+    suspend_the_cdl(&mut app);
+    app.clear_speech();
+    let entry = freight_fate::states::main_menu::world_entry_state(&mut app.ctx, false);
+    assert!(entry.borrow().as_any().is::<CityMenuState>());
+    assert!(app
+        .ctx
+        .profile
+        .as_ref()
+        .expect("a career")
+        .active_trip
+        .is_none());
+    assert_eq!(
+        app.main_lines(),
+        vec![
+            "Your saved run cannot go on: dispatch cancels it, and a relief driver brings the \
+             truck back."
+        ]
+    );
 }

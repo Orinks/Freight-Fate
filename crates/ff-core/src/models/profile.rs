@@ -388,6 +388,10 @@ pub struct Profile {
     // clock. Real-time driving re-anchors it on selection or drive start; it
     // is intentionally not saved or sent to the cloud validator.
     pub calendar_offset_hours: f64,
+    // Session-only: live weather is driving the spoken calendar, so the date
+    // the player hears is today's real one. The app mirrors the settings into
+    // it every frame; never saved.
+    pub live_calendar: bool,
     pub tutorial_done: bool,
     /// owner-operator active tractor, or assignment key
     pub truck: String,
@@ -491,6 +495,7 @@ impl Default for Profile {
             game_hours: 6.0,
             calendar_offset_days: 0,
             calendar_offset_hours: 0.0,
+            live_calendar: false,
             tutorial_done: false,
             truck: "rig".to_string(),
             owned_trucks: Vec::new(),
@@ -915,6 +920,16 @@ impl Profile {
 
     pub fn calendar_game_hours(&self) -> f64 {
         self.game_hours + self.calendar_offset_days as f64 * 24.0 + self.calendar_offset_hours
+    }
+
+    /// The date and hour the player hears right now: the real clock while
+    /// live weather drives the calendar, otherwise the career's own calendar.
+    pub fn player_calendar_hours(&self) -> f64 {
+        crate::sim::season::player_calendar_hours(
+            self.game_hours,
+            Some(self.calendar_game_hours()),
+            self.live_calendar,
+        )
     }
 
     /// Whether this profile has progressed beyond a just-created career.

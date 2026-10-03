@@ -124,7 +124,7 @@ fn test_route_key_answers_with_the_gate_on_the_facility_approach() {
 
     let report = last(&app);
     assert!(
-        report.starts_with("off the highway, on the facility approach"),
+        report.starts_with("Off the highway, on the facility approach"),
         "{report}"
     );
     assert!(!report.contains("I-90"), "{report}");
@@ -244,12 +244,18 @@ fn test_route_key_names_the_street_under_the_wheels() {
         .map(|leg| (leg.miles, leg.highway.clone()))
         .collect();
     assert!(legs.len() >= 2);
+    // Street and city read as written: capitalising the line's first word
+    // once lowercased the rest, and "US 83" was read as the word "us".
+    let city = app
+        .ctx
+        .world
+        .spoken_city(&d.trip.route.cities[0], Some(true));
     app.clear_speech();
 
     d.trip.position_mi = legs[0].0 * 0.5;
     d.handle_key_event(&mut app.ctx, &key(Key::R));
     assert!(
-        last(&app).contains(&format!("on city streets, {},", legs[0].1)),
+        last(&app).contains(&format!("On city streets, {}, in {city}.", legs[0].1)),
         "{}",
         last(&app)
     );
@@ -257,7 +263,7 @@ fn test_route_key_names_the_street_under_the_wheels() {
     d.trip.position_mi = legs[0].0 + legs[1].0 * 0.5;
     d.handle_key_event(&mut app.ctx, &key(Key::R));
     assert!(
-        last(&app).contains(&format!("on city streets, {},", legs[1].1)),
+        last(&app).contains(&format!("On city streets, {}, in {city}.", legs[1].1)),
         "{}",
         last(&app)
     );
@@ -290,7 +296,7 @@ fn test_route_key_counts_down_to_the_on_ramp_leaving_the_origin_gate() {
 
     let report = last(&app);
     assert!(
-        report.starts_with("on city streets,"),
+        report.starts_with("On city streets,"),
         "{report}"
     );
     assert!(
@@ -337,7 +343,7 @@ fn test_route_key_answers_the_pickup_drive_as_city_streets() {
 
     let report = last(&app);
     assert!(
-        report.starts_with("on city streets,"),
+        report.starts_with("On city streets,"),
         "{report}"
     );
     assert!(report.contains("200 feet to the gate at"), "{report}");

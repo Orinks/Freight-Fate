@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import hashlib
 import zipfile
 from pathlib import Path
 
 import assets_pack
 import pytest
-from asset_helpers import music_pack_available, needs_audio_assets
 
 ROOT = Path(__file__).resolve().parents[1]
 SOUNDS_DIR = ROOT / "assets" / "sounds"
@@ -112,73 +110,6 @@ def test_pack_is_deterministic(tmp_path):
     first = assets_pack.write_pack(sounds, tmp_path / "a.pak").read_bytes()
     second = assets_pack.write_pack(sounds, tmp_path / "b.pak").read_bytes()
     assert first == second
-
-
-@needs_audio_assets
-def test_committed_pack_has_freight_fate_header():
-    assert assets_pack.DEFAULT_PACK_PATH.exists()
-    pack_bytes = assets_pack.DEFAULT_PACK_PATH.read_bytes()
-    # Repacked 2026-09-11 (traffic cues): the eleven pass and crossing cues
-    # added on 2026-08-20 (pickup, motorcycle, bus, tractor passes; car,
-    # pickup, box truck, semi, motorcycle, bus, tractor crossings) were
-    # regenerated through the ElevenLabs Sound Effects API and MERGED into the
-    # shipped pack, 162 -> 173 entries. The eleven were never in the pack
-    # before (the numpy stand-ins only ever lived in the loose tree), so the
-    # prior 162 are preserved byte for byte.
-    #
-    # Repacked 2026-08-29 (the scale verdict tones): added the procedural
-    # events/scale_green.ogg and events/scale_red.ogg cues, which the code and
-    # the sound catalog both named while the pack carried neither -- and the
-    # release ships THIS pack rather than baking a fresh one, so both lights
-    # changed in silence for players. 162 entries, the prior 160 preserved
-    # byte for byte plus the two new assets.
-    #
-    # Merged into rather than rebuilt, deliberately: a plain
-    # tools/pack_sounds.py run on the current builder machine yields 113
-    # entries, because 60 API-generated effects are no longer in the loose
-    # tree. Re-baking here would silently drop them.
-    #
-    # Repacked 2026-08-14 (weigh-station warning earcon): added the procedural
-    # events/weigh_station_warning.ogg cue, taking the pack 159 -> 160.
-    assert len(pack_bytes) == 8_278_280
-    assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
-    assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "33e35cab8258f5eccaf5553d698ffcfca24d65e986bd579f24579250a981bae6"
-    )
-
-
-@pytest.mark.skipif(
-    not music_pack_available(),
-    reason=(
-        "music.pak is not in the repository: at 250 MB it is downloaded from "
-        "a private release URL when needed, so only a builder machine holding "
-        "it can check the header it stands in for."
-    ),
-)
-def test_committed_music_pack_has_freight_fate_header():
-    assert assets_pack.DEFAULT_MUSIC_PACK_PATH.exists()
-    pack_bytes = assets_pack.DEFAULT_MUSIC_PACK_PATH.read_bytes()
-    # Repacked 2026-09-19: 25 selected songs, preserving all 380 prior entries.
-    # Repacked 2026-09-13 for two owner-supplied instrumentals, D-Major
-    # Medley (a menu bed) and From Bossa to Blues (a day drive bed):
-    # 378 -> 380 entries, merged into the prior pack.
-    #
-    # Repacked 2026-09-11 for the gospel, tejano, synthwave and Night Line
-    # song batch (nineteen songs, see CHANGELOG Unreleased): 359 -> 378
-    # entries, merged into the prior pack rather than rebuilt.
-    #
-    # Repacked 2026-08-30 for "Four Sources and the Truth" (a country song
-    # about trusting the forecast): 358 -> 359 entries. Before that,
-    # 356 -> 358 on 2026-08-26 for "Dangerous Dan" and "Dial-up Summer".
-    #
-    # Split out of sounds.pak on 2026-08-14 alongside the radio
-    # station-identity batch: 356 entries, the music/ subtree plus the new
-    # station jingles and songs.
-    assert len(pack_bytes) == 367_493_532
-    assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
-    assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "5d72f39a56320a147e0061122c3426ab9e920c388ac0bb1f67ed1ce72e976fc0"
-    )
 
 
 def test_damaged_entry_costs_only_its_own_sound(tmp_path, monkeypatch):

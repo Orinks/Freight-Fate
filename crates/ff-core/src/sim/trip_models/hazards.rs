@@ -54,6 +54,18 @@ impl OpenSide {
         self != OpenSide::Neither
     }
 
+    /// The lane a pass takes, as a step from the truck's lane: `1` is one
+    /// lane left (lane 0 is the right lane), `-1` one lane right. Left
+    /// wherever left is open, the side traffic passes on; right only where
+    /// it is the one lane open.
+    pub fn pass_step(self) -> Option<i64> {
+        match self {
+            OpenSide::Left | OpenSide::Either => Some(1),
+            OpenSide::Right => Some(-1),
+            OpenSide::Neither => None,
+        }
+    }
+
     /// The lane answer, in the L key's own words ("left lane open", see
     /// docs/ontology.md), so the call and the readout never disagree.
     pub fn spoken(self) -> &'static str {

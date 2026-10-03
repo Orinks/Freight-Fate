@@ -109,6 +109,19 @@ range from 5 to 80 mph; metric signs retain their normalized mph equivalent.
 The deterministic harvester-boundary fixture exercises the same production
 transform without depending on the dated national extracts.
 
+The same pass bakes `ramp_length_ft_forward`, `ramp_length_ft_backward` and
+`ramp_length_source` (derived): the distance along the `motorway_link` ways
+from the gore node, where the ramp way leaves the motorway way, to the nearest
+surface-road node or dead end, or else to the merge onto another motorway. The
+length starts at or near the gore, so the deceleration lane in front of it is
+not included. Values under 300 ft or over 1.5 mi are dropped, not clamped. On
+2026-09-24 the pass gave 16,882 of 18,165 exits (92.9%) a length in at least
+one direction, 21,577 directional values in all. The median is 1,474 ft, the
+5th percentile 735 ft and the 95th 3,456 ft. The screen dropped 172 short
+values and 47 long ones. The counts are in `meta.json` under
+`ramp_length_bake`. The topology pass caches each state extract separately, so
+a national rebuild (about 35 minutes) can be run a few states at a time.
+
 ---
 
 ## Workstream A: Region Taxonomy (Fixes Reno Now)

@@ -233,8 +233,13 @@ pub const PECAN_STATES: &[&str] = &["AL", "GA", "LA", "MS", "TX"];
 pub const SHEETZ_STATES: &[&str] = &["MD", "MI", "NC", "OH", "PA", "VA", "WV"];
 pub const WAWA_STATES: &[&str] = &["DE", "FL", "MD", "NJ", "PA", "VA"];
 /// RaceTrac's real southeast-plus-Texas footprint.
+// RaceTrac-branded stores as of 2026-09 (cstoredive.com: a first store in
+// Indianapolis, a travel center at Findlay, Ohio, North Carolina in late
+// 2025). Arkansas has
+// only RaceWay, the franchise brand; Virginia has one travel-center site
+// bought and none confirmed open.
 pub const RACETRAC_STATES: &[&str] = &[
-    "AL", "AR", "FL", "GA", "KY", "LA", "MS", "NC", "SC", "TN", "TX", "VA",
+    "AL", "FL", "GA", "IN", "KY", "LA", "MS", "NC", "OH", "SC", "TN", "TX",
 ];
 /// Cracker Barrel as a South/Midwest roadside, not a West-Coast or New England board.
 pub const CRACKER_BARREL_STATES: &[&str] = &[
@@ -434,7 +439,9 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // Wall Drug is Wall, South Dakota. Official campaign boards cover
         // SD / WY / western MN (Argus Leader); farthest cited is Greybull WY
         // ~394 mi. Montana stays off -- too far west of the real pool.
-        in_states("Free ice water at Wall Drug. Only three hundred miles. You're basically there.", &["SD", "WY", "MN"]),
+        // Only a line with no distance or "ahead" lives here: a state anchor
+        // cannot tell which side of Wall the truck is on. The countdown is
+        // placed data on the legs through Wall, one set per direction.
         in_states("Wall Drug. Five-cent coffee since your grandfather was your age.", &["SD", "WY", "MN"]),
         // Landmark attraction -- Cleveland's ticketed Rock Hall.
         approaching("Cleveland ahead. The Rock and Roll Hall of Fame sits on the lake. Chuck Berry, Aretha Franklin, and a glass pyramid you can actually visit.", &["cleveland_oh_us"]),
@@ -449,8 +456,9 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         in_states("Minnesota. The Spam Museum is a real place they built for a canned lunch. Samples included. The trailer is not.", &["MN"]),
     ]),
     ("I-95", &[
-        in_states("The big sombrero tower ahead. Fireworks, tacos, and a lookout. You never sausage a place.", &["SC", "NC"]),
-        in_states("South of the Border, coming up. Or is it? Keep driving to find out.", &["SC", "NC"]),
+        // South of the Border's "ahead" signs are a placed countdown on the
+        // legs either side of Dillon, one set per direction, for the same
+        // reason as Wall Drug: a state anchor reads them after the exit.
         // 2026-08-12 owner batch -- Carolinas fireworks-stand country, the
         // genre South of the Border already trades on. "362 days" keeps its
         // numerals verbatim (owner sign-off, see test_billboards.py).
@@ -459,16 +467,20 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // Song tributes -- the Jersey Turnpike (Elle King) and Jacksonville
         // (Lynyrd Skynyrd). Haynesville Woods was radio memory, not a paid board.
         in_states("New Jersey: more state than it gets credit for. Elle King sings one called Jersey Giant.", &["NJ"]),
-        approaching("Jacksonville ahead, hometown of Lynyrd Skynyrd. Down here even the breeze plays guitar -- they named a song for it, Call Me the Breeze.", &["jacksonville_fl_us"]),
+        approaching("Jacksonville ahead, hometown of Lynyrd Skynyrd. Down here even the breeze plays guitar -- listen to their Call Me the Breeze.", &["jacksonville_fl_us"]),
         // Peanut-stand genre -- southside Virginia I-95, not a New England board.
         in_states("Virginia peanuts, next exit. Cooked in the shell. Your cab will smell like a ballpark for a week.", &["VA"]),
     ]),
+    // A line saying "next exit" or "ahead" about one real place cannot be
+    // state-anchored: it would be read anywhere in the state, either way.
+    // Those are placed data now (signsheets/pool-moves-2026-09-30.md):
+    // the Cabazon dinosaurs, Baker's alien jerky, Little America, the
+    // Grapevine, Hope, Muskogee and the Casey rocking chair. The Thing's
+    // "two hundred miles of suspense" was cut; its placed countdown says it.
     ("I-10", &[
-        in_states("The Thing? Mystery of the desert. Two hundred miles of suspense building.", &["AZ", "NM"]),
-        in_states("Dinosaurs, next exit. Concrete, enormous, unbothered by extinction.", &["CA"]),
         // Song tributes -- the southern transcontinental collects song towns:
         // Phoenix, Houston, Baton Rouge, Biloxi, El Paso, and the Big Thicket.
-        approaching("Phoenix ahead, eventually. The desert gives you time to think. Glen Campbell got By the Time I Get to Phoenix out of it.", &["phoenix_az_us"]),
+        approaching("Phoenix ahead, eventually. The desert gives you time to think. Jimmy Webb got By the Time I Get to Phoenix out of it, and Glen Campbell sang it.", &["phoenix_az_us"]),
         approaching("Houston ahead. Larry Gatlin measured this trip in days and just called the song Houston.", &["houston_tx_us"]),
         // Gilley's, the Urban Cowboy honky-tonk, stood in Pasadena outside
         // Houston until it closed in nineteen eighty-nine and burned the year
@@ -487,7 +499,6 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         in_states("Cajun country. Boudin, cracklins, and a drive-thru that does not need a window. Next exit.", &["LA"]),
     ]),
     ("I-15", &[
-        in_states("Alien jerky, next exit. They won't say who the jerky's made from.", &["CA"]),
         in_states("The Mad Greek. Gyros in the middle of the Mojave. Trust the desert.", &["CA"]),
         // Song tribute -- Las Vegas (Elvis Presley).
         approaching("Las Vegas ahead. Elvis said Viva. The lights are on all night.", &["las_vegas_nv_us"]),
@@ -506,7 +517,6 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         approaching("Memphis ahead. Graceland is a real house with a real ticket line. Elvis lived there. The jumpsuits are in the museum.", &["memphis_tn_us"]),
         // Casino genre -- Oklahoma City's casino boards belong on its approach.
         approaching("Oklahoma City ahead. Casino billboards outnumber the cattle. You have been warned.", &["oklahoma_city_ok_us"]),
-        in_states("Muskogee, Oklahoma, up the road. Merle Haggard put it on the map. The proudest Okies you'll ever wave at.", &["OK"]),
         in_states("Okemah, Oklahoma. Home of Woody Guthrie. This Land Is Your Land. This billboard is somebody else's.", &["OK"]),
         approaching("East Tennessee, home of Dolly Parton. The Smokies raised her. Nobody's worked a longer shift with a bigger smile.", &["knoxville_tn_us"]),
         // Ticketed Memphis tourism -- Beale Street, not a Music Highway state marker.
@@ -516,8 +526,7 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         approaching("Albuquerque ahead. Red chile, green chile, and a sky that does not quit. Fuel up.", &["albuquerque_nm_us"]),
     ]),
     ("I-80", &[
-        in_states("World's largest porch swing. Seats twenty-five. Zero of them truckers.", &["NE"]),
-        in_states("Little America, ahead. Ice cream, cheap gas, and a very large sign about it.", &["WY", "UT"]),
+        in_states("One of the world's largest porch swings. Seats eighteen. Zero of them truckers.", &["NE"]),
         // Song tribute -- San Francisco Bay at the far western end (Otis
         // Redding).
         // Otis is the San Francisco bay, not the Humboldt. Nevada I-80 is
@@ -535,21 +544,23 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // Song tributes -- the Front Range (Joe Walsh) and Kansas City
         // (Roger Miller). Black Bear Road is a Jeep trail, not a paid board
         // on Interstate 70.
-        in_states("The Rockies, straight ahead and getting bigger. Joe Walsh saw this view and wrote Rocky Mountain Way.", &["CO", "KS"]),
-        approaching("Kansas City ahead. Roger Miller made it famous twice -- Kansas City Star, then King of the Road.", &["kansas_city_mo_us"]),
+        // Westbound only: the Rockies are behind anyone driving east.
+        approaching("The Rockies, straight ahead and getting bigger. Joe Walsh saw this view and wrote Rocky Mountain Way.", &["denver_co_us"]),
+        approaching("Kansas City ahead. Roger Miller gave it Kansas City Star, the same year he was King of the Road.", &["kansas_city_mo_us"]),
         // Paying attraction -- OZ Museum, Wamego KS (I-70 billboards documented).
         in_states("Kansas sky, as advertised. The Oz Museum is a few exits off this road in Wamego. Ruby slippers not required.", &["KS"]),
         approaching("Saint Louis ahead. The Gateway Arch is the big one. You may look. The trailer stays on this side of the river.", &["st_louis_mo_us"]),
     ]),
     // Song tributes -- the Missouri and Oklahoma road. Franklin County,
-    // Missouri (Union, Pacific, Saint Clair, Sullivan) is the Franklin County
-    // Trucking Company's home turf, by owner order; Tulsa belongs to Don
-    // Williams.
+    // Missouri (Union, Pacific, Saint Clair, Sullivan) carries the Franklin
+    // County Trucking Company's name, by owner order; no source places the
+    // band there (its founders are in Illinois and Kentucky), so the line
+    // claims the name only (owner, 2026-09-30). Tulsa belongs to Don Williams.
     ("I-44", &[
         // Moved from Interstate 40 Arkansas: Meramec Caverns is Stanton,
         // Missouri, on Interstate 44, a real paid-board attraction.
-        in_states("Meramec-style caverns ahead. Outlaws hid here. So can you, for nine ninety-five.", &["MO"]),
-        in_states("Franklin County, Missouri -- Union, Pacific, Saint Clair, and Sullivan. Home turf of the Franklin County Trucking Company. If you're a trucker, they already wrote your song.", &["MO"]),
+        in_states("Meramec-style caverns ahead. Outlaws hid here. So can you, for the price of a ticket.", &["MO"]),
+        in_states("Franklin County, Missouri -- Union, Pacific, Saint Clair, and Sullivan. Same name as the Franklin County Trucking Company. If you're a trucker, they already wrote your song.", &["MO"]),
         approaching("Tulsa ahead. Set your watch to Tulsa Time. Don Williams says it runs a little easier.", &["tulsa_ok_us"]),
         // Casino genre -- the Tulsa approach.
         approaching("Tulsa ahead. Casino lights off the right. Don't bet the load.", &["tulsa_ok_us"]),
@@ -576,15 +587,14 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // The Longhorn Ballroom, Dallas: Bob Wills opened it in nineteen
         // fifty, the Sex Pistols played it in nineteen seventy-eight, and it
         // reopened restored in twenty twenty-three.
-        approaching("Dallas ahead. The Longhorn Ballroom is open again. Bob Wills built it and the Sex Pistols played it once. Bring the freight to the dock, not the dance floor.", &["dallas_tx_us"]),
+        approaching("Dallas ahead. The Longhorn Ballroom is open again. It was built for Bob Wills, and the Sex Pistols played it once. Bring the freight to the dock, not the dance floor.", &["dallas_tx_us"]),
         // Kolache stands at West, Texas on I-35 -- invented copy, no stolen bakery slogan.
         approaching("Waco ahead. West, Texas, is kolache country. The bakery has been stopping traffic since the interstate was new.", &["waco_tx_us"]),
-        in_states("Flattest stretch in Kansas: wheat, sky, and telephone poles. Glen Campbell got Wichita Lineman out of one of those poles. Plenty left.", &["KS"]),
+        in_states("Flattest stretch in Kansas: wheat, sky, and telephone poles. Jimmy Webb wrote Wichita Lineman about a man up a pole like these, and Glen Campbell sang it. Plenty left.", &["KS"]),
     ]),
     // Song tributes -- the Central Valley grade and the Bakersfield Sound.
     ("I-5", &[
         in_states("Bakersfield Sound country. Buck Owens and Merle Haggard tuned it, Red Simpson trucked it, Dwight Yoakam kept it running. Turn it up.", &["CA"]),
-        in_states("The Grapevine, dead ahead. Commander Cody raced a Hot Rod Lincoln up this grade. Trucks use low gear.", &["CA"]),
         // Moved off the corridor-less tribute pool: "far off this road" is a
         // claim about WHERE the truck is, and on the national pool it was
         // being read in Georgia. Redwood country is the far northern end of
@@ -593,7 +603,7 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // Landmark attraction -- Seattle's ticketed music museum.
         approaching("Seattle ahead. The museum of pop culture is the colorful blob by the Needle. Jimi Hendrix is inside; the rain is not.", &["seattle_wa_us"]),
         // Paying venue -- Buck Owens' Crystal Palace, Bakersfield.
-        in_states("Buck Owens' Crystal Palace is a real room in Bakersfield. The Sound was born here. The freight just passes through.", &["CA"]),
+        in_states("Bakersfield. Buck Owens' Crystal Palace closed its doors in twenty twenty-five, but the Bakersfield Sound still plays. The freight just passes through.", &["CA"]),
     ]),
     // Song tributes -- the Delta highway: Dyess, Arkansas (Johnny Cash) and
     // the old rail line to New Orleans (Willie Nelson's version).
@@ -612,7 +622,7 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
     ]),
     // Song tribute -- Fort Payne, Alabama, hometown of the band Alabama.
     ("I-59", &[
-        in_states("Fort Payne, Alabama -- hometown of the band Alabama. They wrote Roll On for every eighteen wheeler on this road.", &["AL"]),
+        in_states("Fort Payne, Alabama -- hometown of the band Alabama. They sang Roll On for every eighteen wheeler on this road.", &["AL"]),
     ]),
     // Song tributes -- the long north-south haul: Saginaw and Detroit at the
     // top, Macon, Georgia at the bottom.
@@ -623,7 +633,7 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // Produce stands -- not See Rock City.
         in_states("Georgia peaches, next few exits. The stands are real. The claims about whose are best are advertising.", &["GA"]),
         in_states("Florida citrus, next few exits. The bags are heavy. The claims about fresh are mostly true.", &["FL"]),
-        in_states("Horse country. The Kentucky Horse Park is a real farm with a hall of fame. Your trailer is not invited to the paddock.", &["KY"]),
+        in_states("Horse country. The Kentucky Horse Park is a real farm with a Hall of Champions. Your trailer is not invited to the paddock.", &["KY"]),
     ]),
     // Song tributes -- Atlanta owns this corridor: Jerry Reed, Alan Jackson,
     // and Gladys Knight all call it home.
@@ -634,7 +644,7 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
     ]),
     // Song tribute -- Chattanooga (Glenn Miller).
     ("I-24", &[
-        approaching("Chattanooga ahead. The Choo Choo is real -- an actual train, parked downtown since Glenn Miller made it swing. No ticket required.", &["chattanooga_tn_us"]),
+        approaching("Chattanooga ahead. The Choo Choo is real -- an actual train, parked at the old terminal station. Glenn Miller made it swing. No ticket required.", &["chattanooga_tn_us"]),
     ]),
     // Song tributes -- Wisconsin gave trucking Dave Dudley; Detroit gave
     // everyone Motown and Bob Seger.
@@ -674,13 +684,12 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         in_states("Coal country. Tennessee Ernie Ford counted Sixteen Tons of it and famously came up broke.", &["KY", "WV", "VA"]),
         approaching("Louisville ahead. They make the bats here. The Louisville Slugger Museum is the giant one you cannot miss.", &["louisville_ky_us"]),
     ]),
-    // Song tribute -- Hope, Arkansas (Brennen Leigh).
+    // Hope, Arkansas (Brennen Leigh) is placed at its exit; see above I-10.
     ("I-30", &[
-        in_states("Hope, Arkansas, next exit. Brennen Leigh wrote a song about running out of it. Fuel up before you do.", &["AR"]),
         // The Longhorn Ballroom, Dallas: Bob Wills opened it in nineteen
         // fifty, the Sex Pistols played it in nineteen seventy-eight, and it
         // reopened restored in twenty twenty-three.
-        approaching("Dallas ahead. The Longhorn Ballroom is open again. Bob Wills built it and the Sex Pistols played it once. Bring the freight to the dock, not the dance floor.", &["dallas_tx_us"]),
+        approaching("Dallas ahead. The Longhorn Ballroom is open again. It was built for Bob Wills, and the Sex Pistols played it once. Bring the freight to the dock, not the dance floor.", &["dallas_tx_us"]),
     ]),
     // I-8 Mexican Radio / Wall of Voodoo was radio memory of Rio Grande
     // border-blasters, not a paid board on Interstate 8. Pulled.
@@ -719,7 +728,7 @@ pub const CORRIDOR_BILLBOARDS: &[(&str, &[CorridorSign])] = &[
         // The Longhorn Ballroom, Dallas: Bob Wills opened it in nineteen
         // fifty, the Sex Pistols played it in nineteen seventy-eight, and it
         // reopened restored in twenty twenty-three.
-        approaching("Dallas ahead. The Longhorn Ballroom is open again. Bob Wills built it and the Sex Pistols played it once. Bring the freight to the dock, not the dance floor.", &["dallas_tx_us"]),
+        approaching("Dallas ahead. The Longhorn Ballroom is open again. It was built for Bob Wills, and the Sex Pistols played it once. Bring the freight to the dock, not the dance floor.", &["dallas_tx_us"]),
     ]),
 ];
 
@@ -872,9 +881,7 @@ pub fn corridor_signs(highway: &str) -> &'static [CorridorSign] {
 /// Real roadside attractions from the oddities genre, each true only in
 /// the states where a driver could actually turn off for it. Sources: the
 /// Cawker City, Kansas ball (off Interstate 70 on US-24) and Darwin,
-/// Minnesota's one-man ball (US-12); the Casey, Illinois rocking chair
-/// (Interstate 70) and the Fanning, Missouri one (old Route 66 beside
-/// Interstate 44); the Collinsville, Illinois ketchup bottle water tower
+/// Minnesota's one-man ball (US-12); the Collinsville, Illinois ketchup bottle water tower
 /// (Interstates 55 and 70 east of Saint Louis); and the Petrified Forest
 /// gift shops on Interstate 40 through Holbrook, Arizona, with the trade
 /// running into New Mexico.
@@ -882,10 +889,6 @@ pub const PLACED_ODDITIES: &[CorridorSign] = &[
     in_states(
         "World's largest ball of twine. Bigger than your problems. Probably.",
         &["KS", "MN"],
-    ),
-    in_states(
-        "World's largest rocking chair. You may not sit in it. Next exit.",
-        &["IL", "MO"],
     ),
     in_states(
         "World's largest ketchup bottle. French fries not included.",
@@ -1285,7 +1288,11 @@ mod tests {
             .iter()
             .filter(|s| s.text.contains("Wall Drug"))
             .collect();
-        assert_eq!(signs.len(), 2, "both Wall Drug lines must remain");
+        assert_eq!(
+            signs.len(),
+            1,
+            "the direction-free Wall Drug line must remain"
+        );
         for sign in signs {
             assert_eq!(
                 sign.anchor,

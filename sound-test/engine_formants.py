@@ -67,9 +67,9 @@ def levinson(r: np.ndarray, order: int) -> np.ndarray:
     if err <= 0:
         return a
     for i in range(1, order + 1):
-        acc = r[i] + np.dot(a[1:i], r[i - 1:0:-1]) if i > 1 else r[i]
+        acc = r[i] + np.dot(a[1:i], r[i - 1 : 0 : -1]) if i > 1 else r[i]
         k = -acc / err
-        a[1:i + 1] = a[1:i + 1] + k * a[i - 1::-1][:i]
+        a[1 : i + 1] = a[1 : i + 1] + k * a[i - 1 :: -1][:i]
         err *= 1.0 - k * k
         if err <= 0:
             break
@@ -82,10 +82,10 @@ def lpc(x: np.ndarray, order: int = LPC_ORDER) -> np.ndarray:
     # Slight pre-emphasis: without it the fit spends most of its poles on the
     # steep low-frequency tilt and resolves the upper resonances poorly.
     w = np.append(w[0], w[1:] - 0.97 * w[:-1])
-    full = np.correlate(w, w, "full")[len(w) - 1:]
+    full = np.correlate(w, w, "full")[len(w) - 1 :]
     if full[0] <= 0:
         return np.zeros(order + 1)
-    return levinson(full[:order + 1] / full[0], order)
+    return levinson(full[: order + 1] / full[0], order)
 
 
 def poles_to_resonances(a: np.ndarray, sr: int = ANALYSIS_SR) -> list[tuple[float, float, float]]:
@@ -136,7 +136,7 @@ def donor_frames(x: np.ndarray, sr: int, n_frames: int = 24) -> np.ndarray:
     step = max(flen // 2, (len(xa) - flen) // max(n_frames, 1))
     fits = []
     for i in range(0, len(xa) - flen, step):
-        a = lpc(xa[i:i + flen])
+        a = lpc(xa[i : i + flen])
         if np.isfinite(a).all() and abs(a[0] - 1.0) < 1e-9:
             fits.append(a)
     if not fits:

@@ -151,8 +151,8 @@ class WindowsRuntimeTests(unittest.TestCase):
         windows_runtime.verify_windows_runtime(payload)
 
     def test_optional_screen_reader_bridges_do_not_have_to_ship(self):
-        # Prism reaches PC-Talker, ZDSR and BoYing through DELAY imports: a
-        # player without that reader loses the bridge, never the game.
+        # A DELAY import resolves on first call: a player without that
+        # reader loses the bridge, never the game.
         payload = self.make_payload()
         pe_file(payload / "prism.dll", ["KERNEL32.dll"], delayed=["pctkusr.dll"])
         windows_runtime.verify_windows_runtime(payload)

@@ -451,7 +451,6 @@ fn test_the_cb_call_a_hazard_swallowed_still_comes_back_on_alt_c() {
     d.handle_key_event(&mut app.ctx, &InputEvent::key_mods(Key::C, Mods::ALT));
     let said = app.main_lines();
     assert_eq!(said, vec![d.trip.cb_patrol_message(&post, 2.0)]);
-    assert!(said[0].starts_with("CB chatter"), "{}", said[0]);
 }
 
 #[test]
@@ -543,6 +542,10 @@ fn test_zone_entry_no_longer_destroys_pending_ambient_chatter() {
             "Crossing Ohio.",
             TripEventData::default(),
         ),
+    );
+    assert_eq!(
+        d.pending_ambient_events.back().unwrap().priority,
+        Some(EventPriority::Route)
     );
     assert_eq!(
         app.event_calls(),

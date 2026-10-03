@@ -208,9 +208,10 @@ fn test_announced_destination_exit_stays_actionable_when_window_shrinks() {
             harness.read_drive(|d| d.exit_stop.as_ref().map(|s| s.stop_type.clone())),
             Some("delivery_destination".to_string())
         );
-        // "Signal on for ..." is the 1.9 wording of the old "Signaling for ...".
+        // "Signal set for ..." (the blinker waits for half a mile) is the 1.9
+        // wording of the old "Signaling for ...".
         assert!(
-            last_said(&harness).contains("Signal on for"),
+            last_said(&harness).contains("Signal set for"),
             "{}",
             last_said(&harness)
         );
@@ -290,7 +291,7 @@ fn queue_behind_a_safety_cue(harness: &mut PlaytestHarness) -> Vec<(String, bool
 fn assert_warning_then_queued_confirmation(calls: &[(String, bool)]) {
     assert_eq!(calls.len(), 2, "{calls:#?}");
     assert_eq!(calls[0].0, "Brake now. Hazard ahead.");
-    assert!(calls[1].0.contains("Signal on for"), "{calls:#?}");
+    assert!(calls[1].0.contains("Signal set for"), "{calls:#?}");
     assert!(
         !calls[1].1,
         "the confirmation queues rather than cutting in"
@@ -450,6 +451,8 @@ fn test_exit_announcements_speak_each_name_once() {
     // Fallback phrasing must not repeat the facility or exit label -- the
     // sentence is heard, not read.
     let mut harness = a_drive("Name Once");
+    // A miss needs a driver who can miss: full lane keeping takes the exit.
+    harness.app.ctx.settings.lane_keeping = "partial".to_string();
     let facility = "grocery warehouse Trenton Distribution in Trenton";
     harness.with_drive(|drive, _| {
         let mut stop = RoadStop::new(facility, 10.0, "delivery_destination");
@@ -483,8 +486,9 @@ fn test_exit_announcements_speak_each_name_once() {
     assert!(close.contains("a quarter mile"), "{close}");
 
     harness.with_drive(move |drive, _| {
-        drive.trip.position_mi = stop.at_mi;
-        drive.truck_mut().velocity_mps = 29.0; // too fast: blow past it
+        // Past the end of the gore window, never having taken the exit lane.
+        drive.trip.position_mi = stop.at_mi + 0.5;
+        drive.truck_mut().velocity_mps = 29.0;
     });
     harness.clear_speech();
     harness.with_drive(|drive, ctx| drive.update_exit(ctx, 0.0, DT));

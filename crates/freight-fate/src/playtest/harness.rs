@@ -60,6 +60,7 @@ pub fn key_event(key: Key, text: Option<char>) -> InputEvent {
         key,
         mods: Mods::NONE,
         text,
+        repeat: false,
     }
 }
 
@@ -1621,10 +1622,24 @@ impl PlaytestHarness {
                 return (false, false);
             };
             let remaining = ramp_mi.max(0.0);
+            // A driver who knows the realistic exit (2026-09-24): road speed
+            // into the deceleration lane, the exit speed by the ramp curve,
+            // then a steady stop to the end. The old rule, seventy times the
+            // miles left, was a half-mile ramp's profile and braked hard at
+            // the gore of every shorter one.
+            const SHED_MPS2: f64 = 1.5;
+            let profile = |miles: f64, end_mph: f64| {
+                let end = end_mph / MPH_PER_MPS;
+                (end * end + 2.0 * SHED_MPS2 * miles.max(0.0) * 1609.344).sqrt() * MPH_PER_MPS
+            };
+            let exit_mph = drive.armed_ramp_mph(None);
+            let to_the_end = profile(remaining, 0.0).max(4.0);
             let target_mph = if remaining == 0.0 {
                 0.0
+            } else if let Some(lane_left) = drive.deceleration_lane_left_mi() {
+                profile(lane_left, exit_mph).min(to_the_end)
             } else {
-                (remaining * 70.0).max(4.0)
+                exit_mph.min(to_the_end)
             };
             let speed = drive.truck().speed_mph();
             (
@@ -1632,7 +1647,9 @@ impl PlaytestHarness {
                 remaining > 0.0 && speed < target_mph - 1.0,
             )
         });
-        for (key, held) in [(Key::Down, down), (Key::Up, up)] {
+        // Right into the exit lane where the cab says it opens.
+        let right = self.read_drive(|drive| drive.lane.exit_lane_open);
+        for (key, held) in [(Key::Down, down), (Key::Up, up), (Key::Right, right)] {
             if held {
                 self.app.ctx.input.press(key, Mods::NONE);
             } else {

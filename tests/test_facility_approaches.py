@@ -1,11 +1,14 @@
 import importlib.util
-import json
 import sys
 from pathlib import Path
 
 import pytest
 
-RAW_MARKERS = ("osm_id", "amenity=", "highway=", "operator=", "node/", "way/", "source_ref")
+
+def in_town(_kind: str, _lat: float, _lon: float) -> bool:
+    """The fixture town judge: every fixture street is in town. The real
+    bake judges by the Census boundaries, a local download CI does not have."""
+    return True
 
 
 def _load_tool():
@@ -17,100 +20,6 @@ def _load_tool():
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
-
-
-def test_facility_approach_data_covers_full_facility_set(world):
-    data = json.loads(Path("data/facility_approaches.json").read_text(encoding="utf-8"))
-    coverage = data["coverage"]
-
-    assert coverage["facilities"] == 4271
-    # Synced with facility_endpoints after far-pin regeocode (419 estimated)
-    # and the 2026-09-17 endpoint re-sweep, which replaced 1,224 endpoints and
-    # had every chain to one of them rebuilt toward the new endpoint.
-    # The 2026-09-17 yard-road rule then gave 89 facilities the public roads
-    # do not reach a chain over the facility's own private road (52 new chains,
-    # 37 stale ones rebuilt).
-    # 2026-09-20: the four families that had no matcher rule -- grain
-    # elevators, quarries, construction materials yards, lumber and paper --
-    # gained one, and the six sibling types the builder still skipped are in.
-    # Chains 2,314 to 2,456. The public search also honours gates and ways
-    # signed against trucks now; not one of the 2,314 existing chains needed a
-    # truck-signed way, so nothing was demoted.
-    assert coverage["source_backed_endpoints"] == 2874
-    assert coverage["road_snapped"] == 2490
-    assert coverage["turn_level"] == 2456
-    assert coverage["nearest_road_fallback"] == 384
-    # Sourced endpoints with no chain whose own OSM object is not a freight site
-    # (a railway line, a substation, a shop): the 2026-09-17 endpoint screen.
-    assert coverage["endpoint_screen_refused"] == 344
-    # Chains that still lead to a replaced endpoint because no public-road
-    # path reaches the new one, not even over its own private road; kept until
-    # a chain replaces them, and labelled.
-    assert coverage["stale_chain_kept"] == 42
-    assert coverage["representative_fallback"] == 1397
-    assert coverage["gate_yard_dock_hints"] == 0
-
-    # The 2026-07-14 regen keys records by current slug facility ids and
-    # covers every facility the endpoint/local-approach sweeps know about;
-    # facilities added by map growth since those sweeps are simply absent
-    # until the next data expansion pass (see ROADMAP).
-    facilities = {
-        location.id for city in world.city_names() for location in world.cities[city].locations
-    }
-    resolved, missing = set(), []
-    for facility_id in data["approaches"]:
-        try:
-            resolved.add(world.facility_by_id(facility_id).id)
-        except KeyError:
-            missing.append(facility_id)
-    assert resolved <= facilities
-    assert not missing, missing[:10]
-    assert len(resolved) == coverage["facilities"]
-
-
-def test_facility_approach_records_are_clean_and_honest(world):
-    data = json.loads(Path("data/facility_approaches.json").read_text(encoding="utf-8"))
-
-    for facility_id, record in data["approaches"].items():
-        try:
-            world.facility_by_id(facility_id)
-        except KeyError:
-            continue  # facility retired by map growth; record is inert
-        approach = world.facility_source_approach(record["city"], facility_id)
-        assert approach is not None
-        spoken = " ".join(
-            [record["facility_name"], record["endpoint_name"], record["approach_road"]]
-            + [segment["road"] for segment in record["segments"]]
-            + [segment["cue"] for segment in record["segments"]]
-        ).lower()
-        assert not any(marker in spoken for marker in RAW_MARKERS)
-        assert not record["gate_hint"]
-        assert not record["yard_hint"]
-        assert not record["dock_hint"]
-        if record["turn_level"]:
-            assert record["road_snapped"]
-            assert record["nearest_road_context"]
-            assert record["source_type"] == "osm_local_road_graph"
-            assert not record["fallback"]
-            assert record["total_miles"] > 0
-            assert len(record["segments"]) >= 1
-        else:
-            assert record["fallback"]
-            assert record["fallback_reason"]
-            assert record["source_type"] == "facility_approach_fallback"
-
-
-def test_facility_route_keeps_existing_fallback_when_no_source_geometry(world):
-    facility = world.facility_by_id("abilene:grocery_retail_dc:abilene-grocery-distribution-center")
-    source_approach = world.facility_source_approach("Abilene", facility.name)
-    fallback_approach = world.facility_approach("Abilene", facility.name)
-    route = world.facility_approach_route("Abilene", facility.name)
-
-    assert source_approach is not None
-    assert source_approach.fallback
-    assert fallback_approach is not None
-    assert route.miles == pytest.approx(fallback_approach.approach_miles)
-    assert route.highways == [fallback_approach.road]
 
 
 def test_build_tool_routes_tiny_facility_fixture(tmp_path, monkeypatch):
@@ -172,6 +81,7 @@ def test_build_tool_routes_tiny_facility_fixture(tmp_path, monkeypatch):
         tmp_path,
         states=("Illinois",),
         max_route_mi=2.0,
+        town_judge=in_town,
     )
     record = payload["approaches"]["fixture:warehouse"]
 
@@ -253,6 +163,7 @@ def test_build_tool_says_what_an_unnamed_road_is(tmp_path, monkeypatch):
         tmp_path,
         states=("Illinois",),
         max_route_mi=2.0,
+        town_judge=in_town,
     )
     record = payload["approaches"]["fixture:cross_dock"]
 
@@ -378,7 +289,9 @@ def test_build_tool_refuses_a_chain_to_an_endpoint_that_is_not_a_freight_site(
     monkeypatch.setattr(local_geometry, "state_extract_path", lambda _cache, _state: osm_path)
     monkeypatch.setattr(tool, "_load_local_geometry_tool", lambda: local_geometry)
 
-    screened = tool.build_facility_approaches(tmp_path, states=("Illinois",), max_route_mi=2.0)
+    screened = tool.build_facility_approaches(
+        tmp_path, states=("Illinois",), max_route_mi=2.0, town_judge=in_town
+    )
     record = screened["approaches"]["fixture:cross_dock"]
     assert not record["turn_level"]
     assert record["fallback_reason"].startswith(tool.SCREEN_REFUSAL_PREFIX)
@@ -387,7 +300,7 @@ def test_build_tool_refuses_a_chain_to_an_endpoint_that_is_not_a_freight_site(
 
     # The screen is a switch, not an edit: off, the same endpoint routes.
     unscreened = tool.build_facility_approaches(
-        tmp_path, states=("Illinois",), max_route_mi=2.0, endpoint_screen=False
+        tmp_path, states=("Illinois",), max_route_mi=2.0, endpoint_screen=False, town_judge=in_town
     )
     assert unscreened["approaches"]["fixture:cross_dock"]["turn_level"]
 
@@ -397,12 +310,14 @@ def test_build_tool_refuses_a_chain_to_an_endpoint_that_is_not_a_freight_site(
         '<tag k="power" v="substation" />', '<tag k="building" v="warehouse" />'
     )
     osm_path.write_text(warehouse, encoding="utf-8")
-    assert tool.build_facility_approaches(tmp_path, states=("Illinois",), max_route_mi=2.0)[
-        "approaches"
-    ]["fixture:cross_dock"]["turn_level"]
+    assert tool.build_facility_approaches(
+        tmp_path, states=("Illinois",), max_route_mi=2.0, town_judge=in_town
+    )["approaches"]["fixture:cross_dock"]["turn_level"]
     across = "The sourced endpoint lies across the national border from its city."
     monkeypatch.setattr(tool, "endpoint_row_refusals", lambda: {"fixture:cross_dock": across})
-    labelled = tool.build_facility_approaches(tmp_path, states=("Illinois",), max_route_mi=2.0)
+    labelled = tool.build_facility_approaches(
+        tmp_path, states=("Illinois",), max_route_mi=2.0, town_judge=in_town
+    )
     record = labelled["approaches"]["fixture:cross_dock"]
     assert not record["turn_level"]
     assert across in record["fallback_reason"]

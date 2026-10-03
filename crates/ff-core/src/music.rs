@@ -471,7 +471,7 @@ mod tests {
 
     #[test]
     fn test_jazz_pool_exists_and_ships_assets() {
-        assert_eq!(JAZZ_TRACKS.len(), 7);
+        assert_eq!(JAZZ_TRACKS.len(), 15);
         assert_eq!(station_playlist("jazz"), JAZZ_TRACKS.as_slice());
     }
 

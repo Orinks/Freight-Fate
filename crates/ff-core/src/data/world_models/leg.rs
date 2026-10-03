@@ -10,11 +10,19 @@ use parking_lot::Mutex;
 use super::{
     lane_word, DataError, ElevationSample, GradeSegment, HpmsTerrain, Interchange, Landmark,
     LaneSegment, RouteCheckpoint, RoutePoint, RouteRestriction, SpeedLimitSample, StateCrossing,
-    StateMileage, Stop, TollEvent, TrafficVolumeSample,
+    StateMileage, Stop, StreetControl, StreetLimit, TollEvent, TrafficVolumeSample,
 };
 use crate::data::world::World;
 use crate::data::world_corridor::build_leg_corridor;
 use crate::pyfmt::fmt_f;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct BillboardBan {
+    pub from_mi: f64,
+    pub to_mi: f64,
+    pub name: String,
+    pub source: String,
+}
 
 /// The heavy per-mile corridor fields a leg parses on first touch.
 /// Everything else on a `Leg` (endpoints, miles, highway, terrain, stops,
@@ -36,6 +44,7 @@ pub struct CorridorDetail {
     pub landmarks: Vec<Landmark>,
     pub restrictions: Vec<RouteRestriction>,
     pub lane_segments: Vec<LaneSegment>,
+    pub billboard_bans: Vec<BillboardBan>,
 }
 
 /// The raw corridor JSON plus its parse context, held by a lazy leg until the
@@ -132,6 +141,16 @@ pub struct Leg {
     /// magnitude survives a route reversal unchanged: an inbound 90-degree
     /// right is an outbound 90-degree left at the same corner.
     pub local_turn_deg: f64,
+    /// A facility street's posted limit and what kind of value it is, and
+    /// its READ traffic controls (`tools/street_chain.py`). None and empty on
+    /// highways, on chains baked before the street detail, and outbound.
+    pub local_limit: Option<StreetLimit>,
+    pub local_controls: Vec<StreetControl>,
+    /// The leg lies past the facility's driveway, on its own service or
+    /// private way: the yard, not a public street. Derived from the chain's
+    /// baked driveway (`Driveway`), which is a leg boundary on 1,872 of 1,875
+    /// exit chains; a driveway inside a leg marks nothing.
+    pub local_yard: bool,
     /// Whether the leg runs on a divided carriageway, baked from real OSM
     /// oneway-pair geometry (Track D2). None where the bake was mixed or
     /// thin -- honest absence; the runtime infers from road class instead.
@@ -171,6 +190,9 @@ impl Leg {
             local_cue: String::new(),
             local_speed_mph: 0.0,
             local_turn_deg: 0.0,
+            local_limit: None,
+            local_controls: Vec::new(),
+            local_yard: false,
             divided: None,
             meta_complete: None,
             corridor: OnceCell::new(),
@@ -200,6 +222,30 @@ impl Leg {
     pub fn with_turn_deg(mut self, degrees: f64) -> Self {
         self.local_turn_deg = degrees;
         self
+    }
+
+    /// The street detail of the facility chain segment this leg drives.
+    pub fn with_street(mut self, limit: Option<StreetLimit>, controls: Vec<StreetControl>) -> Self {
+        self.local_limit = limit;
+        self.local_controls = controls;
+        self
+    }
+
+    /// Mark this local leg as past the driveway (see `local_yard`).
+    pub fn with_yard(mut self, yard: bool) -> Self {
+        self.local_yard = yard;
+        self
+    }
+
+    /// The posted limit of this facility street, when the chain carries the
+    /// street detail: the yard's own limit past the driveway, else the
+    /// street's baked limit whatever its kind (read, statutory or assumed).
+    /// None on a highway leg and on a chain baked before the street detail.
+    pub fn street_limit_mph(&self) -> Option<f64> {
+        if self.local_yard {
+            return Some(crate::sim::trip_models::YARD_LIMIT_MPH);
+        }
+        self.local_limit.as_ref().map(|limit| limit.mph)
     }
 
     /// A leg whose corridor detail is parsed from `source` on first read.
@@ -343,6 +389,10 @@ impl Leg {
         &self.corridor().landmarks
     }
 
+    pub fn billboard_bans(&self) -> &[BillboardBan] {
+        &self.corridor().billboard_bans
+    }
+
     pub fn restrictions(&self) -> &[RouteRestriction] {
         &self.corridor().restrictions
     }
@@ -409,6 +459,9 @@ impl Clone for Leg {
             local_cue: self.local_cue.clone(),
             local_speed_mph: self.local_speed_mph,
             local_turn_deg: self.local_turn_deg,
+            local_limit: self.local_limit.clone(),
+            local_controls: self.local_controls.clone(),
+            local_yard: self.local_yard,
             divided: self.divided,
             meta_complete: self.meta_complete,
             corridor,
@@ -485,15 +538,38 @@ impl Route {
             .collect()
     }
 
-    pub fn stop_details(&self) -> Vec<&Stop> {
-        self.legs
-            .iter()
-            .flat_map(|leg| leg.stops.iter().filter(|s| s.curated()))
-            .collect()
+    fn stops_with_route_miles(&self, include_uncurated: bool) -> Vec<Stop> {
+        let mut at_mi = 0.0;
+        let mut stops = Vec::new();
+        for (index, leg) in self.legs.iter().enumerate() {
+            let forward = self.cities.get(index).is_none_or(|city| city == &leg.a);
+            for stop in &leg.stops {
+                if !include_uncurated && !stop.curated() {
+                    continue;
+                }
+                let mut route_stop = stop.clone();
+                let local_mi = if forward {
+                    stop.at_mi
+                } else {
+                    leg.miles - stop.at_mi
+                };
+                route_stop.at_mi = at_mi + local_mi;
+                stops.push(route_stop);
+            }
+            at_mi += leg.miles;
+        }
+        stops.sort_by(|left, right| left.at_mi.total_cmp(&right.at_mi));
+        stops
     }
 
-    pub fn raw_stop_details(&self) -> Vec<&Stop> {
-        self.legs.iter().flat_map(|leg| leg.stops.iter()).collect()
+    /// Curated stops with mileposts measured from the route's start.
+    pub fn stop_details(&self) -> Vec<Stop> {
+        self.stops_with_route_miles(false)
+    }
+
+    /// All stop records with mileposts measured from the route's start.
+    pub fn raw_stop_details(&self) -> Vec<Stop> {
+        self.stops_with_route_miles(true)
     }
 
     /// Curated stops the rig can physically use, for pre-trip planning.
@@ -502,7 +578,7 @@ impl Route {
     /// decides whether a run is survivable, so a stop that would turn a rig
     /// away must not pad them. Pass `false` for the trailer case, the cautious
     /// read and the one nearly every job is.
-    pub fn accessible_stop_details(&self, bobtail: bool) -> Vec<&Stop> {
+    pub fn accessible_stop_details(&self, bobtail: bool) -> Vec<Stop> {
         self.stop_details()
             .into_iter()
             .filter(|s| s.accessible_to(bobtail))

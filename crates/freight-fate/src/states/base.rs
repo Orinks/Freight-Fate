@@ -274,6 +274,8 @@ pub enum InputEvent {
         key: Key,
         mods: Mods,
         text: Option<char>,
+        /// True when the operating system auto-repeated a held key.
+        repeat: bool,
     },
     KeyUp {
         key: Key,
@@ -313,6 +315,7 @@ impl InputEvent {
             key,
             mods: Mods::NONE,
             text: None,
+            repeat: false,
         }
     }
 
@@ -322,6 +325,7 @@ impl InputEvent {
             key,
             mods: Mods::NONE,
             text: Some(text),
+            repeat: false,
         }
     }
 
@@ -331,6 +335,7 @@ impl InputEvent {
             key,
             mods,
             text: None,
+            repeat: false,
         }
     }
 
@@ -384,9 +389,16 @@ impl InputEvent {
     /// The key of a `KeyDown`, else `None`.
     pub fn key_down(&self) -> Option<(Key, Mods, Option<char>)> {
         match self {
-            InputEvent::KeyDown { key, mods, text } => Some((*key, *mods, *text)),
+            InputEvent::KeyDown {
+                key, mods, text, ..
+            } => Some((*key, *mods, *text)),
             _ => None,
         }
+    }
+
+    /// Whether this is an OS auto-repeat `KeyDown` (false for everything else).
+    pub fn key_repeat(&self) -> bool {
+        matches!(self, InputEvent::KeyDown { repeat: true, .. })
     }
 }
 

@@ -41,13 +41,17 @@ OUT = Path(r"C:\temp\ffsound\brakes")
 LV = Path(r"C:\temp\ffsound\splice\Samples\packs\Large Vehicles")
 IND = Path(r"C:\temp\ffsound\splice\Samples\packs\Industry Vol. 1")
 BRIGHT_SRCS = [
-    LV / "SemiTruckBrake_S08IN.917.wav",       # 10.6 kHz centroid, brightest
-    LV / "SemiTruckAirBrake_BWU.95.wav",       # 9.1 kHz
-    IND / "AirBrake_BW.20321.wav",             # 8.3 kHz
+    LV / "SemiTruckBrake_S08IN.917.wav",  # 10.6 kHz centroid, brightest
+    LV / "SemiTruckAirBrake_BWU.95.wav",  # 9.1 kHz
+    IND / "AirBrake_BW.20321.wav",  # 8.3 kHz
 ]
 # (tag, seconds, level) -- firmer press = longer bleed and a touch louder.
-INTENSITIES = [("feather", 0.16, 0.07), ("light", 0.30, 0.09),
-               ("firm", 0.55, 0.11), ("hard", 0.95, 0.12)]
+INTENSITIES = [
+    ("feather", 0.16, 0.07),
+    ("light", 0.30, 0.09),
+    ("firm", 0.55, 0.11),
+    ("hard", 0.95, 0.12),
+]
 BED_S = 2.0
 SEED = 20260721
 
@@ -59,13 +63,15 @@ def hp(x: np.ndarray, fc: float) -> np.ndarray:
 
 def write(name: str, x: np.ndarray, target_rms: float) -> None:
     x = np.nan_to_num(np.asarray(x, float))
-    x = x * (target_rms / (float(np.sqrt(np.mean(x ** 2))) or 1.0))
+    x = x * (target_rms / (float(np.sqrt(np.mean(x**2))) or 1.0))
     p = float(np.max(np.abs(x))) or 1.0
     if p > 0.97:
         x = x * (0.97 / p)
     OUT.mkdir(parents=True, exist_ok=True)
     with wave.open(str(OUT / name), "wb") as fh:
-        fh.setnchannels(1); fh.setsampwidth(2); fh.setframerate(C.SR)
+        fh.setnchannels(1)
+        fh.setsampwidth(2)
+        fh.setframerate(C.SR)
         fh.writeframes((x * 32767).astype("<i2").tobytes())
 
 
@@ -78,12 +84,14 @@ def air_shape_blend(paths: list[Path], nfft: int = 8192) -> tuple[np.ndarray, np
         if not p.exists():
             continue
         x = hp(C.load_wav(p), 220.0)
-        frames = [np.abs(np.fft.rfft(x[i:i + nfft] * np.hanning(nfft)))
-                  for i in range(0, len(x) - nfft, nfft // 2)]
+        frames = [
+            np.abs(np.fft.rfft(x[i : i + nfft] * np.hanning(nfft)))
+            for i in range(0, len(x) - nfft, nfft // 2)
+        ]
         if not frames:
             continue
-        mag = medfilt(np.mean(frames, axis=0), 41)     # de-whistle
-        acc += mag / (mag.max() or 1.0)                # normalize so each counts equally
+        mag = medfilt(np.mean(frames, axis=0), 41)  # de-whistle
+        acc += mag / (mag.max() or 1.0)  # normalize so each counts equally
         used += 1
     return f, acc / max(1, used)
 
@@ -105,7 +113,7 @@ def release(f: np.ndarray, mag: np.ndarray, len_s: float, seed: int) -> np.ndarr
     n = int(len_s * C.SR)
     y = synth_noise(f, mag, n, seed)
     t = np.linspace(0.0, 1.0, n)
-    env = np.exp(-3.0 * t)                    # bleeds to ~5% by the end
+    env = np.exp(-3.0 * t)  # bleeds to ~5% by the end
     atk = int(0.005 * C.SR)
     env[:atk] *= np.linspace(0, 1, atk)
     return y * env
@@ -133,8 +141,11 @@ def main() -> None:
     demo = np.concatenate([np.concatenate([s, gap]) for _, s in shots])
     write("brake_hiss_synth_demo.wav", demo, target_rms=0.09)
 
-    print("  synthesized brake hisses: " + ", ".join(t for t, _ in shots)
-          + "  + brake_hiss_bed (steady, any-length) + demo")
+    print(
+        "  synthesized brake hisses: "
+        + ", ".join(t for t, _ in shots)
+        + "  + brake_hiss_bed (steady, any-length) + demo"
+    )
     print(f"  wrote to {OUT}")
 
 

@@ -51,7 +51,7 @@ jobs:
         run: uv sync --dev
 
       - name: Lint
-        run: uv run ruff check tests tools
+        run: uv run ruff check tests tools sound-test
 
       - name: Run tests
         run: uv run pytest tests/ -n auto --durations=15 --cov=tools --cov-report=xml

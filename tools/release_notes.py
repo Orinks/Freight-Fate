@@ -37,6 +37,12 @@ SNAPSHOT_COMPLETE_LIST = (
     "release page. Read `CHANGELOG.md` in the download for the complete "
     "curated list."
 )
+STABLE_COMPLETE_LIST = (
+    "## Complete change list\n\n"
+    "This release carries more player-facing changes than fit on the GitHub "
+    "release page. Read `CHANGELOG.md` in the download for the complete "
+    "curated list."
+)
 SECTION_ORDER = ("Added", "Changed", "Improved", "Fixed", "Removed", "Deprecated", "Security")
 PLAYER_FACING_SECTIONS = SECTION_ORDER + ("Compatibility",)
 INTERNAL_SECTIONS = (
@@ -363,10 +369,23 @@ def sections_added_since(
     return added
 
 
+def format_stable_notes(sections: list[ChangelogSection], footer: str = "") -> str:
+    body = format_sections(sections)
+    return f"{body}\n\n{footer}" if footer else body
+
+
 def stable_notes(version: str) -> str:
+    """The version's block, or Unreleased, bounded like a snapshot's notes.
+
+    1.9's Unreleased block alone is past GitHub's limit, so an unbounded
+    stable would fail the tag build's size check after every platform built.
+    """
     changelog_text = changelog_file().read_text(encoding="utf-8")
     block = version_block(changelog_text, version) or unreleased_block(changelog_text)
-    return format_sections(parse_sections(block))
+    sections, was_bounded = bounded_sections(
+        parse_sections(block), "", STABLE_COMPLETE_LIST, render=format_stable_notes
+    )
+    return format_stable_notes(sections, STABLE_COMPLETE_LIST if was_bounded else "")
 
 
 def format_nightly_notes(
@@ -403,7 +422,8 @@ def bounded_sections(
     changes_heading: str,
     footer: str,
     *,
-    section_heading_level: int,
+    section_heading_level: int = 2,
+    render=None,
 ) -> tuple[list[ChangelogSection], bool]:
     """Keep complete recent entries from every section within GitHub's limit.
 
@@ -411,10 +431,17 @@ def bounded_sections(
     something was, the caller appends ``footer`` so the page says where the
     rest is. Entries are taken in file order, round-robin across sections, so
     the newest of every kind survives rather than all of one section.
+    ``render(sections, footer)`` is the page being measured; snapshot notes
+    by default.
     """
-    if first_snapshot_fits(
-        format_nightly_notes(sections, changes_heading, section_heading_level=section_heading_level)
-    ):
+    if render is None:
+
+        def render(chosen: list[ChangelogSection], tail: str) -> str:
+            return format_nightly_notes(
+                chosen, changes_heading, tail, section_heading_level=section_heading_level
+            )
+
+    if first_snapshot_fits(render(sections, "")):
         return sections, False
 
     selected: list[list[str]] = [[] for _ in sections]
@@ -434,13 +461,7 @@ def bounded_sections(
                 continue
             entry = section.entries[offsets[index]]
             selected[index].append(entry)
-            candidate = format_nightly_notes(
-                selected_sections(),
-                changes_heading,
-                footer,
-                section_heading_level=section_heading_level,
-            )
-            if first_snapshot_fits(candidate):
+            if first_snapshot_fits(render(selected_sections(), footer)):
                 offsets[index] += 1
                 added_this_round = True
             else:

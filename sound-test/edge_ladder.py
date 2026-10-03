@@ -53,7 +53,7 @@ def wrap_fold(sig: np.ndarray, loop_n: int) -> np.ndarray:
     """Fold everything past the loop length back onto the start."""
     out = sig[:loop_n].copy()
     tail = sig[loop_n:]
-    out[: len(tail)] += tail[: loop_n]
+    out[: len(tail)] += tail[:loop_n]
     return out
 
 

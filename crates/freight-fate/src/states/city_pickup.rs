@@ -249,6 +249,20 @@ pub fn set_engine_running(ctx: &mut GameContext, truck: &mut TruckState, running
     true
 }
 
+/// Bring a running engine's idle back under a facility menu.
+///
+/// Arriving at a shipper or receiver replaces the drive, and leaving the
+/// drive silences the world, engine loop included. A running engine then
+/// idled in silence, and "Shut down the engine" had no loop to stop, so it
+/// made no sound at all (tester report, 2026-09-28). No ignition crank: the
+/// engine never stopped.
+pub fn sync_facility_engine_audio(ctx: &mut GameContext, truck: &TruckState) {
+    if truck.engine_on && !ctx.audio.engine_running() {
+        ctx.audio.engine_start_with(false);
+        ctx.audio.set_engine_rpm_with(truck.specs.idle_rpm, 0.0);
+    }
+}
+
 /// The engine kill switch, offered where a facility menu has taken over.
 ///
 /// Arriving at a shipper or a receiver parks the truck under half a mile an
@@ -491,6 +505,9 @@ impl PickupFacilityState {
             fmt_f(TRAILER_SWAP_MIN, 0),
             self.tank_walk_around_clause()
         ));
+        // The badge is for finding it: awarded at the hook, it announced the
+        // write-up before the driver had looked, and to drivers who never did.
+        ctx.award_achievement("hooked_a_bad_one");
         self.offer_refusal = true;
         self.refresh(ctx, false);
     }
@@ -716,9 +733,6 @@ impl PickupFacilityState {
         ctx.award_achievement("first_day");
         if plan.is_drop_hook() {
             ctx.award_achievement("first_drop_hook");
-            if plan.trailer.as_ref().is_some_and(|t| t.defect().is_some()) {
-                ctx.award_achievement("hooked_a_bad_one");
-            }
         } else if plan.detention_minutes > 0.0 && is_owner_operator(&profile(ctx).business_status) {
             ctx.award_achievement("detention_paid");
         }
@@ -864,6 +878,8 @@ impl PickupFacilityState {
             let p = profile_mut(ctx);
             p.active_trip = None;
             p.dispatch_board_cache = None;
+            // Every other way a run ends frees the advance for the next load.
+            p.pay_advance_used_for_load = false;
         }
         ctx.save_profile();
         let terminal = crate::states::city::home_terminal(ctx);
@@ -921,6 +937,7 @@ impl Menu for PickupFacilityState {
             select_menu_music_sequence(ctx.profile.as_ref().map(|p| p as &dyn MenuMusicProfile));
         let refs: Vec<&str> = sequence.iter().map(String::as_str).collect();
         ctx.play_music_sequence("menu", &refs);
+        sync_facility_engine_audio(ctx, &self.truck);
         base_menu_enter(self, ctx);
     }
 
@@ -964,9 +981,17 @@ impl Menu for PickupFacilityState {
                 }
                 // Rounded to a tenth, so the smallest number that can be
                 // spoken is one worth hearing rather than "0.0 gallons".
+                // Off now means every idle gallon came before the shutdown;
+                // a bare "burned idling" after the load read as the engine
+                // having run through it (tester report, 2026-09-28).
                 if round_py_n(self.idle_gallons, 1) > 0.0 {
+                    let when = if self.truck.engine_on {
+                        ""
+                    } else {
+                        " before you shut down"
+                    };
                     lead.push_str(&format!(
-                        " {} gallons burned idling.",
+                        " {} gallons burned idling{when}.",
                         fmt_f(self.idle_gallons, 1)
                     ));
                 }
@@ -1001,6 +1026,9 @@ impl Menu for PickupFacilityState {
 
     fn exit(&mut self, ctx: &mut GameContext) {
         ctx.audio.set_ambient(None);
+        // Save and quit, or cancel: the idle must not follow the driver to
+        // the title or the terminal. A departing drive brings its own back.
+        ctx.audio.engine_stop_with(false);
     }
 
     fn build_items(&mut self, ctx: &mut GameContext) -> Vec<MenuItem<Self>> {

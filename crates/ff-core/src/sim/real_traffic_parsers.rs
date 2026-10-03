@@ -20,6 +20,8 @@
 //!   `list511` — The 511 sites' own list-page JSON rows joined with the
 //!              map-pin locations (Florida FL511 and New York 511NY
 //!              incidents).  Lives in `real_traffic_list511`.
+//!   `caltrans_lcs` — Caltrans's Lane Closure System, one CSV per
+//!              district (California lane closures).
 //!
 //! Port of `freight_fate/sim/real_traffic_parsers.py`. The Python parsers
 //! are a mixin on the provider; here they are free functions over
@@ -58,6 +60,10 @@ pub struct TrafficEvent {
     pub work_type: String,
     /// "alternating", "single lane", "shoulder", "full closure"
     pub closure: String,
+    /// The one direction of travel the event holds, as the road is signed:
+    /// "North", "South", "East" or "West". Empty when it holds both ways or
+    /// the feed does not say.
+    pub direction: String,
 }
 
 impl TrafficEvent {
@@ -144,6 +150,7 @@ impl TrafficEvent {
             location_text: chain_str(data, &["location_text"], ""),
             work_type: chain_str(data, &["work_type"], ""),
             closure: chain_str(data, &["closure"], ""),
+            direction: String::new(),
         })
     }
 }
@@ -213,6 +220,7 @@ pub fn parse_construction_events(data: &Value, _state: &str) -> Vec<TrafficEvent
             location_text,
             work_type,
             closure,
+            direction: String::new(),
         });
     }
     events
@@ -334,6 +342,7 @@ pub fn parse_iteris_construction_events(data: &Value, state: &str) -> Vec<Traffi
             location_text,
             work_type,
             closure,
+            direction: String::new(),
         });
     }
     construction_events
@@ -519,6 +528,7 @@ pub fn parse_cars_events(data: &Value, _state: &str, construction: bool) -> Vec<
             location_text,
             work_type,
             closure,
+            direction: String::new(),
         });
     }
     events
@@ -627,6 +637,10 @@ pub use wzdx::{
     extract_wzdx_coordinates, parse_wzdx_construction_events, parse_wzdx_events,
     wzdx_impact_to_closure, wzdx_prop,
 };
+
+// ---- Caltrans Lane Closure System (per-district CSV) -----------------
+mod caltrans_lcs;
+pub use caltrans_lcs::parse_lcs_csv;
 
 // ---- Shared construction-field helpers -------------------------------
 

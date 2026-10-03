@@ -245,6 +245,50 @@ fn test_last_known_report_says_updating_only_during_true_inflight_refresh() {
 }
 
 #[test]
+fn test_retry_after_a_failure_stays_unavailable_while_it_runs() {
+    // Reading a retry as "loading" flipped the source back and forth every
+    // minute and re-announced simulated weather after each failed retry.
+    let monotonic = Arc::new(StdMutex::new(0.0));
+    let (started_tx, started_rx) = mpsc::channel::<()>();
+    let (release_tx, release_rx) = mpsc::channel::<()>();
+    let release_rx = StdMutex::new(release_rx);
+    let calls = Arc::new(StdMutex::new(0));
+    let counter = Arc::clone(&calls);
+    let provider = RealWeatherProvider::new(Arc::new(move |_, _| {
+        let n = {
+            let mut c = counter.lock().unwrap();
+            *c += 1;
+            *c
+        };
+        if n > 1 {
+            started_tx.send(()).unwrap();
+            release_rx
+                .lock()
+                .unwrap()
+                .recv_timeout(std::time::Duration::from_secs(5))
+                .expect("released");
+        }
+        Err("The server answered with error 404.".to_string())
+    }))
+    .with_clock(shared_clock(&monotonic));
+    provider.request("route-cell", 40.0, -80.0);
+    provider.join_background();
+    assert!(provider.unavailable("route-cell"));
+
+    *monotonic.lock().unwrap() = RETRY_AFTER_S + 1.0;
+    provider.request("route-cell", 40.0, -80.0);
+    started_rx
+        .recv_timeout(std::time::Duration::from_secs(5))
+        .expect("retry started");
+    assert!(provider.refreshing("route-cell"));
+    assert!(provider.unavailable("route-cell"));
+
+    release_tx.send(()).unwrap();
+    provider.join_background();
+    assert!(provider.unavailable("route-cell"));
+}
+
+#[test]
 fn test_failed_refresh_expires_last_known_observation_instead_of_loading_forever() {
     let monotonic = Arc::new(StdMutex::new(0.0));
     let wall = Arc::new(StdMutex::new(1_000_000.0));
@@ -869,7 +913,8 @@ fn nws_obs(text: &str, age_s: f64, now: f64) -> Value {
 }
 
 /// Answers the discovery chain for any point with two stations, then
-/// each station's latest observation from `answer`.
+/// each station's latest observation from `answer`; a null answer is the
+/// 404 NWS gives a station with no current observation.
 struct StationTransport {
     answer: Box<dyn Fn(&str) -> Value + Send + Sync>,
     calls: StdMutex<Vec<String>>,
@@ -885,6 +930,9 @@ impl HttpTransport for StationTransport {
         } else {
             (self.answer)(url)
         };
+        if doc.is_null() {
+            return Err(TransportError::new("The server answered with error 404."));
+        }
         Ok(serde_json::to_vec(&doc).unwrap())
     }
 
@@ -927,6 +975,37 @@ fn test_station_walk_skips_a_dead_nearest_station() {
     transport.calls.lock().unwrap().clear();
     fetcher.default_fetch(41.88, -87.63).unwrap();
     assert!(transport.calls.lock().unwrap()[0].contains("st1"));
+}
+
+#[test]
+fn test_station_walk_skips_a_nearest_station_that_answers_404() {
+    // Casa Grande, 2026-09-24: the nearest station (KCGZ) answered 404 for
+    // its latest observation and the first error ended the walk, so the
+    // whole leg drove on simulated weather while the next station reported.
+    let now = 1_700_000_000.0;
+    let transport = Arc::new(StationTransport {
+        answer: Box::new(move |url| {
+            if url.contains("st0") {
+                Value::Null
+            } else {
+                nws_obs("Clear", 20.0 * 60.0, now)
+            }
+        }),
+        calls: StdMutex::new(Vec::new()),
+    });
+    let fetcher = NwsFetcher::new(transport).with_wall_clock(fixed(now));
+    assert_eq!(fetcher.default_fetch(32.88, -111.76).unwrap().text, "Clear");
+
+    // Every station failing is still an error, carrying what the last said.
+    let dead = Arc::new(StationTransport {
+        answer: Box::new(|_| Value::Null),
+        calls: StdMutex::new(Vec::new()),
+    });
+    let error = NwsFetcher::new(dead)
+        .with_wall_clock(fixed(now))
+        .default_fetch(32.88, -111.76)
+        .unwrap_err();
+    assert!(error.contains("404"), "{error}");
 }
 
 #[test]

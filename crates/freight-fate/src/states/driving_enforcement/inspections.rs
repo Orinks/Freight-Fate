@@ -26,7 +26,7 @@ pub fn roadside_inspection_scale_for(ctx: &mut GameContext, damage_pct: f64) -> 
         return (0.0, false);
     };
     let score = refresh_selection_score(profile, damage_pct);
-    let blitz = roadcheck_blitz(profile.calendar_game_hours());
+    let blitz = roadcheck_blitz(profile.player_calendar_hours());
     (
         roadside_inspection_scale(safety_band(score), relaxed, blitz),
         blitz,

@@ -13,16 +13,26 @@ use ff_core::models::jobs::route_drive_hours;
 use ff_core::sim::trip_models::RoadStop;
 
 use crate::app::GameContext;
+use crate::bindings::Action;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
+
+/// The arrival estimate's pace for a truck not yet moving on the highway:
+/// the same typical pace the stop list's estimate names.
+const HIGHWAY_PACE_MPH: f64 = crate::states::driving_stop_detail::FALLBACK_MPH;
+/// The same for the road into the facility. Assumed, not measured: the
+/// street-limit bake's own fallback for a street it has no statute for.
+const STREET_PACE_MPH: f64 = ff_core::data::street_limits::FALLBACK_MPH;
 
 impl DrivingState {
     /// The spoken clock is anchored to the computer when Real time is
     /// selected.  Calling that initial wall-clock reading a route timezone
     /// would be misleading when the computer is elsewhere, so name it as the
     /// game's local clock.  Accelerated modes retain the geographic label.
-    pub fn clock_zone_label(&self, ctx: &GameContext) -> &'static str {
-        if ctx.settings.time_scale == 1.0 {
+    /// It follows the pace the drive is running: a pace chosen while rolling
+    /// waits for the next stop, and so does its clock.
+    pub fn clock_zone_label(&self, _ctx: &GameContext) -> &'static str {
+        if self.trip.time_scale == 1.0 {
             "local game time"
         } else {
             self.trip.current_timezone().name
@@ -131,7 +141,19 @@ impl DrivingState {
         } else {
             0.0
         };
-        let eta = self.trip.eta_game_hours(self.trip.truck.speed_mph()) + highway_hours;
+        // Off the highway the road left is the gate's, not the frozen mainline
+        // remainder, and a truck stopped at a ramp's stop bar is not a truck
+        // doing 1 mph for the rest of the trip: "arrival in 8.6 hours at a
+        // typical highway pace" two miles from the gate (agent drive B,
+        // 2026-09-24). The fallback pace was the truck's own crawl, not the
+        // typical pace the readout names.
+        let speed = self.trip.truck.speed_mph();
+        let moving = speed >= ff_core::sim::trip::ETA_MIN_MPH;
+        let gate_mi = self.gate_distance_mi(ctx);
+        let eta = match gate_mi {
+            Some(gate) => gate / if moving { speed } else { STREET_PACE_MPH },
+            None => self.trip.eta_game_hours(HIGHWAY_PACE_MPH),
+        } + highway_hours;
         if remaining <= 0.0 {
             ctx.say(&format!(
                 "{now} {:.1} hours past the deadline. The pay is shrinking.{tail}",
@@ -152,10 +174,10 @@ impl DrivingState {
         }
         // With the highway still ahead the estimate is mostly the route's
         // pace, whatever the streets are doing right now.
-        let basis = if self.trip.truck.speed_mph() >= ff_core::sim::trip::ETA_MIN_MPH
-            && highway_hours == 0.0
-        {
+        let basis = if moving && highway_hours == 0.0 {
             "at this pace"
+        } else if gate_mi.is_some() && highway_hours == 0.0 {
+            "at a typical street pace"
         } else {
             "at a typical highway pace"
         };
@@ -207,7 +229,12 @@ impl DrivingState {
             return String::new();
         }
         profile_mut_of(ctx).hos_key_notice_left = left - 1;
-        " Hours of service moved to Alt A, Alt S, and Alt D.".to_string()
+        format!(
+            " Hours of service moved to {}, {}, and {}.",
+            ctx.control_name(Action::HosWheel),
+            ctx.control_name(Action::HosBreak),
+            ctx.control_name(Action::HosDrive)
+        )
     }
 
     /// `_speak_hos_wheel_time()`: Alt A -- how much of this shift is already
@@ -247,7 +274,13 @@ impl DrivingState {
         let Some(advice) = self.hos_stop_advice(ctx) else {
             return String::new();
         };
-        advice.summary(&ctx.settings.distance_text(advice.ahead_mi, false))
+        let fallback_distance = ctx.settings.distance_text(advice.ahead_mi, false);
+        let suggested_distance = advice
+            .suggested
+            .as_ref()
+            .map(|option| ctx.settings.distance_text(option.ahead_mi, false))
+            .unwrap_or_else(|| fallback_distance.clone());
+        advice.summary(&suggested_distance, &fallback_distance)
     }
 
     /// `_legal_miles_for_hos(remaining_min)`.
@@ -266,7 +299,13 @@ impl DrivingState {
             if !(0.0..=within_mi).contains(&ahead) {
                 continue;
             }
-            if !stop.actions.iter().any(|a| a == action) || stop.parking == "none" {
+            if !stop
+                .actions
+                .iter()
+                .any(|a| a == action || (action == "break" && a == "sleep"))
+                || stop.parking == "none"
+                || !stop.accessible_to(self.trip.bobtail)
+            {
                 continue;
             }
             if best.is_none_or(|b| stop.at_mi < b.at_mi) {

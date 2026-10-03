@@ -49,13 +49,14 @@ def load(path: Path) -> np.ndarray:
     data, sr = sf.read(str(path), always_2d=True)
     mono = data.mean(axis=1)
     if sr != SR:
-        mono = np.interp(np.linspace(0, len(mono) - 1, int(len(mono) * SR / sr)),
-                         np.arange(len(mono)), mono)
+        mono = np.interp(
+            np.linspace(0, len(mono) - 1, int(len(mono) * SR / sr)), np.arange(len(mono)), mono
+        )
     # Trim dead air at either end so grains never land on silence.
     e = np.abs(mono)
     e = np.convolve(e, np.ones(int(0.01 * SR)) / int(0.01 * SR), mode="same")
     live = np.where(e > e.max() * 0.06)[0]
-    return mono[live[0]:live[-1]] if len(live) > 2 else mono
+    return mono[live[0] : live[-1]] if len(live) > 2 else mono
 
 
 def granulate(
@@ -91,7 +92,7 @@ def granulate(
             continue
         start = RNG.integers(0, max(1, len(src) - g))
         amp = 1.0 + level_spread * RNG.standard_normal()
-        out[pos:pos + g] += src[start:start + g] * window * max(0.0, amp)
+        out[pos : pos + g] += src[start : start + g] * window * max(0.0, amp)
     out = out[:n]
     return out / (np.abs(out).max() or 1.0)
 
@@ -123,7 +124,7 @@ def graded(src: np.ndarray, seconds: float, curve: np.ndarray, peak_density: flo
         start = RNG.integers(0, max(1, len(src) - g))
         amp = (0.35 + 0.65 * frac) * (1.0 + 0.5 * RNG.standard_normal())
         i = int(pos)
-        out[i:i + g] += src[start:start + g] * window * max(0.0, amp)
+        out[i : i + g] += src[start : start + g] * window * max(0.0, amp)
         pos += SR / rate * RNG.uniform(0.4, 1.6)
     out = out[:n]
     return out / (np.abs(out).max() or 1.0)

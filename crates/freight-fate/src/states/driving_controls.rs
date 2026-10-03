@@ -42,9 +42,6 @@ pub mod vehicle;
 /// Wear meters join the status readout once they're worth planning around.
 pub const WEAR_STATUS_PCT: f64 = 50.0;
 
-/// An armed exit owns the D safe-speed answer once it is this close: past
-/// here the ramp speed is the number that matters, not the mainline's.
-pub const SAFE_SPEED_EXIT_MI: f64 = 2.0;
 /// D looks this far ahead for a bend: about the pacenote call distance, so
 /// the one number never contradicts the call you just heard.
 pub const SAFE_SPEED_CURVE_MI: f64 = 0.5;

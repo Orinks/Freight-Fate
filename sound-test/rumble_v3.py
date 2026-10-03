@@ -78,9 +78,14 @@ BODY = [
 # Per-groove impact: heavily damped, densely moded. Rubber is lossy, so these
 # are dead in under 10 ms -- long decays here are what built the v1 vowel.
 IMPACT = [
-    (74.0, 0.009, 0.9), (118.0, 0.007, 1.0), (162.0, 0.006, 0.8),
-    (245.0, 0.005, 0.6), (330.0, 0.004, 0.5), (520.0, 0.003, 0.35),
-    (880.0, 0.0025, 0.22), (1500.0, 0.002, 0.13),
+    (74.0, 0.009, 0.9),
+    (118.0, 0.007, 1.0),
+    (162.0, 0.006, 0.8),
+    (245.0, 0.005, 0.6),
+    (330.0, 0.004, 0.5),
+    (520.0, 0.003, 0.35),
+    (880.0, 0.0025, 0.22),
+    (1500.0, 0.002, 0.13),
 ]
 
 
@@ -163,18 +168,30 @@ def rumble(
         chopped = carrier * (1.0 - depth + depth * mod)
 
         # Structure-borne: through the fixed body modes. Weight, no sparkle.
-        structure = convolve_circular(chopped, bank_ir(
-            [(f, d, g * (1.0 if f < 100 else hf_keep ** (1.0 + f / 400.0)))
-             for f, d, g in BODY]))
+        structure = convolve_circular(
+            chopped,
+            bank_ir(
+                [(f, d, g * (1.0 if f < 100 else hf_keep ** (1.0 + f / 400.0))) for f, d, g in BODY]
+            ),
+        )
         # Airborne: the chopped carrier straight to the ear, top end intact.
         # Distant axles lose more of it -- the trailer is behind the sleeper.
         airborne = chopped * hf_keep
 
         smack = RNG.standard_normal(max(2, int(0.0022 * SR)))
         smack *= np.hanning(len(smack))
-        trans = np.roll(convolve_circular(convolve_circular(
-            pulse_train(rate, 1.0 + 0.25 * RNG.standard_normal(n)), smack),
-            impact_ir), shift) * hf_keep
+        trans = (
+            np.roll(
+                convolve_circular(
+                    convolve_circular(
+                        pulse_train(rate, 1.0 + 0.25 * RNG.standard_normal(n)), smack
+                    ),
+                    impact_ir,
+                ),
+                shift,
+            )
+            * hf_keep
+        )
 
         sig = (body_mix * structure + airborne + transient_mix * trans) * load * eng
         # Circular shift, not a zero-padded delay: a padded delay writes
@@ -208,10 +225,14 @@ def profile(x: np.ndarray) -> str:
     S = np.abs(np.fft.rfft(x * np.hanning(len(x))))
     f = np.fft.rfftfreq(len(x), 1.0 / SR)
     tot = S.sum() or 1.0
-    b = [S[(f >= a) & (f < c)].sum() / tot for a, c in
-         ((0, 200), (200, 1000), (1000, 4000), (4000, SR / 2))]
-    return (f"centroid {(S * f).sum() / tot:6.0f} Hz   <200 {b[0]:.2f}  "
-            f"200-1k {b[1]:.2f}  1k-4k {b[2]:.2f}  >4k {b[3]:.2f}")
+    b = [
+        S[(f >= a) & (f < c)].sum() / tot
+        for a, c in ((0, 200), (200, 1000), (1000, 4000), (4000, SR / 2))
+    ]
+    return (
+        f"centroid {(S * f).sum() / tot:6.0f} Hz   <200 {b[0]:.2f}  "
+        f"200-1k {b[1]:.2f}  1k-4k {b[2]:.2f}  >4k {b[3]:.2f}"
+    )
 
 
 def main() -> None:
@@ -241,8 +262,10 @@ def main() -> None:
     for m in (35, 45, 55, 65, 75):
         sig, hz = rumble_loop(m * mph, carrier_hz=900.0)
         write_wav(f"rumble3_loop_{m}mph.wav", sig)
-        print(f"    {m:2d} mph   groove rate {hz:6.1f} Hz   "
-              f"{len(sig) / SR:.3f}s   seam {seam_check(sig):.3f} x step")
+        print(
+            f"    {m:2d} mph   groove rate {hz:6.1f} Hz   "
+            f"{len(sig) / SR:.3f}s   seam {seam_check(sig):.3f} x step"
+        )
 
     print("\nSEAM PROOF -- 55 mph loop tiled x6, listen for a tick at the joins")
     sig, _ = rumble_loop(speed55, carrier_hz=900.0)
@@ -253,8 +276,7 @@ def main() -> None:
     t = np.arange(n) / SR
     y = 3.6 * smoothstep((t - 0.8) / 3.0)
     eng = smoothstep((y - 1.55) / 0.23) * (1.0 - smoothstep((y - 2.15) / 0.35))
-    write_wav("rumble3_lanechange_70mph.wav",
-              rumble(70 * mph, carrier_hz=900.0, engagement=eng))
+    write_wav("rumble3_lanechange_70mph.wav", rumble(70 * mph, carrier_hz=900.0, engagement=eng))
 
     print(f"\nwrote to {pulse_synth.OUT}")
     print("NOTE: no gravel here by design -- this is the periodic strip cue only,")

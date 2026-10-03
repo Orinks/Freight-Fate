@@ -43,14 +43,14 @@ use freight_fate::states::driving_updates::{
 /// through the same recording backend rather than growing a second copy.
 #[derive(Default)]
 pub(super) struct Calls {
-    played: Vec<(String, f64)>,
+    pub(super) played: Vec<(String, f64)>,
     /// `play_bank(base, volume)`, kept apart from `played` the way Python's
     /// two separate stubs did.
     banks: Vec<(String, f64)>,
     /// `("start", channel, key, volume)` / `("vol", channel, volume)` /
     /// `("stop", channel)`, flattened into one ordered log the way the Python
     /// cases collected them.
-    loops: Vec<LoopCall>,
+    pub(super) loops: Vec<LoopCall>,
     reverse: Vec<&'static str>,
     engine_rpm: Vec<(f64, f64)>,
     pub(super) engine_pan: Vec<f64>,
@@ -65,7 +65,7 @@ pub(super) struct Calls {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-enum LoopCall {
+pub(super) enum LoopCall {
     Start(u32, String, f64),
     Volume(u32, f64),
     Rate(u32, f64),
@@ -496,6 +496,85 @@ fn test_jake_growl_follows_stage_rpm_and_cuts_through_shifts() {
         "{:#?}",
         loops(&log)
     );
+}
+
+/// Agent drive, Silverthorne to Edwards (2026-09-24): the jake bed restarted
+/// dozens of times in a row, one start per throttle pulse. The gap is still
+/// silent; the loop is held through it and comes back up, not restarted.
+#[test]
+fn test_a_jake_gap_holds_the_loop_instead_of_restarting_it() {
+    let (mut harness, log) = a_drive("Jake Gap");
+    harness.with_drive(|drive, _| {
+        let truck = drive.truck_mut();
+        truck.set_air_ready(false);
+        truck.start_engine();
+        truck.transmission.automatic = true;
+        truck.transmission.gear = 8;
+        truck.velocity_mps = 20.0;
+        truck.throttle = 0.0;
+        truck.engine_brake_stage = 2;
+        truck.rpm = 2000.0;
+    });
+    log.borrow_mut().loops.clear();
+    for frame in 0..40 {
+        let throttle = if (frame / 5) % 2 == 1 { 0.5 } else { 0.0 };
+        harness.with_drive(move |drive, _| drive.truck_mut().throttle = throttle);
+        update_audio(&mut harness, 0.05);
+    }
+    let calls = loops(&log);
+    let starts = calls
+        .iter()
+        .filter(|call| matches!(call, LoopCall::Start(CH_JAKE, _, _)))
+        .count();
+    assert_eq!(starts, 1, "{calls:#?}");
+    assert!(!calls.contains(&LoopCall::Stop(CH_JAKE)), "{calls:#?}");
+    assert!(
+        calls.contains(&LoopCall::Volume(CH_JAKE, 0.0)),
+        "the gap is silent"
+    );
+
+    // Switched off for good, it stops.
+    harness.with_drive(|drive, _| {
+        drive.truck_mut().throttle = 0.0;
+        drive.truck_mut().engine_brake_stage = 0;
+    });
+    for _ in 0..60 {
+        update_audio(&mut harness, 0.05);
+    }
+    assert!(loops(&log).contains(&LoopCall::Stop(CH_JAKE)));
+}
+
+/// A stage change is a change of level on the loop already playing, never a
+/// new start: the owner heard the engine-brake sound "looping" down I-70 as
+/// the retarder walked 3, 2, 1, 2 (2026-09-24).
+#[test]
+fn test_a_jake_stage_change_turns_the_loop_rather_than_restarting_it() {
+    let (mut harness, log) = a_drive("Jake Stages");
+    harness.with_drive(|drive, _| {
+        let truck = drive.truck_mut();
+        truck.set_air_ready(false);
+        truck.start_engine();
+        truck.transmission.automatic = true;
+        truck.transmission.gear = 8;
+        truck.velocity_mps = 20.0;
+        truck.throttle = 0.0;
+        truck.engine_brake_stage = 3;
+        truck.rpm = 1600.0;
+    });
+    log.borrow_mut().loops.clear();
+    for stage in [3, 2, 1, 2, 3, 1, 3] {
+        harness.with_drive(move |drive, _| drive.truck_mut().engine_brake_stage = stage);
+        for _ in 0..10 {
+            update_audio(&mut harness, 0.05);
+        }
+    }
+    let calls = loops(&log);
+    let starts = calls
+        .iter()
+        .filter(|call| matches!(call, LoopCall::Start(CH_JAKE, _, _)))
+        .count();
+    assert_eq!(starts, 1, "{calls:#?}");
+    assert!(!calls.contains(&LoopCall::Stop(CH_JAKE)), "{calls:#?}");
 }
 
 /// The last playback rate set on the jake channel, if any.

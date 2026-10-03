@@ -193,6 +193,34 @@ fn drive_the_finder(origin: &str, destination: &str) -> (PlaytestHarness, Hit, f
 }
 
 #[test]
+fn a_staged_drive_does_not_replay_the_road_behind_it() {
+    // Staged at mile 1175 of Aberdeen to Abilene, the first frame spoke every
+    // state line from South Dakota on, charged a turnpike toll and earned two
+    // achievements for road nobody drove (agent drives, 2026-09-23).
+    let opts = destination_options();
+    let hit = find_one("Aberdeen", "Abilene").expect("the Abilene delivery exit");
+    let mut harness = PlaytestHarness::new();
+    let start_mi = harness.start_road_feature(&hit, &opts);
+    assert!(start_mi > 1000.0, "staged at {start_mi:.0}");
+    harness.clear_speech();
+    harness.drive_frames(30);
+    let text = harness.transcript_text();
+    assert!(!text.contains("Crossing into"), "{text}");
+    assert!(!text.contains("toll"), "{text}");
+    assert!(!text.contains("trooper has somebody"), "{text}");
+    harness.read_drive(|d| {
+        assert!(d.trip.toll_charges.is_empty());
+        // Posts wholly behind the start are heard-and-passed without a sound.
+        for post in &d.trip.posts {
+            if post.at_mi + post.reach_mi < start_mi {
+                assert!(d.marked_post_ids.contains(&post.id()));
+                assert!(!post.announced, "a post behind the start made a noise");
+            }
+        }
+    });
+}
+
+#[test]
 fn the_finder_starts_before_the_destination_exit_call_and_reaches_it() {
     let (origin, destination) = world_pair();
     let (mut harness, hit, start_mi) = drive_the_finder(&origin, &destination);

@@ -1,9 +1,9 @@
 //! The achievement catalog: every badge and category. Originally generated
 //! from `src/freight_fate/achievements.py`; since the Python gameplay
-//! mirror retired (2026-08-29) this file is the source of truth, and new
-//! badges are added here AND to the Python module (whose id list still
-//! feeds the invariants export). The digest test pins the content against
-//! accidental edits -- update it deliberately with each catalog change.
+//! mirror retired (2026-08-29) this file is the source of truth, and the
+//! `ff-invariants` exporter reads it for the server's copy. The digest test
+//! pins the content against accidental edits -- update it deliberately with
+//! each catalog change, then regenerate the invariants export.
 //!
 //! Copy note (from the Python source): each badge has a specific
 //! inspiration, but player-facing text uses song-title-level allusions and
@@ -17,7 +17,7 @@ use super::{Achievement, AchievementCategory};
 /// sha256 over every category and achievement field, as the generator
 /// computed it from the Python catalog (see `catalog_digest` in the
 /// tests for the exact framing).
-pub const CATALOG_DIGEST: &str = "8a0be9ee9387f8edd9c1f913584275ad7af8d33adab0c0f6c2df8d43b7136d44";
+pub const CATALOG_DIGEST: &str = "b6a0cbe4b1c75c16033f180f8b66f075dc45e51223ac54442fb8aa97e09b8958";
 
 /// What a locked, hidden achievement speaks in place of its real name and
 /// description. Keeps a hidden badge's surprise -- the joke, the calendar
@@ -70,7 +70,7 @@ pub const CATEGORIES: [AchievementCategory; 7] = [
 
 /// Every badge, in the Python catalog's order (the achievements menu and
 /// the cloud validator's allow-list both walk it in this order).
-pub const ACHIEVEMENTS: [Achievement; 181] = [
+pub const ACHIEVEMENTS: [Achievement; 182] = [
     Achievement {
         id: "first_dispatch",
         name: "Breaker, Breaker",
@@ -922,7 +922,7 @@ pub const ACHIEVEMENTS: [Achievement; 181] = [
     Achievement {
         id: "weather_collector",
         name: "Every Sky in the Logbook",
-        description: "You have driven under every kind of sky the forecast can throw: sun, cloud, rain, downpour, thunder, snow, fog, and wind. None of it lasted; you did.",
+        description: "You have driven under every kind of sky the forecast can throw: sun, cloud, rain, downpour, thunder, snow, freezing rain, fog, and wind. None of it lasted; you did.",
         category: "weather_seasons",
         inspiration: "Waylon Jennings & Jessi Colter - Storms Never Last",
         hidden: false,
@@ -1517,6 +1517,14 @@ pub const ACHIEVEMENTS: [Achievement; 181] = [
         description: "A load settled on the fourth of October, which every driver reads as ten-four. Some white knight on the channel started it, and by noon the whole band was saying the date back.",
         category: "hidden",
         inspiration: "Cledus Maggard and the Citizen's Band - The White Knight",
+        hidden: true,
+    },
+    Achievement {
+        id: "appreciation_week",
+        name: "Somebody Said Thank You",
+        description: "A load delivered during Truck Driver Appreciation Week. There were doughnuts at the receiving window, and a dispatcher said thanks without being asked. Next week it goes back to being the job.",
+        category: "hidden",
+        inspiration: "Andrew Gold - Thank You for Being a Friend",
         hidden: true,
     },
 ];

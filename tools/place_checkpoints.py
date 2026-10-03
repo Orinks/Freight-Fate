@@ -32,6 +32,7 @@ if str(TOOLS_DIR) not in sys.path:
     sys.path.insert(0, str(TOOLS_DIR))
 
 import enrich_routes as er  # noqa: E402  (needs sys.path above)
+import leg_geometry as lg  # noqa: E402
 from world_source import load_world, save_world  # noqa: E402
 
 # A candidate further off the route than this is probably the wrong town, a
@@ -77,6 +78,7 @@ def position_on_route(
 def merge_checkpoints(
     existing: list[dict[str, Any]],
     accepted: list[dict[str, Any]],
+    remove_existing: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Existing + new checkpoints, deduped by name, placeholder dropped.
 
@@ -84,13 +86,22 @@ def merge_checkpoints(
     dispatchable before real curation; once a real named place covers the
     leg it is spoken noise, so it goes.
     """
-    names = {str(c.get("name", "")).lower() for c in existing}
-    merged = list(existing)
+    remove_names = {name.casefold() for name in remove_existing or []}
+    existing_names = {str(c.get("name", "")).casefold() for c in existing}
+    missing = remove_names - existing_names
+    if missing:
+        raise ValueError(f"cannot replace missing checkpoints: {', '.join(sorted(missing))}")
+    merged = [
+        checkpoint
+        for checkpoint in existing
+        if str(checkpoint.get("name", "")).casefold() not in remove_names
+    ]
+    names = {str(c.get("name", "")).casefold() for c in merged}
     for cand in accepted:
-        if cand["name"].lower() in names:
+        if cand["name"].casefold() in names:
             continue
         merged.append(cand)
-        names.add(cand["name"].lower())
+        names.add(cand["name"].casefold())
     has_real = any(PLACEHOLDER_MARKER not in str(c.get("name", "")) for c in merged)
     if has_real:
         merged = [c for c in merged if PLACEHOLDER_MARKER not in str(c.get("name", ""))]
@@ -100,8 +111,10 @@ def merge_checkpoints(
 
 def _parse_candidate(raw: str) -> dict[str, Any]:
     parts = [p.strip() for p in raw.split("|")]
-    if len(parts) not in (4, 5, 6):
-        raise SystemExit(f"--candidate must be 'Name|lat|lon|State[|type[|highway]]', got {raw!r}")
+    if len(parts) not in (4, 5, 6, 7):
+        raise SystemExit(
+            f"--candidate must be 'Name|lat|lon|State[|type[|highway[|source]]]', got {raw!r}"
+        )
     name, lat, lon, state = parts[:4]
     if not name or "_" in name:
         raise SystemExit(f"candidate name {name!r} must be spoken text (no slugs)")
@@ -114,8 +127,44 @@ def _parse_candidate(raw: str) -> dict[str, Any]:
         # A leg's declared highway can oversimplify (Billings->SLC is "I-15"
         # but really I-90 + US-191 + US-20 + I-15); the spoken cue should name
         # the road the driver is actually on at that checkpoint.
-        "highway": parts[5] if len(parts) == 6 and parts[5] else "",
+        "highway": parts[5] if len(parts) >= 6 and parts[5] else "",
+        "source": parts[6] if len(parts) == 7 and parts[6] else "",
     }
+
+
+def _route_geometry(
+    data: dict[str, Any],
+    leg: dict[str, Any],
+    use_archive: bool,
+    cache_dir: Path,
+    rate_limit: float,
+    api_key: str | None,
+) -> tuple[dict[str, Any], str]:
+    if not use_archive:
+        if api_key is None:
+            raise SystemExit(
+                f"Needs the {er.ORS_API_KEY_ENV} environment variable and the "
+                "tooling group (uv run --group tooling ...)."
+            )
+        return (
+            er._cached_ors_route(data, leg, cache_dir, rate_limit, api_key),
+            "real ORS driving-hgv route",
+        )
+
+    polyline = lg.archived_polyline(lg.leg_id_of(leg), lg.state_code_of(leg))
+    if polyline is None:
+        raise SystemExit(f"No archived dense geometry for {lg.leg_id_of(leg)}")
+    coordinates, _elevations = polyline
+    miles = sum(
+        er._haversine_miles(
+            coordinates[i - 1][1],
+            coordinates[i - 1][0],
+            coordinates[i][1],
+            coordinates[i][0],
+        )
+        for i in range(1, len(coordinates))
+    )
+    return {"coordinates": coordinates, "miles": miles}, "archived dense route geometry"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -139,17 +188,23 @@ def main(argv: list[str] | None = None) -> int:
         default=MAX_OFF_ROUTE_MI,
         help="Reject candidates further off the route than this (sanity gate).",
     )
+    parser.add_argument(
+        "--remove-existing",
+        action="append",
+        default=[],
+        help="Replace a named existing checkpoint; repeat for multiple names.",
+    )
+    parser.add_argument(
+        "--archived",
+        action="store_true",
+        help="Position candidates on archived dense geometry instead of fetching an ORS route.",
+    )
     parser.add_argument("--write", action="store_true", help="Merge into the world source.")
     parser.add_argument("--cache-dir", default=str(er.CACHE_PATH))
     parser.add_argument("--rate-limit", type=float, default=1.0)
     args = parser.parse_args(argv)
 
-    api_key = er.ors_api_key()
-    if api_key is None:
-        raise SystemExit(
-            f"Needs the {er.ORS_API_KEY_ENV} environment variable and the "
-            "tooling group (uv run --group tooling ...)."
-        )
+    api_key = None if args.archived else er.ors_api_key()
     data = load_world()
     from_city, _, to_city = args.leg.partition(":")
     leg = next(
@@ -168,7 +223,9 @@ def main(argv: list[str] | None = None) -> int:
         hint = " (the reverse direction exists -- at_mi is measured from 'from')" if reverse else ""
         raise SystemExit(f"No leg {args.leg!r} in the world source{hint}")
 
-    parsed = er._cached_ors_route(data, leg, Path(args.cache_dir), args.rate_limit, api_key)
+    parsed, geometry_source = _route_geometry(
+        data, leg, args.archived, Path(args.cache_dir), args.rate_limit, api_key
+    )
     leg_miles = float(leg["miles"])
     accepted: list[dict[str, Any]] = []
     for raw in args.candidate:
@@ -197,10 +254,10 @@ def main(argv: list[str] | None = None) -> int:
                 "lat": round(cand["lat"], 5),
                 "lon": round(cand["lon"], 5),
                 "source": (
-                    f"Real town on {highway} between {leg['from']} and "
-                    f"{leg['to']}; position matched to the nearest point on the "
-                    f"real ORS driving-hgv route geometry ({off_mi} mi off-route "
-                    "at closest approach)."
+                    f"{cand['source'] + '; ' if cand['source'] else ''}"
+                    f"real place on {highway} between {leg['from']} and {leg['to']}; "
+                    f"position matched to the nearest point on the {geometry_source} "
+                    f"({off_mi} mi off-route at closest approach)."
                 ),
             }
         )
@@ -209,10 +266,16 @@ def main(argv: list[str] | None = None) -> int:
     if not accepted:
         print("Nothing accepted; the world source is unchanged.")
         return 1
+    if args.remove_existing and len(accepted) != len(args.candidate):
+        print("Replacement incomplete; the world source is unchanged.")
+        return 1
     corridor = leg.setdefault("corridor", {})
-    merged = merge_checkpoints(list(corridor.get("checkpoints", [])), accepted)
+    previous = list(corridor.get("checkpoints", []))
+    merged = merge_checkpoints(previous, accepted, args.remove_existing)
     corridor["checkpoints"] = merged
     print(f"\nLeg {leg['from']} -> {leg['to']} checkpoints ({len(merged)}):")
+    if args.remove_existing:
+        print(f"  replaced {len(args.remove_existing)} existing checkpoints")
     for checkpoint in merged:
         print(f"  {checkpoint['at_mi']:>7.1f}  {checkpoint['name']}, {checkpoint['state']}")
     if args.write:
