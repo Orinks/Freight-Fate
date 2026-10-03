@@ -557,61 +557,6 @@ const HAZARDS: SoundCategory = SoundCategory {
              at night, and a tired driver drifts and reacts late. Plan a \
              stop rather than pushing through it.",
         ),
-        // The two earcons the S4 driving speech ladder stands in with, once a
-        // rung stops speaking a whole category (LADDER_EARCONS in
-        // speech_pacing.py, pinned learnable by
-        // tests/test_driving_speech_ladder.py, and played by
-        // GameContext._play_ladder_earcon in app.py via
-        // sound_catalog.entry_by_name). This entry's own recipe -- key and
-        // volume -- IS the road level: app.py resolves the cue from here
-        // rather than keeping a second copy, so there is nothing to drift.
-        // Synthesized rather than shipped (``ladder_earcons.py``), the same
-        // way the enforcement signature is -- and, like that one, keyed under
-        // a folder name ("ladder/") outside the ones
-        // ``tests/test_speech_audio.py::test_all_referenced_assets_exist``
-        // scans for a file on disk, since neither cue has one.
-        SoundEntry::new(
-            "Confirmation note",
-            &[Cue::new("ladder/confirmation_note").volume(0.32)],
-            "One short, clear high note standing in for a confirmation -- \
-             the assist acted, the setting took, the latch caught. Not to be confused with Hazard \
-             clear above, which means something quite different and used to \
-             be played here.",
-        )
-        .when("Driving speech set to Urgent only. Quiet speaks short confirmations."),
-        SoundEntry::new(
-            "Road ahead note",
-            &[Cue::new("ladder/road_ahead_note").volume(0.38)],
-            "Two short notes falling, standing in for a heads-up about what \
-             the road is about to do -- a bend coming, a merge, how far the \
-             next stretch runs. The route and road keys still answer on demand.",
-        )
-        .when(
-            "Driving speech set to Urgent only. At Quiet and below \
-             these are spoken. Directions you cannot recover from -- take \
-             this exit, turn here, you missed it -- are always spoken, at \
-             every setting.",
-        ),
-        SoundEntry::new(
-            "Coaching note",
-            &[Cue::new("ladder/coaching_note").volume(0.4)],
-            "A soft two-note rising chime standing in for a driving tip. \
-             Standard driving speech speaks the tip.",
-        )
-        .when(
-            "Driving speech set to Quiet. At Urgent only, tips are \
-             dropped instead of getting a sound.",
-        ),
-        SoundEntry::new(
-            "Status note",
-            &[Cue::new("ladder/status_note").volume(0.35)],
-            "A single short, low tock standing in for a status update -- \
-             load condition, the weather turning, and the like.",
-        )
-        .when(
-            "Available here for reference. Quiet now speaks short status updates; \
-             Urgent only suppresses them.",
-        ),
     ],
 };
 
@@ -809,11 +754,9 @@ pub fn catalog_entries() -> impl Iterator<Item = &'static SoundEntry> {
 
 /// The catalog entry with this canonical spoken noun, or `None`.
 ///
-/// A lookup one caller (the S4 ladder's earcon playback, the app shell)
-/// needs at runtime: it knows a cue only by the name it teaches under
-/// (`speech_pacing.LADDER_EARCONS`), and the recipe -- key, volume, pan
-/// -- lives here so the drive and the Learn game sounds screen can never
-/// play the same cue two different ways.
+/// The recipe -- key, volume, pan -- lives here, so anything that plays a
+/// cue by the name it teaches under plays it exactly as the Learn game
+/// sounds screen does.
 pub fn entry_by_name(name: &str) -> Option<&'static SoundEntry> {
     catalog_entries().find(|entry| entry.name == name)
 }

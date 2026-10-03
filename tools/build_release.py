@@ -21,9 +21,10 @@ to turn the JSON data tree into ``world.ffdata``, then a ``FreightFate/``
 folder with the executable renamed to ``FreightFate``. On macOS it creates
 ``FreightFate.app`` with the executable under ``Contents/MacOS``, native
 libraries under ``Contents/Frameworks``, and data, packs, build metadata, and
-documents under ``Contents/Resources``; macOS builds are ad-hoc signed, with no
-Apple Developer ID or notarization, so a downloaded app can need the
-documented first-launch Open Anyway step. ``--rust`` is accepted for the
+documents under ``Contents/Resources``. With ``MACOS_SIGN_IDENTITY`` set, the
+app is signed with that Developer ID under the hardened runtime, and with the
+``MACOS_NOTARY_*`` variables also set it is notarized and stapled before it is
+archived; without them it is ad-hoc signed for local use. ``--rust`` is accepted for the
 callers that still pass it; it is the only mode.
 """
 
@@ -222,18 +223,135 @@ def stamp_build_info(build_dir: Path, label: str, root: Path | None = None) -> N
         json.dump(info, f, indent=2)
 
 
-def sign_distribution(build_dir: Path) -> None:
-    """Ad-hoc sign the finalized macOS app bundle."""
+MACOS_SIGN_IDENTITY_ENV = "MACOS_SIGN_IDENTITY"
+MACOS_SIGN_KEYCHAIN_ENV = "MACOS_SIGN_KEYCHAIN"
+MACOS_NOTARY_ENV = ("MACOS_NOTARY_KEY_PATH", "MACOS_NOTARY_KEY_ID", "MACOS_NOTARY_ISSUER_ID")
+
+
+def macos_signing_identity(environ: Mapping[str, str] = os.environ) -> str:
+    """The Developer ID to sign with, or empty for an ad-hoc local build."""
+    return environ.get(MACOS_SIGN_IDENTITY_ENV, "").strip()
+
+
+def macos_notary_credentials(
+    environ: Mapping[str, str] = os.environ,
+) -> tuple[str, str, str] | None:
+    """App Store Connect key path, key ID and issuer, or None when unset."""
+    values = tuple(environ.get(name, "").strip() for name in MACOS_NOTARY_ENV)
+    if not any(values):
+        return None
+    if not all(values):
+        missing = [name for name, value in zip(MACOS_NOTARY_ENV, values, strict=True) if not value]
+        raise RuntimeError(f"notarization is half configured; missing {', '.join(missing)}")
+    return values  # type: ignore[return-value]
+
+
+def developer_id_codesign_command(identity: str, target: Path, keychain: str = "") -> list[str]:
+    """codesign for one Mach-O or the bundle: hardened runtime, secure timestamp."""
+    command = ["codesign", "--force", "--options", "runtime", "--timestamp"]
+    if keychain:
+        command += ["--keychain", keychain]
+    return [*command, "--sign", identity, str(target)]
+
+
+def sign_distribution(build_dir: Path, environ: Mapping[str, str] = os.environ) -> None:
+    """Sign the finalized macOS app bundle, Developer ID when configured."""
     if sys.platform != "darwin":
         return
     verify_macos_native_dependencies(build_dir)
-    subprocess.run(
-        ["codesign", "--force", "--deep", "--sign", "-", str(build_dir)],
-        check=True,
-    )
+    identity = macos_signing_identity(environ)
+    if identity:
+        keychain = environ.get(MACOS_SIGN_KEYCHAIN_ENV, "").strip()
+        # Inside out: nested libraries first, then the bundle seals them.
+        # Notarization rejects --deep signing, so each dylib is signed alone.
+        executable = build_dir / "Contents" / "MacOS" / APP_NAME
+        for binary in macos_bundle_binaries(build_dir):
+            if binary != executable:
+                subprocess.run(
+                    developer_id_codesign_command(identity, binary, keychain), check=True
+                )
+        subprocess.run(developer_id_codesign_command(identity, build_dir, keychain), check=True)
+    else:
+        subprocess.run(
+            ["codesign", "--force", "--deep", "--sign", "-", str(build_dir)],
+            check=True,
+        )
     subprocess.run(
         ["codesign", "--verify", "--deep", "--strict", str(build_dir)],
         check=True,
+    )
+
+
+def notarize_distribution(build_dir: Path, environ: Mapping[str, str] = os.environ) -> None:
+    """Notarize and staple a Developer ID signed app, when credentials are set."""
+    if sys.platform != "darwin":
+        return
+    credentials = macos_notary_credentials(environ)
+    if credentials is None:
+        print("Skipped notarization: no App Store Connect key configured.")
+        return
+    if not macos_signing_identity(environ):
+        raise RuntimeError("notarization needs a Developer ID signature; set MACOS_SIGN_IDENTITY")
+    key_path, key_id, issuer = credentials
+    with tempfile.TemporaryDirectory() as scratch:
+        upload = Path(scratch) / f"{build_dir.stem}-notarize.zip"
+        subprocess.run(
+            ["ditto", "-c", "-k", "--keepParent", str(build_dir), str(upload)], check=True
+        )
+        result = subprocess.run(
+            [
+                "xcrun",
+                "notarytool",
+                "submit",
+                str(upload),
+                "--key",
+                key_path,
+                "--key-id",
+                key_id,
+                "--issuer",
+                issuer,
+                "--wait",
+                "--timeout",
+                "45m",
+                "--output-format",
+                "json",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    try:
+        submission = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        submission = {}
+    status = submission.get("status", "")
+    if status != "Accepted":
+        submission_id = submission.get("id", "")
+        if submission_id:
+            subprocess.run(
+                [
+                    "xcrun",
+                    "notarytool",
+                    "log",
+                    submission_id,
+                    "--key",
+                    key_path,
+                    "--key-id",
+                    key_id,
+                    "--issuer",
+                    issuer,
+                ],
+                check=False,
+            )
+        raise RuntimeError(
+            f"Apple notarization returned {status or 'no status'} "
+            f"(exit {result.returncode}): {result.stderr.strip()}"
+        )
+    print(f"Notarization accepted: {submission.get('id', '')}")
+    subprocess.run(["xcrun", "stapler", "staple", str(build_dir)], check=True)
+    subprocess.run(["xcrun", "stapler", "validate", str(build_dir)], check=True)
+    subprocess.run(
+        ["spctl", "--assess", "--type", "execute", "--verbose=2", str(build_dir)], check=True
     )
 
 
@@ -1266,6 +1384,7 @@ def build_rust(
     if sys.platform == "darwin":
         # Prove the archive input after every possible smoke-side mutation.
         sign_distribution(build_dir)
+        notarize_distribution(build_dir)
     DIST.mkdir(parents=True, exist_ok=True)
     out = archive(build_dir, label)
     verify_archive(out)

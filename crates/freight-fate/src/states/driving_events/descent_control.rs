@@ -194,7 +194,7 @@ impl DrivingState {
         // the brakes for a grade (automation-handoff sweep, 2026-08-20, the
         // deferred 2026-08-15 audit).
         let spoken = ctx.settings.speed_text(held);
-        self.say_route_confirmation(ctx, &format!("Descent control holding {spoken}."));
+        self.say_route_confirmation(ctx, format!("Descent control holding {spoken}."));
     }
 
     /// The descent-control half of `_update_cruise`; true when it returns.

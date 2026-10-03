@@ -81,8 +81,19 @@ impl DrivingState {
     /// logged is the full, normal wording regardless of speech mode: a
     /// driver who opens review after hearing the terse form is asking for
     /// the detail terse left out, not a repeat of the short version.
-    pub fn log_ambient_event(&self, ctx: &mut GameContext, message: &SpokenMessage) {
+    pub fn log_ambient_event(
+        &self,
+        ctx: &mut GameContext,
+        message: &SpokenMessage,
+        category: Option<SpeechCategory>,
+    ) {
         if message.normal.is_empty() {
+            return;
+        }
+        if ctx.ladder_applies() && !ctx.settings.speaks(category) {
+            // The rung carries it as a sound or as nothing; `say_event`
+            // keeps such a line out of review, and queueing it first must
+            // not file it anyway.
             return;
         }
         if message.terse.is_some() && message.render(self.terse_speech(ctx)).is_empty() {
@@ -110,7 +121,7 @@ impl DrivingState {
         if log {
             // The drain call below passes log=False so a line that does
             // make it to speech is not entered into review twice.
-            self.log_ambient_event(ctx, &message);
+            self.log_ambient_event(ctx, &message, category);
         }
         if self.hazard_deadline.is_some() || self.ambient_event_cooldown_s > 0.0 {
             // Queued, not stored in place. This used to be a single slot, and
@@ -163,7 +174,8 @@ impl DrivingState {
             return;
         }
         if let Some(sound) = sound.as_deref() {
-            ctx.audio.play(sound);
+            // The line's own tone: nothing when the rung drops the words.
+            ctx.play_event_cue(category, sound, 1.0, 0.0);
         }
         let mut opts = SayEvent::queued();
         opts.review = false;

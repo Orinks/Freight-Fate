@@ -220,12 +220,6 @@ pub const ENGINE_START_SETTLE_CURVE: &str = "ease_out"; // key into audio_fades.
 /// stays present, the words win (XAG 105; speech priority research, R13).
 pub const SPEECH_DUCK_LEVEL: f64 = 0.5;
 
-/// How long the same duck holds for an EARCON, which has no voice for the
-/// pacer to project. Real seconds, and sized to the cues themselves: the
-/// longest ladder earcon is the two-note coaching chime at 0.18 s, so this
-/// covers it and its tail without the mix audibly breathing.
-pub const EARCON_DUCK_S: f64 = 0.25;
-
 pub const BASS_NO_SOUND_DEVICE: i32 = 0;
 
 // Radio streaming (BASS only). Opening a URL blocks until the server answers;

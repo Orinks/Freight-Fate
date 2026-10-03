@@ -8,9 +8,8 @@
 //! set that profile directly: the tests are about the rung, not the drive.
 
 use ff_core::models::profile::Profile;
-use ff_core::sound_catalog::entry_by_name;
 use ff_core::speech_pacing::{
-    ladder_earcon, Disposition, EventSpeechPacer, SpeechCategory, DRIVING_SPEECH_DISPOSITIONS,
+    Disposition, EventSpeechPacer, SpeechCategory, DRIVING_SPEECH_DISPOSITIONS,
 };
 use ff_core::speech_text::SpokenMessage;
 use freight_fate::app::testing::{stepping_clock, TestApp};
@@ -34,13 +33,6 @@ fn past_the_walkthrough(app: &mut TestApp) {
     profile.current_city = "Denver".to_string();
     profile.tutorial_done = true;
     app.ctx.profile = Some(profile);
-}
-
-fn earcon_cue(category: SpeechCategory) -> (String, f64, f64) {
-    let cue = entry_by_name(ladder_earcon(category).unwrap())
-        .unwrap()
-        .plays[0];
-    (cue.key.to_string(), cue.volume, cue.pan)
 }
 
 fn logged_last(app: &TestApp) -> String {
@@ -211,24 +203,37 @@ fn test_the_ladder_applies_with_no_profile_at_all() {
 }
 
 #[test]
-fn test_an_earcon_category_actually_asks_the_audio_layer_to_play() {
-    // Spec invariant 3: a "urgent_only" driver gets a cue where the words were.
-    // Asserts the actual call into `ctx.audio.play`, not that a table
-    // contains a key.
-    let mut app = app();
-    let audio = app.record_audio();
-    set_rung(&mut app, "urgent_only");
-
-    app.ctx.say_event_with(
-        "Load damage 43 percent.",
-        SayEvent::queued().category(SpeechCategory::NavigationAdvisory),
-    );
-
-    assert_eq!(
-        audio.borrow().played,
-        vec![earcon_cue(SpeechCategory::NavigationAdvisory)]
-    );
-    app.shutdown();
+fn test_nothing_a_rung_silences_makes_a_sound() {
+    // The owner retired the stand-in notes (2026-10-03): a line quiet or
+    // urgent only leaves out is silent, through either channel, and a
+    // standing condition re-firing stays silent too.
+    for (rung, row) in DRIVING_SPEECH_DISPOSITIONS {
+        for (category, disposition) in row {
+            if disposition != Disposition::Silent {
+                continue;
+            }
+            let mut app = app();
+            let audio = app.record_audio();
+            set_rung(&mut app, rung);
+            for _ in 0..3 {
+                app.ctx.say_event_with(
+                    "Parking brake set. Press P to release it.",
+                    SayEvent::queued()
+                        .key("air_brake_lockout")
+                        .category(category),
+                );
+                app.ctx
+                    .say_with("Nice smooth shift.", Say::new().category(category));
+            }
+            assert!(
+                audio.borrow().played.is_empty(),
+                "{rung} {category:?}: {:?}",
+                audio.borrow().played
+            );
+            assert!(app.event_lines().is_empty(), "{rung} {category:?}");
+            app.shutdown();
+        }
+    }
 }
 
 #[test]
@@ -246,75 +251,6 @@ fn test_a_silent_category_asks_the_audio_layer_for_nothing() {
     );
 
     assert!(audio.borrow().played.is_empty());
-    app.shutdown();
-}
-
-#[test]
-fn test_an_earcon_category_plays_through_say_too() {
-    let mut app = app();
-    let audio = app.record_audio();
-    set_rung(&mut app, "quiet");
-
-    app.ctx.say_with(
-        "Nice smooth shift.",
-        Say::new().category(SpeechCategory::Coaching),
-    );
-
-    assert_eq!(
-        audio.borrow().played,
-        vec![earcon_cue(SpeechCategory::Coaching)]
-    );
-    app.shutdown();
-}
-
-#[test]
-fn test_a_silenced_keyed_advisory_plays_the_earcon_once() {
-    // A keyed standing condition re-firing every few seconds while the
-    // accelerator is held against a locked-out brake must not play its
-    // earcon on every re-announce at quiet, where the same condition speaks
-    // one sentence and falls silent at standard.
-    let mut app = app();
-    let audio = app.record_audio();
-    set_rung(&mut app, "urgent_only");
-
-    for _ in 0..5 {
-        app.ctx.say_event_with(
-            "Parking brake set. Press P to release it.",
-            SayEvent::queued()
-                .key("air_brake_lockout")
-                .category(SpeechCategory::NavigationAdvisory),
-        );
-    }
-
-    assert_eq!(
-        audio.borrow().played,
-        vec![earcon_cue(SpeechCategory::NavigationAdvisory)]
-    );
-    app.shutdown();
-}
-
-#[test]
-fn test_a_silenced_plain_repeat_via_say_plays_the_earcon_once() {
-    // `say` has no key/force, so its silenced branch relies on the pacer's
-    // plain repeat window instead. The same line fired twice in a row
-    // (inside REPEAT_WINDOW_S) must not double the earcon.
-    let mut app = app();
-    let audio = app.record_audio();
-    set_rung(&mut app, "quiet");
-
-    app.ctx.say_with(
-        "Nice smooth shift.",
-        Say::new().category(SpeechCategory::Coaching),
-    );
-    app.ctx.say_with(
-        "Nice smooth shift.",
-        Say::new().category(SpeechCategory::Coaching),
-    );
-
-    assert_eq!(
-        audio.borrow().played,
-        vec![earcon_cue(SpeechCategory::Coaching)]
-    );
     app.shutdown();
 }
 

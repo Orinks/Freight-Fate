@@ -278,6 +278,59 @@ jobs:
       - name: Test Rust workspace
         run: cargo test -p ff-core -p freight-fate
 
+      - name: Import the Developer ID signing credentials
+        # Signs as "Developer ID Application: Joshua Tubbs" and notarizes
+        # with the App Store Connect key, so Gatekeeper opens the app without
+        # the Open Anyway step. The certificate goes into a throwaway keychain
+        # and the key into RUNNER_TEMP, never the checkout or the bundle.
+        shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          IS_PRERELEASE: ${{ needs.prepare.outputs.is_prerelease }}
+        run: |
+          if [ -z "$MACOS_CERT_P12_BASE64" ] || [ -z "$ASC_KEY_P8_BASE64" ]; then
+            if [ "$IS_PRERELEASE" = "false" ]; then
+              echo "A stable release must be Developer ID signed and notarized; the signing secrets are missing." >&2
+              exit 1
+            fi
+            echo "::warning::Signing secrets are not configured; this Mac build is ad-hoc signed and not notarized."
+            exit 0
+          fi
+          keychain="$RUNNER_TEMP/freight-fate-signing.keychain-db"
+          keychain_password="$(uuidgen)"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          echo "$MACOS_CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/developer_id.p12"
+          security import "$RUNNER_TEMP/developer_id.p12" -k "$keychain" \
+            -P "$MACOS_CERT_PASSWORD" -T /usr/bin/codesign
+          rm -f "$RUNNER_TEMP/developer_id.p12"
+          # The G2 intermediate is not in macOS's system keychain; without it
+          # the identity is untrusted and codesign finds nothing to sign with.
+          curl -fsSL https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer \
+            -o "$RUNNER_TEMP/DeveloperIDG2CA.cer"
+          security import "$RUNNER_TEMP/DeveloperIDG2CA.cer" -k "$keychain"
+          security set-key-partition-list -S apple-tool:,apple: -s \
+            -k "$keychain_password" "$keychain" >/dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          identity="Developer ID Application: Joshua Tubbs ($APPLE_TEAM_ID)"
+          security find-identity -v -p codesigning "$keychain" | grep -F "$identity"
+          key_path="$RUNNER_TEMP/AuthKey_$ASC_KEY_ID.p8"
+          echo "$ASC_KEY_P8_BASE64" | base64 --decode > "$key_path"
+          chmod 600 "$key_path"
+          {
+            echo "MACOS_SIGN_IDENTITY=$identity"
+            echo "MACOS_SIGN_KEYCHAIN=$keychain"
+            echo "MACOS_NOTARY_KEY_PATH=$key_path"
+            echo "MACOS_NOTARY_KEY_ID=$ASC_KEY_ID"
+            echo "MACOS_NOTARY_ISSUER_ID=$ASC_ISSUER_ID"
+          } >> "$GITHUB_ENV"
+
       - name: Build the macOS release
         # --smoke boots the PACKAGED app for five frames with dummy drivers:
         # real dylib loading, real data, real boot. The old non-launch mode
@@ -295,6 +348,15 @@ jobs:
         run: |
           ./target/release/freightfate --list-speech-backends | tee speech-backends.txt
           grep -q "^AVSpeech " speech-backends.txt
+
+      - name: Remove the signing credentials
+        if: always()
+        shell: bash
+        run: |
+          if [ -n "${MACOS_SIGN_KEYCHAIN:-}" ]; then
+            security delete-keychain "$MACOS_SIGN_KEYCHAIN" || true
+          fi
+          rm -f "${MACOS_NOTARY_KEY_PATH:-/nonexistent}"
 
       - uses: actions/upload-artifact@v7
         with:

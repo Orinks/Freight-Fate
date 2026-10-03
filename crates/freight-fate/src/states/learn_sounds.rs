@@ -12,7 +12,6 @@
 
 use std::cell::RefCell;
 
-use ff_core::ladder_earcons::register_ladder_earcons;
 use ff_core::lane_guide_tone::register_lane_guide_tone;
 use ff_core::sound_catalog::demo::{DemoAudio, SoundDemo};
 use ff_core::sound_catalog::{SoundCategory, SoundEntry, CATALOG};
@@ -202,7 +201,6 @@ impl Menu for LearnSoundCategoryState {
     /// a held cue would otherwise pick its hold straight back up.
     fn enter(&mut self, ctx: &mut GameContext) {
         register_enforcement_sounds();
-        register_ladder_earcons();
         register_lane_guide_tone();
         self.stop_demo(ctx);
         // The base `Menu::enter`: rebuild the rows, play the open sound,

@@ -19,12 +19,12 @@ returning from an earlier version, read What Changed Recently first.
    an Apple Silicon Mac, choose the newest Career 1.9 prerelease and download
    the archive ending in `-macos-arm64.zip`; Career 1.9 does not provide an
    Intel Mac build. Extract the archive and move `FreightFate.app` to
-   Applications. Apple has not notarized this build, so macOS may block it the
-   first time you open it. Open System Settings, Privacy & Security, scroll to
-   the message about Freight Fate, choose Open Anyway, and confirm Open. The
-   button appears for about an hour after macOS blocks the launch. VoiceOver
-   reads these controls. You only need to do this for the first launch of a
-   newly downloaded app.
+   Applications. The app is signed by its developer and notarized by Apple,
+   so it opens like any other app; macOS may ask once to confirm you want to
+   open an app downloaded from the internet. An older build that macOS
+   blocks instead can still be opened from System Settings, Privacy &
+   Security: scroll to the message about Freight Fate, choose Open Anyway,
+   and confirm Open.
 4. The first time the game starts, it asks how much the truck should do for
    you. All assists is recommended for your first drives: the truck steers
    while you learn how the road sounds. You can change it later in Settings,
@@ -1842,7 +1842,7 @@ quiets it, and settling back under the limit disarms it.
 
 | Setting | Purpose |
 | --- | --- |
-| Driving speech | Standard gives full confirmations, status updates, and a driving tip once per route leg. Quiet keeps short spoken updates, including lane openings, assist confirmations, costs, and navigation. Urgent only speaks safety warnings and directions requiring action; routine costs, status, and tips are silent, while road heads-ups and confirmations use sounds. Events suppressed by the speech setting stay out of message review. Readout keys always answer on demand. Billboards, place names, and landmarks keep their own switches below. |
+| Driving speech | Standard gives full confirmations, status updates, traffic calls, and a driving tip once per route leg. Quiet keeps short spoken updates, including lane openings, assist confirmations, costs, and navigation, but not the traffic around you or tips. Urgent only speaks safety warnings and directions requiring action; achievements earned at the wheel wait silently in message review. Anything else a setting leaves out makes no sound and stays out of message review. Readout keys always answer on demand. Billboards, place names, and landmarks keep their own switches below. |
 | Roadside chatter | The ambient color spoken between navigation cues: entering parks and forests, named river crossings, mountain passes, museums and attractions, and parody billboards. One master switch turns it all on or off, and each kind has its own switch below it. Safety and navigation speech is never affected, and town names have their own Place callouts setting. |
 | Place callouts | How much the co-driver says about places along the road. Sparse, the default, speaks only the town names that explain a speed limit change, like Entering Strawberry right before its 35. All adds the towns the route passes through or skirts. Off silences place names entirely. Speed limit announcements themselves are never affected, and no tier ever reads out every place on the map. |
 | Menu position announcements | When on, menus say the position, like 3 of 10, after each option. Turn off to hear only the option. |

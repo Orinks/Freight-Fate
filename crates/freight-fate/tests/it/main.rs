@@ -198,3 +198,4 @@ mod states_ramp_signal_timing;
 
 mod states_driving_hos_planning;
 mod states_driving_hos_rest_stretch;
+mod states_driving_speech_modes;
