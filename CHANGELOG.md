@@ -199,7 +199,7 @@
 
 ### Fixed
 
-- **On a Mac, the game no longer freezes at launch asking to control VoiceOver.** VoiceOver also speaks the first screen now. (Reported by Jason Harkness)
+- **On a Mac, the game no longer freezes at launch asking to control VoiceOver.** VoiceOver also speaks the first screen now. (Reported by Jason)
 
 - **Radio stations that were silent, gone, listed twice or playing a different station are fixed or off the dial.** Stations that moved play from their new address.
 
