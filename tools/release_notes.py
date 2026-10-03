@@ -269,14 +269,19 @@ def format_entry(entry: str) -> str:
     return marker + " ".join([first_text, *lines[1:]])
 
 
-def format_sections(sections: list[ChangelogSection], *, heading_level: int = 2) -> str:
+def format_sections(
+    sections: list[ChangelogSection],
+    *,
+    heading_level: int = 2,
+    order: tuple[str, ...] = SECTION_ORDER,
+) -> str:
     if not sections:
         return "- No user-facing changes"
 
     by_title: dict[str, list[str]] = {}
     for section in sections:
         by_title.setdefault(section.title, []).extend(section.entries)
-    ordered_titles = [title for title in SECTION_ORDER if title in by_title]
+    ordered_titles = [title for title in order if title in by_title]
     ordered_titles.extend(title for title in by_title if title not in ordered_titles)
 
     chunks: list[str] = []
@@ -370,7 +375,9 @@ def sections_added_since(
 
 
 def format_stable_notes(sections: list[ChangelogSection], footer: str = "") -> str:
-    body = format_sections(sections)
+    # A stable release is read by players upgrading in place, so what decides
+    # whether their install or career comes across leads the page.
+    body = format_sections(sections, order=("Compatibility",) + SECTION_ORDER)
     return f"{body}\n\n{footer}" if footer else body
 
 
