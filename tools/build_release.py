@@ -199,6 +199,23 @@ def _is_snapshot_label(label: str) -> bool:
     return len(suffix) == 8 and suffix.isdigit()
 
 
+def build_commit() -> str:
+    """The checked-out commit, so the updater can tell a same-day rebuild
+    under one snapshot tag from the copy it replaced; "" outside git."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return result.stdout.strip()
+
+
 def stamp_build_info(build_dir: Path, label: str, root: Path | None = None) -> None:
     """Record what this build is, for the in-game updater.
 
@@ -216,6 +233,7 @@ def stamp_build_info(build_dir: Path, label: str, root: Path | None = None) -> N
         "channel": "dev" if snapshot else "stable",
         "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
         "package_version": project_version(),
+        "commit": build_commit(),
     }
     info_path = (root or runtime_root(build_dir)) / "build_info.json"
     with open(info_path, "w", encoding="utf-8") as f:
