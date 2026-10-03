@@ -344,9 +344,6 @@ The owner's:
       ([September 12](#september-12-long-sessions-and-speech)).
 - [x] The eight remaining jazz songs, in the pack and on Nashville After
       Hours since 2026-09-25 ([September 13](#september-13-driver-directory)).
-- [ ] New station IDs for the 16 stations still without them; the
-      Roadhouse, Desert Rock and Neon Drive got theirs 2026-09-25
-      ([September 13](#september-13-driver-directory)).
 - [ ] The radio stream sweep (`--recheck-dead`) on release day.
 - [ ] Push the `v1.9.0` tag on the commit to ship, last, after every other
       item here is closed.
@@ -361,6 +358,13 @@ into the release gate. Details stay in the linked dated sections, marked
 Everything found before 2026-09-25 moved to
 [2.0](#found-along-the-way-in-19-moved-to-20) that day.
 
+- [ ] New station IDs for the 16 stations still without them, moved out
+      of the gate by the owner 2026-10-02 for a post-launch build. Made in
+      Suno that day, waiting on downloads (none left until October 21): a
+      "Short Sung ID" per station, two takes each, plus two Speech-tab
+      liners each; re-voice the liners with ElevenLabs after its
+      October 6 reset if the Suno ones are not downloaded
+      ([September 13](#september-13-driver-directory)).
 - [ ] Simulated snow by region and month, not a hard Dec-Feb gate
       ([October 1](#october-1-seasons)).
 - [ ] Updater, issue 266: after "Restarting to finish the update" the window
