@@ -706,9 +706,7 @@ def test_macos_stage_is_a_player_ready_app_bundle(tmp_path, monkeypatch):
     assert info["CFBundleIdentifier"] == "net.orinks.freight-fate"
     assert info["CFBundleVersion"] == "2026.08.30"
     assert info["CFBundleGetInfoString"] == "Freight Fate 1.9.0 (1.9-tester-20260830)"
-    assert info["NSAppleEventsUsageDescription"] == (
-        "Freight Fate uses VoiceOver to speak menus, driving information, and alerts."
-    )
+    assert "NSAppleEventsUsageDescription" not in info
     assert "LSMinimumSystemVersion" not in info
 
 
