@@ -305,3 +305,67 @@ fn test_work_zone_short_forms() {
     assert!(warning.contains("Limit "), "{warning}");
     app.shutdown();
 }
+
+#[test]
+fn test_the_weather_gap_line_is_short_at_quiet() {
+    let mut app = an_app("quiet");
+    let mut drive = a_drive(&mut app);
+    drive.weather_mut().current = ff_core::sim::weather::WeatherKind::HeavyRain;
+    let line = drive
+        .acc_weather_gap_text()
+        .expect("heavy rain lengthens the gap");
+    assert_eq!(line.render(true), "Wet roads, longer gap.");
+    assert_eq!(
+        line.render(false),
+        "Wet roads, adaptive cruise increasing following gap."
+    );
+    app.shutdown();
+}
+
+// -- achievements at the wheel ---------------------------------------------------------
+
+/// What earning one achievement mid-drive said, chimed, and left in review.
+fn achievement_at(mode: &str) -> (Vec<String>, Vec<String>, Vec<String>) {
+    let mut app = an_app(mode);
+    let _drive = a_drive(&mut app);
+    let audio = app.record_audio();
+    app.clear_speech();
+    let review_from = app.ctx.message_log.messages.len();
+
+    app.ctx.award_driving_achievement("rain_driver");
+
+    let mut spoken = app.main_lines();
+    spoken.extend(app.event_lines());
+    let chimes = audio
+        .borrow()
+        .played
+        .iter()
+        .map(|(key, _, _)| key.clone())
+        .collect();
+    let review = app.ctx.message_log.messages[review_from..]
+        .iter()
+        .map(|message| message.text.clone())
+        .collect();
+    app.shutdown();
+    (spoken, chimes, review)
+}
+
+#[test]
+fn test_urgent_only_keeps_achievements_out_of_the_drive() {
+    let (spoken, chimes, review) = achievement_at("urgent_only");
+    assert!(spoken.is_empty(), "{spoken:?}");
+    assert!(chimes.is_empty(), "{chimes:?}");
+    assert!(
+        review
+            .iter()
+            .any(|line| line.starts_with("New achievement!")),
+        "{review:?}"
+    );
+}
+
+#[test]
+fn test_quiet_still_names_an_achievement() {
+    let (spoken, chimes, _) = achievement_at("quiet");
+    assert_eq!(spoken.len(), 1, "{spoken:?}");
+    assert!(chimes.contains(&"ui/level_up".to_string()), "{chimes:?}");
+}

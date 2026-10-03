@@ -75,7 +75,9 @@
 
 - **Anything Quiet or Urgent only leaves out now makes no sound.** The stand-in notes and the notification tones of silenced lines are gone.
 
-- **Quiet driving speech says cruise, speed keeper and work zone updates in a few words.** For example, Cruise easing to 50.
+- **Quiet driving speech says cruise, speed keeper, work zone and collision updates in a few words.** For example, Cruise easing to 50.
+
+- **Urgent only no longer announces achievements while you drive.** They wait in message review.
 
 - **Urgent only no longer speaks CB reports, toll heads-ups or traffic packs.** Lane closures and the directions you must act on still speak.
 

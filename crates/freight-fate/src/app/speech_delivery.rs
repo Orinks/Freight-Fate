@@ -255,6 +255,19 @@ impl GameContext {
         }
     }
 
+    /// An achievement earned at the wheel. It is flavor: urgent only keeps
+    /// the drive silent for it, chime and name both, and the full record
+    /// waits in message review and the achievements menu (speech mode
+    /// audit, 2026-10-03). Quiet still hears the bare name.
+    pub fn award_driving_achievement(&mut self, achievement_id: &str) {
+        let announce = self.event_speaks(Some(SpeechCategory::Status));
+        let awarded = self.award_achievement_with(achievement_id, false, announce);
+        if let (false, Some(awarded)) = (announce, awarded) {
+            self.message_log
+                .add(&awarded.award.message.normal, MessageCategory::General);
+        }
+    }
+
     /// `say(text)`: interrupt, review, no category.
     pub fn say(&mut self, text: &str) {
         self.say_with(text, Say::new());

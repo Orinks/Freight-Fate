@@ -193,7 +193,7 @@ impl DrivingState {
                 let mut opts = SayEvent::queued().priority(EventPriority::Route);
                 opts.category = category;
                 ctx.say_event_with(message, opts);
-                ctx.award_achievement("toll_paid");
+                ctx.award_driving_achievement("toll_paid");
             }
             TripEventKind::StateCrossing => {
                 self.handle_state_crossing(ctx, event, sound, message, category)
@@ -240,10 +240,10 @@ impl DrivingState {
                 .unwrap_or_default();
             if reason == "construction" {
                 self.construction_seen = true;
-                ctx.award_achievement("construction_zone");
+                ctx.award_driving_achievement("construction_zone");
             } else if reason == "heavy traffic" {
                 self.traffic_seen = true;
-                ctx.award_achievement("traffic_slowing");
+                ctx.award_driving_achievement("traffic_slowing");
             }
         }
         if kind == TripEventKind::GpsCue {
@@ -254,11 +254,11 @@ impl DrivingState {
                 .is_some_and(|cue| cue.kind == "traffic");
             if traffic_cue || event.data.traffic_pressure.is_some() {
                 self.traffic_seen = true;
-                ctx.award_achievement("traffic_slowing");
+                ctx.award_driving_achievement("traffic_slowing");
             }
         }
         if self.construction_seen && self.traffic_seen {
-            ctx.award_achievement("jam_and_cones");
+            ctx.award_driving_achievement("jam_and_cones");
         }
     }
 
@@ -489,7 +489,7 @@ impl DrivingState {
                 .category(category)
                 .priority(EventPriority::Route),
         );
-        ctx.award_achievement("state_crossing");
+        ctx.award_driving_achievement("state_crossing");
     }
 
     /// The CURVE branch of `_handle_trip_event`.

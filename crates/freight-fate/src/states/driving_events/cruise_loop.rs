@@ -44,14 +44,20 @@ impl DrivingState {
         6.0f64.min(chosen.max(gap))
     }
 
-    /// `_acc_weather_gap_text()`.
-    pub fn acc_weather_gap_text(&self) -> Option<&'static str> {
+    /// `_acc_weather_gap_text()`, with the quiet rungs' short form.
+    pub fn acc_weather_gap_text(&self) -> Option<SpokenMessage> {
         let effects = self.trip.weather.effects();
         if effects.grip < 0.9 {
-            return Some("Wet roads, adaptive cruise increasing following gap.");
+            return Some(SpokenMessage::with_terse(
+                "Wet roads, adaptive cruise increasing following gap.",
+                "Wet roads, longer gap.",
+            ));
         }
         if effects.visibility_mi < 3.0 {
-            return Some("Low visibility, adaptive cruise increasing following gap.");
+            return Some(SpokenMessage::with_terse(
+                "Low visibility, adaptive cruise increasing following gap.",
+                "Low visibility, longer gap.",
+            ));
         }
         None
     }
