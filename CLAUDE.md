@@ -324,9 +324,9 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   audited playtest sandbox, never against the owner's careers. The one
   exception is `--staging`, only when the owner asks for a site check: its
   own `saves-agent-staging` directory, no careers and no identity copied in,
-  its own driver on the staging site (dev.orinks.net; the owner enters its
-  spoken code there the first time), cloud backup on, presence and Mastodon
-  off. No agent session ever reaches production: `--online`, which carried
+  its own driver on the staging backend (through the orinks-net `dev`
+  preview; the owner enters its spoken code there the first time), cloud
+  backup on, presence and Mastodon off. No agent session ever reaches production: `--online`, which carried
   the real driver identity, was removed on 2026-09-25.
 
 ## World and route data

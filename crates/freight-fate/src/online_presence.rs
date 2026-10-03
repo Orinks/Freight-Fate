@@ -51,12 +51,12 @@ pub const PRODUCTION_BASE_URL: &str = "https://www.orinks.net";
 // live board. That backend went to production with the server stack, so the
 // game reads the real site again.
 //
-// Staging is deliberately still up. Builds already in players' hands carry
-// the old value and keep talking to it; nothing they have is cut off by this
-// flip. What does NOT follow them here is their staging career: driver
-// identities, cloud backups and public profiles live on the staging
-// deployment and do not exist on production, so a staging player who takes a
-// post-cutover build starts fresh.
+// The staging site stayed up after the cutover for builds that still carried
+// the old value, and closed on 2026-10-02; those builds can no longer reach
+// it. Their staging careers never followed them here: driver identities,
+// cloud backups and public profiles lived on the staging deployment and do
+// not exist on production, so a staging player on a post-cutover build
+// started fresh.
 pub const DEFAULT_BASE_URL: &str = PRODUCTION_BASE_URL;
 
 // Presence is by far the biggest source of backend reads and writes -- a
