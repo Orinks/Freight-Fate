@@ -445,7 +445,8 @@ Everything found before 2026-09-25 moved to
       builds without it (2026-09-25).
 - [x] A source build still has the agent server, so `--online` is gone: no
       agent session reaches production. Site checks use `--staging`, its
-      own driver on dev.orinks.net, connected once by the owner, with no
+      own driver on the staging backend (dev.orinks.net until 2026-10-02, the
+      orinks-net `dev` preview since), connected once by the owner, with no
       identity copied from the real saves (2026-09-25).
 - [ ] The site cannot tell an invented career from an earned one. Anyone
       who builds from source can set their own money or level before a
