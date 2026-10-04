@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.9.1 - 2026-10-04
+
 ### Fixed
 
 - **The update check no longer offers the version you already have, and the welcome no longer says development build.**

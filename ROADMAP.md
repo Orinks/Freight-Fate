@@ -397,6 +397,11 @@ Everything found before 2026-09-25 moved to
       out makes no sound, and quiet says cruise, keeper and work zone
       updates short. Urgent only now says when a work zone turns cruise off.
 - [ ] A listening pass by the owner at quiet and urgent only, at the wheel.
+- [ ] The exit-call truth test (`test_the_exit_calls_name_the_road_that_is_really_left`)
+      failed once on the Linux ARM runner in the v1.9.1 tag build, hearing
+      only the two-mile call, and passed on re-run. It passed 80 of 80 runs
+      alone on x86_64 and in its module; the source of the nondeterminism is
+      not found yet.
 
 - [x] More music on the Terrestrial dial (owner, 2026-10-03, from player
       feedback): 156 commercial music stations in 35 states, each heard
