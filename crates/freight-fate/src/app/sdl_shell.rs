@@ -56,6 +56,8 @@ pub struct SdlShell {
     touch: crate::touch::TouchInput,
     #[cfg(target_os = "ios")]
     keyboard_shown: bool,
+    #[cfg(target_os = "ios")]
+    text_field_open: bool,
 }
 
 #[cfg(target_os = "windows")]
@@ -184,6 +186,8 @@ impl SdlShell {
             touch: crate::touch::TouchInput::new(),
             #[cfg(target_os = "ios")]
             keyboard_shown: false,
+            #[cfg(target_os = "ios")]
+            text_field_open: false,
         })
     }
 
@@ -275,6 +279,29 @@ impl SdlShell {
         let events = self.with_touch(translate_events(raw));
         Some(events)
     }
+
+    /// Follow the active screen: raise the on-screen keyboard when a text
+    /// field opens and lower it when the field goes away. In between, the
+    /// three-finger double tap still hides or shows it.
+    #[cfg(target_os = "ios")]
+    pub fn set_text_field(&mut self, open: bool) {
+        if open == self.text_field_open {
+            return;
+        }
+        self.text_field_open = open;
+        if open != self.keyboard_shown {
+            self.keyboard_shown = open;
+            if open {
+                self.video.text_input().start();
+            } else {
+                self.video.text_input().stop();
+            }
+        }
+    }
+
+    /// Text input always runs off iOS; there is no keyboard to raise.
+    #[cfg(not(target_os = "ios"))]
+    pub fn set_text_field(&mut self, _open: bool) {}
 
     /// Append this frame's gestures to the SDL events. A
     /// lost focus (the app leaving the foreground) lets go of a held pedal.

@@ -1010,7 +1010,21 @@ impl App {
             probe.end_frame(&self.ctx.input);
         }
         self.tick(dt);
+        self.sync_text_field();
         self.render();
+    }
+
+    /// Tell the shell whether the active screen takes typed text.
+    fn sync_text_field(&mut self) {
+        let Some(shell) = self.shell.as_mut() else {
+            return;
+        };
+        let open = self.ctx.state().is_some_and(|state| {
+            state
+                .try_borrow()
+                .is_ok_and(|state| state.captures_text_input())
+        });
+        shell.set_text_field(open);
     }
 
     /// Main loop. `max_frames` runs that many frames then exits cleanly;

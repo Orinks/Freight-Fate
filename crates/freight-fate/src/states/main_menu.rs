@@ -996,11 +996,12 @@ impl TextEntry for NameEntryState {
     }
 
     fn enter(&mut self, ctx: &mut GameContext) {
-        ctx.say(
+        ctx.say(&format!(
             "New career. Type your driver name, then Enter. Left and Right \
              arrows review the letters, Home and End jump to the start or \
-             end. Escape cancels.",
-        );
+             end. Escape cancels.{}",
+            crate::states::text_entry::KEYBOARD_HINT
+        ));
     }
 
     fn confirm(&mut self, ctx: &mut GameContext) {
