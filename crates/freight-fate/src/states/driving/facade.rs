@@ -9,6 +9,7 @@ use ff_core::sim::weather::WeatherSystem;
 use crate::app::GameContext;
 use crate::discord_presence::PresenceState;
 use crate::states::base::{InputEvent, State};
+use crate::touch::Gesture;
 
 use super::DrivingState;
 
@@ -87,6 +88,10 @@ impl State for DrivingState {
 
     fn handle_event(&mut self, ctx: &mut GameContext, event: &InputEvent) {
         self.handle_key_event(ctx, event);
+    }
+
+    fn handle_gesture(&mut self, ctx: &mut GameContext, gesture: Gesture) -> bool {
+        self.handle_touch_gesture(ctx, gesture)
     }
 
     fn handle_controller(&mut self, ctx: &mut GameContext, event: &InputEvent) {

@@ -14,6 +14,7 @@ use super::settings_actions::{
     pace_label, update_channel,
 };
 use super::shortcuts::{ShortcutDevice, ShortcutsState};
+use super::touch_gestures::TouchGesturesState;
 use crate::app::GameContext;
 use crate::states::base::{Label, Menu, MenuItem};
 use crate::states::main_menu_help::render_help_line;
@@ -84,6 +85,20 @@ fn steering_lean_text(s: &Settings) -> String {
         "toward"
     };
     format!("{what} {way} where the wheel should go, so steer {way} it")
+}
+
+/// Only the iPhone and iPad game has a touch surface to bind.
+fn touch_gestures_row() -> Row {
+    MenuItem::new(
+        "Touch gestures",
+        |_s: &mut SettingsCategoryState, ctx: &mut GameContext| {
+            ctx.push_state(TouchGesturesState::new())
+        },
+    )
+    .help(
+        "Choose which driving command each touch gesture runs, including a second \
+         finger while you hold the top or bottom half.",
+    )
 }
 
 fn back_row() -> Row {
@@ -665,8 +680,11 @@ impl SettingsCategoryState {
                 // for you, which is what every other row on that screen does.
                 // Controls is the keyboard, the controller, and the units the
                 // numbers arrive in.
-                back_row(),
-            ],
+            ]
+            .into_iter()
+            .chain(cfg!(target_os = "ios").then(touch_gestures_row))
+            .chain([back_row()])
+            .collect(),
             "audio" => self.audio_items(),
             "speech" => {
                 let mut items: Vec<Row> = self

@@ -198,6 +198,10 @@ pub fn is_frozen_in(env: &UpdaterEnv) -> bool {
             || root.join("_internal").exists())
 }
 
+/// Whether this build may download and apply its own updates. An iOS app
+/// cannot replace itself: the App Store or TestFlight does that.
+pub const SELF_UPDATES: bool = !cfg!(target_os = "ios");
+
 pub fn is_frozen() -> bool {
     is_frozen_in(&UpdaterEnv::current())
 }

@@ -22,4 +22,5 @@ pub mod playtest;
 pub mod single_instance;
 pub mod speech;
 pub mod states;
+pub mod touch;
 pub mod updater;

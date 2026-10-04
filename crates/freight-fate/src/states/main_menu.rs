@@ -44,6 +44,7 @@ mod settings;
 mod settings_actions;
 mod settings_items;
 mod shortcuts;
+mod touch_gestures;
 
 pub use achievements::{AchievementCareerState, AchievementCategoryState, AchievementsState};
 pub use careers::{
@@ -53,6 +54,7 @@ pub use settings::{
     GameplaySettingsState, SettingsCategoryState, SettingsState, SETTINGS_LAYOUT_NOTICES,
 };
 pub use shortcuts::{ShortcutDevice, ShortcutsState};
+pub use touch_gestures::{TouchCommandPickerState, TouchGesturesState};
 
 pub use crate::states::main_menu_career::{
     region_menu_name, CareerStartState, HomeCityState, HomeTerminalState,
@@ -585,7 +587,7 @@ impl MainMenuState {
 
     /// Start a fresh silent check for the next main-menu update cycle.
     pub fn arm_update_check(settings: &ff_core::settings::Settings) {
-        if !updater::is_frozen() {
+        if !updater::is_frozen() || !updater::SELF_UPDATES {
             return;
         }
         let mut guard = UPDATE_CHECK.lock().unwrap_or_else(|e| e.into_inner());
@@ -1020,11 +1022,12 @@ impl TextEntry for NameEntryState {
     }
 
     fn enter(&mut self, ctx: &mut GameContext) {
-        ctx.say(
+        ctx.say(&format!(
             "New career. Type your driver name, then Enter. Left and Right \
              arrows review the letters, Home and End jump to the start or \
-             end. Escape cancels.",
-        );
+             end. Escape cancels.{}",
+            crate::states::text_entry::KEYBOARD_HINT
+        ));
     }
 
     fn confirm(&mut self, ctx: &mut GameContext) {

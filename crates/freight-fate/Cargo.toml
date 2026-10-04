@@ -95,5 +95,15 @@ sdl2 = { workspace = true, features = ["bundled", "static-link"] }
 [target.'cfg(target_os = "linux")'.dependencies]
 sdl2 = { workspace = true, features = ["bundled", "static-link"] }
 
+# iOS compiles SDL2 in for the same reason as macOS, and because an app
+# bundle may not load a dylib from anywhere but its own Frameworks folder.
+# The UIKit gesture and VoiceOver layer is Objective-C, built by `cc`.
+[target.'cfg(target_os = "ios")'.dependencies]
+sdl2 = { workspace = true, features = ["bundled", "static-link"] }
+raw-window-handle.workspace = true
+
+[build-dependencies]
+cc = "1"
+
 [dev-dependencies]
 tempfile.workspace = true

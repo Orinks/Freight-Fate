@@ -217,6 +217,8 @@ pub fn secret_store_report() -> (bool, String) {
         Some("Windows")
     } else if cfg!(target_os = "macos") {
         Some("macOS")
+    } else if cfg!(target_os = "ios") {
+        Some("iOS")
     } else if cfg!(target_os = "linux") {
         Some("SecretService")
     } else {

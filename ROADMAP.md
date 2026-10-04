@@ -589,6 +589,26 @@ Everything found before 2026-09-25 moved to
       exit blinker end on a new stalk click, `vehicle/turn_signal_off`,
       where the steering cue used to borrow the signal tone (owner's pick by
       ear, 2026-09-29).
+- [x] Freight Fate builds for iPhone and iPad: the same Rust game, speech
+      through Prism's VoiceOver backend, controllers through SDL, touch and
+      VoiceOver gestures as key presses, and F2 or a three-finger tap for a
+      spoken list of driving commands. `tools/build_ios.py` packages it;
+      `docs/ios.md` has the gestures (2026-09-29).
+- [x] iOS driving gestures run commands directly and can be rebound in
+      Settings, Gameplay, Controls, Touch gestures: a second finger while holding a
+      pedal (cruise, shifts, parking brake, engine), plus tap for speed,
+      swipes for the cruise target, magic tap to pause (2026-09-29).
+- [ ] (Found along the way) The iOS second-finger gestures (hold a pedal,
+      then tap, double tap or swipe with another finger) need a pass on real
+      hardware: the Simulator's touch replay lifts both fingers together, so
+      cruise, engine and parking brake from a held pedal are covered only by
+      the headless tests.
+- [ ] iOS runs from TestFlight on a real iPhone (2026-10-03) but still
+      needs a real controller, BASS sound on hardware (the Simulator has no
+      audio device), and VoiceOver's scrub and on-screen-keyboard typing on
+      hardware. For the App Store: a real app icon (TestFlight has a
+      placeholder), a privacy manifest, BASS licensing for iOS, and a title
+      screen or review note for the blank game screen.
 
 ### Release gate record
 

@@ -33,6 +33,7 @@ use crate::speech::{NullSpeech, SpeechSink};
 use crate::states::base::{InputEvent, Key, Mods, State};
 use crate::states::driving::DrivingState;
 use crate::states::main_menu::ConfirmQuitState;
+use crate::touch::Gesture;
 
 pub mod boot_timing;
 pub mod context;
@@ -770,6 +771,21 @@ impl App {
         self.ctx.run_deferred();
     }
 
+    /// Hand a touch gesture to the active state, or press its key when the
+    /// state leaves it to the keyboard table.
+    pub fn dispatch_gesture(&mut self, gesture: Gesture) {
+        if let Some(state) = self.ctx.state() {
+            let taken = state.borrow_mut().handle_gesture(&mut self.ctx, gesture);
+            self.ctx.run_deferred();
+            if taken {
+                return;
+            }
+        }
+        for event in gesture.key_events() {
+            self.handle_event(&event);
+        }
+    }
+
     /// Alt+F4 and the window's close button ask, they do not just go.
     ///
     /// Closing the window used to end the process on the spot. Mid-drive that
@@ -828,6 +844,7 @@ impl App {
                 self.dispatch_to_state(event);
             }
             InputEvent::Quit => self.handle_close_request(),
+            InputEvent::Gesture(gesture) => self.dispatch_gesture(*gesture),
             InputEvent::KeyDown { key, mods, .. } => {
                 self.ctx.input.press(*key, *mods);
                 self.dispatch_to_state(event);
@@ -1006,7 +1023,21 @@ impl App {
             probe.end_frame(&self.ctx.input);
         }
         self.tick(dt);
+        self.sync_text_field();
         self.render();
+    }
+
+    /// Tell the shell whether the active screen takes typed text.
+    fn sync_text_field(&mut self) {
+        let Some(shell) = self.shell.as_mut() else {
+            return;
+        };
+        let open = self.ctx.state().is_some_and(|state| {
+            state
+                .try_borrow()
+                .is_ok_and(|state| state.captures_text_input())
+        });
+        shell.set_text_field(open);
     }
 
     /// Main loop. `max_frames` runs that many frames then exits cleanly;
