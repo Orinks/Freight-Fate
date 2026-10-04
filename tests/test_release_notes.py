@@ -930,16 +930,13 @@ def test_career_19_release_requires_and_verifies_every_platform_archive():
     )
 
 
-def test_player_manual_distinguishes_stable_and_career_19_mac_archives():
+def test_player_manual_names_the_apple_silicon_mac_archive():
     manual = (Path(__file__).resolve().parents[1] / "docs" / "user-manual.md").read_text(
         encoding="utf-8"
     )
 
-    assert "| macOS stable | `FreightFate-<version>-macos.zip` |" in manual
-    assert (
-        "| Career 1.9 macOS, Apple Silicon | `FreightFate-<version>-macos-arm64.zip` |"
-    ) in manual
-    assert "On an Intel Mac, the in-game updater will not offer" in manual
+    assert "| macOS, Apple Silicon | `FreightFate-<version>-macos-arm64.zip` |" in manual
+    assert "Intel Mac, the in-game updater will not offer it" in manual
 
 
 def test_player_manual_names_both_linux_architectures():
