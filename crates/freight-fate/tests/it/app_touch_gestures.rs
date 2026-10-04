@@ -141,6 +141,16 @@ fn a_second_finger_on_the_brake_runs_the_parking_brake_and_the_engine() {
     assert!(harness.app.ctx.input.physically_down(Key::Down));
     let engine_before = harness.with_drive(|d, _| d.trip.truck.engine_on);
     touch(&mut harness, &mut input, Gesture::LowerHoldDoubleTap);
+    // Same answer as the key, with the parking brake named as its gesture.
+    let expected: Vec<String> = expected
+        .iter()
+        .map(|line| {
+            line.replace(
+                "P releases",
+                "a second-finger tap while you hold the bottom half releases",
+            )
+        })
+        .collect();
     assert_eq!(harness.transcript(), expected);
     let engine_after = harness.with_drive(|d, _| d.trip.truck.engine_on);
     assert_eq!(engine_after, engine_by_key);

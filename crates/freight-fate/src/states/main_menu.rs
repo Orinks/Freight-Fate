@@ -872,20 +872,30 @@ impl Menu for MainMenuState {
             MenuItem::new("Settings", |_s: &mut Self, ctx| {
                 ctx.push_state(SettingsState::new())
             })
-            .help(
+            .help(if cfg!(target_os = "ios") {
+                "Units, transmission mode, volumes, weather, voices, and trip pacing."
+            } else {
                 "Units, transmission mode, volumes, weather, voices, \
-                 update channel, and trip pacing.",
-            ),
+                 update channel, and trip pacing."
+            }),
         );
         items.push(
             MenuItem::new("Report a problem", |s: &mut Self, ctx| s.report_issue(ctx))
                 .help("The bug report page on GitHub, in your web browser."),
         );
-        items.push(MenuItem::new("Quit", |_s: &mut Self, ctx| ctx.quit()).help("Exit the game."));
+        // An iPhone app is never quit from inside; the system closes it.
+        if !cfg!(target_os = "ios") {
+            items.push(
+                MenuItem::new("Quit", |_s: &mut Self, ctx| ctx.quit()).help("Exit the game."),
+            );
+        }
         items
     }
 
     fn go_back(&mut self, ctx: &mut GameContext) {
+        if cfg!(target_os = "ios") {
+            return;
+        }
         ctx.audio.play("ui/menu_back");
         ctx.push_state(ConfirmQuitState::new());
     }

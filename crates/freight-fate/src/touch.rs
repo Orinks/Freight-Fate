@@ -150,6 +150,21 @@ impl Gesture {
         })
     }
 
+    /// The pedal key a hold keeps down: Up for the top half, Down for the
+    /// bottom.
+    pub fn held_key(self) -> Option<Key> {
+        match self {
+            Gesture::HoldUpperBegan => Some(Key::Up),
+            Gesture::HoldLowerBegan => Some(Key::Down),
+            _ => None,
+        }
+    }
+
+    /// The press that starts [`Self::held_key`].
+    pub fn hold_events(self) -> Vec<InputEvent> {
+        self.held_key().map(key_down).into_iter().collect()
+    }
+
     /// The press and release of [`Self::key`], for a screen that did not
     /// take the gesture itself.
     pub fn key_events(self) -> Vec<InputEvent> {
@@ -197,15 +212,12 @@ impl TouchInput {
             // Top half is the accelerator, bottom half the brake: the Up and
             // Down arrows held, so the latching brake and the reverse
             // press-and-hold work exactly as they do on a keyboard.
+            // The hold goes out as its gesture, and the app presses the
+            // key, so the press is known to be the screen's.
             Gesture::HoldUpperBegan | Gesture::HoldLowerBegan => {
                 self.release_into(&mut out.events);
-                let key = if gesture == Gesture::HoldUpperBegan {
-                    Key::Up
-                } else {
-                    Key::Down
-                };
-                out.events.push(key_down(key));
-                self.held = Some(key);
+                out.events.push(InputEvent::Gesture(gesture));
+                self.held = gesture.held_key();
             }
             Gesture::HoldEnded => self.release_into(&mut out.events),
             other => out.events.push(InputEvent::Gesture(other)),
@@ -242,6 +254,15 @@ fn key_down(key: Key) -> InputEvent {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    impl Gesture {
+        fn hold_events_output(self) -> TouchOutput {
+            TouchOutput {
+                events: self.hold_events(),
+                toggle_keyboard: false,
+            }
+        }
+    }
 
     fn pressed(out: &TouchOutput) -> Vec<Key> {
         out.events
@@ -342,8 +363,14 @@ mod tests {
     fn holds_keep_the_pedal_down_until_the_finger_lifts() {
         let mut touch = TouchInput::new();
         let out = touch.handle(Gesture::HoldUpperBegan);
-        assert_eq!(pressed(&out), vec![Key::Up]);
-        assert_eq!(out.events.len(), 1);
+        assert_eq!(
+            out.events,
+            vec![InputEvent::Gesture(Gesture::HoldUpperBegan)]
+        );
+        assert_eq!(
+            pressed(&Gesture::HoldUpperBegan.hold_events_output()),
+            vec![Key::Up]
+        );
         assert_eq!(touch.held(), Some(Key::Up));
 
         let out = touch.handle(Gesture::HoldEnded);
@@ -369,12 +396,7 @@ mod tests {
                     key: Key::Up,
                     mods: Mods::NONE,
                 },
-                InputEvent::KeyDown {
-                    key: Key::Down,
-                    mods: Mods::NONE,
-                    text: None,
-                    repeat: false,
-                },
+                InputEvent::Gesture(Gesture::HoldLowerBegan),
             ]
         );
         assert_eq!(touch.held(), Some(Key::Down));

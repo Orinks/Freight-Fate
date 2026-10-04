@@ -773,17 +773,28 @@ impl App {
 
     /// Hand a touch gesture to the active state, or press its key when the
     /// state leaves it to the keyboard table.
+    ///
+    /// Spoken hints follow: from here on they name gestures, until a key or
+    /// a controller button is pressed.
     pub fn dispatch_gesture(&mut self, gesture: Gesture) {
-        if let Some(state) = self.ctx.state() {
-            let taken = state.borrow_mut().handle_gesture(&mut self.ctx, gesture);
-            self.ctx.run_deferred();
-            if taken {
-                return;
+        self.ctx.controller.note_touch();
+        let events = if gesture.held_key().is_some() {
+            gesture.hold_events()
+        } else {
+            if let Some(state) = self.ctx.state() {
+                let taken = state.borrow_mut().handle_gesture(&mut self.ctx, gesture);
+                self.ctx.run_deferred();
+                if taken {
+                    return;
+                }
             }
-        }
-        for event in gesture.key_events() {
+            gesture.key_events()
+        };
+        self.ctx.controller.touch_keys = true;
+        for event in events {
             self.handle_event(&event);
         }
+        self.ctx.controller.touch_keys = false;
     }
 
     /// Alt+F4 and the window's close button ask, they do not just go.
