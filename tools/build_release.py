@@ -516,6 +516,19 @@ def verify_archive(out: Path) -> None:
         )
 
 
+def is_career_19_label(label: str) -> bool:
+    """A Career 1.9 tester snapshot or a stable tag from v1.9.0 on.
+
+    Their Apple Silicon archive is named ``-macos-arm64`` (the workflow
+    uploads only that name, and its stable step adds the ``-macos`` copy
+    the updaters look for); a 1.8 stable tag keeps the plain ``-macos``.
+    """
+    if label.startswith("1.9-tester-"):
+        return True
+    match = re.match(r"v?(\d+)\.(\d+)\.", label)
+    return bool(match) and (int(match[1]), int(match[2])) >= (1, 9)
+
+
 def archive(build_dir: Path, label: str) -> Path:
     if sys.platform == "win32":
         out = DIST / f"{APP_NAME}-{label}-windows-portable.zip"
@@ -523,9 +536,8 @@ def archive(build_dir: Path, label: str) -> Path:
             for path in sorted(build_dir.rglob("*")):
                 z.write(path, Path(APP_NAME) / path.relative_to(build_dir))
     elif sys.platform == "darwin":
-        is_career_19_tester = label.startswith("1.9-tester-")
         is_apple_silicon = platform.machine().lower() in {"arm64", "aarch64"}
-        mac_suffix = "macos-arm64" if is_career_19_tester and is_apple_silicon else "macos"
+        mac_suffix = "macos-arm64" if is_career_19_label(label) and is_apple_silicon else "macos"
         out = DIST / f"{APP_NAME}-{label}-{mac_suffix}.zip"
         subprocess.run(["ditto", "-c", "-k", "--keepParent", str(build_dir), str(out)], check=True)
     else:

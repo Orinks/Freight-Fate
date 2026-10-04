@@ -1118,6 +1118,22 @@ def test_apple_silicon_stable_archive_keeps_legacy_suffix(tmp_path, monkeypatch)
     assert out.name == "FreightFate-v1.8.8-macos.zip"
 
 
+def test_apple_silicon_stable_19_archive_matches_the_workflow_upload(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    app.mkdir()
+    monkeypatch.setattr(build_release, "DIST", tmp_path / "dist")
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+    monkeypatch.setattr(build_release.platform, "machine", lambda: "arm64")
+    monkeypatch.setattr(build_release.subprocess, "run", lambda *_args, **_kwargs: None)
+    (tmp_path / "dist").mkdir()
+
+    out = build_release.archive(app, "v1.9.0")
+
+    # build-career-1.9.yml uploads only `*-macos-arm64.zip` and fails on none.
+    assert out.name == "FreightFate-v1.9.0-macos-arm64.zip"
+
+
 def test_intel_macos_archive_keeps_legacy_suffix(tmp_path, monkeypatch):
     build_release = load_build_release_module()
     app = tmp_path / "FreightFate.app"
