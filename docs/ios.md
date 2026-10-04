@@ -109,5 +109,15 @@ frameworks it and SDL2 need, plus clang's iOS runtime for `@available` checks.
 
 - Saves, settings and logs live in the app sandbox under
   `Library/Application Support/FreightFate`.
-- The game does not update itself on iOS; the App Store or TestFlight does.
+- The game does not update itself on iOS; the App Store or TestFlight does,
+  so Settings has no Updates category. The main menu has no Quit (iOS closes
+  apps, they do not quit themselves), and a two-finger swipe down there does
+  nothing. Settings also leaves out Problem reports (the log is in the
+  sandbox, out of reach) and the braille-only Output row (it needs NVDA or
+  JAWS).
+- Spoken prompts name the gesture for a control ("press a second-finger
+  double tap while you hold the bottom half to start the engine"), or its row
+  on the three-finger tap command list when no gesture runs it. Pressing a
+  key on a hardware keyboard, or a controller button, switches them back to
+  key or button names until the screen is touched again.
 - The Simulator has no BASS audio device, so only speech is heard there.

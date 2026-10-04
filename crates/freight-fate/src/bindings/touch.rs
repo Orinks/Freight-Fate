@@ -218,7 +218,84 @@ pub(super) fn saved_touch(moved: &HashMap<Gesture, TouchCommand>) -> String {
         .join(";")
 }
 
+/// A slot gesture as a noun, to follow a verb in a spoken prompt ("press a
+/// two-finger tap"); `None` for a fixed one.
+pub fn touch_gesture_noun(gesture: Gesture) -> Option<String> {
+    let held = |half: &str, motion: &str| {
+        Some(format!(
+            "a second-finger {motion} while you hold the {half} half"
+        ))
+    };
+    let plain = |noun: &str| Some(noun.to_string());
+    match gesture {
+        Gesture::Tap => plain("a tap"),
+        Gesture::SwipeUp => plain("a swipe up"),
+        Gesture::SwipeDown => plain("a swipe down"),
+        Gesture::TwoFingerTap => plain("a two-finger tap"),
+        Gesture::MagicTap => plain("a two-finger double tap"),
+        Gesture::ThreeFingerSwipeUp => plain("a three-finger swipe up"),
+        Gesture::ThreeFingerSwipeDown => plain("a three-finger swipe down"),
+        Gesture::UpperHoldTap => held("top", "tap"),
+        Gesture::UpperHoldDoubleTap => held("top", "double tap"),
+        Gesture::UpperHoldSwipeUp => held("top", "swipe up"),
+        Gesture::UpperHoldSwipeDown => held("top", "swipe down"),
+        Gesture::UpperHoldSwipeLeft => held("top", "swipe left"),
+        Gesture::UpperHoldSwipeRight => held("top", "swipe right"),
+        Gesture::LowerHoldTap => held("bottom", "tap"),
+        Gesture::LowerHoldDoubleTap => held("bottom", "double tap"),
+        Gesture::LowerHoldSwipeUp => held("bottom", "swipe up"),
+        Gesture::LowerHoldSwipeDown => held("bottom", "swipe down"),
+        Gesture::LowerHoldSwipeLeft => held("bottom", "swipe left"),
+        Gesture::LowerHoldSwipeRight => held("bottom", "swipe right"),
+        _ => None,
+    }
+}
+
 impl KeyBindings {
+    /// How a touch player runs `action`, as a noun for a spoken prompt:
+    /// the first gesture it is on, else the fixed pedal and steering
+    /// gestures, else its row on the driving command list.
+    pub fn touch_noun(&self, action: Action) -> String {
+        let on_gesture = SLOTS
+            .iter()
+            .map(|(gesture, ..)| *gesture)
+            .find(|gesture| self.touch_command(*gesture) == Some(TouchCommand::Action(action)))
+            .and_then(touch_gesture_noun);
+        if let Some(noun) = on_gesture {
+            return noun;
+        }
+        match action {
+            Action::Accelerate => "the top half of the screen".to_string(),
+            Action::Brake | Action::EmergencyBrake => {
+                "a hold on the bottom half of the screen".to_string()
+            }
+            Action::SteerLeft => "a swipe left".to_string(),
+            Action::SteerRight => "a swipe right".to_string(),
+            Action::TakeExit => "the exit command from the three-finger tap list".to_string(),
+            other => format!("{} from the three-finger tap list", other.label()),
+        }
+    }
+
+    /// The touch phrase for a `control_hint` action id; `None` leaves the
+    /// fixed table's wording (the pedal holds and fixed gestures).
+    pub fn hint_touch_phrase(&self, hint: &str) -> Option<String> {
+        Some(match hint {
+            "gears" => format!(
+                "{} and {}",
+                self.touch_noun(Action::ShiftUp),
+                self.touch_noun(Action::ShiftDown)
+            ),
+            "gear_first" => self.touch_noun(Action::ShiftUp),
+            other => {
+                let action = super::hint_action(other)?;
+                if action.held() {
+                    return None;
+                }
+                self.touch_noun(action)
+            }
+        })
+    }
+
     /// The command a slot gesture runs today; `None` for a fixed gesture,
     /// which keeps its key.
     pub fn touch_command(&self, gesture: Gesture) -> Option<TouchCommand> {
@@ -257,6 +334,29 @@ impl KeyBindings {
 mod tests {
     use super::*;
     use ff_core::settings::Settings;
+
+    #[test]
+    fn touch_hints_name_the_gesture_or_the_command_list() {
+        let mut b = KeyBindings::default();
+        assert_eq!(
+            b.hint_touch_phrase("engine").as_deref(),
+            Some("a second-finger double tap while you hold the bottom half")
+        );
+        assert_eq!(b.hint_touch_phrase("accelerate"), None);
+        assert_eq!(
+            b.hint_touch_phrase("take_exit").as_deref(),
+            Some("the exit command from the three-finger tap list")
+        );
+        assert_eq!(
+            b.touch_noun(Action::Rest),
+            "Rest stop from the three-finger tap list"
+        );
+        b.set_touch_command(Gesture::UpperHoldDoubleTap, run(Action::TakeExit));
+        assert_eq!(
+            b.hint_touch_phrase("take_exit").as_deref(),
+            Some("a second-finger double tap while you hold the top half")
+        );
+    }
 
     #[test]
     fn the_defaults_are_the_agreed_layout() {

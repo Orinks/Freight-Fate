@@ -28,6 +28,8 @@ impl DrivingState {
         self.note_instruction_demonstrated(ctx, "help");
         if ctx.controller.device() == "controller" {
             self.speak_controller_help(ctx);
+        } else if ctx.controller.device() == ff_core::input_hints::TOUCH {
+            self.speak_touch_help(ctx);
         } else {
             self.speak_keyboard_help(ctx);
         }
@@ -399,6 +401,36 @@ impl DrivingState {
             "Any of these buttons can be moved under Settings, Gameplay, Controls, \
              Controller buttons.",
         );
+        ctx.say(&text);
+    }
+}
+
+impl DrivingState {
+    /// The touch-screen layout, from the player's own touch bindings.
+    pub fn speak_touch_help(&mut self, ctx: &mut GameContext) {
+        let mut text = String::from(
+            "Touch and hold the top half of the screen for the gas, the bottom half for \
+             the brake. Swipe left or right to steer, unless lane keeping is on full. ",
+        );
+        for gesture in crate::bindings::touch_slots() {
+            let (Some(name), Some(command)) = (
+                crate::bindings::touch_gesture_name(gesture),
+                ctx.bindings.touch_command(gesture),
+            ) else {
+                continue;
+            };
+            if command != crate::bindings::TouchCommand::Nothing {
+                text.push_str(&format!("{name}: {}. ", command.label()));
+            }
+        }
+        text.push_str(
+            "Two-finger swipe down pauses, two-finger swipe up is this help, two-finger \
+             swipes left and right review messages, and three-finger swipes left and right \
+             tune the radio. A three-finger tap lists every driving command: swipe to one \
+             and double tap to run it. ",
+        );
+        text.push_str(&self.objective_help(ctx));
+        text.push_str("Gestures can be moved in Settings, Gameplay, Controls, Touch gestures.");
         ctx.say(&text);
     }
 }

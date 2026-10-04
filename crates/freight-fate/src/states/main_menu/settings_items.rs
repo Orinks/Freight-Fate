@@ -313,13 +313,24 @@ impl SettingsCategoryState {
             SpeechSpec {
                 label: dyn_label(|s| format!("Driving event voice: {}", event_voice_label(s))),
                 action: adjust(|s, ctx, d| s.cycle_event_voice(ctx, d)),
-                help: "Road events through the main voice or a separate SAPI or \
-                       OneCore voice a screen reader cannot cut off. The rate, \
-                       pitch, volume, and voice rows below appear only when the \
-                       voice supports them; with a screen reader running, set \
-                       those in the screen reader.",
+                help: if cfg!(target_os = "ios") {
+                    "Road events through the main voice or a separate system \
+                     voice that VoiceOver cannot cut off. The rate, pitch, \
+                     volume, and voice rows below appear only when the voice \
+                     supports them; with VoiceOver running, set those in \
+                     VoiceOver."
+                } else {
+                    "Road events through the main voice or a separate SAPI or \
+                     OneCore voice a screen reader cannot cut off. The rate, \
+                     pitch, volume, and voice rows below appear only when the \
+                     voice supports them; with a screen reader running, set \
+                     those in the screen reader."
+                },
             },
-            SpeechSpec {
+        ];
+        // Braille only needs NVDA or JAWS, which iPhone and iPad do not have.
+        if !cfg!(target_os = "ios") {
+            specs.push(SpeechSpec {
                 label: dyn_label(|s| format!("Output: {}", output_label(s))),
                 action: adjust(|s, ctx, d| s.toggle_braille_only(ctx, d)),
                 help: "Speech and braille speaks every line and, with NVDA or JAWS, \
@@ -327,8 +338,8 @@ impl SettingsCategoryState {
                        every line on the display and speaks nothing: menus, \
                        readouts, and road events alike. It needs NVDA or JAWS; \
                        with any other voice the game keeps speaking and says so.",
-            },
-        ];
+            });
+        }
         if speech.backend_name().eq_ignore_ascii_case("jaws") {
             specs.push(SpeechSpec {
                 label: Label::dynamic(|_s, ctx| {
