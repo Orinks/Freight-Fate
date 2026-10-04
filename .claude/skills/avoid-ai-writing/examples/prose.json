@@ -1,0 +1,16 @@
+{
+  "name": "Long-form prose (example)",
+  "genre": "published prose",
+  "register": [
+    "Preserve the author's established voice and purposeful irregularities.",
+    "Formal but not stiff; contractions are acceptable."
+  ],
+  "mechanics": {
+    "quotes": "curly",
+    "headings": "title",
+    "emDash": "deliberate",
+    "latinAbbrev": "parentheses",
+    "serialComma": true,
+    "spellNumbersUpTo": 100
+  }
+}
