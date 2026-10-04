@@ -51,6 +51,15 @@ use freight_fate::playtest::{breaker, observer, road, sandbox};
 use freight_fate::speech::CaptureSpeech;
 
 fn main() {
+    #[cfg(target_os = "ios")]
+    ios::run_under_uikit();
+    #[cfg(not(target_os = "ios"))]
+    std::process::exit(game_main());
+}
+
+/// The game process proper. On iOS this runs inside UIKit's application
+/// loop, handed over by SDL once the app has finished launching.
+fn game_main() -> i32 {
     // First of all, so the opening phase mark charges process creation and
     // dynamic linking to the launch instead of losing them.
     app::boot_timing::start();
@@ -71,7 +80,40 @@ fn main() {
     // console and, on every shell tested, no standard handles either, so an
     // un-attached tool run prints into the void.
     console::attach_parent(&args);
-    std::process::exit(run(&args));
+    run(&args)
+}
+
+/// iOS start-up: UIKit owns the main thread, so SDL starts the application
+/// and calls back into [`game_main`] once it has launched. The game loop then
+/// runs on the main thread exactly as on the desktop, SDL pumping UIKit's
+/// run loop with every event poll.
+#[cfg(target_os = "ios")]
+mod ios {
+    use std::ffi::{c_char, c_int, CString};
+
+    type SdlMain = extern "C" fn(c_int, *mut *mut c_char) -> c_int;
+
+    extern "C" {
+        fn SDL_UIKitRunApp(argc: c_int, argv: *mut *mut c_char, main: SdlMain) -> c_int;
+    }
+
+    extern "C" fn sdl_main(_argc: c_int, _argv: *mut *mut c_char) -> c_int {
+        super::game_main()
+    }
+
+    pub fn run_under_uikit() -> ! {
+        let args: Vec<CString> = std::env::args_os()
+            .filter_map(|arg| CString::new(arg.into_encoded_bytes()).ok())
+            .collect();
+        let mut argv: Vec<*mut c_char> = args.iter().map(|arg| arg.as_ptr().cast_mut()).collect();
+        let argc = argv.len() as c_int;
+        argv.push(std::ptr::null_mut());
+        // SAFETY: `argv` is a NULL-terminated array of NUL-terminated strings
+        // that `args` keeps alive for the whole call, which does not return
+        // until the application ends.
+        let code = unsafe { SDL_UIKitRunApp(argc, argv.as_mut_ptr(), sdl_main) };
+        std::process::exit(code)
+    }
 }
 
 /// Giving the drive tools their terminal back, without giving the player one.

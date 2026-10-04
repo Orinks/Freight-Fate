@@ -48,7 +48,11 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
     (
         "Settings",
         &[
-            "Settings are grouped into categories: Gameplay, Audio, Speech, Updates, and Problem reports, plus a row that opens the Online menu. Open a category to see its settings.",
+            if cfg!(target_os = "ios") {
+                "Settings are grouped into categories: Gameplay, Audio, and Speech, plus a row that opens the Online menu. Open a category to see its settings."
+            } else {
+                "Settings are grouped into categories: Gameplay, Audio, Speech, Updates, and Problem reports, plus a row that opens the Online menu. Open a category to see its settings."
+            },
             "Gameplay has four screens: Driving assistance, Difficulty and hours of service, World and traffic, and Controls.",
             "Driving assistance holds lane keeping and every driving assist. World and traffic holds the weather, traffic, and parking sources. Audio holds the lane and edge cue volume. Problem reports says where the game log is saved.",
             "Up and Down pick a setting. Right arrow or Enter changes it forward, Left arrow backward. Changes save as you make them.",

@@ -70,7 +70,7 @@ impl SaveRoots {
             game_root: game_root(),
             legacy_data_dir: legacy_data_dir(),
             macos_data_dir: macos_data_dir(),
-            macos: cfg!(target_os = "macos"),
+            macos: cfg!(any(target_os = "macos", target_os = "ios")),
             frozen_exe_dir: if super::is_frozen() {
                 std::env::current_exe()
                     .ok()

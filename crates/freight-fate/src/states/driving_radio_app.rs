@@ -383,10 +383,11 @@ impl TextEntry for RadioSearchEntryState {
     }
 
     fn enter(&mut self, ctx: &mut GameContext) {
-        ctx.say(
+        ctx.say(&format!(
             "Search stations. Type part of a name, call sign, or format, then Enter. Left and \
-             Right review the letters, Home and End jump to the ends. Escape cancels.",
-        );
+             Right review the letters, Home and End jump to the ends. Escape cancels.{}",
+            crate::states::text_entry::KEYBOARD_HINT
+        ));
     }
 
     fn confirm(&mut self, ctx: &mut GameContext) {

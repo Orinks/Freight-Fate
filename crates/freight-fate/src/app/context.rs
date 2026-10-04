@@ -779,8 +779,11 @@ impl GameContext {
     /// the pad button when a controller is active and the control has one,
     /// else the keyboard key (the keyboard always stays active).
     pub fn control_name(&self, action: crate::bindings::Action) -> String {
-        if self.controller.device() == ff_core::input_hints::CONTROLLER && action.on_pad() {
+        let device = self.controller.device();
+        if device == ff_core::input_hints::CONTROLLER && action.on_pad() {
             self.bindings.pad_spoken(action)
+        } else if device == ff_core::input_hints::TOUCH {
+            self.bindings.touch_noun(action)
         } else {
             self.bindings.spoken(action)
         }
@@ -789,8 +792,11 @@ impl GameContext {
     /// Name a control for a spoken prompt, following the active device and
     /// whatever key or button the player has it on.
     pub fn control_hint(&self, action: &str) -> String {
-        let moved = if self.controller.device() == ff_core::input_hints::CONTROLLER {
+        let device = self.controller.device();
+        let moved = if device == ff_core::input_hints::CONTROLLER {
             self.bindings.hint_pad_phrase(action)
+        } else if device == ff_core::input_hints::TOUCH {
+            self.bindings.hint_touch_phrase(action)
         } else {
             self.bindings.hint_key_phrase(action)
         };

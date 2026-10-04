@@ -699,6 +699,7 @@ wherever the pad has one.
 | Alt+C | Repeat the last CB chatter, with the distance as it is now. Once you have passed what the CB called, it says so instead. |
 | U | Report the road ahead that no other key answers: the exit your signal is on for, first, then the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that will demand slowing, with its advisory speed. Four short clauses at the most. It does not report police activity -- enforcement reaches you on the CB. |
 | F1 | Show the driving control list and current objective. |
+| F2 | List every driving command by name. Enter runs the one you are on and puts you back on the road; Escape returns without one. The held controls -- pedals, steering, emergency brake, horn -- are not on it. |
 | Comma | Review earlier speech. The full review keys are listed under "Reviewing what the game said". |
 | Period | Move toward newer speech. |
 | Escape | Open the pause menu. |
@@ -1817,7 +1818,7 @@ quiets it, and settling back under the limit disarms it.
 | Automatic direction changes | In an automatic, both styles now change direction the same way: a fresh press held at a standstill. A brake held through a stop just holds the truck. The setting remains for familiarity. |
 | Controller | Accept controller input alongside the keyboard. The keyboard always stays active. |
 | Haptics | Use controller vibration for hazards, hard braking, rumble strips, and road seams. |
-| Keyboard shortcuts | One row per driving control, naming the key it is on. Enter on a row, then press the key you want, with Shift, Control, or Alt held if you want a chord. A key another control already has is refused by name; Escape keeps the current key. The pause key, Enter, F1, the Control keys that stop the voice, plus and minus, the radio dial keys, and the message review keys stay fixed. A last row puts every key back to its default. |
+| Keyboard shortcuts | One row per driving control, naming the key it is on. Enter on a row, then press the key you want, with Shift, Control, or Alt held if you want a chord. A key another control already has is refused by name; Escape keeps the current key. The pause key, Enter, F1, F2, the Control keys that stop the voice, plus and minus, the radio dial keys, and the message review keys stay fixed. A last row puts every key back to its default. |
 | Controller buttons | The same for the pad. Enter on a row, then press the button you want, with the right bumper held for the second layer. Press the button the row already has to keep it. Start, Back, the bumpers, the triggers, and the sticks stay fixed. |
 
 ### Audio settings

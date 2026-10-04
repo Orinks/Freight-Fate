@@ -2,6 +2,150 @@
 
 ## Unreleased
 
+## 1.9.0 - 2026-10-04
+
+### Compatibility
+
+- **Careers from 1.8 and earlier do not carry over; every driver starts a new career.** Old saves stay listed, untouched and playable in 1.8.
+
+- **Your settings come across from 1.8.**
+
+- **Freight Fate runs on Windows, Apple Silicon Macs and Linux.** Linux comes for x64 or ARM64, as an archive or an AppImage.
+
+- **On Linux, speech uses the Speech Dispatcher installed on your computer.** Without it the game still starts, but stays silent.
+
+### Highlights
+
+- **Freight Fate is rebuilt from the ground up, and starts noticeably faster.**
+
+- **The biggest map yet: 100 new cities, real speed limits coast to coast, and real streets into hundreds of facilities.**
+
+- **Highways drive like highways.** Real lanes, exit ramps at their real lengths, deceleration lanes, ramp-end lights and cross traffic at the bar.
+
+- **A co-driver reads the road.** Spoken curve calls, steep-grade warnings and speed-limit drops, with bends that can move your load or roll the truck.
+
+- **Choose how much the truck does for you.** The game asks once: All assists, Balanced or Realistic.
+
+- **The road has rules and someone enforcing them.** Troopers, roadside inspections, real weigh stations, and a driving record your carrier and insurer read.
+
+- **The radio is a real dial.** Thousands of real stations, dozens of new original songs, your own playlists, and Synthesized music the game makes itself.
+
+- **The truck sounds like a real truck.** A three-stage engine brake, real brakes and gear changes, and traffic that sounds like what it is.
+
+- **Weather and seasons matter.** Snow chains and chain laws on the western grades, winter tires and hydroplaning.
+
+- **Truck stops sell more than fuel.** Meals, showers, repairs, loyalty points, live parking counts and CAT scales.
+
+### New features
+
+- **Each truck keeps its own condition.** Worn brakes, tires or engine can put it out of service, so walk around it before you pull out.
+
+- **Your freight can be damaged, and the receiver can refuse it.** Tank loads slosh, and hard bends and stops show it.
+
+- **Drop and hook, detention pay, and receivers with a drop yard.**
+
+- **Hours of service has its own keys.** T plans your next sleep stop, and opt-in hints name a comfortable break.
+
+- **Cruise reads the road ahead.** It drives the hill before it arrives, has a resume button, and adaptive cruise slows for bad weather.
+
+- **You can choose how much room the truck leaves to the vehicle ahead.**
+
+- **Latch the brake and give your hands a rest.** Turn it off under Settings, Driving assistance, Latching brake.
+
+- **Hold slash to straighten up.** With lane keeping on partial or off, the truck points down the road.
+
+- **Alt T switches between automatic and manual shifting on the road.**
+
+- **You can change which key or controller button each driving control uses.** F2 lists every driving command by name.
+
+- **Learn game sounds plays what every sound means before you meet it at speed.**
+
+- **Comma and period review your recent spoken messages while you drive.** Comma re-reads the last line anywhere in the game.
+
+- **You can play from a braille display with speech off.** Driving readouts are short enough to fit one.
+
+- **Driving keys work with JAWS without the pass-through key.** Settings, Speech has a JAWS arrow keys row when JAWS is running.
+
+- **Live road reports, real construction zones and live truck parking cover most of the map.**
+
+- **The pumps charge this week's real diesel price.**
+
+- **Real time joins the Driving mode row.** The game clock follows your computer's.
+
+- **Licenses and training replaces the endorsement menu.** Train out of the automatic-only restriction, and add steel and lumber to flatbed securement.
+
+- **You can stay a company driver, and owner-operators can go back to company driving.** Owner-operators start with a brand-new truck.
+
+- **Dispatch picks the truck to fit the load, and relays one from a nearby town when your board is thin.**
+
+- **Online, you choose which career is public.** A driver directory sits next to Drivers on duty, and profiles say what each achievement was for.
+
+- **Dozens of new achievements, browsed by category.** Careers that reach level 21 get a menu theme of their own.
+
+- **The driver tablet has a Radio app.** Search the dial, tune by name, and save favorites with O.
+
+- **Music source can be set to Synthesized.** A music seed changes every piece, and the original 1.5 soundtrack is back.
+
+- **About three thousand new billboards, state welcome signs, and real roadside attractions where they really stand.**
+
+### Fixes
+
+- **A stalled or damaged update download is never installed.** Escape leaves the download at once.
+
+- **Closing the game hands your screen reader back right away.** A stuck screen reader can no longer freeze the game.
+
+- **Speech comes back on its own when a voice locks up mid-drive.**
+
+- **Safety calls, hazard instructions, turn calls and exit calls are never lost or talked over.**
+
+- **Automatic braking stops the truck in time, even on hot or worn brakes.**
+
+- **The assists no longer run your air tanks dry by pumping the brakes.**
+
+- **Hills and bends match the real road, and interstate curve warnings are rare.**
+
+- **Exits, state lines and rivers are announced where the truck really is.**
+
+- **Every stop the game announces is one your truck can enter.** Convenience stores no longer pose as truck stops.
+
+- **Town speed limits no longer follow you out of town, and a lower limit is always announced in time.**
+
+- **Checking in at a weigh station no longer gets you fined for bypassing it.**
+
+- **A dead radio stream lands on a live station instead of silence.**
+
+- **A damaged settings file or sound file no longer takes the game down.**
+
+### Changes
+
+- **New installs start on All assists.** Switch to Balanced or Realistic under Driving assistance.
+
+- **Spoken lines are shorter everywhere.** Quiet and Urgent only leave out traffic chatter, and a key you press always answers.
+
+- **The game stops repeating key prompts you have mastered, and Escape acts instead of explaining.**
+
+- **The radio dial moved to Page Down and Page Up.**
+
+- **Four keys answer one question each about where you are.** R now answers just "where am I".
+
+- **Fines match what they cost a real trucker, and your driving record costs you with the carrier and the insurer.**
+
+- **Company drivers no longer see the truck dealer, upgrades or tire choice.** The carrier handles the truck.
+
+- **Pausing no longer takes you off duty.**
+
+- **Every music track and radio segment plays at the same loudness.**
+
+- **The Mac app is signed and notarized by Apple, so it opens without the Open Anyway step.**
+
+- **The driving school steps out of this release to finish training.**
+
+- **Lane centering assistance is gone from Driving assistance.** Lane keeping on full already holds the lane.
+
+## 1.9.0 complete change list
+
+Every change since 1.8.8.1, as each tester snapshot listed it.
+
 ### Added
 
 - **Before a stable release, the billboards grow: about three thousand new ones, from Ocean City's boardwalk to Big Bend.** Big Jim notices your driving.
@@ -9,6 +153,8 @@
 - **You can pull in at The Thing, on Interstate 10 in Arizona.** Only a tractor without a trailer can fuel there.
 
 - **The game asks how much the truck should do for you before the main menu, once.** Choose All assists, Balanced or Realistic; Escape keeps what you have.
+
+- **F2 lists every driving command by name.** Pick one and it runs as its key would, then you are back on the road.
 
 - **Settings, Speech has a JAWS arrow keys row when JAWS is running.** Faster makes menus and held arrows answer at once; Default removes the script.
 
@@ -70,6 +216,10 @@
 - **A career balance edited outside the game stays marked.** Money changed by a memory tool saves with the modified flag.
 
 ### Changed
+
+- **Every music track and radio segment now plays at the same loudness.** The music and radio volume settings no longer need adjusting from one song to the next.
+
+- **Light rain, snow, night rest stops and the traffic slowing cue are louder.** They were far quieter than the sounds around them.
 
 - **The Mac app is signed and notarized by Apple, so it opens without the Open Anyway step.**
 
@@ -214,6 +364,8 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **A ramp light that turns green as you roll up announces green once.** Crossing it now says only to stop at the entrance, without a second chime.
 
 - **Urgent only now says when a work zone turns adaptive cruise off.** It used to let go of the pedals without a word.
 
