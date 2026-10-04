@@ -73,6 +73,10 @@
 
 ### Changed
 
+- **Every music track and radio segment now plays at the same loudness.** The music and radio volume settings no longer need adjusting from one song to the next.
+
+- **Light rain, snow, night rest stops and the traffic slowing cue are louder.** They were far quieter than the sounds around them.
+
 - **The Mac app is signed and notarized by Apple, so it opens without the Open Anyway step.**
 
 - **Quiet and Urgent only driving speech no longer call out traffic.** Slow cars ahead, cruise settling in behind them and lane keeping passing are spoken only on Standard.

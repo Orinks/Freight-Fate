@@ -112,6 +112,15 @@ bookmarks usable.
       (`signsheets/*-2026-10-01.md`, `owner-decisions-2026-10-01.md`). The
       map carries 3,237 placed signs.
 
+- [x] Audio levels (owner, 2026-10-03): all 426 music.pak tracks
+      normalized to -18 LUFS with static gain under a -1 dBTP ceiling
+      (spread 16.1 dB down to 4.2 dB; 23 peaky speech segments stop short at
+      the ceiling), and four sound-effect outliers raised to their peers
+      (`docs/audio-levels.md`). Slider defaults unchanged.
+- [ ] (Found along the way) Shift-sound bank variants 09, 11 and 15 (manual
+      and automatic) sit 5 to 11 dB under their siblings by momentary
+      loudness, with peaks too close to full scale for static gain. Needs a
+      peak limiter or replacement takes.
 - [x] New installs start on All assists (owner, 2026-09-30): first drives kept
       going wrong at the wheel, city street corners above all, so the truck
       steers until the driver steps down to Balanced. Saved settings keep
