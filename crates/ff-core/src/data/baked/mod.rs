@@ -109,7 +109,9 @@ pub const MAGIC: &[u8; 8] = b"FFDATA\0\0";
 /// (`approach_chains`).
 ///
 /// 7: a street limit carries the statute it follows (`basis`: town or rural).
-pub const FORMAT_VERSION: u32 = 7;
+///
+/// 8: a landmark carries the directions it is heard in (`directions`).
+pub const FORMAT_VERSION: u32 = 8;
 
 const HEADER_LEN: usize = 32;
 

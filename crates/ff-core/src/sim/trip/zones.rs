@@ -311,9 +311,21 @@ impl Trip {
         ]
     }
 
-    /// Stretches under a winter chain law: sustained steep grade, fixed in
+    /// Stretches under a winter chain law: sustained steep grade in a state
+    /// that runs commercial chain controls (`CHAIN_CONTROL_STATES`), fixed in
     /// space at trip build. Whether the law is *active* follows the weather.
     pub fn place_chain_law_areas(&self) -> Vec<(f64, f64)> {
+        self.steep_runs()
+            .into_iter()
+            .filter(|&(start, end)| {
+                self.state_code_at((start + end) / 2.0)
+                    .is_some_and(|code| CHAIN_CONTROL_STATES.contains(&code.as_str()))
+            })
+            .collect()
+    }
+
+    /// Every sustained steep run on the route, joined across short gaps.
+    fn steep_runs(&self) -> Vec<(f64, f64)> {
         if self.is_facility_approach_route() {
             return Vec::new();
         }

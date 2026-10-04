@@ -9,6 +9,10 @@ sane routing, and the archived polyline runs US-181 instead.
 This replaces such a leg's route with the one a truck would actually take,
 and re-derives the layers that ride on it.
 
+Curated ``route_via`` points constrain Valhalla; billboards and highway
+markers stay unchanged, while stops with coordinates are re-positioned on the
+new road and stops without coordinates retain a sourced proportional mile.
+
 WHY IT IS SAFE TO DO NOW, HAVING SAID IT WAS NOT
 ------------------------------------------------
 The earlier reading of this was that rerouting would strip a leg of its 807
@@ -47,11 +51,10 @@ silently skips the rest. ``reroute_enrich.py`` runs them in sequence.
 WHAT THIS TOOL DOES AND DOES NOT DO
 -----------------------------------
 It writes the new polyline into the geometry archive, sets ``leg.miles`` from
-the router's own distance, and drops every corridor layer keyed to the OLD
-polyline, because those are now wrong rather than merely stale -- a landmark
-at mile 40 of a route that no longer passes it is worse than no landmark.
-Rebuilding them is ``reroute_enrich.py``, and the leg is INCOMPLETE until
-that has run. ``--check`` reports any leg left in that state.
+the router's own distance, and drops corridor layers keyed to the OLD
+polyline, except for unchanged billboards and highway markers. Rebuilding the
+other layers is ``reroute_enrich.py``, and the leg is INCOMPLETE until that
+has run. ``--check`` reports any leg left in that state.
 
 Curated CHECKPOINTS are the exception and are re-positioned rather than
 dropped: see ``CHECKPOINT_MAX_OFF_MI`` below.
@@ -72,6 +75,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -102,6 +106,7 @@ VALHALLA_ELEVATION = os.environ.get(
 ).rstrip("/")
 USER_AGENT = "Freight-Fate rerouting (https://github.com/Orinks/Freight-Fate)"
 COSTING = "truck"
+VIA_SEARCH_FILTER = {"min_road_class": "primary", "exclude_ramp": True}
 
 # What the truck actually is. Valhalla's truck costing defaults to 21.77
 # tonnes -- about 48,000 lb -- which is not a loaded US semi, and a weight
@@ -133,6 +138,27 @@ DELAY_S = 0.4  # a free community service; do not hammer it
 # retained 0 of 59,924 ramp nodes.
 SAMPLE_MI = 25.0
 
+STOP_MAX_OFF_MI = 3.0
+CURATED_LANDMARK_CATEGORIES = frozenset({"billboard_sign", "highway_marker"})
+
+
+def sampled_route_indices(
+    cumulative_m: list[float], adopted_miles: float
+) -> list[tuple[int, float]]:
+    raw_miles = cumulative_m[-1] / 1609.344
+    mile_scale = adopted_miles / raw_miles if raw_miles else 1.0
+    sampled: list[tuple[int, float]] = []
+    last = -1e9
+    last_index = len(cumulative_m) - 1
+    for index, distance_m in enumerate(cumulative_m):
+        at_mi = distance_m / 1609.344 * mile_scale
+        if at_mi - last < SAMPLE_MI and index not in (0, last_index):
+            continue
+        last = at_mi
+        sampled.append((index, min(at_mi, adopted_miles)))
+    return sampled
+
+
 # Layers keyed to the old polyline. After a reroute they describe a road the
 # truck no longer drives, so they are dropped rather than carried over.
 # route_points and elevation_samples are dropped here and rebuilt below.
@@ -142,7 +168,6 @@ STALE_AFTER_REROUTE = (
     "grade_segments",
     "speed_limits",
     "interchanges",
-    "landmarks",
     "state_crossings",
     "state_miles",
     "traffic_aadt",
@@ -222,16 +247,57 @@ def decode_shape(encoded: str, precision: float = 1e-6) -> list[list[float]]:
     return coords
 
 
-def fetch_route(start: dict, end: dict) -> tuple[list[list[float]], float, bool] | None:
-    """``(polyline, miles, whether it tolls)`` for the truck route between two
-    city nodes."""
+def route_via_points(leg: dict) -> list[dict]:
+    """The numeric coordinates constraining this leg's route, in source order."""
+    points = []
+    for point in leg.get("route_via") or []:
+        if not isinstance(point, dict):
+            continue
+        lat, lon = point.get("lat"), point.get("lon")
+        if (
+            isinstance(lat, (int, float))
+            and not isinstance(lat, bool)
+            and isinstance(lon, (int, float))
+            and not isinstance(lon, bool)
+        ):
+            points.append({"lat": lat, "lon": lon})
+    return points
+
+
+def has_osm_pinned_label_segment(leg: dict) -> bool:
+    highway = str(leg.get("highway", ""))
+    for point in leg.get("route_via") or []:
+        if not isinstance(point, dict):
+            continue
+        note = str(point.get("note", ""))
+        match = re.search(r"\bref\s+([^;]+)", note, re.IGNORECASE)
+        if match and scs.matches_shield(match.group(1), highway):
+            return True
+    return False
+
+
+def fetch_route(
+    start: dict, end: dict, via: tuple[dict, ...] | list[dict] = ()
+) -> tuple[list[list[float]], float, bool] | None:
+    """``(polyline, miles, whether it tolls)`` for a truck route with optional
+    through locations."""
+    if len(via) + 2 > 10:
+        raise ValueError("Valhalla routes support at most 10 locations, including endpoints")
+    locations = [{"lat": start["lat"], "lon": start["lon"]}]
+    locations.extend(
+        {
+            "lat": point["lat"],
+            "lon": point["lon"],
+            "type": "through",
+            "search_filter": VIA_SEARCH_FILTER,
+        }
+        for point in via
+    )
+    locations.append({"lat": end["lat"], "lon": end["lon"]})
     result = _post(
         "/route",
         {
-            "locations": [
-                {"lat": start["lat"], "lon": start["lon"]},
-                {"lat": end["lat"], "lon": end["lon"]},
-            ],
+            "locations": locations,
             "costing": COSTING,
             "costing_options": {COSTING: TRUCK_OPTIONS},
             "directions_options": {"units": "miles"},
@@ -242,10 +308,81 @@ def fetch_route(start: dict, end: dict) -> tuple[list[list[float]], float, bool]
     shape: list[list[float]] = []
     for leg in result["trip"].get("legs", []):
         piece = decode_shape(leg.get("shape", ""))
-        # Legs abut, so drop the duplicated joint rather than doubling a vertex.
-        shape.extend(piece[1:] if shape else piece)
+        if shape and piece and shape[-1] == piece[0]:
+            piece = piece[1:]
+        shape.extend(piece)
     summary = result["trip"]["summary"]
-    return shape, float(summary["length"]), bool(summary.get("has_toll"))
+    has_toll = any(
+        bool(leg.get("has_toll") or (leg.get("summary") or {}).get("has_toll"))
+        for leg in result["trip"].get("legs", [])
+    ) or bool(summary.get("has_toll"))
+    return shape, float(summary["length"]), has_toll
+
+
+def landmarks_beyond_miles(landmarks: list[dict], miles: float) -> list[dict]:
+    """Curated landmarks that cannot fit on the proposed rerouted leg."""
+    beyond = []
+    for landmark in landmarks:
+        if landmark.get("category") not in CURATED_LANDMARK_CATEGORIES:
+            continue
+        try:
+            at_mi = float(landmark["at_mi"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if at_mi > miles:
+            beyond.append(landmark)
+    return beyond
+
+
+def reroute_stops(
+    stops: list[dict], shape: list[list[float]], miles: float, old_miles: float
+) -> tuple[list[dict], list[tuple[dict, float]]]:
+    """Re-place coordinate stops and keep them inside the adopted leg mileage."""
+    with_coords, without_coords = [], []
+    for stop in stops:
+        lat, lon = stop.get("lat"), stop.get("lon")
+        numeric = (
+            isinstance(lat, (int, float))
+            and not isinstance(lat, bool)
+            and isinstance(lon, (int, float))
+            and not isinstance(lon, bool)
+        )
+        (with_coords if numeric else without_coords).append(stop)
+
+    placed, dropped = lg.reposition_on_route(with_coords, shape, miles, STOP_MAX_OFF_MI)
+
+    def interior_mile(at_mi: float) -> float:
+        return round(min(max(float(at_mi), 0.1), max(0.1, round(miles - 0.1, 1))), 1)
+
+    def with_source(stop: dict, provenance: str) -> dict:
+        source = str(stop.get("source") or "").strip().rstrip("; ")
+        stop["source"] = f"{source}; {provenance}" if source else provenance
+        return stop
+
+    rerouted = []
+    for stop in placed:
+        stop.pop("_off_mi", None)
+        stop["at_mi"] = interior_mile(stop["at_mi"])
+        rerouted.append(
+            with_source(
+                stop,
+                "at_mi derived 2026-10-01: the stop's own coordinates projected onto the "
+                "rerouted Valhalla truck geometry (nearest point, distance rescaled to leg miles)",
+            )
+        )
+    for stop in without_coords:
+        carried = dict(stop)
+        at_mi = carried.get("at_mi")
+        if at_mi is not None and old_miles > 0:
+            carried["at_mi"] = interior_mile(float(at_mi) * miles / old_miles)
+            with_source(
+                carried,
+                "at_mi derived 2026-10-01: old at_mi x new miles / old miles "
+                "(the stop has no coordinates)",
+            )
+        rerouted.append(carried)
+    rerouted.sort(key=lambda stop: float(stop.get("at_mi") or 0.0))
+    return rerouted, dropped
 
 
 def fetch_elevation(shape: list[list[float]]) -> list[float] | None:
@@ -405,11 +542,23 @@ def main() -> int:
         print(f"no such leg: {args.leg}")
         return 1
 
-    fetched = fetch_route(cities[leg["from"]], cities[leg["to"]])
+    fetched = fetch_route(cities[leg["from"]], cities[leg["to"]], via=route_via_points(leg))
     if fetched is None:
         print("the router returned no route")
         return 1
     shape, miles, has_toll = fetched
+    corridor = leg.get("corridor") or {}
+    preserved_landmarks = [
+        record
+        for record in corridor.get("landmarks") or []
+        if record.get("category") in CURATED_LANDMARK_CATEGORIES
+    ]
+    beyond = landmarks_beyond_miles(preserved_landmarks, miles)
+    if beyond:
+        print("REFUSING: curated landmarks lie beyond the proposed route mileage:")
+        for record in beyond:
+            print(f"  {record.get('name')!r} at mile {record.get('at_mi')}")
+        return 1
     old_miles = float(leg.get("miles") or 0)
     cum = scs._cumulative_m(shape)
     print(f"{args.leg} ({leg.get('highway')})")
@@ -430,13 +579,15 @@ def main() -> int:
         f"  the new route rides {leg.get('highway')} for {100 * share:.0f}% of its"
         f" matched miles (dominant road: {dominant})"
     )
-    if share < MIN_ON_LABEL:
+    if share < MIN_ON_LABEL and not has_osm_pinned_label_segment(leg):
         print()
         print(
             f"  REFUSING: a reroute is meant to put this leg back on "
             f"{leg.get('highway')}, and this route does not. Investigate the leg."
         )
         return 1
+    if share < MIN_ON_LABEL:
+        print("  the route's OSM-pinned highway segment uses signed connector roads")
 
     if not args.write:
         print("\n(dry run; pass --write)")
@@ -455,24 +606,20 @@ def main() -> int:
     )
     leg["miles"] = round(miles)
     leg["rerouted"] = True
-    corridor = leg.get("corridor") or {}
     dropped = {k: len(corridor.get(k) or []) for k in STALE_AFTER_REROUTE if corridor.get(k)}
+    landmarks = corridor.get("landmarks") or []
+    dropped_landmarks = len(landmarks) - len(preserved_landmarks)
+    if landmarks:
+        dropped["landmarks"] = dropped_landmarks
+        corridor["landmarks"] = preserved_landmarks
     tolls = corridor.get("toll_events") or []
     for key in STALE_AFTER_REROUTE:
         corridor.pop(key, None)
 
-    stops = list(leg.get("stops") or [])
-    if stops and old_miles > 0:
-        scale = miles / old_miles
-        for stop in stops:
-            at_mi = stop.get("at_mi")
-            if at_mi is None:
-                continue
-            stop["at_mi"] = round(min(max(float(at_mi) * scale, 0.0), miles), 1)
-            note = stop.get("source") or ""
-            marker = " Mile carried across proportionally when the leg was rerouted."
-            if marker.strip() not in note:
-                stop["source"] = (note + marker).strip()
+    stops, dropped_stops = reroute_stops(
+        list(leg.get("stops") or []), shape, float(leg["miles"]), old_miles
+    )
+    if leg.get("stops"):
         leg["stops"] = stops
 
     kept, left_behind = lg.reposition_on_route(
@@ -506,16 +653,9 @@ def main() -> int:
     # instead put the last route point at mile 140.16 of a 140-mile leg, and
     # the world refuses to load a position past the end of its own leg.
     adopted = float(leg["miles"])
-    raw_mi = cum[-1] / 1609.344
-    mile_scale = (adopted / raw_mi) if raw_mi else 1.0
     points, elevation = [], []
-    last = -1e9
-    for i, (lon, lat) in enumerate(shape):
-        at_mi = cum[i] / 1609.344 * mile_scale
-        if at_mi - last < SAMPLE_MI and i not in (0, len(shape) - 1):
-            continue
-        last = at_mi
-        at_mi = min(at_mi, adopted)
+    for i, at_mi in sampled_route_indices(cum, adopted):
+        lon, lat = shape[i]
         points.append({"at_mi": round(at_mi, 2), "lat": round(lat, 5), "lon": round(lon, 5)})
         elevation.append(
             {
@@ -530,8 +670,11 @@ def main() -> int:
     save_world(world)
     print(f"\n  wrote the new route; dropped {sum(dropped.values())} stale rows: {dropped}")
     print(f"  kept {len(kept)} curated checkpoints, re-positioned onto the new road")
+    print(f"  kept {len(preserved_landmarks)} curated landmarks unchanged")
     if stops:
-        print(f"  carried {len(stops)} curated stops across on the new mileage")
+        print(f"  kept {len(stops)} stops on the new mileage")
+    for record, off_mi in dropped_stops:
+        print(f"    dropped stop {record.get('name')!r} ({off_mi:.1f} mi off the new road)")
     for record, off_mi in left_behind:
         where = "no coordinates" if off_mi == float("inf") else f"{off_mi:.1f} mi off the new road"
         print(f"    dropped checkpoint {record.get('name')!r} ({where})")

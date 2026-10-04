@@ -49,7 +49,7 @@ pub use record::{
 use crate::models::business_constants::is_owner_operator;
 use crate::models::solvency::{debt_owed, debt_rung, money_text};
 use crate::pyfmt::{round_py_int, round_py_n};
-use crate::sim::season::{date_text, weekday_name};
+use crate::sim::season::{date_text, weekday_name, CAREER_START_DAY_OF_YEAR, DAYS_PER_YEAR};
 
 pub const HOURS_PER_DAY: f64 = 24.0;
 
@@ -337,8 +337,14 @@ pub trait StandingProfile {
     fn career_total_earnings(&self) -> f64;
     /// `profile.game_hours`.
     fn game_hours(&self) -> f64;
-    /// `profile.calendar_offset_days`.
-    fn calendar_offset_days(&self) -> f64;
+    /// The hour the player's own calendar reads now
+    /// (`Profile::player_calendar_hours`): dates are spoken counted from it.
+    fn calendar_now_hours(&self) -> f64;
+    /// Whether that calendar is the real one (live weather drives it), so a
+    /// spoken weekday comes from the real date.
+    fn calendar_is_live(&self) -> bool {
+        false
+    }
     /// `getattr(profile, "driving_record", None)`.
     fn driving_record(&self) -> Option<&DrivingRecord>;
     /// `profile.business_status`.
@@ -730,8 +736,31 @@ pub fn record_clears_text<P: StandingProfile + ?Sized>(
     let Some(at) = record.window_clears_at(profile.game_hours(), holds) else {
         return String::new();
     };
-    let at = at + profile.calendar_offset_days() * HOURS_PER_DAY;
-    format!("{}, {}", weekday_name(at), date_text(at))
+    calendar_day_text(profile, at)
+}
+
+/// A point on the career clock as the spoken day the player will reach it.
+///
+/// Counted forward from the date the player hears now, never from the
+/// career's own calendar: with live weather driving the calendar the two
+/// differ, and a suspension once "cleared" on a day already gone
+/// (reported 2026-09-29). A day a new year away says so, or a year-long
+/// disqualification would name today's own date.
+fn calendar_day_text<P: StandingProfile + ?Sized>(profile: &P, career_hours: f64) -> String {
+    let now = profile.calendar_now_hours();
+    let at = now + (career_hours - profile.game_hours()).max(0.0);
+    let year = |h: f64| ((CAREER_START_DAY_OF_YEAR + h / HOURS_PER_DAY) / DAYS_PER_YEAR).floor();
+    let when = match (year(at) - year(now)) as i64 {
+        0 => "",
+        1 => ", next year",
+        _ => ", the year after next",
+    };
+    let weekday = if profile.calendar_is_live() {
+        crate::sim::season::real_weekday_name(at, None)
+    } else {
+        weekday_name(at)
+    };
+    format!("{weekday}, {}{when}", date_text(at))
 }
 
 /// The day the carrier's record review lets go: back under its floor.
@@ -1014,9 +1043,7 @@ pub fn clears_text<P: StandingProfile + ?Sized>(profile: &P) -> String {
     if record.lifetime_disqualified {
         return String::new();
     }
-    let offset = profile.calendar_offset_days() * HOURS_PER_DAY;
-    let at = record.suspended_until_h + offset;
-    format!("{}, {}", weekday_name(at), date_text(at))
+    calendar_day_text(profile, record.suspended_until_h)
 }
 
 /// A serious-violation ladder suspends; a major offense disqualifies.

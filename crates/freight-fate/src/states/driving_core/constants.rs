@@ -132,6 +132,10 @@ pub const EXIT_TAPER_MI: f64 = 300.0 / 5280.0;
 /// (MUTCD 11th ed. 2E.23, 1/2 mi). X commits to the exit wherever it is
 /// pressed; this is only when the blinker runs.
 pub const EXIT_BLINKER_MI: f64 = EXIT_COUNTDOWN_MILESTONES_MI[2];
+/// How far out lane keeping on full starts moving to the right lane for an
+/// exit it is taking: the countdown's first anchor, where a manual driver is
+/// asked for the same lane.
+pub const EXIT_KEEP_RIGHT_MI: f64 = EXIT_COUNTDOWN_MILESTONES_MI[0];
 pub const EXIT_CANCEL_GUARD_MI: f64 = 1.0; // inside this, X keeps the signal; a second press cancels
 pub const EXIT_TAP_HOLD_S: f64 = 0.35; // a Right press this short is a tap, not held steering
 pub const AEB_BUDGET_MARGIN: f64 = 1.2; // emergency braking leads the physics budget by this factor
@@ -400,7 +404,8 @@ pub const UNLOADING_WAIT_S: f64 = 1.5;
 // on, holding the wheel across the lane line is the lane change; with assist
 // off, a Left/Right arrow tap runs a timed change with signal clicks.
 pub const LANE_MIN_MPH: f64 = 10.0; // below this there is nothing to steer
-pub const LANE_TAP_CHANGE_S: f64 = 2.5; // assist-off timed drift across the line
+                                    // A full-lane-keeping tap change, and the pace a held key crosses a lane at.
+pub const LANE_TAP_CHANGE_S: f64 = ff_core::sim::lane::LANE_CHANGE_S;
 pub const LANE_SIGNAL_CLICK_S: f64 = 0.45; // turn-signal cadence during a tap change
 pub const MERGE_WINDOW_S: f64 = 8.0; // time to vacate a coned-off lane after the warning
 pub const MERGE_BARRELS_DAMAGE: f64 = 0.25; // collision severity for riding into the barrels

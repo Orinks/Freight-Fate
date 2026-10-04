@@ -19,15 +19,19 @@ returning from an earlier version, read What Changed Recently first.
    an Apple Silicon Mac, choose the newest Career 1.9 prerelease and download
    the archive ending in `-macos-arm64.zip`; Career 1.9 does not provide an
    Intel Mac build. Extract the archive and move `FreightFate.app` to
-   Applications. Apple has not notarized this build, so macOS may block it the
-   first time you open it. Open System Settings, Privacy & Security, scroll to
-   the message about Freight Fate, choose Open Anyway, and confirm Open. The
-   button appears for about an hour after macOS blocks the launch. VoiceOver
-   reads these controls. You only need to do this for the first launch of a
-   newly downloaded app.
-4. Choose **New career**, enter a driver name, pick a home region, and pick a
+   Applications. The app is signed by its developer and notarized by Apple,
+   so it opens like any other app; macOS may ask once to confirm you want to
+   open an app downloaded from the internet. An older build that macOS
+   blocks instead can still be opened from System Settings, Privacy &
+   Security: scroll to the message about Freight Fate, choose Open Anyway,
+   and confirm Open.
+4. The first time the game starts, it asks how much the truck should do for
+   you. All assists is recommended for your first drives: the truck steers
+   while you learn how the road sounds. You can change it later in Settings,
+   Gameplay, Driving assistance.
+5. Choose **New career**, enter a driver name, pick a home region, and pick a
    home terminal.
-5. Listen to the first-day briefing, open the dispatch board, accept a job,
+6. Listen to the first-day briefing, open the dispatch board, accept a job,
    and follow the current objective.
 
 In the Windows and Linux archive downloads, saves, settings, save identity
@@ -172,6 +176,11 @@ When an update is available, the prompt offers:
 | Skip this version | Stops asking about that exact release. |
 
 Updates replace the game files only. They preserve the `saves` folder.
+
+While an update downloads, Tab reads the progress and Escape leaves at once;
+the game says when it moves on to unpacking. If no data arrives for a minute,
+or unpacking runs far too long, the game says so, keeps the version you have,
+and names the releases page for downloading it yourself.
 
 ## Main menu and career flow
 
@@ -684,7 +693,8 @@ wherever the pad has one.
 | Alt+4 | Report the direction you are travelling, as the shields sign it -- "Eastbound". A city street has no signed direction and it says so. |
 | V | Report weather and forecast. |
 | L | Report which lane you are in, whether you are centered, drifting, or at an edge, and whether the lane beside you is open or blocked. |
-| Left / Right arrow | With lane keeping on partial or off, steer; steer across the line to change lanes. With lane keeping on full, tap to change one lane in that direction -- the signal clicks and the change is announced. |
+| Left / Right arrow | With lane keeping on partial or off, steer; steer across the line to change lanes. Hold to move across the lane: the truck angles over only as far as a lane change needs, so it crosses a lane in about two and a half seconds however long you hold, and a tap is a nudge. Let go and the truck squares itself with the road and stays where you put it in the lane, so there is no wheel to unwind. Once a bend, ramp curve or street corner has been called, hold the arrow toward the turn and the truck follows the road and keeps its lane -- straight until the turn begins, round with it, straight after -- until you let go; steering away still widens. On a controller the left stick steers as far as you push it, and pushed toward a called turn it follows the road the same way. With lane keeping on full, tap to change one lane in that direction -- the signal clicks and the change is announced. |
+| Slash, hold | Straighten up. With lane keeping on partial or off, the truck squares itself with the road and stops drifting across the lane, wherever in the lane it is. Letting go of the arrows does the same; Slash does it while you keep another key held. |
 | A | Repeat the last route announcement -- the last thing with consequences -- even if other speech came after it. |
 | Alt+C | Repeat the last CB chatter, with the distance as it is now. Once you have passed what the CB called, it says so instead. |
 | U | Report the road ahead that no other key answers: the exit your signal is on for, first, then the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that will demand slowing, with its advisory speed. Four short clauses at the most. It does not report police activity -- enforcement reaches you on the CB. |
@@ -910,10 +920,16 @@ crossing a lane line's markers.
 
 ### Steer toward the lean
 
-The engine leans toward the way to
-steer: into a bend as it arrives and through it, and into a street corner as
-you reach it. Hold the arrow that way and the engine comes back to the middle
-as the truck comes round. This is the one cue you follow rather than avoid --
+The engine leans toward the way to steer, and only when the steering is
+yours. With lane keeping off and curve assistance off, it leans into a bend as
+it arrives and through it, and into a street corner as you reach it. Hold the
+arrow that way and the engine comes back to the middle as the truck comes
+round. With curve assistance on, or lane keeping on partial, the truck takes
+the bends and corners itself, so the engine leans only when you drift; the
+co-driver still names each bend. Holding the arrow into a turn is safe either
+way: the truck follows the road until you let go. On full, the engine leans for the bends and
+corners ahead so you hear the road's shape, but your arrow keys change lanes
+there and never steer. This is the one cue you follow rather than avoid --
 every other panned cue comes from the side you are drifting toward and you
 steer away from it. Small, held corrections. Sawing at the wheel bounces you
 across the lane line, and you will hear the marker thump each time; that
@@ -1011,6 +1027,15 @@ lane you are in and whether the lanes beside you are open. With automatic
 emergency braking on, the truck brakes for you at the last moment -- down to
 a crawl for an object in the lane. Fatigue shortens the reaction window.
 
+With lane keeping on full, the truck passes a slow vehicle itself. The call
+names what it is doing instead of asking you: "Slow car right ahead. Passing
+on the left." It moves into the open lane, says "In the left lane, passing
+the slow car", and moves back to the right lane once the vehicle is behind
+you and the lane is clear. It does not pull out to pass in the last two miles
+before an exit it is taking; there the call stays "Change lanes or brake!",
+and the truck brakes unless you change lanes. Debris and other objects in the
+lane are still yours to steer around.
+
 The road tells you how many lanes you have. Road status names the lanes on
 your side -- "divided, three lanes your side" -- and as the road widens or
 narrows mid-leg you hear it happen. Where the map has no lane data the game
@@ -1060,7 +1085,8 @@ Posted speed limits come from real map data and change along a corridor; a
 change is announced as reduced or raised, and named near a city. State troopers
 patrol some stretches, hotter on busy interstates, in construction, and at
 night. CB chatter may mention a bear ahead or drivers talking about enforcement
-near a construction zone. U reports the road ahead, not enforcement chatter. Speed
+near a construction zone. You hear the short squelch of a CB call ending, then
+the report itself: "2 miles: a driver reports a bear in the median." U reports the road ahead, not enforcement chatter. Speed
 badly inside a patrol and a trooper may pull you over: signal with X (the same
 key as an exit), brake to a stop on the shoulder, and sit through a license and
 logbook check that reads your recent duty entries before ending in an
@@ -1227,8 +1253,9 @@ Unless lane keeping is on full, move to the right lane and stay centered there;
 the game asks for that move only while you are out of the right lane. Just
 before the gore the exit lane opens beside the right lane, and the game says
 "Exit lane opening. Steer right into it." Steer right across the line and you
-are in the exit lane, the start of the ramp. On full, lane keeping takes it for
-you. Keep road speed until then: the gore accepts anything up to the speed the
+are in the exit lane, the start of the ramp. On full, lane keeping makes both moves
+for you: from two miles out it changes to the right lane once that lane is
+clear, saying "Changing to the right lane for the exit", then takes the exit lane. Keep road speed until then: the gore accepts anything up to the speed the
 posted limit allows. The exit lane, which road engineers call the deceleration
 lane, is where you slow down, and the game says the exit speed as you enter it.
 Brake to it before the ramp curve at the end of that lane; a loaded truck
@@ -1372,7 +1399,10 @@ that it is a fatigued-driving violation and joins the serious ladder.
 While your CDL is suspended, driving work comes off the dispatch board. The
 board opens by telling you so and naming the date the work returns, and any
 job you try to take says the same. A roadside stop that pulls your licence
-ends the run there and releases you to the terminal. Nothing else about your
+ends the run there and releases you to the terminal, and so does a suspension
+mid-drive with no stop, from running off the road asleep or through the
+barrels: the truck pulls onto the shoulder and the run closes out. A saved
+run on a pulled licence does not resume. Nothing else about your
 career is touched: your level, experience, endorsements, and equipment are
 all still yours when it clears.
 
@@ -1659,7 +1689,7 @@ quarters always reaching you. See When You Owe Money.
 
 ### Driving assistance and speed keeper
 
-Three driving assistance presets are available: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Adaptive cruise always follows traffic, anticipates large posted-limit drops, and increases its following gap in poor weather. Realistic adds modern safety support: automatic emergency braking, lane-departure warning, supported stop-and-go behavior, and realistic descent control. Balanced adds partial lane keeping, lets braking capture a lower descent target, and stops for you at your destination. All assists adds a 55 mile per hour ceiling on every descent and stronger intervention. These presets do not change trip pacing, hours rules, transmission, weather, or hazard frequency.
+Three driving assistance presets are available: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Adaptive cruise always follows traffic, anticipates large posted-limit drops, and increases its following gap in poor weather. Realistic adds modern safety support: automatic emergency braking, lane-departure warning, supported stop-and-go behavior, and realistic descent control. Balanced adds partial lane keeping, lets braking capture a lower descent target, and stops for you at your destination. All assists adds a 55 mile per hour ceiling on every descent and stronger intervention. The first time the game starts it asks which of the three you want, with the cursor on the one you already have; Escape keeps it. A new install starts on All assists, so the truck does the steering while you learn how the road sounds; switch to Balanced when you want to steer yourself. These presets do not change trip pacing, hours rules, transmission, weather, or hazard frequency.
 
 #### Individual assists
 
@@ -1813,7 +1843,7 @@ quiets it, and settling back under the limit disarms it.
 
 | Setting | Purpose |
 | --- | --- |
-| Driving speech | Standard gives full confirmations, status updates, and a driving tip once per route leg. Quiet keeps short spoken updates, including lane openings, assist confirmations, costs, and navigation. Urgent only speaks safety warnings and directions requiring action; routine costs, status, and tips are silent, while road heads-ups and confirmations use sounds. Events suppressed by the speech setting stay out of message review. Readout keys always answer on demand. Billboards, place names, and landmarks keep their own switches below. |
+| Driving speech | Standard gives full confirmations, status updates, traffic calls, and a driving tip once per route leg. Quiet keeps short spoken updates, including lane openings, assist confirmations, costs, and navigation, but not the traffic around you or tips. Urgent only speaks safety warnings and directions requiring action; achievements earned at the wheel wait silently in message review. Anything else a setting leaves out makes no sound and stays out of message review. Readout keys always answer on demand. Billboards, place names, and landmarks keep their own switches below. |
 | Roadside chatter | The ambient color spoken between navigation cues: entering parks and forests, named river crossings, mountain passes, museums and attractions, and parody billboards. One master switch turns it all on or off, and each kind has its own switch below it. Safety and navigation speech is never affected, and town names have their own Place callouts setting. |
 | Place callouts | How much the co-driver says about places along the road. Sparse, the default, speaks only the town names that explain a speed limit change, like Entering Strawberry right before its 35. All adds the towns the route passes through or skirts. Off silences place names entirely. Speed limit announcements themselves are never affected, and no tier ever reads out every place on the map. |
 | Menu position announcements | When on, menus say the position, like 3 of 10, after each option. Turn off to hear only the option. |
@@ -2001,7 +2031,8 @@ If Check for updates says the copy is running from source, download a packaged
 release archive from the releases page and play from that folder.
 
 If an update cannot reach the server, check your internet connection and try
-again later. The game writes packaged-build logs to `logs/game.log`, which can
+again later. The game writes packaged-build logs to `logs/game.log` (on macOS,
+`~/Library/Application Support/FreightFate/logs/game.log`), which can
 help when reporting update or startup problems. That log also records every
 line the game spoke, so it is the most useful thing to attach to any bug
 report. Settings, Problem reports, Where the game log is saved reads out its

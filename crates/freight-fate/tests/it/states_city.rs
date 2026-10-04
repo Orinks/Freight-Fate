@@ -1384,6 +1384,19 @@ fn test_first_day_terminal_entry_speaks_training_arc_without_tutorial_language()
 }
 
 #[test]
+fn test_the_terminal_does_not_double_the_dalles_article() {
+    let mut app = TestApp::new();
+    career(&mut app, "Gorge", "the_dalles_or_us");
+
+    let city = CityMenuState::new(&app.ctx, false);
+    app.push_state(city);
+
+    let entry = entry_announcement(&app);
+    assert!(entry.contains(" in The Dalles service area, "), "{entry}");
+    assert!(!entry.contains("the The"), "{entry}");
+}
+
+#[test]
 fn test_out_of_sync_company_terminal_entry_uses_first_week_guidance() {
     let mut app = TestApp::new();
     career(&mut app, "First Week", "Chicago");

@@ -57,6 +57,17 @@ pub fn type_prefix_is_redundant(label: &str, name: &str) -> bool {
     label_words.iter().all(|word| name_words.contains(word))
 }
 
+/// A spoken city with a leading "the" for phrases like "the {city} service
+/// area", unless the name already starts with its own article: "the
+/// Chicago", but "The Dalles", never "the The Dalles".
+pub fn the_city(city: &str) -> String {
+    if city.starts_with("The ") {
+        city.to_string()
+    } else {
+        format!("the {city}")
+    }
+}
+
 /// A facility's name with its type prefix, unless the prefix is redundant.
 pub fn typed_name(label: &str, name: &str, sep: &str) -> String {
     if type_prefix_is_redundant(label, name) {
@@ -254,6 +265,19 @@ pub fn in_lane_hazard_call(body: &str, side: OpenSide) -> SpokenMessage {
         let normal = format!("Brake! {body} {answer}");
         SpokenMessage::with_terse(normal.clone(), normal)
     }
+}
+
+/// The same call when lane keeping on full answers it by passing: the thing
+/// and where, then what the truck is doing ("Slow car right ahead. Passing
+/// on the left."). No "Change lanes or brake!" -- the truck is the one
+/// changing lanes -- and terse is the same line. None where no lane is open.
+pub fn passing_hazard_call(body: &str, side: OpenSide) -> Option<SpokenMessage> {
+    let side = if side.pass_step()? > 0 {
+        "left"
+    } else {
+        "right"
+    };
+    Some(SpokenMessage::new(format!("{body} Passing on the {side}.")))
 }
 
 // -- traffic lead cues --------------------------------------------------------
@@ -686,6 +710,13 @@ mod tests {
     //! and `tests/test_driving_speech_ladder.py`.
     use super::*;
 
+    #[test]
+    fn test_the_city_keeps_a_name_that_carries_its_own_article() {
+        assert_eq!(the_city("The Dalles"), "The Dalles");
+        assert_eq!(the_city("Chicago"), "the Chicago");
+        assert_eq!(the_city("Theodore"), "the Theodore");
+    }
+
     // -- the hazard call (R8) --------------------------------------------------
 
     #[test]
@@ -724,6 +755,16 @@ mod tests {
 
     /// The Python half that reads `main_menu_help.py` stays with the help
     /// port; the phrase itself is pinned here.
+    #[test]
+    fn test_the_passing_call_names_the_side_the_truck_takes() {
+        let left = passing_hazard_call("Slow car right ahead.", OpenSide::Either).unwrap();
+        assert_eq!(left.normal, "Slow car right ahead. Passing on the left.");
+        assert_eq!(left.terse, None);
+        let right = passing_hazard_call("Slow semi ahead.", OpenSide::Right).unwrap();
+        assert_eq!(right.normal, "Slow semi ahead. Passing on the right.");
+        assert!(passing_hazard_call("Slow car ahead.", OpenSide::Neither).is_none());
+    }
+
     #[test]
     fn test_the_dodge_call_is_the_phrase_the_help_teaches() {
         assert_eq!(

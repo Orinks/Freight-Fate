@@ -54,6 +54,8 @@ struct Take {
     /// the ramp onto city streets has one.
     corner: bool,
     lane_departure_warning: bool,
+    /// `None` leaves the harness's own setting.
+    curve_assistance: Option<bool>,
 }
 
 impl Take {
@@ -66,6 +68,7 @@ impl Take {
             hold: true,
             corner: false,
             lane_departure_warning: true,
+            curve_assistance: None,
         }
     }
 }
@@ -81,6 +84,9 @@ fn through_the_curve(take: Take) -> CurveRun {
     let (mut harness, stop) = exit_rig_with(45.0, 0.0, 0.05, speed_mph, false, take.rig);
     harness.app.ctx.settings.lane_keeping = take.lane_keeping.to_string();
     harness.app.ctx.settings.lane_departure_warning = take.lane_departure_warning;
+    if let Some(on) = take.curve_assistance {
+        harness.app.ctx.settings.curve_speed_assist = on;
+    }
     harness.app.ctx.settings.steering_guide_inverted = false;
     harness.app.ctx.settings.lane_guide_tone = false;
     harness.with_drive(move |d, _| d.truck_mut().cargo_kg = REFERENCE_CARGO_KG * load);
@@ -296,15 +302,18 @@ fn test_the_curve_warning_comes_before_anything_costs() {
 #[test]
 fn test_the_engine_leans_to_the_inside_of_a_ramp_curve_the_truck_runs_wide_on() {
     // Same drive: the engine stayed centred while the truck ran wide. With
-    // the lane work partly the driver's, the lean points where the wheel
-    // should go -- into the curve. The curve is a turn, so its lean speaks
-    // with the lane-departure warning off as well ("turns yes, drift no",
-    // 2026-09-19), and a street turn waiting past the ramp's end does not
-    // take the engine from it while the curve is being taken.
+    // the turn the driver's -- lane keeping off and curve assistance off,
+    // since the lean asks for the wheel only where nothing else is steering
+    // (2026-09-30) -- the lean points where the wheel should go, into the
+    // curve. The curve is a turn, so its lean speaks with the lane-departure
+    // warning off as well ("turns yes, drift no", 2026-09-19), and a street
+    // turn waiting past the ramp's end does not take the engine from it
+    // while the curve is being taken.
     for lane_departure_warning in [true, false] {
         for corner in [false, true] {
             let run = through_the_curve(Take {
-                lane_keeping: "partial",
+                lane_keeping: "off",
+                curve_assistance: Some(false),
                 corner,
                 lane_departure_warning,
                 ..Take::at(40.0, 0.3)

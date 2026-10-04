@@ -53,10 +53,38 @@ fn adjust(f: impl Fn(&mut SettingsCategoryState, &mut GameContext, i64) + 'stati
 /// player's own keys the way the help pages read them.
 fn row(label: Label<SettingsCategoryState>, action: Adjust, help: &str) -> Row {
     let help = help.to_string();
+    row_dyn_help(label, action, move |_| help.clone())
+}
+
+/// A row whose help reads the settings as they stand, for help that has to
+/// describe what another row has set.
+fn row_dyn_help(
+    label: Label<SettingsCategoryState>,
+    action: Adjust,
+    help: impl Fn(&Settings) -> String + 'static,
+) -> Row {
     MenuItem::new(label, move |s: &mut SettingsCategoryState, ctx| {
         action(s, ctx, 1)
     })
-    .help(Label::dynamic(move |_s, ctx| render_help_line(ctx, &help)))
+    .help(Label::dynamic(move |_s, ctx| {
+        render_help_line(ctx, &help(&ctx.settings))
+    }))
+}
+
+/// What leans and which way to steer, as the Steering guide and Lane guide
+/// sound rows under Audio have it set.
+fn steering_lean_text(s: &Settings) -> String {
+    let what = if s.lane_guide_tone {
+        "a soft tone leans"
+    } else {
+        "the engine leans"
+    };
+    let way = if s.steering_guide_inverted {
+        "away from"
+    } else {
+        "toward"
+    };
+    format!("{what} {way} where the wheel should go, so steer {way} it")
 }
 
 /// Only the iPhone and iPad game has a touch surface to bind.
@@ -112,7 +140,7 @@ pub(super) const DRIVING_ASSIST_SPECS: [(&str, &str, &str); 12] = [
     (
         "curve_speed_assist",
         "Curve assistance",
-        "Takes mapped bends for you: slows to the advised speed on the service brakes, never the engine brake, and holds the wheel through the bend. On a real downgrade it does raise the jake. Lane keeping is a separate setting and holds you between the lines the rest of the time.",
+        "Takes mapped bends for you: slows to the advised speed on the service brakes, never the engine brake, and holds the wheel through the bend and through street corners. On a real downgrade it does raise the jake. While it steers, the engine leans only when you drift. Lane keeping is a separate setting and holds you between the lines the rest of the time.",
     ),
     (
         "route_transition_assist",
@@ -190,12 +218,13 @@ impl SettingsCategoryState {
                 }),
                 action: adjust(|s, ctx, d| s.cycle_driving_speech(ctx, d)),
                 help: "How much the road tells you. Standard speaks every \
-                       confirmation and status update, and a driving tip once \
-                       per leg. Quiet speaks short confirmations, lane openings, \
-                       and status updates. Urgent only keeps safety warnings \
-                       and directions requiring action, with sounds for road \
-                       heads-ups and confirmations. Suppressed speech stays out \
-                       of the event buffer. Readout keys always answer. \
+                       confirmation, status update and traffic call, and a \
+                       driving tip once per leg. Quiet speaks short \
+                       confirmations, lane openings, and status updates, but \
+                       not the traffic around you or tips. Urgent only keeps \
+                       safety warnings and directions requiring action. What \
+                       a setting leaves out makes no sound and stays out of \
+                       the event buffer. Readout keys always answer. \
                        Billboards, place names, and \
                        landmarks have their own switches below.",
             },
@@ -715,22 +744,27 @@ impl SettingsCategoryState {
                 help_text,
             ));
         }
-        items.push(row(
+        items.push(row_dyn_help(
             dyn_label(|s| format!("Lane keeping: {}", lane_keeping_label(s))),
             adjust(|s, ctx, d| s.cycle_lane_keeping(ctx, d)),
-            "How much of the lane-holding work the truck does. Full \
-             holds the lane, turns {{steer_left}} and {{steer_right}} into tap lane \
-             changes, and takes your exits, including the destination \
-             exit, without a signal. Partial steers the truck through \
-             the road's bends and drifts gently, with generous steering \
-             help; lane changes and speed are yours. Off drifts like a \
-             real wheel; bends are yours unless curve assistance is \
-             on, and every exit needs its signal and its exit lane. On partial \
-             or off the road sound leans toward where the wheel should \
-             go, and the road edge answers: a stutter clipping the \
-             rumble strip, a buzz fully on it, gravel off the pavement. \
-             Realistic sets this off, Balanced partial, All assists \
-             full.",
+            |s| {
+                "How much of the lane-holding work the truck does. Full \
+                 holds the lane, turns {{steer_left}} and {{steer_right}} into tap lane \
+                 changes, and takes your exits, including the destination \
+                 exit, without a signal. Partial steers the truck through \
+                 the road's bends and drifts gently, with generous steering \
+                 help; lane changes and speed are yours. Off drifts like a \
+                 real wheel; bends are yours unless curve assistance is \
+                 on, and every exit needs its signal and its exit lane. On \
+                 partial or off {lean}. The road sound only says where you \
+                 sit in your lane, and the road edge answers: a stutter \
+                 clipping the rumble strip, a buzz fully on it, gravel off \
+                 the pavement. Steering guide and Lane guide sound, under \
+                 Audio, change which way to steer and what leans. \
+                 Realistic sets this off, Balanced partial, All assists \
+                 full."
+                    .replace("{lean}", &steering_lean_text(s))
+            },
         ));
         items.push(row(
             dyn_label(|s| format!("Following gap: {}", acc_gap_label(s))),

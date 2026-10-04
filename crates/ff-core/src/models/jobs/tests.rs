@@ -1083,6 +1083,24 @@ fn job_payload_round_trips_and_legacy_payloads_fill_in() {
 }
 
 #[test]
+fn test_metro_market_text_does_not_double_the_dalles_article() {
+    for text in [
+        facility_text("metro_market", "", "The Dalles", ""),
+        facility_offer_text("metro_market", "", "The Dalles", ""),
+    ] {
+        assert_eq!(text, "The Dalles metro freight market");
+    }
+    assert_eq!(
+        facility_text("metro_market", "", "Chicago", ""),
+        "the Chicago metro freight market"
+    );
+    assert_eq!(
+        facility_offer_text("metro_market", "", "Chicago", ""),
+        "the Chicago metro freight market"
+    );
+}
+
+#[test]
 fn make_reposition_job_pays_assigned_empty_miles_only() {
     let bobtail = make_reposition_job(world(), "Denver", "Cheyenne", false, None).unwrap();
     assert!(bobtail.bobtail && !bobtail.assigned);

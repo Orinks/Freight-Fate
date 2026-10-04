@@ -18,9 +18,9 @@ use serde::{Deserialize, Serialize};
 use crate::data::curves::CurveRecord;
 use crate::data::world_local_data::CityServiceEntry;
 use crate::data::world_models::{
-    City, CorridorDetail, Driveway, ElevationSample, ExitChain, FacilityApproach, FacilityEndpoint,
-    GradeSegment, HpmsTerrain, Interchange, Landmark, LaneSegment, LocalApproach, LocalGeometry,
-    LocalGeometrySegment, Location, RouteCheckpoint, RoutePoint, RouteRestriction,
+    BillboardBan, City, CorridorDetail, Driveway, ElevationSample, ExitChain, FacilityApproach,
+    FacilityEndpoint, GradeSegment, HpmsTerrain, Interchange, Landmark, LaneSegment, LocalApproach,
+    LocalGeometry, LocalGeometrySegment, Location, RouteCheckpoint, RoutePoint, RouteRestriction,
     SpeedLimitSample, StateCrossing, StateMileage, Stop, StreetControl, StreetLimit, TollEvent,
     TrafficVolumeSample,
 };
@@ -112,11 +112,15 @@ mirror!(BakedHpmsTerrain => HpmsTerrain {
 
 mirror!(BakedLandmark => Landmark {
     name: String, at_mi: f64, category: String, kind: String, spoken: String,
-    off_mi: f64,
+    off_mi: f64, directions: Vec<String>,
 });
 
 mirror!(BakedRouteRestriction => RouteRestriction {
     at_mi: f64, kind: String, feet: f64, tons: f64, source: String,
+});
+
+mirror!(BakedBillboardBan => BillboardBan {
+    from_mi: f64, to_mi: f64, name: String, source: String,
 });
 
 mirror!(BakedLaneSegment => LaneSegment {
@@ -124,7 +128,7 @@ mirror!(BakedLaneSegment => LaneSegment {
     lanes_backward: i64, oneway: bool, source: String,
 });
 
-/// The whole deferred half of one leg: the fourteen per-mile record lists
+/// The whole deferred half of one leg: the per-mile record lists
 /// `CorridorDetail` holds, in one blob.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BakedCorridor {
@@ -142,6 +146,8 @@ pub struct BakedCorridor {
     pub landmarks: Vec<BakedLandmark>,
     pub restrictions: Vec<BakedRouteRestriction>,
     pub lane_segments: Vec<BakedLaneSegment>,
+    #[serde(default)]
+    pub billboard_bans: Vec<BakedBillboardBan>,
 }
 
 impl From<&CorridorDetail> for BakedCorridor {
@@ -161,6 +167,7 @@ impl From<&CorridorDetail> for BakedCorridor {
             landmarks: to_mirror(&detail.landmarks),
             restrictions: to_mirror(&detail.restrictions),
             lane_segments: to_mirror(&detail.lane_segments),
+            billboard_bans: to_mirror(&detail.billboard_bans),
         }
     }
 }
@@ -182,6 +189,7 @@ impl From<BakedCorridor> for CorridorDetail {
             landmarks: from_mirror(baked.landmarks),
             restrictions: from_mirror(baked.restrictions),
             lane_segments: from_mirror(baked.lane_segments),
+            billboard_bans: from_mirror(baked.billboard_bans),
         }
     }
 }

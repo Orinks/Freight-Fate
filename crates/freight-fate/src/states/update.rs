@@ -7,7 +7,7 @@
 //! on the network.
 
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicU8, Ordering};
 use std::sync::{Arc, Mutex};
 
 use ff_core::pyfmt::fmt_f;
@@ -352,8 +352,60 @@ struct DownloadOutcome {
 /// AppImage (the Python tests monkeypatched the module functions).
 pub type AutoApplyProbe = Box<dyn Fn(&Path) -> bool>;
 pub type StashHook = Box<dyn Fn(&Path) -> PathBuf>;
+/// `updater::apply_and_restart`, injectable so a test can make the apply
+/// script fail to start without spawning a real shell.
+pub type ApplyHook = Box<dyn Fn(&Path, &Path) -> std::io::Result<()>>;
+/// `updater::download`, injectable so a test can play a transfer that
+/// stalls or fails part-way without the network.
+pub type FetchHook = Box<
+    dyn FnOnce(
+            &UpdateInfo,
+            &Path,
+            &mut dyn FnMut(u64, u64),
+            &AtomicBool,
+        ) -> Result<PathBuf, DownloadError>
+        + Send,
+>;
+
+/// Seconds without a byte before this screen gives up on the worker.
+///
+/// The worker fails its own transfer after
+/// [`updater::DOWNLOAD_IDLE_TIMEOUT`] and says why; this is the backstop
+/// for a worker that cannot even report, so the screen can never hold the
+/// player (issue 266).
+pub const STALL_TIMEOUT_S: f64 = updater::DOWNLOAD_IDLE_TIMEOUT.as_secs_f64() + 30.0;
+/// Seconds the unpack may take on this screen's clock: the worker's own
+/// unpacker bound, plus a moment for it to report back.
+pub const UNPACK_TIMEOUT_S: f64 = updater::UNPACK_TIMEOUT.as_secs_f64() + 30.0;
+
+/// `text` as a spoken sentence: capitalized, with a closing full stop.
+fn sentence(text: &str) -> String {
+    let text = text.trim();
+    let mut chars = text.chars();
+    let mut out = match chars.next() {
+        Some(first) => first.to_uppercase().chain(chars).collect::<String>(),
+        None => return String::new(),
+    };
+    if !out.ends_with(['.', '!', '?']) {
+        out.push('.');
+    }
+    out
+}
+
+/// Where a player can always get the update by hand.
+pub const MANUAL_DOWNLOAD: &str =
+    "To update by hand, download it from github.com/Orinks/Freight-fate/releases.";
+
+const PHASE_DOWNLOADING: u8 = 0;
+const PHASE_UNPACKING: u8 = 1;
 
 /// Downloads and stages the update, then restarts the game.
+///
+/// Everything slow -- the transfer and the unpack -- runs on the worker
+/// thread. This screen only polls it, so it can always speak and always be
+/// left: Escape leaves at once, a transfer that goes quiet for
+/// [`STALL_TIMEOUT_S`] or an unpack past [`UNPACK_TIMEOUT_S`] is abandoned
+/// with a spoken reason and the manual route, and the game is unchanged.
 pub struct UpdateDownloadState {
     pub info: UpdateInfo,
     cancelled: Arc<AtomicBool>,
@@ -361,11 +413,22 @@ pub struct UpdateDownloadState {
     outcome: Arc<Mutex<DownloadOutcome>>,
     /// 0..1, written by the worker thread (as f64 bits).
     progress: Arc<AtomicU64>,
+    /// Bytes received so far, written by the worker thread.
+    bytes: Arc<AtomicU64>,
+    /// [`PHASE_DOWNLOADING`] or [`PHASE_UNPACKING`], written by the worker.
+    phase: Arc<AtomicU8>,
     spoken_quarter: i64,
     finished: bool,
     started: bool,
+    /// The byte count last seen, and seconds since it last moved.
+    seen_bytes: u64,
+    idle_s: f64,
+    unpack_s: f64,
+    unpack_spoken: bool,
     can_auto_apply: AutoApplyProbe,
     stash_for_manual_install: StashHook,
+    apply: ApplyHook,
+    fetch: Option<FetchHook>,
 }
 
 impl UpdateDownloadState {
@@ -376,13 +439,25 @@ impl UpdateDownloadState {
             done: Arc::new(AtomicBool::new(false)),
             outcome: Arc::new(Mutex::new(DownloadOutcome::default())),
             progress: Arc::new(AtomicU64::new(0f64.to_bits())),
+            bytes: Arc::new(AtomicU64::new(0)),
+            phase: Arc::new(AtomicU8::new(PHASE_DOWNLOADING)),
             spoken_quarter: 0,
             finished: false,
             started: false,
+            seen_bytes: 0,
+            idle_s: 0.0,
+            unpack_s: 0.0,
+            unpack_spoken: false,
             can_auto_apply: Box::new(|root| updater::can_auto_apply(root, &UpdaterEnv::current())),
+            // The home folder, so a parked update is somewhere the player
+            // can find again, not under the system temp folder.
             stash_for_manual_install: Box::new(|root| {
-                updater::stash_for_manual_install(root, None)
+                updater::stash_for_manual_install(root, UpdaterEnv::current().home.as_deref())
             }),
+            apply: Box::new(updater::apply_and_restart),
+            fetch: Some(Box::new(|info, dir, progress, cancelled| {
+                updater::download(info, dir, Some(progress), Some(cancelled))
+            })),
         }
     }
 
@@ -408,6 +483,54 @@ impl UpdateDownloadState {
         state.can_auto_apply = can_auto_apply;
         state.stash_for_manual_install = stash_for_manual_install;
         state
+    }
+
+    /// Test seam: a download already under way whose worker the test plays
+    /// by hand through [`report_progress`](Self::report_progress) and
+    /// [`report_unpacking`](Self::report_unpacking). Nothing is fetched; a
+    /// test that reports nothing is a transfer that has gone quiet.
+    pub fn in_progress(info: UpdateInfo) -> Self {
+        let mut state = Self::new(info);
+        state.started = true;
+        state
+    }
+
+    /// Replace the transfer (test seam; see [`FetchHook`]).
+    pub fn with_fetch(mut self, fetch: FetchHook) -> Self {
+        self.fetch = Some(fetch);
+        self
+    }
+
+    /// The worker's staging folder, once it has made one.
+    pub fn staging(&self) -> Option<PathBuf> {
+        self.outcome
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .staging
+            .clone()
+    }
+
+    /// Replace the apply step (test seam; see [`ApplyHook`]).
+    pub fn with_apply(mut self, apply: ApplyHook) -> Self {
+        self.apply = apply;
+        self
+    }
+
+    /// What the worker reports as bytes arrive.
+    pub fn report_progress(&self, done: u64, total: u64) {
+        Self::record_progress(&self.bytes, &self.progress, done, total);
+    }
+
+    /// What the worker reports once the archive is on disk.
+    pub fn report_unpacking(&self) {
+        self.phase.store(PHASE_UNPACKING, Ordering::SeqCst);
+    }
+
+    fn record_progress(bytes: &AtomicU64, progress: &AtomicU64, done: u64, total: u64) {
+        bytes.store(done, Ordering::SeqCst);
+        if total > 0 {
+            progress.store((done as f64 / total as f64).to_bits(), Ordering::Relaxed);
+        }
     }
 
     pub fn progress(&self) -> f64 {
@@ -442,43 +565,131 @@ impl UpdateDownloadState {
             .clone()
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn work(
+        fetch: FetchHook,
         info: UpdateInfo,
         outcome: Arc<Mutex<DownloadOutcome>>,
         progress: Arc<AtomicU64>,
+        bytes: Arc<AtomicU64>,
+        phase: Arc<AtomicU8>,
         cancelled: Arc<AtomicBool>,
         done: Arc<AtomicBool>,
     ) {
+        let is_cancelled = || cancelled.load(Ordering::SeqCst);
+        let mut staged_in: Option<PathBuf> = None;
         let result = (|| -> Result<(), DownloadError> {
             let staging = updater::make_staging_dir()?;
+            staged_in = Some(staging.clone());
             outcome.lock().unwrap_or_else(|e| e.into_inner()).staging = Some(staging.clone());
-            let mut on_progress = |done: u64, total: u64| {
-                if total > 0 {
-                    progress.store((done as f64 / total as f64).to_bits(), Ordering::Relaxed);
-                }
-            };
-            let archive =
-                updater::download(&info, &staging, Some(&mut on_progress), Some(&cancelled))?;
-            let new_root = updater::stage_update(&archive, &staging, &UpdaterEnv::current())?;
+            let mut on_progress =
+                |done: u64, total: u64| Self::record_progress(&bytes, &progress, done, total);
+            let archive = fetch(&info, &staging, &mut on_progress, &cancelled)?;
+            if is_cancelled() {
+                return Err(DownloadError::Cancelled);
+            }
+            phase.store(PHASE_UNPACKING, Ordering::SeqCst);
+            log::info!("Update downloaded; unpacking {}", archive.display());
+            let new_root = updater::stage_update_with(
+                &archive,
+                &staging,
+                &UpdaterEnv::current(),
+                Some(&cancelled),
+                updater::UNPACK_TIMEOUT,
+            )?;
+            if is_cancelled() {
+                return Err(DownloadError::Cancelled);
+            }
+            log::info!("Update unpacked to {}", new_root.display());
             outcome.lock().unwrap_or_else(|e| e.into_inner()).new_root = Some(new_root);
             Ok(())
         })();
-        match result {
-            Ok(()) | Err(DownloadError::Cancelled) => {}
+        if result.is_err() {
+            // Nothing will use a half-finished download: never leave up to
+            // 420 MB of it in the temp folder.
+            if let Some(staging) = &staged_in {
+                let _ = std::fs::remove_dir_all(staging);
+            }
+        }
+        let message = match result {
+            Ok(()) => None,
+            // The screen already left (Escape, or it gave up on a stall):
+            // nothing will read this outcome.
+            Err(_) if is_cancelled() => {
+                log::info!("Update download stopped after the screen left it");
+                None
+            }
+            Err(DownloadError::Cancelled) => None,
+            Err(DownloadError::Stalled(idle)) => Some(format!(
+                "The download stopped. Nothing arrived for {} seconds.",
+                idle.as_secs()
+            )),
+            Err(DownloadError::Corrupt) => {
+                Some("The download arrived damaged, so it was not installed.".to_string())
+            }
             Err(DownloadError::Net(e)) => {
                 log::warn!("Update download failed: {e:?}");
-                outcome.lock().unwrap_or_else(|e| e.into_inner()).error = Some(format!(
-                    "The download failed. {} Try again later.",
-                    net::describe_error(&e)
-                ));
+                Some(format!("The download failed. {}", net::describe_error(&e)))
             }
             Err(DownloadError::Io(e)) => {
                 log::warn!("Update download failed: {e:?}");
-                outcome.lock().unwrap_or_else(|e| e.into_inner()).error =
-                    Some(format!("The download failed. {e} Try again later."));
+                Some(format!("The download failed. {}", sentence(&e.to_string())))
             }
+        };
+        if let Some(message) = message {
+            outcome.lock().unwrap_or_else(|e| e.into_inner()).error = Some(format!(
+                "{message} Your game is unchanged. Try again later. {MANUAL_DOWNLOAD}"
+            ));
         }
         done.store(true, Ordering::SeqCst);
+    }
+
+    /// Leave the screen on a stalled or wedged worker, telling the player
+    /// why and how to get the update anyway. The worker is told to stop;
+    /// it tidies up whenever it next wakes.
+    fn abandon(&mut self, ctx: &mut GameContext, reason: &str) {
+        log::warn!("Update abandoned: {reason}");
+        self.cancelled.store(true, Ordering::SeqCst);
+        self.finished = true;
+        ctx.say(&format!(
+            "{reason} Your game is unchanged. Try again later. {MANUAL_DOWNLOAD}"
+        ));
+        ctx.audio.play("ui/error");
+        ctx.pop_state();
+    }
+
+    /// The stall and unpack watchdogs, on this screen's own clock.
+    fn watch(&mut self, ctx: &mut GameContext, dt: f64) {
+        if self.phase.load(Ordering::SeqCst) == PHASE_UNPACKING {
+            if !self.unpack_spoken {
+                self.unpack_spoken = true;
+                ctx.say_with(
+                    "Download complete. Unpacking the update.".to_string(),
+                    Say::queued(),
+                );
+            }
+            self.unpack_s += dt;
+            if self.unpack_s >= UNPACK_TIMEOUT_S {
+                self.abandon(ctx, "Unpacking the update took too long.");
+            }
+            return;
+        }
+        let bytes = self.bytes.load(Ordering::SeqCst);
+        if bytes != self.seen_bytes {
+            self.seen_bytes = bytes;
+            self.idle_s = 0.0;
+            return;
+        }
+        self.idle_s += dt;
+        if self.idle_s >= STALL_TIMEOUT_S {
+            self.abandon(
+                ctx,
+                &format!(
+                    "The download stopped. Nothing arrived for {} seconds.",
+                    STALL_TIMEOUT_S as i64
+                ),
+            );
+        }
     }
 }
 
@@ -499,12 +710,24 @@ impl State for UpdateDownloadState {
         let info = self.info.clone();
         let outcome = Arc::clone(&self.outcome);
         let progress = Arc::clone(&self.progress);
+        let bytes = Arc::clone(&self.bytes);
+        let phase = Arc::clone(&self.phase);
         let cancelled = Arc::clone(&self.cancelled);
         let done = Arc::clone(&self.done);
-        std::thread::Builder::new()
+        let Some(fetch) = self.fetch.take() else {
+            return;
+        };
+        let spawned = std::thread::Builder::new()
             .name("update-download".into())
-            .spawn(move || Self::work(info, outcome, progress, cancelled, done))
-            .ok();
+            .spawn(move || {
+                Self::work(
+                    fetch, info, outcome, progress, bytes, phase, cancelled, done,
+                )
+            });
+        if let Err(e) = spawned {
+            log::warn!("Could not start the update download: {e}");
+            self.abandon(ctx, "The download could not start.");
+        }
     }
 
     fn update(&mut self, ctx: &mut GameContext, dt: f64) {
@@ -518,6 +741,7 @@ impl State for UpdateDownloadState {
             ctx.say_with(format!("{} percent.", quarter * 25), Say::queued());
         }
         if !self.is_done() {
+            self.watch(ctx, dt);
             return;
         }
         self.finished = true;
@@ -541,8 +765,9 @@ impl State for UpdateDownloadState {
         };
         if !(self.can_auto_apply)(&new_root) {
             // e.g. an AppImage sitting in a folder this user cannot write
-            // to: the swap would fail, so park the download somewhere
-            // findable and say where instead of dead-ending on restart.
+            // to, or a Mac app opened straight from a download: the swap
+            // would fail, so park the download somewhere findable and say
+            // where instead of dead-ending on restart.
             let dest = (self.stash_for_manual_install)(&new_root);
             ctx.say(&format!(
                 "Download complete, but this install cannot update itself. \
@@ -553,11 +778,23 @@ impl State for UpdateDownloadState {
             ctx.pop_state();
             return;
         }
-        ctx.say("Download complete. Restarting to finish the update.");
         let staging = staging.unwrap_or_else(|| new_root.clone());
-        if let Err(e) = updater::apply_and_restart(&new_root, &staging) {
+        if let Err(e) = (self.apply)(&new_root, &staging) {
+            // Quitting now would close the game with nothing to bring it
+            // back. Stay, and hand the player the update instead.
             log::warn!("Could not spawn the update apply script: {e}");
+            let dest = (self.stash_for_manual_install)(&new_root);
+            ctx.say(&format!(
+                "Download complete, but the update could not install itself. \
+                 The new version is saved at {}. Install it yourself, then \
+                 restart the game.",
+                dest.display()
+            ));
+            ctx.audio.play("ui/error");
+            ctx.pop_state();
+            return;
         }
+        ctx.say("Installing the update. The game closes and restarts by itself.");
         ctx.quit();
     }
 
@@ -570,30 +807,39 @@ impl State for UpdateDownloadState {
         }
         match key {
             Key::Escape => {
+                // Leave now, whatever the worker is doing. Waiting for it
+                // to notice meant a transfer blocked on a quiet connection,
+                // or a long unpack, kept the player here with Escape
+                // answering "cancelled" and nothing else (issue 266). The
+                // worker stops and tidies up when it next wakes.
                 self.cancelled.store(true, Ordering::SeqCst);
+                self.finished = true;
                 ctx.say("Update cancelled.");
                 ctx.audio.play("ui/menu_back");
-                if self.is_done() {
-                    self.finished = true;
-                    ctx.pop_state();
-                }
-                // otherwise update() pops once the worker notices the flag
+                ctx.pop_state();
             }
             Key::Tab => {
-                ctx.say(&format!(
-                    "{} percent downloaded.",
-                    fmt_f(self.progress() * 100.0, 0)
-                ));
+                let text = if self.phase.load(Ordering::SeqCst) == PHASE_UNPACKING {
+                    "Unpacking the update.".to_string()
+                } else {
+                    format!("{} percent downloaded.", fmt_f(self.progress() * 100.0, 0))
+                };
+                ctx.say(&text);
             }
             _ => {}
         }
     }
 
     fn lines(&self, _ctx: &GameContext) -> Vec<String> {
+        let status = if self.phase.load(Ordering::SeqCst) == PHASE_UNPACKING {
+            "Unpacking".to_string()
+        } else {
+            format!("{} percent", fmt_f(self.progress() * 100.0, 0))
+        };
         vec![
             format!("Downloading {}", self.info.title),
             String::new(),
-            format!("{} percent", fmt_f(self.progress() * 100.0, 0)),
+            status,
             "Escape cancels, Tab reads progress.".to_string(),
         ]
     }

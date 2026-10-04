@@ -1263,7 +1263,9 @@ fn test_camping_the_left_lane_draws_a_cb_nag() {
         .expect("the nag is repeatable")
         .clone();
     assert!(
-        recalled.text.starts_with("CB chatter:"),
+        recalled
+            .text
+            .starts_with("You have been riding the left lane"),
         "{}",
         recalled.text
     );

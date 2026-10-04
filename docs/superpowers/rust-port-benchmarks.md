@@ -108,7 +108,7 @@ port's win here is headroom, not a rescue.
 
 ### The whole frame, on a hard route
 
-`crates/freight-fate/tests/it/frame_time.rs` is the missing measurement: not
+`crates/freight-fate/tests/frame_time/` is the missing measurement: not
 the sim alone but everything `App::frame` does with the window taken away --
 `App::tick` (controller, the speech poll, cloud notices, audio fades, the
 speech duck, the state update, presence) plus the line build `App::render`
@@ -172,7 +172,7 @@ in a 60 Hz frame. What catches it is the ratio gate below.
 
 ### The gates
 
-Both live in `frame_time.rs` and run in the ordinary suite.
+Both live in the `frame_time` test binary and run in the ordinary suite.
 
 * `a_driven_frame_stays_well_inside_the_sixty_hertz_budget` -- p99 of the
   driven frame under **4 167 us**. Derived: the loop targets `app::FPS` = 60,

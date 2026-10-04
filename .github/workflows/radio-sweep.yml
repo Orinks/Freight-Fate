@@ -1,0 +1,69 @@
+name: Radio stream sweep
+
+# Listens to every stream on the dial from a runner with an open network:
+# reachability, what each stream calls itself, and a decoded sample for dead
+# air. Reports only; the catalog is edited by hand from what it finds.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "all, curated or imported"
+        default: "all"
+      seconds:
+        description: "seconds of audio to decode per station"
+        default: "25"
+
+jobs:
+  sweep:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Audit
+        run: |
+          python3 tools/audit_radio_streams.py --only "${{ inputs.only }}" --recheck-dropped \
+            --seconds "${{ inputs.seconds }}" \
+            --shard ${{ matrix.shard }}/8 --workers 24 \
+            --output radio-audit-${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: radio-audit-${{ matrix.shard }}
+          path: radio-audit-${{ matrix.shard }}.json
+
+  merge:
+    needs: sweep
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: radio-audit-*
+          merge-multiple: true
+      - name: Merge
+        run: |
+          python3 - <<'EOF'
+          import glob, json
+          results = []
+          for path in sorted(glob.glob("radio-audit-*.json")):
+              results += json.load(open(path))["results"]
+          results.sort(key=lambda r: (r["tier"], r["id"]))
+          counts = {}
+          for r in results:
+              counts[r["verdict"]] = counts.get(r["verdict"], 0) + 1
+          print(counts)
+          json.dump({"counts": counts, "results": results}, open("radio-audit.json", "w"), indent=1, ensure_ascii=False)
+          EOF
+      - uses: actions/upload-artifact@v7
+        with:
+          name: radio-audit
+          path: radio-audit.json

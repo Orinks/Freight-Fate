@@ -782,7 +782,7 @@ impl DrivingState {
             // 2026-08-15 audit).
             self.say_route_confirmation(
                 ctx,
-                &format!(
+                format!(
                     "Facility stopping assistance handling the entrance to {}.",
                     stop.spoken_name()
                 ),

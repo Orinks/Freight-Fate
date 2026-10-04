@@ -175,82 +175,74 @@ impl Trip {
     /// framing is the same for every kind; what differs is what the post
     /// actually is. Bear stays CB slang for a trooper on the open road,
     /// never for a fixed inspection facility or a chain checkpoint.
+    ///
+    /// No "CB chatter" opener: the CB's own sound marks the line as radio
+    /// talk, and the words are the report (owner, 2026-10-01). A fresh
+    /// report leads with how far; a stale one with who said it.
     pub fn cb_patrol_message(&self, post: &EnforcementPost, ahead_mi: f64) -> String {
-        let distance = self.ahead_text(ahead_mi.max(0.0));
+        let distance = cap_first(&self.ahead_text(ahead_mi.max(0.0)));
         let confidence = self.cb_confidence(post);
         let side = Self::cb_side(post);
         if post.kind == KIND_WORK_ZONE {
             return match confidence {
-                "strong" => {
-                    format!("CB chatter, {distance}: two drivers say troopers are working {side}.")
-                }
-                "ordinary" => {
-                    format!("CB chatter, {distance}: a driver says troopers are working {side}.")
-                }
-                _ => {
-                    format!("CB chatter: somebody said troopers were working {side} a while back.")
-                }
+                "strong" => format!("{distance}: two drivers say troopers are working {side}."),
+                "ordinary" => format!("{distance}: a driver says troopers are working {side}."),
+                _ => format!("Somebody said troopers were working {side} a while back."),
             };
         }
         if post.kind == KIND_SCALE_APRON || post.kind == KIND_FIXED_SCALE {
             return match confidence {
-                "strong" => {
-                    format!("CB chatter, {distance}: two drivers say they're checking logs {side}.")
-                }
-                "ordinary" => {
-                    format!("CB chatter, {distance}: a driver says they're checking logs {side}.")
-                }
-                _ => format!(
-                    "CB chatter: somebody said they were checking logs {side} a while back."
-                ),
+                "strong" => format!("{distance}: two drivers say they're checking logs {side}."),
+                "ordinary" => format!("{distance}: a driver says they're checking logs {side}."),
+                _ => format!("Somebody said they were checking logs {side} a while back."),
             };
         }
         if post.kind == KIND_CMV {
             return match confidence {
                 "strong" => format!(
-                    "CB chatter, {distance}: two drivers say they're checking logs and equipment {side}."
+                    "{distance}: two drivers say they're checking logs and equipment {side}."
                 ),
-                "ordinary" => format!(
-                    "CB chatter, {distance}: a driver says they're checking logs and equipment {side}."
-                ),
+                "ordinary" => {
+                    format!("{distance}: a driver says they're checking logs and equipment {side}.")
+                }
                 _ => format!(
-                    "CB chatter: somebody said they were checking logs and equipment {side} a while back."
+                    "Somebody said they were checking logs and equipment {side} a while back."
                 ),
             };
         }
         if post.kind == KIND_CHAIN {
             return match confidence {
                 "strong" => format!(
-                    "CB chatter, {distance}: two drivers say the chain control is checking rigs {side}."
+                    "{distance}: two drivers say the chain control is checking rigs {side}."
                 ),
-                "ordinary" => format!(
-                    "CB chatter, {distance}: a driver says the chain control is checking rigs {side}."
-                ),
+                "ordinary" => {
+                    format!("{distance}: a driver says the chain control is checking rigs {side}.")
+                }
                 _ => format!(
-                    "CB chatter: somebody said the chain control was checking rigs {side} a while back."
+                    "Somebody said the chain control was checking rigs {side} a while back."
                 ),
             };
         }
         match confidence {
-            "strong" => format!("CB chatter, {distance}: two drivers call a bear {side}."),
-            "ordinary" => format!("CB chatter, {distance}: a driver reports a bear {side}."),
-            _ => format!("CB chatter: somebody called a bear {side} a while back."),
+            "strong" => format!("{distance}: two drivers call a bear {side}."),
+            "ordinary" => format!("{distance}: a driver reports a bear {side}."),
+            _ => format!("Somebody called a bear {side} a while back."),
         }
     }
 
     /// CB chatter for a bear who already has somebody else stopped.
     pub fn cb_tableau_message(&self, post: &EnforcementPost, ahead_mi: f64) -> String {
-        let distance = self.ahead_text(ahead_mi.max(0.0));
+        let distance = cap_first(&self.ahead_text(ahead_mi.max(0.0)));
         let confidence = self.cb_confidence(post);
         let side = Self::cb_side(post);
         match confidence {
-            "strong" => format!(
-                "CB chatter, {distance}: two drivers say a bear already has somebody stopped {side}."
-            ),
-            "ordinary" => format!(
-                "CB chatter, {distance}: a driver says a bear already has somebody stopped {side}."
-            ),
-            _ => format!("CB chatter: somebody said a bear had somebody stopped {side} a while back."),
+            "strong" => {
+                format!("{distance}: two drivers say a bear already has somebody stopped {side}.")
+            }
+            "ordinary" => {
+                format!("{distance}: a driver says a bear already has somebody stopped {side}.")
+            }
+            _ => format!("Somebody said a bear had somebody stopped {side} a while back."),
         }
     }
 
@@ -544,5 +536,14 @@ impl Trip {
             "shoulder" => None,              // shoulder work doesn't close a travel lane
             _ => None,
         }
+    }
+}
+
+/// A distance phrase opening a sentence: "half a mile" becomes "Half a mile".
+fn cap_first(text: &str) -> String {
+    let mut chars = text.chars();
+    match chars.next() {
+        Some(first) => first.to_uppercase().chain(chars).collect(),
+        None => String::new(),
     }
 }

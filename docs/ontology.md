@@ -253,6 +253,7 @@ from the words, and synonyms cost them a re-read.
 | Vehicles around you now | traffic | NPCs, cars | `TrafficManager` |
 | Room adaptive cruise leaves to the vehicle ahead | following gap, always with its seconds ("close, two and a half seconds") | following distance, headway, gap on its own (bare "gap" is the lane row below, and the two are different things) | `settings.acc_following_gap`, `ACC_GAP_CHOICES` |
 | Room to move into the next lane over | the lane is open ("right lane open"); held by somebody, it is blocked ("right lane blocked by a semi"); at a hazard call the same words name the side a dodge can go ("Left lane open.", "Either lane open.", "No lane open.") | clear (that is what the truck is clear OF -- the vehicle passed), safe, free, gap, "open lane on the left" | `Trip::open_side_at`, `Trip::lane_blocker_at`, `states/driving_lane_gap.rs` |
+| Lane keeping on full moving into the open lane around a slow vehicle the hazard call named, and back to the right lane once it is behind | passing ("Passing on the left.", "In the left lane, passing the slow car.") | overtaking, going around, swerving (the driver's own dodge), dodge | `DrivingState::pass_for_hazard`, `update_pass_return`, `passing_hazard_call` |
 | Incidents reported ahead | delays, road reports | traffic (unqualified) | `RealTrafficProvider` |
 | A parking space at a stop | parking | slot, spot | `TruckParkingLocation` |
 | The trailer liquid bulk rides in | tank trailer | tanker (as a noun for the trailer), tank truck | `TRAILER_CATALOG["tank"]` |
@@ -329,7 +330,7 @@ from the words, and synonyms cost them a re-read.
 | The sticker a clean Level 1 earns, good for three months of being waved past open scales | inspection decal; "the decal on the windshield" | CVSA sticker, decal, bypass sticker | `DrivingRecord::decal_until_h`, `DECAL_VALID_HOURS` |
 | The driver's own pre-trip check of the same items | walk-around; "Walk around the truck" is the row | pre-trip, DVIR, pre-trip inspection, vehicle check | `roadside_inspection::walk_around`, `WALK_AROUND_MIN` |
 | The three days in May when every inspector is on the road | Roadcheck week | blitz, inspection blitz, Roadcheck event | `roadside_inspection::roadcheck_blitz`, `Trip::roadcheck_blitz` |
-| Drivers talking about enforcement on the radio | CB chatter | radio talk, scanner, traffic | `cb_patrol_message` |
+| Drivers talking about enforcement on the radio | CB chatter (the name in help and menus; the spoken report itself opens with the distance or "Somebody", never a "CB chatter" label -- the squelch marks it, owner 2026-10-01) | radio talk, scanner, traffic | `cb_patrol_message` |
 | A CB report nobody has verified | unconfirmed | rumor, maybe, possible, unreliable | `_cb_confidence` |
 | The last CB call said again because the driver asked for it | repeat the CB chatter | CB replay, rewind, play back the CB, last CB | `DrivingState::speak_last_cb_chatter` (Alt C) |
 | How much police activity you hear | it is not a setting -- the road's own presence, from region, road class and the clock | enforcement presence (the player setting, removed 2026-08-16), police density, patrol frequency, difficulty | `Trip._post_density_at`, `EnforcementWatchMixin._ambience_scale` |
@@ -376,7 +377,7 @@ from the words, and synonyms cost them a re-read.
 | The receiver refusing a load outright | the receiver refused the load | bounced, returned, kicked back | `CARGO_OUTCOME_REJECTED` |
 | Damage a safety committee rules the driver's fault | preventable damage | at-fault, chargeable, negligence | `TruckState.preventable_damage_pct` |
 | The polling secret bound to this device | never spoken -- internal only | activation code | `Activation.device_code` |
-| The engine leaning the way the wheel should go -- into a bend or a street corner, and, with lane keeping on partial or off and lane-departure warning on, back toward lane center on a drift. The one panned cue a driver steers TOWARD; the rumble strip is the opposite and is steered away from | The engine lean | the road lean (what it was called while it rode the road bed, before 2026-09-18), engine pan, steering lean, drift beep (that is the rumble strip, and it means the other direction) | `sim/turn_guide.rs`, `DrivingState::update_lane_guidance_audio`, `sim/lane_guidance.rs` |
+| The engine leaning the way the wheel should go -- into a bend or a street corner only when that steering is the driver's (lane keeping off and curve assistance off; on full, for the road's shape), and, with lane keeping on partial or off and lane-departure warning on, back toward lane center on a drift. The one panned cue a driver steers TOWARD; the rumble strip is the opposite and is steered away from | The engine lean | the road lean (what it was called while it rode the road bed, before 2026-09-18), engine pan, steering lean, drift beep (that is the rumble strip, and it means the other direction) | `sim/turn_guide.rs`, `DrivingState::update_lane_guidance_audio`, `sim/lane_guidance.rs` |
 | Where the truck is sitting across its lane, reported by panning the road noise; centered whenever lane keeping is doing the steering. A position readout, never a direction to steer | Where you sit in the lane | the road lean (that is the engine now), road bed, ambient road, tire hiss | `vehicle/road`, `DrivingState::update_lane_guidance_audio` |
 | A tire just catching the edge line, still fully inside the lane | Rumble strip, clipped | edge clip, low rung of the edge ladder | `vehicle/edge_clip`, `sim/lane_guidance.EDGE_CLIP_KEY` |
 | The whole tire riding the rumble strip on one side | Rumble strip | edge strip, full rumble, middle rung of the edge ladder | `vehicle/edge_strip`, `sim/lane_guidance.EDGE_STRIP_KEY` |
@@ -385,12 +386,12 @@ from the words, and synonyms cost them a re-read.
 | Tires rolling over a painted line's raised markers, meaning a lane change happened whether meant or not | Lane line crossed | line cross, lane-change bump | `vehicle/lane_line_cross` |
 | The held control that steers out the truck's heading so it points down the road, without moving it back to lane center; does nothing on full lane keeping | Straighten up (the shortcuts row), "hold slash" by default | center steering, recenter, auto-straighten, lane keeping (it is not: it leaves the lane position alone) | `Action::Straighten`, `LaneKeeping::straighten` |
 | The tock that pans to where the truck sits inside its lane, toggled with I | Lane locator | position tick, lane ping, centering assist | `vehicle/lane_locator` |
-| Mechanical relay clicks following steering position or assisted lane-change direction; an armed exit repeats on the right from half a mile out (`EXIT_BLINKER_MI`) until ramp entry, cancellation, or a missed exit | Mechanical blinker | indicator tick, automatic locator | `vehicle/turn_signal` |
+| A turn signal relay's tick and softer tock, one flasher cycle per 0.9 s beat, following steering position or assisted lane-change direction; an armed exit repeats on the right from half a mile out (`EXIT_BLINKER_MI`) until ramp entry, cancellation, or a missed exit | Mechanical blinker | indicator tick, automatic locator | `vehicle/turn_signal` |
+| The turn signal stalk clicking back, centred and quieter, when the steering cue ends, the exit position is set, or a running exit blinker is canceled; assisted lane changes instead finish with Lane line crossed | Blinker off | signal tone (a different sound since 2026-09-29), cancel chime, all-clear, "exit lane set" tone | `vehicle/turn_signal_off` |
 | One rumble hit with nothing held after it, unattached to a steering correction -- fatigue or a momentary catch | Rumble strip, single hit | single tap, fatigue rumble | `vehicle/rumble_strip` |
 | Grouped bars cut across a whole lane, placed only ahead of a curve that has killed people | Transverse strips | rumble bars, wake-up strips, dead-man's-curve strips | `vehicle/transverse_strips`, `sim/lane_guidance.TRANSVERSE_KEY` |
 | The tick that speeds up as the truck closes on a ramp's stop bar, handing over to the stop bar tone once the bar is close enough that the truck must already be stopping | Stop bar countdown | curve chime (retired 2026-09-18 -- the bend chime no longer exists, and this sound is all that still uses the key), curve bink, bend warning, bar tick | `vehicle/curve_bink`, `DrivingState::update_ramp_bar_audio` |
 | A short confirmation from the side of a deliberate lane crossing, shoulder pull-over, ramp merge, or route exit | Signal tone | confirmation tone, manoeuvre tone | `vehicle/signal_tone` |
-| A quieter centered confirmation when the steering cue ends or the exit position is set; assisted lane changes instead finish with Lane line crossed | Signal tone (the treatment marks cancellation) | cancel chime, all-clear, "exit lane set" tone | `vehicle/signal_tone` |
 | The compressor filling the air tanks before the truck can move | Air building | air pressurize, tank fill | `vehicle/air_pressurize` |
 | The short sharp pop when the tanks reach full and the compressor cuts out | Air dryer purge | dryer pop, compressor cutout | `vehicle/air_dryer_purge` |
 | Air pressure fallen too low to brake safely | Low air buzzer | low-pressure alarm, air warning | `vehicle/low_air_buzzer` |
@@ -421,10 +422,7 @@ from the words, and synonyms cost them a re-read.
 | The driver's own yawn as fatigue builds | Yawn | fatigue sound, drowsy cue | `driver/yawn` |
 | The optional note that carries the lean instead of the engine, off by default; with it on the engine stays centered | Lane guide tone (the settings row is "Lane guide sound: engine" or "tone") | guide tone, steering tone, lean tone | `guide/lane_guide_tone`, `Settings.lane_guide_tone`, `DrivingState::lean_the_tone` |
 | The setting for which way to steer when the engine leans: toward the lean by default, or away from it | Steering guide (the settings row reads "steer toward the lean" or "steer away from the lean") | invert steering, reverse guide, flipped lean | `Settings.steering_guide_inverted`, `guide_sign` |
-| The synthesized short high note standing in for a confirmation -- the assist acted, the setting took -- once the speech ladder stops speaking it | Confirmation note | confirmation earcon, acted tone | `ladder/confirmation_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS` |
-| The synthesized two falling notes standing in for a heads-up about what the road is about to do -- a bend, a merge, a stop still miles off -- once the speech ladder stops speaking them, at the Urgent only rung | Road ahead note | navigation advisory earcon, lead-cue tone | `ladder/road_ahead_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS`, `SpeechCategory.NAVIGATION_ADVISORY` |
-| The synthesized chime standing in for a driving tip once the speech ladder stops speaking coaching, at the Quiet rung | Coaching note | coaching earcon, tip chime | `ladder/coaching_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS` |
-| The synthesized tock standing in for a status update once the speech ladder stops speaking it, available in Learn game sounds; Quiet now speaks status | Status note | status earcon, state tock | `ladder/status_note`, `ladder_earcons.py`, `speech_pacing.LADDER_EARCONS` |
+| The one-time screen before the main menu that asks how much the truck should do, answered once by every player | Driving assistance (the same choice as the preset row in Settings) | setup wizard, onboarding, first-run screen | `states::assist_picker`, `Settings.assist_preset_chosen` |
 | Being looked at for something other than speed: damage, missing chains, following too close | Inspection warning | inspection cue, roadside-check tone | `events/inspection_warning` |
 | The earcon that fires with the open-scale approach notice, ahead of the ambient bed | Scale warning | weigh-station warning cue, scale earcon | `events/weigh_station_warning` |
 | The ambient bed that swells as the truck comes up on an open scale | Weigh station | scale bed, weigh-lane loop | `poi/weigh_station_lane` |
@@ -583,7 +581,7 @@ reader user a second noun for a thing that already had one.
 
 ### Driving speech rungs
 
-How much of the road's *information* speaks. Four rungs, cutting whole
+How much of the road's *information* speaks. Three rungs, cutting whole
 categories rather than shortening sentences; the player picks one and the
 delivery layer decides per category. "Terse" survives only as the internal
 name of the shorter rendering and is no longer a thing the player selects.
@@ -591,12 +589,17 @@ name of the shorter rendering and is no longer a thing the player selects.
 | Concept | Canonical spoken noun | Never say | Where |
 | --- | --- | --- | --- |
 | The working default | standard | normal, default | `DRIVING_SPEECH_MODES` |
-| Short confirmations, lane openings, and status updates | quiet | terse (that is the rendering, not the rung), minimal | `DRIVING_SPEECH_MODES` |
+| Short confirmations, lane openings, and status updates, without the traffic around the truck | quiet | terse (that is the rendering, not the rung), minimal | `DRIVING_SPEECH_MODES` |
 | Safety warnings and directions requiring action | urgent only | emergency mode, critical only | `DRIVING_SPEECH_MODES` |
 
 Roadside colour -- billboards, place names, landmarks -- is **not** governed
 by these rungs. It answers to the chatter switches and the place-callouts
 ladder, and a player may run the loudest colour with the quietest rung.
+
+A line a rung leaves out is silent: no stand-in sound, and no tone of its
+own (owner, 2026-10-03). The four ladder notes that used to stand in for
+cut lines are retired. The road's own sounds -- traffic going by, the
+engine, a siren -- are not announcements and always play.
 
 ### Terse speech grammar
 
@@ -655,8 +658,14 @@ synonym for the game's most safety-critical cue and is exactly what this
 table exists to prevent. The lane change leads the braking (owner,
 2026-08-17): both actions stay on offer, because a driver who cannot see the
 gap may reasonably prefer to slow, but at a hazard the first word is the one
-that gets acted on. Lane changes stay driver-initiated: one tap of the arrow
-the call named, with adaptive cruise riding through the dodge.
+that gets acted on. On partial or off, lane changes stay driver-initiated:
+one tap of the arrow the call named, with adaptive cruise riding through the
+dodge. On full, a slow VEHICLE ahead is passed by the truck itself (owner,
+2026-10-01): the call drops the opener and the lane answer and says what the
+truck is doing, "Slow car right ahead. Passing on the left.", the arrival is
+"In the left lane, passing the slow car.", and the move back is reported by
+"In the right lane." alone. "Passing" is the canonical word for it -- never
+overtaking or going around. Objects in the lane keep the driver's call.
 
 ## Open naming decisions
 

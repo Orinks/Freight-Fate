@@ -272,19 +272,13 @@ fn test_route_planning_counts_only_usable_stops() {
     leg.stops = stops();
     let route = Route::from_legs(cached.cities[..2].to_vec(), vec![leg]);
 
-    let usable: Vec<&str> = route
-        .accessible_stop_details(false)
-        .iter()
-        .map(|s| s.name.as_str())
-        .collect();
+    let usable_stops = route.accessible_stop_details(false);
+    let usable: Vec<&str> = usable_stops.iter().map(|s| s.name.as_str()).collect();
     assert_eq!(usable, ["Big Rig Plaza"]);
     // The unfiltered view still sees everything, for tooling and data review.
     assert_eq!(route.stop_details().len(), 3);
 
-    let bobtailing: Vec<&str> = route
-        .accessible_stop_details(true)
-        .iter()
-        .map(|s| s.name.as_str())
-        .collect();
+    let bobtailing_stops = route.accessible_stop_details(true);
+    let bobtailing: Vec<&str> = bobtailing_stops.iter().map(|s| s.name.as_str()).collect();
     assert_eq!(bobtailing, ["Big Rig Plaza", "Corner Mart"]);
 }

@@ -29,8 +29,7 @@ use ff_core::models::profile::Profile;
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::trip_models::{TrafficPressure, TripEvent, TripEventData, TripEventKind};
 use ff_core::sim::weather::{WeatherKind, WeatherSystem};
-use ff_core::sound_catalog::CATALOG;
-use ff_core::speech_pacing::{disposition_for, Disposition, SpeechCategory, DRIVING_SPEECH_MODES};
+use ff_core::speech_pacing::{disposition_for, Disposition, SpeechCategory};
 use ff_core::speech_text::{stop_callout, SpokenMessage, StopCalloutParts};
 
 use ff_core::data::world_models::{Leg, Route};
@@ -205,7 +204,7 @@ fn test_the_lead_announcement_yields_before_the_turn_itself() {
     );
     assert_eq!(
         disposition_for("urgent_only", Some(SpeechCategory::NavigationAdvisory)),
-        Disposition::Earcon
+        Disposition::Silent
     );
     for rung in ["quiet", "urgent_only"] {
         assert_eq!(
@@ -323,31 +322,6 @@ fn test_every_trip_event_kind_is_classified() {
         both.is_empty(),
         "trip event kinds claimed by both lists: {both:?}"
     );
-}
-
-#[test]
-fn test_every_earcon_category_is_learnable() {
-    // R14's standing rule, binding S4's substitutions: no earcon may carry
-    // meaning that the Learn game sounds screen cannot teach. This is what
-    // makes "the rung replaces words with sounds" legitimate rather than
-    // exclusionary.
-    let learnable: Vec<&str> = CATALOG
-        .iter()
-        .flat_map(|category| category.entries.iter().map(|entry| entry.name))
-        .collect();
-    for rung in DRIVING_SPEECH_MODES {
-        for category in SpeechCategory::ALL {
-            if disposition_for(rung, Some(category)) == Disposition::Earcon {
-                let cue = ff_core::speech_pacing::ladder_earcon(category).unwrap_or_else(|| {
-                    panic!("{category:?} becomes an earcon at {rung} with no cue at all")
-                });
-                assert!(
-                    learnable.contains(&cue),
-                    "{category:?} becomes an earcon at {rung} with nothing to learn it by"
-                );
-            }
-        }
-    }
 }
 
 // -- the gate, with a literal line ---------------------------------------------------
@@ -1211,8 +1185,8 @@ fn call_is_tagged(call: &SayEventCall) -> bool {
         return true;
     }
     // The options are the last argument. When it is a plain binding --
-    // `opts`, or `opts()` for the closure form -- follow it back to where it
-    // was built or assigned inside this function.
+    // `opts`, or `opts()` / `opts(reason)` for the closure form -- follow it
+    // back to where it was built or assigned inside this function.
     // A multi-line call ends with a trailing comma, so the last split piece is
     // whitespace: take the last one that is not.
     let Some(last) = call
@@ -1223,7 +1197,7 @@ fn call_is_tagged(call: &SayEventCall) -> bool {
     else {
         return false;
     };
-    let name = last.trim_end_matches("()").trim();
+    let name = last.split('(').next().unwrap_or(last).trim();
     if name.is_empty() || !name.chars().all(|c| c.is_alphanumeric() || c == '_') {
         return false;
     }

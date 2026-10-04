@@ -5,7 +5,9 @@
 //! Files live in `tests/it/`, which cargo does not auto-discover, so this
 //! file is the only target and the `mod` lines below are what includes
 //! them. A new test file needs a line here. The exceptions:
-//! `tests/classic_startup.rs` needs a process nothing has touched yet, and
+//! `tests/classic_startup.rs` needs a process nothing has touched yet,
+//! `tests/frame_time/` times frames and must not share the CPU with
+//! sibling tests, and
 //! `tests/agent_server.rs` tests agent tooling rather than the game, so it
 //! is its own binary that a plain `cargo test` leaves out (see Cargo.toml).
 
@@ -60,7 +62,6 @@ mod cloud_backup_review;
 mod cloud_saves;
 mod discord_presence;
 mod duty_watch;
-mod frame_time;
 mod net;
 mod network_guard;
 mod online_activation;
@@ -80,6 +81,7 @@ mod secret_store_guard;
 mod single_instance;
 mod speech;
 mod speech_live;
+mod states_assist_picker;
 mod states_career_close_out;
 mod states_city;
 mod states_city_hos;
@@ -95,6 +97,7 @@ mod states_driving_approach_sweep;
 mod states_driving_armed_exit_readout;
 mod states_driving_arrival_gate;
 mod states_driving_bend_rollover_sweep;
+mod states_driving_billboard_moment;
 mod states_driving_buffs;
 mod states_driving_cab_systems;
 mod states_driving_cat_scale;
@@ -138,6 +141,7 @@ mod states_driving_menus_rest;
 mod states_driving_menus_roadside;
 mod states_driving_menus_tablet;
 mod states_driving_multilane_speech;
+mod states_driving_passing;
 mod states_driving_ramps;
 mod states_driving_rest_choice_scenarios;
 mod states_driving_retarder;
@@ -188,6 +192,7 @@ mod transcript_truck_status;
 mod transcript_tutorial_verbosity;
 mod transcript_wrong_way;
 mod updater;
+mod updater_watchdog;
 mod windows_subsystem;
 
 mod states_ramp_assist_control;
@@ -195,3 +200,4 @@ mod states_ramp_signal_timing;
 
 mod states_driving_hos_planning;
 mod states_driving_hos_rest_stretch;
+mod states_driving_speech_modes;

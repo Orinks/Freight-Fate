@@ -1016,6 +1016,16 @@
         ],
         "landmarks": [
           {
+            "name": "Lucy the Elephant (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.6,
+            "spoken": "Billboard: Lucy the Elephant, in Margate, about six miles south of Atlantic City. Six stories of elephant since eighteen eighty-one. You can walk inside her.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Pleasantville",
             "at_mi": 5.9,
             "off_mi": 0.71,
@@ -1041,6 +1051,46 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158819522, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Northfield"
+          },
+          {
+            "name": "Absecon Lighthouse (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.1,
+            "spoken": "Billboard: Absecon Lighthouse, ahead in Atlantic City. New Jersey's tallest lighthouse, two hundred twenty-eight steps to the top. The elevator is you.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Storybook Land (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: Storybook Land, next exit. Nursery rhymes you can walk through, family-run since nineteen fifty-five. The big bad wolf is on his lunch break.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Steel Pier (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: Steel Pier, on the Atlantic City boardwalk. A pier over the ocean since eighteen ninety-eight, with rides and a Ferris wheel. Hold your hat.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Storybook Land (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Billboard: Storybook Land, next exit. Nursery rhymes you can walk through, family-run since nineteen fifty-five. The big bad wolf is on his lunch break.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Egg Harbor City",
@@ -1158,6 +1208,16 @@
             "spoken": "Passing Hi-Nella"
           },
           {
+            "name": "Battleship New Jersey (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.0,
+            "spoken": "Billboard: Battleship New Jersey, ahead on the Camden waterfront. The most decorated battleship in Navy history, open for tours. It parks better than you do.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Deptford Township",
             "at_mi": 50.3,
             "off_mi": 1.82,
@@ -1266,13 +1326,6 @@
             "spoken": "Passing Oaklyn"
           },
           {
-            "name": "Delaware River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 56.5,
-            "spoken": "Crossing the Delaware River"
-          },
-          {
             "name": "Collingswood",
             "at_mi": 56.8,
             "off_mi": 0.85,
@@ -1298,6 +1351,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158273573, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Pennsauken Township"
+          },
+          {
+            "name": "Delaware River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 60.7,
+            "spoken": "Crossing the Delaware River",
+            "lat": 39.95301,
+            "lon": -75.13455,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1539907533 (Delaware River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -2672,20 +2735,22 @@
         "state_miles": [
           {
             "state": "New Jersey",
-            "miles": 60.8
+            "miles": 59.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Pennsylvania",
-            "miles": 21.2
+            "miles": 22.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 60.8,
+            "at_mi": 59.1,
             "from_state": "New Jersey",
             "state": "Pennsylvania",
             "place": "New Jersey-Pennsylvania line on I-78",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -3416,15 +3481,31 @@
             "name": "North Branch Raritan River",
             "category": "river",
             "kind": "point",
-            "at_mi": 32.7,
-            "spoken": "Crossing the North Branch Raritan River"
+            "at_mi": 30.4,
+            "spoken": "Crossing the North Branch Raritan River",
+            "lat": 40.64304,
+            "lon": -74.68408,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 31465069 (North Branch Raritan River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Red Mill Museum Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.5,
+            "spoken": "Billboard: The Red Mill Museum Village, ahead in Clinton. A wool mill from around eighteen ten, with a quarry and a schoolhouse. Still red, still open.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Lamington River",
             "category": "river",
             "kind": "point",
-            "at_mi": 32.7,
-            "spoken": "Crossing the Lamington River"
+            "at_mi": 32.5,
+            "spoken": "Crossing the Lamington River",
+            "lat": 40.64559,
+            "lon": -74.72392,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 241811428 (Lamington River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Oldwick",
@@ -3470,6 +3551,16 @@
             "spoken": "Entering Clinton"
           },
           {
+            "name": "South Branch Raritan River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 42.6,
+            "spoken": "Crossing the South Branch Raritan River",
+            "lat": 40.63285,
+            "lon": -74.91068,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 241192289 (South Branch Raritan River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Franklin",
             "at_mi": 43.3,
             "off_mi": 0.45,
@@ -3477,6 +3568,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158843608, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Franklin"
+          },
+          {
+            "name": "Red Mill Museum Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.0,
+            "spoken": "Billboard: The Red Mill Museum Village, ahead in Clinton. A wool mill from around eighteen ten, with a quarry and a schoolhouse. Still red, still open.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Crayola Experience (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.1,
+            "spoken": "Billboard: The Crayola Experience, ahead in Easton. Twenty-five rooms of crayons, and you can melt one into a new shape. Coloring outside the lines is encouraged.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Musconetcong River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 52.1,
+            "spoken": "Crossing the Musconetcong River",
+            "lat": 40.66196,
+            "lon": -75.07825,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 884940196 (Musconetcong River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Bloomsbury",
@@ -3488,27 +3609,6 @@
             "spoken": "Passing Bloomsbury"
           },
           {
-            "name": "South Branch Raritan River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 54.6,
-            "spoken": "Crossing the South Branch Raritan River"
-          },
-          {
-            "name": "Delaware River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 54.6,
-            "spoken": "Crossing the Delaware River"
-          },
-          {
-            "name": "Musconetcong River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 54.6,
-            "spoken": "Crossing the Musconetcong River"
-          },
-          {
             "name": "Alpha",
             "at_mi": 55.9,
             "off_mi": 0.87,
@@ -3516,6 +3616,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157637931, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Alpha"
+          },
+          {
+            "name": "Delaware River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 59.1,
+            "spoken": "Crossing the Delaware River",
+            "lat": 40.67229,
+            "lon": -75.17779,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 257378493 (Delaware River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Phillipsburg",
@@ -3572,6 +3682,16 @@
             "spoken": "Passing Lower Saucon"
           },
           {
+            "name": "The Crayola Experience (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.3,
+            "spoken": "Billboard: The Crayola Experience, ahead in Easton. Twenty-five rooms of crayons, and you can melt one into a new shape. Coloring outside the lines is encouraged.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Freemansburg",
             "at_mi": 70.4,
             "off_mi": 2.05,
@@ -3588,13 +3708,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158449440, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fountain Hill"
-          },
-          {
-            "name": "Lehigh River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 73.4,
-            "spoken": "Crossing the Lehigh River"
           }
         ],
         "restrictions": [],
@@ -4290,20 +4403,22 @@
         "state_miles": [
           {
             "state": "New Jersey",
-            "miles": 25.2
+            "miles": 24.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "New York",
-            "miles": 6.8
+            "miles": 7.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 25.2,
+            "at_mi": 24.1,
             "from_state": "New Jersey",
             "state": "New York",
             "place": "New Jersey-New York line on I-95",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -4602,8 +4717,11 @@
             "name": "Passaic River",
             "category": "river",
             "kind": "point",
-            "at_mi": 4.1,
-            "spoken": "Crossing the Passaic River"
+            "at_mi": 1.5,
+            "spoken": "Crossing the Passaic River",
+            "lat": 40.74517,
+            "lon": -74.16567,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1447420985 (Passaic River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Belleville",
@@ -4622,6 +4740,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158855616, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing North Arlington"
+          },
+          {
+            "name": "Hackensack River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 7.1,
+            "spoken": "Crossing the Hackensack River",
+            "lat": 40.75695,
+            "lon": -74.09451,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1446908956 (Hackensack River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Communipaw",
@@ -4676,13 +4804,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 7525202641, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing West New York"
-          },
-          {
-            "name": "Hackensack River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.2,
-            "spoken": "Crossing the Hackensack River"
           },
           {
             "name": "Guttenberg",
@@ -4893,15 +5014,21 @@
             "name": "Hudson River",
             "category": "river",
             "kind": "point",
-            "at_mi": 28.1,
-            "spoken": "Crossing the Hudson River"
+            "at_mi": 24.2,
+            "spoken": "Crossing the Hudson River",
+            "lat": 40.85126,
+            "lon": -73.951,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 459202666 (Hudson River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Harlem River",
             "category": "river",
             "kind": "point",
-            "at_mi": 28.1,
-            "spoken": "Crossing the Harlem River"
+            "at_mi": 25.8,
+            "spoken": "Crossing the Harlem River",
+            "lat": 40.84552,
+            "lon": -73.92874,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1447760094 (Harlem River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [
@@ -6614,18 +6741,14 @@
         ],
         "landmarks": [
           {
-            "name": "Rahway River",
-            "category": "river",
+            "name": "Thomas Edison Center (southbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 10.4,
-            "spoken": "Crossing the Rahway River"
-          },
-          {
-            "name": "Robinson's Branch Rahway River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 10.4,
-            "spoken": "Crossing the Robinson's Branch Rahway River"
+            "at_mi": 7.0,
+            "spoken": "Billboard: The Thomas Edison Center, ahead in Edison. On the site of his lab, a tower wears a fourteen-foot light bulb. It still works.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Linden",
@@ -6635,6 +6758,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158806741, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Linden"
+          },
+          {
+            "name": "Rahway River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 11.4,
+            "spoken": "Crossing the Rahway River",
+            "lat": 40.59934,
+            "lon": -74.23253,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 814564391 (Rahway River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Carteret",
@@ -6664,6 +6797,16 @@
             "spoken": "Entering Woodbridge Township"
           },
           {
+            "name": "Thomas Edison Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.0,
+            "spoken": "Billboard: The Thomas Edison Center, next exit. On the site of his lab, a tower wears a fourteen-foot light bulb. It still works.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Metuchen",
             "at_mi": 19.8,
             "off_mi": 1.56,
@@ -6682,6 +6825,16 @@
             "spoken": "Passing Edison"
           },
           {
+            "name": "Raritan River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 23.3,
+            "spoken": "Crossing the Raritan River",
+            "lat": 40.48839,
+            "lon": -74.39625,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 31464483 (Raritan River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Milltown",
             "at_mi": 26.7,
             "off_mi": 1.17,
@@ -6698,13 +6851,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158842957, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing East Brunswick"
-          },
-          {
-            "name": "Raritan River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 32.1,
-            "spoken": "Crossing the Raritan River"
           },
           {
             "name": "Jamesburg",
@@ -6885,13 +7031,6 @@
             "spoken": "Passing Palmyra"
           },
           {
-            "name": "Delaware River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 74.9,
-            "spoken": "Crossing the Delaware River"
-          },
-          {
             "name": "Pennsauken Township",
             "at_mi": 77.6,
             "off_mi": 0.0,
@@ -6917,6 +7056,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158605549, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Collingswood"
+          },
+          {
+            "name": "Battleship New Jersey (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.8,
+            "spoken": "Billboard: Battleship New Jersey, ahead on the Camden waterfront. The most decorated battleship in Navy history, open for tours. It parks better than you do.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Delaware River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 82.7,
+            "spoken": "Crossing the Delaware River",
+            "lat": 39.95301,
+            "lon": -75.13455,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1539907533 (Delaware River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -7705,6 +7864,26 @@
         ],
         "landmarks": [
           {
+            "name": "Thomas Edison Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.0,
+            "spoken": "Billboard: The Thomas Edison Center, ahead in Edison. On the site of his lab, a tower wears a fourteen-foot light bulb. It still works.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Elizabeth River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 7.8,
+            "spoken": "Crossing the Elizabeth River",
+            "lat": 40.64589,
+            "lon": -74.2041,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 144772010 (Elizabeth River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Roselle",
             "at_mi": 8.3,
             "off_mi": 2.78,
@@ -7732,6 +7911,16 @@
             "spoken": "Passing Rahway"
           },
           {
+            "name": "Rahway River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 11.7,
+            "spoken": "Crossing the Rahway River",
+            "lat": 40.59952,
+            "lon": -74.24437,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 814564391 (Rahway River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Carteret",
             "at_mi": 12.4,
             "off_mi": 0.84,
@@ -7748,34 +7937,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 9879366685, projected onto the leg's checked-in route geometry",
             "spoken": "Entering Port Reading"
-          },
-          {
-            "name": "Elizabeth River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.3,
-            "spoken": "Crossing the Elizabeth River"
-          },
-          {
-            "name": "Rahway River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.3,
-            "spoken": "Crossing the Rahway River"
-          },
-          {
-            "name": "Robinson's Branch Rahway River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.3,
-            "spoken": "Crossing the Robinson's Branch Rahway River"
-          },
-          {
-            "name": "Raritan River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.3,
-            "spoken": "Crossing the Raritan River"
           },
           {
             "name": "Woodbridge Township",
@@ -7796,6 +7957,16 @@
             "spoken": "Passing Perth Amboy"
           },
           {
+            "name": "Thomas Edison Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.0,
+            "spoken": "Billboard: The Thomas Edison Center, next exit. On the site of his lab, a tower wears a fourteen-foot light bulb. It still works.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Metuchen",
             "at_mi": 19.5,
             "off_mi": 1.56,
@@ -7803,6 +7974,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158811925, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Metuchen"
+          },
+          {
+            "name": "Raritan River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 21.5,
+            "spoken": "Crossing the Raritan River",
+            "lat": 40.485,
+            "lon": -74.34383,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1250069207 (Raritan River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Sayreville",
@@ -7981,6 +8162,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 9927671683, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Foxmoor"
+          },
+          {
+            "name": "Grounds For Sculpture (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.2,
+            "spoken": "Billboard: Grounds For Sculpture, ahead in Hamilton. Forty-two acres of art outdoors, and some of the people on the benches are bronze. Say hello anyway.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Bordentown Township",
@@ -8958,8 +9149,11 @@
             "name": "Toms River",
             "category": "river",
             "kind": "point",
-            "at_mi": 7.13,
-            "spoken": "Crossing the Toms River"
+            "at_mi": 1.3,
+            "spoken": "Crossing the Toms River",
+            "lat": 39.94995,
+            "lon": -74.20757,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 882439138 (Toms River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lacey Township",
@@ -9089,15 +9283,21 @@
             "name": "Bass River",
             "category": "river",
             "kind": "point",
-            "at_mi": 36.18,
-            "spoken": "Crossing the Bass River"
+            "at_mi": 30.5,
+            "spoken": "Crossing the Bass River",
+            "lat": 39.59422,
+            "lon": -74.44315,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 28212782 (Bass River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Mullica River",
             "category": "river",
             "kind": "point",
-            "at_mi": 36.18,
-            "spoken": "Crossing the Mullica River"
+            "at_mi": 33.4,
+            "spoken": "Crossing the Mullica River",
+            "lat": 39.55594,
+            "lon": -74.46254,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 28622069 (Mullica River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Port Republic",
@@ -10132,20 +10332,6 @@
         ],
         "landmarks": [
           {
-            "name": "Metedeconk River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 8.63,
-            "spoken": "Crossing the Metedeconk River"
-          },
-          {
-            "name": "Manasquan River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 8.63,
-            "spoken": "Crossing the Manasquan River"
-          },
-          {
             "name": "Brick Township",
             "at_mi": 9.44,
             "off_mi": 1.52,
@@ -10162,6 +10348,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158846523, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Point Pleasant"
+          },
+          {
+            "name": "Manasquan River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 14.4,
+            "spoken": "Crossing the Manasquan River",
+            "lat": 40.13798,
+            "lon": -74.11322,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 254578973 (Manasquan River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Brielle",
@@ -10288,13 +10484,6 @@
             "spoken": "Entering Old Bridge Township"
           },
           {
-            "name": "Raritan River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 40.62,
-            "spoken": "Crossing the Raritan River"
-          },
-          {
             "name": "Sayreville",
             "at_mi": 44.37,
             "off_mi": 3.39,
@@ -10311,6 +10500,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158860956, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering South Amboy"
+          },
+          {
+            "name": "Raritan River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 47.6,
+            "spoken": "Crossing the Raritan River",
+            "lat": 40.50902,
+            "lon": -74.30042,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 31464483 (Raritan River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Perth Amboy",
@@ -10367,6 +10566,16 @@
             "spoken": "Passing Clark"
           },
           {
+            "name": "Rahway River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 54.4,
+            "spoken": "Crossing the Rahway River",
+            "lat": 40.59936,
+            "lon": -74.2701,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1369337793 (Rahway River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Rahway",
             "at_mi": 54.53,
             "off_mi": 0.69,
@@ -10403,20 +10612,6 @@
             "spoken": "Passing Cranford"
           },
           {
-            "name": "Elizabeth River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 57.57,
-            "spoken": "Crossing the Elizabeth River"
-          },
-          {
-            "name": "Rahway River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 57.57,
-            "spoken": "Crossing the Rahway River"
-          },
-          {
             "name": "Roselle",
             "at_mi": 57.78,
             "off_mi": 1.66,
@@ -10442,6 +10637,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158805413, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kenilworth"
+          },
+          {
+            "name": "Elizabeth River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 59.5,
+            "spoken": "Crossing the Elizabeth River",
+            "lat": 40.6567,
+            "lon": -74.21026,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 144772010 (Elizabeth River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -11721,13 +11926,6 @@
             "spoken": "Passing Chesterfield Township"
           },
           {
-            "name": "Delaware River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 9.0,
-            "spoken": "Crossing the Delaware River"
-          },
-          {
             "name": "Roebling",
             "at_mi": 9.2,
             "off_mi": 4.13,
@@ -11753,6 +11951,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158800394, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Florence Township"
+          },
+          {
+            "name": "Grounds For Sculpture (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: Grounds For Sculpture, ahead in Hamilton. Forty-two acres of art outdoors, and some of the people on the benches are bronze. Say hello anyway.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Springfield Township",
@@ -11839,8 +12047,11 @@
             "name": "Mullica River",
             "category": "river",
             "kind": "point",
-            "at_mi": 27.5,
-            "spoken": "Crossing the Mullica River"
+            "at_mi": 34.7,
+            "spoken": "Crossing the Mullica River",
+            "lat": 39.74053,
+            "lon": -74.72654,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1098421846 (Mullica River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pinelands National Reserve",
@@ -11902,6 +12113,26 @@
             "spoken": "Entering Egg Harbor City"
           },
           {
+            "name": "Steel Pier (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.0,
+            "spoken": "Billboard: Steel Pier, on the Atlantic City boardwalk. A pier over the ocean since eighteen ninety-eight, with rides and a Ferris wheel. Hold your hat.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Absecon Lighthouse (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.0,
+            "spoken": "Billboard: Absecon Lighthouse, ahead in Atlantic City. New Jersey's tallest lighthouse, two hundred twenty-eight steps to the top. The elevator is you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Galloway Township",
             "at_mi": 62.4,
             "off_mi": 2.02,
@@ -11918,6 +12149,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158845677, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Absecon"
+          },
+          {
+            "name": "Lucy the Elephant (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.0,
+            "spoken": "Billboard: Lucy the Elephant, in Margate, about six miles south of Atlantic City. Six stories of elephant since eighteen eighty-one. You can walk inside her.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pleasantville",
@@ -12926,8 +13167,11 @@
             "name": "Delaware River",
             "category": "river",
             "kind": "point",
-            "at_mi": 4.1,
-            "spoken": "Crossing the Delaware River"
+            "at_mi": 2.0,
+            "spoken": "Crossing the Delaware River",
+            "lat": 40.209,
+            "lon": -74.76814,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 407099323 (Delaware River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Fallsington",
@@ -13831,13 +14075,6 @@
             "spoken": "Passing Winslow Township"
           },
           {
-            "name": "Great Egg Harbor River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.64,
-            "spoken": "Crossing the Great Egg Harbor River"
-          },
-          {
             "name": "Weymouth Township",
             "at_mi": 15.86,
             "off_mi": 1.93,
@@ -13883,6 +14120,16 @@
             "spoken": "Passing Hamilton Township"
           },
           {
+            "name": "Great Egg Harbor River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 18.0,
+            "spoken": "Crossing the Great Egg Harbor River",
+            "lat": 39.44904,
+            "lon": -74.72897,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 26559942 (Great Egg Harbor River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Mullica Township",
             "at_mi": 18.39,
             "off_mi": 8.8,
@@ -13892,6 +14139,16 @@
             "spoken": "Passing Mullica Township"
           },
           {
+            "name": "Storybook Land (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.5,
+            "spoken": "Billboard: Storybook Land, ahead. Nursery rhymes you can walk through, family-run since nineteen fifty-five. The big bad wolf is on his lunch break.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Egg Harbor City",
             "at_mi": 22.83,
             "off_mi": 5.42,
@@ -13899,6 +14156,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158860648, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Egg Harbor City"
+          },
+          {
+            "name": "Steel Pier (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.0,
+            "spoken": "Billboard: Steel Pier, on the Atlantic City boardwalk. A pier over the ocean since eighteen ninety-eight, with rides and a Ferris wheel. Hold your hat.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Port Republic",
@@ -13917,6 +14184,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 4835901438, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Egg Harbor Township"
+          },
+          {
+            "name": "Absecon Lighthouse (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.0,
+            "spoken": "Billboard: Absecon Lighthouse, ahead in Atlantic City. New Jersey's tallest lighthouse, two hundred twenty-eight steps to the top. The elevator is you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Storybook Land (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.4,
+            "spoken": "Billboard: Storybook Land, ahead. Nursery rhymes you can walk through, family-run since nineteen fifty-five. The big bad wolf is on his lunch break.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Northfield",
@@ -13989,6 +14276,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158857070, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Longport"
+          },
+          {
+            "name": "Lucy the Elephant (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.0,
+            "spoken": "Billboard: Lucy the Elephant, in Margate, about six miles south of Atlantic City. Six stories of elephant since eighteen eighty-one. You can walk inside her.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Margate City",
@@ -14691,6 +14988,16 @@
             "spoken": "Passing Glassboro"
           },
           {
+            "name": "Battleship New Jersey (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.0,
+            "spoken": "Billboard: Battleship New Jersey, ahead on the Camden waterfront. The most decorated battleship in Navy history, open for tours. It parks better than you do.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pitman",
             "at_mi": 22.25,
             "off_mi": 1.07,
@@ -14919,8 +15226,11 @@
             "name": "Delaware River",
             "category": "river",
             "kind": "point",
-            "at_mi": 38.7,
-            "spoken": "Crossing the Delaware River"
+            "at_mi": 40.7,
+            "spoken": "Crossing the Delaware River",
+            "lat": 39.95301,
+            "lon": -75.13455,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1539907533 (Delaware River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [

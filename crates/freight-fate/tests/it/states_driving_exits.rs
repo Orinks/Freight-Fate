@@ -1048,7 +1048,7 @@ fn test_exit_speed_assist_slows_with_full_lane_keeping() {
     harness.with_drive(move |d, _| {
         d.trip.position_mi = at - 1.0;
         d.truck_mut().velocity_mps = 29.0; // ~65 mph, well over ramp speed
-                                           // Out of the right lane, so the line owes the move.
+                                           // Out of the right lane.
         d.lane.lane_count = 2;
         d.lane.lane = 1;
     });
@@ -1064,11 +1064,11 @@ fn test_exit_speed_assist_slows_with_full_lane_keeping() {
         .filter(|line| line.contains("Exit speed assistance slowing"))
         .collect();
     assert!(!slowing.is_empty(), "{:?}", spoken(&harness));
-    // Never name a key this driver does not have: with lane keeping on full a
-    // tap changes lanes, and holding Right does nothing.
+    // No lane request at all: lane keeping on full moves right itself, and a
+    // tap into a lane it is waiting on is a sideswipe.
     let last = slowing.last().expect("a slowing line");
-    assert!(last.contains("Tap the Right arrow"), "{last}");
-    assert!(!last.contains("Hold the Right arrow"), "{last}");
+    assert!(!last.contains("Right arrow"), "{last}");
+    assert!(!last.contains("right lane"), "{last}");
 }
 
 #[test]

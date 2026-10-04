@@ -272,6 +272,10 @@ pub struct DrivingState {
     // Congestion badges: both kinds of slow inside one trip earns a nod.
     pub construction_seen: bool,
     pub traffic_seen: bool,
+    // Billboards that notice the drive: the record at the last pool sign,
+    // and how many pool signs this trip has read.
+    pub billboard_watch: crate::states::driving_events::billboard_moment::BillboardWatch,
+    pub pool_billboards_heard: usize,
     pub brake_squeal_cooldown_s: f64, // hot-brake squeal cue spacing
     pub hydro_active: bool,           // spoken hydroplane warning edge tracking
     pub jake_slip_active: bool,       // spoken jake-slip warning edge tracking
@@ -811,6 +815,12 @@ pub struct DrivingState {
     pub lane_change_target: Option<i64>,
     pub lane_change_timer: f64,
     pub lane_signal_timer: f64,
+    /// Lane keeping on full is passing a slow vehicle: (the lane to come
+    /// back to, the lane it passed into). See `pass_for_hazard`.
+    pub passing: Option<(i64, i64)>,
+    /// Lane keeping is moving back after a pass: the landing line is the
+    /// tail of going around traffic, not a lane change the driver made.
+    pub pass_returning: bool,
     pub merge_deadline: Option<f64>,
     // Miles of acceleration lane still ahead after pulling out of a
     // facility. None once the lane is behind the truck (or when the run

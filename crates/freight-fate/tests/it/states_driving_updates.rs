@@ -45,6 +45,7 @@ type LoopCall = (&'static str, u32, String);
 
 const LOCATOR: &str = "vehicle/lane_locator";
 const SIGNAL: &str = "vehicle/signal_tone";
+const BLINKER_OFF: &str = "vehicle/turn_signal_off";
 
 // -- rigging -------------------------------------------------------------------------
 //

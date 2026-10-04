@@ -4,6 +4,61 @@
    "id": "rb-web-3e9560a2-b36e-4e44-b3bb-c4368835b2f4",
    "name": "TheRadioStorm.com",
    "why": "read: the same station as the curated the-radio-storm, listed twice by the directory. Both addresses resolve to 198.37.123.243 port 8242 and answer with icy-name TheRadioStorm.com; checked 2026-09-18. The curated row drops the other listing on its URL, but this one's hostname differs, so it needs saying here."
+  },
+  {
+   "id": "rb-7f1c5042-7a97-46bc-96c8-72b8328aa0b4",
+   "name": "KDST",
+   "why": "read: the stream is KSDT, UC San Diego's student station (icy-name 'KSDT Radio', ksdt.ucsd.edu); the directory's misspelt call sign placed it at KDST's transmitter in Iowa. Checked 2026-10-03."
+  },
+  {
+   "id": "rb-dbeea354-e9ed-43dc-b7e6-e83c1955e5a7",
+   "name": "Seattle",
+   "why": "read: the stream is 106.1 KISS FM Seattle (KBKS-FM); the directory's 'KISS FM' call sign placed it at KISS in San Antonio. Checked 2026-10-03."
+  },
+  {
+   "id": "rb-06cc9253-4ce4-4975-9c96-75c1e97b1498",
+   "name": "WNNK",
+   "why": "read: the stream is WINK 104 Harrisburg (WNNK); the directory's 'WINK FM' call sign placed it at WINK in Fort Myers. Checked 2026-10-03."
+  },
+  {
+   "id": "rb-411532e4-8a6e-4bd9-b69c-030e9aae677a",
+   "name": "WHCF",
+   "why": "read: the stream identifies as Power 93.3 WXLN (wxlnradio.com), not WHCF in Bangor, Maine, where it was placed. Checked 2026-10-03."
+  },
+  {
+   "id": "rb-fcc-64ad2f11-8950-49cd-984c-43f8c3cc7f36",
+   "name": "KUBE 93.3",
+   "why": "read: the stream is iHeart's KJR-FM backup feed from Seattle, placed at a Pueblo, Colorado transmitter. Checked 2026-10-03."
+  },
+  {
+   "id": "rb-c60c6d49-1e50-11ea-a955-52543be04c81",
+   "name": "Rock",
+   "why": "read: the stream identifies as ROCK 94.3 WMCA, not KHYX in northern Nevada, where it was placed. Checked 2026-10-03."
+  },
+  {
+   "id": "rb-50df862e-f301-4ae5-8aa5-dedc656dc06b",
+   "name": "Z965 Radio",
+   "why": "read: the stream identifies as KSST, not WAZY in Lafayette, Indiana, where it was placed. Checked 2026-10-03."
+  },
+  {
+   "id": "rb-web-c0a15a90-ea72-49d5-b36a-814214e69f38",
+   "name": "Sfliny Christmas",
+   "why": "read: the address plays Sfliny Country (icy-name 'SFLINY Country'), the same stream as the Sfliny - Country listing. Checked 2026-10-03."
+  },
+  {
+   "id": "rb-web-a760fcbe-de29-4448-9595-05a061971cd8",
+   "name": "Mountain Chill KRKQ - 95.5 FM",
+   "why": "read: the same station as the FCC-placed KRKQ listing; the two addresses differ only in the case of the mount name. Checked 2026-10-03."
+  },
+  {
+   "id": "rb-web-ef54fc76-d141-11e9-a861-52543be04c81",
+   "name": "Truckers Radio USA",
+   "why": "read: the same station as the curated truckers-radio-usa, on the 64k /low mount where the curated row uses the 192k /listen mount; both answer with icy-name 'Truckers Radio USA'. Checked 2026-10-03."
+  },
+  {
+   "id": "rb-web-ac721368-0ba0-4b89-b895-010b4dec5720",
+   "name": "K103",
+   "why": "read: the same iHeart stream (zc1957) as the curated kkcw-portland (K103), on a pinned edge host the URL match does not fold. Checked 2026-10-03."
   }
  ],
  "notes": "Hand curation the importer cannot derive, applied by tools/import_radio_catalog.py on top of what it builds. Every entry carries a why, and each one is a judgement about a single station: a name the source mangled past any rule, a format its keyword tags do not give, or a station the directory lists twice. Rules that hold for many stations belong in the cleaners instead, not here. An id no longer in the build is an error, not a no-op: the tool says so, so a stale entry is noticed rather than silently ignored.",
@@ -29,11 +84,6 @@
    "format": "christmas",
    "name": "Christmas104 (Star104)",
    "why": "read: the stream identifies itself as 'Christmas104' at star104.net; the network is named in brackets, as with the other Star104 channels."
-  },
-  "rb-web-b4844481-c223-4fa0-9229-e0a19541c163": {
-   "format": "country",
-   "name": "Country104 (Star104)",
-   "why": "read: the stream identifies itself as 'Country104' at star104.net; the network is named in brackets so the four Star104 channels read as one station's channels."
   },
   "rb-web-b7f92f2e-0f4b-486d-a3c4-8d5051c37e6c": {
    "stream_format": "mp3",

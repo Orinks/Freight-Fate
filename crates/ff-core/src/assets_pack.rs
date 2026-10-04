@@ -572,7 +572,7 @@ pub fn open_default() -> Option<Arc<CombinedPack>> {
 // ---------------------------------------------------------------------------
 // Generated sounds
 //
-// Runtime-synthesized cues (the ladder earcons, the lane guide tone, the
+// Runtime-synthesized cues (the lane guide tone, the
 // enforcement signature) are published under ordinary sound keys and win
 // over every pack and loose file: `audio._asset_bytes` checks `_GENERATED`
 // first, so a synthesized cue plays through the same path as a packed asset
@@ -963,37 +963,33 @@ mod tests {
             return;
         }
         let pack_bytes = std::fs::read(&path).unwrap();
-        // Repacked 2026-08-29 (the scale verdict tones): added the procedural
-        // events/scale_green.ogg and events/scale_red.ogg cues, which the code
-        // and the sound catalog both named while the pack carried neither --
-        // and the release ships THIS pack rather than baking a fresh one, so
-        // both lights changed in silence for players. 162 entries, the prior
-        // 160 preserved byte for byte plus the two new assets.
-        //
-        // Merged into rather than rebuilt, deliberately: a plain
-        // `tools/pack_sounds.py` run on the current builder machine yields
-        // 113 entries, because 60 API-generated effects are no longer in the
-        // loose tree. Re-baking here would silently drop them.
-        //
-        // Repacked 2026-08-14 (weigh-station warning earcon): added the
-        // procedural events/weigh_station_warning.ogg cue (owner ruling --
-        // the scale gets its own earcon instead of reusing the shared
-        // inspection cue), taking the pack from 159 entries to 160.
-        //
-        // Repacked 2026-09-11 (traffic cues): the eleven pass and crossing
-        // cues from 2026-08-20 regenerated through the ElevenLabs Sound
-        // Effects API and merged in, 162 -> 173 entries, the prior 162 kept
-        // byte for byte.
-        assert_eq!(pack_bytes.len(), 8_278_280);
         assert!(pack_bytes.starts_with(PACK_MAGIC));
-        use sha2::{Digest, Sha256};
-        let digest = hex::encode(Sha256::digest(&pack_bytes));
-        assert_eq!(
-            digest,
-            "33e35cab8258f5eccaf5553d698ffcfca24d65e986bd579f24579250a981bae6"
-        );
+        // The release ships THIS pack, so what has to hold is that it carries
+        // every cue the game teaches -- the failure that happened was cues
+        // missing from it (the scale lights, 2026-08-29) and a re-bake from
+        // the incomplete loose tree dropping 60 effects. A deliberate swap of
+        // one sound is not a failure, so size and hash are not pinned.
         let pack = SoundPack::open(&path).unwrap();
-        assert_eq!(pack.names().len(), 173);
+        // Synthesized cues are not packed: the guide tone publishes itself
+        // here, and enforcement/ is the game crate's siren signature.
+        crate::lane_guide_tone::register_lane_guide_tone();
+        let ships = |key: &str| {
+            !key.is_empty()
+                && (key.starts_with("enforcement/")
+                    || ["ogg", "wav"]
+                        .iter()
+                        .any(|ext| pack.has(&format!("{key}.{ext}")))
+                    || generated_sound(key).is_some())
+        };
+        let missing: Vec<&str> = crate::sound_catalog::catalog_entries()
+            .flat_map(|entry| entry.plays.iter())
+            .filter(|cue| !ships(cue.key) && !ships(cue.fallback))
+            .map(|cue| cue.key)
+            .collect();
+        assert!(
+            missing.is_empty(),
+            "taught but not in sounds.pak: {missing:?}"
+        );
     }
 
     #[test]
@@ -1002,18 +998,8 @@ mod tests {
         if !committed_pack(&path) {
             return;
         }
-        // Split out of sounds.pak on 2026-08-14 alongside the radio
-        // station-identity batch: 356 entries, the music/ subtree plus the new
-        // station jingles and songs. 358 since 2026-08-26 (Dangerous Dan,
-        // Dial-up Summer); 359 since 2026-08-30, when Four Sources and the
-        // Truth joined the country pool; 378 since 2026-09-11 (the gospel,
-        // tejano, synthwave and Night Line song batch); 380 since 2026-09-13
-        // (D-Major Medley and From Bossa to Blues); 405 since 2026-09-19
-        // (25 selected radio songs); 426 since 2026-09-25 (eight jazz songs,
-        // ten station IDs, three hiring ads). Only the size and header are
-        // checked here: hashing the whole pack is the Python suite's job, once.
-        let len = std::fs::metadata(&path).unwrap().len();
-        assert_eq!(len, 392_392_427);
+        // Only the header: tools/build_release.py checks the download against
+        // DEFAULT_MUSIC_SHA256 before every release build.
         let mut head = [0u8; 6];
         std::fs::File::open(&path)
             .unwrap()

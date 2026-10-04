@@ -987,6 +987,16 @@
             "spoken": "Passing Leesburg"
           },
           {
+            "name": "Flint River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.6,
+            "spoken": "Crossing the Flint River",
+            "lat": 31.5769,
+            "lon": -84.14726,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 909927259 (Flint River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Putney",
             "at_mi": 10.0,
             "off_mi": 0.04,
@@ -996,11 +1006,14 @@
             "spoken": "Entering Putney"
           },
           {
-            "name": "Flint River",
-            "category": "river",
+            "name": "Ray Charles Plaza (northbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 10.2,
-            "spoken": "Crossing the Flint River"
+            "at_mi": 12.4,
+            "spoken": "Billboard: Albany, ahead, where Ray Charles was born. A bronze of him at the piano turns slowly in the plaza downtown. He has not missed a show.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Baconton",
@@ -1069,8 +1082,11 @@
             "name": "Ochlockonee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 54.1,
-            "spoken": "Crossing the Ochlockonee River"
+            "at_mi": 60.8,
+            "spoken": "Crossing the Ochlockonee River",
+            "lat": 30.79154,
+            "lon": -84.15462,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 337047360 (Ochlockonee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Thomasville",
@@ -1089,6 +1105,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154183839, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Metcalfe"
+          },
+          {
+            "name": "Historic Capitol (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 78.0,
+            "spoken": "Billboard: Florida's Historic Capitol, ahead in Tallahassee. The plan was to tear it down for the twenty-two story tower. People said no, and the striped awnings stayed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Midway",
@@ -2107,6 +2133,16 @@
             "spoken": "Passing Leesburg"
           },
           {
+            "name": "Flint River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.6,
+            "spoken": "Crossing the Flint River",
+            "lat": 31.5769,
+            "lon": -84.14726,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 909927259 (Flint River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Putney",
             "at_mi": 2.0,
             "off_mi": 7.38,
@@ -2116,11 +2152,14 @@
             "spoken": "Passing Putney"
           },
           {
-            "name": "Flint River",
-            "category": "river",
+            "name": "Ray Charles Plaza (westbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 5.1,
-            "spoken": "Crossing the Flint River"
+            "at_mi": 10.0,
+            "spoken": "Billboard: Albany, ahead, where Ray Charles was born. A bronze of him at the piano turns slowly in the plaza downtown. He has not missed a show.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Poulan",
@@ -2141,13 +2180,6 @@
             "spoken": "Entering Ty Ty"
           },
           {
-            "name": "Little River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 36.8,
-            "spoken": "Crossing the Little River"
-          },
-          {
             "name": "Omega",
             "at_mi": 38.4,
             "off_mi": 6.9,
@@ -2155,6 +2187,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154310380, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Omega"
+          },
+          {
+            "name": "Little River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 38.7,
+            "spoken": "Crossing the Little River",
+            "lat": 31.43931,
+            "lon": -83.56018,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 370397673 (Little River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Enigma",
@@ -3459,6 +3501,16 @@
             "spoken": "Passing Leesburg"
           },
           {
+            "name": "Flint River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.6,
+            "spoken": "Crossing the Flint River",
+            "lat": 31.5769,
+            "lon": -84.14726,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 909927259 (Flint River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Putney",
             "at_mi": 7.9,
             "off_mi": 4.32,
@@ -3468,13 +3520,6 @@
             "spoken": "Passing Putney"
           },
           {
-            "name": "Flint River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 10.0,
-            "spoken": "Crossing the Flint River"
-          },
-          {
             "name": "Baconton",
             "at_mi": 11.5,
             "off_mi": 11.04,
@@ -3482,6 +3527,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153904251, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Baconton"
+          },
+          {
+            "name": "Ray Charles Plaza (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.2,
+            "spoken": "Billboard: Albany, ahead, where Ray Charles was born. A bronze of him at the piano turns slowly in the plaza downtown. He has not missed a show.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sylvester",
@@ -3514,15 +3569,11 @@
             "name": "Ochlockonee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 30.1,
-            "spoken": "Crossing the Ochlockonee River"
-          },
-          {
-            "name": "Little Ochlockonee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 30.1,
-            "spoken": "Crossing the Little Ochlockonee River"
+            "at_mi": 33.2,
+            "spoken": "Crossing the Ochlockonee River",
+            "lat": 31.24669,
+            "lon": -83.83407,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 808535856 (Ochlockonee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Funston",
@@ -3622,18 +3673,34 @@
             "spoken": "Passing Quitman"
           },
           {
+            "name": "Wild Adventures (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.3,
+            "spoken": "Billboard: Wild Adventures, ahead, south of Valdosta. Six roller coasters and a zoo in one park. The animals have chosen not to ride.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Little River",
             "category": "river",
             "kind": "point",
-            "at_mi": 71.5,
-            "spoken": "Crossing the Little River"
+            "at_mi": 75.0,
+            "spoken": "Crossing the Little River",
+            "lat": 30.85283,
+            "lon": -83.3467,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 370213784 (Little River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Withlacoochee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 71.5,
-            "spoken": "Crossing the Withlacoochee River"
+            "at_mi": 75.5,
+            "spoken": "Crossing the Withlacoochee River",
+            "lat": 30.85003,
+            "lon": -83.33958,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 639447821 (Withlacoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Dasher",
@@ -4646,6 +4713,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154170504, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Leesburg"
+          },
+          {
+            "name": "Ray Charles Plaza (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.1,
+            "spoken": "Billboard: Albany, ahead, where Ray Charles was born. A bronze of him at the piano turns slowly in the plaza downtown. He has not missed a show.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Putney",
@@ -5802,6 +5879,16 @@
             "spoken": "Passing Ellaville"
           },
           {
+            "name": "Jimmy Carter National Historical Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 2.0,
+            "spoken": "Billboard: Plains, ahead, home of President Jimmy Carter. The old train depot, the oldest building in town, ran his nineteen seventy-six campaign. Open daily.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Smithville",
             "at_mi": 3.26,
             "off_mi": 10.88,
@@ -5829,6 +5916,16 @@
             "spoken": "Entering Preston"
           },
           {
+            "name": "Jimmy Carter National Historical Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.6,
+            "spoken": "Billboard: Plains, ahead, home of President Jimmy Carter. The old train depot, the oldest building in town, ran his nineteen seventy-six campaign. Open daily.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Richland",
             "at_mi": 28.16,
             "off_mi": 0.01,
@@ -5854,6 +5951,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153895486, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cusseta"
+          },
+          {
+            "name": "The National Infantry Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.0,
+            "spoken": "Billboard: The National Infantry Museum, ahead in Columbus. Free admission, from the Revolution to today. The infantry walked here. You get to drive.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Ladonia",
@@ -7296,8 +7403,11 @@
             "name": "Middle Oconee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 7.8,
-            "spoken": "Crossing the Middle Oconee River"
+            "at_mi": 5.0,
+            "spoken": "Crossing the Middle Oconee River",
+            "lat": 33.95608,
+            "lon": -83.4374,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 29070760 (Middle Oconee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Watkinsville",
@@ -7345,13 +7455,6 @@
             "spoken": "Passing Bethlehem"
           },
           {
-            "name": "Apalachee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 25.6,
-            "spoken": "Crossing the Apalachee River"
-          },
-          {
             "name": "Carl",
             "at_mi": 30.9,
             "off_mi": 2.52,
@@ -7359,6 +7462,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153964520, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Carl"
+          },
+          {
+            "name": "Apalachee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 31.7,
+            "spoken": "Crossing the Apalachee River",
+            "lat": 33.96995,
+            "lon": -83.83327,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 34480609 (Apalachee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Auburn",
@@ -8878,6 +8991,16 @@
             "spoken": "Passing Nicholson"
           },
           {
+            "name": "North Oconee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.0,
+            "spoken": "Crossing the North Oconee River",
+            "lat": 33.95458,
+            "lon": -83.36814,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 28994654 (North Oconee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Watkinsville",
             "at_mi": 1.7,
             "off_mi": 6.53,
@@ -8900,7 +9023,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Athens is the birthplace of R E M and the B-Fifty-Twos. This college town produced more good bands than it had any right to."
+            "spoken": "Billboard: Athens is the birthplace of R E M and the B-Fifty-Twos. This college town produced more good bands than it had any right to.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hull",
@@ -8937,13 +9063,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154083079, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Arnoldsville"
-          },
-          {
-            "name": "North Oconee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.8,
-            "spoken": "Crossing the North Oconee River"
           },
           {
             "name": "Crawford",
@@ -11626,33 +11745,35 @@
             "source": "Real town on I-75 between athens_ga_us and chattanooga_tn_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.81 mi off-route at closest approach)."
           },
           {
-            "name": "Fort Oglethorpe",
-            "at_mi": 168.8,
-            "type": "place",
-            "state": "Georgia",
-            "highway": "I-75",
-            "lat": 34.949,
-            "lon": -85.2569,
-            "source": "Real town on I-75 between athens_ga_us and chattanooga_tn_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.4 mi off-route at closest approach)."
+            "name": "East Ridge",
+            "at_mi": 171.1,
+            "type": "town",
+            "state": "Tennessee",
+            "highway": "I-24",
+            "lat": 35.01424,
+            "lon": -85.2519,
+            "source": "OSM village/town cache node 153747734; OpenStreetMap US PBF dated 2026-09-29 ref I 24; real place on I-24 between athens_ga_us and chattanooga_tn_us; position matched to the nearest point on the archived dense route geometry (0.12 mi off-route at closest approach)."
           }
         ],
         "state_miles": [
           {
             "state": "Georgia",
-            "miles": 172.0
+            "miles": 167.5,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Tennessee",
-            "miles": 5.0
+            "miles": 9.5,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 172.0,
+            "at_mi": 167.5,
             "from_state": "Georgia",
             "state": "Tennessee",
             "place": "Georgia-Tennessee line on I-75",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -12988,6 +13109,16 @@
             "spoken": "Passing Auburn"
           },
           {
+            "name": "Apalachee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 31.9,
+            "spoken": "Crossing the Apalachee River",
+            "lat": 33.96993,
+            "lon": -83.83327,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 34480609 (Apalachee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Dacula",
             "at_mi": 35.4,
             "off_mi": 1.03,
@@ -12995,13 +13126,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154083096, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dacula"
-          },
-          {
-            "name": "Apalachee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 43.0,
-            "spoken": "Crossing the Apalachee River"
           },
           {
             "name": "Duluth",
@@ -13094,6 +13218,16 @@
             "spoken": "Passing Brookhaven"
           },
           {
+            "name": "Chattahoochee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 70.3,
+            "spoken": "Crossing the Chattahoochee River",
+            "lat": 33.90179,
+            "lon": -84.44289,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 484301356 (Chattahoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Vinings",
             "at_mi": 71.3,
             "off_mi": 1.95,
@@ -13101,13 +13235,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154361589, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Vinings"
-          },
-          {
-            "name": "Chattahoochee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 72.6,
-            "spoken": "Crossing the Chattahoochee River"
           },
           {
             "name": "The Big Chicken",
@@ -13135,6 +13262,16 @@
             "spoken": "Passing Kennesaw"
           },
           {
+            "name": "The Big Chicken (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 85.6,
+            "spoken": "Billboard: The Big Chicken is ahead near Marietta. This fifty-six-foot chicken-shaped restaurant rolls its eyes, moves its beak, and has confused Atlanta families giving directions for generations.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Rosenwald School",
             "category": "museum",
             "kind": "point",
@@ -13145,8 +13282,21 @@
             "name": "Etowah River",
             "category": "river",
             "kind": "point",
-            "at_mi": 101.1,
-            "spoken": "Crossing the Etowah River"
+            "at_mi": 99.2,
+            "spoken": "Crossing the Etowah River",
+            "lat": 34.16,
+            "lon": -84.75371,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 290287736 (Etowah River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Tellus Science Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 104.6,
+            "spoken": "Billboard: Tellus Science Museum, next exit. A dinosaur skeleton stands in the lobby, and the planetarium has the rest of the universe. Allow an afternoon.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "White",
@@ -13158,11 +13308,14 @@
             "spoken": "Passing White"
           },
           {
-            "name": "Goats on the Roof",
+            "name": "Tellus Science Museum (southbound)",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 115.0,
-            "spoken": "Billboard: Goats on the Roof is ahead. There are real goats on a real roof, because ground-level goats were failing to stop traffic."
+            "at_mi": 107.6,
+            "spoken": "Billboard: Tellus Science Museum, next exit. A dinosaur skeleton stands in the lobby, and the planetarium has the rest of the universe. Allow an afternoon.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Adairsville",
@@ -13208,6 +13361,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153573354, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Ringgold"
+          },
+          {
+            "name": "Ruby Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 164.5,
+            "spoken": "Billboard: Ruby Falls, ahead in Chattanooga. A waterfall more than a thousand feet inside Lookout Mountain, named for the finder's wife. Beat that on your anniversary.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Rossville",
@@ -14322,6 +14485,16 @@
         ],
         "landmarks": [
           {
+            "name": "North Oconee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.0,
+            "spoken": "Crossing the North Oconee River",
+            "lat": 33.95458,
+            "lon": -83.36814,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 28994654 (North Oconee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Watkinsville",
             "at_mi": 1.9,
             "off_mi": 6.53,
@@ -14356,13 +14529,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154083079, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Arnoldsville"
-          },
-          {
-            "name": "North Oconee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.4,
-            "spoken": "Crossing the North Oconee River"
           },
           {
             "name": "Maxeys",
@@ -14435,13 +14601,6 @@
             "spoken": "Passing Grovetown"
           },
           {
-            "name": "Savannah River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 86.3,
-            "spoken": "Crossing the Savannah River"
-          },
-          {
             "name": "Evans",
             "at_mi": 88.7,
             "off_mi": 4.04,
@@ -14449,6 +14608,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154338390, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Evans"
+          },
+          {
+            "name": "Savannah River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 95.3,
+            "spoken": "Crossing the Savannah River",
+            "lat": 33.53166,
+            "lon": -82.01205,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 41303907 (Savannah River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Belvedere",
@@ -14586,6 +14755,16 @@
             "spoken": "Passing South Congaree"
           },
           {
+            "name": "Riverbanks Zoo and Garden (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 152.2,
+            "spoken": "Billboard: Riverbanks Zoo and Garden, ahead in Columbia. Three thousand animals beside the Saluda River. None of them has ever had to merge.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pine Ridge",
             "at_mi": 152.3,
             "off_mi": 6.8,
@@ -14598,15 +14777,11 @@
             "name": "Saluda River",
             "category": "river",
             "kind": "point",
-            "at_mi": 158.7,
-            "spoken": "Crossing the Saluda River"
-          },
-          {
-            "name": "Congaree River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 158.7,
-            "spoken": "Crossing the Congaree River"
+            "at_mi": 158.1,
+            "spoken": "Crossing the Saluda River",
+            "lat": 34.02556,
+            "lon": -81.12834,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1073075880 (Saluda River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Springdale",
@@ -16573,20 +16748,22 @@
         "state_miles": [
           {
             "state": "Georgia",
-            "miles": 100.7
+            "miles": 95.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "South Carolina",
-            "miles": 64.3
+            "miles": 69.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 100.7,
+            "at_mi": 95.3,
             "from_state": "Georgia",
             "state": "South Carolina",
             "place": "Georgia-South Carolina line on I-20",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -17996,6 +18173,16 @@
             "spoken": "Passing Watkinsville"
           },
           {
+            "name": "North Oconee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.6,
+            "spoken": "Crossing the North Oconee River",
+            "lat": 33.96616,
+            "lon": -83.3717,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 28994654 (North Oconee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Hull",
             "at_mi": 1.7,
             "off_mi": 4.63,
@@ -18012,13 +18199,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154068467, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Winterville"
-          },
-          {
-            "name": "North Oconee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.4,
-            "spoken": "Crossing the North Oconee River"
           },
           {
             "name": "Arcade",
@@ -18075,25 +18255,24 @@
             "spoken": "Passing Homer"
           },
           {
-            "name": "Middle Fork Broad River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 36.1,
-            "spoken": "Crossing the Middle Fork Broad River"
-          },
-          {
             "name": "Hudson River",
             "category": "river",
             "kind": "point",
-            "at_mi": 36.1,
-            "spoken": "Crossing the Hudson River"
+            "at_mi": 27.6,
+            "spoken": "Crossing the Hudson River",
+            "lat": 34.29267,
+            "lon": -83.41526,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1213933015 (Hudson River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
-            "name": "North Fork Broad River",
+            "name": "Middle Fork Broad River",
             "category": "river",
             "kind": "point",
-            "at_mi": 36.1,
-            "spoken": "Crossing the North Fork Broad River"
+            "at_mi": 37.5,
+            "spoken": "Crossing the Middle Fork Broad River",
+            "lat": 34.37041,
+            "lon": -83.27192,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1213933012 (Middle Fork Broad River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Carnesville",
@@ -18103,6 +18282,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154079513, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Carnesville"
+          },
+          {
+            "name": "North Fork Broad River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 43.2,
+            "spoken": "Crossing the North Fork Broad River",
+            "lat": 34.41088,
+            "lon": -83.18727,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1212908631 (North Fork Broad River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Eastanollee",
@@ -18144,8 +18333,11 @@
             "name": "Tugaloo River",
             "category": "river",
             "kind": "point",
-            "at_mi": 62.5,
-            "spoken": "Crossing the Tugaloo River"
+            "at_mi": 53.7,
+            "spoken": "Crossing the Tugaloo River",
+            "lat": 34.48382,
+            "lon": -83.02841,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 584987877 (Tugaloo River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pendleton",
@@ -18202,13 +18394,6 @@
             "spoken": "Passing Pelzer"
           },
           {
-            "name": "Reedy River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 88.3,
-            "spoken": "Crossing the Reedy River"
-          },
-          {
             "name": "Piedmont",
             "at_mi": 89.0,
             "off_mi": 2.05,
@@ -18216,6 +18401,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154323881, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Piedmont"
+          },
+          {
+            "name": "Falls Park on the Reedy (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 91.0,
+            "spoken": "Billboard: Falls Park, ahead in Greenville. A waterfall downtown, and a footbridge that curves over it, hung from cables on one side only. It holds.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Easley",
@@ -18261,6 +18456,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154193223, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mauldin"
+          },
+          {
+            "name": "Reedy River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 100.3,
+            "spoken": "Crossing the Reedy River",
+            "lat": 34.84247,
+            "lon": -82.39863,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 38013829 (Reedy River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Berea",
@@ -19848,7 +20053,20 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Athens is home to the Tree That Owns Itself, a white oak said to hold the deed to the ground where it grows. That tree owns more property than most people."
+            "spoken": "Billboard: Athens is home to the Tree That Owns Itself, a white oak said to hold the deed to the ground where it grows. That tree owns more property than most people.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Middle Oconee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "Crossing the Middle Oconee River",
+            "lat": 33.91582,
+            "lon": -83.39354,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 29070760 (Middle Oconee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Bogart",
@@ -19878,20 +20096,6 @@
             "spoken": "Passing Watkinsville"
           },
           {
-            "name": "Middle Oconee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.5,
-            "spoken": "Crossing the Middle Oconee River"
-          },
-          {
-            "name": "Apalachee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.5,
-            "spoken": "Crossing the Apalachee River"
-          },
-          {
             "name": "Bishop",
             "at_mi": 12.8,
             "off_mi": 0.0,
@@ -19919,6 +20123,16 @@
             "spoken": "Passing Good Hope"
           },
           {
+            "name": "Apalachee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 21.0,
+            "spoken": "Crossing the Apalachee River",
+            "lat": 33.71898,
+            "lon": -83.43422,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1255446425 (Apalachee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Bostwick",
             "at_mi": 21.4,
             "off_mi": 4.56,
@@ -19931,8 +20145,11 @@
             "name": "The Town Sherman Spared",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 29.0,
-            "spoken": "Billboard: Madison is ahead, the town said to have been too pretty to burn. Sherman marched past and left the mansions standing, and they stand yet."
+            "at_mi": 24.0,
+            "spoken": "Billboard: Madison is ahead, the town said to have been too pretty to burn. Sherman marched past and left the mansions standing, and they stand yet.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Rutledge",
@@ -19942,6 +20159,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154342522, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rutledge"
+          },
+          {
+            "name": "The Town Sherman Spared (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.2,
+            "spoken": "Billboard: Madison is ahead, the town said to have been too pretty to burn. Sherman marched past and left the mansions standing, and they stand yet.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Shady Dale",
@@ -19962,18 +20189,21 @@
             "spoken": "Passing Lake Oconee"
           },
           {
+            "name": "Uncle Remus Country",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.5,
+            "spoken": "Billboard: Eatonton is home to Br'er Rabbit. The old Uncle Remus tales were set down here, and a statue of the rabbit himself stands watch at the courthouse.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Bledsoe-Green House Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 51.8,
             "spoken": "Bledsoe-Green House Museum ahead"
-          },
-          {
-            "name": "Uncle Remus Country",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 53.0,
-            "spoken": "Billboard: Eatonton is home to Br'er Rabbit. The old Uncle Remus tales were set down here, and a statue of the rabbit himself stands watch at the courthouse."
           },
           {
             "name": "Crooked Creek",
@@ -19988,8 +20218,21 @@
             "name": "Little River",
             "category": "river",
             "kind": "point",
-            "at_mi": 57.9,
-            "spoken": "Crossing the Little River"
+            "at_mi": 59.0,
+            "spoken": "Crossing the Little River",
+            "lat": 33.26161,
+            "lon": -83.41803,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1257047224 (Little River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Uncle Remus Country (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.3,
+            "spoken": "Billboard: Eatonton is home to Br'er Rabbit. The old Uncle Remus tales were set down here, and a statue of the rabbit himself stands watch at the courthouse.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gray",
@@ -20001,13 +20244,6 @@
             "spoken": "Passing Gray"
           },
           {
-            "name": "Ocmulgee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 82.0,
-            "spoken": "Crossing the Ocmulgee River"
-          },
-          {
             "name": "Clinton",
             "at_mi": 82.3,
             "off_mi": 1.08,
@@ -20015,6 +20251,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154394684, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Clinton"
+          },
+          {
+            "name": "Ocmulgee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 93.4,
+            "spoken": "Crossing the Ocmulgee River",
+            "lat": 32.84587,
+            "lon": -83.62818,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1012575586 (Ocmulgee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -20749,11 +20995,11 @@
         ],
         "state_crossings": [
           {
-            "at_mi": 68.5,
+            "at_mi": 57.3,
             "from_state": "Georgia",
             "state": "Alabama",
             "place": "Georgia-Alabama line near Tallapoosa",
-            "source": "Curated from I-20 corridor state sequence and checked route geometry."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "checkpoints": [
@@ -20768,12 +21014,14 @@
             "source": "Real town on I-20 between atlanta_ga_us and birmingham_al_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.61 mi off-route at closest approach)."
           },
           {
-            "name": "Tallapoosa and Alabama line approach",
-            "at_mi": 64.6,
+            "name": "Tallapoosa",
+            "at_mi": 53.7,
             "type": "place",
             "state": "Georgia",
             "highway": "I-20",
-            "source": "Curated OSM/OSRM corridor checkpoint."
+            "lat": 33.68375,
+            "lon": -85.27992,
+            "source": "Place identity and coordinates read from village cache node 153597613 (Tallapoosa, 33.744291,-85.287989); checkpoint coordinates projected from that node onto the archived I-20 route at mile 53.7, before the Georgia-Alabama line; road verified on OSM way 46213558 ref I 20 in Geofabrik us-latest 2026-09-29.; real place on I-20 between atlanta_ga_us and birmingham_al_us; position matched to the nearest point on the archived dense route geometry (0.0 mi off-route at closest approach)."
           },
           {
             "name": "Oxford",
@@ -20799,11 +21047,13 @@
         "state_miles": [
           {
             "state": "Georgia",
-            "miles": 68.5
+            "miles": 57.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Alabama",
-            "miles": 77.5
+            "miles": 88.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "interchanges": [
@@ -22018,6 +22268,16 @@
             "spoken": "Passing Fruithurst"
           },
           {
+            "name": "Tallapoosa River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 62.7,
+            "spoken": "Crossing the Tallapoosa River",
+            "lat": 33.64685,
+            "lon": -85.42924,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1257322626 (Tallapoosa River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Edwardsville",
             "at_mi": 66.6,
             "off_mi": 4.22,
@@ -22034,13 +22294,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153704319, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Heflin"
-          },
-          {
-            "name": "Tallapoosa River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 73.2,
-            "spoken": "Crossing the Tallapoosa River"
           },
           {
             "name": "Choccolocco",
@@ -22061,6 +22314,16 @@
             "spoken": "Passing Hobson City"
           },
           {
+            "name": "Talladega (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 90.5,
+            "spoken": "Billboard: Talladega is ahead, home to the biggest and fastest superspeedway in NASCAR. Cars run flat out in a pack around more than two and a half miles of high banking, and a movie taught the nation that if you ain't first, you're last.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Munford",
             "at_mi": 93.8,
             "off_mi": 3.56,
@@ -22068,13 +22331,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153518525, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Munford"
-          },
-          {
-            "name": "Coosa River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 102.9,
-            "spoken": "Crossing the Coosa River"
           },
           {
             "name": "Lincoln",
@@ -22086,6 +22342,16 @@
             "spoken": "Passing Lincoln"
           },
           {
+            "name": "Coosa River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 107.3,
+            "spoken": "Crossing the Coosa River",
+            "lat": 33.59396,
+            "lon": -86.18421,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 188284383 (Coosa River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Riverside",
             "at_mi": 108.8,
             "off_mi": 0.39,
@@ -22093,6 +22359,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 11115471247, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Riverside"
+          },
+          {
+            "name": "Talladega",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 113.0,
+            "spoken": "Billboard: Talladega is ahead, home to the biggest and fastest superspeedway in NASCAR. Cars run flat out in a pack around more than two and a half miles of high banking, and a movie taught the nation that if you ain't first, you're last.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Moody",
@@ -22122,6 +22398,16 @@
             "spoken": "Passing Trussville"
           },
           {
+            "name": "The Barber Motorsports Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 131.0,
+            "spoken": "Billboard: The Barber Vintage Motorsports Museum, next exit. Nine hundred motorcycles on display, the world's largest motorcycle museum. Every one of them gets better mileage.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Dunnavant",
             "at_mi": 131.3,
             "off_mi": 4.37,
@@ -22129,6 +22415,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153543387, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dunnavant"
+          },
+          {
+            "name": "The Barber Motorsports Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 133.2,
+            "spoken": "Billboard: The Barber Vintage Motorsports Museum, next exit. Nine hundred motorcycles on display, the world's largest motorcycle museum. Every one of them gets better mileage.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Vulcan (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 136.0,
+            "spoken": "Billboard: Vulcan, ahead in Birmingham. The largest cast iron statue in the world stands on Red Mountain. His bare backside has faced Homewood since nineteen thirty-nine.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Irondale",
@@ -28436,43 +28742,43 @@
         "checkpoints": [
           {
             "name": "Douglasville",
-            "at_mi": 22.0,
+            "at_mi": 26.1,
             "type": "place",
             "state": "Georgia",
             "highway": "I-20",
             "lat": 33.7515,
             "lon": -84.7477,
-            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.41 mi off-route at closest approach)."
+            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.41 mi off-route at closest approach).; real place on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the archived dense route geometry (1.41 mi off-route at closest approach)."
           },
           {
             "name": "Temple",
-            "at_mi": 39.1,
+            "at_mi": 43.2,
             "type": "place",
             "state": "Georgia",
             "highway": "I-20",
             "lat": 33.7371,
             "lon": -85.0324,
-            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.45 mi off-route at closest approach)."
+            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.45 mi off-route at closest approach).; real place on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the archived dense route geometry (1.5 mi off-route at closest approach)."
           },
           {
             "name": "Oxford",
-            "at_mi": 86.8,
+            "at_mi": 90.9,
             "type": "place",
             "state": "Alabama",
             "highway": "I-20",
             "lat": 33.6143,
             "lon": -85.835,
-            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.63 mi off-route at closest approach)."
+            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.63 mi off-route at closest approach).; real place on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the archived dense route geometry (0.71 mi off-route at closest approach)."
           },
           {
             "name": "Pell City",
-            "at_mi": 113.9,
+            "at_mi": 117.0,
             "type": "place",
             "state": "Alabama",
             "highway": "I-20",
             "lat": 33.5862,
             "lon": -86.2861,
-            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.33 mi off-route at closest approach)."
+            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.33 mi off-route at closest approach).; real place on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the archived dense route geometry (1.41 mi off-route at closest approach)."
           },
           {
             "name": "Irondale",
@@ -28485,14 +28791,14 @@
             "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.53 mi off-route at closest approach)."
           },
           {
-            "name": "Bessemer",
-            "at_mi": 159.9,
-            "type": "place",
+            "name": "McCalla",
+            "at_mi": 167.6,
+            "type": "town",
             "state": "Alabama",
             "highway": "I-20",
-            "lat": 33.4018,
-            "lon": -86.9544,
-            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.06 mi off-route at closest approach)."
+            "lat": 33.34872,
+            "lon": -87.01416,
+            "source": "OSM village/town cache node 153402493; OpenStreetMap US PBF dated 2026-09-29 ref I 20; real place on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the archived dense route geometry (0.78 mi off-route at closest approach)."
           },
           {
             "name": "Coaling",
@@ -28675,66 +28981,71 @@
             "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.37 mi off-route at closest approach)."
           },
           {
-            "name": "Canton",
-            "at_mi": 724.0,
-            "type": "place",
+            "name": "Myrtle Springs",
+            "at_mi": 729.3,
+            "type": "village",
             "state": "Texas",
             "highway": "I-20",
-            "lat": 32.5565,
-            "lon": -95.8633,
-            "source": "Real town on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.57 mi off-route at closest approach)."
+            "lat": 32.61045,
+            "lon": -95.93167,
+            "source": "OSM village/town cache node 151446276; OpenStreetMap US PBF dated 2026-09-29 ref I 20; real place on I-20 between atlanta_ga_us and dallas_tx_us; position matched to the nearest point on the archived dense route geometry (0.67 mi off-route at closest approach)."
           }
         ],
         "state_miles": [
           {
             "state": "Georgia",
-            "miles": 89.3
+            "miles": 61.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Alabama",
-            "miles": 200.4
+            "miles": 212.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Mississippi",
-            "miles": 170.6
+            "miles": 154.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Louisiana",
-            "miles": 165.5
+            "miles": 188.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 157.2
+            "miles": 166.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 89.3,
+            "at_mi": 61.3,
             "from_state": "Georgia",
             "state": "Alabama",
             "place": "Georgia-Alabama line on I-20",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
-            "at_mi": 289.7,
+            "at_mi": 273.4,
             "from_state": "Alabama",
             "state": "Mississippi",
             "place": "Alabama-Mississippi line on I-20",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
-            "at_mi": 460.4,
+            "at_mi": 427.5,
             "from_state": "Mississippi",
             "state": "Louisiana",
             "place": "Mississippi-Louisiana line on I-20",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
-            "at_mi": 625.9,
+            "at_mi": 616.4,
             "from_state": "Louisiana",
             "state": "Texas",
             "place": "Louisiana-Texas line on I-20",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -33535,8 +33846,11 @@
             "name": "Tallapoosa River",
             "category": "river",
             "kind": "point",
-            "at_mi": 48.7,
-            "spoken": "Crossing the Tallapoosa River"
+            "at_mi": 66.6,
+            "spoken": "Crossing the Tallapoosa River",
+            "lat": 33.64685,
+            "lon": -85.42924,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1257322626 (Tallapoosa River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Hobson City",
@@ -33546,6 +33860,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153666289, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hobson City"
+          },
+          {
+            "name": "Talladega (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 94.4,
+            "spoken": "Billboard: Talladega is ahead, home to the biggest and fastest superspeedway in NASCAR. Cars run flat out in a pack around more than two and a half miles of high banking, and a movie taught the nation that if you ain't first, you're last.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Riverside",
@@ -33560,8 +33884,21 @@
             "name": "Coosa River",
             "category": "river",
             "kind": "point",
-            "at_mi": 115.0,
-            "spoken": "Crossing the Coosa River"
+            "at_mi": 111.2,
+            "spoken": "Crossing the Coosa River",
+            "lat": 33.59399,
+            "lon": -86.18419,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 188284383 (Coosa River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Talladega (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 112.8,
+            "spoken": "Billboard: Talladega is ahead, home to the biggest and fastest superspeedway in NASCAR. Cars run flat out in a pack around more than two and a half miles of high banking, and a movie taught the nation that if you ain't first, you're last.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Moody",
@@ -33582,11 +33919,34 @@
             "spoken": "Passing Leeds"
           },
           {
+            "name": "The Barber Motorsports Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 134.0,
+            "spoken": "Billboard: The Barber Vintage Motorsports Museum, next exit. Nine hundred motorcycles on display, the world's largest motorcycle museum. Every one of them gets better mileage.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Barber Motorsports Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 137.0,
+            "spoken": "Billboard: The Barber Vintage Motorsports Museum, next exit. Nine hundred motorcycles on display, the world's largest motorcycle museum. Every one of them gets better mileage.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Cahaba River",
             "category": "river",
             "kind": "point",
-            "at_mi": 145.8,
-            "spoken": "Crossing the Cahaba River"
+            "at_mi": 145.7,
+            "spoken": "Crossing the Cahaba River",
+            "lat": 33.46761,
+            "lon": -86.70907,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 30817179 (Cahaba River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Fairfield",
@@ -33628,15 +33988,11 @@
             "name": "Black Warrior River",
             "category": "river",
             "kind": "point",
-            "at_mi": 207.7,
-            "spoken": "Crossing the Black Warrior River"
-          },
-          {
-            "name": "Sucarnoochee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 240.6,
-            "spoken": "Crossing the Sucarnoochee River"
+            "at_mi": 209.5,
+            "spoken": "Crossing the Black Warrior River",
+            "lat": 33.11589,
+            "lon": -87.65406,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 164030661 (Black Warrior River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Epes",
@@ -33646,6 +34002,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153562740, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Epes"
+          },
+          {
+            "name": "Sucarnoochee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 257.2,
+            "spoken": "Crossing the Sucarnoochee River",
+            "lat": 32.61563,
+            "lon": -88.21359,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 947304276 (Sucarnoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Toomsuba",
@@ -33678,8 +34044,11 @@
             "name": "Pearl River",
             "category": "river",
             "kind": "point",
-            "at_mi": 371.6,
-            "spoken": "Crossing the Pearl River"
+            "at_mi": 381.8,
+            "spoken": "Crossing the Pearl River",
+            "lat": 32.27642,
+            "lon": -90.1794,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 31648171 (Pearl River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Bolton",
@@ -33691,13 +34060,6 @@
             "spoken": "Passing Bolton"
           },
           {
-            "name": "Big Black River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 403.4,
-            "spoken": "Crossing the Big Black River"
-          },
-          {
             "name": "Edwards",
             "at_mi": 407.4,
             "off_mi": 0.82,
@@ -33707,11 +34069,44 @@
             "spoken": "Passing Edwards"
           },
           {
+            "name": "Big Black River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 410.2,
+            "spoken": "Crossing the Big Black River",
+            "lat": 32.35319,
+            "lon": -90.63016,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 27883472 (Big Black River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Vicksburg National Military Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 421.2,
+            "spoken": "Billboard: Vicksburg National Military Park, next exit. A sixteen-mile road around the siege lines of eighteen sixty-three, and a Union gunboat raised from the river.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Vicksburg National Military Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 424.2,
+            "spoken": "Billboard: Vicksburg National Military Park, next exit. A sixteen-mile road around the siege lines of eighteen sixty-three, and a Union gunboat raised from the river.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mississippi River",
             "category": "river",
             "kind": "point",
-            "at_mi": 436.3,
-            "spoken": "Crossing the Mississippi River"
+            "at_mi": 427.5,
+            "spoken": "Crossing the Mississippi River",
+            "lat": 32.31421,
+            "lon": -90.90655,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 27736266 (Mississippi River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Richmond",
@@ -33732,6 +34127,16 @@
             "spoken": "Passing Start"
           },
           {
+            "name": "Duck Commander (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 494.0,
+            "spoken": "Billboard: Duck Commander, ahead in West Monroe. The Robertsons' duck call company, with a museum of fifteen galleries about Duck Dynasty. Beards optional.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Claiborne",
             "at_mi": 504.0,
             "off_mi": 0.34,
@@ -33739,6 +34144,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151708380, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Claiborne"
+          },
+          {
+            "name": "Duck Commander (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 510.5,
+            "spoken": "Billboard: Duck Commander, ahead in West Monroe. The Robertsons' duck call company, with a museum of fifteen galleries about Duck Dynasty. Beards optional.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Calhoun",
@@ -33804,6 +34219,26 @@
             "spoken": "Passing Waskom"
           },
           {
+            "name": "World's Richest Acre (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 663.4,
+            "spoken": "Billboard: Kilgore, next exit. Downtown keeps a block of oil derricks standing on the World's Richest Acre. At Christmas they wear lighted stars.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "World's Richest Acre (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 666.4,
+            "spoken": "Billboard: Kilgore, next exit. Downtown keeps a block of oil derricks standing on the World's Richest Acre. At Christmas they wear lighted stars.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Van",
             "at_mi": 710.8,
             "off_mi": 1.3,
@@ -33811,6 +34246,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151718455, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Van"
+          },
+          {
+            "name": "First Monday Trade Days (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 723.3,
+            "spoken": "Billboard: First Monday Trade Days, next exit in Canton. Trading here since the eighteen fifties, the weekend before the first Monday. Close enough.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "First Monday Trade Days (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 726.3,
+            "spoken": "Billboard: First Monday Trade Days, ahead in Canton. Trading here since the eighteen fifties, the weekend before the first Monday. Close enough.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Myrtle Springs",
@@ -38628,11 +39083,15 @@
             "spoken": "Passing Siloam"
           },
           {
-            "name": "Apalachee River",
-            "category": "river",
+            "name": "The Town Sherman Spared (westbound I-20 approach)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 74.4,
-            "spoken": "Crossing the Apalachee River"
+            "at_mi": 83.5,
+            "spoken": "Billboard: Madison is ahead, the town said to have been too pretty to burn. Sherman marched past and left the mansions standing, and they stand yet.",
+            "source": "REVIEW-east-south-2026-10-01.md item 5; approved wording from processed/Batch1/GeorgiaWeb.md; OSM place node 153829188 at 33.595681,-83.467944 projected to archived I-20 geometry.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Madison",
@@ -38644,6 +39103,17 @@
             "spoken": "Passing Madison"
           },
           {
+            "name": "The Town Sherman Spared (eastbound I-20 approach)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 98.5,
+            "spoken": "Billboard: Madison is ahead, the town said to have been too pretty to burn. Sherman marched past and left the mansions standing, and they stand yet.",
+            "source": "REVIEW-east-south-2026-10-01.md item 5; approved reverse copy from east-south-reverse-copies-2026-10-01.md; OSM place node 153829188 at 33.595681,-83.467944 projected to archived I-20 geometry.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Rutledge",
             "at_mi": 100.2,
             "off_mi": 2.5,
@@ -38651,13 +39121,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154342522, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rutledge"
-          },
-          {
-            "name": "Yellow River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 104.5,
-            "spoken": "Crossing the Yellow River"
           },
           {
             "name": "Social Circle",
@@ -38694,6 +39157,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154335377, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Porterdale"
+          },
+          {
+            "name": "Yellow River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 116.9,
+            "spoken": "Crossing the Yellow River",
+            "lat": 33.6149,
+            "lon": -83.91487,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1255882911 (Yellow River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Conyers",
@@ -40412,7 +40885,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Augusta is home to the Masters. Every April, the golf world comes to Augusta National for the green jacket, the azaleas, Amen Corner, and a pimento cheese sandwich that somehow still costs almost nothing."
+            "spoken": "Billboard: Augusta is home to the Masters. Every April, the golf world comes to Augusta National for the green jacket, the azaleas, Amen Corner, and a pimento cheese sandwich that somehow still costs almost nothing.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Clearwater",
@@ -40577,18 +41053,14 @@
             "spoken": "Passing Red Bank"
           },
           {
-            "name": "Saluda River",
-            "category": "river",
+            "name": "Riverbanks Zoo and Garden (eastbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 62.1,
-            "spoken": "Crossing the Saluda River"
-          },
-          {
-            "name": "Congaree River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 62.1,
-            "spoken": "Crossing the Congaree River"
+            "at_mi": 59.5,
+            "spoken": "Billboard: Riverbanks Zoo and Garden, ahead in Columbia. Three thousand animals beside the Saluda River. None of them has ever had to merge.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "South Congaree",
@@ -40625,6 +41097,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154320706, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Springdale"
+          },
+          {
+            "name": "Saluda River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 69.5,
+            "spoken": "Crossing the Saluda River",
+            "lat": 33.99792,
+            "lon": -81.05597,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1073075880 (Saluda River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Congaree River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 69.6,
+            "spoken": "Crossing the Congaree River",
+            "lat": 33.999,
+            "lon": -81.05368,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 129318244 (Congaree River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Arcadia Lakes",
@@ -42811,6 +43303,16 @@
             "spoken": "Passing Mitchell"
           },
           {
+            "name": "Ogeechee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 50.9,
+            "spoken": "Crossing the Ogeechee River",
+            "lat": 33.04498,
+            "lon": -82.60395,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 700800260 (Ogeechee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Davisboro",
             "at_mi": 52.7,
             "off_mi": 3.7,
@@ -42818,13 +43320,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153843034, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Davisboro"
-          },
-          {
-            "name": "Ogeechee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 65.4,
-            "spoken": "Crossing the Ogeechee River"
           },
           {
             "name": "Tennille",
@@ -42876,7 +43371,10 @@
             "category": "river",
             "kind": "point",
             "at_mi": 89.0,
-            "spoken": "Crossing the Oconee River"
+            "spoken": "Crossing the Oconee River",
+            "lat": 33.02514,
+            "lon": -83.18503,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 816434866 (Oconee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ivey",
@@ -42897,13 +43395,6 @@
             "spoken": "Passing Irwinton"
           },
           {
-            "name": "Ocmulgee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 111.2,
-            "spoken": "Crossing the Ocmulgee River"
-          },
-          {
             "name": "Gray",
             "at_mi": 114.6,
             "off_mi": 10.73,
@@ -42920,6 +43411,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154394684, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Clinton"
+          },
+          {
+            "name": "Ocmulgee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 122.4,
+            "spoken": "Crossing the Ocmulgee River",
+            "lat": 32.84587,
+            "lon": -83.62818,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1012575586 (Ocmulgee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -44932,20 +45433,6 @@
             "spoken": "Passing Hardeeville"
           },
           {
-            "name": "Savannah River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 118.1,
-            "spoken": "Crossing the Savannah River"
-          },
-          {
-            "name": "Front River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 118.1,
-            "spoken": "Crossing the Front River"
-          },
-          {
             "name": "Bloomingdale",
             "at_mi": 122.17,
             "off_mi": 7.04,
@@ -45922,25 +46409,54 @@
             "spoken": "Passing Country Club Estates"
           },
           {
-            "name": "Darien River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 9.8,
-            "spoken": "Crossing the Darien River"
-          },
-          {
             "name": "Altamaha River",
             "category": "river",
             "kind": "point",
-            "at_mi": 9.8,
-            "spoken": "Crossing the Altamaha River"
+            "at_mi": 16.3,
+            "spoken": "Crossing the Altamaha River",
+            "lat": 31.36453,
+            "lon": -81.45727,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 810298566 (Altamaha River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Darien River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 16.9,
+            "spoken": "Crossing the Darien River",
+            "lat": 31.37311,
+            "lon": -81.45491,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 673230753 (Darien River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Peach World",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.0,
+            "spoken": "Billboard: Peach World is ahead. It sells peaches, pecans, preserves, boiled peanuts, and enough peach-flavored merchandise to prove Georgia takes branding personally.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Smallest Church in America",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.6,
+            "spoken": "Billboard: The Smallest Church in America is ahead near South Newport. It has thirteen seats, one tiny steeple, and absolutely no room for a megachurch coffee shop.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "South Newport River",
             "category": "river",
             "kind": "point",
-            "at_mi": 30.4,
-            "spoken": "Crossing the South Newport River"
+            "at_mi": 36.3,
+            "spoken": "Crossing the South Newport River",
+            "lat": 31.64443,
+            "lon": -81.39962,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1006537447 (South Newport River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Riceboro",
@@ -45961,11 +46477,24 @@
             "spoken": "Passing Midway"
           },
           {
-            "name": "Peach World",
+            "name": "The Smallest Church in America (southbound)",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 58.0,
-            "spoken": "Billboard: Peach World is ahead. It sells peaches, pecans, preserves, boiled peanuts, and enough peach-flavored merchandise to prove Georgia takes branding personally."
+            "at_mi": 46.9,
+            "spoken": "Billboard: The Smallest Church in America is ahead near South Newport. It has thirteen seats, one tiny steeple, and absolutely no room for a megachurch coffee shop.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Ogeechee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 60.9,
+            "spoken": "Crossing the Ogeechee River",
+            "lat": 31.98115,
+            "lon": -81.30732,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1257058862 (Ogeechee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Henderson",
@@ -45986,6 +46515,16 @@
             "spoken": "Passing Georgetown"
           },
           {
+            "name": "Little Ogeechee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 65.2,
+            "spoken": "Crossing the Little Ogeechee River",
+            "lat": 32.0314,
+            "lon": -81.26738,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 828702227 (Little Ogeechee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Bloomingdale",
             "at_mi": 68.4,
             "off_mi": 5.22,
@@ -46002,20 +46541,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154150996, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Pooler"
-          },
-          {
-            "name": "Little Ogeechee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 69.1,
-            "spoken": "Crossing the Little Ogeechee River"
-          },
-          {
-            "name": "Ogeechee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 69.1,
-            "spoken": "Crossing the Ogeechee River"
           },
           {
             "name": "Garden City",
@@ -47458,8 +47983,11 @@
             "name": "Etowah River",
             "category": "river",
             "kind": "point",
-            "at_mi": 4.7,
-            "spoken": "Crossing the Etowah River"
+            "at_mi": 3.8,
+            "spoken": "Crossing the Etowah River",
+            "lat": 34.16001,
+            "lon": -84.75404,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 290287736 (Etowah River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "New Hope",
@@ -47478,6 +48006,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154324809, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Holly Springs"
+          },
+          {
+            "name": "The Big Chicken (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.4,
+            "spoken": "Billboard: The Big Chicken is ahead near Marietta. This fifty-six-foot chicken-shaped restaurant rolls its eyes, moves its beak, and has confused Atlanta families giving directions for generations.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Woodstock",
@@ -47541,6 +48079,16 @@
             "spoken": "Passing Vinings"
           },
           {
+            "name": "Chattahoochee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 33.2,
+            "spoken": "Crossing the Chattahoochee River",
+            "lat": 33.87582,
+            "lon": -84.44821,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 484301357 (Chattahoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Dunwoody",
             "at_mi": 33.4,
             "off_mi": 8.14,
@@ -47568,11 +48116,14 @@
             "spoken": "Passing Doraville"
           },
           {
-            "name": "Chattahoochee River",
-            "category": "river",
+            "name": "The Big Chicken (northbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 38.5,
-            "spoken": "Crossing the Chattahoochee River"
+            "at_mi": 36.3,
+            "spoken": "Billboard: The Big Chicken is ahead near Marietta. This fifty-six-foot chicken-shaped restaurant rolls its eyes, moves its beak, and has confused Atlanta families giving directions for generations.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Brookhaven",
@@ -49541,6 +50092,16 @@
             "spoken": "Passing Crawford"
           },
           {
+            "name": "The National Infantry Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The National Infantry Museum, ahead in Columbus. Free admission, from the Revolution to today. The infantry walked here. You get to drive.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lumpkin",
             "at_mi": 38.5,
             "off_mi": 7.13,
@@ -49584,6 +50145,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154345461, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Shellman"
+          },
+          {
+            "name": "Ray Charles Plaza (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 76.0,
+            "spoken": "Billboard: Albany, ahead, where Ray Charles was born. A bronze of him at the piano turns slowly in the plaza downtown. He has not missed a show.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Leesburg",
@@ -51135,6 +51706,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Chattahoochee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.9,
+            "spoken": "Crossing the Chattahoochee River",
+            "lat": 32.45314,
+            "lon": -84.99501,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163525849 (Chattahoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Smiths Station",
             "at_mi": 2.0,
             "off_mi": 7.77,
@@ -51162,11 +51743,14 @@
             "spoken": "Passing Crawford"
           },
           {
-            "name": "Chattahoochee River",
-            "category": "river",
+            "name": "The National Infantry Museum (northbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 11.7,
-            "spoken": "Crossing the Chattahoochee River"
+            "at_mi": 9.5,
+            "spoken": "Billboard: The National Infantry Museum, ahead in Columbus. Free admission, from the Revolution to today. The infantry walked here. You get to drive.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Seale",
@@ -51201,6 +51785,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153746968, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Georgetown"
+          },
+          {
+            "name": "Lake Eufaula (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.5,
+            "spoken": "Billboard: Eufaula is ahead, the Big Bass Capital. The lake is full of largemouth bass, and the town is full of columned antebellum mansions.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Newville",
@@ -52488,6 +53082,26 @@
         ],
         "landmarks": [
           {
+            "name": "Chattahoochee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.0,
+            "spoken": "Crossing the Chattahoochee River",
+            "lat": 32.45316,
+            "lon": -84.99502,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163525849 (Chattahoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "The National Infantry Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.5,
+            "spoken": "Billboard: The National Infantry Museum, ahead in Columbus. Free admission, from the Revolution to today. The infantry walked here. You get to drive.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Ladonia",
             "at_mi": 6.7,
             "off_mi": 0.02,
@@ -52504,13 +53118,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153734403, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Smiths Station"
-          },
-          {
-            "name": "Chattahoochee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 10.0,
-            "spoken": "Crossing the Chattahoochee River"
           },
           {
             "name": "Crawford",
@@ -53345,7 +53952,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Cordele calls itself the Watermelon Capital of the world. Arkansas may argue, but the melons here do not care who wins."
+            "spoken": "Billboard: Cordele calls itself the Watermelon Capital of the world. Arkansas may argue, but the melons here do not care who wins.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Arabi",
@@ -53357,11 +53967,14 @@
             "spoken": "Passing Arabi"
           },
           {
-            "name": "Flint River",
-            "category": "river",
+            "name": "Ray Charles Plaza (westbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 34.5,
-            "spoken": "Crossing the Flint River"
+            "at_mi": 29.0,
+            "spoken": "Billboard: Albany, ahead, where Ray Charles was born. A bronze of him at the piano turns slowly in the plaza downtown. He has not missed a show.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Putney",
@@ -53371,6 +53984,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154107453, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Putney"
+          },
+          {
+            "name": "Flint River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 38.4,
+            "spoken": "Crossing the Flint River",
+            "lat": 31.5769,
+            "lon": -84.14726,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 909927259 (Flint River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Leesburg",
@@ -54777,6 +55400,16 @@
             "spoken": "Passing Marshallville"
           },
           {
+            "name": "The Museum of Aviation (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.3,
+            "spoken": "Billboard: The Museum of Aviation, ahead at Warner Robins. Free admission and more than eighty aircraft, among them the fastest jet ever flown. It is on a long break.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Bonaire",
             "at_mi": 42.3,
             "off_mi": 8.6,
@@ -54811,6 +55444,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154169724, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Centerville"
+          },
+          {
+            "name": "The Museum of Aviation (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.3,
+            "spoken": "Billboard: The Museum of Aviation, ahead at Warner Robins. Free admission and more than eighty aircraft, among them the fastest jet ever flown. It is on a long break.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bolingbroke",
@@ -55842,8 +56485,11 @@
             "name": "Oostanaula River",
             "category": "river",
             "kind": "point",
-            "at_mi": 19.8,
-            "spoken": "Crossing the Oostanaula River"
+            "at_mi": 15.2,
+            "spoken": "Crossing the Oostanaula River",
+            "lat": 34.57169,
+            "lon": -84.94702,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 290280676 (Oostanaula River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Plainville",
@@ -55873,6 +56519,16 @@
             "spoken": "Passing Kingston"
           },
           {
+            "name": "Tellus Science Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.0,
+            "spoken": "Billboard: Tellus Science Museum, next exit. A dinosaur skeleton stands in the lobby, and the planetarium has the rest of the universe. Allow an afternoon.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "White",
             "at_mi": 41.7,
             "off_mi": 3.05,
@@ -55880,6 +56536,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153872087, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing White"
+          },
+          {
+            "name": "Tellus Science Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.0,
+            "spoken": "Billboard: Tellus Science Museum, next exit. A dinosaur skeleton stands in the lobby, and the planetarium has the rest of the universe. Allow an afternoon.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Acworth",
@@ -57532,8 +58198,11 @@
             "name": "Oconee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 13.68,
-            "spoken": "Crossing the Oconee River"
+            "at_mi": 6.2,
+            "spoken": "Crossing the Oconee River",
+            "lat": 32.47984,
+            "lon": -82.85832,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 816016634 (Oconee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Adrian",
@@ -57554,6 +58223,16 @@
             "spoken": "Passing Soperton"
           },
           {
+            "name": "Ohoopee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 37.8,
+            "spoken": "Crossing the Ohoopee River",
+            "lat": 32.40805,
+            "lon": -82.3351,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 699580456 (Ohoopee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Oak Park",
             "at_mi": 40.53,
             "off_mi": 2.65,
@@ -57561,20 +58240,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153893511, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Oak Park"
-          },
-          {
-            "name": "Ohoopee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 43.14,
-            "spoken": "Crossing the Ohoopee River"
-          },
-          {
-            "name": "Canoochee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 43.14,
-            "spoken": "Crossing the Canoochee River"
           },
           {
             "name": "Stillmore",
@@ -57593,6 +58258,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154300207, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cobbtown"
+          },
+          {
+            "name": "Canoochee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 50.9,
+            "spoken": "Crossing the Canoochee River",
+            "lat": 32.37483,
+            "lon": -82.11772,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 700229263 (Canoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Metter",
@@ -57658,6 +58333,16 @@
             "spoken": "Passing Pembroke"
           },
           {
+            "name": "Ogeechee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 96.8,
+            "spoken": "Crossing the Ogeechee River",
+            "lat": 32.13777,
+            "lon": -81.40708,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 503613630 (Ogeechee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Bloomingdale",
             "at_mi": 102.58,
             "off_mi": 2.65,
@@ -57665,13 +58350,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154139307, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bloomingdale"
-          },
-          {
-            "name": "Ogeechee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 102.9,
-            "spoken": "Crossing the Ogeechee River"
           },
           {
             "name": "Pooler",
@@ -60997,7 +61675,19 @@
           "name": "rolling",
           "sections": 408,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "landmarks": [
+          {
+            "name": "Falls Park on the Reedy (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 76.0,
+            "spoken": "Billboard: Falls Park, ahead in Greenville. A waterfall downtown, and a footbridge that curves over it, hung from cables on one side only. It holds.",
+            "directions": [
+              "forward"
+            ]
+          }
+        ]
       },
       "lanes": 3
     },
@@ -61536,22 +62226,11 @@
             "name": "South Newport River",
             "category": "river",
             "kind": "point",
-            "at_mi": 22.63,
-            "spoken": "Crossing the South Newport River"
-          },
-          {
-            "name": "Darien River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 38.6,
-            "spoken": "Crossing the Darien River"
-          },
-          {
-            "name": "Altamaha River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 38.6,
-            "spoken": "Crossing the Altamaha River"
+            "at_mi": 24.4,
+            "spoken": "Crossing the South Newport River",
+            "lat": 31.64439,
+            "lon": -81.39989,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1006537447 (South Newport River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ashantilly Center",
@@ -61568,6 +62247,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154077894, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Darien"
+          },
+          {
+            "name": "Darien River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 43.9,
+            "spoken": "Crossing the Darien River",
+            "lat": 31.37328,
+            "lon": -81.45528,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 673230753 (Darien River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Altamaha River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 44.5,
+            "spoken": "Crossing the Altamaha River",
+            "lat": 31.36458,
+            "lon": -81.45769,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 810298566 (Altamaha River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Country Club Estates",
@@ -62283,18 +62982,14 @@
             "spoken": "Passing Richmond Hill"
           },
           {
-            "name": "Little Ogeechee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 25.11,
-            "spoken": "Crossing the Little Ogeechee River"
-          },
-          {
             "name": "Ogeechee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 25.11,
-            "spoken": "Crossing the Ogeechee River"
+            "at_mi": 24.0,
+            "spoken": "Crossing the Ogeechee River",
+            "lat": 31.98115,
+            "lon": -81.30732,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1257058862 (Ogeechee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Savannah-Ogeechee Canal Museum and Nature Center",
@@ -62320,6 +63015,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153973251, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Georgetown"
+          },
+          {
+            "name": "Little Ogeechee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 28.2,
+            "spoken": "Crossing the Little Ogeechee River",
+            "lat": 32.0314,
+            "lon": -81.26738,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 828702227 (Little Ogeechee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Bloomingdale",
@@ -65489,6 +66194,16 @@
             "spoken": "Passing Hogansville"
           },
           {
+            "name": "Callaway Gardens (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 2.0,
+            "spoken": "Billboard: Callaway Gardens, ahead at Pine Mountain. About a thousand butterflies live in its glass conservatory all year. Not one of them keeps a schedule.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pine Mountain",
             "at_mi": 12.0,
             "off_mi": 6.02,
@@ -65525,6 +66240,16 @@
             "spoken": "Passing Valley"
           },
           {
+            "name": "Callaway Gardens (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.0,
+            "spoken": "Billboard: Callaway Gardens, ahead at Pine Mountain. About a thousand butterflies live in its glass conservatory all year. Not one of them keeps a schedule.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Hamilton",
             "at_mi": 23.4,
             "off_mi": 8.22,
@@ -65532,6 +66257,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154037335, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hamilton"
+          },
+          {
+            "name": "The National Infantry Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.0,
+            "spoken": "Billboard: The National Infantry Museum, ahead in Columbus. Free admission, from the Revolution to today. The infantry walked here. You get to drive.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Smiths Station",
@@ -68958,15 +69693,21 @@
             "name": "Macon Music",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 3.0,
-            "spoken": "Billboard: Macon is home to Little Richard, Otis Redding, and the Allman Brothers. This red-clay town wrote a shocking share of American music."
+            "at_mi": 2.8,
+            "spoken": "Billboard: Macon is home to Little Richard, Otis Redding, and the Allman Brothers. This red-clay town wrote a shocking share of American music.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cherry Blossom Capital",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 5.0,
-            "spoken": "Billboard: Macon is the Cherry Blossom Capital of the world. About three hundred fifty thousand Yoshino cherry trees bloom pink every March, which is more than Washington and Tokyo have to spare."
+            "spoken": "Billboard: Macon is the Cherry Blossom Capital of the world. About three hundred fifty thousand Yoshino cherry trees bloom pink every March, which is more than Washington and Tokyo have to spare.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Robins Air Force Base",
@@ -69035,8 +69776,11 @@
             "name": "Flint River",
             "category": "river",
             "kind": "point",
-            "at_mi": 37.8,
-            "spoken": "Crossing the Flint River"
+            "at_mi": 35.5,
+            "spoken": "Crossing the Flint River",
+            "lat": 32.5434,
+            "lon": -84.01433,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 113191 (Flint River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Butler",
@@ -69064,6 +69808,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154085659, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Waverly Hall"
+          },
+          {
+            "name": "The National Infantry Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 89.0,
+            "spoken": "Billboard: The National Infantry Museum, ahead in Columbus. Free admission, from the Revolution to today. The infantry walked here. You get to drive.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Coca-Cola's Inventor",
@@ -70116,8 +70870,11 @@
             "name": "Ocmulgee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 6.83,
-            "spoken": "Crossing the Ocmulgee River"
+            "at_mi": 1.0,
+            "spoken": "Crossing the Ocmulgee River",
+            "lat": 32.83865,
+            "lon": -83.62031,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1012575586 (Ocmulgee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Centerville",
@@ -71275,18 +72032,24 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
-            "name": "The Capitoline Wolf",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 2.0,
-            "spoken": "Billboard: Rome, Georgia, was built on seven hills and has a bronze she-wolf suckling Romulus and Remus. It was a gift from Rome, Italy. Yes, that Rome."
-          },
-          {
             "name": "Etowah River",
             "category": "river",
             "kind": "point",
-            "at_mi": 3.2,
-            "spoken": "Crossing the Etowah River"
+            "at_mi": 0.2,
+            "spoken": "Crossing the Etowah River",
+            "lat": 34.25437,
+            "lon": -85.16398,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 290462266 (Etowah River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "The Capitoline Wolf",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.5,
+            "spoken": "Billboard: Rome, Georgia, was built on seven hills and has a bronze she-wolf suckling Romulus and Remus. It was a gift from Rome, Italy. Yes, that Rome.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Aragon",
@@ -71323,6 +72086,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154323110, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Stilesboro"
+          },
+          {
+            "name": "Tellus Science Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.0,
+            "spoken": "Billboard: Tellus Science Museum, ahead at Cartersville. A dinosaur skeleton stands in the lobby, and the planetarium has the rest of the universe. Allow an afternoon.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Adairsville",
@@ -72498,18 +73271,14 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
-            "name": "Berry College",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 5.0,
-            "spoken": "Billboard: Berry College is ahead near Rome. Its twenty-seven thousand acres of forest and fields make it the largest college campus on Earth, and its stone mill wheel is taller than a house."
-          },
-          {
             "name": "Oostanaula River",
             "category": "river",
             "kind": "point",
-            "at_mi": 8.8,
-            "spoken": "Crossing the Oostanaula River"
+            "at_mi": 0.5,
+            "spoken": "Crossing the Oostanaula River",
+            "lat": 34.26061,
+            "lon": -85.17075,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 290292705 (Oostanaula River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Plainville",
@@ -72519,6 +73288,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153559588, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Plainville"
+          },
+          {
+            "name": "Berry College",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: Berry College is ahead near Rome. Its twenty-seven thousand acres of forest and fields make it the largest college campus on Earth, and its old mill wheel stands forty-two feet tall.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lyerly",
@@ -76563,13 +77342,6 @@
             "spoken": "Passing Pooler"
           },
           {
-            "name": "Ogeechee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.2,
-            "spoken": "Crossing the Ogeechee River"
-          },
-          {
             "name": "Bloomingdale",
             "at_mi": 14.6,
             "off_mi": 2.63,
@@ -76577,6 +77349,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154139307, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bloomingdale"
+          },
+          {
+            "name": "Ogeechee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 20.4,
+            "spoken": "Crossing the Ogeechee River",
+            "lat": 32.13808,
+            "lon": -81.40696,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 503613630 (Ogeechee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Register",
@@ -76600,15 +77382,11 @@
             "name": "Canoochee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 69.0,
-            "spoken": "Crossing the Canoochee River"
-          },
-          {
-            "name": "Ohoopee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 69.0,
-            "spoken": "Crossing the Ohoopee River"
+            "at_mi": 66.4,
+            "spoken": "Crossing the Canoochee River",
+            "lat": 32.37517,
+            "lon": -82.11797,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 700229263 (Canoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Stillmore",
@@ -76629,6 +77407,16 @@
             "spoken": "Passing Oak Park"
           },
           {
+            "name": "Ohoopee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 79.5,
+            "spoken": "Crossing the Ohoopee River",
+            "lat": 32.40841,
+            "lon": -82.3352,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 699580456 (Ohoopee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Soperton",
             "at_mi": 94.3,
             "off_mi": 3.8,
@@ -76638,6 +77426,16 @@
             "spoken": "Passing Soperton"
           },
           {
+            "name": "Oconee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 111.0,
+            "spoken": "Crossing the Oconee River",
+            "lat": 32.48014,
+            "lon": -82.8583,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 816016634 (Oconee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Dexter",
             "at_mi": 122.4,
             "off_mi": 5.36,
@@ -76645,13 +77443,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154381557, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dexter"
-          },
-          {
-            "name": "Oconee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 125.4,
-            "spoken": "Crossing the Oconee River"
           },
           {
             "name": "Montrose",
@@ -76672,6 +77463,16 @@
             "spoken": "Passing Jeffersonville"
           },
           {
+            "name": "Ocmulgee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 165.8,
+            "spoken": "Crossing the Ocmulgee River",
+            "lat": 32.85488,
+            "lon": -83.63488,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1012575586 (Ocmulgee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Sidney Lanier Cottage",
             "category": "museum",
             "kind": "point",
@@ -76686,13 +77487,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154374449, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Bolingbroke"
-          },
-          {
-            "name": "Ocmulgee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 181.1,
-            "spoken": "Crossing the Ocmulgee River"
           },
           {
             "name": "McDonough",
@@ -78246,20 +79040,22 @@
         "state_miles": [
           {
             "state": "Georgia",
-            "miles": 3.3
+            "miles": 2.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "South Carolina",
-            "miles": 172.7
+            "miles": 173.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 3.3,
+            "at_mi": 2.9,
             "from_state": "Georgia",
             "state": "South Carolina",
             "place": "Georgia-South Carolina line on I-95",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -78346,6 +79142,36 @@
             "spoken": "Passing Garden City"
           },
           {
+            "name": "Savannah River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.6,
+            "spoken": "Crossing the Savannah River",
+            "lat": 32.08847,
+            "lon": -81.09895,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163679063 (Savannah River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Back River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 2.6,
+            "spoken": "Crossing the Back River",
+            "lat": 32.10037,
+            "lon": -81.0901,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 586137351 (Back River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Little Back River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 2.9,
+            "spoken": "Crossing the Little Back River",
+            "lat": 32.10351,
+            "lon": -81.08745,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 586137347 (Little Back River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Port Wentworth",
             "at_mi": 9.3,
             "off_mi": 5.41,
@@ -78353,27 +79179,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153898291, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Port Wentworth"
-          },
-          {
-            "name": "Savannah River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.9,
-            "spoken": "Crossing the Savannah River"
-          },
-          {
-            "name": "Little Back River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.9,
-            "spoken": "Crossing the Little Back River"
-          },
-          {
-            "name": "Back River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.9,
-            "spoken": "Crossing the Back River"
           },
           {
             "name": "Rincon",
@@ -78388,8 +79193,11 @@
             "name": "Coosawhatchie River",
             "category": "river",
             "kind": "point",
-            "at_mi": 36.4,
-            "spoken": "Crossing the Coosawhatchie River"
+            "at_mi": 39.8,
+            "spoken": "Crossing the Coosawhatchie River",
+            "lat": 32.58836,
+            "lon": -80.92349,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1327973004 (Coosawhatchie River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Yemassee",
@@ -78404,8 +79212,21 @@
             "name": "Combahee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 61.7,
-            "spoken": "Crossing the Combahee River"
+            "at_mi": 51.3,
+            "spoken": "Crossing the Combahee River",
+            "lat": 32.73047,
+            "lon": -80.84841,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 137730225 (Combahee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "The South Carolina Artisans Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.8,
+            "spoken": "Billboard: The South Carolina Artisans Center, ahead in Walterboro. Two hundred artists from forty-one of the state's forty-six counties. The other five are still practicing.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Smoaks",
@@ -78417,6 +79238,26 @@
             "spoken": "Passing Smoaks"
           },
           {
+            "name": "The South Carolina Artisans Center (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 76.8,
+            "spoken": "Billboard: The South Carolina Artisans Center, ahead in Walterboro. Two hundred artists from forty-one of the state's forty-six counties. The other five are still practicing.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Edisto River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 79.5,
+            "spoken": "Crossing the Edisto River",
+            "lat": 33.09029,
+            "lon": -80.64977,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 165547200 (Edisto River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Reevesville",
             "at_mi": 87.0,
             "off_mi": 2.56,
@@ -78424,13 +79265,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154096495, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Reevesville"
-          },
-          {
-            "name": "Edisto River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 87.5,
-            "spoken": "Crossing the Edisto River"
           },
           {
             "name": "Harleyville",
@@ -78499,8 +79333,11 @@
             "name": "Santee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 113.3,
-            "spoken": "Crossing the Santee River"
+            "at_mi": 110.4,
+            "spoken": "Crossing the Santee River",
+            "lat": 33.50192,
+            "lon": -80.45684,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 192456264 (Santee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Summerton",
@@ -78539,6 +79376,16 @@
             "spoken": "Passing Turbeville"
           },
           {
+            "name": "South of the Border (northbound, sign one)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 150.0,
+            "spoken": "Billboard: South of the Border, coming up. Or is it? Keep driving to find out.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Olanta",
             "at_mi": 154.0,
             "off_mi": 6.14,
@@ -78557,6 +79404,16 @@
             "spoken": "Passing Lynchburg"
           },
           {
+            "name": "Lynches River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 157.4,
+            "spoken": "Crossing the Lynches River",
+            "lat": 34.03758,
+            "lon": -79.98537,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 184630385 (Lynches River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Lamar",
             "at_mi": 162.4,
             "off_mi": 9.19,
@@ -78564,13 +79421,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154154085, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lamar"
-          },
-          {
-            "name": "Lynches River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 164.0,
-            "spoken": "Crossing the Lynches River"
           },
           {
             "name": "Timmonsville",
@@ -81176,6 +82026,16 @@
             "spoken": "Passing Garfield"
           },
           {
+            "name": "Ogeechee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 27.5,
+            "spoken": "Crossing the Ogeechee River",
+            "lat": 32.78889,
+            "lon": -81.96014,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 700750402 (Ogeechee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Millen",
             "at_mi": 28.84,
             "off_mi": 0.01,
@@ -81183,13 +82043,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153962583, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Millen"
-          },
-          {
-            "name": "Ogeechee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 31.97,
-            "spoken": "Crossing the Ogeechee River"
           },
           {
             "name": "Waynesboro",
@@ -82316,8 +83169,11 @@
             "name": "Ogeechee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 38.72,
-            "spoken": "Crossing the Ogeechee River"
+            "at_mi": 42.6,
+            "spoken": "Crossing the Ogeechee River",
+            "lat": 32.13777,
+            "lon": -81.40708,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 503613630 (Ogeechee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Bloomingdale",
@@ -82327,6 +83183,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154139307, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bloomingdale"
+          },
+          {
+            "name": "Little Ogeechee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 49.2,
+            "spoken": "Crossing the Little Ogeechee River",
+            "lat": 32.09423,
+            "lon": -81.30856,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 828702227 (Little Ogeechee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pooler",
@@ -82363,13 +83229,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153973251, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Georgetown"
-          },
-          {
-            "name": "Little Ogeechee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 55.21,
-            "spoken": "Crossing the Little Ogeechee River"
           },
           {
             "name": "Port Wentworth",
@@ -83030,6 +83889,16 @@
             "spoken": "Passing Enigma"
           },
           {
+            "name": "New River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 2.1,
+            "spoken": "Crossing the New River",
+            "lat": 31.47282,
+            "lon": -83.51915,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 929863686 (New River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Ty Ty",
             "at_mi": 2.3,
             "off_mi": 7.62,
@@ -83039,11 +83908,14 @@
             "spoken": "Passing Ty Ty"
           },
           {
-            "name": "New River",
-            "category": "river",
+            "name": "Ashburn's peanut (northbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 5.3,
-            "spoken": "Crossing the New River"
+            "at_mi": 10.5,
+            "spoken": "Billboard: Ashburn, ahead. Its giant crowned peanut is a state monument. A hurricane knocked it down in two thousand eighteen, and it got back up.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Sycamore",
@@ -83062,6 +83934,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154401082, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rebecca"
+          },
+          {
+            "name": "Ashburn's peanut (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.0,
+            "spoken": "Billboard: Ashburn, next exit. Its giant crowned peanut is a state monument. A hurricane knocked it down in two thousand eighteen, and it got back up.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Arabi",
@@ -84945,6 +85827,26 @@
             "spoken": "Passing Lake Park"
           },
           {
+            "name": "Wild Adventures (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Wild Adventures, ahead, south of Valdosta. Six roller coasters and a zoo in one park. The animals have chosen not to ride.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Withlacoochee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 11.1,
+            "spoken": "Crossing the Withlacoochee River",
+            "lat": 30.79355,
+            "lon": -83.45352,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 84256144 (Withlacoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Morven",
             "at_mi": 12.3,
             "off_mi": 10.45,
@@ -84954,11 +85856,14 @@
             "spoken": "Passing Morven"
           },
           {
-            "name": "Withlacoochee River",
-            "category": "river",
+            "name": "The Big Oak (westbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 14.2,
-            "spoken": "Crossing the Withlacoochee River"
+            "at_mi": 31.1,
+            "spoken": "Billboard: Thomasville, ahead, the City of Roses. The Big Oak downtown has been growing since about sixteen eighty. It was here before the roses.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Metcalfe",
@@ -84979,13 +85884,6 @@
             "spoken": "Passing Thomasville"
           },
           {
-            "name": "Ochlockonee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 41.6,
-            "spoken": "Crossing the Ochlockonee River"
-          },
-          {
             "name": "Coolidge",
             "at_mi": 43.6,
             "off_mi": 10.88,
@@ -84995,6 +85893,16 @@
             "spoken": "Passing Coolidge"
           },
           {
+            "name": "Ochlockonee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 49.4,
+            "spoken": "Crossing the Ochlockonee River",
+            "lat": 30.87594,
+            "lon": -84.04657,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 84617010 (Ochlockonee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Ochlocknee",
             "at_mi": 49.8,
             "off_mi": 6.59,
@@ -85002,6 +85910,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154340495, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ochlocknee"
+          },
+          {
+            "name": "The Big Oak (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.1,
+            "spoken": "Billboard: Thomasville, ahead, the City of Roses. The Big Oak downtown has been growing since about sixteen eighty. It was here before the roses.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Whigham",
@@ -85034,8 +85952,11 @@
             "name": "Flint River",
             "category": "river",
             "kind": "point",
-            "at_mi": 95.7,
-            "spoken": "Crossing the Flint River"
+            "at_mi": 84.4,
+            "spoken": "Crossing the Flint River",
+            "lat": 30.90633,
+            "lon": -84.58863,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163525852 (Flint River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Colquitt",
@@ -85059,8 +85980,11 @@
             "name": "Chattahoochee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 123.9,
-            "spoken": "Crossing the Chattahoochee River"
+            "at_mi": 116.5,
+            "spoken": "Crossing the Chattahoochee River",
+            "lat": 31.12342,
+            "lon": -85.05529,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163525846 (Chattahoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Columbia",
@@ -85192,20 +86116,22 @@
         "state_miles": [
           {
             "state": "Georgia",
-            "miles": 116.4
+            "miles": 116.5,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Alabama",
-            "miles": 21.6
+            "miles": 21.5,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 116.4,
+            "at_mi": 116.5,
             "from_state": "Georgia",
             "state": "Alabama",
             "place": "Georgia-Alabama line on US-84",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -86611,11 +87537,24 @@
             "spoken": "Passing Lake Park"
           },
           {
+            "name": "Wild Adventures (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.7,
+            "spoken": "Billboard: Wild Adventures, ahead, south of Valdosta. Six roller coasters and a zoo in one park. The animals have chosen not to ride.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Withlacoochee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 10.9,
-            "spoken": "Crossing the Withlacoochee River"
+            "at_mi": 11.0,
+            "spoken": "Crossing the Withlacoochee River",
+            "lat": 30.79355,
+            "lon": -83.45352,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 84256144 (Withlacoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Morven",
@@ -86636,11 +87575,34 @@
             "spoken": "Passing Boston"
           },
           {
+            "name": "Greenville (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.5,
+            "spoken": "Billboard: Greenville, ahead, where Ray Charles grew up. A life-size bronze Ray plays piano in the town park. He has not missed a show since.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Greenville (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.6,
+            "spoken": "Billboard: Greenville, next exit, where Ray Charles grew up. A life-size bronze Ray plays piano in the town park. He has not missed a show since.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Aucilla River",
             "category": "river",
             "kind": "point",
-            "at_mi": 55.9,
-            "spoken": "Crossing the Aucilla River"
+            "at_mi": 49.6,
+            "spoken": "Crossing the Aucilla River",
+            "lat": 30.44565,
+            "lon": -83.7244,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160552659 (Aucilla River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Monticello",
@@ -86659,6 +87621,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153837815, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wacissa"
+          },
+          {
+            "name": "Historic Capitol (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.0,
+            "spoken": "Billboard: Florida's Historic Capitol, ahead in Tallahassee. The plan was to tear it down for the twenty-two story tower. People said no, and the striped awnings stayed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Midway",
@@ -86822,11 +87794,13 @@
         "state_miles": [
           {
             "state": "Georgia",
-            "miles": 28.2
+            "miles": 28.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Florida",
-            "miles": 58.8
+            "miles": 58.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
@@ -86835,7 +87809,7 @@
             "from_state": "Georgia",
             "state": "Florida",
             "place": "Georgia-Florida line on US-84",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -87503,7 +88477,20 @@
             "category": "river",
             "kind": "point",
             "at_mi": 5.2,
-            "spoken": "Crossing the Withlacoochee River"
+            "spoken": "Crossing the Withlacoochee River",
+            "lat": 30.85503,
+            "lon": -83.33422,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 639447821 (Withlacoochee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Wild Adventures (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Wild Adventures, ahead, south of Valdosta. Six roller coasters and a zoo in one park. The animals have chosen not to ride.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Morven",

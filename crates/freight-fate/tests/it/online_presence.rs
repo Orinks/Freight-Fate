@@ -20,7 +20,7 @@ use freight_fate::online_presence::{
     request_headers, set_profile_sharing, verify_identity, IdentityStore, MastodonStatus,
     MemoryStore, OnlineIdentity, OnlinePresence, OnlinePresenceOptions, RefusingStore, SecretStore,
     HEARTBEAT_INTERVAL_S, IDLE_SIGNOFF_S, MIN_CHANGE_INTERVAL_S, OFF_DUTY_GRACE_S, PACKAGE_VERSION,
-    PAUSED_ACTIVITY, TOKEN_SERVICE,
+    PAUSED_ACTIVITY, RADIO_CLAUSE, TOKEN_SERVICE,
 };
 use freight_fate::updater::BuildInfo;
 
@@ -385,6 +385,60 @@ fn test_snapshot_change_relists_an_idle_driver() {
     clock.advance(HEARTBEAT_INTERVAL_S);
     service.pump();
     assert_eq!(last_activity(&transport), resting().activity);
+}
+
+/// The board snapshot with the cab radio on a live stream, mid-song.
+fn driving_to(song: &str) -> PresenceState {
+    PresenceState::new(
+        "Driving: Chicago to Dallas",
+        &format!("steel coils, 45% there, {RADIO_CLAUSE}KVSC 88.1: {song}"),
+    )
+}
+
+#[test]
+fn test_a_new_song_does_not_keep_a_parked_truck_on_the_board() {
+    // A truck parked with the radio on a live stream: the song title in the
+    // snapshot changes every few minutes on its own. That kept a driver at
+    // 0% on the board, beating, for seven hours (2026-10-03).
+    let transport = FakeTransport::new();
+    let clock = ManualClock::new();
+    let service = service(&transport, &clock);
+    service.start();
+    let mut song = 0;
+    service.update(Some(driving_to("song 0")));
+    let step = 200.0;
+    let mut t = 0.0;
+    while t < IDLE_SIGNOFF_S {
+        clock.advance(step);
+        t += step;
+        song += 1;
+        service.update(Some(driving_to(&format!("song {song}"))));
+        service.pump();
+    }
+    assert_eq!(
+        last_activity(&transport),
+        "",
+        "the idle sign-off never went out"
+    );
+
+    // Signed off, the songs keep changing and nothing more is posted.
+    let sent = transport.posts().len();
+    for _ in 0..6 {
+        clock.advance(step);
+        song += 1;
+        service.update(Some(driving_to(&format!("song {song}"))));
+        service.pump();
+    }
+    assert_eq!(transport.posts().len(), sent);
+
+    // Pulling out is a real change and re-lists the driver.
+    service.update(Some(PresenceState::new(
+        "Driving: Chicago to Dallas",
+        &format!("steel coils, 50% there, {RADIO_CLAUSE}KVSC 88.1: song {song}"),
+    )));
+    clock.advance(MIN_CHANGE_INTERVAL_S);
+    service.pump();
+    assert_eq!(last_activity(&transport), "Driving: Chicago to Dallas");
 }
 
 #[test]

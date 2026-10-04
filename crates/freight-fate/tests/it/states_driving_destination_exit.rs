@@ -157,6 +157,8 @@ fn test_every_anchor_asks_for_the_signal_until_it_is_set() {
     // it stops asking -- a countdown still nagging for a signal already on is
     // the same failure the other way round.
     let mut harness = a_drive("Anchor Signal");
+    // The signal gate is the manual driver's; full lane keeping takes the exit.
+    harness.app.ctx.settings.lane_keeping = "partial".to_string();
     let at_mi = harness.read_drive(|d| d.trip.position_mi) + 3.0;
     harness.with_drive(move |drive, _| {
         drive.exit_stop = Some(a_destination_stop(at_mi));
@@ -598,6 +600,8 @@ fn test_destination_exit_keeps_cruise_and_eases_for_ramp() {
     let (miles, highway) = (last.miles, last.highway.clone());
     let mut signed = an_interchange(miles - 1.0, "20", "Memphis", &highway);
     signed.via = "US 64 East".to_string();
+    // The line asks for the signal, which only a driver holding the lane owes.
+    app.ctx.settings.lane_keeping = "partial".to_string();
     let mut drive = a_rochester_run(&mut app, "Cruise Eases", Some(vec![signed]));
     drive.trip.hazard_check_mi = 1e9;
     drive.trip.inspection_check_mi = 1e9;

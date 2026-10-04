@@ -108,16 +108,16 @@ fn hos_planning_hints_row_explains_and_persists_the_opt_in() {
 #[test]
 fn test_settings_menu_cycles_lane_keeping() {
     let mut app = TestApp::new();
-    assert_eq!(app.ctx.settings.lane_keeping, "partial"); // the balanced default
+    assert_eq!(app.ctx.settings.lane_keeping, "full"); // the all-assists default
     open_settings_category(&mut app, "Driving assistance");
     move_to::<Cat>(&mut app, "Lane keeping");
-    // Starts on the shipped default, partial, and steps round the ladder.
+    // Starts on the shipped default, full, and steps round the ladder.
+    key(&mut app, Key::Return);
+    assert_eq!(app.ctx.settings.lane_keeping, "partial");
     key(&mut app, Key::Return);
     assert_eq!(app.ctx.settings.lane_keeping, "off");
-    key(&mut app, Key::Return);
-    assert_eq!(app.ctx.settings.lane_keeping, "full");
     key(&mut app, Key::Left);
-    assert_eq!(app.ctx.settings.lane_keeping, "off");
+    assert_eq!(app.ctx.settings.lane_keeping, "partial");
 }
 
 #[test]
@@ -129,6 +129,11 @@ fn test_lane_keeping_row_speaks_its_consequence_not_a_bare_value() {
     move_to::<Cat>(&mut app, "Lane keeping");
     assert_eq!(
         current_label::<Cat>(&app),
+        "Lane keeping: full, the truck holds the lane and takes your exits"
+    );
+    key(&mut app, Key::Return);
+    assert_eq!(
+        current_label::<Cat>(&app),
         "Lane keeping: partial, gentle drift and you steer with help"
     );
     key(&mut app, Key::Return);
@@ -136,8 +141,6 @@ fn test_lane_keeping_row_speaks_its_consequence_not_a_bare_value() {
         current_label::<Cat>(&app),
         "Lane keeping: off, you hold the lane and take your own exits"
     );
-    key(&mut app, Key::Return);
-    assert!(current_label::<Cat>(&app).contains("the truck holds the lane"));
 }
 
 #[test]
@@ -359,6 +362,61 @@ fn test_no_settings_row_carries_a_run_of_spaces() {
         .filter(|(_, label, help)| label.contains("  ") || help.contains("  "))
         .collect();
     assert!(runs.is_empty(), "{runs:?}");
+}
+
+#[test]
+fn test_no_settings_help_teaches_steering_by_the_road_sound() {
+    // The engine became the lean on 2026-09-18 and the road sound became
+    // where the truck sits, but the Lane keeping help went on saying the
+    // road sound leans toward the steer -- so a driver who followed it
+    // steered the wrong way out of every corner (forum report, 2026-09-30).
+    let mut app = TestApp::new();
+    let rows = all_settings_rows(&mut app);
+    let wrong: Vec<_> = rows
+        .iter()
+        .filter(|(_, _, help)| help.contains("road sound leans"))
+        .collect();
+    assert!(wrong.is_empty(), "{wrong:?}");
+    // And the lean it does teach is the one the Steering guide and Lane
+    // guide sound rows have set, not the defaults.
+    let lane_help = |app: &mut TestApp| {
+        cat_rows(app, "assistance")
+            .into_iter()
+            .find(|(label, _)| label.starts_with("Lane keeping"))
+            .expect("the Lane keeping row")
+            .1
+    };
+    for (tone, inverted, expected) in [
+        (
+            false,
+            false,
+            "the engine leans toward where the wheel should go, so steer toward it",
+        ),
+        (
+            false,
+            true,
+            "the engine leans away from where the wheel should go, so steer away from it",
+        ),
+        (
+            true,
+            false,
+            "a soft tone leans toward where the wheel should go, so steer toward it",
+        ),
+        (
+            true,
+            true,
+            "a soft tone leans away from where the wheel should go, so steer away from it",
+        ),
+    ] {
+        app.ctx.settings.lane_guide_tone = tone;
+        app.ctx.settings.steering_guide_inverted = inverted;
+        let help = lane_help(&mut app);
+        assert!(help.contains(expected), "{help}");
+        assert!(
+            help.contains("Steering guide and Lane guide sound"),
+            "{help}"
+        );
+    }
 }
 
 #[test]

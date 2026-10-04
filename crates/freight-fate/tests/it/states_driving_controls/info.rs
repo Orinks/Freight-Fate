@@ -158,7 +158,6 @@ fn test_alt_c_repeats_the_cb_call_at_the_distance_it_is_now() {
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &alt(Key::C));
     let said = last(&app);
-    assert!(said.starts_with("CB chatter"), "{said}");
     assert_eq!(said, d.trip.cb_patrol_message(&post, 2.0));
     assert_ne!(said, first_heard, "the distance went stale");
 }
@@ -203,11 +202,11 @@ fn test_a_later_announcement_takes_the_a_key_but_not_the_cb_repeat() {
 
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &key(Key::A));
-    assert!(!last(&app).contains("CB chatter"), "{}", last(&app));
+    assert!(!last(&app).contains("in the median"), "{}", last(&app));
 
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &alt(Key::C));
-    assert!(last(&app).starts_with("CB chatter"), "{}", last(&app));
+    assert!(last(&app).contains("in the median"), "{}", last(&app));
 }
 
 #[test]
@@ -223,7 +222,7 @@ fn test_alt_c_brings_back_the_voice_and_not_the_squelch() {
     let audio = app.record_audio();
     app.clear_speech();
     d.handle_key_event(&mut app.ctx, &alt(Key::C));
-    assert!(last(&app).starts_with("CB chatter"), "{}", last(&app));
+    assert!(last(&app).contains("in the median"), "{}", last(&app));
     assert!(
         !audio
             .borrow()

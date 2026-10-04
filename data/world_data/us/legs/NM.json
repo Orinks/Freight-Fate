@@ -468,20 +468,22 @@
         "state_miles": [
           {
             "state": "New Mexico",
-            "miles": 67.66
+            "miles": 67.5,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 21.34
+            "miles": 21.5,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 67.66,
+            "at_mi": 67.5,
             "from_state": "New Mexico",
             "state": "Texas",
             "place": "New Mexico-Texas line on US-54",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -637,6 +639,16 @@
             "spoken": "Passing Boles Acres"
           },
           {
+            "name": "Museum of Space History (from El Paso)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.7,
+            "spoken": "Billboard: The New Mexico Museum of Space History, ahead in Alamogordo. Ham, the first chimpanzee in space, is buried on the grounds. He went first.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Chaparral",
             "at_mi": 70.8,
             "off_mi": 4.39,
@@ -644,6 +656,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151462208, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Chaparral"
+          },
+          {
+            "name": "Franklin Mountains (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 71.5,
+            "spoken": "Billboard: Franklin Mountains State Park, ahead off Transmountain Road. Thirty-seven square miles of mountains, all inside the El Paso city limits. That is quite a backyard.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Anthony",
@@ -671,6 +693,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151925625, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Canutillo"
+          },
+          {
+            "name": "Franklin Mountains (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 83.0,
+            "spoken": "Billboard: Franklin Mountains State Park, ahead off Transmountain Road. Thirty-seven square miles of mountains, all inside the El Paso city limits. That is quite a backyard.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sunland Park",
@@ -2180,6 +2212,16 @@
             "spoken": "Passing La Luz"
           },
           {
+            "name": "Museum of Space History (from Roswell)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The New Mexico Museum of Space History, ahead in Alamogordo. Ham, the first chimpanzee in space, is buried on the grounds. He went first.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mescalero",
             "at_mi": 30.42,
             "off_mi": 0.13,
@@ -2237,6 +2279,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151540455, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Capitan"
+          },
+          {
+            "name": "Roswell (from Alamogordo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 108.0,
+            "spoken": "Billboard: Roswell is ahead, where something crashed in the desert in nineteen forty-seven and the Air Force has been explaining it ever since. Even the streetlights and the McDonald's are shaped like aliens.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -3544,6 +3596,16 @@
             "spoken": "Passing Mesita"
           },
           {
+            "name": "Acoma Sky City (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.4,
+            "spoken": "Billboard: Acoma Sky City, ahead, a pueblo atop a mesa three hundred sixty-five feet high, home for centuries. Tours begin at the cultural center.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Paguate",
             "at_mi": 45.4,
             "off_mi": 6.95,
@@ -3605,6 +3667,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151917544, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Encinal"
+          },
+          {
+            "name": "Acoma Sky City (from Gallup)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.8,
+            "spoken": "Billboard: Acoma Sky City, ahead, a pueblo atop a mesa three hundred sixty-five feet high, home for centuries. Tours begin at the cultural center.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "San Rafael",
@@ -3691,6 +3763,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151850458, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Pinedale"
+          },
+          {
+            "name": "El Rancho Hotel (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 127.2,
+            "spoken": "Billboard: The El Rancho Hotel, ahead in Gallup, built in nineteen thirty-seven for movie crews. Its rooms are named for the stars who stayed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Church Rock",
@@ -7193,6 +7275,16 @@
             "spoken": "Passing Paguate"
           },
           {
+            "name": "Acoma Sky City (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.9,
+            "spoken": "Billboard: Acoma Sky City, ahead, a pueblo atop a mesa three hundred sixty-five feet high, home for centuries. Tours begin at the cultural center.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "New Laguna",
             "at_mi": 48.2,
             "off_mi": 0.99,
@@ -7229,6 +7321,16 @@
             "spoken": "Passing Encinal"
           },
           {
+            "name": "Acoma Sky City (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.2,
+            "spoken": "Billboard: Acoma Sky City, ahead, a pueblo atop a mesa three hundred sixty-five feet high, home for centuries. Tours begin at the cultural center.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "San Rafael",
             "at_mi": 75.0,
             "off_mi": 2.73,
@@ -7256,6 +7358,16 @@
             "spoken": "Passing Iyanbito"
           },
           {
+            "name": "El Rancho Hotel (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 127.5,
+            "spoken": "Billboard: The El Rancho Hotel, ahead in Gallup, built in nineteen thirty-seven for movie crews. Its rooms are named for the stars who stayed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Yah-ta-hey",
             "at_mi": 138.3,
             "off_mi": 7.05,
@@ -7265,13 +7377,6 @@
             "spoken": "Passing Yah-ta-hey"
           },
           {
-            "name": "Puerco River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 138.6,
-            "spoken": "Crossing the Puerco River"
-          },
-          {
             "name": "Red Rock",
             "at_mi": 140.1,
             "off_mi": 4.92,
@@ -7279,6 +7384,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151813300, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Red Rock"
+          },
+          {
+            "name": "Puerco River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 141.4,
+            "spoken": "Crossing the Puerco River",
+            "lat": 35.5135,
+            "lon": -108.80988,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 481826683 (Puerco River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "El Rancho Hotel (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.5,
+            "spoken": "Billboard: The El Rancho Hotel, ahead in Gallup, built in nineteen thirty-seven for movie crews. Its rooms are named for the stars who stayed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Manuelito",
@@ -7317,6 +7442,56 @@
             "spoken": "Entering Chambers"
           },
           {
+            "name": "Petrified Forest National Park (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 205.5,
+            "spoken": "Billboard: Petrified Forest National Park, next exit, with trees turned to stone two hundred twenty-five million years ago. Thieves keep mailing pieces back.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Petrified Forest National Park (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 208.9,
+            "spoken": "Billboard: Petrified Forest National Park, next exit, with trees turned to stone two hundred twenty-five million years ago. Thieves keep mailing pieces back.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Wigwam Motel (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 223.3,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Jack Rabbit Trading Post (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 240.9,
+            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Wigwam Motel (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 240.9,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Joseph City",
             "at_mi": 243.2,
             "off_mi": 0.09,
@@ -7326,11 +7501,71 @@
             "spoken": "Entering Joseph City"
           },
           {
+            "name": "Jack Rabbit Trading Post (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 261.1,
+            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Meteor Crater (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 275.5,
+            "spoken": "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Two Guns (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 279.7,
+            "spoken": "Billboard: The ghost town of Two Guns is ahead. Its stone ruins, old zoo and canyon are on private land now, posted against visitors, with enough Route sixty-six legends to make every abandoned wall suspicious.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Meteor Crater (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 293.5,
+            "spoken": "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Two Guns (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 297.7,
+            "spoken": "Billboard: The ghost town of Two Guns is ahead. Its stone ruins, old zoo and canyon are on private land now, posted against visitors, with enough Route sixty-six legends to make every abandoned wall suspicious.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Coconino National Forest",
             "category": "national_forest",
             "kind": "zone",
             "at_mi": 305.8,
             "spoken": "Entering Coconino National Forest"
+          },
+          {
+            "name": "Lowell Observatory (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 308.1,
+            "spoken": "Billboard: Lowell Observatory, ahead in Flagstaff. Pluto was found here in nineteen thirty. It has since been demoted, and the observatory took it well.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Mountain View Ranches",
@@ -7340,6 +7575,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 11709590971, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Mountain View Ranches"
+          },
+          {
+            "name": "Walnut Canyon (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 312.5,
+            "spoken": "Billboard: Walnut Canyon National Monument, next exit. Twenty-five cliff dwelling rooms down a trail that drops a hundred eighty-five feet. The climb back is included.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Walnut Canyon (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 315.7,
+            "spoken": "Billboard: Walnut Canyon National Monument, next exit. Twenty-five cliff dwelling rooms down a trail that drops a hundred eighty-five feet. The climb back is included.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Doney Park",
@@ -7376,6 +7631,16 @@
             "spoken": "Passing Mountainaire"
           },
           {
+            "name": "Lowell Observatory (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 331.8,
+            "spoken": "Billboard: Lowell Observatory, ahead in Flagstaff. Pluto was found here in nineteen thirty. It has since been demoted, and the observatory took it well.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Munds Park",
             "at_mi": 340.8,
             "off_mi": 0.75,
@@ -7385,11 +7650,14 @@
             "spoken": "Passing Munds Park"
           },
           {
-            "name": "Verde River",
-            "category": "river",
+            "name": "Montezuma Castle (from Albuquerque)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 365.7,
-            "spoken": "Crossing the Verde River"
+            "at_mi": 368.0,
+            "spoken": "Billboard: Montezuma Castle National Monument, ahead near Camp Verde. A five-story cliff dwelling ninety feet up. Montezuma never lived there, and it is not a castle.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Lake Montezuma",
@@ -7399,6 +7667,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150980291, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Lake Montezuma"
+          },
+          {
+            "name": "Verde River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 375.0,
+            "spoken": "Crossing the Verde River",
+            "lat": 34.58654,
+            "lon": -111.87988,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 502237931 (Verde River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Montezuma Castle (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 376.1,
+            "spoken": "Billboard: Montezuma Castle National Monument, ahead near Camp Verde. A five-story cliff dwelling ninety feet up. Montezuma never lived there, and it is not a castle.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Prescott National Forest",
@@ -7411,8 +7699,11 @@
             "name": "Agua Fria River",
             "category": "river",
             "kind": "point",
-            "at_mi": 390.4,
-            "spoken": "Crossing the Agua Fria River"
+            "at_mi": 397.3,
+            "spoken": "Crossing the Agua Fria River",
+            "lat": 34.36576,
+            "lon": -112.11426,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 191504602 (Agua Fria River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Spring Valley",
@@ -7440,6 +7731,16 @@
             "spoken": "Entering State Trust Land"
           },
           {
+            "name": "New River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 431.0,
+            "spoken": "Crossing the New River",
+            "lat": 33.90562,
+            "lon": -112.14616,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 102901200 (New River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Anthem",
             "at_mi": 434.3,
             "off_mi": 1.0,
@@ -7456,13 +7757,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 9237180808, projected onto the leg's checked-in route geometry",
             "spoken": "Passing Desert Hills"
-          },
-          {
-            "name": "New River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 440.8,
-            "spoken": "Crossing the New River"
           }
         ],
         "traffic_aadt": [
@@ -12205,6 +12499,16 @@
             "spoken": "Passing South Valley"
           },
           {
+            "name": "Sandia Peak Tramway (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.5,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Paradise Hills",
             "at_mi": 4.1,
             "off_mi": 7.04,
@@ -12241,6 +12545,16 @@
             "spoken": "Entering Pueblo of Sandia Village"
           },
           {
+            "name": "Sandia Peak Tramway (from Santa Fe)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.9,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "San Felipe Pueblo",
             "at_mi": 27.1,
             "off_mi": 2.3,
@@ -12268,6 +12582,16 @@
             "spoken": "Passing Cochiti"
           },
           {
+            "name": "Meow Wolf (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.1,
+            "spoken": "Billboard: Meow Wolf, ahead in Santa Fe. A bowling alley became a house with doors to other worlds. A fantasy novelist footed the bill.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "El Rancho de las Golondrinas",
             "category": "museum",
             "kind": "point",
@@ -12282,13 +12606,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 4245267324, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rancho Viejo"
-          },
-          {
-            "name": "Santa Fe River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 56.8,
-            "spoken": "Crossing the Santa Fe River"
           },
           {
             "name": "Lamy",
@@ -12307,6 +12624,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151881272, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Glorieta"
+          },
+          {
+            "name": "Santa Fe River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 62.8,
+            "spoken": "Crossing the Santa Fe River",
+            "lat": 35.68845,
+            "lon": -105.95394,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 435625158 (Santa Fe River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Las Campanas",
@@ -13531,6 +13858,16 @@
             "kind": "zone",
             "at_mi": 57.1,
             "spoken": "Entering Sevilleta National Wildlife Refuge"
+          },
+          {
+            "name": "The Very Large Array (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.0,
+            "spoken": "Billboard: West of Socorro, twenty-seven giant white dish antennas listen to the universe together across the Plains of San Agustin. You have seen them in the movies, aimed at the stars.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "interchanges": [
@@ -15325,6 +15662,16 @@
             "spoken": "Passing Pueblo of Sandia Village"
           },
           {
+            "name": "Sandia Peak Tramway (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.5,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Tijeras",
             "at_mi": 17.2,
             "off_mi": 0.1,
@@ -15341,6 +15688,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 10703399671, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cedar Crest"
+          },
+          {
+            "name": "Sandia Peak Tramway (from Tucumcari)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.2,
+            "spoken": "Billboard: The Sandia Peak Tramway, ahead. The longest aerial tram in the Americas climbs nearly four thousand feet in fifteen minutes. Pack a jacket.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Edgewood",
@@ -15375,11 +15732,54 @@
             "spoken": "Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young."
           },
           {
+            "name": "Cline's Corners (from Tucumcari)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.7,
+            "spoken": "Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Blue Hole (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 108.7,
+            "spoken": "Billboard: The Blue Hole, ahead in Santa Rosa. A desert spring over eighty feet deep, sixty-two degrees year round. Divers love it; toes are less sure.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pecos River",
             "category": "river",
             "kind": "point",
-            "at_mi": 102.5,
-            "spoken": "Crossing the Pecos River"
+            "at_mi": 115.7,
+            "spoken": "Crossing the Pecos River",
+            "lat": 34.94538,
+            "lon": -104.70316,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 193424523 (Pecos River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "The Blue Hole (from Tucumcari)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 126.7,
+            "spoken": "Billboard: The Blue Hole, ahead in Santa Rosa. A desert spring over eighty feet deep, sixty-two degrees year round. Divers love it; toes are less sure.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Tucumcari Tonite (from Albuquerque)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 167.0,
+            "spoken": "Billboard: Stay in Tucumcari tonight, with a mile of motel neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -16789,6 +17189,16 @@
         ],
         "landmarks": [
           {
+            "name": "Pecos River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.6,
+            "spoken": "Crossing the Pecos River",
+            "lat": 32.41791,
+            "lon": -104.22435,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 191166107 (Pecos River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Loving",
             "at_mi": 3.09,
             "off_mi": 11.44,
@@ -16798,11 +17208,14 @@
             "spoken": "Passing Loving"
           },
           {
-            "name": "Pecos River",
-            "category": "river",
+            "name": "Carlsbad Caverns (from Hobbs)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 8.54,
-            "spoken": "Crossing the Pecos River"
+            "at_mi": 10.8,
+            "spoken": "Billboard: Carlsbad Caverns National Park, southwest of Carlsbad. The Big Room is the largest cave chamber in North America. Your whole fleet would fit.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Buckeye",
@@ -17831,6 +18244,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Pecos River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.6,
+            "spoken": "Crossing the Pecos River",
+            "lat": 32.41791,
+            "lon": -104.22435,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 191166107 (Pecos River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Loving",
             "at_mi": 3.0,
             "off_mi": 11.44,
@@ -17840,11 +18263,14 @@
             "spoken": "Passing Loving"
           },
           {
-            "name": "Pecos River",
-            "category": "river",
+            "name": "Carlsbad Caverns (from Odessa)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 13.5,
-            "spoken": "Crossing the Pecos River"
+            "at_mi": 9.1,
+            "spoken": "Billboard: Carlsbad Caverns National Park, southwest of Carlsbad. The Big Room is the largest cave chamber in North America. Your whole fleet would fit.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Buckeye",
@@ -19072,6 +19498,16 @@
             "spoken": "Entering Friona"
           },
           {
+            "name": "Palo Duro Canyon (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.0,
+            "spoken": "Billboard: Palo Duro Canyon, ahead through Canyon, then twelve miles east. The second largest canyon in the country. The Panhandle is not as flat as advertised.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Canyon",
             "at_mi": 87.3,
             "off_mi": 0.43,
@@ -19081,6 +19517,16 @@
             "spoken": "Entering Canyon"
           },
           {
+            "name": "Ozymandias on the Plains (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 91.5,
+            "spoken": "Billboard: Ozymandias on the Plains, ahead beside the highway. Two giant legs standing alone in a pasture, wearing socks. Somebody keeps painting the socks back on.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Timbercreek Canyon",
             "at_mi": 92.5,
             "off_mi": 5.72,
@@ -19088,6 +19534,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151713181, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Timbercreek Canyon"
+          },
+          {
+            "name": "Palo Duro Canyon (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 92.5,
+            "spoken": "Billboard: Palo Duro Canyon, ahead through Canyon, then twelve miles east. The second largest canyon in the country. The Panhandle is not as flat as advertised.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Palisades",
@@ -19124,6 +19580,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 12662291806, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Catalpa"
+          },
+          {
+            "name": "Ozymandias on the Plains (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.5,
+            "spoken": "Billboard: Ozymandias on the Plains, ahead beside the highway. Two giant legs standing alone in a pasture, wearing socks. Somebody keeps painting the socks back on.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bishop Hills",
@@ -19960,22 +20426,11 @@
             "name": "Pecos River",
             "category": "river",
             "kind": "point",
-            "at_mi": 98.8,
-            "spoken": "Crossing the Pecos River"
-          },
-          {
-            "name": "Spring River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 98.8,
-            "spoken": "Crossing the Spring River"
-          },
-          {
-            "name": "Lost River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 98.8,
-            "spoken": "Crossing the Lost River"
+            "at_mi": 94.0,
+            "spoken": "Crossing the Pecos River",
+            "lat": 33.57182,
+            "lon": -104.37378,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 271349097 (Pecos River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Roswell",
@@ -19990,6 +20445,16 @@
             "kind": "point",
             "at_mi": 108.0,
             "spoken": "Billboard: Welcome to Roswell, where little green men became big green money. The Main Street gift shops sell aliens in every size, so beam yourself up a T-shirt."
+          },
+          {
+            "name": "Spring River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 110.3,
+            "spoken": "Crossing the Spring River",
+            "lat": 33.40392,
+            "lon": -104.52285,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 367384951 (Spring River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -20983,15 +21448,21 @@
             "name": "Animas River",
             "category": "river",
             "kind": "point",
-            "at_mi": 34.3,
-            "spoken": "Crossing the Animas River"
+            "at_mi": 33.0,
+            "spoken": "Crossing the Animas River",
+            "lat": 37.05104,
+            "lon": -107.87516,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 116936770 (Animas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
-            "name": "Florida River",
-            "category": "river",
+            "name": "Durango and Silverton Railroad (northbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 34.3,
-            "spoken": "Crossing the Florida River"
+            "at_mi": 42.0,
+            "spoken": "Billboard: The Durango and Silverton steam train, ahead in Durango. Up the Animas canyon since eighteen eighty-two. Your truck is faster, and nobody photographs it.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -21245,7 +21716,15 @@
           "name": "rolling",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": [
+          {
+            "from_mi": 45.83,
+            "to_mi": 51.48,
+            "name": "Tracks Across Borders",
+            "source": "Colorado SB21-263 / C.R.S. 43-1-401; CDOT Colorado Scenic and Historic Byways GeoJSON dataset 6aqe-63uq; exact CDOT route label and OSM route refs agree; OSM route refs: US 160, US 160;US 550; OpenStreetMap US PBF 2026-09-29; OSM way IDs: 117912818, 117912908, 1210581565, 1210581568, 1210793104, 1210793105, 1210793106, 1210793108, 1210793109, 1210793110, 1210793111, 1210793113, 1210793114, 1210793115, 1210793116, 1210793117, 1301871701, 1301871702, 1317002789, 1366753848, 1366753849, 1377903597, 1377903605, 1393611245, 17089332, 276202762, 276202767, 276203845, 277659306, 277659308, 277660217, 277660221, 291070565, 440198023, 478196486, 478196487, 933120933, 933122826."
+          }
+        ]
       },
       "stops": [
         {
@@ -22593,6 +23072,16 @@
             "spoken": "Entering Hogback"
           },
           {
+            "name": "San Juan River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 28.0,
+            "spoken": "Crossing the San Juan River",
+            "lat": 36.78114,
+            "lon": -108.69228,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 333765006 (San Juan River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Gadii'ahi",
             "at_mi": 28.2,
             "off_mi": 6.9,
@@ -22600,20 +23089,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151338595, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gadii'ahi"
-          },
-          {
-            "name": "San Juan River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.1,
-            "spoken": "Crossing the San Juan River"
-          },
-          {
-            "name": "Chaco River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.1,
-            "spoken": "Crossing the Chaco River"
           },
           {
             "name": "Sanostee",
@@ -22688,13 +23163,6 @@
             "spoken": "Entering Twin Lakes"
           },
           {
-            "name": "Puerco River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 108.8,
-            "spoken": "Crossing the Puerco River"
-          },
-          {
             "name": "Yah-ta-hey",
             "at_mi": 112.6,
             "off_mi": 0.15,
@@ -22702,6 +23170,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 6685254023, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Yah-ta-hey"
+          },
+          {
+            "name": "El Rancho Hotel (from Farmington)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 114.9,
+            "spoken": "Billboard: The El Rancho Hotel, ahead in Gallup, built in nineteen thirty-seven for movie crews. Its rooms are named for the stars who stayed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Puerco River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 120.7,
+            "spoken": "Crossing the Puerco River",
+            "lat": 35.52965,
+            "lon": -108.74533,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 481826683 (Puerco River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Red Rock",
@@ -24076,6 +24564,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151962960, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Wolfforth"
+          },
+          {
+            "name": "Buddy Holly Center (from Hobbs)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 102.0,
+            "spoken": "Billboard: The Buddy Holly Center, ahead in Lubbock. His guitar and glasses inside, and a seven-hundred-fifty-pound pair of glasses out front. No prescription required.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Shallowater",
@@ -25803,6 +26301,16 @@
             "spoken": "Passing Do\u00f1a Ana"
           },
           {
+            "name": "Mesilla (from Alamogordo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.9,
+            "spoken": "Billboard: Mesilla, ahead by Las Cruces. The railroad bypassed it in eighteen eighty-one over land prices, which kept the old plaza old. Thank the haggling.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Butterfield Park",
             "at_mi": 11.2,
             "off_mi": 0.23,
@@ -25830,6 +26338,16 @@
             "spoken": "Passing White Sands"
           },
           {
+            "name": "White Sands National Park (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.9,
+            "spoken": "Billboard: White Sands National Park, ahead. The largest gypsum dunefield on Earth, and you may sled it. This road closes now and then for missile tests.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "White Sands National Park",
             "category": "national_park",
             "kind": "zone",
@@ -25844,6 +26362,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 13666182006, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Holloman"
+          },
+          {
+            "name": "White Sands National Park (from Alamogordo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.9,
+            "spoken": "Billboard: White Sands National Park, ahead. The largest gypsum dunefield on Earth, and you may sled it. This road closes now and then for missile tests.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Museum of Space History (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.9,
+            "spoken": "Billboard: The New Mexico Museum of Space History, ahead in Alamogordo. Ham, the first chimpanzee in space, is buried on the grounds. He went first.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Boles Acres",
@@ -26454,20 +26992,22 @@
         "state_miles": [
           {
             "state": "New Mexico",
-            "miles": 25.5
+            "miles": 25.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 19.5
+            "miles": 19.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 25.5,
+            "at_mi": 25.1,
             "from_state": "New Mexico",
             "state": "Texas",
             "place": "New Mexico-Texas line on I-10",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -26512,6 +27052,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151400185, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing San Miguel"
+          },
+          {
+            "name": "Mesilla (from El Paso)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.3,
+            "spoken": "Billboard: Mesilla, ahead by Las Cruces. The railroad bypassed it in eighteen eighty-one over land prices, which kept the old plaza old. Thank the haggling.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mesquite",
@@ -26568,6 +27118,16 @@
             "spoken": "Passing Chaparral"
           },
           {
+            "name": "Franklin Mountains (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.9,
+            "spoken": "Billboard: Franklin Mountains State Park, ahead off Transmountain Road. Thirty-seven square miles of mountains, all inside the El Paso city limits. That is quite a backyard.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Vinton",
             "at_mi": 28.2,
             "off_mi": 0.73,
@@ -26593,6 +27153,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151925625, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Canutillo"
+          },
+          {
+            "name": "Franklin Mountains (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.0,
+            "spoken": "Billboard: Franklin Mountains State Park, ahead off Transmountain Road. Thirty-seven square miles of mountains, all inside the El Paso city limits. That is quite a backyard.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Santa Teresa",
@@ -29155,20 +29725,22 @@
         "state_miles": [
           {
             "state": "New Mexico",
-            "miles": 25.7
+            "miles": 25.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 324.3
+            "miles": 324.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 25.7,
+            "at_mi": 25.3,
             "from_state": "New Mexico",
             "state": "Texas",
             "place": "New Mexico-Texas line on I-10",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -30982,6 +31554,16 @@
             "spoken": "Passing San Miguel"
           },
           {
+            "name": "Mesilla (from Midland)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.3,
+            "spoken": "Billboard: Mesilla, ahead by Las Cruces. The railroad bypassed it in eighteen eighty-one over land prices, which kept the old plaza old. Thank the haggling.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mesquite",
             "at_mi": 12.0,
             "off_mi": 1.66,
@@ -31027,6 +31609,16 @@
             "spoken": "Passing Chamberino"
           },
           {
+            "name": "Franklin Mountains (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.1,
+            "spoken": "Billboard: Franklin Mountains State Park, ahead off Transmountain Road. Thirty-seven square miles of mountains, all inside the El Paso city limits. That is quite a backyard.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Vinton",
             "at_mi": 28.4,
             "off_mi": 0.73,
@@ -31054,6 +31646,16 @@
             "spoken": "Passing Canutillo"
           },
           {
+            "name": "Franklin Mountains (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.2,
+            "spoken": "Billboard: Franklin Mountains State Park, ahead off Transmountain Road. Thirty-seven square miles of mountains, all inside the El Paso city limits. That is quite a backyard.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Santa Teresa",
             "at_mi": 34.4,
             "off_mi": 4.05,
@@ -31072,6 +31674,16 @@
             "spoken": "Passing Sunland Park"
           },
           {
+            "name": "Ysleta Mission (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.5,
+            "spoken": "Billboard: Ysleta Mission, ahead on the Mission Trail. Founded in sixteen eighty-two, the oldest active parish in Texas. It was here before Texas was.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Horizon City",
             "at_mi": 64.1,
             "off_mi": 2.86,
@@ -31079,6 +31691,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151331817, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Horizon City"
+          },
+          {
+            "name": "Ysleta Mission (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.0,
+            "spoken": "Billboard: Ysleta Mission, ahead on the Mission Trail. Founded in sixteen eighty-two, the oldest active parish in Texas. It was here before Texas was.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "San Elizario",
@@ -31151,11 +31773,34 @@
             "spoken": "Entering Toyah"
           },
           {
+            "name": "West of the Pecos Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 254.0,
+            "spoken": "Billboard: The West of the Pecos Museum, next exit. An old saloon with a hallway straight to the hotel. The rodeo here dates to eighteen eighty-three.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "West of the Pecos Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 257.5,
+            "spoken": "Billboard: The West of the Pecos Museum, next exit. An old saloon with a hallway straight to the hotel. The rodeo here dates to eighteen eighty-three.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Pecos River",
             "category": "river",
             "kind": "point",
-            "at_mi": 245.2,
-            "spoken": "Crossing the Pecos River"
+            "at_mi": 261.7,
+            "spoken": "Crossing the Pecos River",
+            "lat": 31.42679,
+            "lon": -103.38917,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1535291611 (Pecos River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Barstow",
@@ -31194,6 +31839,26 @@
             "spoken": "Entering Thorntonville"
           },
           {
+            "name": "Monahans Sandhills (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 297.5,
+            "spoken": "Billboard: Monahans Sandhills State Park, next exit. Dunes up to seventy feet tall, and they rent you a disc to ride down. Your boots will bring some home.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Monahans Sandhills (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 301.0,
+            "spoken": "Billboard: Monahans Sandhills State Park, next exit. Dunes up to seventy feet tall, and they rent you a disc to ride down. Your boots will bring some home.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Penwell",
             "at_mi": 314.7,
             "off_mi": 0.13,
@@ -31203,6 +31868,16 @@
             "spoken": "Entering Penwell"
           },
           {
+            "name": "Odessa Meteor Crater (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 320.3,
+            "spoken": "Billboard: The Odessa Meteor Crater, next exit. A rock from space hit here sixty-three thousand years ago. Admission is free, and it has not been back.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "West Odessa",
             "at_mi": 323.7,
             "off_mi": 3.15,
@@ -31210,6 +31885,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 1920734893, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing West Odessa"
+          },
+          {
+            "name": "Odessa Meteor Crater (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 323.8,
+            "spoken": "Billboard: The Odessa Meteor Crater, next exit. A rock from space hit here sixty-three thousand years ago. Admission is free, and it has not been back.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Petroleum Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 337.5,
+            "spoken": "Billboard: The Petroleum Museum, ahead in Midland. Antique drilling rigs out back, Jim Hall's Chaparral race cars inside. All of it ran on the local product.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Warfield",
@@ -31904,6 +32599,50 @@
             }
           ],
           "approach_source": "derived: routed over the local OpenStreetMap extract from this exit's ramp terminal node (read) to the stop's read coordinates; per-street limit, controls and driveway as in facility_approaches.json generated.street_sources"
+        },
+        {
+          "name": "The Thing",
+          "type": "truck_parking",
+          "at_mi": 210.3,
+          "source": "Bowlin's The Thing, 2631 North Johnson Road, Dragoon, Arizona, on I-10 at Exit 322 (bowlintc.com; NATSO, 'Stop and See The Thing at Bowlin Travel Center'). Read: museum, gift shop, Dairy Queen, Shell fuel with diesel. Assumed: a combination vehicle can pull into the lot to visit. Bowlin's lists no truck parking, so parking is limited and this is a visit stop, not a place to fuel with a trailer (owner, 2026-09-30). Mile marker derived from this leg's Exit 322 interchange record. Curated 2026-09-30.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break"
+          ],
+          "services": [
+            "parking"
+          ],
+          "directions": [
+            "both"
+          ],
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer",
+          "lat": 32.0312,
+          "lon": -110.051
+        },
+        {
+          "name": "Shell at The Thing",
+          "type": "fuel_station",
+          "at_mi": 210.3,
+          "source": "Shell fuel at Bowlin's The Thing, I-10 Exit 322 (bowlintc.com: self-serve Shell fuel, diesel sold). Truck access: no verified truck access; Bowlin's lists no truck parking or diesel lanes, so the pumps are bobtail_only per the truck-accessibility policy. Mile marker derived from this leg's Exit 322 interchange record. Curated 2026-09-30.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel"
+          ],
+          "directions": [
+            "both"
+          ],
+          "curation": "curated",
+          "vehicle_access": "bobtail_only",
+          "lat": 32.0312,
+          "lon": -110.051
         }
       ],
       "corridor": {
@@ -33090,11 +33829,13 @@
         "state_miles": [
           {
             "state": "New Mexico",
-            "miles": 141.6
+            "miles": 141.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Arizona",
-            "miles": 133.4
+            "miles": 133.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
@@ -33103,7 +33844,7 @@
             "from_state": "New Mexico",
             "state": "Arizona",
             "place": "New Mexico-Arizona line on I-10",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -34372,15 +35113,51 @@
             "name": "The Thing (countdown, sign one)",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 60.0,
-            "spoken": "Billboard: What is it? The Thing? Mystery of the desert ahead. Two hundred miles to guess, and whatever you do, do not stop moving."
+            "at_mi": 10.1,
+            "spoken": "Billboard: What is it? The Thing? Mystery of the desert ahead. Two hundred miles to guess, and whatever you do, do not stop moving.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Mesilla (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.7,
+            "spoken": "Billboard: Mesilla, ahead by Las Cruces. The railroad bypassed it in eighteen eighty-one over land prices, which kept the old plaza old. Thank the haggling.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Rockhound State Park (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.3,
+            "spoken": "Billboard: Rockhound State Park, ahead near Deming, the first park in the country to let you take the rocks home. Your suspension gets a vote.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Mimbres River",
             "category": "river",
             "kind": "point",
-            "at_mi": 71.6,
-            "spoken": "Crossing the Mimbres River"
+            "at_mi": 55.9,
+            "spoken": "Crossing the Mimbres River",
+            "lat": 32.27883,
+            "lon": -107.70288,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 769821568 (Mimbres River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Rockhound State Park (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.3,
+            "spoken": "Billboard: Rockhound State Park, ahead near Deming, the first park in the country to let you take the rocks home. Your suspension gets a vote.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Stein's Pass",
@@ -34394,7 +35171,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 150.0,
-            "spoken": "Billboard: The Thing. Still ahead, still a mystery, still a dollar or two to find out. No officials of any type allowed -- if you're one, turn back now or hide your identity."
+            "spoken": "Billboard: The Thing. Still ahead, still a mystery, still a few dollars to find out. No officials of any type allowed -- if you're one, turn back now or hide your identity.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "San Simon",
@@ -34404,6 +35184,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151948552, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering San Simon"
+          },
+          {
+            "name": "Rex Allen Museum (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 183.6,
+            "spoken": "Billboard: The Rex Allen Arizona Cowboy Museum, ahead in Willcox. He sang, rode Koko through nineteen Westerns, and narrated for Disney. Koko gets a memorial too.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Rex Allen Museum (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 201.6,
+            "spoken": "Billboard: The Rex Allen Arizona Cowboy Museum, ahead in Willcox. He sang, rode Koko through nineteen Westerns, and narrated for Disney. Koko gets a memorial too.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "The Thing (countdown, sign three)",
@@ -34420,11 +35220,44 @@
             "spoken": "Approaching Dragoon Pass"
           },
           {
+            "name": "The Thing (eastbound, sign two)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 218.0,
+            "spoken": "Billboard: The Thing, the exit after the rest area. A few dollars, and you will finally know.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Kartchner Caverns (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 219.0,
+            "spoken": "Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "San Pedro River",
             "category": "river",
             "kind": "point",
-            "at_mi": 234.1,
-            "spoken": "Crossing the San Pedro River"
+            "at_mi": 226.5,
+            "spoken": "Crossing the San Pedro River",
+            "lat": 31.96894,
+            "lon": -110.27925,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 173195810 (San Pedro River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Kartchner Caverns (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 237.0,
+            "spoken": "Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Corona de Tucson",
@@ -34434,6 +35267,36 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150934158, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Corona de Tucson"
+          },
+          {
+            "name": "The Thing (eastbound, sign one)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 255.0,
+            "spoken": "Billboard: What is The Thing? Forty-five miles to find out. The people who know are not telling.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Pima Air and Space Museum (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 255.0,
+            "spoken": "Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pima Air and Space Museum (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 270.0,
+            "spoken": "Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pascua Pueblo",
@@ -35312,15 +36175,21 @@
             "name": "Mora River",
             "category": "river",
             "kind": "point",
-            "at_mi": 13.8,
-            "spoken": "Crossing the Mora River"
+            "at_mi": 21.3,
+            "spoken": "Crossing the Mora River",
+            "lat": 35.79852,
+            "lon": -104.98357,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 564720237 (Mora River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Vermejo River",
             "category": "river",
             "kind": "point",
-            "at_mi": 67.9,
-            "spoken": "Crossing the Vermejo River"
+            "at_mi": 78.2,
+            "spoken": "Crossing the Vermejo River",
+            "lat": 36.49657,
+            "lon": -104.57104,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1165191804 (Vermejo River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Maxwell",
@@ -35336,7 +36205,10 @@
             "category": "river",
             "kind": "point",
             "at_mi": 95.5,
-            "spoken": "Crossing the Canadian River"
+            "spoken": "Crossing the Canadian River",
+            "lat": 36.72376,
+            "lon": -104.46572,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 599970064 (Canadian River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -36644,7 +37516,8 @@
           "name": "mountainous",
           "sections": 235,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -37157,6 +38030,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Roswell (from Carlsbad)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Roswell is ahead, where something crashed in the desert in nineteen forty-seven and the Air Force has been explaining it ever since. Even the streetlights and the McDonald's are shaped like aliens.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Dexter",
             "at_mi": 15.7,
             "off_mi": 4.67,
@@ -37191,11 +38074,14 @@
             "spoken": "Artesia Historical Museum and Art Centre ahead"
           },
           {
-            "name": "Pecos River",
-            "category": "river",
+            "name": "Carlsbad Caverns (from Roswell)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 67.2,
-            "spoken": "Crossing the Pecos River"
+            "at_mi": 64.9,
+            "spoken": "Billboard: Carlsbad Caverns National Park, southwest of Carlsbad. The Big Room is the largest cave chamber in North America. Your whole fleet would fit.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -38488,18 +39374,34 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
-            "name": "Pecos River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 14.6,
-            "spoken": "Crossing the Pecos River"
-          },
-          {
             "name": "Spring River",
             "category": "river",
             "kind": "point",
-            "at_mi": 14.6,
-            "spoken": "Crossing the Spring River"
+            "at_mi": 0.7,
+            "spoken": "Crossing the Spring River",
+            "lat": 33.40393,
+            "lon": -104.52272,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 367384951 (Spring River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Roswell (from Lubbock)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Roswell is ahead, where something crashed in the desert in nineteen forty-seven and the Air Force has been explaining it ever since. Even the streetlights and the McDonald's are shaped like aliens.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Pecos River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 16.4,
+            "spoken": "Crossing the Pecos River",
+            "lat": 33.57179,
+            "lon": -104.37364,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 271349097 (Pecos River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Elida",
@@ -38597,6 +39499,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151402560, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Shallowater"
+          },
+          {
+            "name": "Buddy Holly Center (from Roswell)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 200.5,
+            "spoken": "Billboard: The Buddy Holly Center, ahead in Lubbock. His guitar and glasses inside, and a seven-hundred-fifty-pound pair of glasses out front. No prescription required.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Wolfforth",
@@ -38921,11 +39833,13 @@
         "state_miles": [
           {
             "state": "New Mexico",
-            "miles": 118.2
+            "miles": 118.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 90.8
+            "miles": 90.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
@@ -38934,7 +39848,7 @@
             "from_state": "New Mexico",
             "state": "Texas",
             "place": "New Mexico-Texas line on US-380",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -40155,6 +41069,16 @@
             "spoken": "Passing Tesuque Pueblo"
           },
           {
+            "name": "Santa Fe River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.3,
+            "spoken": "Crossing the Santa Fe River",
+            "lat": 35.68468,
+            "lon": -105.93765,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 435625159 (Santa Fe River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Rancho Viejo",
             "at_mi": 4.0,
             "off_mi": 4.87,
@@ -40162,13 +41086,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 4245267324, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rancho Viejo"
-          },
-          {
-            "name": "Santa Fe River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 6.6,
-            "spoken": "Crossing the Santa Fe River"
           },
           {
             "name": "Galisteo",
@@ -40208,8 +41125,11 @@
             "name": "Pecos River",
             "category": "river",
             "kind": "point",
-            "at_mi": 40.1,
-            "spoken": "Crossing the Pecos River"
+            "at_mi": 41.4,
+            "spoken": "Crossing the Pecos River",
+            "lat": 35.40025,
+            "lon": -105.47541,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 192332566 (Pecos River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -41916,7 +42836,40 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: West of Socorro, twenty-seven giant white dish antennas listen to the universe together across the Plains of San Agustin. You have seen them in the movies, aimed at the stars."
+            "spoken": "Billboard: West of Socorro, twenty-seven giant white dish antennas listen to the universe together across the Plains of San Agustin. You have seen them in the movies, aimed at the stars.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Bosque del Apache (from Socorro)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Billboard: Bosque del Apache National Wildlife Refuge, ahead at San Antonio. Thousands of sandhill cranes winter here with the snow geese. They are louder than you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Bosque del Apache (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.8,
+            "spoken": "Billboard: Bosque del Apache National Wildlife Refuge, ahead at San Antonio. Thousands of sandhill cranes winter here with the snow geese. They are louder than you.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Truth or Consequences (from Socorro)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.0,
+            "spoken": "Billboard: Truth or Consequences, ahead. In nineteen fifty, Hot Springs renamed itself after a radio quiz show for one broadcast. The name stuck; the show moved on.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Elephant Butte",
@@ -41937,6 +42890,36 @@
             "spoken": "Entering Williamsburg"
           },
           {
+            "name": "Truth or Consequences (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.4,
+            "spoken": "Billboard: Truth or Consequences, ahead. In nineteen fifty, Hot Springs renamed itself after a radio quiz show for one broadcast. The name stuck; the show moved on.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Hatch chile (from Socorro)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 106.2,
+            "spoken": "Billboard: Hatch, next exit, the chile capital of the world, by its own count. Its Labor Day festival draws thousands. Mild is a matter of opinion.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Hatch chile (from Las Cruces)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 109.6,
+            "spoken": "Billboard: Hatch, next exit, the chile capital of the world, by its own count. Its Labor Day festival draws thousands. Mild is a matter of opinion.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Rincon",
             "at_mi": 113.1,
             "off_mi": 0.24,
@@ -41953,6 +42936,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151340775, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fort Selden"
+          },
+          {
+            "name": "Mesilla (from Socorro)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 136.9,
+            "spoken": "Billboard: Mesilla, ahead by Las Cruces. The railroad bypassed it in eighteen eighty-one over land prices, which kept the old plaza old. Thank the haggling.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Do\u00f1a Ana",
@@ -42929,11 +43922,14 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
-            "name": "Cadillac Ranch",
+            "name": "Tucumcari Tonite",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 8.0,
-            "spoken": "Billboard: Cadillac Ranch is ahead. Ten Cadillacs are buried nose-down in a field with their tailfins to the sky, and you are invited to spray-paint them. Bring a can."
+            "at_mi": 6.0,
+            "spoken": "Billboard: Stay in Tucumcari tonight, with a mile of motel neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "San Jon",
@@ -42954,6 +43950,16 @@
             "spoken": "Entering Bard"
           },
           {
+            "name": "Route 66 Midpoint (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.6,
+            "spoken": "Billboard: The Route sixty-six Midpoint, next exit in Adrian. Chicago and Los Angeles are each eleven hundred thirty-nine miles away. Halfway calls for pie.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Adrian",
             "at_mi": 64.9,
             "off_mi": 0.35,
@@ -42961,6 +43967,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151368062, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Adrian"
+          },
+          {
+            "name": "Route 66 Midpoint (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.2,
+            "spoken": "Billboard: The Route sixty-six Midpoint, next exit in Adrian. Chicago and Los Angeles are each eleven hundred thirty-nine miles away. Halfway calls for pie.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Oldham County Farm and Ranch Heritage Museum",
@@ -42977,6 +43993,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151446317, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Wildorado"
+          },
+          {
+            "name": "Cadillac Ranch (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 96.0,
+            "spoken": "Billboard: Cadillac Ranch is ahead. Ten Cadillacs are buried nose-down in a field with their tailfins to the sky, and you are invited to spray-paint them. Bring a can.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Cadillac Ranch",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 106.0,
+            "spoken": "Billboard: Cadillac Ranch is ahead. Ten Cadillacs are buried nose-down in a field with their tailfins to the sky, and you are invited to spray-paint them. Bring a can.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Coulter Acres",
@@ -43004,13 +44040,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151713181, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Timbercreek Canyon"
-          },
-          {
-            "name": "Tucumcari Tonite",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 108.0,
-            "spoken": "Billboard: Stay in Tucumcari tonight, with two thousand motel rooms and a mile of neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered."
           },
           {
             "name": "Palisades",

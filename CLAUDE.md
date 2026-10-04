@@ -58,8 +58,9 @@ Read this before opening files; the rest is discoverable from `lib.rs` docs.
   transcripts from, and fakes. `audio/` is BASS behind a backend trait with a
   null fallback. The Prism screen-reader and TTS library comes from the
   `prismer` crate, compiled from source (CMake and a C++23 compiler) and
-  linked into the executable; the screen-reader client DLLs behind it are
-  delay-loaded, so a missing reader costs that reader, not the game.
+  linked into the executable; it opens the screen-reader client DLLs and
+  Speech Dispatcher at run time, so a missing reader costs that reader, not
+  the game.
   `bass-sys` declares the BASS C ABI by hand and loads the DLL at run time,
   so a machine without BASS still starts the game.
 - **Environment variables are two different roots.** `FREIGHT_FATE_DATA_ROOT`
@@ -171,8 +172,11 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   per crate, deliberately, so add a `mod` line there rather than a new
   top-level file. The exceptions: `crates/ff-core/tests/data_baked.rs`
   and `data_map_correction.rs` each point the process at a different data
-  root, and `crates/freight-fate/tests/classic_startup.rs` needs a process
-  where the 1.5 classics are not yet registered, so each keeps its own binary.
+  root, `crates/freight-fate/tests/classic_startup.rs` needs a process
+  where the 1.5 classics are not yet registered, and
+  `crates/freight-fate/tests/frame_time/` times frames against the wall
+  clock, which sibling tests' threads would contend for, so each keeps its
+  own binary.
   `crates/freight-fate/tests/agent_server.rs` is agent tooling, not the game:
   `test = false` in the crate's Cargo.toml keeps it out of a plain
   `cargo test`, so run it by name (`cargo test -p freight-fate --test
@@ -323,9 +327,9 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   audited playtest sandbox, never against the owner's careers. The one
   exception is `--staging`, only when the owner asks for a site check: its
   own `saves-agent-staging` directory, no careers and no identity copied in,
-  its own driver on the staging site (dev.orinks.net; the owner enters its
-  spoken code there the first time), cloud backup on, presence and Mastodon
-  off. No agent session ever reaches production: `--online`, which carried
+  its own driver on the staging backend (through the orinks-net `dev`
+  preview; the owner enters its spoken code there the first time), cloud
+  backup on, presence and Mastodon off. No agent session ever reaches production: `--online`, which carried
   the real driver identity, was removed on 2026-09-25.
 
 ## World and route data

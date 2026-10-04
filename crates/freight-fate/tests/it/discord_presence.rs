@@ -13,8 +13,9 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use freight_fate::discord_presence::{
-    driving_presence, format_activity, ActivityPayload, DiscordPresence, DiscordPresenceOptions,
-    PresenceState, RpcClient, RpcFactory, DEFAULT_CLIENT_ID, IDLE_CLEAR_S, MAX_FIELD_LEN,
+    check_reply, driving_presence, format_activity, ActivityPayload, DiscordPresence,
+    DiscordPresenceOptions, PresenceState, RpcClient, RpcFactory, DEFAULT_CLIENT_ID, IDLE_CLEAR_S,
+    MAX_FIELD_LEN,
 };
 use freight_fate::net::testing::ManualClock;
 
@@ -718,4 +719,19 @@ fn test_turning_the_setting_back_on_restarts_the_idle_clock() {
         "the restored presence was hidden by the old idle age"
     );
     presence.shutdown();
+}
+
+/// Discord answers every command; the reply is how a refusal is seen at all.
+#[test]
+fn test_check_reply_tells_a_refusal_from_an_acknowledgement() {
+    let ack = serde_json::json!({"cmd": "SET_ACTIVITY", "evt": null, "data": {}});
+    assert!(check_reply(1, &ack).is_ok());
+    let refused = serde_json::json!({
+        "cmd": "SET_ACTIVITY", "evt": "ERROR",
+        "data": {"code": 4000, "message": "rate limited"},
+    });
+    let err = check_reply(1, &refused).unwrap_err();
+    assert!(err.contains("rate limited"), "{err}");
+    let closed = serde_json::json!({"code": 1000, "message": "bye"});
+    assert!(check_reply(2, &closed).is_err());
 }

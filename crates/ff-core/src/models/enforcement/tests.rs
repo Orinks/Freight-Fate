@@ -539,6 +539,39 @@ fn the_spoken_standing_lines_match_the_python_f_strings() {
     );
 }
 
+/// Reported 2026-09-29: with live weather driving the calendar, a suspension
+/// said it cleared on a day already gone. The date was counted on the
+/// career's own calendar while every other date the player heard was real.
+#[test]
+fn the_clear_date_counts_from_the_calendar_the_player_hears() {
+    use crate::sim::season::{date_text, real_clock_game_hours, real_weekday_name};
+    let mut p = real_profile();
+    p.game_hours = 2000.0; // a career calendar in early June
+    p.driving_record.record_serious_violation(p.game_hours);
+    p.driving_record.record_serious_violation(p.game_hours);
+    p.live_calendar = true;
+    let cleared = real_clock_game_hours(None) + 60.0 * DAY;
+    // The weekday is the real one: the live clock keeps the day of the year,
+    // not 2001's weekdays (seasonal audit, 2026-10-01).
+    let expected = format!(
+        "{}, {}",
+        real_weekday_name(cleared, None),
+        date_text(cleared)
+    );
+    let clears = clears_text(&p);
+    assert!(clears.starts_with(&expected), "{clears} vs {expected}");
+
+    // A year-long disqualification lands on today's own date; the year is
+    // what tells the two apart.
+    let mut q = profile();
+    q.game_hours = 100.0;
+    q.record_mut().record_major_offense(100.0);
+    let today = date_text(q.calendar_now_hours());
+    let clears = clears_text(&q);
+    assert!(clears.contains(&today), "{clears}");
+    assert!(clears.ends_with(", next year"), "{clears}");
+}
+
 #[test]
 fn count_and_ordinal_words_and_days_text() {
     assert_eq!(count_word(0), "no");

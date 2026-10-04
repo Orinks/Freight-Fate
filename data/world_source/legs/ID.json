@@ -3697,20 +3697,22 @@
         "state_miles": [
           {
             "state": "Idaho",
-            "miles": 84.1
+            "miles": 54.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Oregon",
-            "miles": 345.9
+            "miles": 375.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 84.1,
+            "at_mi": 54.2,
             "from_state": "Idaho",
             "state": "Oregon",
             "place": "Idaho-Oregon line on I-84",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -6142,8 +6144,31 @@
             "name": "Boise River",
             "category": "river",
             "kind": "point",
-            "at_mi": 13.8,
-            "spoken": "Crossing the Boise River"
+            "at_mi": 1.6,
+            "spoken": "Crossing the Boise River",
+            "lat": 43.61854,
+            "lon": -116.22814,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1348388013 (Boise River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Warhawk Air Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.5,
+            "spoken": "Billboard: The Warhawk Air Museum, ahead in Nampa. Warhawks, Mustangs and Sabres, a hangar full of fighters. Any one of them could beat you home.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Old Idaho Penitentiary (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.1,
+            "spoken": "Billboard: The Old Idaho Penitentiary, ahead in Boise. A working prison for a hundred and one years, now a museum. Visitors leave the same day.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Star",
@@ -6164,11 +6189,14 @@
             "spoken": "Passing Middleton"
           },
           {
-            "name": "Snake River",
-            "category": "river",
+            "name": "Warhawk Air Museum (eastbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 42.8,
-            "spoken": "Crossing the Snake River"
+            "at_mi": 27.5,
+            "spoken": "Billboard: The Warhawk Air Museum, ahead in Nampa. Warhawks, Mustangs and Sabres, a hangar full of fighters. Any one of them could beat you home.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "New Plymouth",
@@ -6180,25 +6208,54 @@
             "spoken": "Passing New Plymouth"
           },
           {
+            "name": "Snake River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 54.2,
+            "spoken": "Crossing the Snake River",
+            "lat": 44.00748,
+            "lon": -116.94107,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1349132766 (Snake River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Malheur River",
             "category": "river",
             "kind": "point",
-            "at_mi": 73.0,
-            "spoken": "Crossing the Malheur River"
+            "at_mi": 58.1,
+            "spoken": "Crossing the Malheur River",
+            "lat": 44.05332,
+            "lon": -116.98212,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1375777513 (Malheur River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Burnt River",
             "category": "river",
             "kind": "point",
-            "at_mi": 102.1,
-            "spoken": "Crossing the Burnt River"
+            "at_mi": 94.7,
+            "spoken": "Crossing the Burnt River",
+            "lat": 44.4841,
+            "lon": -117.34794,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 221489975 (Burnt River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
-            "name": "Powder River",
-            "category": "river",
+            "name": "Oregon Trail Interpretive Center (westbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 130.4,
-            "spoken": "Crossing the Powder River"
+            "at_mi": 117.9,
+            "spoken": "Billboard: The Oregon Trail Interpretive Center, ahead at Baker City. Pioneers crossed two thousand miles of this by wagon. You have a heater.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Oregon Trail Interpretive Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 137.9,
+            "spoken": "Billboard: The Oregon Trail Interpretive Center, ahead at Baker City. Pioneers crossed two thousand miles of this by wagon. You have a heater.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Haines",
@@ -6210,6 +6267,26 @@
             "spoken": "Passing Haines"
           },
           {
+            "name": "Powder River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 142.7,
+            "spoken": "Crossing the Powder River",
+            "lat": 44.9823,
+            "lon": -117.89032,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 221962467 (Powder River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "North Powder River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 145.6,
+            "spoken": "Crossing the North Powder River",
+            "lat": 45.01897,
+            "lon": -117.92185,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1256678292 (North Powder River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Union",
             "at_mi": 156.9,
             "off_mi": 5.65,
@@ -6219,18 +6296,31 @@
             "spoken": "Passing Union"
           },
           {
-            "name": "North Powder River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 159.0,
-            "spoken": "Crossing the North Powder River"
-          },
-          {
             "name": "Deadman Pass",
             "category": "mountain_pass",
             "kind": "point",
             "at_mi": 202.4,
             "spoken": "Approaching Deadman Pass"
+          },
+          {
+            "name": "Pendleton (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 211.3,
+            "spoken": "Billboard: Pendleton is ahead, with a woolen mill since nineteen oh-nine and the Round-Up rodeo since nineteen ten. Blankets for you. Bulls for them.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pendleton (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 229.3,
+            "spoken": "Billboard: Pendleton is ahead, with a woolen mill since nineteen oh-nine and the Round-Up rodeo since nineteen ten. Blankets for you. Bulls for them.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Echo",
@@ -6260,6 +6350,16 @@
             "spoken": "Passing Roosevelt"
           },
           {
+            "name": "Maryhill Stonehenge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 316.7,
+            "spoken": "Billboard: Maryhill Stonehenge, ahead, across the river from Biggs. A full-size concrete copy built as a First World War memorial. It still catches the solstice sunrise.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Rufus",
             "at_mi": 321.7,
             "off_mi": 0.11,
@@ -6276,6 +6376,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150968228, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Maryhill"
+          },
+          {
+            "name": "Maryhill Stonehenge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 330.7,
+            "spoken": "Billboard: Maryhill Stonehenge, next exit, across the river from Biggs. A full-size concrete copy built as a First World War memorial. It still catches the solstice sunrise.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wishram",
@@ -11845,8 +11955,41 @@
             "name": "Boise River",
             "category": "river",
             "kind": "point",
-            "at_mi": 14.2,
-            "spoken": "Crossing the Boise River"
+            "at_mi": 1.1,
+            "spoken": "Crossing the Boise River",
+            "lat": 43.60365,
+            "lon": -116.19346,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1348388002 (Boise River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Old Idaho Penitentiary (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.2,
+            "spoken": "Billboard: The Old Idaho Penitentiary, ahead in Boise. A working prison for a hundred and one years, now a museum. Visitors leave the same day.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "World Center for Birds of Prey (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.5,
+            "spoken": "Billboard: The World Center for Birds of Prey, ahead at Boise. Live falcons, eagles and owls, from the people who saved the peregrine. Keep your sandwich covered.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Three Island Crossing (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.0,
+            "spoken": "Billboard: Three Island Crossing State Park, ahead at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Hammett",
@@ -11858,18 +12001,54 @@
             "spoken": "Passing Hammett"
           },
           {
-            "name": "Malad River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 99.9,
-            "spoken": "Crossing the Malad River"
-          },
-          {
             "name": "Snake River",
             "category": "river",
             "kind": "point",
-            "at_mi": 99.9,
-            "spoken": "Crossing the Snake River"
+            "at_mi": 77.5,
+            "spoken": "Crossing the Snake River",
+            "lat": 42.95515,
+            "lon": -115.16684,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1349098508 (Snake River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Three Island Crossing (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.4,
+            "spoken": "Billboard: Three Island Crossing State Park, ahead at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Hagerman Fossil Beds (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 81.0,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Malad River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 95.5,
+            "spoken": "Crossing the Malad River",
+            "lat": 42.86779,
+            "lon": -114.8538,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 215082120 (Malad River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Hagerman Fossil Beds (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 97.6,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wendell",
@@ -11879,6 +12058,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150970161, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wendell"
+          },
+          {
+            "name": "Shoshone Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 117.3,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Shoshone Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 135.3,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Eden",
@@ -11952,8 +12151,11 @@
             "name": "Bear River",
             "category": "river",
             "kind": "point",
-            "at_mi": 273.0,
-            "spoken": "Crossing the Bear River"
+            "at_mi": 273.2,
+            "spoken": "Crossing the Bear River",
+            "lat": 41.65131,
+            "lon": -112.11465,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 33727399 (Bear River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Honeyville",
@@ -11972,6 +12174,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150964164, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bear River City"
+          },
+          {
+            "name": "Golden Spike (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 276.1,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Corinne",
@@ -12010,6 +12222,16 @@
             "spoken": "Passing Willard"
           },
           {
+            "name": "Golden Spike (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 292.9,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Pleasant View",
             "at_mi": 296.2,
             "off_mi": 1.95,
@@ -12037,11 +12259,14 @@
             "spoken": "Passing Harrisville"
           },
           {
-            "name": "Ogden River",
-            "category": "river",
+            "name": "Hill Aerospace Museum (southbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 300.2,
-            "spoken": "Crossing the Ogden River"
+            "at_mi": 302.5,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "West Haven",
@@ -12051,6 +12276,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150942410, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing West Haven"
+          },
+          {
+            "name": "Weber River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 302.9,
+            "spoken": "Crossing the Weber River",
+            "lat": 41.23729,
+            "lon": -112.01447,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 806194834 (Weber River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Roy",
@@ -12089,6 +12324,16 @@
             "spoken": "Passing Uintah"
           },
           {
+            "name": "Hill Aerospace Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 317.9,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Kaysville",
             "at_mi": 319.8,
             "off_mi": 1.51,
@@ -12114,13 +12359,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150976887, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Farmington"
-          },
-          {
-            "name": "Weber River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 327.2,
-            "spoken": "Crossing the Weber River"
           },
           {
             "name": "Centerville",
@@ -13948,6 +14186,26 @@
             "spoken": "Passing Rathdrum"
           },
           {
+            "name": "The Floating Green (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.4,
+            "spoken": "Billboard: Coeur d'Alene has a golf green that floats on the lake, and a boat ferries you out to your ball. Miss the island and you feed the fish.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Cataldo Mission (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.4,
+            "spoken": "Billboard: The Cataldo Mission, ahead. The oldest building in Idaho, raised in the eighteen fifties without one nail. It has outlasted plenty that used them.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fourth of July Summit",
             "category": "mountain_pass",
             "kind": "point",
@@ -13965,8 +14223,21 @@
             "name": "Coeur d'Alene River",
             "category": "river",
             "kind": "point",
-            "at_mi": 22.4,
-            "spoken": "Crossing the Coeur d'Alene River"
+            "at_mi": 26.3,
+            "spoken": "Crossing the Coeur d'Alene River",
+            "lat": 47.54647,
+            "lon": -116.33505,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 149663107 (Coeur d'Alene River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Cataldo Mission (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.0,
+            "spoken": "Billboard: The Cataldo Mission, next exit. The oldest building in Idaho, raised in the eighteen fifties without one nail. It has outlasted plenty that used them.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pinehurst",
@@ -13981,8 +14252,11 @@
             "name": "South Fork Coeur d'Alene River",
             "category": "river",
             "kind": "point",
-            "at_mi": 32.1,
-            "spoken": "Crossing the South Fork Coeur d'Alene River"
+            "at_mi": 35.8,
+            "spoken": "Crossing the South Fork Coeur d'Alene River",
+            "lat": 47.54792,
+            "lon": -116.13789,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 149769672 (South Fork Coeur d'Alene River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Osburn",
@@ -14547,7 +14821,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Coeur d'Alene has a golf green that floats on the lake, and a boat ferries you out to your ball. Miss the island and you feed the fish."
+            "spoken": "Billboard: Coeur d'Alene has a golf green that floats on the lake, and a boat ferries you out to your ball. Miss the island and you feed the fish.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hayden Lake",
@@ -14566,6 +14843,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150940177, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hauser"
+          },
+          {
+            "name": "Silverwood Theme Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.5,
+            "spoken": "Billboard: Silverwood Theme Park, ahead at Athol. The largest theme park in the Northwest, with two wooden roller coasters. They have more curves than this highway.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Rathdrum",
@@ -14593,6 +14880,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150978919, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bayview"
+          },
+          {
+            "name": "Silverwood Theme Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.5,
+            "spoken": "Billboard: Silverwood Theme Park, ahead at Athol. The largest theme park in the Northwest, with two wooden roller coasters. They have more curves than this highway.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sagle",
@@ -18621,13 +18918,6 @@
             "spoken": "Passing Shelley"
           },
           {
-            "name": "Snake River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 14.1,
-            "spoken": "Crossing the Snake River"
-          },
-          {
             "name": "Basalt",
             "at_mi": 14.4,
             "off_mi": 3.9,
@@ -18644,6 +18934,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150956589, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Firth"
+          },
+          {
+            "name": "Idaho Potato Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.4,
+            "spoken": "Billboard: The Idaho Potato Museum, ahead in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Snake River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 24.3,
+            "spoken": "Crossing the Snake River",
+            "lat": 43.22235,
+            "lon": -112.34321,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1515706274 (Snake River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Groveland",
@@ -18664,6 +18974,16 @@
             "spoken": "Passing Moreland"
           },
           {
+            "name": "Idaho Potato Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.7,
+            "spoken": "Billboard: The Idaho Potato Museum, next exit in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Riverside",
             "at_mi": 28.1,
             "off_mi": 2.97,
@@ -18671,6 +18991,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150970312, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Riverside"
+          },
+          {
+            "name": "Blackfoot River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 28.4,
+            "spoken": "Crossing the Blackfoot River",
+            "lat": 43.17162,
+            "lon": -112.3863,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 149083288 (Blackfoot River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Fort Hall",
@@ -18682,20 +19012,6 @@
             "spoken": "Passing Fort Hall"
           },
           {
-            "name": "Blackfoot River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 40.5,
-            "spoken": "Crossing the Blackfoot River"
-          },
-          {
-            "name": "Portneuf River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 40.5,
-            "spoken": "Crossing the Portneuf River"
-          },
-          {
             "name": "Tyhee",
             "at_mi": 44.4,
             "off_mi": 1.52,
@@ -18703,6 +19019,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150954588, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Tyhee"
+          },
+          {
+            "name": "Portneuf River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 50.5,
+            "spoken": "Crossing the Portneuf River",
+            "lat": 42.91274,
+            "lon": -112.52073,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 135063654 (Portneuf River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Aberdeen",
@@ -18786,6 +19112,16 @@
             "spoken": "Passing Eden"
           },
           {
+            "name": "Shoshone Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.3,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Hansen",
             "at_mi": 148.7,
             "off_mi": 3.19,
@@ -18813,6 +19149,16 @@
             "spoken": "Passing Filer"
           },
           {
+            "name": "Shoshone Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 161.5,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Jerome County Historical Museum",
             "category": "museum",
             "kind": "point",
@@ -18829,11 +19175,14 @@
             "spoken": "Passing Wendell"
           },
           {
-            "name": "Malad River",
-            "category": "river",
+            "name": "Hagerman Fossil Beds (westbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 182.4,
-            "spoken": "Crossing the Malad River"
+            "at_mi": 180.1,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Gooding",
@@ -18854,6 +19203,46 @@
             "spoken": "Passing Hagerman"
           },
           {
+            "name": "Malad River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 184.6,
+            "spoken": "Crossing the Malad River",
+            "lat": 42.86777,
+            "lon": -114.85326,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 215082120 (Malad River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Hagerman Fossil Beds (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 199.2,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Three Island Crossing (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 208.0,
+            "spoken": "Billboard: Three Island Crossing State Park, next exit at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Three Island Crossing (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 211.0,
+            "spoken": "Billboard: Three Island Crossing State Park, next exit at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Hammett",
             "at_mi": 219.0,
             "off_mi": 0.9,
@@ -18868,6 +19257,26 @@
             "kind": "zone",
             "at_mi": 223.0,
             "spoken": "Entering Morley Nelson Snake River Birds of Prey National Conservation Area"
+          },
+          {
+            "name": "World Center for Birds of Prey (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 265.6,
+            "spoken": "Billboard: The World Center for Birds of Prey, ahead at Boise. Live falcons, eagles and owls, from the people who saved the peregrine. Keep your sandwich covered.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Old Idaho Penitentiary (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 267.9,
+            "spoken": "Billboard: The Old Idaho Penitentiary, ahead in Boise. A working prison for a hundred and one years, now a museum. Visitors leave the same day.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Robie Creek",
@@ -19427,8 +19836,11 @@
             "name": "Snake River",
             "category": "river",
             "kind": "point",
-            "at_mi": 7.04,
-            "spoken": "Crossing the Snake River"
+            "at_mi": 1.8,
+            "spoken": "Crossing the Snake River",
+            "lat": 43.46728,
+            "lon": -112.06573,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 757486673 (Snake River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Shelley",
@@ -19456,6 +19868,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150956589, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Firth"
+          },
+          {
+            "name": "Idaho Potato Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.4,
+            "spoken": "Billboard: The Idaho Potato Museum, ahead in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Groveland",
@@ -19495,8 +19917,21 @@
             "name": "Blackfoot River",
             "category": "river",
             "kind": "point",
-            "at_mi": 32.33,
-            "spoken": "Crossing the Blackfoot River"
+            "at_mi": 28.6,
+            "spoken": "Crossing the Blackfoot River",
+            "lat": 43.17159,
+            "lon": -112.38635,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 149083288 (Blackfoot River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Idaho Potato Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.4,
+            "spoken": "Billboard: The Idaho Potato Museum, ahead in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Tyhee",
@@ -23048,11 +23483,24 @@
         ],
         "landmarks": [
           {
+            "name": "Idaho Potato Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.1,
+            "spoken": "Billboard: The Idaho Potato Museum, ahead in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Snake River",
             "category": "river",
             "kind": "point",
-            "at_mi": 13.8,
-            "spoken": "Crossing the Snake River"
+            "at_mi": 24.2,
+            "spoken": "Crossing the Snake River",
+            "lat": 43.22234,
+            "lon": -112.34331,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1515706274 (Snake River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Groveland",
@@ -23064,6 +23512,26 @@
             "spoken": "Passing Groveland"
           },
           {
+            "name": "Idaho Potato Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.6,
+            "spoken": "Billboard: The Idaho Potato Museum, next exit in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Blackfoot River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 28.3,
+            "spoken": "Crossing the Blackfoot River",
+            "lat": 43.17159,
+            "lon": -112.38635,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 149083288 (Blackfoot River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Fort Hall",
             "at_mi": 38.0,
             "off_mi": 1.52,
@@ -23071,13 +23539,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150976273, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fort Hall"
-          },
-          {
-            "name": "Blackfoot River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 41.4,
-            "spoken": "Crossing the Blackfoot River"
           },
           {
             "name": "Tyhee",
@@ -23092,8 +23553,11 @@
             "name": "Portneuf River",
             "category": "river",
             "kind": "point",
-            "at_mi": 68.3,
-            "spoken": "Crossing the Portneuf River"
+            "at_mi": 63.0,
+            "spoken": "Crossing the Portneuf River",
+            "lat": 42.78232,
+            "lon": -112.23082,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 135066527 (Portneuf River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "McCammon",
@@ -23139,6 +23603,16 @@
             "spoken": "Passing Garland"
           },
           {
+            "name": "Malad River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 141.6,
+            "spoken": "Crossing the Malad River",
+            "lat": 41.68933,
+            "lon": -112.16129,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 49092940 (Malad River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Elwood",
             "at_mi": 142.5,
             "off_mi": 0.63,
@@ -23146,6 +23620,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150949763, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Elwood"
+          },
+          {
+            "name": "Bear River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 145.3,
+            "spoken": "Crossing the Bear River",
+            "lat": 41.65145,
+            "lon": -112.11424,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 33727399 (Bear River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Honeyville",
@@ -23166,18 +23650,14 @@
             "spoken": "Passing Bear River City"
           },
           {
-            "name": "Malad River",
-            "category": "river",
+            "name": "Golden Spike (southbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 148.8,
-            "spoken": "Crossing the Malad River"
-          },
-          {
-            "name": "Bear River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 148.8,
-            "spoken": "Crossing the Bear River"
+            "at_mi": 151.5,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Corinne",
@@ -23216,6 +23696,26 @@
             "spoken": "Passing Willard"
           },
           {
+            "name": "Golden Spike (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 165.2,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Hill Aerospace Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 168.7,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pleasant View",
             "at_mi": 169.2,
             "off_mi": 1.95,
@@ -23243,18 +23743,14 @@
             "spoken": "Passing Harrisville"
           },
           {
-            "name": "Ogden River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 174.8,
-            "spoken": "Crossing the Ogden River"
-          },
-          {
             "name": "Weber River",
             "category": "river",
             "kind": "point",
-            "at_mi": 174.8,
-            "spoken": "Crossing the Weber River"
+            "at_mi": 174.9,
+            "spoken": "Crossing the Weber River",
+            "lat": 41.23729,
+            "lon": -112.01447,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 806194834 (Weber River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "West Haven",
@@ -23300,6 +23796,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150932122, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Uintah"
+          },
+          {
+            "name": "Hill Aerospace Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 189.3,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kaysville",
@@ -25490,13 +25996,6 @@
             "spoken": "Passing Basalt"
           },
           {
-            "name": "Snake River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 14.5,
-            "spoken": "Crossing the Snake River"
-          },
-          {
             "name": "Firth",
             "at_mi": 14.9,
             "off_mi": 3.53,
@@ -25504,6 +26003,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150956589, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Firth"
+          },
+          {
+            "name": "Idaho Potato Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.8,
+            "spoken": "Billboard: The Idaho Potato Museum, ahead in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Snake River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 24.3,
+            "spoken": "Crossing the Snake River",
+            "lat": 43.22235,
+            "lon": -112.34321,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1515706274 (Snake River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Groveland",
@@ -25524,6 +26043,16 @@
             "spoken": "Passing Moreland"
           },
           {
+            "name": "Idaho Potato Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.7,
+            "spoken": "Billboard: The Idaho Potato Museum, next exit in Blackfoot. Home of the world's largest potato chip, twenty-five inches long. It is not for sharing.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Riverside",
             "at_mi": 28.1,
             "off_mi": 2.97,
@@ -25531,6 +26060,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150970312, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Riverside"
+          },
+          {
+            "name": "Blackfoot River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 28.4,
+            "spoken": "Crossing the Blackfoot River",
+            "lat": 43.17162,
+            "lon": -112.3863,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 149083288 (Blackfoot River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Fort Hall",
@@ -25542,20 +26081,6 @@
             "spoken": "Passing Fort Hall"
           },
           {
-            "name": "Blackfoot River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 41.8,
-            "spoken": "Crossing the Blackfoot River"
-          },
-          {
-            "name": "Portneuf River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 41.8,
-            "spoken": "Crossing the Portneuf River"
-          },
-          {
             "name": "Tyhee",
             "at_mi": 44.4,
             "off_mi": 1.52,
@@ -25563,6 +26088,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150954588, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Tyhee"
+          },
+          {
+            "name": "Portneuf River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 50.6,
+            "spoken": "Crossing the Portneuf River",
+            "lat": 42.91274,
+            "lon": -112.52073,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 135063654 (Portneuf River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Aberdeen",
@@ -25653,6 +26188,16 @@
             "spoken": "Passing Eden"
           },
           {
+            "name": "Shoshone Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.3,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Hansen",
             "at_mi": 148.7,
             "off_mi": 3.19,
@@ -25669,6 +26214,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150959451, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kimberly"
+          },
+          {
+            "name": "Evel Knievel's Canyon (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 156.0,
+            "spoken": "Billboard: Twin Falls is where Evel Knievel tried to rocket across the Snake River Canyon on a steam-powered cycle. He came up short but alive, while today's base jumpers leap from the bridge for fun.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Jerome",
@@ -26916,20 +27471,22 @@
         "state_miles": [
           {
             "state": "Idaho",
-            "miles": 21.7
+            "miles": 23.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Montana",
-            "miles": 48.3
+            "miles": 46.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 21.7,
+            "at_mi": 23.4,
             "from_state": "Idaho",
             "state": "Montana",
             "place": "Idaho-Montana line on I-90",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "interchanges": [
@@ -27345,6 +27902,16 @@
             "spoken": "Passing Pinehurst"
           },
           {
+            "name": "Wallace (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 1.5,
+            "spoken": "Billboard: Wallace, ahead. The mayor declared a manhole cover here the center of the universe. The town also had the last stoplight on Interstate Ninety.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Osburn",
             "at_mi": 6.5,
             "off_mi": 0.2,
@@ -27357,8 +27924,11 @@
             "name": "South Fork Coeur d'Alene River",
             "category": "river",
             "kind": "point",
-            "at_mi": 8.8,
-            "spoken": "Crossing the South Fork Coeur d'Alene River"
+            "at_mi": 8.5,
+            "spoken": "Crossing the South Fork Coeur d'Alene River",
+            "lat": 47.49098,
+            "lon": -115.96627,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 149810520 (South Fork Coeur d'Alene River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Silverton",
@@ -27368,6 +27938,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150944758, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Silverton"
+          },
+          {
+            "name": "Wallace (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.0,
+            "spoken": "Billboard: Wallace, next exit. The mayor declared a manhole cover here the center of the universe. The town also had the last stoplight on Interstate Ninety.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Captain John Mullan Museum",
@@ -27396,8 +27976,11 @@
             "name": "St. Regis River",
             "category": "river",
             "kind": "point",
-            "at_mi": 26.1,
-            "spoken": "Crossing the St. Regis River"
+            "at_mi": 25.1,
+            "spoken": "Crossing the St. Regis River",
+            "lat": 47.43581,
+            "lon": -115.67749,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 471642110 (St. Regis River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lolo National Forest",
@@ -27405,6 +27988,26 @@
             "kind": "zone",
             "at_mi": 34.7,
             "spoken": "Entering Lolo National Forest"
+          },
+          {
+            "name": "Silver Dollar Bar (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 37.5,
+            "spoken": "Billboard: Lincoln's Fifty Thousand Silver Dollar Bar, next exit in Haugan. The walls hold more than fifty thousand donated dollars. Making change here is frowned upon.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Silver Dollar Bar (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 41.6,
+            "spoken": "Billboard: Lincoln's Fifty Thousand Silver Dollar Bar, next exit in Haugan. The walls hold more than fifty thousand donated dollars. Making change here is frowned upon.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Saint Regis",
@@ -28838,6 +29441,16 @@
             "spoken": "Passing Asotin"
           },
           {
+            "name": "Clearwater River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.3,
+            "spoken": "Crossing the Clearwater River",
+            "lat": 46.41882,
+            "lon": -117.00015,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1323726887 (Clearwater River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Colton",
             "at_mi": 10.7,
             "off_mi": 7.24,
@@ -28854,13 +29467,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150940260, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Uniontown"
-          },
-          {
-            "name": "Clearwater River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.8,
-            "spoken": "Crossing the Clearwater River"
           },
           {
             "name": "Juliaetta",
@@ -28897,13 +29503,6 @@
             "spoken": "Passing Albion"
           },
           {
-            "name": "Palouse River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.0,
-            "spoken": "Crossing the Palouse River"
-          },
-          {
             "name": "Palouse",
             "at_mi": 43.6,
             "off_mi": 3.87,
@@ -28911,6 +29510,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150975253, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Palouse"
+          },
+          {
+            "name": "Palouse River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 46.7,
+            "spoken": "Crossing the Palouse River",
+            "lat": 46.91526,
+            "lon": -116.95155,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 113545762 (Palouse River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Onaway",
@@ -29028,6 +29637,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150937785, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Liberty Lake"
+          },
+          {
+            "name": "The Floating Green (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 107.7,
+            "spoken": "Billboard: Coeur d'Alene has a golf green that floats on the lake, and a boat ferries you out to your ball. Miss the island and you feed the fish.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Stateline",
@@ -31580,15 +32199,21 @@
             "name": "Salmon River",
             "category": "river",
             "kind": "point",
-            "at_mi": 103.9,
-            "spoken": "Crossing the Salmon River"
+            "at_mi": 94.6,
+            "spoken": "Crossing the Salmon River",
+            "lat": 45.66247,
+            "lon": -116.29252,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 628142900 (Salmon River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Little Salmon River",
             "category": "river",
             "kind": "point",
-            "at_mi": 128.3,
-            "spoken": "Crossing the Little Salmon River"
+            "at_mi": 129.2,
+            "spoken": "Crossing the Little Salmon River",
+            "lat": 45.25494,
+            "lon": -116.33573,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 249760523 (Little Salmon River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -33076,8 +33701,11 @@
             "name": "North Fork Payette River",
             "category": "river",
             "kind": "point",
-            "at_mi": 43.6,
-            "spoken": "Crossing the North Fork Payette River"
+            "at_mi": 43.9,
+            "spoken": "Crossing the North Fork Payette River",
+            "lat": 44.32511,
+            "lon": -116.05968,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1526487639 (North Fork Payette River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Boise National Forest",
@@ -33090,8 +33718,11 @@
             "name": "Payette River",
             "category": "river",
             "kind": "point",
-            "at_mi": 70.2,
-            "spoken": "Crossing the Payette River"
+            "at_mi": 64.8,
+            "spoken": "Crossing the Payette River",
+            "lat": 44.08418,
+            "lon": -116.11516,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 24335427 (Payette River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Spring Valley Summit",
@@ -34576,8 +35207,11 @@
             "name": "North Fork Payette River",
             "category": "river",
             "kind": "point",
-            "at_mi": 9.5,
-            "spoken": "Crossing the North Fork Payette River"
+            "at_mi": 1.0,
+            "spoken": "Crossing the North Fork Payette River",
+            "lat": 44.91219,
+            "lon": -116.11888,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1526487642 (North Fork Payette River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Payette National Forest",
@@ -34590,8 +35224,11 @@
             "name": "Weiser River",
             "category": "river",
             "kind": "point",
-            "at_mi": 33.7,
-            "spoken": "Crossing the Weiser River"
+            "at_mi": 27.1,
+            "spoken": "Crossing the Weiser River",
+            "lat": 44.84931,
+            "lon": -116.37814,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1466140042 (Weiser River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cambridge",
@@ -34603,13 +35240,6 @@
             "spoken": "Entering Cambridge"
           },
           {
-            "name": "Little Weiser River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 63.1,
-            "spoken": "Crossing the Little Weiser River"
-          },
-          {
             "name": "Midvale",
             "at_mi": 66.7,
             "off_mi": 0.04,
@@ -34619,18 +35249,14 @@
             "spoken": "Entering Midvale"
           },
           {
-            "name": "Snake River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 92.3,
-            "spoken": "Crossing the Snake River"
-          },
-          {
             "name": "Payette River",
             "category": "river",
             "kind": "point",
-            "at_mi": 92.3,
-            "spoken": "Crossing the Payette River"
+            "at_mi": 103.8,
+            "spoken": "Crossing the Payette River",
+            "lat": 44.04226,
+            "lon": -116.92624,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1526487604 (Payette River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "New Plymouth",
@@ -34640,6 +35266,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150980848, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing New Plymouth"
+          },
+          {
+            "name": "Snake River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 105.6,
+            "spoken": "Crossing the Snake River",
+            "lat": 44.02503,
+            "lon": -116.93544,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1349132767 (Snake River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Nyssa",
@@ -38310,13 +38946,6 @@
             "spoken": "Passing Malad"
           },
           {
-            "name": "Malad River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 75.0,
-            "spoken": "Crossing the Malad River"
-          },
-          {
             "name": "Plymouth",
             "at_mi": 78.9,
             "off_mi": 1.34,
@@ -38324,6 +38953,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150947439, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Plymouth"
+          },
+          {
+            "name": "Malad River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 79.6,
+            "spoken": "Crossing the Malad River",
+            "lat": 41.86522,
+            "lon": -112.17004,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 805425637 (Malad River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Garland",
@@ -38351,6 +38990,16 @@
             "spoken": "Passing Elwood"
           },
           {
+            "name": "Bear River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 96.7,
+            "spoken": "Crossing the Bear River",
+            "lat": 41.65145,
+            "lon": -112.11424,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 33727399 (Bear River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Honeyville",
             "at_mi": 98.3,
             "off_mi": 1.07,
@@ -38369,11 +39018,14 @@
             "spoken": "Passing Bear River City"
           },
           {
-            "name": "Bear River",
-            "category": "river",
+            "name": "Golden Spike (southbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 106.8,
-            "spoken": "Crossing the Bear River"
+            "at_mi": 100.6,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Perry",
@@ -38394,6 +39046,16 @@
             "spoken": "Passing Willard"
           },
           {
+            "name": "Golden Spike (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 116.7,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Farr West",
             "at_mi": 122.5,
             "off_mi": 0.06,
@@ -38401,6 +39063,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150943236, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Farr West"
+          },
+          {
+            "name": "Hill Aerospace Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 124.8,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Roy",
@@ -38421,20 +39093,6 @@
             "spoken": "Entering South Weber"
           },
           {
-            "name": "Weber River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 136.3,
-            "spoken": "Crossing the Weber River"
-          },
-          {
-            "name": "Ogden River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 136.3,
-            "spoken": "Crossing the Ogden River"
-          },
-          {
             "name": "Uintah",
             "at_mi": 137.0,
             "off_mi": 0.53,
@@ -38442,6 +39100,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150932122, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Uintah"
+          },
+          {
+            "name": "Weber River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 137.2,
+            "spoken": "Crossing the Weber River",
+            "lat": 41.13682,
+            "lon": -111.91913,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1414492620 (Weber River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Hill Aerospace Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 140.8,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kaysville",
@@ -38543,6 +39221,16 @@
             "spoken": "Passing White City"
           },
           {
+            "name": "Museum of Ancient Life (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 178.7,
+            "spoken": "Billboard: The Museum of Ancient Life, ahead in Lehi, with one of the world's largest collections of mounted dinosaur skeletons. Extinction was never this tidy.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Draper",
             "at_mi": 181.0,
             "off_mi": 1.5,
@@ -38550,6 +39238,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150933314, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Draper"
+          },
+          {
+            "name": "Museum of Ancient Life (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 192.0,
+            "spoken": "Billboard: The Museum of Ancient Life, ahead in Lehi, with one of the world's largest collections of mounted dinosaur skeletons. Extinction was never this tidy.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "American Fork",
@@ -41666,13 +42364,6 @@
             "spoken": "Passing Malad"
           },
           {
-            "name": "Malad River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 69.0,
-            "spoken": "Crossing the Malad River"
-          },
-          {
             "name": "Portage",
             "at_mi": 70.8,
             "off_mi": 2.54,
@@ -41689,6 +42380,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150947439, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Plymouth"
+          },
+          {
+            "name": "Malad River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 79.2,
+            "spoken": "Crossing the Malad River",
+            "lat": 41.86522,
+            "lon": -112.17004,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 805425637 (Malad River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Garland",
@@ -41719,8 +42420,11 @@
             "name": "Bear River",
             "category": "river",
             "kind": "point",
-            "at_mi": 97.5,
-            "spoken": "Crossing the Bear River"
+            "at_mi": 96.3,
+            "spoken": "Crossing the Bear River",
+            "lat": 41.65145,
+            "lon": -112.11424,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 33727399 (Bear River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Honeyville",
@@ -41739,6 +42443,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150964164, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bear River City"
+          },
+          {
+            "name": "Golden Spike (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 100.2,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Corinne",
@@ -41777,6 +42491,26 @@
             "spoken": "Passing Willard"
           },
           {
+            "name": "Golden Spike (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 116.2,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Hill Aerospace Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 119.7,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Pleasant View",
             "at_mi": 120.3,
             "off_mi": 1.95,
@@ -41813,18 +42547,14 @@
             "spoken": "Passing Harrisville"
           },
           {
-            "name": "Ogden River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 124.4,
-            "spoken": "Crossing the Ogden River"
-          },
-          {
             "name": "Weber River",
             "category": "river",
             "kind": "point",
-            "at_mi": 124.4,
-            "spoken": "Crossing the Weber River"
+            "at_mi": 125.9,
+            "spoken": "Crossing the Weber River",
+            "lat": 41.23729,
+            "lon": -112.01447,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 806194834 (Weber River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "West Haven",
@@ -41870,6 +42600,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150932122, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Uintah"
+          },
+          {
+            "name": "Hill Aerospace Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 140.3,
+            "spoken": "Billboard: The Hill Aerospace Museum, ahead at Roy. More than seventy aircraft, biplanes to stealth jets, beside a working air base. The neighbors are louder.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kaysville",
@@ -43619,8 +44359,11 @@
             "name": "Portneuf River",
             "category": "river",
             "kind": "point",
-            "at_mi": 10.8,
-            "spoken": "Crossing the Portneuf River"
+            "at_mi": 6.5,
+            "spoken": "Crossing the Portneuf River",
+            "lat": 42.91268,
+            "lon": -112.52073,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 135063654 (Portneuf River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Aberdeen",
@@ -43630,13 +44373,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150961512, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Aberdeen"
-          },
-          {
-            "name": "Snake River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 34.5,
-            "spoken": "Crossing the Snake River"
           },
           {
             "name": "Rockland",
@@ -43718,6 +44454,16 @@
             "spoken": "Passing Eden"
           },
           {
+            "name": "Shoshone Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.3,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Hansen",
             "at_mi": 104.7,
             "off_mi": 3.19,
@@ -43736,6 +44482,16 @@
             "spoken": "Passing Kimberly"
           },
           {
+            "name": "Evel Knievel's Canyon (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 112.0,
+            "spoken": "Billboard: Twin Falls is where Evel Knievel tried to rocket across the Snake River Canyon on a steam-powered cycle. He came up short but alive, while today's base jumpers leap from the bridge for fun.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Jerome",
             "at_mi": 114.0,
             "off_mi": 6.5,
@@ -43743,6 +44499,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150935685, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Jerome"
+          },
+          {
+            "name": "Snake River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 117.2,
+            "spoken": "Crossing the Snake River",
+            "lat": 42.60081,
+            "lon": -114.45371,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1420014007 (Snake River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Twin Falls Original Townsite Residential Historic District",
@@ -44589,6 +45355,16 @@
             "spoken": "Passing Bayview"
           },
           {
+            "name": "Silverwood Theme Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.7,
+            "spoken": "Billboard: Silverwood Theme Park, ahead at Athol. The largest theme park in the Northwest, with two wooden roller coasters. They have more curves than this highway.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Spirit Lake",
             "at_mi": 24.7,
             "off_mi": 7.84,
@@ -44614,6 +45390,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150977999, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rathdrum"
+          },
+          {
+            "name": "Silverwood Theme Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 37.6,
+            "spoken": "Billboard: Silverwood Theme Park, ahead at Athol. The largest theme park in the Northwest, with two wooden roller coasters. They have more curves than this highway.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hayden",
@@ -44668,6 +45454,16 @@
             "spoken": "Entering Stateline"
           },
           {
+            "name": "Spokane River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 56.3,
+            "spoken": "Crossing the Spokane River",
+            "lat": 47.69698,
+            "lon": -117.04102,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 56702599 (Spokane River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "East Farms",
             "at_mi": 57.5,
             "off_mi": 0.78,
@@ -44693,13 +45489,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150937785, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Liberty Lake"
-          },
-          {
-            "name": "Spokane River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 66.3,
-            "spoken": "Crossing the Spokane River"
           },
           {
             "name": "Colbert",
@@ -45095,7 +45884,8 @@
           "name": "level",
           "sections": 800,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "stops": [
         {
@@ -47271,6 +48061,26 @@
             "spoken": "Passing Hansen"
           },
           {
+            "name": "Evel Knievel's Canyon (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Twin Falls is where Evel Knievel tried to rocket across the Snake River Canyon on a steam-powered cycle. He came up short but alive, while today's base jumpers leap from the bridge for fun.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Shoshone Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Buhl",
             "at_mi": 22.2,
             "off_mi": 11.89,
@@ -47287,6 +48097,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150970161, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wendell"
+          },
+          {
+            "name": "Hagerman Fossil Beds (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.4,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Gooding",
@@ -47314,11 +48134,44 @@
             "spoken": "Museum ahead: Hagerman National monument and thousand springs state park visitor center"
           },
           {
+            "name": "Hagerman Fossil Beds (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.4,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Snake River",
             "category": "river",
             "kind": "point",
-            "at_mi": 37.1,
-            "spoken": "Crossing the Snake River"
+            "at_mi": 50.8,
+            "spoken": "Crossing the Snake River",
+            "lat": 42.95535,
+            "lon": -115.16693,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1349098510 (Snake River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Three Island Crossing (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.6,
+            "spoken": "Billboard: Three Island Crossing State Park, next exit at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Three Island Crossing (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.6,
+            "spoken": "Billboard: Three Island Crossing State Park, next exit at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hammett",
@@ -47335,6 +48188,26 @@
             "kind": "zone",
             "at_mi": 74.6,
             "spoken": "Entering Morley Nelson Snake River Birds of Prey National Conservation Area"
+          },
+          {
+            "name": "World Center for Birds of Prey (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 113.6,
+            "spoken": "Billboard: The World Center for Birds of Prey, ahead at Boise. Live falcons, eagles and owls, from the people who saved the peregrine. Keep your sandwich covered.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Old Idaho Penitentiary (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 115.9,
+            "spoken": "Billboard: The Old Idaho Penitentiary, ahead in Boise. A working prison for a hundred and one years, now a museum. Visitors leave the same day.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Robie Creek",
@@ -49299,22 +50172,31 @@
             "name": "Humboldt River",
             "category": "river",
             "kind": "point",
-            "at_mi": 124.5,
-            "spoken": "Crossing the Humboldt River"
+            "at_mi": 130.5,
+            "spoken": "Crossing the Humboldt River",
+            "lat": 41.08608,
+            "lon": -115.23051,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1112196212 (Humboldt River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Marys River",
             "category": "river",
             "kind": "point",
-            "at_mi": 124.5,
-            "spoken": "Crossing the Marys River"
+            "at_mi": 131.8,
+            "spoken": "Crossing the Marys River",
+            "lat": 41.08628,
+            "lon": -115.25572,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 442883756 (Marys River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "North Fork Humboldt River",
             "category": "river",
             "kind": "point",
-            "at_mi": 152.6,
-            "spoken": "Crossing the North Fork Humboldt River"
+            "at_mi": 149.9,
+            "spoken": "Crossing the North Fork Humboldt River",
+            "lat": 40.94962,
+            "lon": -115.53402,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 321520031 (North Fork Humboldt River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ryndon",
@@ -50947,8 +51829,21 @@
             "name": "Snake River",
             "category": "river",
             "kind": "point",
-            "at_mi": 11.5,
-            "spoken": "Crossing the Snake River"
+            "at_mi": 2.8,
+            "spoken": "Crossing the Snake River",
+            "lat": 42.60081,
+            "lon": -114.45355,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1420014007 (Snake River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Evel Knievel's Canyon (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Twin Falls is where Evel Knievel tried to rocket across the Snake River Canyon on a steam-powered cycle. He came up short but alive, while today's base jumpers leap from the bridge for fun.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kimberly",
@@ -50967,6 +51862,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150955594, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hansen"
+          },
+          {
+            "name": "Shoshone Falls (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.7,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Eden",
@@ -51055,20 +51960,6 @@
             "spoken": "Passing Howell"
           },
           {
-            "name": "Bear River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 148.4,
-            "spoken": "Crossing the Bear River"
-          },
-          {
-            "name": "Malad River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 148.4,
-            "spoken": "Crossing the Malad River"
-          },
-          {
             "name": "Garland",
             "at_mi": 149.6,
             "off_mi": 3.0,
@@ -51076,6 +51967,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150975114, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Garland"
+          },
+          {
+            "name": "Malad River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 151.5,
+            "spoken": "Crossing the Malad River",
+            "lat": 41.68939,
+            "lon": -112.16124,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 49092940 (Malad River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Elwood",
@@ -51096,6 +51997,16 @@
             "spoken": "Passing Deweyville"
           },
           {
+            "name": "Bear River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 155.1,
+            "spoken": "Crossing the Bear River",
+            "lat": 41.65142,
+            "lon": -112.11431,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 33727399 (Bear River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Honeyville",
             "at_mi": 156.7,
             "off_mi": 1.07,
@@ -51112,6 +52023,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150964164, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bear River City"
+          },
+          {
+            "name": "Golden Spike (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 159.0,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Corinne",
@@ -51150,11 +52071,14 @@
             "spoken": "Passing Willard"
           },
           {
-            "name": "Ogden River",
-            "category": "river",
+            "name": "Golden Spike (northbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 174.8,
-            "spoken": "Crossing the Ogden River"
+            "at_mi": 177.1,
+            "spoken": "Billboard: Golden Spike National Historical Park, west of Brigham City, where the first transcontinental railroad was joined in eighteen sixty-nine. Even that ran two days late.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pleasant View",
@@ -51209,6 +52133,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150942410, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing West Haven"
+          },
+          {
+            "name": "Ogden River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 187.1,
+            "spoken": "Crossing the Ogden River",
+            "lat": 41.23448,
+            "lon": -111.97577,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 29193913 (Ogden River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Roy",
@@ -53701,6 +54635,16 @@
             "spoken": "Passing Hansen"
           },
           {
+            "name": "Evel Knievel's Canyon",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 2.8,
+            "spoken": "Billboard: Twin Falls is where Evel Knievel tried to rocket across the Snake River Canyon on a steam-powered cycle. He came up short but alive, while today's base jumpers leap from the bridge for fun.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Jerome",
             "at_mi": 2.9,
             "off_mi": 11.06,
@@ -53708,13 +54652,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150935685, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Jerome"
-          },
-          {
-            "name": "Evel Knievel's Canyon",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 3.0,
-            "spoken": "Billboard: Twin Falls is where Evel Knievel tried to rocket across the Snake River Canyon on a steam-powered cycle. He came up short but alive, while today's base jumpers leap from the bridge for fun."
           },
           {
             "name": "Shoshone Falls",
@@ -53731,6 +54668,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150939893, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Buhl"
+          },
+          {
+            "name": "Jackpot (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.7,
+            "spoken": "Billboard: Jackpot is ahead, on the Idaho line. Idaho banned casinos in nineteen fifty-four, so the casinos moved a mile south. The slot machines did not mind.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Jackpot (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.7,
+            "spoken": "Billboard: Jackpot is ahead, on the Idaho line. Idaho banned casinos in nineteen fifty-four, so the casinos moved a mile south. The slot machines did not mind.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "HD Summit",

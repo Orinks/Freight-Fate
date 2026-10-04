@@ -1,8 +1,11 @@
-//! Lane-guidance director: pans the EXISTING road bed toward the steer.
+//! Lane-guidance director: a pan toward the steer.
 //!
 //! Pure logic, no audio calls -- the driving state feeds it the lane model and
-//! the curve context each frame and applies the pan it returns to the road
-//! noise loop. Keeping it a plain object keeps the cue logic testable headless.
+//! the curve context each frame and applies the pan it returns to the engine
+//! on a ramp or connector, or to the opt-in tone. It rode the road bed until
+//! 2026-09-18; the bed is now where the truck sits (see
+//! `DrivingState::update_lane_guidance_audio`). Keeping it a plain object
+//! keeps the cue logic testable headless.
 //!
 //! The design is the community-resolved one on the roadmap (JaceK's audiogames
 //! ruling, owner concurring, 2026-07-17), plus the owner's wake/sleep contract
@@ -188,7 +191,7 @@ pub fn classify_boundaries(
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct GuidanceFrame {
     pub awake: bool,
-    /// Road-bed pan, -1..1: the side the wheel should go toward.
+    /// Guide pan, -1..1: the side the wheel should go toward.
     pub pan: f64,
     /// This frame ended a drift episode back at center.
     pub centered: bool,
@@ -199,7 +202,7 @@ pub struct GuidanceFrame {
 pub struct LaneGuidance {
     awake: bool,
     episode_drifted: bool,
-    /// Current slewed pan, applied to the road bed.
+    /// Current slewed pan; the driving state decides what carries it.
     pub pan: f64,
 }
 

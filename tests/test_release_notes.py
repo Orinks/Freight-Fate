@@ -281,6 +281,21 @@ def test_stable_notes_are_bounded_and_point_at_the_changelog(tmp_path, monkeypat
     assert notes.endswith(release_notes.STABLE_COMPLETE_LIST)
 
 
+def test_stable_notes_lead_with_compatibility(tmp_path, monkeypatch):
+    # Players upgrading in place need to hear first whether their career
+    # comes across; snapshot notes keep the usual order.
+    release_notes = load_release_notes_module()
+    repo = make_repo(
+        tmp_path,
+        changelog("### Added\n- New thing.\n\n### Compatibility\n- Old careers stay behind.\n"),
+    )
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    assert release_notes.stable_notes("1.9.0") == (
+        "## Compatibility\n- Old careers stay behind.\n\n## Added\n- New thing."
+    )
+
+
 def test_nightly_notes_exclude_entries_from_previous_nightly(tmp_path, monkeypatch):
     release_notes = load_release_notes_module()
     repo = make_repo(tmp_path, changelog("### Added\n- Old curated note.\n"))
@@ -745,7 +760,7 @@ def test_career_19_snapshot_builds_and_boots_a_linux_release():
         encoding="utf-8"
     )
     # Speech is not disabled in the container boot: Prism really opens the
-    # system's speech-dispatcher, which is where a loader would object.
+    # system's Speech Dispatcher, or boots silent where there is none.
     assert "FREIGHT_FATE_NO_SPEECH" not in smoke
     assert "Speech backend: Speech Dispatcher" in smoke
     assert 'grep -q " ERROR "' in smoke
@@ -844,6 +859,10 @@ def test_career_19_release_requires_and_verifies_every_platform_archive():
     assert "--prerelease" not in stable["run"]
     assert "is_prerelease == 'false'" in stable["if"]
     assert "Freight Fate $VERSION" in stable["run"]
+    # 1.8.8.1 and the 1.9 updater both pick a stable Mac archive by `-macos.zip`.
+    assert 'cp "$zip" "${zip%-macos-arm64.zip}-macos.zip"' in stable["run"]
+    assert stable["run"].index('-macos.zip"') < stable["run"].index("gh release create")
+    assert "sha256sum FreightFate-* > checksums.txt" in stable["run"]
     verify = next(
         step for step in release["steps"] if step.get("name") == "Verify release archives"
     )

@@ -257,24 +257,57 @@ const LANE: SoundCategory = SoundCategory {
         ),
         SoundEntry::new(
             "Mechanical blinker",
+            // Three flasher cycles a side: one cycle is one tick and one tock,
+            // and the rhythm is what a single cycle cannot teach.
             &[
                 Cue::new("vehicle/turn_signal").volume(0.8).pan(-0.6),
                 Cue::new("vehicle/turn_signal")
                     .volume(0.8)
+                    .pan(-0.6)
+                    .delay_s(0.9),
+                Cue::new("vehicle/turn_signal")
+                    .volume(0.8)
+                    .pan(-0.6)
+                    .delay_s(1.8),
+                Cue::new("vehicle/turn_signal")
+                    .volume(0.8)
                     .pan(0.6)
-                    .delay_s(5.0),
+                    .delay_s(3.0),
+                Cue::new("vehicle/turn_signal")
+                    .volume(0.8)
+                    .pan(0.6)
+                    .delay_s(3.9),
+                Cue::new("vehicle/turn_signal")
+                    .volume(0.8)
+                    .pan(0.6)
+                    .delay_s(4.8),
             ],
-            "Mechanical relay clicks. During a full-assist lane change they \
-             come from the side you are moving toward. With lane keeping \
-             partial or off, they follow your position within the lane while \
-             you steer. Signaling for an exit starts steady clicks on the right \
-             until you take the ramp, cancel, or miss the exit, even after the \
-             exit lane is set. Each recording finishes before repeating. \
-             Ordinary steering clicks stop when the move ends. A quieter centered signal tone confirms the \
-             steering cue ending; an assisted lane change ends with the \
+            "A turn signal relay: a tick, then a softer tock, at a steady \
+             pace. During a full-assist lane change it comes from the side \
+             you are moving toward. With lane keeping partial or off, it \
+             follows your position within the lane while you steer. \
+             Signaling for an exit starts it on the right until you take the \
+             ramp, cancel, or miss the exit, even after the exit lane is set. \
+             Ordinary steering clicks stop when the move ends, with the \
+             blinker clicking off; an assisted lane change ends with the \
              sound of tires crossing the painted line.",
         )
         .when("The I-key locator silences ordinary steering clicks, but not an armed exit signal."),
+        SoundEntry::new(
+            "Blinker off",
+            // Quieter and from straight ahead, exactly as
+            // update_steering_lane_cue and a canceled exit play it.
+            &[Cue::new("vehicle/turn_signal_off").volume(0.45).pan(0.0)],
+            "The turn signal stalk clicking back to the middle, from straight \
+             ahead. You hear it when you straighten up after steering over, \
+             when the exit lane is set, and when you cancel an exit while \
+             its blinker is running. The move is finished.",
+        )
+        .when(
+            "Straightening up clicks it off only with lane keeping partial or \
+             off and the I-key locator off. Canceling a running exit blinker \
+             clicks it off in every mode.",
+        ),
         SoundEntry::new(
             "Signal tone",
             &[
@@ -283,21 +316,12 @@ const LANE: SoundCategory = SoundCategory {
                     .volume(0.8)
                     .pan(0.6)
                     .delay_s(1.2),
-                // The self-cancel, third: quieter and from straight ahead,
-                // exactly as update_steering_lane_cue
-                // plays it. Same tone, and the treatment is the difference.
-                Cue::new("vehicle/signal_tone")
-                    .volume(0.45)
-                    .pan(0.0)
-                    .delay_s(2.4),
             ],
             "A short confirmation tone. It marks a \
              move you meant to make: crossing into another lane, easing onto the shoulder, \
-             coming up a ramp, or taking the exit the route asked for. The \
-             quieter one from straight ahead is the same signal cancelling \
-             itself, the way it does in a truck when the wheel comes back: \
-             the move is finished. Exit lane readiness is announced separately; \
-             the exit blinker continues until the ramp or cancellation.",
+             coming up a ramp, or taking the exit the route asked for. Exit \
+             lane readiness is announced separately; the exit blinker \
+             continues until the ramp or cancellation.",
         ),
     ],
 };
@@ -533,61 +557,6 @@ const HAZARDS: SoundCategory = SoundCategory {
              at night, and a tired driver drifts and reacts late. Plan a \
              stop rather than pushing through it.",
         ),
-        // The two earcons the S4 driving speech ladder stands in with, once a
-        // rung stops speaking a whole category (LADDER_EARCONS in
-        // speech_pacing.py, pinned learnable by
-        // tests/test_driving_speech_ladder.py, and played by
-        // GameContext._play_ladder_earcon in app.py via
-        // sound_catalog.entry_by_name). This entry's own recipe -- key and
-        // volume -- IS the road level: app.py resolves the cue from here
-        // rather than keeping a second copy, so there is nothing to drift.
-        // Synthesized rather than shipped (``ladder_earcons.py``), the same
-        // way the enforcement signature is -- and, like that one, keyed under
-        // a folder name ("ladder/") outside the ones
-        // ``tests/test_speech_audio.py::test_all_referenced_assets_exist``
-        // scans for a file on disk, since neither cue has one.
-        SoundEntry::new(
-            "Confirmation note",
-            &[Cue::new("ladder/confirmation_note").volume(0.32)],
-            "One short, clear high note standing in for a confirmation -- \
-             the assist acted, the setting took, the latch caught. Not to be confused with Hazard \
-             clear above, which means something quite different and used to \
-             be played here.",
-        )
-        .when("Driving speech set to Urgent only. Quiet speaks short confirmations."),
-        SoundEntry::new(
-            "Road ahead note",
-            &[Cue::new("ladder/road_ahead_note").volume(0.38)],
-            "Two short notes falling, standing in for a heads-up about what \
-             the road is about to do -- a bend coming, a merge, how far the \
-             next stretch runs. The route and road keys still answer on demand.",
-        )
-        .when(
-            "Driving speech set to Urgent only. At Quiet and below \
-             these are spoken. Directions you cannot recover from -- take \
-             this exit, turn here, you missed it -- are always spoken, at \
-             every setting.",
-        ),
-        SoundEntry::new(
-            "Coaching note",
-            &[Cue::new("ladder/coaching_note").volume(0.4)],
-            "A soft two-note rising chime standing in for a driving tip. \
-             Standard driving speech speaks the tip.",
-        )
-        .when(
-            "Driving speech set to Quiet. At Urgent only, tips are \
-             dropped instead of getting a sound.",
-        ),
-        SoundEntry::new(
-            "Status note",
-            &[Cue::new("ladder/status_note").volume(0.35)],
-            "A single short, low tock standing in for a status update -- \
-             load condition, the weather turning, and the like.",
-        )
-        .when(
-            "Available here for reference. Quiet now speaks short status updates; \
-             Urgent only suppresses them.",
-        ),
     ],
 };
 
@@ -737,9 +706,10 @@ const ENFORCEMENT: SoundCategory = SoundCategory {
         SoundEntry::new(
             "CB chatter",
             &[Cue::new("events/cb_radio_chatter")],
-            "Other drivers passing on what they have seen: enforcement, \
-             wrecks, work zones. It says how sure it is, it is sometimes out \
-             of date, and it never claims the road is clear.",
+            "The squelch of a CB call ending, played with what another \
+             driver passed on: enforcement, wrecks, work zones. The report \
+             says how sure it is, it is sometimes out of date, and it never \
+             claims the road is clear.",
         ),
     ],
 };
@@ -784,11 +754,9 @@ pub fn catalog_entries() -> impl Iterator<Item = &'static SoundEntry> {
 
 /// The catalog entry with this canonical spoken noun, or `None`.
 ///
-/// A lookup one caller (the S4 ladder's earcon playback, the app shell)
-/// needs at runtime: it knows a cue only by the name it teaches under
-/// (`speech_pacing.LADDER_EARCONS`), and the recipe -- key, volume, pan
-/// -- lives here so the drive and the Learn game sounds screen can never
-/// play the same cue two different ways.
+/// The recipe -- key, volume, pan -- lives here, so anything that plays a
+/// cue by the name it teaches under plays it exactly as the Learn game
+/// sounds screen does.
 pub fn entry_by_name(name: &str) -> Option<&'static SoundEntry> {
     catalog_entries().find(|entry| entry.name == name)
 }

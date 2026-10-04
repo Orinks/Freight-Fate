@@ -1,4 +1,7 @@
 {
+  "permissions": {
+    "allow": ["WebFetch", "WebSearch"]
+  },
   "hooks": {
     "SessionStart": [
       {

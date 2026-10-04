@@ -22,18 +22,20 @@ use crate::states::driving_updates::{
 impl DrivingState {
     pub fn update_lane(&mut self, ctx: &mut GameContext, dt: f64) {
         let mode = ctx.settings.lane_keeping.clone();
-        let mut steer = 0.0;
+        let mut key_dir = 0i8;
         if ctx.bindings.pressed(&ctx.input, Action::SteerLeft) {
-            steer -= 1.0;
+            key_dir -= 1;
         }
         if ctx.bindings.pressed(&ctx.input, Action::SteerRight) {
-            steer += 1.0;
+            key_dir += 1;
         }
         // The left stick provides analog steering when the keys are idle.
-        if steer == 0.0 && ctx.controller.active() && ctx.controller.steering() != 0.0 {
-            steer = ctx.controller.steering();
-        }
-        self.lane.steering = steer;
+        let stick = if ctx.controller.active() {
+            ctx.controller.steering()
+        } else {
+            0.0
+        };
+        self.lane.steer_input(key_dir, stick);
         self.lane.straighten = ctx.bindings.pressed(&ctx.input, Action::Straighten);
         // The exit ramp is a single lane; the mainline keeps its leg count.
         self.lane_before_narrow = Some(self.lane.lane);
@@ -409,12 +411,18 @@ impl DrivingState {
                 )
             })
             .unwrap_or(0.0);
+        // A street corner bends the lane's road as well, added here and not
+        // above so the bend and ramp speed assists read what they always did
+        // (`street_corner_curvature`).
         let road = RoadConditions {
-            curvature: curve,
+            curvature: curve + self.street_corner_curvature(),
             wind,
             grip,
             bank,
         };
+        // The turn a hold toward follows the road for, from its call on
+        // (`hold_turn_side`, `LaneKeeping::turn_in_play`).
+        self.lane.turn_in_play = self.hold_turn_side();
         let off_road_event = self.lane.update(dt, speed_mps, road, &mode, takes_the_bend);
         if off_road_event {
             // The shoulder costs the truck whether or not anything warns about
@@ -447,6 +455,7 @@ impl DrivingState {
             self.on_lane_crossed(ctx);
         }
         self.update_tap_lane_change(ctx, dt);
+        self.update_pass_return(ctx);
         self.update_merge(ctx, dt);
         self.update_keep_right(ctx, dt);
     }
@@ -521,6 +530,7 @@ impl DrivingState {
     /// The truck has just arrived in a new lane: check the space it moved
     /// into, resolve any dodgeable hazard, and reset keep-right pressure.
     pub fn finish_lane_change(&mut self, ctx: &mut GameContext, quiet: bool) {
+        let pass_return = std::mem::take(&mut self.pass_returning);
         self.left_lane_s = 0.0;
         self.keep_right_nags = 0;
         let lane_index = self.lane.lane;
@@ -569,9 +579,32 @@ impl DrivingState {
             // spoken damage line, so the outcome pair is never ambiguous
             // (R4, R14).
             let names = self.hazard_names_text();
-            self.finish_hazard_clear(ctx, &format!("You swerve around {names}. Well done."));
+            // Lane keeping's own pass is not the driver's swerve to praise:
+            // say where the truck is now, the line a tap change ends on.
+            let text = if self
+                .passing
+                .is_some_and(|(_, passed_in)| passed_in == lane_index)
+            {
+                format!(
+                    "In {}, passing {names}.",
+                    lane_phrase(lane_index, lane_count)
+                )
+            } else {
+                format!("You swerve around {names}. Well done.")
+            };
+            self.finish_hazard_clear(ctx, &text);
             return;
         }
+        // Lane keeping back in its lane after going around traffic is the
+        // end of the pass, and the pass itself is TRAFFIC: words at
+        // standard only. At quiet "In the right lane." used to arrive on
+        // its own, about a pass nobody had mentioned (speech mode audit,
+        // 2026-10-03).
+        let category = if pass_return {
+            SpeechCategory::Traffic
+        } else {
+            SpeechCategory::Confirmation
+        };
         if !quiet {
             // ROUTE, not the ambient default: the driver's only confirmation
             // of where a lane change landed, same class as the lane-open
@@ -581,7 +614,7 @@ impl DrivingState {
                 format!("In {}.", lane_phrase(lane_index, lane_count)),
                 SayEvent::queued()
                     .priority(EventPriority::Route)
-                    .category(SpeechCategory::Confirmation),
+                    .category(category),
             );
         }
     }
@@ -843,6 +876,9 @@ impl DrivingState {
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Money),
         );
+        // A second serious violation just suspended the CDL: the drive ends
+        // here instead of carrying on.
+        self.end_drive_if_licence_pulled(ctx);
     }
 
     /// Left-lane time is legitimate while passing slower right-lane
@@ -887,8 +923,7 @@ impl DrivingState {
         }
         self.keep_right_nags += 1;
         if self.keep_right_nags == 1 {
-            let grumble = "CB chatter: you have been riding the left lane a while. Keep right \
-                           except to pass.";
+            let grumble = "You have been riding the left lane a while. Keep right except to pass.";
             // Repeatable with Alt C like any other CB call. No post and no
             // distance in it, so the repeat says it back word for word.
             self.last_cb_chatter = Some(CbChatterRecall {
@@ -898,14 +933,20 @@ impl DrivingState {
             self.speak_ambient_event(
                 ctx,
                 SpokenMessage::new(grumble),
-                Ambient::new().sound(Some("events/cb_radio_chatter")),
+                // Advice from the CB, not a rule the game enforces: a tip,
+                // said once a leg at standard and not at all quieter.
+                Ambient::new()
+                    .sound(Some("events/cb_radio_chatter"))
+                    .category(Some(SpeechCategory::Coaching)),
             );
         } else {
             ctx.audio.play_with("traffic/car_pass", 0.9, 0.5);
             self.speak_ambient_event(
                 ctx,
                 SpokenMessage::new("Traffic is stacking up and passing you on the right."),
-                Ambient::new().sound(Some("events/cb_radio_chatter")),
+                Ambient::new()
+                    .sound(Some("events/cb_radio_chatter"))
+                    .category(Some(SpeechCategory::Traffic)),
             );
         }
     }

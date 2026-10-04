@@ -4,9 +4,13 @@
 
 ### Added
 
-- **Freight Fate runs on iPhone and iPad.** It speaks through VoiceOver, answers touch gestures, and plays with game controllers.
-- **F2 lists every driving command by name.** Pick one and it runs as its key would, then you are back on the road. On iPhone and iPad, a three-finger tap opens the list.
-- **On iPhone and iPad, driving gestures run their commands directly.** Hold the top half and tap a second finger for cruise; Touch gestures in Controls moves any gesture.
+- **Before a stable release, the billboards grow: about three thousand new ones, from Ocean City's boardwalk to Big Bend.** Big Jim notices your driving.
+
+- **You can pull in at The Thing, on Interstate 10 in Arizona.** Only a tractor without a trailer can fuel there.
+
+- **The game asks how much the truck should do for you before the main menu, once.** Choose All assists, Balanced or Realistic; Escape keeps what you have.
+
+- **F2 lists every driving command by name.** Pick one and it runs as its key would, then you are back on the road.
 
 - **Settings, Speech has a JAWS arrow keys row when JAWS is running.** Faster makes menus and held arrows answer at once; Default removes the script.
 
@@ -31,7 +35,13 @@
 
 - **A new hidden achievement belongs to one week of the real year.**
 
+- **Truckers Radio USA sounds better.** It now plays the station's full-quality stream under Web radio.
+
+- **The Terrestrial dial has 156 more music stations.** Country, rock, hits, hip-hop and Spanish stations across 35 states.
+
 - **Dodge Radio is on the dial.** A United Kingdom station playing a bit of everything, and it comes in anywhere you drive.
+
+- **Six AFN 360 channels are back on the dial for players outside the United States.** AFN blocks them inside the US, so they won't play there.
 
 - **X Transmission FM is on the dial.** Rock, metal and country from live DJs, and it names the song playing.
 
@@ -62,6 +72,36 @@
 - **A career balance edited outside the game stays marked.** Money changed by a memory tool saves with the modified flag.
 
 ### Changed
+
+- **The Mac app is signed and notarized by Apple, so it opens without the Open Anyway step.**
+
+- **Quiet and Urgent only driving speech no longer call out traffic.** Slow cars ahead, cruise settling in behind them and lane keeping passing are spoken only on Standard.
+
+- **Anything Quiet or Urgent only leaves out now makes no sound.** The stand-in notes and the notification tones of silenced lines are gone.
+
+- **Quiet driving speech says cruise, speed keeper, work zone and collision updates in a few words.** For example, Cruise easing to 50.
+
+- **Urgent only no longer announces achievements while you drive.** They wait in message review.
+
+- **Urgent only no longer speaks CB reports, toll heads-ups or traffic packs.** Lane closures and the directions you must act on still speak.
+
+- **Radio stations whose name already includes the call sign say it once.** Tuning now says "KXLU 88.9", not "KXLU, KXLU 88.9".
+
+- **CB reports now open with a short squelch and go straight to the news.** "CB chatter" is no longer said before each one.
+
+- **Lane keeping on full now passes slow vehicles.** You hear "Passing on the left", and the truck moves back right once past.
+
+- **Letting go of the steering keys now straightens the truck.** It stops drifting where you leave it, so there is no wheel to unwind after a turn.
+
+- **Holding the arrow toward a bend or street corner now takes the turn.** The truck follows the road until you let go, instead of steering past it.
+
+- **Holding a steering key now moves the truck across at a steady pace.** A lane change takes about two and a half seconds however long you hold, and a tap is a nudge.
+
+- **New installs start on All assists.** The truck steers, street corners included, until you switch to Balanced under Driving assistance.
+
+- **The Lane keeping help describes the lean your Steering guide and Lane guide sound settings give you.**
+
+- **The turn signal ticks and tocks like a real flasher, and clicks off when the move ends.**
 
 - **Downshifting a manual with the clutch held matches revs.** The engine follows the truck's speed down instead of dropping to idle, so letting the clutch out is smooth.
 
@@ -128,8 +168,6 @@
 
 - **Quiet speaks short updates, including lane openings.** Urgent only keeps essential warnings and directions; suppressed speech stays out of the event buffer.
 
-- **A new install now starts on the Balanced assists.** The truck helps hold your lane and stops for you at the destination gate.
-
 - **Curve assistance now steers through a bend as well as slowing for it.** Lane keeping holds your line the rest of the time.
 
 - **Leave the wheel alone in a bend and the truck runs wide.** Steering turns the truck now instead of sliding it sideways.
@@ -178,6 +216,70 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **Urgent only now says when a work zone turns adaptive cruise off.** It used to let go of the pedals without a word.
+
+- **Quiet speaks every truck stop heads-up in its short form.** One that had to wait was read out in full.
+
+- **On a Mac, the game no longer freezes at launch asking to control VoiceOver.** VoiceOver also speaks the first screen now. (Reported by Jason)
+
+- **Radio stations that were silent, gone, listed twice or playing a different station are fixed or off the dial.** Stations that moved play from their new address.
+
+- **Your Discord status keeps up on long sessions.** If Discord turns down an update, the game reconnects and sends it again instead of leaving the old status showing.
+
+- **A truck parked with the radio on now leaves the live drivers board after half an hour.** A new song no longer counts as driving.
+
+- **The game keeps answering your computer while it closes, after an update too, and finishes its last sentence first.** macOS no longer reports it as not responding.
+
+- **A stalled update no longer freezes the download screen.** After a quiet minute the game says so and names where to download it yourself.
+
+- **Escape now leaves an update download at once, and the game says when it is unpacking.**
+
+- **An update download that arrives damaged is no longer installed.** The game says so and keeps the version you have.
+
+- **On a Mac, Report a problem names the folder that really holds your game log.**
+
+- **Chain controls now stand only while a chain law is in effect.** On dry roads the CB no longer calls one, and no chain-control trooper watches you.
+
+- **Chain laws now apply only in the western states that post them.** A steep grade in Texas or Wisconsin no longer brings a chain law in snow.
+
+- **A chain citation now comes only on a grade where the chain law is posted.** Snow elsewhere no longer lets a scale or patrol write one.
+
+- **Install snow chains appears in the pause menu only when snow, ice or a chain law calls for them.**
+
+- **With live weather setting the calendar, real snow now stays snow in any month.** An October snow in Denver is no longer driven as rain.
+
+- **Simulated weather no longer says rain below freezing out of season.** A cold March night is overcast instead.
+
+- **A real winter storm warning no longer reaches a career that is in summer on its own calendar.**
+
+- **On the real calendar, dates now name the right weekday.** A leap year no longer shifts every date a day late.
+
+- **Lane keeping on full now moves to the right lane for your exit.** Pulling out to pass no longer costs you the exit.
+
+- **State lines, rivers and exits on several highways now match where the truck is.** The New York Thruway no longer announces Pennsylvania.
+
+- **A CDL suspended mid-drive now ends the run.** The truck stops on the shoulder, the way a roadside stop ends it.
+
+- **More route cues match the roads trucks drive.** Repaired checkpoints, river callouts and signs follow their routes; scenic stretches keep billboards quiet.
+
+- **Escape on a roadside stop that suspends your CDL no longer drives on.** It returns to the terminal, like the Return to terminal row.
+
+- **A saved run on a suspended CDL no longer resumes.** Continuing the career closes it out and opens the terminal.
+
+- **The Dalles is no longer read as the The Dalles.**
+
+- **The truck no longer tells you to release a parking brake that is already off.** A late "Press P to release it" could send you to set the brake while rolling.
+
+- **The engine no longer leans into bends and corners the truck is already taking.** With curve assistance or partial lane keeping, it leans only when you drift.
+
+- **Steering into a street corner no longer pushes the truck across its lane.** The truck turns with the corner, and curve assistance takes it for you.
+
+- **The manual now lists Slash, Straighten up.** Hold it to stop the truck drifting across the lane.
+
+- **The Lane keeping help now teaches the engine lean.** It used to say steer by the road sound, which only tells you where you sit in your lane.
+
+- **The day a CDL suspension clears now matches the calendar you hear.** It never names a day already past, and a year-long one says next year.
 
 - **With JAWS, a held arrow keeps working when you tap another key.** Hold Up and tap Space for your speed, and the truck keeps accelerating.
 
@@ -530,7 +632,9 @@
 
 ### Compatibility
 
-- **On Linux, speech now uses the Speech Dispatcher installed on your computer.** Install it first if your system lacks it; the game will not start without it.
+- **Careers from 1.8 and earlier do not carry over; every driver starts a new career.** Old saves stay listed, untouched and playable in 1.8.
+
+- **On Linux, speech uses the Speech Dispatcher installed on your computer.** Without it the game still starts, but stays silent.
 
 
 ### Changed
@@ -1708,10 +1812,6 @@
   next station, Page Up the previous, Control still jumps a category, and
   semicolon and apostrophe keep working.
 
-- **Careers from earlier versions stay in their own era.** A career from
-  Freight Fate 1.8 or earlier still shows in your list, labeled, and picking
-  it offers a new career instead; the old save is untouched.
-
 - **Every Freight Fate music station now plays everywhere.** The game's own
   stations no longer fade past their home cities, and they play in
   streamer-safe mode, in the Freight Fate stations category.
@@ -1931,7 +2031,7 @@
   with the truck they happened to, so swapping tractors no longer carries
   them onto the next one.
 
-- **Careers from earlier versions load unchanged: your current wear settles
+- **Careers from 1.9 test builds load unchanged: your current wear settles
   onto every truck you own.**
 
 - **Relaxed driving now leaves real breathing room without removing the

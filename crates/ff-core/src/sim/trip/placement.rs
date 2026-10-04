@@ -392,14 +392,23 @@ impl Trip {
         {
             let forward = self.route.cities[i] == leg.a;
             for landmark in leg.landmarks() {
+                if !landmark.applies_to_direction(forward) {
+                    continue;
+                }
                 let offset = stop_offset_for_direction(landmark.at_mi, leg.miles, forward);
+                let at_mi = start + offset;
+                if landmark.category == "billboard_sign"
+                    && self.commercial_billboards_banned_at(at_mi)
+                {
+                    continue;
+                }
                 let mut callout = RoadsideCallout::new(
                     &format!(
                         "landmark:{i}:{}:{}",
                         py_str_float(landmark.at_mi),
                         landmark.name
                     ),
-                    start + offset,
+                    at_mi,
                     &landmark.category,
                     &format!("{}.", landmark.spoken),
                 );
@@ -420,9 +429,10 @@ impl Trip {
         let mut spaced = Self::thin_villages(villages);
         callouts.sort_by(|a, b| a.at_mi.partial_cmp(&b.at_mi).expect("finite mileposts"));
         for callout in callouts {
-            if spaced
-                .iter()
-                .any(|kept| (callout.at_mi - kept.at_mi).abs() < LANDMARK_MIN_SPACING_MI)
+            if callout.category != "billboard_sign"
+                && spaced
+                    .iter()
+                    .any(|kept| (callout.at_mi - kept.at_mi).abs() < LANDMARK_MIN_SPACING_MI)
             {
                 continue;
             }
@@ -576,17 +586,31 @@ impl Trip {
     }
 
     /// Maine, Vermont, Alaska, and Hawaii ban commercial billboards (Scenic
-    /// America / FHWA). Pool jokes and corridor ads stay silent there.
+    /// America / FHWA). Scenic-byway spans are stored in each leg's own
+    /// direction and are mirrored for reverse travel.
     fn commercial_billboards_banned_at(&self, at: f64) -> bool {
-        matches!(
+        if matches!(
             self.state_code_at(at).as_deref(),
             Some("ME") | Some("VT") | Some("AK") | Some("HI")
-        )
+        ) {
+            return true;
+        }
+        let (leg_index, leg_start) = self.leg_at_mile(at);
+        let leg = &self.route.legs[leg_index];
+        let local_mi = at - leg_start;
+        let local_mi = if self.route.cities[leg_index] == leg.a {
+            local_mi
+        } else {
+            leg.miles - local_mi
+        };
+        leg.billboard_bans()
+            .iter()
+            .any(|ban| ban.from_mi <= local_mi && local_mi < ban.to_mi)
     }
 
     /// The two-letter state code at a trip milepost, or None where the bake is
     /// silent and the route names no city we can fall back on.
-    fn state_code_at(&self, at: f64) -> Option<String> {
+    pub(crate) fn state_code_at(&self, at: f64) -> Option<String> {
         let name = self.state_at(Some(at));
         if !name.is_empty() {
             if let Some(code) = self.state_codes.get(&name) {

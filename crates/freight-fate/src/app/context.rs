@@ -176,9 +176,6 @@ pub struct GameContext {
     /// Whether the game mix is currently stepped down under the event voice
     /// (Settings > Audio; see `engage_speech_duck`).
     pub(crate) speech_ducked: bool,
-    /// Deadline for a duck an earcon opened, in real seconds. Zero when the
-    /// duck belongs to a spoken line, which the pacer's projection ends.
-    pub(crate) earcon_duck_until: f64,
     /// True only while a control the player actually pressed is being
     /// handled. See `player_asked`: a readout somebody asked for cuts the
     /// line in progress even at the wheel, where unasked-for lines queue.
@@ -240,14 +237,8 @@ pub struct ContextParts {
 
 impl GameContext {
     pub fn new(parts: ContextParts) -> Self {
-        // The S4 ladder's earcons (LADDER_EARCONS) can play from any screen
-        // the silencing gate fires on, not only the Learn game sounds screen
-        // that used to be the sole registrant. Idempotent and cheap, so doing
-        // it once here means the drive never has to wait on that screen
-        // having been visited first.
-        ff_core::ladder_earcons::register_ladder_earcons();
-        // Same reason, same shape: the guide tone must exist before a drive
-        // starts, not only after the Learn screen has been opened.
+        // The guide tone must exist before a drive starts, not only after
+        // the Learn game sounds screen has been opened. Idempotent and cheap.
         ff_core::lane_guide_tone::register_lane_guide_tone();
         Self {
             speech: parts.speech,
@@ -272,7 +263,6 @@ impl GameContext {
             input: HeldKeys::default(),
             running: false,
             speech_ducked: false,
-            earcon_duck_until: 0.0,
             speech_requested: false,
             ladder_said: HashSet::new(),
             ladder_last: HashMap::new(),

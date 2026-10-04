@@ -103,7 +103,11 @@ def worst_off_road_m(coords: list[list[float]]) -> float:
 
 
 def refetch(leg: dict, cities: dict) -> dict[str, Any]:
-    fetched = rr.fetch_route(cities[leg["from"]], cities[leg["to"]])
+    fetched = rr.fetch_route(
+        cities[leg["from"]],
+        cities[leg["to"]],
+        via=rr.route_via_points(leg),
+    )
     if fetched is None:
         raise RuntimeError("the router returned no route")
     shape, _miles, _toll = fetched

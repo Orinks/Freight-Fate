@@ -157,24 +157,24 @@ fn test_gps_state_crossing_and_rest_stop_cues_deduplicate() {
     trip.traffic_manager.rolling_bubble = false;
     trip.traffic_manager.vehicles = Vec::new();
 
-    // State crossings speak once, at the line -- the old 10-mile advance
-    // warning was cut in the reduce-repeated-alerts player-feedback round.
-    trip.position_mi = 23.0;
-    let advance = trip.update(0.0);
-    let repeat = trip.update(0.0);
-    assert!(gps_events(&advance).is_empty());
-    assert!(gps_events(&repeat).is_empty());
-
-    trip.position_mi = 31.5;
-    let near = trip.update(0.0);
-    assert!(gps_events(&near).is_empty());
-
     // Read the line's position rather than pinning a number to it. Correcting
     // Chicago-Indianapolis from 183 to the 185 miles its baked route runs moved
     // every along-route position, and a hardcoded probe then lands somewhere
     // else entirely -- next to an interchange, in one case, whose exit cue
     // joined the assertion.
+    // State crossings speak once, at the line -- the old 10-mile advance
+    // warning was cut in the reduce-repeated-alerts player-feedback round.
     let line_mi = trip.route.legs[0].state_crossings()[0].at_mi;
+    trip.position_mi = (line_mi - 10.0).max(0.0);
+    let advance = trip.update(0.0);
+    let repeat = trip.update(0.0);
+    assert!(gps_events(&advance).is_empty());
+    assert!(gps_events(&repeat).is_empty());
+
+    trip.position_mi = (line_mi - 1.0).max(0.0);
+    let near = trip.update(0.0);
+    assert!(gps_events(&near).is_empty());
+
     trip.position_mi = line_mi;
     let crossing = trip.update(0.0);
     assert_eq!(

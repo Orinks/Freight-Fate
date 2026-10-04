@@ -328,6 +328,14 @@ impl SdlShell {
         events
     }
 
+    /// Pump the event queue once and discard what arrives. Quit calls this
+    /// while services shut down so macOS keeps reading the still-open
+    /// window as responsive (issue 266); events during quit are ignored on
+    /// purpose -- the game is leaving.
+    pub fn pump_during_quit(&mut self) {
+        let _ = self.poll();
+    }
+
     /// `screen.fill(BG_COLOR)` ... `display.flip()`. The text lines are not
     /// drawn: the window is a debug mirror of the speech, and `sdl2::ttf` is
     /// not enabled in this build; `State::lines()` stays for the harness.

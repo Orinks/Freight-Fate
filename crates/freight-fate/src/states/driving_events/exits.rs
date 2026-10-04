@@ -128,9 +128,15 @@ impl DrivingState {
                 );
                 return;
             }
+            let was_blinking = self.exit_blinker_on();
             self.exit_signal_on = false;
             ctx.audio.release_cue("vehicle/turn_signal");
             ctx.audio.release_cue(STEER_CUE_HOLD);
+            if was_blinking {
+                // The stalk clicking back, as when the steering cue ends.
+                let volume = 1.0f64.min(STEER_CUE_CANCEL_VOL * self.cue_loudness(ctx));
+                ctx.audio.play_with("vehicle/turn_signal_off", volume, 0.0);
+            }
             self.steer_cue_active = false;
             self.steer_cue_hold_s = 0.0;
             self.exit_cancel_armed = false;
@@ -221,7 +227,8 @@ impl DrivingState {
         let mut message = if ctx.settings.lane_is_automated() {
             self.exit_lane_entered = true;
             ctx.audio.play_with("ui/notify", 0.6, 0.0);
-            let lane_hint = if in_right_lane { "" } else { " Right lane." };
+            // No lane hint: lane keeping moves to the right lane itself
+            // (`keep_right_for_exit`).
             // The first granted lane of the run says who granted it. A driver
             // who never asked for this needs one chance to notice the truck
             // is doing it, and where to change that.
@@ -232,7 +239,7 @@ impl DrivingState {
                 self.lane_keeping_grant_said = true;
                 "Lane keeping takes the exit lane for you."
             };
-            format!("{head} {ahead_text} ahead. {granted}{lane_hint}{ending}{cap}")
+            format!("{head} {ahead_text} ahead. {granted}{ending}{cap}")
         } else {
             // The right lane now; the exit lane itself where it opens, which
             // the cab calls at the taper. Nothing at all when the truck is
@@ -667,6 +674,7 @@ impl DrivingState {
             self.update_exit_speed_assist(ctx, &stop);
         }
         if automated {
+            self.keep_right_for_exit(ctx, &stop);
             return;
         }
         if !self.exit_signal_on {
@@ -939,14 +947,12 @@ impl DrivingState {
     }
 }
 
-/// Ask for the right lane in this driver's own key. With lane keeping on, a
-/// tap of steer right changes lanes; without it the driver steers there.
+/// Ask for the right lane, when the move is the driver's. Lane keeping on
+/// full makes it itself (`keep_right_for_exit`), so it is not asked for: a
+/// tap into a lane lane keeping is waiting on is a sideswipe.
 fn right_lane_request(ctx: &GameContext) -> String {
     if ctx.settings.lane_is_automated() {
-        format!(
-            " Tap {} to the right lane.",
-            ctx.control_name(Action::SteerRight)
-        )
+        String::new()
     } else {
         " Move to the right lane.".to_string()
     }

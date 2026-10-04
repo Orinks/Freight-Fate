@@ -41,10 +41,9 @@ use crate::assets_pack::register_generated_sound;
 use crate::cab_filter::wav::write_wav_pcm16;
 use crate::pyfmt::round_py;
 
-/// Keyed under "guide/" rather than "vehicle/" for the same reason the
-/// ladder earcons sit under "ladder/": the asset-scan test walks the
-/// shipped folders looking for a file on disk, and a synthesized cue has
-/// none.
+/// Keyed under "guide/" rather than "vehicle/": the asset-scan test walks
+/// the shipped folders looking for a file on disk, and a synthesized cue
+/// has none.
 pub const LANE_GUIDE_TONE_KEY: &str = "guide/lane_guide_tone";
 
 const RATE: u32 = 44100;
@@ -79,8 +78,7 @@ static REGISTERED: std::sync::Once = std::sync::Once::new();
 
 /// Publish the tone under its ordinary sound key.
 ///
-/// Idempotent, mirroring `ladder_earcons::register_ladder_earcons`: safe to
-/// call from the Learn screen every time it opens.
+/// Idempotent: safe to call from the Learn screen every time it opens.
 pub fn register_lane_guide_tone() {
     REGISTERED.call_once(|| {
         register_generated_sound(LANE_GUIDE_TONE_KEY, lane_guide_tone_wav(), "wav");

@@ -303,6 +303,7 @@ impl Profile {
             game_hours: f("game_hours", defaults.game_hours),
             calendar_offset_days: i("calendar_offset_days", 0),
             calendar_offset_hours: 0.0,
+            live_calendar: false,
             tutorial_done: b("tutorial_done", false),
             truck: s("truck", &defaults.truck),
             owned_trucks: list("owned_trucks"),
