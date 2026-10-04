@@ -221,6 +221,8 @@
 
 ### Fixed
 
+- **A ramp light that turns green as you roll up announces green once.** Crossing it now says only to stop at the entrance, without a second chime.
+
 - **Urgent only now says when a work zone turns adaptive cruise off.** It used to let go of the pedals without a word.
 
 - **Quiet speaks every truck stop heads-up in its short form.** One that had to wait was read out in full.
