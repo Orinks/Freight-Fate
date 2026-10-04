@@ -200,6 +200,12 @@ def _is_snapshot_label(label: str) -> bool:
     return len(suffix) == 8 and suffix.isdigit()
 
 
+def label_package_version(label: str) -> str:
+    """The version a build labelled ``label`` is: the label's own for a
+    stable (``v1.9.1`` or ``1.9.1``), else the ``pyproject.toml`` version."""
+    return project_version() if _is_snapshot_label(label) else label.removeprefix("v")
+
+
 def stamp_build_info(build_dir: Path, label: str, root: Path | None = None) -> None:
     """Record what this build is, for the in-game updater.
 
@@ -207,16 +213,20 @@ def stamp_build_info(build_dir: Path, label: str, root: Path | None = None) -> N
     ``1.9-tester-20260828``) or a plain version (``1.6.0``); the release
     tag for the latter is ``v``-prefixed.
 
-    ``package_version`` is the exact ``pyproject.toml`` project version --
-    not ``label``, which for a snapshot is a date-stamped tag, not a package
-    version.
+    ``package_version`` is what the game reports as its own version, and
+    what the updater compares releases against. A snapshot carries the
+    exact ``pyproject.toml`` project version, since its label is a
+    date-stamped tag. A stable build carries the label's version: the
+    ``v1.9.0`` tag push built a game whose pyproject still read
+    ``1.9.0.dev0``, so every 1.9.0 copy called itself a development build
+    and was offered 1.9.0 again on every start.
     """
     snapshot = _is_snapshot_label(label)
     info = {
-        "tag": label if snapshot else f"v{label}",
+        "tag": label if snapshot else f"v{label.removeprefix('v')}",
         "channel": "dev" if snapshot else "stable",
         "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-        "package_version": project_version(),
+        "package_version": label_package_version(label),
     }
     info_path = (root or runtime_root(build_dir)) / "build_info.json"
     with open(info_path, "w", encoding="utf-8") as f:
@@ -930,7 +940,7 @@ def macos_bundle_version(label: str) -> str:
 
 def write_macos_info_plist(app: Path, label: str) -> None:
     """Write the minimal metadata Finder and assistive technology need."""
-    short_version = project_version().split(".dev", 1)[0]
+    short_version = label_package_version(label).split(".dev", 1)[0]
     info = {
         "CFBundleDevelopmentRegion": "en",
         "CFBundleDisplayName": "Freight Fate",

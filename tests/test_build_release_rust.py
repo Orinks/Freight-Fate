@@ -1574,3 +1574,32 @@ def test_secret_scan_passes_a_clean_payload_and_skips_binaries(tmp_path):
     # opaque media, and false positives would train everyone to ignore it.
     (staged / "freight_fate" / "sounds.pak").write_bytes(b"FFPK1 ghp_" + b"c" * 36)
     build_release.verify_no_shipped_secrets(staged)
+
+
+@pytest.mark.parametrize(
+    ("label", "tag", "channel", "version"),
+    [
+        # The tag push passes the tag itself; v1.9.0 once stamped `vv1.9.0`
+        # with pyproject's `1.9.0.dev0`, and the game offered itself forever.
+        ("v1.9.1", "v1.9.1", "stable", "1.9.1"),
+        ("1.9.1", "v1.9.1", "stable", "1.9.1"),
+        ("1.9-tester-20261005", "1.9-tester-20261005", "dev", None),
+    ],
+)
+def test_build_info_stamp_names_the_release(tmp_path, label, tag, channel, version):
+    build_release = load_build_release_module()
+    build_release.stamp_build_info(tmp_path, label, tmp_path)
+    info = json.loads((tmp_path / "build_info.json").read_text(encoding="utf-8"))
+    assert info["tag"] == tag
+    assert info["channel"] == channel
+    assert info["package_version"] == (version or build_release.project_version())
+
+
+def test_stable_mac_bundle_reports_the_tag_version(tmp_path):
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    build_release.write_macos_info_plist(app, "v1.9.1")
+    with (app / "Contents" / "Info.plist").open("rb") as stream:
+        info = plistlib.load(stream)
+    assert info["CFBundleShortVersionString"] == "1.9.1"
+    assert info["CFBundleVersion"] == "1.9.1"
