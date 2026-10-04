@@ -310,11 +310,6 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   reply to every key press.
 - Spoken text is player-facing: no maintainer or CI jargon, and never replace
   spoken information with visual-only cues.
-- Check player-facing prose for AI writing (owner, 2026-10-04): changelog
-  entries, release notes, What's New text, the manual, and new spoken lines
-  go through the `avoid-ai-writing` skill in `.claude/skills/` in detect mode
-  before they ship. `writing-changelog-entries`, `docs/ontology.md` and the
-  silence rule above win where they disagree with it.
 - If you touch menu items, prompts, warnings, settings, or status text, test
   the spoken result and say how in the PR.
 - Use the canonical spoken noun for each concept from `docs/ontology.md`.
