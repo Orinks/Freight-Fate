@@ -296,6 +296,51 @@ def test_stable_notes_lead_with_compatibility(tmp_path, monkeypatch):
     )
 
 
+def test_stable_notes_publish_the_curated_summary_and_link_the_full_list(tmp_path, monkeypatch):
+    # 1.9.0 opens with a hand-written summary; the per-snapshot detail sits
+    # in its own block below and must not leak into the release page.
+    release_notes = load_release_notes_module()
+    repo = make_repo(
+        tmp_path,
+        changelog(
+            "",
+            "## 1.9.0 - 2026-10-04\n\n"
+            "### Changes\n- A change.\n\n"
+            "### Highlights\n- The big one.\n\n"
+            "### Fixes\n- A fix.\n\n"
+            "### Compatibility\n- Old careers stay behind.\n\n"
+            "### New features\n- A feature.\n\n"
+            "## 1.9.0 complete change list\n\n### Added\n- Snapshot detail.\n",
+        ),
+    )
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    notes = release_notes.stable_notes("v1.9.0")
+
+    assert notes == (
+        "## Compatibility\n- Old careers stay behind.\n\n"
+        "## Highlights\n- The big one.\n\n"
+        "## New features\n- A feature.\n\n"
+        "## Fixes\n- A fix.\n\n"
+        "## Changes\n- A change.\n\n" + release_notes.STABLE_FULL_CHANGELOG.format(version="1.9.0")
+    )
+    assert "blob/v1.9.0/CHANGELOG.md" in notes
+
+
+def test_curated_summary_never_feeds_nightly_notes(tmp_path):
+    release_notes = load_release_notes_module()
+    text = changelog(
+        "",
+        "## 1.9.0 - 2026-10-04\n\n### Highlights\n- The big one.\n\n"
+        "## 1.9.0 complete change list\n\n### Added\n- Snapshot detail.\n",
+    )
+
+    sections = release_notes.nightly_candidate_sections(text, set())
+
+    assert sections == [release_notes.ChangelogSection("Added", ("- Snapshot detail.",))]
+    assert release_notes.nightly_candidate_sections(text, {"1.9.0"}) == []
+
+
 def test_nightly_notes_exclude_entries_from_previous_nightly(tmp_path, monkeypatch):
     release_notes = load_release_notes_module()
     repo = make_repo(tmp_path, changelog("### Added\n- Old curated note.\n"))

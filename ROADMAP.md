@@ -739,6 +739,14 @@ are in the [release gate](#release-gate-190).
       notes open with Compatibility, which says 1.8 careers do not carry
       over.
 
+- [x] The stable 1.9.0 notes are a curated summary (2026-10-04). The
+      `## 1.9.0` block holds Compatibility, Highlights, New features, Fixes
+      and Changes; the tag build publishes it whole to the GitHub release,
+      which the downloads page on orinks.net and every updater read, and
+      ends it with a link to the full changelog at the tag. The ~1,100
+      snapshot bullets moved under `## 1.9.0 complete change list`, which
+      nightlies stop reading once the `v1.9.0` tag exists.
+
 - [x] The Mac app is Developer ID signed and notarized (2026-10-03). The
       macOS job imports Joshua Tubbs's Developer ID Application certificate
       into a throwaway keychain, signs each bundled library and then the app
