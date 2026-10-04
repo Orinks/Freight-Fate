@@ -559,12 +559,22 @@ impl DrivingState {
             // was named on the approach, and nothing about it is news.
             return;
         }
-        ctx.audio.play_with("events/ramp_light_green", 0.7, 0.0);
         let on_yellow = self.ramp_light_phase() == "yellow";
+        // A green the driver already heard -- named on the approach, or
+        // called as the light changed while the truck rolled toward it -- is
+        // not news at the bar. Chiming and naming it again a few seconds later
+        // was the light announcing green twice (owner, agent drive into
+        // Milwaukee, 2026-10-04).
+        let green_heard = self.ramp_light_announced && self.ramp_light_last_phase == "green";
+        if !(green_heard && !on_yellow && speed <= GREEN_ROLL_MPH) {
+            ctx.audio.play_with("events/ramp_light_green", 0.7, 0.0);
+        }
         let message = if speed > GREEN_ROLL_MPH {
             "Through the light, far too fast. Stop at the entrance."
         } else if on_yellow {
             "Through on the yellow. Stop at the entrance."
+        } else if green_heard {
+            "Through the intersection. Stop at the entrance."
         } else {
             "Green light. Through the intersection. Stop at the entrance."
         };
