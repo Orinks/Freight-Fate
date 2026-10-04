@@ -22,7 +22,7 @@
 
 - **Highways drive like highways.** Real lanes, exit ramps at their real lengths, deceleration lanes, ramp-end lights and cross traffic at the bar.
 
-- **A co-driver reads the road.** Spoken curve calls, steep-grade warnings and speed-limit drops, with bends that can move your load or roll the truck.
+- **The GPS reads the road.** Spoken curve calls, steep-grade warnings and speed-limit drops, with bends that can move your load or roll the truck.
 
 - **Choose how much the truck does for you.** The game asks once: All assists, Balanced or Realistic.
 
