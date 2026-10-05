@@ -175,7 +175,12 @@ impl SettingsCategoryState {
         ctx.settings.apply_driving_assistance_preset(presets[next]);
         self.announce(ctx);
         if ctx.settings.lane_keeping != lane_before {
-            let note = if ctx.settings.lane_is_automated() {
+            let note = if ctx.settings.lane_is_automated()
+                && ctx.controller.device() == ff_core::input_hints::TOUCH
+            {
+                "Lane keeping full: the truck holds the lane, swipe left or right to change lanes."
+                    .to_string()
+            } else if ctx.settings.lane_is_automated() {
                 format!(
                     "Lane keeping full: the truck holds the lane, tap {} or {} to change lanes.",
                     ctx.control_name(Action::SteerLeft),

@@ -21,9 +21,10 @@ to turn the JSON data tree into ``world.ffdata``, then a ``FreightFate/``
 folder with the executable renamed to ``FreightFate``. On macOS it creates
 ``FreightFate.app`` with the executable under ``Contents/MacOS``, native
 libraries under ``Contents/Frameworks``, and data, packs, build metadata, and
-documents under ``Contents/Resources``; macOS builds are ad-hoc signed, with no
-Apple Developer ID or notarization, so a downloaded app can need the
-documented first-launch Open Anyway step. ``--rust`` is accepted for the
+documents under ``Contents/Resources``. With ``MACOS_SIGN_IDENTITY`` set, the
+app is signed with that Developer ID under the hardened runtime, and with the
+``MACOS_NOTARY_*`` variables also set it is notarized and stapled before it is
+archived; without them it is ad-hoc signed for local use. ``--rust`` is accepted for the
 callers that still pass it; it is the only mode.
 """
 
@@ -80,7 +81,7 @@ ADDON_LIB_DIR = PACKAGE_DIR / SOURCE_ASSETS / "lib"
 # environment at deploy time, so setting it takes a redeploy to have any
 # effect. The sha256 below is what actually gates the download either way.
 DEFAULT_MUSIC_URL = "https://www.orinks.net/downloads/music.pak"
-DEFAULT_MUSIC_SHA256 = "251a9883dc82f39e4b0e51b3d5b3d788f9dce5b931f04c14526cb71087dda77d"
+DEFAULT_MUSIC_SHA256 = "c56401a2a45057faba0bd4bf7d024ce7dd3908f682f4c35526643a1870cb7798"
 
 
 def platform_native_exts(platform_name: str = sys.platform) -> set[str]:
@@ -216,6 +217,12 @@ def build_commit() -> str:
     return result.stdout.strip()
 
 
+def label_package_version(label: str) -> str:
+    """The version a build labelled ``label`` is: the label's own for a
+    stable (``v1.9.1`` or ``1.9.1``), else the ``pyproject.toml`` version."""
+    return project_version() if _is_snapshot_label(label) else label.removeprefix("v")
+
+
 def stamp_build_info(build_dir: Path, label: str, root: Path | None = None) -> None:
     """Record what this build is, for the in-game updater.
 
@@ -223,16 +230,20 @@ def stamp_build_info(build_dir: Path, label: str, root: Path | None = None) -> N
     ``1.9-tester-20260828``) or a plain version (``1.6.0``); the release
     tag for the latter is ``v``-prefixed.
 
-    ``package_version`` is the exact ``pyproject.toml`` project version --
-    not ``label``, which for a snapshot is a date-stamped tag, not a package
-    version.
+    ``package_version`` is what the game reports as its own version, and
+    what the updater compares releases against. A snapshot carries the
+    exact ``pyproject.toml`` project version, since its label is a
+    date-stamped tag. A stable build carries the label's version: the
+    ``v1.9.0`` tag push built a game whose pyproject still read
+    ``1.9.0.dev0``, so every 1.9.0 copy called itself a development build
+    and was offered 1.9.0 again on every start.
     """
     snapshot = _is_snapshot_label(label)
     info = {
-        "tag": label if snapshot else f"v{label}",
+        "tag": label if snapshot else f"v{label.removeprefix('v')}",
         "channel": "dev" if snapshot else "stable",
         "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-        "package_version": project_version(),
+        "package_version": label_package_version(label),
         "commit": build_commit(),
     }
     info_path = (root or runtime_root(build_dir)) / "build_info.json"
@@ -240,18 +251,135 @@ def stamp_build_info(build_dir: Path, label: str, root: Path | None = None) -> N
         json.dump(info, f, indent=2)
 
 
-def sign_distribution(build_dir: Path) -> None:
-    """Ad-hoc sign the finalized macOS app bundle."""
+MACOS_SIGN_IDENTITY_ENV = "MACOS_SIGN_IDENTITY"
+MACOS_SIGN_KEYCHAIN_ENV = "MACOS_SIGN_KEYCHAIN"
+MACOS_NOTARY_ENV = ("MACOS_NOTARY_KEY_PATH", "MACOS_NOTARY_KEY_ID", "MACOS_NOTARY_ISSUER_ID")
+
+
+def macos_signing_identity(environ: Mapping[str, str] = os.environ) -> str:
+    """The Developer ID to sign with, or empty for an ad-hoc local build."""
+    return environ.get(MACOS_SIGN_IDENTITY_ENV, "").strip()
+
+
+def macos_notary_credentials(
+    environ: Mapping[str, str] = os.environ,
+) -> tuple[str, str, str] | None:
+    """App Store Connect key path, key ID and issuer, or None when unset."""
+    values = tuple(environ.get(name, "").strip() for name in MACOS_NOTARY_ENV)
+    if not any(values):
+        return None
+    if not all(values):
+        missing = [name for name, value in zip(MACOS_NOTARY_ENV, values, strict=True) if not value]
+        raise RuntimeError(f"notarization is half configured; missing {', '.join(missing)}")
+    return values  # type: ignore[return-value]
+
+
+def developer_id_codesign_command(identity: str, target: Path, keychain: str = "") -> list[str]:
+    """codesign for one Mach-O or the bundle: hardened runtime, secure timestamp."""
+    command = ["codesign", "--force", "--options", "runtime", "--timestamp"]
+    if keychain:
+        command += ["--keychain", keychain]
+    return [*command, "--sign", identity, str(target)]
+
+
+def sign_distribution(build_dir: Path, environ: Mapping[str, str] = os.environ) -> None:
+    """Sign the finalized macOS app bundle, Developer ID when configured."""
     if sys.platform != "darwin":
         return
     verify_macos_native_dependencies(build_dir)
-    subprocess.run(
-        ["codesign", "--force", "--deep", "--sign", "-", str(build_dir)],
-        check=True,
-    )
+    identity = macos_signing_identity(environ)
+    if identity:
+        keychain = environ.get(MACOS_SIGN_KEYCHAIN_ENV, "").strip()
+        # Inside out: nested libraries first, then the bundle seals them.
+        # Notarization rejects --deep signing, so each dylib is signed alone.
+        executable = build_dir / "Contents" / "MacOS" / APP_NAME
+        for binary in macos_bundle_binaries(build_dir):
+            if binary != executable:
+                subprocess.run(
+                    developer_id_codesign_command(identity, binary, keychain), check=True
+                )
+        subprocess.run(developer_id_codesign_command(identity, build_dir, keychain), check=True)
+    else:
+        subprocess.run(
+            ["codesign", "--force", "--deep", "--sign", "-", str(build_dir)],
+            check=True,
+        )
     subprocess.run(
         ["codesign", "--verify", "--deep", "--strict", str(build_dir)],
         check=True,
+    )
+
+
+def notarize_distribution(build_dir: Path, environ: Mapping[str, str] = os.environ) -> None:
+    """Notarize and staple a Developer ID signed app, when credentials are set."""
+    if sys.platform != "darwin":
+        return
+    credentials = macos_notary_credentials(environ)
+    if credentials is None:
+        print("Skipped notarization: no App Store Connect key configured.")
+        return
+    if not macos_signing_identity(environ):
+        raise RuntimeError("notarization needs a Developer ID signature; set MACOS_SIGN_IDENTITY")
+    key_path, key_id, issuer = credentials
+    with tempfile.TemporaryDirectory() as scratch:
+        upload = Path(scratch) / f"{build_dir.stem}-notarize.zip"
+        subprocess.run(
+            ["ditto", "-c", "-k", "--keepParent", str(build_dir), str(upload)], check=True
+        )
+        result = subprocess.run(
+            [
+                "xcrun",
+                "notarytool",
+                "submit",
+                str(upload),
+                "--key",
+                key_path,
+                "--key-id",
+                key_id,
+                "--issuer",
+                issuer,
+                "--wait",
+                "--timeout",
+                "45m",
+                "--output-format",
+                "json",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    try:
+        submission = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        submission = {}
+    status = submission.get("status", "")
+    if status != "Accepted":
+        submission_id = submission.get("id", "")
+        if submission_id:
+            subprocess.run(
+                [
+                    "xcrun",
+                    "notarytool",
+                    "log",
+                    submission_id,
+                    "--key",
+                    key_path,
+                    "--key-id",
+                    key_id,
+                    "--issuer",
+                    issuer,
+                ],
+                check=False,
+            )
+        raise RuntimeError(
+            f"Apple notarization returned {status or 'no status'} "
+            f"(exit {result.returncode}): {result.stderr.strip()}"
+        )
+    print(f"Notarization accepted: {submission.get('id', '')}")
+    subprocess.run(["xcrun", "stapler", "staple", str(build_dir)], check=True)
+    subprocess.run(["xcrun", "stapler", "validate", str(build_dir)], check=True)
+    subprocess.run(
+        ["spctl", "--assess", "--type", "execute", "--verbose=2", str(build_dir)], check=True
     )
 
 
@@ -416,6 +544,19 @@ def verify_archive(out: Path) -> None:
         )
 
 
+def is_career_19_label(label: str) -> bool:
+    """A Career 1.9 tester snapshot or a stable tag from v1.9.0 on.
+
+    Their Apple Silicon archive is named ``-macos-arm64`` (the workflow
+    uploads only that name, and its stable step adds the ``-macos`` copy
+    the updaters look for); a 1.8 stable tag keeps the plain ``-macos``.
+    """
+    if label.startswith("1.9-tester-"):
+        return True
+    match = re.match(r"v?(\d+)\.(\d+)\.", label)
+    return bool(match) and (int(match[1]), int(match[2])) >= (1, 9)
+
+
 def archive(build_dir: Path, label: str) -> Path:
     if sys.platform == "win32":
         out = DIST / f"{APP_NAME}-{label}-windows-portable.zip"
@@ -423,9 +564,8 @@ def archive(build_dir: Path, label: str) -> Path:
             for path in sorted(build_dir.rglob("*")):
                 z.write(path, Path(APP_NAME) / path.relative_to(build_dir))
     elif sys.platform == "darwin":
-        is_career_19_tester = label.startswith("1.9-tester-")
         is_apple_silicon = platform.machine().lower() in {"arm64", "aarch64"}
-        mac_suffix = "macos-arm64" if is_career_19_tester and is_apple_silicon else "macos"
+        mac_suffix = "macos-arm64" if is_career_19_label(label) and is_apple_silicon else "macos"
         out = DIST / f"{APP_NAME}-{label}-{mac_suffix}.zip"
         subprocess.run(["ditto", "-c", "-k", "--keepParent", str(build_dir), str(out)], check=True)
     else:
@@ -818,7 +958,7 @@ def macos_bundle_version(label: str) -> str:
 
 def write_macos_info_plist(app: Path, label: str) -> None:
     """Write the minimal metadata Finder and assistive technology need."""
-    short_version = project_version().split(".dev", 1)[0]
+    short_version = label_package_version(label).split(".dev", 1)[0]
     info = {
         "CFBundleDevelopmentRegion": "en",
         "CFBundleDisplayName": "Freight Fate",
@@ -1284,6 +1424,7 @@ def build_rust(
     if sys.platform == "darwin":
         # Prove the archive input after every possible smoke-side mutation.
         sign_distribution(build_dir)
+        notarize_distribution(build_dir)
     DIST.mkdir(parents=True, exist_ok=True)
     out = archive(build_dir, label)
     verify_archive(out)

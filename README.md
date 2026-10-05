@@ -171,6 +171,8 @@ Career 1.9 workflow installs; on Ubuntu 22.04 the script picks up
 `gcc-13`/`g++-13` itself when the default `gcc` is older. macOS builds SDL2
 from source, so do not install Homebrew's `sdl2`.
 
+For iPhone and iPad builds and the touch gestures, see `docs/ios.md`.
+
 ### Advanced maintainer overrides
 
 The release script passes extra options to `tools/build_release.py`. Maintainers

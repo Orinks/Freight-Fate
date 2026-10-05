@@ -127,11 +127,22 @@ pub enum SpeechCategory {
     Coaching,
     Confirmation,
     Status,
+    /// The other vehicles on the road when nothing is asked of the driver:
+    /// a slow car or brake lights miles ahead, adaptive cruise settling in
+    /// behind someone, a traffic pack, lane keeping going around a slow
+    /// truck. The pass-by and engine sounds already carry it, and the assist
+    /// is the one answering it, so only standard puts it into words. Quiet
+    /// is meant to be quiet: a player's report (2026-10-03) was that quiet
+    /// still read out every slow box truck and its speed. Traffic the driver
+    /// must answer -- closing on a slow vehicle, stopped traffic, a merge
+    /// into the lane -- is a hazard and stays SAFETY.
+    Traffic,
 }
 
 impl SpeechCategory {
-    /// Every category, in the Python enum's declaration order.
-    pub const ALL: [SpeechCategory; 7] = [
+    /// Every category, in declaration order (Traffic is the Rust-era
+    /// addition, appended so the Python order of the rest is unchanged).
+    pub const ALL: [SpeechCategory; 8] = [
         SpeechCategory::Safety,
         SpeechCategory::Navigation,
         SpeechCategory::NavigationAdvisory,
@@ -139,6 +150,7 @@ impl SpeechCategory {
         SpeechCategory::Coaching,
         SpeechCategory::Confirmation,
         SpeechCategory::Status,
+        SpeechCategory::Traffic,
     ];
 
     /// The Python `StrEnum` value.
@@ -151,6 +163,7 @@ impl SpeechCategory {
             SpeechCategory::Coaching => "coaching",
             SpeechCategory::Confirmation => "confirmation",
             SpeechCategory::Status => "status",
+            SpeechCategory::Traffic => "traffic",
         }
     }
 
@@ -164,9 +177,13 @@ impl SpeechCategory {
 
 /// What a rung does with a category.
 ///
-/// `Earcon` and `Silent` both stop the words; they differ in whether the
-/// sound layer still marks the moment. Neither adds suppressed words to
-/// message review. Status-query keys still answer on demand.
+/// `Silent` stops the words and makes no sound in their place, and keeps
+/// them out of message review. Status-query keys still answer on demand.
+///
+/// There used to be an `Earcon` disposition as well: four synthesized notes
+/// (Road ahead, Coaching, Confirmation and Status note) stood in for the
+/// words a rung cut. The owner retired it on 2026-10-03 -- a quiet rung
+/// should be quiet, not a run of bloops announcing lines nobody hears.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Disposition {
     /// speaks, normal rendering
@@ -177,19 +194,16 @@ pub enum Disposition {
     FirstOccurrence,
     /// speaks on enter, worsen, and clear only
     Transitions,
-    /// the sound layer carries it; no words
-    Earcon,
     /// no words, no sound; status keys still answer
     Silent,
 }
 
 impl Disposition {
-    pub const ALL: [Disposition; 6] = [
+    pub const ALL: [Disposition; 5] = [
         Disposition::Full,
         Disposition::Terse,
         Disposition::FirstOccurrence,
         Disposition::Transitions,
-        Disposition::Earcon,
         Disposition::Silent,
     ];
 
@@ -200,7 +214,6 @@ impl Disposition {
             Disposition::Terse => "terse",
             Disposition::FirstOccurrence => "first",
             Disposition::Transitions => "transitions",
-            Disposition::Earcon => "earcon",
             Disposition::Silent => "silent",
         }
     }
@@ -214,17 +227,18 @@ impl Disposition {
 // changed nothing a player could hear. In a game read entirely by ear, a
 // setting that offers a choice and produces no audible difference is worse
 // than one fewer choice: it reads as broken. The CATEGORY stays (that one
-// line, and the Coaching note earcon quiet retires it to); it is the RUNG
+// line); it is the RUNG
 // that is gone, and re-adding it is one row of a data table once there are
 // tips to put in it.
 pub const DRIVING_SPEECH_MODES: [&str; 3] = ["standard", "quiet", "urgent_only"];
 
 /// One rung's row of the table: a disposition per category.
-pub type DispositionRow = [(SpeechCategory, Disposition); 7];
+pub type DispositionRow = [(SpeechCategory, Disposition); 8];
 
 /// The rung table. Read a row as "at this rung, a line of this category is
 /// delivered this way". Safety and immediate navigation always speak. Quiet
-/// keeps short confirmations and status; Urgent only omits routine costs.
+/// keeps short confirmations and status but not the traffic around the
+/// truck; Urgent only omits routine costs, status and traffic.
 pub const DRIVING_SPEECH_DISPOSITIONS: [(&str, DispositionRow); 3] = [
     (
         "standard",
@@ -236,6 +250,7 @@ pub const DRIVING_SPEECH_DISPOSITIONS: [(&str, DispositionRow); 3] = [
             (SpeechCategory::Coaching, Disposition::FirstOccurrence),
             (SpeechCategory::Confirmation, Disposition::Full),
             (SpeechCategory::Status, Disposition::Transitions),
+            (SpeechCategory::Traffic, Disposition::Full),
         ],
     ),
     (
@@ -245,9 +260,10 @@ pub const DRIVING_SPEECH_DISPOSITIONS: [(&str, DispositionRow); 3] = [
             (SpeechCategory::Money, Disposition::Terse),
             (SpeechCategory::Navigation, Disposition::Terse),
             (SpeechCategory::NavigationAdvisory, Disposition::Terse),
-            (SpeechCategory::Coaching, Disposition::Earcon),
+            (SpeechCategory::Coaching, Disposition::Silent),
             (SpeechCategory::Confirmation, Disposition::Terse),
             (SpeechCategory::Status, Disposition::Terse),
+            (SpeechCategory::Traffic, Disposition::Silent),
         ],
     ),
     (
@@ -256,10 +272,11 @@ pub const DRIVING_SPEECH_DISPOSITIONS: [(&str, DispositionRow); 3] = [
             (SpeechCategory::Safety, Disposition::Terse),
             (SpeechCategory::Money, Disposition::Silent),
             (SpeechCategory::Navigation, Disposition::Terse),
-            (SpeechCategory::NavigationAdvisory, Disposition::Earcon),
+            (SpeechCategory::NavigationAdvisory, Disposition::Silent),
             (SpeechCategory::Coaching, Disposition::Silent),
-            (SpeechCategory::Confirmation, Disposition::Earcon),
+            (SpeechCategory::Confirmation, Disposition::Silent),
             (SpeechCategory::Status, Disposition::Silent),
+            (SpeechCategory::Traffic, Disposition::Silent),
         ],
     ),
 ];
@@ -279,34 +296,6 @@ pub fn row_disposition(row: &DispositionRow, category: SpeechCategory) -> Option
     row.iter()
         .find(|(candidate, _)| *candidate == category)
         .map(|(_, disposition)| *disposition)
-}
-
-/// The sound that carries a category once a rung stops speaking it. Every
-/// value is a real `SoundEntry.name` in the Learn game sounds catalog
-/// (`sound_catalog::CATALOG`) -- pinned by
-/// `test_every_earcon_category_is_learnable` -- because a sound the player
-/// cannot look up is information removed rather than information moved
-/// (R14). CONFIRMATION had reused the hazard-clear chime that shipped in S3
-/// rather than getting a cue of its own. That was a mistake and is fixed:
-/// the chime already means "you got past the hazard", so at quiet it fired
-/// for every silenced confirmation -- including "Automatic braking.", which
-/// happens while the hazard is still there (owner playtest, 2026-08-17).
-/// COACHING, CONFIRMATION, NAVIGATION_ADVISORY and STATUS have no existing
-/// sound that means what an earcon here needs to mean, so each gets its own
-/// synthesized entry (`ladder_earcons`).
-pub const LADDER_EARCONS: [(SpeechCategory, &str); 4] = [
-    (SpeechCategory::NavigationAdvisory, "Road ahead note"),
-    (SpeechCategory::Coaching, "Coaching note"),
-    (SpeechCategory::Confirmation, "Confirmation note"),
-    (SpeechCategory::Status, "Status note"),
-];
-
-/// `LADDER_EARCONS.get(category)`.
-pub fn ladder_earcon(category: SpeechCategory) -> Option<&'static str> {
-    LADDER_EARCONS
-        .iter()
-        .find(|(candidate, _)| *candidate == category)
-        .map(|(_, name)| *name)
 }
 
 /// How this rung delivers this category.
@@ -354,8 +343,8 @@ struct Protected {
 ///   means say nothing at all.
 /// * `note_spoken` records a line that did reach the voice.
 /// * `is_silenced_repeat`/`note_silenced` are the same pair for a line the
-///   driving speech rung cut to an earcon or to nothing -- a private
-///   namespace so a silenced occurrence can dedupe its own earcon without
+///   driving speech rung cut to nothing -- a private
+///   namespace so a silenced occurrence can dedupe itself without
 ///   ever registering as something `is_repeat` would recognise as heard.
 /// * `note_interrupt` for an interrupting line (it purges the channel), or
 ///   `should_flush` for a queued one -- true there means the backlog has
@@ -374,7 +363,7 @@ pub struct EventSpeechPacer {
     /// condition key -> the last thing said about it.
     conditions: HashMap<String, String>,
     // The same two maps, but for occurrences the driving speech rung
-    // silenced (an earcon or nothing, never the words). Kept separate from
+    // silenced (never the words). Kept separate from
     // `recent`/`conditions` on purpose: those two belong to what the player
     // actually heard, and `is_repeat` consults them to decide whether a
     // genuinely spoken line would be news. If a silenced occurrence wrote
@@ -604,14 +593,14 @@ impl EventSpeechPacer {
         self.receipts.forget(key);
     }
 
-    // -- what the rung silenced (earcon-only or fully quiet) ----------------
+    // -- what the rung silenced ----------------
 
-    /// True when this silenced occurrence was already marked (earcon or not).
+    /// True when this silenced occurrence was already marked.
     ///
     /// The silenced branches' own dedup: mirrors [`Self::is_repeat`]'s rules
     /// exactly, but reads a namespace private to occurrences the rung cut,
     /// never `conditions`/`recent`. A silenced repeat must not go unmarked
-    /// (that is the earcon machine-gun this exists to stop), but it must
+    /// (a re-firing standing condition would log again every time), but it must
     /// equally never be mistaken for a genuinely spoken occurrence by
     /// [`Self::is_repeat`] once the rung changes and the condition is still
     /// active -- that would silence the very line the player raised the rung
@@ -644,7 +633,7 @@ impl EventSpeechPacer {
         }
     }
 
-    /// Record a silenced occurrence (earcon played, or fully quiet).
+    /// Record a silenced occurrence.
     pub fn note_silenced(&mut self, text: &str, key: Option<&str>) {
         if text.is_empty() {
             return;

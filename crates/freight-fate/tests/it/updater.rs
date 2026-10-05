@@ -236,6 +236,30 @@ fn test_stable_channel_ignores_newer_19_tester_prerelease() {
     assert_eq!(info.tag, "v1.8.8.1");
 }
 
+#[test]
+fn test_stable_build_is_not_offered_its_own_release() {
+    // The 1.9.0 stable shipped stamped `1.9.0.dev0` and tagged `vv1.9.0`, so
+    // the version text said it was older than v1.9.0 and the updater offered
+    // the same release again on every start.
+    let api = |path: &str| -> Result<Value, NetError> {
+        assert_eq!(path, "/releases/latest");
+        Ok(release("v1.9.0"))
+    };
+    let env = env_on(Platform::Windows);
+    for tag in ["v1.9.0", "vv1.9.0"] {
+        let build = BuildInfo::new(tag, "stable", "2026-10-04");
+        let found = check_for_update_with("stable", "1.9.0.dev0", Some(&build), &env, &api);
+        assert_eq!(found.unwrap(), None, "{tag}");
+    }
+
+    // An older stable copy is still offered the release.
+    let build = BuildInfo::new("v1.8.8.1", "stable", "2026-08-08");
+    let info = check_for_update_with("stable", "1.8.8.1", Some(&build), &env, &api)
+        .unwrap()
+        .expect("a stable update");
+    assert_eq!(info.tag, "v1.9.0");
+}
+
 // -- dev channel --------------------------------------------------------------
 
 #[test]

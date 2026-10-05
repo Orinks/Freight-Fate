@@ -536,6 +536,7 @@ impl DrivingState {
             was_low_air,
             was_spring_brake,
         );
+        self.check_low_fuel_warning(ctx);
         if was_on && !self.trip.truck.engine_on {
             ctx.audio.engine_stop();
             if self.trip.truck.stalled {

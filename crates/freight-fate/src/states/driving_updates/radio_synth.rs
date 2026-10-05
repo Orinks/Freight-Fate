@@ -10,7 +10,6 @@ use ff_core::radio_content::content_duration_s;
 
 use crate::app::GameContext;
 use crate::states::driving::DrivingState;
-use crate::states::driving_core::is_night;
 
 impl DrivingState {
     /// The Roadhouse plays synthesized music, with no voiced breaks, when the
@@ -107,7 +106,7 @@ impl DrivingState {
         } else {
             // The rotation has not started yet: name what the station is on.
             let pool = self
-                .synth_roadhouse_pool(ctx, station, is_night(self.trip.current_hour()))
+                .synth_roadhouse_pool(ctx, station, self.night_now())
                 .unwrap_or_default();
             self.station_cue(ctx, station, &pool).current_key(&pool)
         };

@@ -15,16 +15,13 @@ returning from an earlier version, read What Changed Recently first.
 2. On Windows or Linux, extract the archive into a folder you control, open
    the extracted `FreightFate` folder, and run `FreightFate.exe` on Windows or
    `FreightFate` on Linux.
-3. On macOS, the stable archive ends in `-macos.zip`. To test Career 1.9 on
-   an Apple Silicon Mac, choose the newest Career 1.9 prerelease and download
-   the archive ending in `-macos-arm64.zip`; Career 1.9 does not provide an
-   Intel Mac build. Extract the archive and move `FreightFate.app` to
-   Applications. Apple has not notarized this build, so macOS may block it the
-   first time you open it. Open System Settings, Privacy & Security, scroll to
-   the message about Freight Fate, choose Open Anyway, and confirm Open. The
-   button appears for about an hour after macOS blocks the launch. VoiceOver
-   reads these controls. You only need to do this for the first launch of a
-   newly downloaded app.
+3. On macOS, download the archive ending in `-macos-arm64.zip`. Freight
+   Fate runs on Apple Silicon Macs; there is no Intel Mac build. Extract the
+   archive and move `FreightFate.app` to Applications. The app is signed by
+   its developer and notarized by Apple, so it opens like any other app;
+   macOS may ask once to confirm you want to open an app downloaded from the
+   internet.
+
 4. The first time the game starts, it asks how much the truck should do for
    you. All assists is recommended for your first drives: the truck steers
    while you learn how the road sounds. You can change it later in Settings,
@@ -42,8 +39,11 @@ so those files live in `~/Library/Application Support/FreightFate` instead.
 
 ## What changed recently
 
-If you have driven an earlier version, check these control and settings changes
+If you have driven 1.8 or earlier, your settings come across but your
+careers do not: every driver starts a new career, and the old saves stay
+untouched and playable in 1.8. Check these control and settings changes
 before starting a new drive.
+
 
 - **Reverse takes a fresh press, held.** Holding the brake through a stop no
   longer selects reverse, and a quick tap at a stop no longer selects it
@@ -51,8 +51,8 @@ before starting a new drive.
   for a moment. The reverse beep starts, and keeps going the whole time you
   are in reverse. The same press-and-hold on the Up arrow brings forward gear
   back and says so. This is now true whichever direction change style you
-  have set. If you latch the throttle by habit while you are doing it, the
-  shift still wins: coming out of reverse always beats the latch.
+  have set.
+
 - **Braking cancels automatic speed control, and Shift+K brings it back.**
   Any service brake or emergency brake press drops it immediately and says so.
   Shift+K resumes the last speed you had set, like the stalk in a car.
@@ -114,8 +114,8 @@ Release archives are named by platform when that platform is available:
 | Platform | Archive Name |
 | --- | --- |
 | Windows | `FreightFate-<version>-windows-portable.zip` |
-| macOS stable | `FreightFate-<version>-macos.zip` |
-| Career 1.9 macOS, Apple Silicon | `FreightFate-<version>-macos-arm64.zip` |
+| macOS, Apple Silicon | `FreightFate-<version>-macos-arm64.zip` |
+
 | Linux | `FreightFate-<version>-linux-x64.tar.gz` |
 | Linux (AppImage) | `FreightFate-<version>-linux-x86_64.AppImage` |
 | Linux ARM64 | `FreightFate-<version>-linux-arm64.tar.gz` |
@@ -124,8 +124,9 @@ Release archives are named by platform when that platform is available:
 On Linux you can pick either download. The tarball extracts to a portable
 folder, exactly like Windows. The AppImage is a single file: mark it
 executable (`chmod +x`) and run it, no extraction needed. Both work on any
-current 64-bit distribution: every Career 1.9 snapshot is started on
-Ubuntu, Debian, Fedora, Arch, and openSUSE before it is published.
+current 64-bit distribution: every release is started on Ubuntu, Debian,
+Fedora, Arch, and openSUSE before it is published.
+
 
 The Linux downloads come in two kinds of processor. The `x64` and `x86_64`
 files are for ordinary PCs. The `arm64` and `aarch64` files are for ARM
@@ -145,18 +146,19 @@ by your user account; when it is not, the game keeps the downloaded update
 in your home folder and tells you where it is so you can finish the
 install yourself.
 
-The Career 1.9 Mac archive runs on Apple Silicon Macs. It does not run on
-Intel Macs. On an Intel Mac, the in-game updater will not offer the Apple
-Silicon archive.
+The Mac app runs on Apple Silicon Macs. It does not run on Intel Macs. On an
+Intel Mac, the in-game updater will not offer it.
+
 
 Use the newest stable release for normal play. Stable releases are numbered,
-such as `v1.6.0`.
+such as `v1.9.0`.
 
-Career 1.9 snapshot builds are tester prereleases named `1.9-tester-YYYYMMDD`.
-They let you try newer 1.9 work sooner, but may have rough edges. They are not
-the public 1.8 snapshots named `nightly-YYYYMMDD`. A career saved in a
+
+Snapshot builds are tester prereleases named `1.9-tester-YYYYMMDD`. They
+let you try newer work sooner, but may have rough edges. A career saved in a
 snapshot build may not load in an older stable release, so treat snapshot saves
 as moving forward.
+
 
 Packaged builds can check GitHub Releases for updates. Open Settings, then
 Updates, to choose an update channel:
@@ -194,9 +196,10 @@ The main menu can include:
 | New career | Starts name entry, career start choice, and home-terminal selection. |
 | Achievements | Reviews earned and locked achievements for a saved career. |
 | Online | The public list of drivers on duty, your account-wide achievement collection, your orinks.net account, cloud backup and restore, and sharing choices like Mastodon and Discord, all in one place. |
-| Learn game sounds | Plays any cue the road uses, with what it means and what to do about it. Also on the pause menu while you drive. |
 | How to play | Opens the built-in help reader. |
-| Settings | Opens gameplay, audio, speech and weather, and update settings. |
+| Learn game sounds | Plays any cue the road uses, with what it means and what to do about it. Also on the pause menu while you drive. |
+| Settings | Opens gameplay, audio, speech, update, and problem report settings. |
+| Report a problem | Opens the bug report page in your web browser. |
 | Quit | Exits the game. |
 
 A new career asks you to choose a start path after entering a driver name.
@@ -294,9 +297,11 @@ what happened rather than where you walked.
 
 While you are reviewing, new announcements do not move your place. Once you
 have left the review keys alone for ten seconds the game takes you as done,
-so the next press starts fresh from the newest message with all categories
-showing again. That way comma always repeats what was just said, rather than
-picking up wherever you left off earlier in the run.
+so the next press starts fresh from the newest message. The category you chose
+stays chosen, and when it is hiding newer messages the game says how many.
+That way comma always repeats what was just said, rather than picking up
+wherever you left off earlier in the run.
+
 
 New career name entry supports Backspace to delete, F2 to review the current
 name, Enter to confirm, and Escape to cancel.
@@ -318,14 +323,19 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Choice | What It Does |
 | --- | --- |
 | Dispatch board | Browse freight offers from local facilities. |
-| Truck dealer | Browse tractors at the local dealer. Owner-operators buy and switch here; company drivers can look at what the fleet may assign next. The intro names a local dealer when one is listed for that area. |
+| Truck dealer | Owner-operators only. Browse tractors at the local dealer, buy one, or switch between the trucks you own. The intro names a local dealer when one is listed for that area. |
+| Bobtail to a nearby city | Owner-operators only. Drive empty to a nearby city for its dispatch board. It costs fuel and hours of service, with no load and no pay. |
 | Career plan | Review your next realistic career objective after the first dispatch. |
 | Business status | Review company-driver or owner-operator status. |
-| Garage | Refuel, repair, service tires, and wash company equipment; owner-operators can also buy upgrades, buy tractors, switch owned tractors, add trailer programs, or buy trailers after own authority. |
+| Garage | Refuel, repair, service the tires, brakes, and engine, buy snow chains, and wash the truck; owner-operators can also switch to winter tires, buy upgrades, buy tractors, switch owned tractors, add trailer programs, or buy trailers after own authority. |
+
 | Request pay advance | Draw cash against your next load when you are broke. |
-| Career stats | Review level, reputation, deliveries, career totals, the endorsements you hold, your dispatch trust, your safety record and CDL status, and any balance you owe. Its last row, Citations and violations, opens the list newest first: what each was, why, what it cost, when, and where. Citations from before this build are counted but carry no reason. |
+| Career stats | Review level, reputation, deliveries, career totals, the endorsements you hold, your dispatch trust, your safety record and CDL status, and any balance you owe. Its last row, Citations and violations, opens the list newest first: what each was, why, what it cost, when, and where. |
+
 | Licenses and training | Book any credential course, from manual transmission training to the LCV certificate. F1 on a row says what the credential unlocks and how you get it: the level the carrier sponsors it at, or the level you can pay for it early. The table under Licenses and training below lists them all. |
 | Truck status | Review truck model, fuel, tank size, damage and its band, tire wear, and road grime. |
+| Walk around the truck | A pre-trip walk-around that finds what a roadside inspector would find on the tractor. It takes 15 minutes on duty. |
+
 | Time and weather | A screen of lines: the clock, the date and season, the career day, and the weather in the city, with the live reading's age when there is one. |
 | Logbook | Review your Record of Duty Status: what you are doing now, your hours limits, today's totals, and the recent entries. |
 | Sleep 10 hours | Rest at the terminal and reset hours of service. |
@@ -420,8 +430,9 @@ factoring costs. Buying a matching trailer lowers the direct-freight trailer
 charge to an owned-trailer reserve. It is a playable business step, not a full
 paperwork or broker-contract simulation.
 
-**Truck dealer** opens directly from the terminal menu and names a local
-dealer when one is listed for that area. The dispatch board
+For owner-operators, **Truck dealer** opens directly from the terminal menu
+and names a local dealer when one is listed for that area. The dispatch board
+
 already opens the freight market, and the garage is its own terminal item, so
 none of the three needs a separate drive to reach. Fuel, food, a break, sleep,
 minor repairs, and paying down what you owe are also available on the road at
@@ -649,7 +660,7 @@ position. Otherwise the game uses the simulated forecast.
 ## Driving controls
 
 Driving controls are active while the road view is focused. The keys and
-buttons below are the defaults. Every one of them can be moved to another key
+buttons below are the defaults. Most of them can be moved to another key
 or pad button under Settings, Gameplay, Controls, then Keyboard shortcuts or
 Controller buttons. The F1 help, the How to play pages and the spoken prompts
 follow the move. With a controller in use, How to play names the pad button
@@ -699,6 +710,7 @@ wherever the pad has one.
 | Alt+C | Repeat the last CB chatter, with the distance as it is now. Once you have passed what the CB called, it says so instead. |
 | U | Report the road ahead that no other key answers: the exit your signal is on for, first, then the ramp control coming up, the next imposed speed limit, the next stop, and the next bend that will demand slowing, with its advisory speed. Four short clauses at the most. It does not report police activity -- enforcement reaches you on the CB. |
 | F1 | Show the driving control list and current objective. |
+| F2 | List every driving command by name. Enter runs the one you are on and puts you back on the road; Escape returns without one. The held controls -- pedals, steering, emergency brake, horn -- are not on it. |
 | Comma | Review earlier speech. The full review keys are listed under "Reviewing what the game said". |
 | Period | Move toward newer speech. |
 | Escape | Open the pause menu. |
@@ -859,14 +871,17 @@ speed it would only have to brake away before a descent. It says what it is
 doing the first time on each hill -- and when it cannot maintain speed on a climb,
 it says that too.
 
-Curves are real too, and a co-driver reads them to you. When a bend
+Curves are real too, and the GPS calls them for you.
+ When a bend
 ahead demands slowing at your current speed, a short tone sounds on the
 curve's side -- left tone for a left bend -- and the call follows:
-"Sharp left, half a mile. Advise 35." The tone marks the words as a
+"Sharp left, half a mile. Advise 35 miles per hour." The tone marks the words as a
+
 description of the road, never a steering instruction, and the call
 lands with enough road left to brake before the bend, never in it. The severity ladder runs gentle bend,
 curve, sharp, and hairpin, and tight pairs link into one call: "Sharp
-left, a quarter mile. Advise 30. Then right." Bends you are already slow
+left, a quarter mile. Advise 30 miles per hour. Then right." Bends you are already slow
+
 enough for stay silent, so a straight interstate stays quiet. Press U
 any time to hear the next few bends with their advisory speeds, and D to
 get one safe-speed number with the bend already baked in. Turn the calls
@@ -904,7 +919,8 @@ habits.
 ### Carry your speed to the bend
 
 The curve callout is braking distance, not
-an order to stop. When you hear "Sharp right, half a mile. Advise 30," you
+an order to stop. When you hear "Sharp right, half a mile. Advise 30 miles per hour," you
+
 have real seconds: brake firmly down toward the advisory and arrive within a
 few miles per hour of it. Slam to a crawl at the callout and the bend becomes
 nothing -- no push, no steering, and time lost.
@@ -925,7 +941,8 @@ it arrives and through it, and into a street corner as you reach it. Hold the
 arrow that way and the engine comes back to the middle as the truck comes
 round. With curve assistance on, or lane keeping on partial, the truck takes
 the bends and corners itself, so the engine leans only when you drift; the
-co-driver still names each bend. Holding the arrow into a turn is safe either
+GPS still names each bend.
+ Holding the arrow into a turn is safe either
 way: the truck follows the road until you let go. On full, the engine leans for the bends and
 corners ahead so you hear the road's shape, but your arrow keys change lanes
 there and never steer. This is the one cue you follow rather than avoid --
@@ -958,7 +975,8 @@ dirt. On an undivided road the left line is different: past the centerline
 there is no gravel, only the oncoming lane, and the warning says exactly
 that.
 
-### Use the co-driver
+### Use the GPS
+
 
 U says what bends are coming and exactly how far. D
 says the safe speed for the road you are on right now. G reads the grade. I
@@ -1334,10 +1352,9 @@ full stop is never a reason to pass it with the tank low.
 
 When a sleep-capable stop is close enough ahead, press T to plan that exact
 stop. The game names it, its exit, and the next action. Press X separately to
-signal for the exit; T never chooses to leave the highway by itself. The
-default-off Planned rest-stop stopping assistance setting can then brake to a
-complete stop at the entrance after you have taken the exit lane and cleared any
-ramp light or stop sign. It never selects, signals, takes, or cancels an exit.
+signal for the exit; T never chooses to leave the highway by itself. Facility
+stopping assistance can then brake to a complete stop at the entrance after you
+have taken the exit lane. It never selects, signals, takes, or cancels an exit.
 
 ## Enforcement, your record, and your CDL
 
@@ -1533,8 +1550,10 @@ again as your hours run down.
 The Logbook is the spoken Record of Duty Status behind that clock. It records a
 rolling timeline of driving, on-duty work, off-duty breaks, and sleeper-berth
 rest, with the time, location, and a short note such as fuel stop, loading, or
-out-of-service order. Open **Logbook** from the terminal, or open **Tab** while
-driving and choose **Logbook**. The first line is what you are doing now and
+out-of-service order. Open **Logbook** from the terminal. While driving, the
+**ELD** app under **Tab**, **Driver apps** gives your hours and where you can
+legally stop. In the Logbook, the first line is what you are doing now and
+
 since when. Then come your limits, one per line: driving left, when the break
 is due, and when the duty window closes. Today's totals follow on one line,
 and after them the recent entries, newest first, each led by what you were
@@ -1596,7 +1615,8 @@ Tab opens the Driving status menu. It has four review screens and a Driver apps 
 | Driver | Driver name, money, load, objective, truck fuel and damage, transmission, fatigue, hours, and deadline. |
 | Map | Route cities, highways, progress, next guidance, upcoming stops, map points, and toll exposure. |
 | Radio | Current station, stream-safety state, approximate reception position, and currently receivable stations. |
-| Driver apps | A tablet-style app menu for Navigation, Weather, Traffic, Truck stops, Road chatter, and ELD. |
+| Driver apps | A tablet-style app menu for Radio, Navigation, Weather, Traffic, Truck stops, Road chatter, and ELD. |
+
 
 Inside a status screen, Up and Down move line by line, Enter repeats the current
 line, and Escape returns to the status screen list.
@@ -1614,16 +1634,23 @@ Escape opens the pause menu during a drive. Public pause choices include:
 | Resume driving | Return to the active drive. |
 | Trip status | A screen of lines: the load, where it is going, how far along you are, the hours used, and the air. |
 | Controls and help | Open the how-to-play reference at the driving keys, page by page, without leaving the drive. |
+| Learn game sounds | Hear any sound the road uses and what it means. |
+
 | Call a roadside mechanic | Patch severe truck damage enough to continue, at a high cost. |
 | Install snow chains | While stopped with chains in the side box: hang the chains. Takes real minutes, more in the dark, logged as on-duty work. |
 | Remove snow chains | While stopped with chains mounted: take them off before bare pavement grinds them apart. |
 | Emergency shoulder sleep | Rest on the shoulder when stopped away from route points; warnings get stronger when hours or fatigue are urgent. |
 | Settings | Open settings during the drive. |
+| Drivers on duty | Hear who is hauling right now on orinks.net. Viewing the list shares nothing about you. |
 | Abandon job | Pay a penalty and return to the origin city. |
-| Save and quit to main menu | Save the active drive and resume it later. |
 
-Freight Fate saves at terminals, at supported route save points, when quitting
-to the main menu, and during important trip state changes. Continue latest
+| Quit to main menu | Return to the title. The drive resumes from your last stop, not from where you quit; quitting while moving asks first. |
+
+
+Freight Fate saves at terminals, at supported route save points, and during
+important trip state changes. Quitting to the main menu mid-drive does not
+save where you are: the drive resumes from your last stop. Continue latest
+
 career can resume a saved pickup objective, pickup drive, pickup facility visit,
 or loaded delivery.
 
@@ -1693,9 +1720,12 @@ Three driving assistance presets are available: Realistic, Balanced, and All ass
 #### Individual assists
 
 The individual controls are Automatic emergency braking, Lane-departure warning,
-Stop-and-go assistance, Descent speed control, Exit speed assistance, Destination
-approach assistance, Planned rest-stop stopping assistance, Curve speed
-assistance, and Route-transition assistance.
+Stop-and-go assistance, Descent speed control, Exit speed assistance, Facility
+stopping assistance, Curve assistance, and Route-transition assistance. Below
+them on the same screen are Latching brake, Predictive cruise, Curve callouts,
+Speed keeper, Lane keeping, and Following gap, which sets how much room
+adaptive cruise leaves to the vehicle ahead: close, normal, or far.
+
 
 Descent speed control has four levels: Off, Realistic, Balanced, and Interactive.
 Interactive is a descent-control level, not a preset. At every level but Off,
@@ -1709,15 +1739,13 @@ exit, so the truck reaches the exit speed by the ramp curve. On the highway it
 only slows a truck the gore would refuse. Route-transition, curve, or
 facility stopping assistance does the same braking when exit speed assistance
 is off. Facility stopping
-assistance (the destination approach assistance row) slows and stops at the
-selected facility arrival point. About a block out, it says "Facility stopping assistance taking the pedals" and controls the pedals until the gate. From a
+assistance slows and stops at pickup and delivery facilities, rest stops, and
+required weigh stations. About a block out, it says "Facility stopping assistance taking the pedals to the entrance" and controls the pedals until the gate. From a
+
 cleared stop or green light at the end of the destination ramp, it also pulls
 ahead for you and hands city streets to the speed keeper. Realistic leaves it
 off; Balanced and All assists turn it on, and changing it by hand reads as
 Custom like any other preset row.
-
-The separate default-off planned-stop control stops at a sleep stop only after
-T plans it and X signals for it.
 
 #### Curve assistance
 
@@ -1769,8 +1797,9 @@ Latching brake is an input accommodation outside the presets, on by default. Tap
 
 #### Curve callouts
 
-Curve callouts sit outside the presets, on by default. A co-driver
+Curve callouts sit outside the presets, on by default. The GPS
 calls the bends that demand slowing before they arrive -- "Sharp left,
+
 half a mile. Advise 35." -- and stays silent for bends you are already
 slow enough for. See Mountain Driving for how to drive with the calls.
 
@@ -1805,7 +1834,9 @@ quiets it, and settling back under the limit disarms it.
 | --- | --- |
 | Weather source | Switches between simulated weather and live conditions for your current route position while driving. Route planning checks live city conditions along the route when available. |
 | Traffic source | Switches between simulated traffic incidents and live reports from state 511 services when available. |
+| Fuel prices | This week's national average, the default, puts the federal weekly diesel price at every pump, with each region's usual difference on top. Simulated draws a price per region for the session. |
 | Parking source | Switches between simulated truck parking and live availability when available. |
+
 | Live weather controls calendar | When on, live weather uses today's real date and season. When off, live conditions continue while the career date advances at midnight and its seasons pass. |
 
 ### Controls
@@ -1817,7 +1848,7 @@ quiets it, and settling back under the limit disarms it.
 | Automatic direction changes | In an automatic, both styles now change direction the same way: a fresh press held at a standstill. A brake held through a stop just holds the truck. The setting remains for familiarity. |
 | Controller | Accept controller input alongside the keyboard. The keyboard always stays active. |
 | Haptics | Use controller vibration for hazards, hard braking, rumble strips, and road seams. |
-| Keyboard shortcuts | One row per driving control, naming the key it is on. Enter on a row, then press the key you want, with Shift, Control, or Alt held if you want a chord. A key another control already has is refused by name; Escape keeps the current key. The pause key, Enter, F1, the Control keys that stop the voice, plus and minus, the radio dial keys, and the message review keys stay fixed. A last row puts every key back to its default. |
+| Keyboard shortcuts | One row per driving control, naming the key it is on. Enter on a row, then press the key you want, with Shift, Control, or Alt held if you want a chord. A key another control already has is refused by name; Escape keeps the current key. The pause key, Enter, F1, F2, the Control keys that stop the voice, plus and minus, the radio dial keys, and the message review keys stay fixed. A last row puts every key back to its default. |
 | Controller buttons | The same for the pad. Enter on a row, then press the button you want, with the right bumper held for the second layer. Press the button the row already has to keep it. Start, Back, the bumpers, the triggers, and the sticks stay fixed. |
 
 ### Audio settings
@@ -1827,26 +1858,36 @@ quiets it, and settling back under the limit disarms it.
 | Master volume | Overall game volume. |
 | Gameplay cues volume | Horn, alerts, road, facility, and gameplay cue sounds. |
 | Lane and edge cue volume | How loud the road cues are when you leave your line, next to everything else: the rumble-strip and shoulder textures, the lane locator, and the warning bars before a hairpin. It rides on the Gameplay cues volume above rather than replacing it, so this row moves those cues alone. Quieter keeps them under the engine, standard matches it, and louder cuts through. Presets never change it. |
+| Steering guide | Which way to steer when the engine leans. Steer toward the lean, the default, or steer away from the lean, for drivers who learned that habit in audio racing games. |
+| Lane guide sound | What leans toward the side to steer: the engine, the default, or a soft tone panned the same way, for setups where the engine is hard to place. |
 | Weather sounds volume | Rain, wind, thunder, snow, and fog sounds. |
+
 | Engine sounds volume | Engine start, shutdown, and running engine sounds. |
 | Engine voice | Real plays the engine recorded from a working truck cab, following the RPM through its range. Classic keeps the original engine sound. Changes apply immediately, even while driving. |
+| Engine brake voice | Recorded, the default, plays the real engine brake growl. Classic plays the synthesized growl from earlier versions. Changes apply at once, even while driving. |
 | Music volume | Menu and facility background music volume. |
+
 | Music source | Original, the default, plays the licensed menu and Roadhouse music. Synthesized has menus and the Roadhouse play music the game composes itself, with no voiced breaks, plus the original three tracks from Freight Fate 1.5. Changes take effect at once, even mid-drive. See below for what Synthesized mode does to the radio dial. |
 | Music seed | Picks every synthesized piece. Enter opens a field where you type a whole number, such as a seed someone shared with you; Escape leaves the seed as it was. Left or Right rolls a new seed and reads it aloud, so you can share a favorite. Every synthesized piece changes, and the current music restarts at once. |
 | In-cab radio volume | Driving radio music volume. It defaults lower than speech and safety cues. |
 | Radio streamer-safe mode | Off by default: the full dial plays, including real public streams and personal playlists. Turn it on while streaming or recording to keep the radio on built-in safe stations only. With Music source set to Synthesized, this locks the radio to the synthesized Roadhouse alone; every other station control does nothing, though the radio key, volume, and now playing still work. |
 | Shuffle personal playlists | Off by default: each of your playlists plays top to bottom and resumes where it left off. On plays it in a random order, every track once before any repeats, with a new order each time through. |
+| Game sounds step back for speech | Off by default. On, the engine, weather, and radio drop to half volume while the road voice speaks, then come back. |
 | Menu and UI sounds volume | Menu movement, selection, warning, and cash sounds. |
+
 
 ### Speech settings
 
 | Setting | Purpose |
 | --- | --- |
-| Driving speech | Standard gives full confirmations, status updates, and a driving tip once per route leg. Quiet keeps short spoken updates, including lane openings, assist confirmations, costs, and navigation. Urgent only speaks safety warnings and directions requiring action; routine costs, status, and tips are silent, while road heads-ups and confirmations use sounds. Events suppressed by the speech setting stay out of message review. Readout keys always answer on demand. Billboards, place names, and landmarks keep their own switches below. |
+| Driving speech | Standard gives full confirmations, status updates, traffic calls, and a driving tip once per route leg. Quiet keeps short spoken updates, including lane openings, assist confirmations, costs, and navigation, but not the traffic around you or tips. Urgent only speaks safety warnings and directions requiring action; achievements earned at the wheel wait silently in message review. Anything else a setting leaves out makes no sound and stays out of message review. Readout keys always answer on demand. Billboards, place names, and landmarks keep their own switches below. |
 | Roadside chatter | The ambient color spoken between navigation cues: entering parks and forests, named river crossings, mountain passes, museums and attractions, and parody billboards. One master switch turns it all on or off, and each kind has its own switch below it. Safety and navigation speech is never affected, and town names have their own Place callouts setting. |
-| Place callouts | How much the co-driver says about places along the road. Sparse, the default, speaks only the town names that explain a speed limit change, like Entering Strawberry right before its 35. All adds the towns the route passes through or skirts. Off silences place names entirely. Speed limit announcements themselves are never affected, and no tier ever reads out every place on the map. |
+| Place callouts | How much the GPS says about places along the road.
+ Sparse, the default, speaks only the town names that explain a speed limit change, like Entering Strawberry right before its 35. All adds the towns the route passes through or skirts. Off silences place names entirely. Speed limit announcements themselves are never affected, and no tier ever reads out every place on the map. |
 | Menu position announcements | When on, menus say the position, like 3 of 10, after each option. Turn off to hear only the option. |
+| Say when a career is backed up | How often you hear that a career is backed up to your orinks.net account: every time, the default, once a session, or never. Backups keep going either way, and a refused backup is always spoken. |
 | Driving event voice | Routes road events through the main voice or a separate software voice when available. |
+
 | Output | Speech and braille, the default, speaks every line and, with NVDA or JAWS, shows it on your braille display as well. Braille only puts every line on the display and speaks nothing, so you can play from the display with speech off: menus, readouts, and road events alike, including the ones the driving event voice would otherwise speak. It needs NVDA or JAWS. With any other voice the game keeps speaking and the row says so, and if your screen reader quits mid-drive, speech comes back until it returns. |
 | JAWS arrow keys | Appears only when JAWS is your screen reader. JAWS reads each arrow key with its own script, which waits for the screen to change, so menus answer slowly and held arrows lag. Faster adds a small script for this game to your JAWS settings, in your own user folder, so the arrows answer at once. Default removes it. The game touches only its own two files there, and leaves a script of the same name that it did not write alone. Restart JAWS if nothing changes. With JAWS, tapping another key while you hold an arrow keeps the hold for a moment, but the truck can still stop accelerating after a few seconds, so tap the arrow again to keep going. |
 | Speech rate | Appears only when the current voice source supports rate changes. |

@@ -263,11 +263,12 @@ impl Trip {
     }
 
     /// The trip's own rush-hour bias, read at the DEPARTURE hour (the
-    /// manager's reads the live clock).
+    /// manager's reads the live clock), on the local clock like the manager's.
     pub fn rush_hour_traffic_bias(&self, leg: &Leg) -> f64 {
+        let hour = self.local_start_hour();
         if !RUSH_HOUR_WINDOWS
             .iter()
-            .any(|(start, end)| *start <= self.start_hour && self.start_hour < *end)
+            .any(|(start, end)| *start <= hour && hour < *end)
         {
             return 0.0;
         }

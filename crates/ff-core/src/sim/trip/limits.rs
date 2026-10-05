@@ -121,9 +121,44 @@ impl Trip {
         )
     }
 
+    /// The quiet rungs' short form of a construction warning, in the terse
+    /// slot grammar: the thing and how far, the lane to be in, the limit.
+    /// The full warning ran three sentences and was read whole at quiet and
+    /// urgent only (speech mode audit, 2026-10-03). Other zones keep their
+    /// one-sentence wording.
+    pub fn zone_warning_terse(&self, zone: &Zone, ahead: f64) -> Option<String> {
+        if zone.reason != "construction" {
+            return None;
+        }
+        let merge = if zone.closed_side.is_some() {
+            let (_, keep) = Self::closure_phrases(zone);
+            format!(" Merge {keep}.")
+        } else {
+            String::new()
+        };
+        let taper_mph = self
+            .zones
+            .iter()
+            .find(|z| z.reason == "construction merge" && (z.end_mi - zone.start_mi).abs() < 1e-6)
+            .map_or(CONSTRUCTION_TAPER_LIMIT_MPH, |z| z.limit_mph);
+        let limit = if taper_mph <= zone.limit_mph {
+            self.speed_value(zone.limit_mph)
+        } else {
+            format!(
+                "{}, then {}",
+                self.speed_value(taper_mph),
+                self.speed_value(zone.limit_mph)
+            )
+        };
+        Some(format!(
+            "Construction, {}.{merge} Limit {limit}.",
+            self.ahead_text(ahead)
+        ))
+    }
+
     /// What to call a live jam: rush hour gets named when it is one.
     pub fn congestion_phrase(&self) -> &'static str {
-        let hour = self.current_hour().rem_euclid(24.0);
+        let hour = self.local_hour();
         let in_rush = RUSH_HOUR_WINDOWS
             .iter()
             .any(|(start, end)| *start <= hour && hour < *end);
@@ -131,6 +166,26 @@ impl Trip {
             "rush hour congestion"
         } else {
             "heavy traffic"
+        }
+    }
+
+    /// The quiet rungs' short form of a work zone entry: the lane to be in
+    /// and the limit (speech mode audit, 2026-10-03). Other zones are a
+    /// sentence already.
+    pub fn zone_entry_terse(&self, zone: &Zone) -> Option<String> {
+        let limit = self.speed_value(zone.limit_mph);
+        let keep = zone
+            .closed_side
+            .as_ref()
+            .map(|_| Self::closure_phrases(zone).1);
+        match (zone.reason.as_str(), keep) {
+            ("construction merge", Some(keep)) => {
+                Some(format!("Reduced speed. Merge {keep}. Limit {limit}."))
+            }
+            ("construction merge", None) => Some(format!("Flagger ahead. Limit {limit}.")),
+            ("construction", Some(keep)) => Some(format!("Work zone. Keep {keep}. Limit {limit}.")),
+            ("construction", None) => Some(format!("Work zone. Limit {limit}.")),
+            _ => None,
         }
     }
 
@@ -299,9 +354,13 @@ impl Trip {
             self.announced_zone_warnings.insert(zone_key(&zone));
             self.pending_zone_warning = Some(zone.start_mi);
             let message = self.zone_warning_message(&zone, ahead);
+            let message = match self.zone_warning_terse(&zone, ahead) {
+                Some(terse) => SpokenMessage::with_terse(message, terse),
+                None => SpokenMessage::new(message),
+            };
             self.emit(
                 TripEventKind::GpsCue,
-                SpokenMessage::new(message),
+                message,
                 TripEventData {
                     zone: Some(zone),
                     ..Default::default()
@@ -394,9 +453,13 @@ impl Trip {
             });
         self.event_breather.spoke("zone");
         let message = self.zone_entry_message(zone);
+        let message = match self.zone_entry_terse(zone) {
+            Some(terse) => SpokenMessage::with_terse(message, terse),
+            None => SpokenMessage::new(message),
+        };
         self.emit(
             TripEventKind::ZoneEnter,
-            SpokenMessage::new(message),
+            message,
             TripEventData {
                 zone: Some(zone.clone()),
                 suppress_sound: Some(quiet),

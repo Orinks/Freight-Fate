@@ -481,7 +481,7 @@ fn a_loaded_truck_departs_on_the_shortest_green_with_manual_acceleration() {
     assert!(
         spoken(&harness)
             .iter()
-            .any(|line| line.contains("Green light")),
+            .any(|line| line.contains("Light green")),
         "green transition was not delivered: {:?}",
         spoken(&harness)
     );

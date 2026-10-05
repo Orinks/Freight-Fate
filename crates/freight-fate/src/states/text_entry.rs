@@ -19,6 +19,14 @@ use crate::states::base::{spoken_char, InputEvent, Key, State};
 /// The longest string a field takes.
 pub const MAX_LEN: usize = 24;
 
+/// Appended to every field's prompt: on iOS the on-screen keyboard rises
+/// with the field, and the player needs to know how to put it away.
+pub const KEYBOARD_HINT: &str = if cfg!(target_os = "ios") {
+    " Three-finger double tap hides or shows the keyboard."
+} else {
+    ""
+};
+
 /// The field itself: what the Python class kept on `self`.
 pub struct TextEntryCore {
     pub heading: String,
@@ -93,7 +101,7 @@ pub trait TextEntry: Sized + 'static {
         ctx.say(&format!(
             "{heading}. Type, then press Enter. \
              Left and right arrows review the letters you have typed, \
-             Home and End jump to the start or end. Press Escape to cancel."
+             Home and End jump to the start or end. Press Escape to cancel.{KEYBOARD_HINT}"
         ));
     }
 

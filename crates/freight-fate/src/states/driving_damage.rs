@@ -411,7 +411,7 @@ impl DrivingState {
                     format!("Damage {damage:.0} percent. Still in limp mode, capped at {cap}.")
                 };
             }
-            ctx.audio.play("ui/notify");
+            ctx.play_event_cue(Some(category), "ui/notify", 1.0, 0.0);
         }
         ctx.say_event_with(message, SayEvent::new().category(category));
     }

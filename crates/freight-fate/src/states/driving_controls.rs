@@ -21,6 +21,8 @@
 //!   question the rest key and the pause menu both ask.
 //! * [`status`] -- the Tab status screen's lines, the gear name and the
 //!   air-brake sentence.
+//! * [`touch`] -- the iPhone and iPad driving gestures, each running the
+//!   command its touch binding names.
 //! * [`help`] -- F1: the keyboard layout, or the pad's, following the device.
 //! * [`latches`] -- `_update_pedal_latches`, the brake latch only, called
 //!   once per frame by `driving_updates` with the raw pedal inputs.
@@ -37,6 +39,7 @@ pub mod latches;
 pub mod pad;
 pub mod pending;
 pub mod status;
+pub mod touch;
 pub mod vehicle;
 
 /// Wear meters join the status readout once they're worth planning around.

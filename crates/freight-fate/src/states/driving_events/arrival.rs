@@ -18,6 +18,36 @@ use crate::states::driving_menu_states::{replace_drive_with, DriveRef, FacilityA
 use crate::states::driving_updates::live;
 
 impl DrivingState {
+    /// Once-per-threshold low-fuel cue at about 15 percent remaining.
+    ///
+    /// Speaks on the Safety channel (heard at quiet and urgent_only), plays
+    /// the same short UI warning other mid-drive safety cues use, and latches
+    /// until a refill climbs the tank back above the line. Empty-tank rescue
+    /// keeps its own path; this cue stays silent once the tank is dry.
+    pub fn check_low_fuel_warning(&mut self, ctx: &mut GameContext) {
+        let fraction = self.trip.truck.fuel_fraction();
+        if self.trip.truck.fuel_gal <= 0.0 {
+            // Empty tank is the rescue line, not a second low-fuel cue.
+            return;
+        }
+        if fraction > LOW_FUEL_WARN_FRACTION {
+            self.low_fuel_said = false;
+            return;
+        }
+        if self.low_fuel_said {
+            return;
+        }
+        self.low_fuel_said = true;
+        let pct = fraction * 100.0;
+        let message = if self.terse_speech(ctx) {
+            format!("Fuel low: {pct:.0} percent.")
+        } else {
+            format!("Low fuel warning, {pct:.0} percent. Find a fuel stop soon.")
+        };
+        ctx.audio.play("ui/warning");
+        ctx.say_event_with(message, SayEvent::new().category(SpeechCategory::Safety));
+    }
+
     /// `_handle_out_of_fuel()`.
     pub fn handle_out_of_fuel(&mut self, ctx: &mut GameContext) {
         if self.rescue_offered {

@@ -202,6 +202,10 @@ pub fn is_frozen_in(env: &UpdaterEnv) -> bool {
             || root.join("_internal").exists())
 }
 
+/// Whether this build may download and apply its own updates. An iOS app
+/// cannot replace itself: the App Store or TestFlight does that.
+pub const SELF_UPDATES: bool = !cfg!(target_os = "ios");
+
 pub fn is_frozen() -> bool {
     is_frozen_in(&UpdaterEnv::current())
 }
@@ -952,7 +956,22 @@ pub fn check_for_update_with(
         Err(NetError::Http { code: 404, .. }) => return Ok(None), // no stable release published yet
         Err(e) => return Err(e),
     };
+    if build.is_some_and(|build| is_running_release(build, &release)) {
+        return Ok(None);
+    }
     Ok(stable_update_from(&release, current_version, env))
+}
+
+/// Whether `release` is the stable release this copy was built as. Its stamp
+/// is the authority over the version text: the 1.9.0 stable shipped saying
+/// `1.9.0.dev0` (and tagged `vv1.9.0`), and then offered itself forever.
+fn is_running_release(build: &BuildInfo, release: &Value) -> bool {
+    if !snapshot_date_of(&build.tag).is_empty() {
+        return false;
+    }
+    let tag = tag_name(release);
+    let release_version = tag.trim_start_matches('v');
+    !release_version.is_empty() && release_version == build.tag.trim_start_matches('v')
 }
 
 /// [`check_for_update_with`] over the real GitHub API and process.

@@ -48,7 +48,11 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
     (
         "Settings",
         &[
-            "Settings are grouped into categories: Gameplay, Audio, Speech, Updates, and Problem reports, plus a row that opens the Online menu. Open a category to see its settings.",
+            if cfg!(target_os = "ios") {
+                "Settings are grouped into categories: Gameplay, Audio, and Speech, plus a row that opens the Online menu. Open a category to see its settings."
+            } else {
+                "Settings are grouped into categories: Gameplay, Audio, Speech, Updates, and Problem reports, plus a row that opens the Online menu. Open a category to see its settings."
+            },
             "Gameplay has four screens: Driving assistance, Difficulty and hours of service, World and traffic, and Controls.",
             "Driving assistance holds lane keeping and every driving assist. World and traffic holds the weather, traffic, and parking sources. Audio holds the lane and edge cue volume. Problem reports says where the game log is saved.",
             "Up and Down pick a setting. Right arrow or Enter changes it forward, Left arrow backward. Changes save as you make them.",
@@ -110,7 +114,7 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
             "{{grade}} speaks the grade under the wheels, how far it runs, whether the truck is holding, pulling, or losing it, and the next grade ahead.",
             "Steep grades of three percent or more announce themselves ahead, except on quiet or urgent only speech, where {{grade}} answers on demand.",
             "{{status}} opens a driving status menu for route, driver, map, and the Driver apps tablet: Navigation, Weather, Traffic, Truck stops, Road chatter, and ELD, each read line by line.",
-            "{{fuel}} speaks fuel level and range.",
+            "{{fuel}} speaks fuel level and range. A low fuel warning also speaks once when the tank crosses about fifteen percent.",
             "{{clock}} speaks the clock, your deadline, and the one hours limit that comes first.",
             "Three keys answer one hours question each.",
             "{{hos_wheel}} speaks time at the wheel so far and time on duty this shift.",
@@ -187,6 +191,7 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
             "Miss a stop and {{rest}} plans the next sleep-capable one. Already safely stopped at the missed route point, {{rest}} opens its menu.",
             "Fuel prices vary by region. Company drivers fuel on the carrier card; owner-operators pay their own diesel.",
             "Running out of fuel means a roadside rescue: owner-operators pay, company drivers take a service-record hit.",
+            "Fuel dropping to about fifteen percent speaks a low fuel warning once, until you refill above that line.",
             "A badly damaged truck: the pause menu calls a roadside mechanic for a pricey field repair.",
         ],
     ),

@@ -801,6 +801,9 @@ pub struct DrivingState {
     // ---- driving.py: air, brakes, engine (driving_updates / driving_controls) ----------
     pub air_ready_said: bool,
     pub low_air_said: bool,
+    /// Once-per-threshold low-fuel cue (see `LOW_FUEL_WARN_FRACTION`). Latched
+    /// until the tank climbs back above the line after a refill.
+    pub low_fuel_said: bool,
     pub spring_brake_said: bool,
     pub brake_lockout_cue_timer: f64,
     pub brake_air_hissed: bool, // rising-edge guard for the brake-apply hiss
@@ -818,6 +821,9 @@ pub struct DrivingState {
     /// Lane keeping on full is passing a slow vehicle: (the lane to come
     /// back to, the lane it passed into). See `pass_for_hazard`.
     pub passing: Option<(i64, i64)>,
+    /// Lane keeping is moving back after a pass: the landing line is the
+    /// tail of going around traffic, not a lane change the driver made.
+    pub pass_returning: bool,
     pub merge_deadline: Option<f64>,
     // Miles of acceleration lane still ahead after pulling out of a
     // facility. None once the lane is behind the truck (or when the run

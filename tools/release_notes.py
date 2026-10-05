@@ -43,6 +43,19 @@ STABLE_COMPLETE_LIST = (
     "release page. Read `CHANGELOG.md` in the download for the complete "
     "curated list."
 )
+# A stable release can open with a hand-written summary of everything since
+# the last stable: these headings, under the version's own `## X.Y.Z - date`
+# block, with the full per-snapshot list kept in `## X.Y.Z complete change
+# list` below it. Nightlies never read them (they are not in
+# PLAYER_FACING_SECTIONS), so the summary cannot resurface as new entries.
+SUMMARY_SECTIONS = ("Highlights", "New features", "Fixes", "Changes")
+STABLE_FULL_CHANGELOG = (
+    "## Complete change list\n\n"
+    "Every change in this release is listed in the "
+    "[full Freight Fate {version} changelog]"
+    "(https://github.com/Orinks/Freight-Fate/blob/v{version}/CHANGELOG.md), "
+    "on GitHub and as CHANGELOG.md in your game folder."
+)
 SECTION_ORDER = ("Added", "Changed", "Improved", "Fixed", "Removed", "Deprecated", "Security")
 PLAYER_FACING_SECTIONS = SECTION_ORDER + ("Compatibility",)
 INTERNAL_SECTIONS = (
@@ -377,20 +390,28 @@ def sections_added_since(
 def format_stable_notes(sections: list[ChangelogSection], footer: str = "") -> str:
     # A stable release is read by players upgrading in place, so what decides
     # whether their install or career comes across leads the page.
-    body = format_sections(sections, order=("Compatibility",) + SECTION_ORDER)
+    body = format_sections(sections, order=("Compatibility",) + SUMMARY_SECTIONS + SECTION_ORDER)
     return f"{body}\n\n{footer}" if footer else body
 
 
 def stable_notes(version: str) -> str:
     """The version's block, or Unreleased, bounded like a snapshot's notes.
 
+    A block with a curated summary (``SUMMARY_SECTIONS``) is published whole,
+    Compatibility first, ending with a link to the full changelog at the tag.
     1.9's Unreleased block alone is past GitHub's limit, so an unbounded
     stable would fail the tag build's size check after every platform built.
     """
     changelog_text = changelog_file().read_text(encoding="utf-8")
     block = version_block(changelog_text, version) or unreleased_block(changelog_text)
+    sections = parse_sections(block)
+    if any(section.title in SUMMARY_SECTIONS for section in sections):
+        # A curated summary is short by construction; it points at the full
+        # list instead of being bounded like one.
+        footer = STABLE_FULL_CHANGELOG.format(version=version.removeprefix("v"))
+        return format_stable_notes(sections, footer)
     sections, was_bounded = bounded_sections(
-        parse_sections(block), "", STABLE_COMPLETE_LIST, render=format_stable_notes
+        sections, "", STABLE_COMPLETE_LIST, render=format_stable_notes
     )
     return format_stable_notes(sections, STABLE_COMPLETE_LIST if was_bounded else "")
 

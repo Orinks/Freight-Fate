@@ -14,6 +14,8 @@
 //! macOS apps live in `/Applications` and must not write beside themselves
 //! (that folder is admin-owned and often read-only), so on macOS saves go in
 //! the standard per-user `~/Library/Application Support/FreightFate` folder.
+//! iOS is the same, with the app's sandbox as home: its bundle is signed and
+//! read-only, and `Library/Application Support` is backed up with the app.
 //!
 //! The same reasoning covers Windows and Linux when the game itself sits in
 //! a read-only location (for example Windows `Program Files`): if the
@@ -188,7 +190,7 @@ fn home_dir() -> PathBuf {
     std::env::home_dir().unwrap_or_else(|| PathBuf::from("."))
 }
 
-/// The standard per-user save location on macOS.
+/// The standard per-user save location on macOS (and in the iOS sandbox).
 fn macos_data_dir() -> PathBuf {
     home_dir()
         .join("Library")
@@ -201,7 +203,7 @@ fn macos_data_dir() -> PathBuf {
 /// On macOS this is also the *current* save location, since app bundles
 /// cannot store saves beside themselves.
 pub fn legacy_data_dir() -> PathBuf {
-    if cfg!(target_os = "macos") {
+    if cfg!(any(target_os = "macos", target_os = "ios")) {
         return macos_data_dir();
     }
     let base = if cfg!(windows) {
@@ -257,7 +259,7 @@ fn probe_writable(path: &Path) -> bool {
 /// such as `Program Files`, Windows and Linux fall back to that same
 /// per-user folder rather than crashing on the first save.
 pub fn save_root() -> PathBuf {
-    if cfg!(target_os = "macos") {
+    if cfg!(any(target_os = "macos", target_os = "ios")) {
         return macos_data_dir();
     }
     let root = game_root();

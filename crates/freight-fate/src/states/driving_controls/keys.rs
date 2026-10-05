@@ -24,8 +24,8 @@ impl DrivingState {
     /// Every key first resolves to the [`Action`] the player has it on
     /// (`ctx.bindings`), so a moved shortcut lands here without the table
     /// knowing. The fixed keys -- Control to stop the voice, Escape to pause,
-    /// plus and minus, the radio dial, Enter, F1 -- are matched on the key
-    /// itself, the way they always were. Three orderings are load-bearing and
+    /// F2 for the command list, plus and minus, the radio dial, Enter, F1 --
+    /// are matched on the key itself, the way they always were. Three orderings are load-bearing and
     /// kept: a chord is tried before the bare key (so Alt with a number reads
     /// a place instead of changing the engine brake), `+`/`-` fall back to the
     /// typed character, and the radio dial reads Ctrl before Shift so
@@ -71,6 +71,10 @@ impl DrivingState {
             ctx.audio.horn_stop();
             self.trip.truck.horn_on = false;
             self.push_pause_menu(ctx);
+            return;
+        }
+        if key == Key::F2 {
+            self.push_driving_commands(ctx);
             return;
         }
         if let Some(action) = ctx.bindings.action_for(key, mods) {
@@ -132,7 +136,7 @@ impl DrivingState {
     /// trooper run) are polled each frame through the same table and do
     /// nothing here; steering's tap is the exception, because with lane
     /// keeping on full a tap of the steering key changes lanes.
-    fn run_key_action(&mut self, ctx: &mut GameContext, action: Action) {
+    pub(crate) fn run_key_action(&mut self, ctx: &mut GameContext, action: Action) {
         let automatic = self.trip.truck.transmission.automatic;
         match action {
             Action::Engine => self.toggle_engine(ctx),
@@ -308,6 +312,7 @@ impl DrivingState {
             return;
         }
         self.lane_change_target = Some(target);
+        self.pass_returning = false; // the driver's own move now
         self.lane_change_timer = LANE_TAP_CHANGE_S;
         self.lane_signal_timer = 0.0;
         let pan = if direction > 0 { -0.6 } else { 0.6 };

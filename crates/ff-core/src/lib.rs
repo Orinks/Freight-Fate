@@ -19,7 +19,6 @@ pub mod cab_filter;
 pub mod cloud_save_integrity;
 pub mod engine_audio;
 pub mod input_hints;
-pub mod ladder_earcons;
 pub mod lane_guide_tone;
 pub mod message_log;
 pub mod music;

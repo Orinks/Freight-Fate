@@ -21,7 +21,7 @@
 use std::ffi::{CStr, CString};
 use std::fmt;
 use std::os::raw::{c_char, c_void};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::ptr;
 use std::sync::Arc;
 
@@ -326,15 +326,32 @@ pub fn plugin_free(handle: HPLUGIN) -> Result<(), BassError> {
 }
 
 /// Is this file name a BASS add-on (not the core library itself)?
+///
+/// On iOS the add-ons are embedded frameworks, `bassflac.framework` and the
+/// like, beside `bass.framework` in the app's `Frameworks` folder.
 fn is_plugin_file_name(name: &str) -> bool {
     let lower = name.to_ascii_lowercase();
-    if cfg!(windows) {
+    if cfg!(target_os = "ios") {
+        lower.starts_with("bass") && lower.ends_with(".framework") && lower != "bass.framework"
+    } else if cfg!(windows) {
         lower.starts_with("bass") && lower.ends_with(".dll") && lower != "bass.dll"
     } else {
         lower.starts_with("libbass")
             && (lower.ends_with(".so") || lower.ends_with(".dylib"))
             && lower != "libbass.so"
             && lower != "libbass.dylib"
+    }
+}
+
+/// The loadable binary for a plugin entry: the entry itself, or the binary
+/// inside a `.framework` bundle (`bassflac.framework/bassflac`).
+fn plugin_binary(entry: &Path) -> PathBuf {
+    let is_framework = entry
+        .extension()
+        .is_some_and(|ext| ext.eq_ignore_ascii_case("framework"));
+    match entry.file_stem() {
+        Some(stem) if is_framework => entry.join(stem),
+        _ => entry.to_path_buf(),
     }
 }
 
@@ -348,7 +365,7 @@ pub fn load_plugins_from(dir: &Path) -> Vec<(String, Result<HPLUGIN, BassError>)
     let mut names: Vec<String> = match std::fs::read_dir(dir) {
         Ok(entries) => entries
             .flatten()
-            .filter(|e| e.path().is_file())
+            .filter(|e| plugin_binary(&e.path()).is_file())
             .filter_map(|e| e.file_name().to_str().map(str::to_owned))
             .filter(|n| is_plugin_file_name(n))
             .collect(),
@@ -361,7 +378,7 @@ pub fn load_plugins_from(dir: &Path) -> Vec<(String, Result<HPLUGIN, BassError>)
     names
         .into_iter()
         .map(|name| {
-            let result = plugin_load(&dir.join(&name));
+            let result = plugin_load(&plugin_binary(&dir.join(&name)));
             match &result {
                 Ok(h) => log::info!("bass: loaded plugin {name} (handle {h})"),
                 Err(e) => log::warn!("bass: could not load plugin {name}: {e}"),
@@ -960,6 +977,18 @@ mod tests {
         assert_eq!(e.to_string(), "BASS_ERROR_HANDLE (5)");
         assert_eq!(BassError::NOT_LOADED.name(), "BASS_NOT_LOADED");
         assert_eq!(BassError { code: 999 }.name(), "BASS_ERROR_?");
+    }
+
+    #[test]
+    fn framework_plugins_load_their_inner_binary() {
+        assert_eq!(
+            plugin_binary(Path::new("Frameworks/bassflac.framework")),
+            Path::new("Frameworks/bassflac.framework/bassflac")
+        );
+        assert_eq!(
+            plugin_binary(Path::new("lib/libbassflac.dylib")),
+            Path::new("lib/libbassflac.dylib")
+        );
     }
 
     #[test]

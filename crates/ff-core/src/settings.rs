@@ -660,6 +660,9 @@ settings_fields! {
     key_bindings: String = "" => str_plain,
     /// The same for pad buttons (`engine=mod+a;horn=paddle_1`).
     pad_bindings: String = "" => str_plain,
+    /// The same for the iPhone and iPad driving gestures
+    /// (`tap=fuel;magic_tap=none`).
+    touch_bindings: String = "" => str_plain,
     /// Steer AWAY from the engine's lean instead of toward it, for
     /// drivers who learned that habit in audio racing games.
     steering_guide_inverted: bool = false => bool_strict,
@@ -798,10 +801,7 @@ impl Settings {
 
     /// Whether this category reaches the voice at all on this rung.
     pub fn speaks(&self, category: Option<SpeechCategory>) -> bool {
-        !matches!(
-            self.speech_disposition(category),
-            Disposition::Earcon | Disposition::Silent
-        )
+        self.speech_disposition(category) != Disposition::Silent
     }
 
     /// Whether spoken lines take their terse rendering on this rung.

@@ -208,6 +208,51 @@ fn test_green_light_rolls_through_clean() {
 }
 
 #[test]
+fn test_a_green_already_called_is_not_called_again_at_the_bar() {
+    // Owner, agent drive into Milwaukee, 2026-10-04: the light changed to
+    // green while the truck rolled toward it ("Light green.", with the chime),
+    // and crossing the bar seconds later chimed and said "Green light" again.
+    let mut app = TestApp::new();
+    let mut d = a_real_drive(&mut app);
+    let audio = app.record_audio();
+    on_ramp(&mut d, "signal", false, GREEN_ROLL_MPH - 5.0);
+
+    d.update_ramp_terminal(&mut app.ctx);
+
+    assert!(d.ramp_terminal_done);
+    let lines = app.event_lines().join("\n");
+    assert!(
+        lines.contains("Through the intersection. Stop at the entrance."),
+        "{lines}"
+    );
+    assert!(!lines.contains("Green light"), "{lines}");
+    let chimes = audio
+        .borrow()
+        .played
+        .iter()
+        .filter(|(key, _, _)| key == "events/ramp_light_green")
+        .count();
+    assert_eq!(chimes, 0);
+
+    // A green nobody has named yet still gets its chime and its name.
+    let mut d = a_real_drive(&mut app);
+    app.clear_speech();
+    on_ramp(&mut d, "signal", false, GREEN_ROLL_MPH - 5.0);
+    d.ramp_light_announced = false;
+    d.update_ramp_terminal(&mut app.ctx);
+    let lines = app.event_lines().join("\n");
+    assert!(
+        lines.contains("Green light. Through the intersection."),
+        "{lines}"
+    );
+    assert!(audio
+        .borrow()
+        .played
+        .iter()
+        .any(|(key, _, _)| key == "events/ramp_light_green"));
+}
+
+#[test]
 fn test_still_braking_toward_the_bar_is_not_a_violation() {
     let mut app = TestApp::new();
     let mut d = a_real_drive(&mut app);

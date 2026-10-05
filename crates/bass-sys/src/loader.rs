@@ -32,7 +32,9 @@ pub const LIBRARY_PATH_ENV: &str = "FREIGHT_FATE_BASS_PATH";
 
 /// Shared-library file name for the current platform.
 pub fn library_file_name() -> &'static str {
-    if cfg!(windows) {
+    if cfg!(target_os = "ios") {
+        "bass.framework/bass"
+    } else if cfg!(windows) {
         "bass.dll"
     } else if cfg!(target_os = "macos") {
         "libbass.dylib"
@@ -80,6 +82,9 @@ fn search_paths() -> Vec<PathBuf> {
             // Packaged macOS bundles keep native libraries beside the app
             // resources rather than next to the executable.
             candidates.push(dir.join("..").join("Frameworks").join(file_name));
+            // An iOS app is flat: its embedded frameworks sit in
+            // `Frameworks` beside the executable.
+            candidates.push(dir.join("Frameworks").join(file_name));
             candidates.push(dir.join("lib").join(file_name));
         }
     }
@@ -210,11 +215,20 @@ impl Api {
         &self.loaded_from
     }
 
-    /// The directory holding the library, if the path has one.
+    /// The directory holding the library, if the path has one. For a
+    /// framework (`Frameworks/bass.framework/bass`) that is the folder the
+    /// framework sits in, where its add-on frameworks sit too.
     pub fn library_dir(&self) -> Option<&Path> {
-        self.loaded_from
-            .parent()
-            .filter(|p| !p.as_os_str().is_empty())
+        let parent = self.loaded_from.parent()?;
+        let parent = if parent
+            .extension()
+            .is_some_and(|ext| ext.eq_ignore_ascii_case("framework"))
+        {
+            parent.parent()?
+        } else {
+            parent
+        };
+        Some(parent).filter(|p| !p.as_os_str().is_empty())
     }
 
     fn load() -> Result<Api, LoadError> {

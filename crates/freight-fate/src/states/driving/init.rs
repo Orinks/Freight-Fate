@@ -617,6 +617,9 @@ impl DrivingState {
             turn_grace_s: 0.0,
             air_ready_said: air_ready,
             low_air_said: air_low_warning,
+            // New drives start clear so a tank already under the line still
+            // earns one cue; resumed drives re-derive the latch below.
+            low_fuel_said: false,
             spring_brake_said: spring_brakes_active,
             brake_lockout_cue_timer: 0.0,
             brake_air_hissed: false,
@@ -628,6 +631,7 @@ impl DrivingState {
             lane_change_timer: 0.0,
             lane_signal_timer: 0.0,
             passing: None,
+            pass_returning: false,
             merge_deadline: None,
             departure_ramp_mi: None,
             departure_merge_road_mph: 0.0,

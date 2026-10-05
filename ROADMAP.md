@@ -112,6 +112,15 @@ bookmarks usable.
       (`signsheets/*-2026-10-01.md`, `owner-decisions-2026-10-01.md`). The
       map carries 3,237 placed signs.
 
+- [x] Audio levels (owner, 2026-10-03): all 426 music.pak tracks
+      normalized to -18 LUFS with static gain under a -1 dBTP ceiling
+      (spread 16.1 dB down to 4.2 dB; 23 peaky speech segments stop short at
+      the ceiling), and four sound-effect outliers raised to their peers
+      (`docs/audio-levels.md`). Slider defaults unchanged.
+- [ ] (Found along the way) Shift-sound bank variants 09, 11 and 15 (manual
+      and automatic) sit 5 to 11 dB under their siblings by momentary
+      loudness, with peaks too close to full scale for static gain. Needs a
+      peak limiter or replacement takes.
 - [x] New installs start on All assists (owner, 2026-09-30): first drives kept
       going wrong at the wheel, city street corners above all, so the truck
       steers until the driver steps down to Balanced. Saved settings keep
@@ -383,6 +392,22 @@ into the release gate. Details stay in the linked dated sections, marked
 Everything found before 2026-09-25 moved to
 [2.0](#found-along-the-way-in-19-moved-to-20) that day.
 
+- [x] Driving speech audit (owner, 2026-10-03, from a player report): quiet
+      and urgent only no longer call out traffic, a line either rung leaves
+      out makes no sound, and quiet says cruise, keeper and work zone
+      updates short. Urgent only now says when a work zone turns cruise off.
+- [ ] A listening pass by the owner at quiet and urgent only, at the wheel.
+- [ ] The exit-call truth test (`test_the_exit_calls_name_the_road_that_is_really_left`)
+      failed once on the Linux ARM runner in the v1.9.1 tag build, hearing
+      only the two-mile call, and passed on re-run. It passed 80 of 80 runs
+      alone on x86_64 and in its module; the source of the nondeterminism is
+      not found yet.
+
+- [ ] Low fuel warning could also fire when remaining range is shorter than
+      the distance to the next fuel-capable stop (issue #272 shipped the
+      once-per-threshold 15 percent cue first; honest loaded range for the
+      range-based alternate is still open).
+
 - [x] More music on the Terrestrial dial (owner, 2026-10-03, from player
       feedback): 156 commercial music stations in 35 states, each heard
       playing and naming itself from an open network before it went in.
@@ -589,6 +614,26 @@ Everything found before 2026-09-25 moved to
       exit blinker end on a new stalk click, `vehicle/turn_signal_off`,
       where the steering cue used to borrow the signal tone (owner's pick by
       ear, 2026-09-29).
+- [x] Freight Fate builds for iPhone and iPad: the same Rust game, speech
+      through Prism's VoiceOver backend, controllers through SDL, touch and
+      VoiceOver gestures as key presses, and F2 or a three-finger tap for a
+      spoken list of driving commands. `tools/build_ios.py` packages it;
+      `docs/ios.md` has the gestures (2026-09-29).
+- [x] iOS driving gestures run commands directly and can be rebound in
+      Settings, Gameplay, Controls, Touch gestures: a second finger while holding a
+      pedal (cruise, shifts, parking brake, engine), plus tap for speed,
+      swipes for the cruise target, magic tap to pause (2026-09-29).
+- [ ] (Found along the way) The iOS second-finger gestures (hold a pedal,
+      then tap, double tap or swipe with another finger) need a pass on real
+      hardware: the Simulator's touch replay lifts both fingers together, so
+      cruise, engine and parking brake from a held pedal are covered only by
+      the headless tests.
+- [ ] iOS runs from TestFlight on a real iPhone (2026-10-03) but still
+      needs a real controller, BASS sound on hardware (the Simulator has no
+      audio device), and VoiceOver's scrub and on-screen-keyboard typing on
+      hardware. For the App Store: a real app icon (TestFlight has a
+      placeholder), a privacy manifest, BASS licensing for iOS, and a title
+      screen or review note for the blank game screen.
 
 ### Release gate record
 
@@ -709,6 +754,22 @@ are in the [release gate](#release-gate-190).
       it now publishes both, as the release-candidate bridge does. Stable
       notes open with Compatibility, which says 1.8 careers do not carry
       over.
+
+- [x] The stable 1.9.0 notes are a curated summary (2026-10-04). The
+      `## 1.9.0` block holds Compatibility, Highlights, New features, Fixes
+      and Changes; the tag build publishes it whole to the GitHub release,
+      which the downloads page on orinks.net and every updater read, and
+      ends it with a link to the full changelog at the tag. The ~1,100
+      snapshot bullets moved under `## 1.9.0 complete change list`, which
+      nightlies stop reading once the `v1.9.0` tag exists.
+
+- [x] The Mac app is Developer ID signed and notarized (2026-10-03). The
+      macOS job imports Joshua Tubbs's Developer ID Application certificate
+      into a throwaway keychain, signs each bundled library and then the app
+      under the hardened runtime, and notarizes and staples it with the App
+      Store Connect key before archiving; a stable build without the signing
+      secrets fails. Players no longer need Open Anyway. TestFlight for the
+      iOS port can reuse the same App Store Connect key.
 
 #### Player-impacting release blockers
 

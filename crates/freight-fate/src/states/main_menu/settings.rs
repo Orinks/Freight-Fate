@@ -35,6 +35,11 @@ impl SettingsState {
         ("Problem reports", "reports"),
     ];
 
+    /// Categories with nothing to do on iPhone and iPad: TestFlight and the
+    /// App Store do the updating, and the log sits where the player cannot
+    /// open it.
+    const HIDDEN_ON_IOS: [&'static str; 2] = ["updates", "reports"];
+
     pub fn new() -> Self {
         Self {
             menu: MenuCore::new("Settings")
@@ -74,6 +79,7 @@ impl Menu for SettingsState {
     fn build_items(&mut self, _ctx: &mut GameContext) -> Vec<MenuItem<Self>> {
         let mut items: Vec<MenuItem<Self>> = Self::CATEGORIES
             .iter()
+            .filter(|(_, key)| !Self::HIDDEN_ON_IOS.contains(key) || !cfg!(target_os = "ios"))
             .map(|(label, key)| {
                 MenuItem::new(*label, move |s: &mut Self, ctx| s.open(ctx, key))
                     .help(format!("Open {} settings.", label.to_lowercase()))

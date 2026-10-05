@@ -531,6 +531,9 @@ impl DrivingState {
         }
         state.air_ready_said = state.trip.truck.air_ready();
         state.low_air_said = state.trip.truck.air_low_warning();
+        // Already under the line on resume: do not re-announce a cue the
+        // driver heard before the save. Above the line clears the latch.
+        state.low_fuel_said = state.trip.truck.fuel_fraction() <= LOW_FUEL_WARN_FRACTION;
         state.spring_brake_said = state.trip.truck.spring_brakes_active();
         // HOS and fatigue: absent in pre-1.5 snapshots, defaulting to a
         // fresh clock and a rested driver.
