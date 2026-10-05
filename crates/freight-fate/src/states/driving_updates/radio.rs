@@ -359,7 +359,10 @@ impl DrivingState {
         station: &RadioStation,
         fade_ms: u32,
     ) {
-        let night = is_night(self.trip.current_hour());
+        // The local clock, as the drive's own flag is: on the trip's Eastern
+        // clock the two disagree for hours, and update_radio_playback took
+        // every frame of them as night falling and restarted the station.
+        let night = self.night_now();
         self.music_night = night;
         self.radio_station_id = station.id.clone();
         self.radio_playlist = self.station_rotation_pool(ctx, station, night);
