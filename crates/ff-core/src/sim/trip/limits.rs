@@ -158,7 +158,7 @@ impl Trip {
 
     /// What to call a live jam: rush hour gets named when it is one.
     pub fn congestion_phrase(&self) -> &'static str {
-        let hour = self.current_hour().rem_euclid(24.0);
+        let hour = self.local_hour();
         let in_rush = RUSH_HOUR_WINDOWS
             .iter()
             .any(|(start, end)| *start <= hour && hour < *end);

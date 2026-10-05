@@ -543,7 +543,7 @@ impl Trip {
     /// The live traffic speed of a congestion zone here, or None when it
     /// flows free right now.
     fn congestion_limit_now(&self, aadt: f64, lanes: i64, start_mi: f64) -> Option<f64> {
-        let ratio = congestion_ratio(aadt, self.current_hour(), lanes, self.is_weekend_now());
+        let ratio = congestion_ratio(aadt, self.local_hour(), lanes, self.is_weekend_now());
         congestion_limit_mph(ratio, self.corridor_limit_at(start_mi))
     }
 
