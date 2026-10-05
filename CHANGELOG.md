@@ -8,6 +8,10 @@
 
 ### Fixed
 
+- **The Roadhouse no longer keeps restarting around dusk and dawn outside Eastern time.** It now changes between its day and night music by the local clock.
+
+- **Rush-hour traffic follows the local clock.** West of Eastern time, jams and the words rush hour now come at the local rush, not hours early.
+
 - **Mac launch no longer freezes waiting on the keychain.** After a newly signed build, macOS can ask before handing over a saved online token; the game now waits a few seconds, then continues and says so, instead of sitting unresponsive with a log that stops after "world".
 
 ## 1.9.1 - 2026-10-04

@@ -640,6 +640,23 @@ fn test_brake_lights_name_the_cause_when_the_road_knows_it() {
     assert_eq!(mgr.braking_reason_at(50.0), "");
 }
 
+/// Rush hour is a local thing. Denver is two hours behind the trip's Eastern
+/// clock, so 10 AM Eastern is 8 AM there, the middle of the morning rush. The
+/// traffic manager already reads the local hour; the trip's own rush-hour
+/// judgements read the Eastern one, and so put Denver's rush at 4:30 AM.
+#[test]
+fn test_rush_hour_follows_the_local_clock() {
+    let opts = TripOptions {
+        start_hour: 10.0,
+        ..TripOptions::seeded(7)
+    };
+    let trip = make_trip_with(world(), "Denver", "Cheyenne", opts);
+    assert!((trip.local_hour() - 8.0).abs() < 1e-9);
+    assert_eq!(trip.congestion_phrase(), "rush hour congestion");
+    let leg = trip.route.legs[0].clone();
+    assert!(trip.rush_hour_traffic_bias(&leg) > 0.0);
+}
+
 #[test]
 #[ignore = "wrong crate: ff-core cannot see the game crate, so this case belongs in crates/freight-fate/tests/ -- driving status browse"]
 fn test_the_status_browse_says_how_much_to_the_next_level() {}

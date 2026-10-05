@@ -7,6 +7,7 @@ use ff_core::data::world::get_world;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
 use ff_core::radio::{dial_group, SAFE_ROUTE_PLAYLIST};
+use ff_core::sim::hos::is_night;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
@@ -171,6 +172,11 @@ fn an_unready_piece_falls_back_to_its_classic_and_is_requested() {
 /// The Denver run the radio rotation tests drive (`a_denver_drive` in
 /// `states_driving_updates_radio.rs`).
 fn a_drive(app: &mut TestApp) -> DrivingState {
+    a_drive_at(app, 13.0)
+}
+
+/// The same run leaving at `start_hour` on the trip's Eastern clock.
+fn a_drive_at(app: &mut TestApp, start_hour: f64) -> DrivingState {
     let world = get_world();
     app.ctx.profile = Some(Profile::named_in("Radio Power", "Denver"));
     let route = world
@@ -192,10 +198,34 @@ fn a_drive(app: &mut TestApp) -> DrivingState {
         route,
         Some(42),
         DRIVE_PHASE_DELIVERY,
-        Some(13.0),
+        Some(start_hour),
     );
     drive.trip.set_npc_vehicles(Vec::new());
     drive
+}
+
+/// Denver keeps Mountain time, two hours behind the trip's Eastern clock: at
+/// 10 PM Eastern it is 8 PM there, still dusk. The drive calls that day, so
+/// the Roadhouse has to as well. When it judged night by the Eastern clock,
+/// the two never agreed and it restarted itself every frame until 11 PM.
+#[test]
+fn the_roadhouse_judges_night_by_the_local_clock() {
+    let mut app = TestApp::new();
+    let mut d = a_drive_at(&mut app, 22.0);
+    assert!(is_night(d.trip.current_hour()) && !d.night_now());
+    let station = d.radio.current_station();
+    assert_eq!(station.playlist, "route");
+    d.start_station_rotation(&mut app.ctx, &station, 0);
+    assert_eq!(d.music_night, d.night_now());
+    let started = d.radio_elapsed_s;
+    for _ in 0..3 {
+        let night = d.night_now();
+        d.update_radio_playback(&mut app.ctx, night, 1.0);
+    }
+    assert!(
+        (d.radio_elapsed_s - (started + 3.0)).abs() < 1e-9,
+        "the Roadhouse restarted"
+    );
 }
 
 #[test]
