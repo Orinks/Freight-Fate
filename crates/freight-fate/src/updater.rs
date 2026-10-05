@@ -167,6 +167,9 @@ pub struct BuildInfo {
     pub channel: String,
     /// "2026-06-11" (UTC date); "" when unknown
     pub built_at: String,
+    /// The commit this copy was built from; "" for builds stamped before
+    /// 2026-10-03. Tells a same-day rebuild apart from the copy it replaced.
+    pub commit: String,
 }
 
 impl BuildInfo {
@@ -175,6 +178,7 @@ impl BuildInfo {
             tag: tag.to_string(),
             channel: channel.to_string(),
             built_at: built_at.to_string(),
+            commit: String::new(),
         }
     }
 }
@@ -337,6 +341,7 @@ pub fn build_info_from_dict(data: &Value, version: &str) -> BuildInfo {
         tag,
         channel,
         built_at: stamp_str(map.get("built_at")),
+        commit: stamp_str(map.get("commit")),
     }
 }
 
@@ -538,30 +543,6 @@ pub fn pick_asset(
         }
     }
     None
-}
-
-static HEADING: Lazy<Regex> = Lazy::new(|| Regex::new(r"^#{1,6}\s+").unwrap());
-static BULLET: Lazy<Regex> = Lazy::new(|| Regex::new(r"^[-*+]\s+").unwrap());
-static LINK: Lazy<Regex> = Lazy::new(|| Regex::new(r"\[([^\]]+)\]\([^)]*\)").unwrap());
-static EMPHASIS: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\*\*|__|\*|_|`)").unwrap());
-
-/// Release-notes markdown as plain, speakable lines.
-pub fn flatten_markdown(body: Option<&str>) -> Vec<String> {
-    let mut lines = Vec::new();
-    for raw in body.unwrap_or("").lines() {
-        let line = raw.trim();
-        if line.is_empty() || line.chars().all(|c| matches!(c, '-' | '=' | '*' | '_')) {
-            continue;
-        }
-        let line = HEADING.replace(line, ""); // headings
-        let line = BULLET.replace(&line, ""); // bullets
-        let line = LINK.replace_all(&line, "$1"); // links
-        let line = EMPHASIS.replace_all(&line, ""); // emphasis/code
-        if !line.is_empty() {
-            lines.push(line.into_owned());
-        }
-    }
-    lines
 }
 
 static NIGHTLY: Lazy<Regex> = Lazy::new(|| Regex::new(r"^nightly-(\d{8})$").unwrap());
@@ -817,7 +798,7 @@ fn snapshot_newer_than_build(
     let tag = tag_name(release);
     if let Some(build) = build {
         if tag == build.tag {
-            return false;
+            return rebuilt_under_same_tag(release, build);
         }
         let snapshot_ts = release_timestamp(Some(release));
         if !build_ts.is_empty() && !snapshot_ts.is_empty() {
@@ -829,6 +810,15 @@ fn snapshot_newer_than_build(
         }
     }
     true
+}
+
+/// A snapshot re-cut under the tag this copy carries (a second run on
+/// the same day, such as a release candidate) points at a different commit.
+/// Unknown on either side means not newer.
+fn rebuilt_under_same_tag(release: &Value, build: &BuildInfo) -> bool {
+    let target = stamp_str(release.get("target_commitish"));
+    let is_sha = |s: &str| s.len() == 40 && s.bytes().all(|b| b.is_ascii_hexdigit());
+    is_sha(&build.commit) && is_sha(&target) && !target.eq_ignore_ascii_case(&build.commit)
 }
 
 fn spoken_ymd(date: &str) -> String {
@@ -1000,6 +990,9 @@ pub fn check_for_update(
 }
 
 mod apply;
+mod notes;
+
+pub use notes::flatten_markdown;
 
 pub use apply::{
     apply_and_restart, apply_and_restart_with, can_auto_apply, download, extract, extract_with,

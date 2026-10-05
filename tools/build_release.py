@@ -200,6 +200,23 @@ def _is_snapshot_label(label: str) -> bool:
     return len(suffix) == 8 and suffix.isdigit()
 
 
+def build_commit() -> str:
+    """The checked-out commit, so the updater can tell a same-day rebuild
+    under one snapshot tag from the copy it replaced; "" outside git."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return result.stdout.strip()
+
+
 def label_package_version(label: str) -> str:
     """The version a build labelled ``label`` is: the label's own for a
     stable (``v1.9.1`` or ``1.9.1``), else the ``pyproject.toml`` version."""
@@ -227,6 +244,7 @@ def stamp_build_info(build_dir: Path, label: str, root: Path | None = None) -> N
         "channel": "dev" if snapshot else "stable",
         "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
         "package_version": label_package_version(label),
+        "commit": build_commit(),
     }
     info_path = (root or runtime_root(build_dir)) / "build_info.json"
     with open(info_path, "w", encoding="utf-8") as f:
