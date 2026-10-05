@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Mac launch no longer freezes waiting on the keychain.** After a newly signed build, macOS can ask before handing over a saved online token; the game now waits a few seconds, then continues and says so, instead of sitting unresponsive with a log that stops after "world".
+
 ## 1.9.1 - 2026-10-04
 
 ### Fixed
