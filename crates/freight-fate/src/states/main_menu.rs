@@ -726,6 +726,14 @@ impl Menu for MainMenuState {
                  elsewhere, then start Freight Fate again.",
             );
         }
+        if crate::online_presence::take_secret_store_timeout_notice() {
+            ctx.say(
+                "The system password store did not answer in time, so online \
+                 features may need you to link your account again under Online. \
+                 If a permission dialog is still open, allow Freight Fate and \
+                 restart.",
+            );
+        }
         let info = {
             let mut guard = UPDATE_CHECK.lock().unwrap_or_else(|e| e.into_inner());
             let (checker, prompted) = &mut *guard;
@@ -779,6 +787,17 @@ impl Menu for MainMenuState {
                 "Game sounds could not start on this computer: the voice, but \
                  no engine, traffic, or alert sounds. Check that sound works \
                  elsewhere, then start Freight Fate again. ",
+            );
+        }
+        if crate::online_presence::take_secret_store_timeout_notice() {
+            // A Keychain ACL prompt after a new Mac signature can block the
+            // driver-token read at launch. We stop waiting after a few
+            // seconds so the menu opens; say why online may need a re-link.
+            warning.push_str(
+                "The system password store did not answer in time, so online \
+                 features may need you to link your account again under Online. \
+                 If a permission dialog is still open, allow Freight Fate and \
+                 restart. ",
             );
         }
         if loadable_saves().is_empty() && !legacy_saves().is_empty() {

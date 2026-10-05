@@ -17,10 +17,11 @@ use freight_fate::net::testing::{FakeTransport, ManualClock};
 use freight_fate::net::{header, NetError, SharedTransport};
 use freight_fate::online_presence::{
     base_url, client_version, client_version_for, fetch_board, fetch_mastodon_status,
-    request_headers, set_profile_sharing, verify_identity, IdentityStore, MastodonStatus,
-    MemoryStore, OnlineIdentity, OnlinePresence, OnlinePresenceOptions, RefusingStore, SecretStore,
-    HEARTBEAT_INTERVAL_S, IDLE_SIGNOFF_S, MIN_CHANGE_INTERVAL_S, OFF_DUTY_GRACE_S, PACKAGE_VERSION,
-    PAUSED_ACTIVITY, RADIO_CLAUSE, TOKEN_SERVICE,
+    request_headers, set_profile_sharing, take_secret_store_timeout_notice, verify_identity,
+    IdentityStore, MastodonStatus, MemoryStore, OnlineIdentity, OnlinePresence,
+    OnlinePresenceOptions, RefusingStore, SecretStore, HEARTBEAT_INTERVAL_S, IDLE_SIGNOFF_S,
+    MIN_CHANGE_INTERVAL_S, OFF_DUTY_GRACE_S, PACKAGE_VERSION, PAUSED_ACTIVITY, RADIO_CLAUSE,
+    TOKEN_SERVICE,
 };
 use freight_fate::updater::BuildInfo;
 
@@ -1042,5 +1043,61 @@ fn test_default_transport_stamps_the_build_in_the_user_agent() {
     assert_eq!(
         header(&headers, "User-agent"),
         Some(format!("FreightFate/{}", client_version()).as_str())
+    );
+}
+
+/// A secret store that never answers -- the Mac Keychain ACL prompt shape.
+struct HungStore;
+
+impl SecretStore for HungStore {
+    fn set_password(&self, _: &str, _: &str, _: &str) -> Result<(), String> {
+        loop {
+            std::thread::park();
+        }
+    }
+
+    fn get_password(&self, _: &str, _: &str) -> Result<Option<String>, String> {
+        loop {
+            std::thread::park();
+        }
+    }
+
+    fn delete_password(&self, _: &str, _: &str) -> Result<(), String> {
+        loop {
+            std::thread::park();
+        }
+    }
+}
+
+#[test]
+fn test_a_hung_secret_store_times_out_so_launch_can_continue() {
+    let _ = take_secret_store_timeout_notice();
+    let dir = tempfile::tempdir().unwrap();
+    let token = "s".repeat(68);
+    fs::write(
+        dir.path().join("online.json"),
+        json!({"driver_id": "road-star-abcd1234"}).to_string(),
+    )
+    .unwrap();
+    // Plaintext fallback so load can still succeed after the keychain times out.
+    fs::write(dir.path().join("online.token"), &token).unwrap();
+
+    let store = IdentityStore::new(dir.path(), Some(Arc::new(HungStore)))
+        .with_secret_timeout(std::time::Duration::from_millis(80));
+    let started = std::time::Instant::now();
+    let loaded = store.load();
+    let elapsed = started.elapsed();
+
+    assert!(
+        elapsed < std::time::Duration::from_secs(2),
+        "hung keychain waited {elapsed:?}"
+    );
+    assert_eq!(
+        loaded,
+        Some(OnlineIdentity::new("road-star-abcd1234", &token))
+    );
+    assert!(
+        take_secret_store_timeout_notice(),
+        "the title screen needs a spoken notice after a keychain timeout"
     );
 }
