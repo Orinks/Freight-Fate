@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- **The truck warns you once when fuel drops to about 15 percent.** It speaks again only after you refill above that line and the tank drops again.
+
 ### Fixed
 
 - **Mac launch no longer freezes waiting on the keychain.** After a newly signed build, macOS can ask before handing over a saved online token; the game now waits a few seconds, then continues and says so, instead of sitting unresponsive with a log that stops after "world".

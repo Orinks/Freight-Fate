@@ -84,6 +84,9 @@ pub const ROAD_TIRE_MIN: f64 = 75.0;
 pub const ROAD_BRAKE_COST_PER_PCT: f64 = 55.0; // road-shop premium over the garage's 40
 pub const ROAD_BRAKE_MIN: f64 = 120.0;
 pub const FUEL_STOP_MIN: f64 = 20.0; // fueling is on-duty-not-driving work
+/// Fraction of tank remaining that fires the once-per-threshold low-fuel cue.
+/// Re-arms only after a refill climbs back above this line.
+pub const LOW_FUEL_WARN_FRACTION: f64 = 0.15;
 pub const INSPECTION_MIN: f64 = 15.0; // inspection lane: they take you in
 /// The driver's own pre-trip walk-around, on duty. ASSUMED: 49 CFR 396.13
 /// sets no time; carriers budget about fifteen minutes.
