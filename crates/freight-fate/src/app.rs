@@ -445,6 +445,7 @@ impl App {
             enabled: settings.discord_presence,
             ..Default::default()
         });
+        boot_timing::mark("discord presence");
         // identity is loaded unconditionally, not gated on whether any
         // online setting is currently on: OnlinePresence/CloudSaves.
         // set_enabled() both refuse to turn on without an identity already
@@ -462,7 +463,10 @@ impl App {
         if let Err(error) = account_achievements.migrate_local_profiles() {
             log::error!("Could not migrate local account achievements: {error}");
         }
+        boot_timing::mark("account achievements");
         let store = IdentityStore::platform(&data_dir);
+        // May wait up to a few seconds on the Mac keychain; a hung ACL
+        // prompt must not freeze launch with no further log (issue 266).
         let identity = store.load();
         boot_timing::mark("driver identity");
         let online = OnlinePresence::new(OnlinePresenceOptions {

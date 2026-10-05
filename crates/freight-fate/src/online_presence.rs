@@ -242,8 +242,8 @@ mod identity;
 
 pub use identity::{
     allow_real_secret_store, clear_refused_secret_keys, real_secret_store_allowed,
-    refused_secret_keys, secret_store_report, IdentityStore, KeyringStore, MemoryStore,
-    OnlineIdentity, RefusingStore, SecretStore, TOKEN_SERVICE,
+    refused_secret_keys, secret_store_report, take_secret_store_timeout_notice, IdentityStore,
+    KeyringStore, MemoryStore, OnlineIdentity, RefusingStore, SecretStore, TOKEN_SERVICE,
 };
 
 // -- verification and board helpers --------------------------------------------------

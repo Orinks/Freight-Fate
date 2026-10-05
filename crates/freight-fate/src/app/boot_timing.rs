@@ -56,6 +56,9 @@ pub fn mark(phase: &str) {
         now.duration_since(previous).as_millis(),
         now.duration_since(begun).as_millis(),
     );
+    // Force the line out before the next phase can hang: a Mac Keychain
+    // prompt after "world" left game.log with no further marks (issue 266).
+    log::logger().flush();
 }
 
 /// Whether the phase clock is running (the marks are live).
