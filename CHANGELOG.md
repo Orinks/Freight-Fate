@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### New features
+
+- **The truck warns you once when fuel drops to about 15 percent.** It speaks again only after you refill above that line and the tank drops again.
+
 ## 1.9.1 - 2026-10-04
 
 ### Fixed

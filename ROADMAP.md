@@ -403,6 +403,11 @@ Everything found before 2026-09-25 moved to
       alone on x86_64 and in its module; the source of the nondeterminism is
       not found yet.
 
+- [ ] Low fuel warning could also fire when remaining range is shorter than
+      the distance to the next fuel-capable stop (issue #272 shipped the
+      once-per-threshold 15 percent cue first; honest loaded range for the
+      range-based alternate is still open).
+
 - [x] More music on the Terrestrial dial (owner, 2026-10-03, from player
       feedback): 156 commercial music stations in 35 states, each heard
       playing and naming itself from an open network before it went in.
