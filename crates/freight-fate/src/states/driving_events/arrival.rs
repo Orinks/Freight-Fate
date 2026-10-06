@@ -18,7 +18,8 @@ use crate::states::driving_menu_states::{replace_drive_with, DriveRef, FacilityA
 use crate::states::driving_updates::live;
 
 impl DrivingState {
-    /// Once-per-threshold low-fuel cue at about 15 percent remaining.
+    /// Once-per-threshold low-fuel cue at about 15 percent remaining, naming
+    /// the next fuel stop on the route (or that none is listed).
     ///
     /// Speaks on the Safety channel (heard at quiet and urgent_only), plays
     /// the same short UI warning other mid-drive safety cues use, and latches
@@ -39,13 +40,37 @@ impl DrivingState {
         }
         self.low_fuel_said = true;
         let pct = fraction * 100.0;
+        let next_fuel = self.next_fuel_text();
         let message = if self.terse_speech(ctx) {
-            format!("Fuel low: {pct:.0} percent.")
+            format!("Fuel low: {pct:.0} percent. {next_fuel}")
         } else {
-            format!("Low fuel warning, {pct:.0} percent. Find a fuel stop soon.")
+            format!("Low fuel warning, {pct:.0} percent. {next_fuel}")
         };
         ctx.audio.play("ui/warning");
         ctx.say_event_with(message, SayEvent::new().category(SpeechCategory::Safety));
+    }
+
+    /// Where the next fuel is: the first stop ahead on the route that sells
+    /// it, by its spoken name and route distance. The route's stops are
+    /// already filtered to this direction and this rig, so the answer is one
+    /// the driver can actually pull into. No range math: whether the tank
+    /// reaches it is the driver's call, and F still speaks the range.
+    pub fn next_fuel_text(&self) -> String {
+        let position = self.trip.position_mi;
+        let next = self
+            .trip
+            .stops
+            .iter()
+            .filter(|stop| stop.at_mi > position && stop.sells_fuel())
+            .min_by(|a, b| a.at_mi.total_cmp(&b.at_mi));
+        match next {
+            Some(stop) => format!(
+                "Next fuel: {}, {}.",
+                stop.spoken_name(),
+                self.trip.ahead_text(stop.at_mi - position)
+            ),
+            None => "No fuel stop listed before your destination.".to_string(),
+        }
     }
 
     /// `_handle_out_of_fuel()`.

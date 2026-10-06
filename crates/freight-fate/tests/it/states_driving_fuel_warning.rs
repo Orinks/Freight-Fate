@@ -4,6 +4,7 @@
 use ff_core::data::world::get_world;
 use ff_core::models::jobs::make_reposition_job;
 use ff_core::models::profile::Profile;
+use ff_core::sim::trip_models::RoadStop;
 use ff_core::sim::weather::WeatherKind;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::driving::DrivingState;
@@ -32,7 +33,30 @@ fn a_drive(app: &mut TestApp) -> DrivingState {
     drive.trip.weather.current = WeatherKind::Clear;
     drive.tutorial = None;
     drive.departure_checked = true;
+    // A known road ahead: a truck-parking lot with no pumps, then a travel
+    // center that sells fuel, so the warning's "next fuel" is predictable.
+    drive.trip.position_mi = 0.0;
+    drive.trip.stops = vec![
+        a_stop(
+            "The 115 Truck Stop",
+            10.0,
+            "truck_parking",
+            &["park", "save", "break", "sleep"],
+        ),
+        a_stop(
+            "Pilot Travel Center",
+            23.0,
+            "travel_center",
+            &["park", "save", "fuel", "food", "break", "sleep"],
+        ),
+    ];
     drive
+}
+
+fn a_stop(name: &str, at_mi: f64, stop_type: &str, actions: &[&str]) -> RoadStop {
+    let mut stop = RoadStop::new(name, at_mi, stop_type);
+    stop.actions = actions.iter().map(|a| a.to_string()).collect();
+    stop
 }
 
 fn set_fuel_fraction(drive: &mut DrivingState, fraction: f64) {
@@ -74,7 +98,7 @@ fn test_crossing_fifteen_percent_speaks_once() {
     assert_eq!(lines.len(), 1, "{lines:?}");
     assert_eq!(
         lines[0],
-        "Low fuel warning, 15 percent. Find a fuel stop soon."
+        "Low fuel warning, 15 percent. Next fuel: Pilot Travel Center, 23 miles."
     );
     assert!(drive.low_fuel_said);
     assert!(
@@ -137,7 +161,7 @@ fn test_refilling_above_then_dropping_again_speaks_again() {
     assert_eq!(lines.len(), 1, "{lines:?}");
     assert_eq!(
         lines[0],
-        "Low fuel warning, 14 percent. Find a fuel stop soon."
+        "Low fuel warning, 14 percent. Next fuel: Pilot Travel Center, 23 miles."
     );
     assert!(drive.low_fuel_said);
 }
@@ -155,7 +179,10 @@ fn test_urgent_only_still_speaks_the_low_fuel_warning() {
 
     let lines = low_fuel_lines(&app);
     assert_eq!(lines.len(), 1, "{lines:?}");
-    assert_eq!(lines[0], "Fuel low: 12 percent.");
+    assert_eq!(
+        lines[0],
+        "Fuel low: 12 percent. Next fuel: Pilot Travel Center, 23 miles."
+    );
 }
 
 #[test]
@@ -198,4 +225,50 @@ fn test_empty_tank_rescue_still_runs_and_skips_the_low_fuel_cue() {
     // clears on the next check and a later drop can warn again.
     drive.check_low_fuel_warning(&mut app.ctx);
     assert!(!drive.low_fuel_said);
+}
+
+#[test]
+fn test_the_warning_skips_stops_behind_and_stops_without_pumps() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app);
+    drive.trip.stops.insert(
+        0,
+        a_stop(
+            "Behind Travel Center",
+            2.0,
+            "travel_center",
+            &["park", "fuel", "food"],
+        ),
+    );
+    drive.trip.position_mi = 5.0;
+    set_fuel_fraction(&mut drive, 0.12);
+    drive.low_fuel_said = false;
+    app.clear_speech();
+
+    drive.check_low_fuel_warning(&mut app.ctx);
+
+    assert_eq!(
+        low_fuel_lines(&app),
+        vec!["Low fuel warning, 12 percent. Next fuel: Pilot Travel Center, 18 miles.".to_string()]
+    );
+}
+
+#[test]
+fn test_the_warning_says_when_no_fuel_stop_is_listed_ahead() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app);
+    drive.trip.stops.retain(|stop| !stop.sells_fuel());
+    set_fuel_fraction(&mut drive, 0.12);
+    drive.low_fuel_said = false;
+    app.clear_speech();
+
+    drive.check_low_fuel_warning(&mut app.ctx);
+
+    assert_eq!(
+        low_fuel_lines(&app),
+        vec![
+            "Low fuel warning, 12 percent. No fuel stop listed before your destination."
+                .to_string()
+        ]
+    );
 }

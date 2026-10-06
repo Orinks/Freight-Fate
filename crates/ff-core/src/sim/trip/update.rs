@@ -472,6 +472,7 @@ impl Trip {
                     parking_normal: &parking_normal,
                     parking_certainty: &stop.parking,
                     exit_hint: &self.exit_hint,
+                    fuel: stop.fuel_callout(),
                 });
                 // The plan flag rides the event so the driving layer can rank
                 // the stop the player chose above ambient roadside chatter.

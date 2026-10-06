@@ -176,6 +176,11 @@ impl RestStopState {
         if !parking_text.is_empty() {
             parts.push(format!("{parking_text}."));
         }
+        if !self.stop.sells_fuel() {
+            // Said on arrival too: a driver who pulled in low needs to know
+            // before the menu, not by finding no Refuel row (issue #272).
+            parts.push("No fuel here.".to_string());
+        }
         // Check real-time parking availability if enabled
         if ctx.settings.real_parking && d.trip.parking_provider.is_some() {
             if let Some(availability) = check_parking_availability(d) {

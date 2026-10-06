@@ -152,6 +152,7 @@ mod states_driving_rollover;
 mod states_driving_speech_ladder;
 mod states_driving_speed_keeper_sweep;
 mod states_driving_status_screens;
+mod states_driving_stop_fuel;
 mod states_driving_stop_menus;
 mod states_driving_street_controls;
 mod states_driving_traffic_rate;

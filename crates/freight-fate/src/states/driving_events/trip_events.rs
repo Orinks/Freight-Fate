@@ -740,6 +740,7 @@ impl DrivingState {
                                 parking_normal: &stop.parking_text(),
                                 parking_certainty: &stop.parking,
                                 exit_hint: &exit_hint,
+                                fuel: stop.fuel_callout(),
                             };
                             // The rung's rendering, as the line had when it
                             // queued: re-rendered as the normal form, quiet
