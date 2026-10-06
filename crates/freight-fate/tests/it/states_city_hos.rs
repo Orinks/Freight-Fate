@@ -528,6 +528,10 @@ fn test_the_load_you_sleep_for_is_still_on_the_board_after_the_rest() {
     });
     let index = index.expect("the warned load is on the new day's board");
     assert_eq!(focused, index, "the board opens on the load you slept for");
+    assert!(warned.deadline_covers_rest, "posted on the tired clock");
+    // Rested, the offer no longer claims your hours will force a rest.
+    let carried = with_state::<JobBoardState, _>(&app, |b, _| b.jobs[index].clone());
+    assert!(!carried.deadline_covers_rest);
 
     // Rested now: Enter takes it with no second warning.
     app.clear_speech();

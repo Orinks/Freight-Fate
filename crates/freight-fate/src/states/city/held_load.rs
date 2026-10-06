@@ -9,7 +9,7 @@
 use serde_json::{Map, Value};
 
 use ff_core::data::world::World;
-use ff_core::models::jobs::{job_from_payload, job_payload, normalize_job_cities, Job};
+use ff_core::models::jobs::{job_from_payload, job_payload, normalize_job_cities, plan_hos, Job};
 use ff_core::models::profile::Profile;
 
 use crate::states::city_pickup::job_origin_exists;
@@ -50,7 +50,22 @@ pub(crate) fn held_load(p: &Profile, world: &World) -> Option<Job> {
     }
     let mut job = job_from_payload(held.get("job")?.as_object()?)?;
     normalize_job_cities(&mut job, world);
-    job_origin_exists(&job, world).then_some(job)
+    if !job_origin_exists(&job, world) {
+        return None;
+    }
+    // The offer was written on the tired clock. Its deadline stays (it only
+    // errs generous), but the line about a forced rest is re-judged on the
+    // hours the driver has now, the way the board judged it when posted.
+    if job.deadline_covers_rest {
+        let route = world
+            .supported_route(&job.origin, &job.destination, None)
+            .ok()
+            .flatten();
+        job.deadline_covers_rest =
+            plan_hos(job.distance_mi, route.as_ref(), Some(world), Some(&p.hos)).sleeps
+                > plan_hos(job.distance_mi, route.as_ref(), Some(world), None).sleeps;
+    }
+    Some(job)
 }
 
 /// Put the held load on a freshly built board and record where it landed
