@@ -255,7 +255,12 @@ pub fn hazard_call(call: &str, body: &str) -> SpokenMessage {
 /// "Brake!" stays in terse for the reason it always has (see
 /// `TONE_IMPLIED_CALLS`): quiet must not leave a noun phrase with no verb.
 pub fn in_lane_hazard_call(body: &str, side: OpenSide) -> SpokenMessage {
-    let answer = side.spoken();
+    in_lane_hazard_call_named(body, side, side.spoken())
+}
+
+/// [`in_lane_hazard_call`] with the lane answer already worded for the road
+/// (see `OpenSide::spoken_from`).
+pub fn in_lane_hazard_call_named(body: &str, side: OpenSide, answer: &str) -> SpokenMessage {
     if side.is_open() {
         SpokenMessage::with_terse(
             format!("{HAZARD_DODGE_CALL} {body} {answer}"),
@@ -740,6 +745,27 @@ mod tests {
         assert_eq!(
             in_lane_hazard_call("Debris on the road.", OpenSide::Either).normal,
             "Change lanes or brake! Debris on the road. Either lane open."
+        );
+    }
+
+    #[test]
+    fn test_on_a_road_three_wide_the_call_names_the_lane_a_tap_lands_in() {
+        // Agent drive to Uvalde, 2026-10-06: from the right lane of three the
+        // call said "Left lane open." and the tap then said "Changing to the
+        // middle lane." The answer names the lane the L key would.
+        assert_eq!(OpenSide::Left.spoken_from(0, 3), "Middle lane open.");
+        assert_eq!(OpenSide::Right.spoken_from(2, 3), "Middle lane open.");
+        assert_eq!(OpenSide::Left.spoken_from(1, 3), "Left lane open.");
+        assert_eq!(OpenSide::Right.spoken_from(1, 3), "Right lane open.");
+        assert_eq!(OpenSide::Either.spoken_from(1, 3), "Either lane open.");
+        // Two wide, nothing changes.
+        assert_eq!(OpenSide::Left.spoken_from(0, 2), "Left lane open.");
+        assert_eq!(OpenSide::Right.spoken_from(1, 2), "Right lane open.");
+        let named = OpenSide::Left.spoken_from(0, 3);
+        assert_eq!(
+            in_lane_hazard_call_named("A sudden lane closure ahead.", OpenSide::Left, &named)
+                .normal,
+            "Change lanes or brake! A sudden lane closure ahead. Middle lane open."
         );
     }
 

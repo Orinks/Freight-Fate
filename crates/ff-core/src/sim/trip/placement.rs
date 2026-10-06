@@ -410,7 +410,13 @@ impl Trip {
                     ),
                     at_mi,
                     &landmark.category,
-                    &format!("{}.", landmark.spoken),
+                    // Landmark text is a bare name ("Lake Texoma") or, for a
+                    // billboard, whole sentences already ending in one.
+                    &if landmark.spoken.ends_with(['.', '!', '?']) {
+                        landmark.spoken.clone()
+                    } else {
+                        format!("{}.", landmark.spoken)
+                    },
                 );
                 if landmark.category == "village" {
                     if landmark.off_mi > VILLAGE_PASS_OFF_MI {
