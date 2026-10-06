@@ -6,6 +6,10 @@
 
 - **LWorks Radio is on the dial.** Upbeat hits from the nineties and two thousands, with an eighties lunch hour, wherever you drive.
 
+- **Stop callouts say whether a stop sells fuel.** You hear Fuel or No fuel as each stop comes up, and a stop with no pumps says so when you pull in. Quiet and Urgent only speech keep only No fuel.
+
+- **The low fuel warning names the next fuel stop on your route and how far away it is.** If none is listed before your destination, it says that instead.
+
 ## 1.9.2 - 2026-10-05
 
 ### Added

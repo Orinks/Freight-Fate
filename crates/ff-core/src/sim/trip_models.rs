@@ -831,6 +831,17 @@ impl RoadStop {
         typed_name(self.label(), &self.name, ": ")
     }
 
+    /// Whether a driver can buy fuel here.
+    pub fn sells_fuel(&self) -> bool {
+        self.actions.iter().any(|action| action == "fuel")
+    }
+
+    /// The fuel verdict the stop callout speaks: none for a weigh station,
+    /// which nobody expects to fuel at, otherwise whether it sells fuel.
+    pub fn fuel_callout(&self) -> Option<bool> {
+        (self.stop_type != "weigh_station").then(|| self.sells_fuel())
+    }
+
     pub fn parking_text(&self) -> String {
         let text = match self.parking.as_str() {
             "confirmed" => "confirmed truck parking",
