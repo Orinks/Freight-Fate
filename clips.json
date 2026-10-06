@@ -1461,6 +1461,36 @@
       "true_peak": -1.57
     },
     {
+      "key": "night_starhauler_01",
+      "kind": "programme",
+      "dayparts": [
+        "prime"
+      ],
+      "opener": false,
+      "title": "Starhauler (The Cola Run)",
+      "duration_s": 384.476,
+      "source_lufs": -21.07,
+      "gain_db": 3.07,
+      "peak_limited": false,
+      "lufs": -17.99,
+      "true_peak": -1.78
+    },
+    {
+      "key": "night_starhauler_02",
+      "kind": "programme",
+      "dayparts": [
+        "prime"
+      ],
+      "opener": false,
+      "title": "Starhauler (Forty Minutes)",
+      "duration_s": 398.32,
+      "source_lufs": -21.26,
+      "gain_db": 3.26,
+      "peak_limited": false,
+      "lufs": -17.99,
+      "true_peak": -1.8
+    },
+    {
       "key": "night_stories_01",
       "kind": "programme",
       "dayparts": [
