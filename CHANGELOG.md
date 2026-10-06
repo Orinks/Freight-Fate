@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.9.3 - 2026-10-06
+
 ### Added
 
 - **LWorks Radio is on the dial.** Upbeat hits from the nineties and two thousands, with an eighties lunch hour, wherever you drive.
