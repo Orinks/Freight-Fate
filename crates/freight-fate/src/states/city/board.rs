@@ -34,9 +34,10 @@ use crate::impl_state_for_menu;
 use crate::meaningful_play::MeaningfulPlayReason;
 use crate::states::base::{InputEvent, Key, Menu, MenuCore, MenuItem};
 use crate::states::city::{
-    base_menu_handle_event, first_day_guidance_active, first_dispatch_done, home_terminal,
-    launch_driving, profile, profile_mut, sleeps_needed, DrivingLaunch, LaunchAnnouncement,
-    DRIVE_PHASE_DELIVERY, DRIVE_PHASE_PICKUP, PICKUP_CHECK_IN_MIN, PICKUP_LOADING_MIN,
+    base_menu_handle_event, first_day_guidance_active, first_dispatch_done, held_load,
+    home_terminal, launch_driving, profile, profile_mut, sleeps_needed, DrivingLaunch,
+    LaunchAnnouncement, DRIVE_PHASE_DELIVERY, DRIVE_PHASE_PICKUP, PICKUP_CHECK_IN_MIN,
+    PICKUP_LOADING_MIN,
 };
 use crate::states::city_pickup::warm_route_feeds;
 use crate::states::city_pickup::{
@@ -235,6 +236,9 @@ impl JobBoardState {
         }
         if state.assigned_mode() {
             state.menu.intro_help = ASSIGNED_INTRO_HELP.to_string();
+        } else if let Some(held) = held_load::held_index(profile(ctx)) {
+            // The load the driver went to sleep for is where they left it.
+            state.menu.index = held.min(state.jobs.len().saturating_sub(1));
         } else if let Some(recommended) = state.recommended_job_index(ctx) {
             if state.recommendation_label(ctx).is_some() {
                 state.menu.index = recommended;
@@ -590,6 +594,16 @@ impl JobBoardState {
             let index = queue.remove(pos);
             queue.insert(0, index);
         }
+        // The load the driver slept for comes back as the assignment,
+        // unless they have since declined it.
+        if let Some(held) = held_load::held_index(profile(ctx)) {
+            if let Some(pos) = queue.iter().position(|&index| index == held) {
+                if !declined.contains(&held) {
+                    let index = queue.remove(pos);
+                    queue.insert(0, index);
+                }
+            }
+        }
         let forced = forced_dispatch_destination();
         if !forced.is_empty() && !queue.is_empty() {
             // Playtest lever: dispatch assigns the forced-destination load
@@ -744,6 +758,8 @@ impl JobBoardState {
         }
         if self.needs_hos_confirmation(ctx, index) {
             self.confirm_risky_job = Some(index);
+            held_load::hold_for_rest(profile_mut(ctx), &job);
+            ctx.save_profile();
             ctx.audio.play("ui/warning");
             let summary = profile(ctx).hos.summary(&ctx.settings.hos_mode);
             ctx.say(&format!(
