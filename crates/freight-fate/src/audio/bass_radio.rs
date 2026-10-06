@@ -104,7 +104,10 @@ impl BassBackend {
     /// already being the one loaded: the point of the call is the position.
     pub(super) fn play_music_at(&mut self, track: &str, fade_ms: u32, start_s: f64) {
         self.cancel_radio_connect();
-        let Some((data, ext)) = asset_bytes(&format!("music/{track}"), MUSIC_EXTENSIONS) else {
+        // Channel 3000's clips live in their own pack under `c3k/`; every
+        // other track is under `music/`.
+        let key = ff_core::channel3000::music_asset_key(track);
+        let Some((data, ext)) = asset_bytes(&key, MUSIC_EXTENSIONS) else {
             log::warn!("Missing music track: {track}");
             return;
         };

@@ -41,6 +41,11 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Channel 3000 on 87.7 (owner, 2026-10-06): the owner's TV programming on
+      a daypart schedule by the truck's local hour, from its own
+      `channel3000.pak`, opened on first tune-in; off the dial without the
+      pack, and in no changelog or manual (`ff_core::channel3000`).
+
 - [x] Billboards that notice the drive (owner, 2026-09-30): when an
       everyday pool sign comes up, Big Jim answers a collision, a citation
       or an out-of-service order since the last one, once; church signs and

@@ -12,6 +12,10 @@
 //! `assets/music.pak` is downloaded by `tools/build_release.py`. Tests can explicitly disable the default packs and exercise the loose-file
 //! fallback.
 //!
+//! A third pack, `channel3000.pak`, carries Channel 3000's clips under
+//! `c3k/`. It is never read into memory or opened at startup: see
+//! [`streamed`], which opens it on the first `c3k/` lookup.
+//!
 //! `tools/pack_sounds.py` writes both packs; the audio engine reads them
 //! through [`open_default`], which returns one object that routes a lookup to
 //! whichever pack carries that name -- callers do not need to know the packs
@@ -32,6 +36,9 @@ use std::sync::{Arc, Mutex};
 
 use once_cell::sync::Lazy;
 use zip::write::SimpleFileOptions;
+
+mod streamed;
+pub use streamed::{channel3000_pack_available, LazyPack, StreamedPack};
 use zip::{CompressionMethod, DateTime, ZipArchive, ZipWriter};
 
 pub const PACK_MAGIC: &[u8; 6] = b"FFPK1\0";
@@ -299,7 +306,12 @@ impl SoundPack {
     }
 }
 
-/// Routes a lookup between the sounds pack and the music pack by name.
+/// Routes a lookup between the sounds pack, the music pack and Channel
+/// 3000's pack by name.
+///
+/// `c3k/...` names go to Channel 3000's [`LazyPack`], which opens its file
+/// on the first such lookup and never otherwise; [`CombinedPack::names`]
+/// leaves it out for the same reason.
 ///
 /// Offers the read-only slice of [`SoundPack`] (`names`/`has`/`read`) so a
 /// caller that got a single pack back before keeps working unchanged: a
@@ -311,11 +323,26 @@ impl SoundPack {
 pub struct CombinedPack {
     sounds: Option<Arc<SoundPack>>,
     music: Option<Arc<SoundPack>>,
+    channel3000: Option<Arc<LazyPack>>,
 }
 
 impl CombinedPack {
     pub fn new(sounds: Option<Arc<SoundPack>>, music: Option<Arc<SoundPack>>) -> Self {
-        Self { sounds, music }
+        Self {
+            sounds,
+            music,
+            channel3000: None,
+        }
+    }
+
+    /// Route `c3k/` names to `pack`, unopened until one is asked for.
+    pub fn with_channel3000(mut self, pack: Arc<LazyPack>) -> Self {
+        self.channel3000 = Some(pack);
+        self
+    }
+
+    fn is_channel3000(name: &str) -> bool {
+        name.starts_with(crate::channel3000::CLIP_KEY_PREFIX)
     }
 
     fn pack_for(&self, name: &str) -> Option<&SoundPack> {
@@ -335,10 +362,16 @@ impl CombinedPack {
     }
 
     pub fn has(&self, name: &str) -> bool {
+        if Self::is_channel3000(name) {
+            return self.channel3000.as_ref().is_some_and(|pack| pack.has(name));
+        }
         self.pack_for(name).is_some_and(|pack| pack.has(name))
     }
 
     pub fn read(&self, name: &str) -> Option<Vec<u8>> {
+        if Self::is_channel3000(name) {
+            return self.channel3000.as_ref().and_then(|pack| pack.read(name));
+        }
         self.pack_for(name).and_then(|pack| pack.read(name))
     }
 }
@@ -392,6 +425,8 @@ fn capitalize(label: &str) -> String {
 pub struct PackLoader {
     sounds_path: PathBuf,
     music_path: PathBuf,
+    /// Channel 3000's pack: handed to every combined view unopened.
+    channel3000: Option<Arc<LazyPack>>,
     /// `None` until a load has been attempted; then the combined view, or
     /// `None` when both packs are unusable.
     state: Mutex<Option<Option<Arc<CombinedPack>>>>,
@@ -404,10 +439,17 @@ impl PackLoader {
         Self {
             sounds_path: sounds_path.into(),
             music_path: music_path.into(),
+            channel3000: None,
             state: Mutex::new(None),
             prefetch_started: AtomicBool::new(false),
             loads: AtomicUsize::new(0),
         }
+    }
+
+    /// Route `c3k/` names to `pack` in every view this loader opens.
+    pub fn with_channel3000(mut self, pack: Arc<LazyPack>) -> Self {
+        self.channel3000 = Some(pack);
+        self
     }
 
     /// How many times the packs were actually read off disk (tests pin this
@@ -432,8 +474,16 @@ impl PackLoader {
         self.loads.fetch_add(1, Ordering::SeqCst);
         let sounds = load_one_pack(&self.sounds_path, "sound");
         let music = load_one_pack(&self.music_path, "music");
-        let combined = if sounds.is_some() || music.is_some() {
-            Some(Arc::new(CombinedPack::new(sounds, music)))
+        let channel3000 = self
+            .channel3000
+            .as_ref()
+            .filter(|pack| pack.path().exists());
+        let combined = if sounds.is_some() || music.is_some() || channel3000.is_some() {
+            let mut combined = CombinedPack::new(sounds, music);
+            if let Some(pack) = channel3000 {
+                combined = combined.with_channel3000(Arc::clone(pack));
+            }
+            Some(Arc::new(combined))
         } else {
             None
         };
@@ -540,10 +590,15 @@ pub fn default_pack_dir() -> PathBuf {
 
 static DEFAULT_LOADER: Lazy<Arc<PackLoader>> = Lazy::new(|| {
     let dir = default_pack_dir();
-    Arc::new(PackLoader::new(
-        dir.join(DEFAULT_PACK_NAME),
-        dir.join(DEFAULT_MUSIC_PACK_NAME),
-    ))
+    Arc::new(
+        PackLoader::new(
+            dir.join(DEFAULT_PACK_NAME),
+            dir.join(DEFAULT_MUSIC_PACK_NAME),
+        )
+        .with_channel3000(Arc::new(LazyPack::new(
+            dir.join(crate::channel3000::CHANNEL_3000_PACK_NAME),
+        ))),
+    )
 });
 
 fn packs_disabled() -> bool {

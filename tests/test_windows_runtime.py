@@ -180,6 +180,7 @@ class WindowsRuntimeTests(unittest.TestCase):
             "USER_MANUAL.md",
             "freight_fate/sounds.pak",
             "freight_fate/music.pak",
+            "freight_fate/channel3000.pak",
             "freight_fate/data/world.ffdata",
         ]
         for missing in (True, False):

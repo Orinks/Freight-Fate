@@ -308,7 +308,11 @@ fn test_ff_music_stations_share_the_ff_dial_group() {
         .iter()
         .filter(|s| !s.playlist.is_empty() && !s.real_stream && s.id != SAFE_ROUTE_PLAYLIST)
         .collect();
-    assert_eq!(playlist_backed.len(), 18);
+    // 19 since 2026-10-06: Channel 3000 (87.7) joined the Freight Fate
+    // stations. Its "playlist" names its own schedule rather than a music
+    // pool, but it is ours, plays no stream, and leaves the dial with the
+    // others in Synthesized music mode.
+    assert_eq!(playlist_backed.len(), 19);
     assert!(playlist_backed.iter().all(|s| dial_group(s) == 1));
     assert!(playlist_backed.iter().all(|s| s.always_available));
 }
@@ -491,8 +495,13 @@ fn test_catalog_entries_have_spoken_identity() {
             problems.push(format!("{where_}: no name"));
         }
         // Web stations are named, not lettered; everything else leads with a
-        // call sign, and display_name copes with either shape.
-        if station.call_sign.is_empty() && station.source_type != "web" {
+        // call sign, and display_name copes with either shape. Channel 3000
+        // is named too: it is a television channel heard on the radio, and
+        // a made-up call sign would squat a real FCC one.
+        if station.call_sign.is_empty()
+            && station.source_type != "web"
+            && station.id != crate::channel3000::CHANNEL_3000_ID
+        {
             problems.push(format!("{where_}: no call sign and not a web station"));
         }
         let display = station.display_name();
