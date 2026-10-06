@@ -76,6 +76,24 @@ impl OpenSide {
             OpenSide::Neither => "No lane open.",
         }
     }
+
+    /// [`Self::spoken`] for a truck in `lane` of `count`, naming the open
+    /// neighbour the way the L key and a lane change do: on a road three
+    /// wide, the lane left of the right lane is the middle lane, and "Left
+    /// lane open." then a move into "the middle lane" read as two different
+    /// lanes (agent drive to Uvalde, 2026-10-06).
+    pub fn spoken_from(self, lane: i64, count: i64) -> String {
+        let neighbour = match self {
+            OpenSide::Left => lane + 1,
+            OpenSide::Right => lane - 1,
+            OpenSide::Either | OpenSide::Neither => return self.spoken().to_string(),
+        };
+        let mut name = crate::sim::lane::lane_label(neighbour, count).to_string();
+        if let Some(first) = name.get_mut(0..1) {
+            first.make_ascii_uppercase();
+        }
+        format!("{name} lane open.")
+    }
 }
 
 /// One grounded road hazard and the conditions under which it can occur.

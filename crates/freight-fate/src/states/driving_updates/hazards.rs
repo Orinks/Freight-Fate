@@ -631,7 +631,7 @@ impl DrivingState {
             let hint = if side.is_open() {
                 format!(
                     "It is still in your lane. Nearly stop, or change lanes. {}",
-                    side.spoken()
+                    self.trip.open_side_spoken(side)
                 )
             } else {
                 "It is still in your lane. Nearly stop.".to_string()
