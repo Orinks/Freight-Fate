@@ -6,6 +6,10 @@
 
 - **LWorks Radio is on the dial.** Upbeat hits from the nineties and two thousands, with an eighties lunch hour, wherever you drive.
 
+### Fixed
+
+- **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now says it waits until you stop.
+
 ## 1.9.2 - 2026-10-05
 
 ### Added

@@ -597,33 +597,7 @@ impl Trip {
                 full
             };
         }
-        if self.pull_over_active {
-            // Lights behind you: the whole encounter runs on the real clock.
-            return full.min(1.0);
-        }
-        if self.controlled_ramp || self.controlled_turn || self.dock_run_in {
-            // A ramp ending in a light or a sign, a street corner, or the
-            // dock run-in plays out in real time: the warning must buy human
-            // reaction seconds, not compressed ones.
-            return full.min(1.0);
-        }
-        if self.severe_curve_decompression() {
-            // Same law for a hard bend (owner, 2026-07-24).
-            return full.min(1.0);
-        }
-        if self.curve_shed_active {
-            // And while curve assistance is still shedding for one. The law
-            // above lets go at the advisory plus the pacenote margin; the
-            // assist aims at the advisory itself, so the last three miles an
-            // hour were shed on the compressed clock, where the road left
-            // passes seventeen times faster than the truck slows and the
-            // only profile that still lands on the number is a full
-            // application (AZ-260 bench trace, 2026-09-18: 0.35 of the
-            // pedal one frame, all of it the next, to take off 3 mph).
-            return full.min(1.0);
-        }
-        if self.armed_exit_decompression() {
-            // And for a signalled exit (Shane, 2026-08-15).
+        if self.real_time_override().is_some() {
             return full.min(1.0);
         }
         if self.exit_approach_release_s > 0.0 {
@@ -640,6 +614,52 @@ impl Trip {
         let real = full.min(1.0);
         let toward_real = self.turn_clock.clamp(0.0, 1.0);
         paced + (real - paced) * toward_real
+    }
+
+    /// Why the clock is pinned to real time this frame, or None when it is
+    /// paced. `effective_time_scale` answers `full.min(1.0)` for every one
+    /// of these, so the name is what a session log says when a tester
+    /// reports the clock stuck at real time (issue 293). Parked waiting is
+    /// checked before this in `effective_time_scale` and is not a pin.
+    pub fn real_time_override(&self) -> Option<&'static str> {
+        if self.pull_over_active {
+            // Lights behind you: the whole encounter runs on the real clock.
+            return Some("police stop");
+        }
+        if self.controlled_ramp {
+            // A ramp ending in a light or a sign, the acceleration lane and
+            // the merge after it: the warning must buy human reaction
+            // seconds, not compressed ones. The driving state names which.
+            return Some("controlled ramp");
+        }
+        if self.controlled_turn {
+            // A street corner, from its brake point in.
+            return Some("street corner");
+        }
+        if self.dock_run_in {
+            // The run-in to the dock.
+            return Some("dock run-in");
+        }
+        if self.severe_curve_decompression() {
+            // Same law for a hard bend (owner, 2026-07-24).
+            return Some("hard bend");
+        }
+        if self.curve_shed_active {
+            // And while curve assistance is still shedding for one. The law
+            // above lets go at the advisory plus the pacenote margin; the
+            // assist aims at the advisory itself, so the last three miles an
+            // hour were shed on the compressed clock, where the road left
+            // passes seventeen times faster than the truck slows and the
+            // only profile that still lands on the number is a full
+            // application (AZ-260 bench trace, 2026-09-18: 0.35 of the
+            // pedal one frame, all of it the next, to take off 3 mph).
+            return Some("curve assist shedding speed");
+        }
+        if self.armed_exit_decompression() {
+            // And for a signalled exit (Shane, 2026-08-15).
+            return Some("signalled exit");
+        }
+        None
     }
 
     pub fn imperial(&self) -> bool {
