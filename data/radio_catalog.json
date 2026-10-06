@@ -34,6 +34,22 @@
       "host": "nightline"
     },
     {
+      "id": "channel-3000",
+      "call_sign": "",
+      "name": "Channel 3000",
+      "format": "television",
+      "source": "Freight Fate original station, the sound of television channel 6",
+      "source_type": "built_in",
+      "station_type": "built_in",
+      "frequency_mhz": 87.7,
+      "safe_for_streaming": true,
+      "always_available": true,
+      "real_stream": false,
+      "supported": true,
+      "playlist": "channel3000",
+      "notes": "An FM radio can pick up analog TV channel 6's sound at 87.7. Its schedule is channel3000.json and its audio is channel3000.pak; the station leaves the dial when the pack is missing. No call sign: a fictional one must not squat a real FCC call sign."
+    },
+    {
       "id": "ff-safety-satellite",
       "call_sign": "SAT",
       "name": "Safe Satellite Fallback",
