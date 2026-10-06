@@ -6,6 +6,10 @@
 
 - **LWorks Radio is on the dial.** Upbeat hits from the nineties and two thousands, with an eighties lunch hour, wherever you drive.
 
+### Fixed
+
+- **The load you sleep for after an hours warning stays on the dispatch board.** It used to vanish when the rest ran past midnight.
+
 ## 1.9.2 - 2026-10-05
 
 ### Added
