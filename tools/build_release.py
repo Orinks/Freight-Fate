@@ -626,6 +626,7 @@ RUST_BAKE_BIN = "ff-bake"
 # so a half-migrated build that ships both is caught rather than shipped.
 RUST_BAKED_SOURCE_FILES = (
     "buffs.json",
+    "channel3000.json",
     "city_services.json",
     "facility_approaches.json",
     "facility_endpoints.json",
