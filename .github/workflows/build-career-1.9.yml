@@ -224,7 +224,10 @@ jobs:
     needs: prepare
     if: needs.prepare.outputs.should_build == 'true'
     runs-on: macos-26
-    timeout-minutes: 60
+    # Notarization waits up to 45 minutes (tools/build_release.py) and starts
+    # about 16 minutes in, so the job outlasts it and a slow Apple queue ends
+    # in Apple's own verdict and log, not a GitHub timeout (v1.9.3 hit 60).
+    timeout-minutes: 75
     env:
       FREIGHT_FATE_NO_SPEECH: "1"
       SDL_VIDEODRIVER: dummy
