@@ -59,6 +59,11 @@
    "id": "rb-web-ac721368-0ba0-4b89-b895-010b4dec5720",
    "name": "K103",
    "why": "read: the same iHeart stream (zc1957) as the curated kkcw-portland (K103), on a pinned edge host the URL match does not fold. Checked 2026-10-03."
+  },
+  {
+   "id": "rb-web-fd3b96dd-3b69-40fe-9b14-cab243089239",
+   "name": "LWorks Radio",
+   "why": "assumed: the same station as the curated lworks-radio. Both carry the name LWorks Radio, and this address is on the station's own domain (l-works.net). Not probed: the cloud machine that made this change could not reach it. Added 2026-10-06."
   }
  ],
  "notes": "Hand curation the importer cannot derive, applied by tools/import_radio_catalog.py on top of what it builds. Every entry carries a why, and each one is a judgement about a single station: a name the source mangled past any rule, a format its keyword tags do not give, or a station the directory lists twice. Rules that hold for many stations belong in the cleaners instead, not here. An id no longer in the build is an error, not a no-op: the tool says so, so a stale entry is noticed rather than silently ignored.",

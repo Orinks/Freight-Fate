@@ -16670,6 +16670,23 @@
       "notes": "Curated 2026-10-03 at the owner's ask: a station for truckers belongs on the curated web list. The 192k MP3 /listen mount played with the BASS user agent from a GitHub runner on 2026-10-03 and named itself 'Truckers Radio USA'. Replaces the directory row, which carried the 64k AAC /low mount."
     },
     {
+      "id": "lworks-radio",
+      "call_sign": "",
+      "name": "LWorks Radio",
+      "format": "hot adult contemporary",
+      "source": "the station's own site, www.l-works.net/radio",
+      "source_type": "web",
+      "station_type": "web",
+      "stream_url": "http://lerven.me:8000/radio",
+      "stream_format": "mp3",
+      "codec": "mp3",
+      "safe_for_streaming": false,
+      "always_available": true,
+      "real_stream": true,
+      "supported": true,
+      "notes": "Added 2026-10-06 at the owner's ask. The stream refused connections from the owner's machine that day. Probed 2026-10-06 from the cloud build machine with tools/check_radio_streams.py's probe: dead, timed out, from a network that may not reach port 8000, so not a verdict on the station. The station's page also offers http://lerven.me:8000/hls/stream.m3u8. Replaces the directory row, which carried https://radio.l-works.net/listen."
+    },
+    {
       "id": "ktst-oklahoma-city",
       "call_sign": "KTST",
       "name": "101.9 The Twister",
