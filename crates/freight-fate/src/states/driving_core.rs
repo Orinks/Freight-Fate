@@ -775,6 +775,8 @@ impl RadioPlaybackBackend for DrivingRadioBackend<'_> {
         if station.fallback {
             self.driving.radio_station_id = station.id.clone();
             self.ctx.audio.stop_music_with(600);
+        } else if DrivingState::is_channel3000(station) {
+            self.driving.start_channel3000(self.ctx, 900);
         } else {
             self.driving.start_station_rotation(self.ctx, station, 900);
         }
