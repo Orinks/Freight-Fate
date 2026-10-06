@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 1.9.3 - 2026-10-06
+
+### Added
+
+- **LWorks Radio is on the dial.** Upbeat hits from the nineties and two thousands, with an eighties lunch hour, wherever you drive.
+
+### Fixed
+
+- **The load you sleep for after an hours warning stays on the dispatch board.** It used to vanish when the rest ran past midnight.
+
+- **On a three-lane road, a hazard call names the lane you can move into.** From the right lane it now says middle lane open, matching the lane change.
+
+- **Roadside billboards end with a single period.** Some used to end with two, which a screen reader could read as dot dot.
+
 ## 1.9.2 - 2026-10-05
 
 ### Added

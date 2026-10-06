@@ -168,6 +168,10 @@ pub struct DrivingState {
     // one (or to nothing at all), so tuning back in has to land where it got
     // to rather than restarting its running order.
     pub radio_airtime_s: f64,
+    // Channel 3000's running order (None when the build has no schedule for
+    // it), and the clip of it the cab last started.
+    pub channel3000: Option<ff_core::channel3000::Schedule>,
+    pub channel3000_serial: u64,
     // Personal playlist stations: where each playlist left off this drive,
     // and a hold between entries so neither a fade-in nor a stream still
     // connecting ever reads as a finished track.

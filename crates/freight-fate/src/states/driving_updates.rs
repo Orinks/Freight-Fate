@@ -45,6 +45,7 @@ pub mod lanes;
 pub mod live_sources;
 pub mod pending;
 pub mod radio;
+pub mod radio_channel3000;
 pub mod radio_synth;
 pub mod stops;
 

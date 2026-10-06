@@ -498,7 +498,7 @@ def test_cargo_command_honours_the_target_dir(tmp_path):
 
 
 def test_prepare_rust_release_dependencies_fetches_bass_then_music(monkeypatch):
-    """Release builds restore native audio before fetching the music pack."""
+    """Release builds restore native audio before fetching the music and Channel 3000 packs."""
     build_release = load_build_release_module()
     calls = []
     monkeypatch.setattr(
@@ -507,12 +507,16 @@ def test_prepare_rust_release_dependencies_fetches_bass_then_music(monkeypatch):
         lambda command, **kwargs: calls.append((command, kwargs)),
     )
     monkeypatch.setattr(build_release, "ensure_music_pack", lambda: calls.append(("music", {})))
+    monkeypatch.setattr(
+        build_release, "ensure_channel3000_pack", lambda: calls.append(("channel3000", {}))
+    )
 
     build_release.prepare_rust_release_dependencies()
 
     assert calls[0][0] == [build_release.sys.executable, str(build_release.TOOLS / "fetch_bass.py")]
     assert calls[0][1] == {"cwd": build_release.ROOT, "check": True}
     assert calls[1][0] == "music"
+    assert calls[2][0] == "channel3000"
 
 
 def test_windows_release_wrapper_is_the_complete_beginner_command():
@@ -654,6 +658,7 @@ def test_macos_stage_is_a_player_ready_app_bundle(tmp_path, monkeypatch):
     track_everything(tmp_path)
     (package_dir / "assets" / "sounds.pak").write_bytes(b"FFPK1 sounds")
     (package_dir / "assets" / "music.pak").write_bytes(b"FFPK1 music")
+    (package_dir / "assets" / "channel3000.pak").write_bytes(b"FFPK1 c3k")
     profile_dir = tmp_path / "target" / "release"
     make_macos_profile(profile_dir)
     baked = make_container(tmp_path / "world.ffdata", build_release)
@@ -683,6 +688,7 @@ def test_macos_stage_is_a_player_ready_app_bundle(tmp_path, monkeypatch):
     assert (resources / "freight_fate" / "data" / "world.ffdata").is_file()
     assert (resources / "freight_fate" / "sounds.pak").is_file()
     assert (resources / "freight_fate" / "music.pak").is_file()
+    assert (resources / "freight_fate" / "channel3000.pak").is_file()
     assert (resources / "SOUND_CREDITS.md").is_file()
     for name in (
         "build_info.json",
@@ -763,6 +769,7 @@ def test_macos_stage_refuses_a_dynamically_linked_sdl(tmp_path, monkeypatch):
     track_everything(tmp_path)
     (package_dir / "assets" / "sounds.pak").write_bytes(b"FFPK1 sounds")
     (package_dir / "assets" / "music.pak").write_bytes(b"FFPK1 music")
+    (package_dir / "assets" / "channel3000.pak").write_bytes(b"FFPK1 c3k")
     profile_dir = tmp_path / "target" / "release"
     make_macos_profile(profile_dir)
     baked = make_container(tmp_path / "world.ffdata", build_release)
@@ -807,6 +814,7 @@ def test_linux_stage_ships_bass_and_its_decoders(tmp_path, monkeypatch):
     track_everything(tmp_path)
     (package_dir / "assets" / "sounds.pak").write_bytes(b"FFPK1 sounds")
     (package_dir / "assets" / "music.pak").write_bytes(b"FFPK1 music")
+    (package_dir / "assets" / "channel3000.pak").write_bytes(b"FFPK1 c3k")
     profile_dir = tmp_path / "target" / "release"
     make_linux_profile(profile_dir)
     baked = make_container(tmp_path / "world.ffdata", build_release)
@@ -889,6 +897,7 @@ def test_linux_stage_refuses_a_dynamically_linked_sdl(tmp_path, monkeypatch):
     track_everything(tmp_path)
     (package_dir / "assets" / "sounds.pak").write_bytes(b"FFPK1 sounds")
     (package_dir / "assets" / "music.pak").write_bytes(b"FFPK1 music")
+    (package_dir / "assets" / "channel3000.pak").write_bytes(b"FFPK1 c3k")
     profile_dir = tmp_path / "target" / "release"
     make_linux_profile(profile_dir)
     baked = make_container(tmp_path / "world.ffdata", build_release)
@@ -933,6 +942,7 @@ def test_linux_archive_verifier_rejects_a_rust_tarball_missing_a_library(tmp_pat
         "USER_MANUAL.md",
         "freight_fate/sounds.pak",
         "freight_fate/music.pak",
+        "freight_fate/channel3000.pak",
         build_release.RUST_BAKED_FILE_ENTRY,
         *(name for name in build_release.LINUX_REQUIRED_LIBRARIES if name != missing_name),
     ]
@@ -981,6 +991,7 @@ def test_linux_archive_verifier_checks_the_arm64_rust_tarball_too(tmp_path):
         "USER_MANUAL.md",
         "freight_fate/sounds.pak",
         "freight_fate/music.pak",
+        "freight_fate/channel3000.pak",
         build_release.RUST_BAKED_FILE_ENTRY,
         *(name for name in build_release.LINUX_REQUIRED_LIBRARIES if name != "libbass.so"),
     ]
@@ -1234,6 +1245,7 @@ def test_full_macos_bundle_verification_reads_packs_from_resources(tmp_path, mon
         "SOUND_CREDITS.md",
         "freight_fate/sounds.pak",
         "freight_fate/music.pak",
+        "freight_fate/channel3000.pak",
         "freight_fate/assets/sounds/CREDITS.md",
     )
     for relative in required:
@@ -1248,7 +1260,7 @@ def test_full_macos_bundle_verification_reads_packs_from_resources(tmp_path, mon
             opened.append(Path(path))
 
         def names(self):
-            return ["engine_classic/idle.ogg", "music/road_song.ogg"]
+            return ["engine_classic/idle.ogg", "music/road_song.ogg", "c3k/day_show_01.opus"]
 
     fake_assets = type("FakeAssets", (), {"SoundPack": FakeSoundPack})
     fake_tool = type("FakeTool", (), {"_load_assets_pack": staticmethod(lambda: fake_assets)})
@@ -1260,6 +1272,7 @@ def test_full_macos_bundle_verification_reads_packs_from_resources(tmp_path, mon
     assert opened == [
         resources / "freight_fate" / "sounds.pak",
         resources / "freight_fate" / "music.pak",
+        resources / "freight_fate" / "channel3000.pak",
     ]
 
 
@@ -1299,6 +1312,7 @@ def test_macos_staged_payload_rejects_each_missing_runtime_library(
         "SOUND_CREDITS.md",
         "freight_fate/sounds.pak",
         "freight_fate/music.pak",
+        "freight_fate/channel3000.pak",
         "freight_fate/assets/sounds/CREDITS.md",
     )
     for relative in required:
@@ -1332,6 +1346,7 @@ def write_macos_archive(
         f"{payload_root}/USER_MANUAL.md": b"manual",
         f"{payload_root}/freight_fate/sounds.pak": b"sounds",
         f"{payload_root}/freight_fate/music.pak": b"music",
+        f"{payload_root}/freight_fate/channel3000.pak": b"c3k",
         f"{payload_root}/freight_fate/data/world.ffdata": b"FFDATA",
     }
     if include_icon:
@@ -1605,3 +1620,74 @@ def test_stable_mac_bundle_reports_the_tag_version(tmp_path):
         info = plistlib.load(stream)
     assert info["CFBundleShortVersionString"] == "1.9.1"
     assert info["CFBundleVersion"] == "1.9.1"
+
+
+def test_channel3000_download_config_uses_public_defaults(monkeypatch):
+    build_release = load_build_release_module()
+    monkeypatch.delenv("FREIGHT_FATE_CHANNEL3000_URL", raising=False)
+    monkeypatch.delenv("FREIGHT_FATE_CHANNEL3000_SHA256", raising=False)
+    url, sha = build_release.channel3000_download_config()
+    assert url == "https://www.orinks.net/downloads/channel3000.pak"
+    assert sha == build_release.DEFAULT_CHANNEL3000_SHA256
+    assert len(sha) == 64
+
+
+def test_channel3000_download_config_rejects_a_non_hex_digest():
+    build_release = load_build_release_module()
+    with pytest.raises(
+        RuntimeError,
+        match="FREIGHT_FATE_CHANNEL3000_SHA256 must be a 64-character hexadecimal digest",
+    ):
+        build_release.channel3000_download_config(
+            {"FREIGHT_FATE_CHANNEL3000_SHA256": "not-a-digest"}
+        )
+
+
+def test_ensure_channel3000_pack_installs_a_verified_download(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    pack = tmp_path / "channel3000.pak"
+    payload = b"approved channel 3000 pack"
+    monkeypatch.setenv("FREIGHT_FATE_CHANNEL3000_URL", "https://example.test/channel3000.pak")
+    monkeypatch.setenv(
+        "FREIGHT_FATE_CHANNEL3000_SHA256", build_release.hashlib.sha256(payload).hexdigest()
+    )
+
+    def download(request, destination):
+        assert request.full_url == "https://example.test/channel3000.pak"
+        Path(destination).write_bytes(payload)
+
+    monkeypatch.setattr(build_release, "download_to_path", download)
+    build_release.ensure_channel3000_pack(pack)
+
+    assert pack.read_bytes() == payload
+    assert list(tmp_path.glob("*.download")) == []
+
+
+def test_ensure_channel3000_pack_names_itself_when_the_download_fails(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    pack = tmp_path / "channel3000.pak"
+    monkeypatch.setenv("FREIGHT_FATE_CHANNEL3000_SHA256", "a" * 64)
+
+    def fail_download(url, _destination):
+        raise urllib.error.HTTPError(url, 404, "Not Found", None, None)
+
+    monkeypatch.setattr(build_release, "download_to_path", fail_download)
+    with pytest.raises(
+        RuntimeError, match="Channel 3000 pack download failed with HTTP status 404"
+    ):
+        build_release.ensure_channel3000_pack(pack)
+    assert not pack.exists()
+
+
+def test_ensure_channel3000_pack_rejects_a_mismatched_download(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    pack = tmp_path / "channel3000.pak"
+    monkeypatch.setenv("FREIGHT_FATE_CHANNEL3000_SHA256", "a" * 64)
+    monkeypatch.setattr(
+        build_release,
+        "download_to_path",
+        lambda _url, destination: Path(destination).write_bytes(b"unapproved pack"),
+    )
+    with pytest.raises(RuntimeError, match="channel3000.pak failed SHA-256 verification"):
+        build_release.ensure_channel3000_pack(pack)
+    assert not pack.exists()

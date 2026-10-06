@@ -51,6 +51,7 @@ use crate::states::driving::DrivingState;
 mod board;
 mod close_out;
 mod extras;
+mod held_load;
 mod terminal;
 mod truck_status;
 mod weather;
@@ -449,11 +450,14 @@ pub fn open_freight_market(ctx: &mut GameContext) -> Vec<Job> {
                 }
             }
             lever_note = add_forced_board_job(ctx, &mut board, &mut fresh);
+            let mut cache = Map::new();
+            if let Some(held) = held_load::held_load(profile(ctx), world) {
+                held_load::carry_onto_board(&mut fresh, held, &mut cache);
+            }
             let payloads: Vec<Value> = fresh
                 .iter()
                 .map(|job| Value::Object(job_payload(job)))
                 .collect();
-            let mut cache = Map::new();
             cache.insert("key".into(), key.clone());
             cache.insert("jobs".into(), Value::Array(payloads));
             profile_mut(ctx).dispatch_board_cache = Some(Value::Object(cache));

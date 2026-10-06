@@ -389,6 +389,7 @@ fn the_container_holds_every_section_and_nothing_stray() {
         "local_approaches",
         "local_geometry",
         "text:buffs.json",
+        "text:channel3000.json",
         "text:radio_catalog.json",
         "text:radio_imported.json",
         "text:street_limits.json",

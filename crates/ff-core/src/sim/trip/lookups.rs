@@ -194,6 +194,12 @@ impl Trip {
         OpenSide::from_sides(open(lane + 1), open(lane - 1))
     }
 
+    /// The lane answer for `side` at the truck's position, the open
+    /// neighbour named the way the L key names it.
+    pub fn open_side_spoken(&self, side: OpenSide) -> String {
+        side.spoken_from(self.traffic_manager.player_lane, self.lane_count_at(None))
+    }
+
     /// True when every mile of a work zone footprint -- taper included --
     /// has a second lane our side (tester report, Detroit-Mansfield,
     /// 2026-08-11).

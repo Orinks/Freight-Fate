@@ -33,6 +33,9 @@ use crate::app::GameContext;
 use crate::net::UreqTransport;
 use crate::states::driving_core::*;
 use crate::states::driving_events::billboard_moment::BillboardWatch;
+use crate::states::driving_updates::radio_channel3000::{
+    channel3000_for_drive, channel3000_playable,
+};
 
 use super::DrivingState;
 
@@ -230,6 +233,14 @@ impl DrivingState {
         let music_night = is_night(trip.local_start_hour());
 
         let mut catalog: Vec<RadioStation> = default_radio_catalog().to_vec();
+        let channel3000 = channel3000_for_drive(
+            trip_seed,
+            trip.local_start_hour(),
+            initial_airtime_s(trip_seed),
+        );
+        if !channel3000_playable(channel3000.as_ref()) {
+            catalog.retain(|station| !DrivingState::is_channel3000(station));
+        }
         catalog.extend(load_personal_playlists(&personal_playlists_dir()));
         let radio = RadioState::from_settings(
             catalog,
@@ -301,6 +312,8 @@ impl DrivingState {
             radio_track_len: None,
             // The stations were already on the air before this drive began.
             radio_airtime_s: initial_airtime_s(trip_seed),
+            channel3000,
+            channel3000_serial: 0,
             playlist_positions: HashMap::new(),
             playlist_shuffle: HashMap::new(),
             playlist_wait_s: 0.0,

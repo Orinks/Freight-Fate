@@ -82,6 +82,14 @@ ADDON_LIB_DIR = PACKAGE_DIR / SOURCE_ASSETS / "lib"
 # effect. The sha256 below is what actually gates the download either way.
 DEFAULT_MUSIC_URL = "https://www.orinks.net/downloads/music.pak"
 DEFAULT_MUSIC_SHA256 = "c56401a2a45057faba0bd4bf7d024ce7dd3908f682f4c35526643a1870cb7798"
+# Channel 3000's clips, packed by tools/build_channel3000.py from the
+# channel3000-clips branch. Its own pack rather than more of music.pak, which
+# the game reads whole into memory; the game opens this one only when the
+# radio is first tuned to 87.7. The digest is of that tool's deterministic
+# build of the branch as of 2026-10-06 (96 clips); the owner publishes the
+# file to the site, and a rebuild that changes the clips moves this pin.
+DEFAULT_CHANNEL3000_URL = "https://www.orinks.net/downloads/channel3000.pak"
+DEFAULT_CHANNEL3000_SHA256 = "af58d90b1236b8a6bd454a7466e63905cb260b17f607963619156b62ebeab32e"
 
 
 def platform_native_exts(platform_name: str = sys.platform) -> set[str]:
@@ -123,9 +131,11 @@ def stage_sound_pack(build_dir: Path, root: Path | None = None) -> None:
     root = root or runtime_root(build_dir)
     destination = root / "freight_fate" / "sounds.pak"
     music_destination = root / "freight_fate" / "music.pak"
+    channel3000_destination = root / "freight_fate" / "channel3000.pak"
     destination.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(PACKAGE_DIR / SOURCE_ASSETS / "sounds.pak", destination)
     shutil.copy2(PACKAGE_DIR / SOURCE_ASSETS / "music.pak", music_destination)
+    shutil.copy2(PACKAGE_DIR / SOURCE_ASSETS / "channel3000.pak", channel3000_destination)
     credits = PACKAGE_DIR / "assets" / "sounds" / "CREDITS.md"
     if not credits.exists():
         raise RuntimeError(f"Sound credits were not found: {credits}")
@@ -189,6 +199,10 @@ def verify_sound_packs(root: Path) -> None:
     music_pack_names = assets_pack.SoundPack(root / "freight_fate" / "music.pak").names()
     if not any(name.startswith("music/") for name in music_pack_names):
         raise RuntimeError("Packaged music pack contains no music files")
+
+    channel3000_names = assets_pack.SoundPack(root / "freight_fate" / "channel3000.pak").names()
+    if not any(name.startswith("c3k/") for name in channel3000_names):
+        raise RuntimeError("Packaged Channel 3000 pack contains no clips")
 
 
 def _is_snapshot_label(label: str) -> bool:
@@ -515,6 +529,7 @@ def verify_archive(out: Path) -> None:
         "USER_MANUAL.md",
         "freight_fate/sounds.pak",
         "freight_fate/music.pak",
+        "freight_fate/channel3000.pak",
         RUST_BAKED_FILE_ENTRY,
     )
     missing = [name for name in required if f"{payload_root}/{name}" not in entries]
@@ -611,6 +626,7 @@ RUST_BAKE_BIN = "ff-bake"
 # so a half-migrated build that ships both is caught rather than shipped.
 RUST_BAKED_SOURCE_FILES = (
     "buffs.json",
+    "channel3000.json",
     "city_services.json",
     "facility_approaches.json",
     "facility_endpoints.json",
@@ -740,15 +756,31 @@ def file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def music_download_config(env: Mapping[str, str] = os.environ) -> tuple[str, str]:
-    """Return the music-pack URL and required lowercase SHA-256 digest."""
-    url = env.get("FREIGHT_FATE_MUSIC_URL", DEFAULT_MUSIC_URL)
-    expected_sha256 = env.get("FREIGHT_FATE_MUSIC_SHA256", DEFAULT_MUSIC_SHA256).lower()
+def _pinned_download_config(
+    env: Mapping[str, str], prefix: str, default_url: str, default_sha256: str
+) -> tuple[str, str]:
+    """``<prefix>_URL`` and ``<prefix>_SHA256`` from ``env``, else the pins."""
+    url = env.get(f"{prefix}_URL", default_url)
+    expected_sha256 = env.get(f"{prefix}_SHA256", default_sha256).lower()
     if len(expected_sha256) != 64 or any(
         character not in "0123456789abcdef" for character in expected_sha256
     ):
-        raise RuntimeError("FREIGHT_FATE_MUSIC_SHA256 must be a 64-character hexadecimal digest")
+        raise RuntimeError(f"{prefix}_SHA256 must be a 64-character hexadecimal digest")
     return url, expected_sha256
+
+
+def music_download_config(env: Mapping[str, str] = os.environ) -> tuple[str, str]:
+    """Return the music-pack URL and required lowercase SHA-256 digest."""
+    return _pinned_download_config(
+        env, "FREIGHT_FATE_MUSIC", DEFAULT_MUSIC_URL, DEFAULT_MUSIC_SHA256
+    )
+
+
+def channel3000_download_config(env: Mapping[str, str] = os.environ) -> tuple[str, str]:
+    """Return the Channel 3000 pack URL and required lowercase SHA-256 digest."""
+    return _pinned_download_config(
+        env, "FREIGHT_FATE_CHANNEL3000", DEFAULT_CHANNEL3000_URL, DEFAULT_CHANNEL3000_SHA256
+    )
 
 
 def download_to_path(request: urllib.request.Request, destination: Path) -> None:
@@ -757,14 +789,19 @@ def download_to_path(request: urllib.request.Request, destination: Path) -> None
         shutil.copyfileobj(response, output, length=1024 * 1024)
 
 
-def ensure_music_pack(path: Path = PACKAGE_DIR / SOURCE_ASSETS / "music.pak") -> None:
-    """Download and verify the public music pack when it is not already present."""
-    url, expected_sha256 = music_download_config()
+def _ensure_pinned_pack(path: Path, url: str, expected_sha256: str, label: str) -> None:
+    """Download ``url`` to ``path`` unless a copy with the pinned digest is there.
+
+    The download lands in a temporary file beside ``path`` and replaces it
+    only once its digest matches, so a failed or tampered download never
+    costs the copy already there. ``label`` names the pack in errors
+    ("Music-pack download failed").
+    """
     if path.is_file() and not is_lfs_pointer(path) and file_sha256(path) == expected_sha256:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
-        dir=path.parent, prefix="music.pak.", suffix=".download", delete=False
+        dir=path.parent, prefix=f"{path.name}.", suffix=".download", delete=False
     ) as temp:
         temporary = Path(temp.name)
     try:
@@ -776,25 +813,39 @@ def ensure_music_pack(path: Path = PACKAGE_DIR / SOURCE_ASSETS / "music.pak") ->
             download_to_path(request, temporary)
         except urllib.error.HTTPError as exc:
             raise RuntimeError(
-                f"Music-pack download failed with HTTP status {exc.code}. "
+                f"{label} download failed with HTTP status {exc.code}. "
                 "Check your connection and retry the build."
             ) from exc
         except (urllib.error.URLError, ConnectionError, TimeoutError) as exc:
             detail = exc.reason if isinstance(exc, urllib.error.URLError) else str(exc)
             raise RuntimeError(
-                f"Music-pack download failed: {detail}. Check your connection and retry the build."
+                f"{label} download failed: {detail}. Check your connection and retry the build."
             ) from exc
         actual_sha256 = file_sha256(temporary)
         if actual_sha256 != expected_sha256:
             raise RuntimeError(
-                "Downloaded music.pak failed SHA-256 verification: "
+                f"Downloaded {path.name} failed SHA-256 verification: "
                 f"expected {expected_sha256}, got {actual_sha256}"
             )
         temporary.replace(path)
-        print(f"Downloaded and verified music.pak ({actual_sha256}).")
+        print(f"Downloaded and verified {path.name} ({actual_sha256}).")
     except Exception:
         temporary.unlink(missing_ok=True)
         raise
+
+
+def ensure_music_pack(path: Path = PACKAGE_DIR / SOURCE_ASSETS / "music.pak") -> None:
+    """Download and verify the public music pack when it is not already present."""
+    url, expected_sha256 = music_download_config()
+    _ensure_pinned_pack(path, url, expected_sha256, "Music-pack")
+
+
+def ensure_channel3000_pack(
+    path: Path = PACKAGE_DIR / SOURCE_ASSETS / "channel3000.pak",
+) -> None:
+    """Download and verify Channel 3000's pack when it is not already present."""
+    url, expected_sha256 = channel3000_download_config()
+    _ensure_pinned_pack(path, url, expected_sha256, "Channel 3000 pack")
 
 
 def rust_data_files(package_dir: Path = PACKAGE_DIR) -> list[Path]:
@@ -1111,6 +1162,7 @@ def prepare_rust_release_dependencies() -> None:
     """Restore native audio and the verified music pack before Cargo runs."""
     subprocess.run(fetch_bass_command(), cwd=ROOT, check=True)
     ensure_music_pack()
+    ensure_channel3000_pack()
 
 
 def stage_rust_build(
@@ -1136,6 +1188,7 @@ def stage_rust_build(
                 raise RuntimeError(f"Rust build is missing Linux player library {name}.{hint}")
     require_real_pack(PACKAGE_DIR / SOURCE_ASSETS / "sounds.pak")
     require_real_pack(PACKAGE_DIR / SOURCE_ASSETS / "music.pak")
+    require_real_pack(PACKAGE_DIR / SOURCE_ASSETS / "channel3000.pak")
     plan = plan_rust_layout(
         profile_dir,
         platform_name=platform_name,
@@ -1290,6 +1343,7 @@ def verify_rust_payload(build_dir: Path, platform_name: str = sys.platform) -> N
         root / "SOUND_CREDITS.md",
         root / "freight_fate" / "sounds.pak",
         root / "freight_fate" / "music.pak",
+        root / "freight_fate" / "channel3000.pak",
         root / "freight_fate" / LOOSE_SOUND_TREE / "CREDITS.md",
     ]
     data_dir = root / "freight_fate" / "data"

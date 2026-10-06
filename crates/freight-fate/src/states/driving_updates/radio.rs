@@ -291,6 +291,7 @@ impl DrivingState {
     /// playing. Real seconds, like the rotation it drives.
     pub fn advance_radio_airtime(&mut self, dt: f64) {
         self.radio_airtime_s += dt.max(0.0);
+        self.advance_channel3000(dt);
     }
 
     /// The key that fixes this station's running order for this trip.
@@ -393,6 +394,10 @@ impl DrivingState {
     pub fn update_radio_playback(&mut self, ctx: &mut GameContext, night: bool, dt: f64) {
         let station = self.radio.current_station();
         if station.real_stream || station.fallback {
+            return;
+        }
+        if Self::is_channel3000(&station) {
+            self.update_channel3000_playback(ctx);
             return;
         }
         if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE {
@@ -1079,6 +1084,9 @@ impl DrivingState {
         }
         let station = self.radio.current_station();
         if let Some(text) = self.synth_now_playing(ctx, &station) {
+            return text;
+        }
+        if let Some(text) = self.channel3000_now_playing(&station) {
             return text;
         }
         if !self.station_sends_song_info(&station) {
