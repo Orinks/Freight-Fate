@@ -89,7 +89,7 @@ DEFAULT_MUSIC_SHA256 = "c56401a2a45057faba0bd4bf7d024ce7dd3908f682f4c35526643a18
 # build of the branch as of 2026-10-06 (96 clips); the owner publishes the
 # file to the site, and a rebuild that changes the clips moves this pin.
 DEFAULT_CHANNEL3000_URL = "https://www.orinks.net/downloads/channel3000.pak"
-DEFAULT_CHANNEL3000_SHA256 = "eb5d9127e071f8e2fde465d8846da2c765e7565bbb8e331f11cc94cd91435b43"
+DEFAULT_CHANNEL3000_SHA256 = "af58d90b1236b8a6bd454a7466e63905cb260b17f607963619156b62ebeab32e"
 
 
 def platform_native_exts(platform_name: str = sys.platform) -> set[str]:
