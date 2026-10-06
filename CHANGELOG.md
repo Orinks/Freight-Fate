@@ -8,6 +8,8 @@
 
 ### Fixed
 
+- **The load you sleep for after an hours warning stays on the dispatch board.** It used to vanish when the rest ran past midnight.
+
 - **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now says it waits until you stop.
 
 ## 1.9.2 - 2026-10-05

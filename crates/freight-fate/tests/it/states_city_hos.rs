@@ -18,7 +18,7 @@ use ff_core::sim::hos::limits;
 use freight_fate::app::testing::TestApp;
 use freight_fate::bindings::Action;
 use freight_fate::states::base::{Key, Menu};
-use freight_fate::states::city::{CityMenuState, JobBoardState};
+use freight_fate::states::city::{open_freight_market, CityMenuState, JobBoardState};
 use freight_fate::states::city_pickup::{
     start_loaded_drive, LoadedDriveOptions, PickupFacilityState, PICKUP_CHECK_IN_MIN,
     PICKUP_LOADING_MIN,
@@ -461,6 +461,98 @@ fn test_dispatch_does_not_warn_after_hours_reset() {
         app.main_lines()
     );
     assert!(profile(&app).active_trip.is_some());
+}
+
+/// Warn on a board load at 8 pm with the shift nearly spent, sleep 10
+/// hours in the bunk room, reopen the board. Returns the warned load and
+/// the market days before and after the sleep.
+fn warn_sleep_and_reopen(app: &mut TestApp, xp: f64) -> (Job, i64, i64) {
+    app.record_audio();
+    let mut p = Profile::named_in("Slept On It", "Austin");
+    p.career.xp = xp;
+    p.game_hours = 20.0;
+    app.ctx.profile = Some(p);
+    app.ctx.settings.hos_mode = "realistic".to_string();
+    let drive_limit = limits("realistic").expect("realistic has limits").0;
+    profile_mut(app).hos.drive(drive_limit - 10.0);
+    let day_before = profile(app).market_day();
+
+    open_freight_market(&mut app.ctx);
+    app.ctx.run_deferred();
+    let count = with_state::<JobBoardState, _>(app, |b, _| b.jobs.len());
+    let mut warned = None;
+    for index in 0..count {
+        app.clear_speech();
+        with_state_mut::<JobBoardState, _>(app, |b, ctx| b.accept(ctx, index));
+        app.ctx.run_deferred();
+        if app.main_lines().iter().any(|l| l.contains("Hours warning")) {
+            warned = Some(with_state::<JobBoardState, _>(app, |b, _| {
+                b.jobs[index].clone()
+            }));
+            break;
+        }
+    }
+    let warned = warned.expect("a load on the board draws the hours warning");
+    assert!(profile(app).active_trip.is_none());
+
+    // Back to the terminal and into the bunk room, as the warning says.
+    app.ctx.pop_state();
+    app.ctx.run_deferred();
+    {
+        let p = profile_mut(app);
+        p.game_hours += 10.0;
+        p.hos.sleep();
+    }
+    let day_after = profile(app).market_day();
+    open_freight_market(&mut app.ctx);
+    app.ctx.run_deferred();
+    (warned, day_before, day_after)
+}
+
+#[test]
+fn test_the_load_you_sleep_for_is_still_on_the_board_after_the_rest() {
+    // Owner, 2026-10-06: finish a drive, pick the next load, hear the hours
+    // warning, sleep -- and the load was gone. The sleep crossed midnight,
+    // the new day rebuilt the board, and nothing remembered the pick.
+    let mut app = TestApp::new();
+    let (warned, day_before, day_after) = warn_sleep_and_reopen(&mut app, LEVEL_XP[7]);
+    assert_ne!(day_before, day_after, "the sleep crosses into a new day");
+
+    let (index, focused) = with_state::<JobBoardState, _>(&app, |b, _| {
+        let index = b.jobs.iter().position(|job| {
+            job.destination == warned.destination
+                && job.origin_location == warned.origin_location
+                && job.pay == warned.pay
+        });
+        (index, Menu::menu(b).index)
+    });
+    let index = index.expect("the warned load is on the new day's board");
+    assert_eq!(focused, index, "the board opens on the load you slept for");
+
+    // Rested now: Enter takes it with no second warning.
+    app.clear_speech();
+    with_state_mut::<JobBoardState, _>(&mut app, |b, ctx| b.accept(ctx, index));
+    app.ctx.run_deferred();
+    assert!(
+        !app.main_lines().iter().any(|l| l.contains("Hours warning")),
+        "{:?}",
+        app.main_lines()
+    );
+    assert!(profile(&app).active_trip.is_some());
+}
+
+#[test]
+fn test_an_assigned_load_you_sleep_for_is_still_the_assignment() {
+    let mut app = TestApp::new();
+    let (warned, day_before, day_after) = warn_sleep_and_reopen(&mut app, 0.0);
+    assert_ne!(day_before, day_after);
+    let assigned = with_state::<JobBoardState, _>(&app, |b, _| {
+        assert!(b.assigned_mode());
+        b.assigned_job().clone()
+    });
+    assert_eq!(assigned.destination, warned.destination);
+    assert_eq!(assigned.origin_location, warned.origin_location);
+    assert_eq!(assigned.pay, warned.pay);
 }
 
 // -- a load staged at the home yard ----------------------------------------------------
