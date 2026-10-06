@@ -16693,14 +16693,14 @@
       "source": "the station's own site, www.l-works.net/radio",
       "source_type": "web",
       "station_type": "web",
-      "stream_url": "http://lerven.me:8000/radio",
+      "stream_url": "https://radio.l-works.net/listen",
       "stream_format": "mp3",
       "codec": "mp3",
       "safe_for_streaming": false,
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Added 2026-10-06 at the owner's ask. The stream refused connections from the owner's machine that day. Probed 2026-10-06 from the cloud build machine with tools/check_radio_streams.py's probe: dead, timed out, from a network that may not reach port 8000, so not a verdict on the station. The station's page also offers http://lerven.me:8000/hls/stream.m3u8. Replaces the directory row, which carried https://radio.l-works.net/listen."
+      "notes": "Added 2026-10-06 at the owner's ask. The owner gave https://radio.l-works.net/listen as the station's address on 2026-10-06, replacing http://lerven.me:8000/radio, which refused connections from the owner's machine that day. Not probed: the cloud machine that made this change cannot reach it. Replaces the directory row, which carried the same address."
     },
     {
       "id": "ktst-oklahoma-city",
