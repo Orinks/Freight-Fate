@@ -6,6 +6,10 @@
 
 - **LWorks Radio is on the dial.** Upbeat hits from the nineties and two thousands, with an eighties lunch hour, wherever you drive.
 
+### Fixed
+
+- **Turnpike and I-95 service plazas now sit on the side they serve, with diesel and food.** The truck-banned Merritt Parkway plaza is gone.
+
 ## 1.9.2 - 2026-10-05
 
 ### Added
