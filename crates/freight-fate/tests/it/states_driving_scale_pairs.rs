@@ -1,6 +1,6 @@
 //! Two weigh stations close together: each gets its own notice and its own
 //! reminder, every line names the scale it is about, and the real West
-//! Memphis pair on a St. Louis - Memphis - Little Rock run.
+//! Memphis scales on the roads through it.
 //!
 //! A tester on that run (log, 2026-10-07) heard the open I-40 scale
 //! announced twelve miles out, then checked in at an "I-55 Weigh Station"
@@ -217,10 +217,18 @@ fn st_louis_to_little_rock_through_memphis_has_one_scale_at_west_memphis() {
     // "both": the St. Louis leg's copy put an "I-55 Weigh Station" on the
     // eastbound approach into Memphis, where Arkansas has none. Riverside is
     // westbound only, the first ramp past the Hernando de Soto Bridge.
+    // Southbound I-55 into West Memphis has its own real one, Marion, at
+    // mile 9 -- eleven miles short of Memphis, and named for its station.
     let rig = st_louis_memphis_little_rock();
     let scales = scales_near_memphis(&rig);
-    assert_eq!(scales.len(), 1, "{scales:?}");
-    let (name, at_mi) = &scales[0];
+    assert_eq!(scales.len(), 2, "{scales:?}");
+    let (marion, marion_mi) = &scales[0];
+    assert_eq!(marion, "Marion Weigh Station");
+    assert!(
+        (marion_mi - (ST_LOUIS_TO_MEMPHIS_MI - 11.3)).abs() < 0.05,
+        "Marion is 11.3 miles short of Memphis, southbound: {marion_mi}"
+    );
+    let (name, at_mi) = &scales[1];
     assert_eq!(name, "I-40 Weigh Station");
     assert!(
         (at_mi - (ST_LOUIS_TO_MEMPHIS_MI + 2.4)).abs() < 0.05,
@@ -259,6 +267,58 @@ fn real_route(cities: &[&str]) -> Rig {
     );
     *rig.drive = drive;
     rig
+}
+
+fn weigh_stations(rig: &Rig) -> Vec<(String, f64)> {
+    rig.drive
+        .trip
+        .stops
+        .iter()
+        .filter(|stop| stop.stop_type == "weigh_station")
+        .map(|stop| (stop.name.clone(), stop.at_mi))
+        .collect()
+}
+
+#[test]
+fn the_arkansas_scales_by_west_memphis_each_screen_one_direction() {
+    // Arkansas Highway Police: Lehi screens eastbound I-40 at mile 274,
+    // Marion southbound I-55 at mile 9, Riverside westbound I-40 at 283.
+    {
+        let little_rock_to_memphis = real_route(&["little_rock_ar_us", "memphis_tn_us"]);
+        let scales = weigh_stations(&little_rock_to_memphis);
+        let lehi: Vec<&(String, f64)> = scales
+            .iter()
+            .filter(|(name, _)| name == "Lehi Weigh Station")
+            .collect();
+        assert_eq!(lehi.len(), 1, "{scales:?}");
+        let to_memphis = little_rock_to_memphis.drive.trip.total_miles() - lehi[0].1;
+        assert!(
+            (to_memphis - 13.4).abs() < 0.05,
+            "Lehi is 13.4 miles short of Memphis, eastbound: {to_memphis}"
+        );
+        assert!(
+            !scales.iter().any(|(name, _)| name == "I-40 Weigh Station"),
+            "Riverside is westbound only: {scales:?}"
+        );
+    }
+    {
+        let memphis_to_little_rock = real_route(&["memphis_tn_us", "little_rock_ar_us"]);
+        let scales = weigh_stations(&memphis_to_little_rock);
+        assert!(
+            !scales.iter().any(|(name, _)| name == "Lehi Weigh Station"),
+            "Lehi is eastbound only: {scales:?}"
+        );
+    }
+    {
+        let memphis_to_st_louis = real_route(&["memphis_tn_us", "st_louis_mo_us"]);
+        let scales = weigh_stations(&memphis_to_st_louis);
+        assert!(
+            !scales
+                .iter()
+                .any(|(name, _)| name == "Marion Weigh Station"),
+            "Marion is southbound only: {scales:?}"
+        );
+    }
 }
 
 #[test]

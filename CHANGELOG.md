@@ -18,6 +18,8 @@
 
 - **The state line on the St. Louis to Memphis drive now says I-40, over the Hernando de Soto Bridge.**
 
+- **Two real Arkansas weigh stations near West Memphis are on the map.** Marion screens southbound I-55, Lehi eastbound I-40.
+
 ## 1.9.3 - 2026-10-06
 
 ### Added

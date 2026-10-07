@@ -38786,6 +38786,23 @@
             "forward"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Lehi Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 13.4,
+          "source": "Station and direction from the Arkansas Highway Police weigh station list (Code of Arkansas Rules, permit rules appendix, https://codeofarrules.arkansas.gov/Rules/AppendixDocument?appendixID=226&partID=1006, read 2026-10-07): Lehi, Interstate 40 East, mile 274. Position read 2026-10-07 from OpenStreetMap via the public Overpass API: the scale ramp (way 40945260, destination=Weigh Station) leaves the eastbound I-40 carriageway (way 40945256, ref I 40, drawn west to east) at highway=motorway_junction node 498744105 (35.1510263, -90.2555316), with the weighbridge (node 8261011620) and the scale area (way 340956254, 'Weigh Station (Truck) I-40') just east of it. at_mi derived: that node projected onto this leg's archived dense route geometry (world_data/us/geometry/tn.jsonl, 89 ft off the line), cumulative distance rescaled to leg miles, 13.43. Eastbound is this leg's reverse (Little Rock toward Memphis), so directions is reverse only; westbound I-40 is screened at Riverside, mile 283.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "reverse"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.1510263,
+          "lon": -90.2555316
         }
       ],
       "corridor": {
@@ -48281,6 +48298,23 @@
             "forward"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Marion Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 11.3,
+          "source": "Station and direction from the Arkansas Highway Police weigh station list (Code of Arkansas Rules, permit rules appendix, https://codeofarrules.arkansas.gov/Rules/AppendixDocument?appendixID=226&partID=1006, read 2026-10-07): Marion, Interstate 55 South, mile 9. Position read 2026-10-07 from OpenStreetMap via the public Overpass API: the scale ramp (way 37921897, destination=Weigh Station) leaves the southbound I-55 carriageway (way 49565551, ref I 55;US 78, drawn north to south) at highway=motorway_junction node 445116050 (35.1950669, -90.2008509), with the weighbridge (node 8261049692) at the ramp's south end. at_mi derived: that node projected onto this leg's archived dense route geometry (world_data/us/geometry/tn.jsonl, 51 ft off the line), cumulative distance rescaled to leg miles, 11.29, a mile south of exit 10. Southbound is this leg's reverse (St. Louis toward Memphis), so directions is reverse only; northbound I-55 is screened at Bridgeport, mile 1, which this leg does not use (it joins I-55 from I-40 west of the river).",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "reverse"
+          ],
+          "vehicle_access": "tractor_trailer",
+          "lat": 35.1950669,
+          "lon": -90.2008509
         }
       ],
       "divided": true,
