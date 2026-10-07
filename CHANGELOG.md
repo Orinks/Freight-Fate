@@ -16,6 +16,8 @@
 
 - **Text fields now paste with Control V, and name punctuation as you type it.** A colon or slash is spoken as a word instead of a silent click.
 
+- **Drivers can call dispatch while stopped for trip-specific help.** Report delays, hours, road conditions, truck trouble or load trouble.
+
 ### Changed
 
 - **Update checks, the bug report page and the manual download link now go to the game's new GitHub home, orinks-games.**

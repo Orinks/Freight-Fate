@@ -232,6 +232,7 @@ from the words, and synonyms cost them a re-read.
 | One booked citation or violation with its reason | citation / serious violation / major offense / safety incident, then day, clock, reason, fine, place | ticket entry, infraction, offense record, strike | `enforcement::RecordEntry`, `DrivingRecord.entries` |
 | The freight itself | cargo, the load | payload, goods | `CargoType`, `Job.cargo` |
 | The board of offers | dispatch board | job list, load board | `JobBoard` |
+| Asking the carrier's dispatcher for help on a trip, from the pause menu while stopped | call dispatch; the answer starts "Dispatch:" | radio dispatch, phone home, check call, Qualcomm message | `DispatchCallState`, `DispatchCallRequest` |
 | The vehicle | truck | rig (except as noted) | `TruckModel` |
 | One city-to-city stretch | leg | segment, hop | `Leg` |
 | The real highway a leg follows | corridor | -- | -- |

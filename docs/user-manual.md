@@ -1633,6 +1633,7 @@ Escape opens the pause menu during a drive. Public pause choices include:
 | --- | --- |
 | Resume driving | Return to the active drive. |
 | Trip status | A screen of lines: the load, where it is going, how far along you are, the hours used, and the air. |
+| Call dispatch | While stopped: report a delay, or ask about hours, the road ahead, truck trouble or the load. Dispatch can send the roadside mechanic. |
 | Controls and help | Open the how-to-play reference at the driving keys, page by page, without leaving the drive. |
 | Learn game sounds | Hear any sound the road uses and what it means. |
 

@@ -13,6 +13,7 @@ pub mod driving;
 pub mod driving_controls;
 pub mod driving_core;
 pub mod driving_damage;
+pub mod driving_dispatch_call;
 pub mod driving_enforcement;
 pub mod driving_engine_brake;
 pub mod driving_events;
