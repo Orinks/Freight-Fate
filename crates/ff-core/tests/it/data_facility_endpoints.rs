@@ -22,7 +22,7 @@ fn test_facility_endpoint_data_covers_supported_facilities() {
     let data = read_json("facility_endpoints.json");
     let coverage = &data["coverage"];
 
-    assert_eq!(coverage["facilities"], 4271);
+    assert_eq!(coverage["facilities"], 4304);
     // After far-pin regeocode: 357 OSM rematches stayed source-backed; 419
     // unresolvable pins became estimated-near-city fallbacks (2779/2258).
     // The 2026-09-17 re-sweep with the matcher that reads an object's own
@@ -43,9 +43,10 @@ fn test_facility_endpoint_data_covers_supported_facilities() {
     // Four of the 19 are the same object re-homed to the right facility in
     // its own town (Columbia Forest Products to Klamath Falls lumber and
     // paper; Scoular Grain Co to the Salina grain elevator).
-    assert_eq!(coverage["source_backed"], 2874);
-    assert_eq!(coverage["fallback"], 1397);
-    assert_eq!(coverage["screen"]["passed"], 2049);
+    assert_eq!(coverage["source_backed"], 2878);
+    assert_eq!(coverage["fallback"], 1426);
+    assert_eq!(coverage["screen"]["passed"], 2053);
+    // Alaska B3 rows: Coldfoot 1, Deadhorse 1, Delta Junction 1, Homer 2, Kenai 8, Seward 10, Soldotna 1 and Valdez 9.
     // Retiring 766 generated facilities from the 137 stand-in markets took only
     // refused and fallback rows with it: `passed` did not move, which is the
     // point -- not one of those towns had a surveyed endpoint to lose.

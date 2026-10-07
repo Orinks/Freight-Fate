@@ -23,7 +23,9 @@ def test_facility_endpoint_data_covers_supported_facilities(world):
     data = json.loads(Path("data/facility_endpoints.json").read_text(encoding="utf-8-sig"))
     coverage = data["coverage"]
 
-    assert coverage["facilities"] == 4271
+    assert coverage["facilities"] == 4304
+    # Alaska B3 adds 33 rows: Coldfoot, Deadhorse, Delta Junction and Soldotna
+    # (1 each), Homer (2), Kenai (8), Seward (10) and Valdez (9).
     # After far-pin regeocode: 357 OSM rematches stayed source-backed; 419
     # unresolvable pins became estimated-near-city fallbacks (2779/2258).
     # The 2026-09-17 re-sweep with the matcher that reads an object's own
@@ -39,10 +41,10 @@ def test_facility_endpoint_data_covers_supported_facilities(world):
     # `passed` rose by only 110 because 19 rows correctly STOPPED passing: a
     # lumber mill, a quarry and a grain company had been standing in as assumed
     # cross-docks, and the matcher now knows what they are.
-    assert coverage["source_backed"] == 2874
-    assert coverage["fallback"] == 1397
+    assert coverage["source_backed"] == 2878
+    assert coverage["fallback"] == 1426
     assert coverage["screen"] == {
-        "passed": 2049,
+        "passed": 2053,
         "refused": 825,
         "not_screened": 0,
         "trade_assumed": 173,

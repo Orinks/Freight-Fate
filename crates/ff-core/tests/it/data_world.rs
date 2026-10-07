@@ -9,7 +9,7 @@ use ff_core::data::world_constants::{
     is_stand_in_market, lookup, set_contains, DEFAULT_POI_ACTIONS, FREIGHT_LOCATION_TYPES,
     PARKING_CERTAINTY_LABELS, POI_ACTIONS, STOP_DIRECTIONS, STOP_TYPE_LABELS,
 };
-use ff_core::data::world_models::Route;
+use ff_core::data::world_models::{City, Route};
 use serde_json::json;
 
 // Every direct connection that existed in the 21-city 1.2.x map. Old
@@ -44,6 +44,42 @@ const ORIGINAL_ADJACENT_PAIRS: &[(&str, &str)] = &[
     ("Portland", "Seattle"),
     ("Portland", "Salt Lake City"),
 ];
+
+fn assert_route_sequence_and_paid_miles(
+    world: &World,
+    start: &str,
+    end: &str,
+    expected_cities: &[&str],
+    expected_paid_miles: f64,
+) {
+    let route = world
+        .shortest_route(start, end, None, false)
+        .unwrap_or_else(|err| panic!("{start}→{end} route: {err}"))
+        .unwrap_or_else(|| panic!("no route from {start} to {end}"));
+    assert_eq!(
+        route.cities,
+        expected_cities
+            .iter()
+            .map(|city| (*city).to_string())
+            .collect::<Vec<_>>()
+    );
+    assert!(
+        (route.miles() - expected_paid_miles).abs() <= 0.5,
+        "{start}→{end} paid miles: expected {expected_paid_miles}, got {}",
+        route.miles()
+    );
+}
+
+fn has_only_public_lots(city: &City) -> bool {
+    !city.locations.is_empty()
+        && city.locations.iter().all(|location| {
+            matches!(
+                location.facility_type.as_str(),
+                "travel_center" | "truck_parking"
+            ) && location.ships.is_empty()
+                && location.receives.is_empty()
+        })
+}
 
 #[test]
 fn test_world_loads() {
@@ -391,7 +427,11 @@ fn test_each_metro_expands_to_representative_facilities() {
                 );
             }
         } else {
-            assert!(city.locations.len() >= 5);
+            assert!(
+                city.locations.len() >= 5,
+                "{}: metro must expand to representative facilities",
+                city.name
+            );
         }
         assert!(!city.market_tags.is_empty());
         let parking_only_curated = is_stand_in_market(&city.key)
@@ -763,7 +803,11 @@ fn test_supported_routes_require_complete_corridor_metadata() {
             leg.b
         );
         assert!(
-            curated.iter().all(|stop| stop.parking != "unknown"),
+            curated.iter().all(|stop| {
+                stop.parking != "unknown"
+                    || (stop.parking_spaces == 0
+                        && stop.actions.iter().all(|action| action == "fuel"))
+            }),
             "{}-{}",
             leg.a,
             leg.b
@@ -1003,15 +1047,14 @@ fn test_every_city_has_coordinates_and_a_known_region() {
             city.region
         );
         assert!(
-            // ALCAN Phase A Fairbanks (~64.8°N / ~-147.7°W) and Phase B1 Anchorage
-            // (~61.2°N / ~-149.9°W) fit these ceilings (lon floor -150.0 clears -149.9).
-            24.0 < city.lat && city.lat < 66.0,
+            // Deadhorse (~70.2°N) is the current northern city.
+            24.0 < city.lat && city.lat < 72.0,
             "{}: lat {}",
             city.name,
             city.lat
         );
         assert!(
-            -150.0 < city.lon && city.lon < -66.0,
+            -170.0 < city.lon && city.lon < -66.0,
             "{}: lon {}",
             city.name,
             city.lon
@@ -1251,6 +1294,7 @@ fn test_alcan_phase_a_terminus_to_fairbanks() {
         vec![
             "whitehorse_yt_ca".to_string(),
             "tok_ak_us".to_string(),
+            "delta_junction_ak_us".to_string(),
             "fairbanks_ak_us".to_string(),
         ]
     );
@@ -1262,6 +1306,7 @@ fn test_alcan_phase_a_terminus_to_fairbanks() {
         south.cities,
         vec![
             "fairbanks_ak_us".to_string(),
+            "delta_junction_ak_us".to_string(),
             "tok_ak_us".to_string(),
             "whitehorse_yt_ca".to_string(),
         ]
@@ -1287,6 +1332,11 @@ fn test_alcan_phase_a_terminus_to_fairbanks() {
         full.cities
     );
     assert!(
+        full.cities.iter().any(|c| c == "delta_junction_ak_us"),
+        "must pass Delta Junction, got {:?}",
+        full.cities
+    );
+    assert!(
         !full.cities.iter().any(|c| c == "anchorage_ak_us"),
         "Anchorage is Phase B, not Phase A terminus"
     );
@@ -1298,14 +1348,34 @@ fn test_alcan_phase_a_terminus_to_fairbanks() {
     for (a, b) in [
         ("whitehorse_yt_ca", "tok_ak_us"),
         ("tok_ak_us", "whitehorse_yt_ca"),
-        ("tok_ak_us", "fairbanks_ak_us"),
-        ("fairbanks_ak_us", "tok_ak_us"),
+        ("tok_ak_us", "delta_junction_ak_us"),
+        ("delta_junction_ak_us", "tok_ak_us"),
+        ("delta_junction_ak_us", "fairbanks_ak_us"),
+        ("fairbanks_ak_us", "delta_junction_ak_us"),
     ] {
         assert!(
             directed.contains(&(a, b)),
             "missing directed terminus ALCAN leg {a}->{b}"
         );
     }
+    assert!(!directed.contains(&("tok_ak_us", "fairbanks_ak_us")));
+    assert!(!directed.contains(&("fairbanks_ak_us", "tok_ak_us")));
+    let tok_delta = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "tok_ak_us" && leg.b == "delta_junction_ak_us")
+        .expect("tok->delta junction");
+    let delta_fairbanks = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "delta_junction_ak_us" && leg.b == "fairbanks_ak_us")
+        .expect("delta junction->fairbanks");
+    assert!((tok_delta.miles - 108.0).abs() < 0.5);
+    assert!((delta_fairbanks.miles - 96.0).abs() < 0.5);
+    assert!(
+        (tok_delta.miles + delta_fairbanks.miles - 202.0).abs() > 1.0,
+        "Tok split miles keep the authored 204-mile milepost total"
+    );
     // Poker Creek / Beaver Creek border_crossing on both CA↔US directions.
     let yt = include_str!("../../../../data/world_data/ca/legs/YT.json");
     let ak = include_str!("../../../../data/world_data/us/legs/AK.json");
@@ -1335,15 +1405,25 @@ fn test_alcan_phase_a_terminus_to_fairbanks() {
         "Whitehorse–Tok must be real Alaska Highway miles, got {}",
         wh_tok.miles
     );
-    let tok_fb = world
+    let tok_delta = world
         .legs
         .iter()
-        .find(|leg| leg.a == "tok_ak_us" && leg.b == "fairbanks_ak_us")
-        .expect("tok->fairbanks");
+        .find(|leg| leg.a == "tok_ak_us" && leg.b == "delta_junction_ak_us")
+        .expect("tok->delta junction");
     assert!(
-        (180.0..=230.0).contains(&tok_fb.miles),
-        "Tok–Fairbanks must be real Alaska/Richardson Highway miles, got {}",
-        tok_fb.miles
+        (107.5..=108.5).contains(&tok_delta.miles),
+        "Tok–Delta Junction must use Alaska Highway mileposts, got {}",
+        tok_delta.miles
+    );
+    let delta_fairbanks = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "delta_junction_ak_us" && leg.b == "fairbanks_ak_us")
+        .expect("delta junction->fairbanks");
+    assert!(
+        (95.5..=96.5).contains(&delta_fairbanks.miles),
+        "Delta Junction–Fairbanks must use Richardson Highway mileposts, got {}",
+        delta_fairbanks.miles
     );
     // Stand-in fuel lots.
     let tok = world.city("tok_ak_us").expect("tok");
@@ -1356,6 +1436,156 @@ fn test_alcan_phase_a_terminus_to_fairbanks() {
         .locations
         .iter()
         .any(|loc| loc.name.contains("Sourdough") || loc.name.contains("Airport")));
+}
+
+#[test]
+fn test_alaska_b3_city_labels_and_metadata() {
+    let world = world();
+    for (key, name) in [
+        ("delta_junction_ak_us", "Delta Junction"),
+        ("valdez_ak_us", "Valdez"),
+        ("seward_ak_us", "Seward"),
+        ("soldotna_ak_us", "Soldotna"),
+        ("kenai_ak_us", "Kenai"),
+        ("homer_ak_us", "Homer"),
+        ("coldfoot_ak_us", "Coldfoot"),
+        ("deadhorse_ak_us", "Deadhorse"),
+    ] {
+        let city = world.city(key).unwrap_or_else(|_| panic!("{key}"));
+        assert_eq!(city.name, name);
+        assert_eq!(city.country, "US", "{key} country");
+        assert_eq!(city.state_code, "AK", "{key} state code");
+        assert_eq!(city.region, "pacific_northwest", "{key} region");
+    }
+}
+
+#[test]
+fn test_alaska_kenai_peninsula_routes_use_paid_miles_both_ways() {
+    let world = world();
+    for (start, end, cities, miles) in [
+        (
+            "anchorage_ak_us",
+            "kenai_ak_us",
+            &["anchorage_ak_us", "soldotna_ak_us", "kenai_ak_us"][..],
+            158.0,
+        ),
+        (
+            "kenai_ak_us",
+            "anchorage_ak_us",
+            &["kenai_ak_us", "soldotna_ak_us", "anchorage_ak_us"][..],
+            158.0,
+        ),
+        (
+            "anchorage_ak_us",
+            "homer_ak_us",
+            &["anchorage_ak_us", "soldotna_ak_us", "homer_ak_us"][..],
+            222.0,
+        ),
+        (
+            "homer_ak_us",
+            "anchorage_ak_us",
+            &["homer_ak_us", "soldotna_ak_us", "anchorage_ak_us"][..],
+            222.0,
+        ),
+        (
+            "soldotna_ak_us",
+            "homer_ak_us",
+            &["soldotna_ak_us", "homer_ak_us"][..],
+            75.0,
+        ),
+        (
+            "homer_ak_us",
+            "soldotna_ak_us",
+            &["homer_ak_us", "soldotna_ak_us"][..],
+            75.0,
+        ),
+        (
+            "seward_ak_us",
+            "soldotna_ak_us",
+            &["seward_ak_us", "soldotna_ak_us"][..],
+            94.0,
+        ),
+        (
+            "soldotna_ak_us",
+            "seward_ak_us",
+            &["soldotna_ak_us", "seward_ak_us"][..],
+            94.0,
+        ),
+    ] {
+        assert_route_sequence_and_paid_miles(world, start, end, cities, miles);
+    }
+}
+
+#[test]
+fn test_alaska_valdez_routes_use_paid_miles_both_ways() {
+    let world = world();
+    for (start, end, cities, miles) in [
+        (
+            "fairbanks_ak_us",
+            "valdez_ak_us",
+            &[
+                "fairbanks_ak_us",
+                "delta_junction_ak_us",
+                "glennallen_ak_us",
+                "valdez_ak_us",
+            ][..],
+            362.0,
+        ),
+        (
+            "valdez_ak_us",
+            "fairbanks_ak_us",
+            &[
+                "valdez_ak_us",
+                "glennallen_ak_us",
+                "delta_junction_ak_us",
+                "fairbanks_ak_us",
+            ][..],
+            362.0,
+        ),
+        (
+            "anchorage_ak_us",
+            "valdez_ak_us",
+            &[
+                "anchorage_ak_us",
+                "palmer_ak_us",
+                "glennallen_ak_us",
+                "valdez_ak_us",
+            ][..],
+            302.0,
+        ),
+        (
+            "valdez_ak_us",
+            "anchorage_ak_us",
+            &[
+                "valdez_ak_us",
+                "glennallen_ak_us",
+                "palmer_ak_us",
+                "anchorage_ak_us",
+            ][..],
+            302.0,
+        ),
+    ] {
+        assert_route_sequence_and_paid_miles(world, start, end, cities, miles);
+    }
+}
+
+#[test]
+fn test_alaska_dalton_routes_reach_deadhorse_both_ways() {
+    let world = world();
+    assert_route_sequence_and_paid_miles(
+        world,
+        "fairbanks_ak_us",
+        "deadhorse_ak_us",
+        &["fairbanks_ak_us", "coldfoot_ak_us", "deadhorse_ak_us"],
+        498.0,
+    );
+    assert_route_sequence_and_paid_miles(
+        world,
+        "deadhorse_ak_us",
+        "fairbanks_ak_us",
+        &["deadhorse_ak_us", "coldfoot_ak_us", "fairbanks_ak_us"],
+        498.0,
+    );
 }
 
 #[test]
@@ -1652,6 +1882,15 @@ fn test_alcan_public_lots_use_travel_center_or_truck_parking() {
         ("glennallen_ak_us", "Hub of Alaska", "travel_center"),
         ("anchorage_ak_us", "Essential One", "travel_center"),
         ("healy_ak_us", "Fisher Fuel", "travel_center"),
+        (
+            "delta_junction_ak_us",
+            "Three Bears Delta Junction",
+            "travel_center",
+        ),
+        ("coldfoot_ak_us", "Coldfoot Camp Fuel", "travel_center"),
+        ("seward_ak_us", "Essential One Seward", "travel_center"),
+        ("soldotna_ak_us", "Essential One Soldotna", "travel_center"),
+        ("homer_ak_us", "Essential One Homer", "travel_center"),
     ];
     for (city, needle, want) in cases {
         let c = world.city(city).unwrap_or_else(|_| panic!("{city}"));
@@ -1707,8 +1946,17 @@ fn test_alcan_retyped_lots_are_fuel_rest_only_not_freight() {
         ("glennallen_ak_us", "Glennallen Fuel", "travel_center"),
         ("anchorage_ak_us", "Essential One", "travel_center"),
         ("healy_ak_us", "Fisher Fuel", "travel_center"),
+        (
+            "delta_junction_ak_us",
+            "Three Bears Delta Junction",
+            "travel_center",
+        ),
+        ("coldfoot_ak_us", "Coldfoot Camp Fuel", "travel_center"),
+        ("seward_ak_us", "Essential One Seward", "travel_center"),
+        ("soldotna_ak_us", "Essential One Soldotna", "travel_center"),
+        ("homer_ak_us", "Essential One Homer", "travel_center"),
     ];
-    assert_eq!(cases.len(), 14, "all ALCAN retyped public lots");
+    assert_eq!(cases.len(), 19, "all Alaska corridor public lots");
     for (city, needle, want) in cases {
         let c = world.city(city).unwrap_or_else(|_| panic!("{city}"));
         let loc = c
@@ -1742,6 +1990,193 @@ fn test_alcan_retyped_lots_are_fuel_rest_only_not_freight() {
         assert!(
             lookup(FACILITY_APPROACH_ROADS, want).is_some(),
             "{want} approach road"
+        );
+    }
+}
+
+#[test]
+fn test_alaska_freight_endpoints_have_source_backed_roles() {
+    let world = world();
+    let cases = [
+        (
+            "valdez_ak_us",
+            "Ryan J. Sontag Valdez Container Terminal",
+            "terminal",
+            &["container", "general", "construction"][..],
+            &["container", "general", "construction"][..],
+            "https://www.valdezak.gov/296/Ryan-J-Sontag-Valdez-Container-Terminal",
+        ),
+        (
+            "kenai_ak_us",
+            "Carlile Kenai Shipping Terminal",
+            "cross_dock",
+            &["general"][..],
+            &["general"][..],
+            "https://www.carlile.biz/contact-and-terminals/kenai/",
+        ),
+        (
+            "seward_ak_us",
+            "Alaska Railroad Seward Freight Dock",
+            "terminal",
+            &["general"][..],
+            &["general"][..],
+            "https://www.alaskarailroad.com/sites/default/files/FCTSHT_2024_Seward_Freight_Dock_Expansion_FactSheet.pdf",
+        ),
+        (
+            "homer_ak_us",
+            "Port of Homer Deep Water Freight Dock",
+            "terminal",
+            &["general"][..],
+            &["general"][..],
+            "https://www.cityofhomer-ak.gov/port/deep-water-dock-scheduling",
+        ),
+    ];
+    for (city_key, name, facility_type, ships, receives, source_url) in cases {
+        let city = world
+            .city(city_key)
+            .unwrap_or_else(|_| panic!("{city_key}"));
+        let location = city
+            .locations
+            .iter()
+            .find(|location| location.name == *name)
+            .unwrap_or_else(|| panic!("{city_key} missing {name}"));
+        assert_eq!(location.facility_type, *facility_type, "{name} type");
+        assert_eq!(
+            location.ships,
+            ships
+                .iter()
+                .map(|cargo| cargo.to_string())
+                .collect::<Vec<_>>(),
+            "{name} ships"
+        );
+        assert_eq!(
+            location.receives,
+            receives
+                .iter()
+                .map(|cargo| cargo.to_string())
+                .collect::<Vec<_>>(),
+            "{name} receives"
+        );
+        assert!(location.roles.iter().any(|role| role == "shipper"));
+        assert!(location.roles.iter().any(|role| role == "receiver"));
+        assert!(location.source_note.contains(source_url), "{name} source");
+    }
+}
+
+#[test]
+fn test_alaska_carrier_lanes_reach_new_freight_markets() {
+    use ff_core::models::carriers::carrier;
+    use ff_core::models::jobs::{JobBoard, OfferOptions};
+
+    let world = world();
+    let cases = [
+        ("anchorage_ak_us", "valdez_ak_us", "chatanika_freight"),
+        ("anchorage_ak_us", "homer_ak_us", "chatanika_freight"),
+        ("anchorage_ak_us", "kenai_ak_us", "chatanika_freight"),
+        ("fairbanks_ak_us", "seward_ak_us", "chatanika_freight"),
+        ("fairbanks_ak_us", "deadhorse_ak_us", "chatanika_freight"),
+        ("anchorage_ak_us", "seward_ak_us", "knik_arm_cartage"),
+    ];
+    for (origin, destination, carrier_key) in cases {
+        let mut board = JobBoard::seeded(world, 19);
+        let job = board
+            .offer_to(
+                origin,
+                destination,
+                &[] as &[&str],
+                OfferOptions {
+                    level: 25,
+                    carrier_key: Some(carrier_key),
+                    ..Default::default()
+                },
+            )
+            .unwrap_or_else(|| panic!("{carrier_key} cannot offer {origin}→{destination}"));
+        assert_eq!(
+            world.resolve_city_key(&job.destination),
+            destination,
+            "{carrier_key} destination"
+        );
+        assert!(
+            carrier(carrier_key)
+                .expect("carrier exists")
+                .run_band_allows(job.distance_mi),
+            "{carrier_key} run to {destination}: {} mi",
+            job.distance_mi
+        );
+    }
+}
+
+#[test]
+fn test_alaska_pass_through_fuel_towns_have_no_board_offers() {
+    use ff_core::models::jobs::{JobBoard, OfferOptions};
+
+    let world = world();
+    for city_key in ["delta_junction_ak_us", "coldfoot_ak_us", "soldotna_ak_us"] {
+        assert!(
+            is_stand_in_market(city_key),
+            "{city_key} must stay a stand-in"
+        );
+        let mut board = JobBoard::seeded(world, 19);
+        let offers = board.offers(city_key, &[] as &[&str], OfferOptions::level(5));
+        assert!(offers.is_empty(), "{city_key} must not offer freight");
+    }
+}
+
+#[test]
+fn test_alaska_stand_in_markets_preserve_authored_facilities() {
+    let world = world();
+    for city_key in ["delta_junction_ak_us", "coldfoot_ak_us", "soldotna_ak_us"] {
+        let city = world
+            .cities
+            .get(city_key)
+            .expect("Alaska pass-through city");
+        assert!(
+            is_stand_in_market(city_key),
+            "{city_key} must be a stand-in"
+        );
+        assert!(
+            has_only_public_lots(city),
+            "{city_key} must not gain freight templates"
+        );
+    }
+
+    let deadhorse = world.cities.get("deadhorse_ak_us").expect("Deadhorse city");
+    assert!(is_stand_in_market("deadhorse_ak_us"));
+    assert_eq!(deadhorse.locations.len(), 1);
+    assert_eq!(deadhorse.locations[0].facility_type, "company_yard");
+    assert!(deadhorse.locations[0].template);
+
+    let homer = world.cities.get("homer_ak_us").expect("Homer city");
+    assert!(is_stand_in_market("homer_ak_us"));
+    assert!(homer.locations.iter().all(|location| !location.template));
+    assert!(homer.locations.iter().any(|location| {
+        location.facility_type == "terminal"
+            && location.name == "Port of Homer Deep Water Freight Dock"
+            && !location.ships.is_empty()
+            && !location.receives.is_empty()
+    }));
+    assert!(homer.locations.iter().any(|location| {
+        location.facility_type == "travel_center"
+            && location.name == "Essential One Homer"
+            && location.ships.is_empty()
+            && location.receives.is_empty()
+    }));
+
+    for city_key in ["seward_ak_us", "valdez_ak_us", "kenai_ak_us"] {
+        let city = world.cities.get(city_key).expect("Alaska freight city");
+        assert!(
+            !is_stand_in_market(city_key),
+            "{city_key} has a real endpoint"
+        );
+        assert!(
+            city.locations.iter().any(|location| location.template),
+            "{city_key} must expand its representative market"
+        );
+        assert!(
+            city.locations.iter().any(|location| {
+                !location.template && (!location.ships.is_empty() || !location.receives.is_empty())
+            }),
+            "{city_key} must retain its authored freight endpoint"
         );
     }
 }

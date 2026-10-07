@@ -642,10 +642,23 @@ def resweep(
     by_type: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
     batch = sorted(states if states is not None else keys_by_state)
     sources = {str(source.get("state")): source for source in existing.get("sources") or []}
+    known_target_ids = {target.facility_id for target in target_for_key.values()}
     for index, state in enumerate(batch, start=1):
         extract = state_extract_path(cache_dir, state)
         sources[state] = source_record(state, extract)
-        keys = sorted(keys_by_state.get(state, []))
+        keys = list(keys_by_state.get(state, []))
+        for target in targets:
+            if target.state != state or target.facility_id in known_target_ids:
+                continue
+            rows[target.facility_id] = fallback_record(
+                target,
+                f"No high-confidence source-backed OSM facility endpoint found within "
+                f"{radius_mi:g} miles in {extract.name}.",
+            )
+            target_for_key[target.facility_id] = target
+            known_target_ids.add(target.facility_id)
+            keys.append(target.facility_id)
+        keys.sort()
         if not extract.exists() or not keys:
             print(f"[{index}/{len(batch)}] {state}: skipped (no extract or no facilities)")
             continue

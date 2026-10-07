@@ -616,7 +616,7 @@
       "deadline_slack": 1.0
     },
     "cargo_weight_bonus": {},
-    "lane_area": "Alaska, between Anchorage, the Mat-Su valley, Fairbanks, and Tok"
+    "lane_area": "Alaska, between Anchorage, the Mat-Su valley, the Kenai Peninsula, Valdez, Fairbanks, Tok, and Deadhorse on the Dalton Highway"
   },
   "des_plaines_cartage": {
     "name": "Des Plaines River Cartage",
@@ -700,6 +700,6 @@
       "deadline_slack": 1.05
     },
     "cargo_weight_bonus": {},
-    "lane_area": "Anchorage and the Mat-Su valley"
+    "lane_area": "Anchorage, the Mat-Su valley, and Seward"
   }
 }

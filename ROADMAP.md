@@ -2185,7 +2185,9 @@ in the audited Windows run.
       or is home with no carrier and applies from the terminal.
 - [x] **Home-base coverage test.** `tests/it/carrier_slice3.rs` pins all
       625 lower-48 map cities as hired into by a regional, every Alaska city
-      as served by Alaska carriers only, and BC and YT as closed.
+      except Deadhorse as offerable only to Alaska carriers, and BC and YT as
+      closed. Deadhorse remains a Chatanika freight destination but lies
+      outside the Alaska carriers' hiring radii.
 - [x] **Firing, reapplication, and reset respect home and hiring area.**
       Fallback never picks the firing carrier or sends an Alaska driver to
       a lower-48 carrier. If no carrier can take the driver, the profile
@@ -2226,7 +2228,7 @@ in the audited Windows run.
       named as a truck repair shop in that city instead.
 
 
-### ALCAN and Alaska (road graph built; international systems partial)
+### ALCAN and Alaska (B3 road graph; international systems partial)
 
 The main roadmap now records the data slices already present on this
 branch. The older Phase A/B plan checklists are not a live completion list.
@@ -2244,9 +2246,17 @@ branch. The older Phase A/B plan checklists are not a live completion list.
       Healy, Wasilla, and Anchorage, plus the Palmer–Wasilla connector,
       is connected in both directions. This is the defined B1/B2 road
       scope, not complete Alaska map enrichment.
+- [x] **Phase B3: Alaska roads reach the peninsula, Valdez, and Deadhorse.**
+      Tok–Fairbanks now passes through Delta Junction; Valdez connects via
+      Glennallen; Anchorage reaches Seward and Soldotna, with Kenai and Homer
+      beyond Soldotna; and the Dalton Highway runs from Fairbanks through
+      Coldfoot to Deadhorse. Paid miles remain separate from loaded-semi
+      router distances. Verified freight endpoints serve Valdez, Kenai,
+      Seward, and Homer.
 - [x] **Public lots are fuel/rest stops, not freight yards.** Curated
       `travel_center` and `truck_parking` pins have no freight cargo roles;
-      a town with only these lots can have an empty dispatch board.
+      Delta Junction, Coldfoot, and Soldotna are pass-through markets with no
+      freight offers until a freight endpoint is verified.
       Anchorage has a separate Port/Ship Creek freight terminal; Fairbanks
       has curated grocery/retail, building-material, and cross-dock pins.
 - [ ] **Partial: cross-border rules and clearance.** Border metadata is
@@ -2255,20 +2265,30 @@ branch. The older Phase A/B plan checklists are not a live completion list.
       restrictions remain open; the corridor does not establish Canadian
       regulatory compliance. Full Canada and Europe remain planned.
 - [ ] **Remaining corridor data work.** Refine the auto-profile
-      Blaine–Surrey geometry for trucks, verify/enrich remaining Parks and
-      Mat-Su lots and Anchorage parking capacity, and reconcile the paid
-      distances noted in the Phase B plan. Further peninsula, Dalton,
-      ferry, and freight-market expansion is outside the completed slices.
+      Blaine–Surrey geometry for trucks; verify remaining Parks and Mat-Su
+      fuel lots and any truck-parking capacity; and add the Whittier tunnel
+      and Haines/Skagway ferry routes in a later slice. Exact Deadhorse
+      Carlile, Valdez/Deadhorse diesel, and Soldotna receive-only retail pins
+      remain unsupported; Yukon River Camp truck-parking capacity is
+      unverified, and the Dalton gravel surface is not modeled.
 
-Automated evidence: the four `test_alcan_phase_a_*` cases,
-`test_alcan_phase_b1_tok_cutoff_glenn_to_anchorage`,
-`test_alcan_phase_b2_parks_to_anchorage`, both public-lot tests, and
+Automated evidence: the four `test_alcan_phase_a_*` cases (including the
+Tok–Delta Junction–Fairbanks split), `test_alcan_phase_b1_tok_cutoff_glenn_to_anchorage`,
+`test_alcan_phase_b2_parks_to_anchorage`, the B3 tests
+`test_alaska_b3_city_labels_and_metadata`,
+`test_alaska_kenai_peninsula_routes_use_paid_miles_both_ways`,
+`test_alaska_valdez_routes_use_paid_miles_both_ways`,
+`test_alaska_dalton_routes_reach_deadhorse_both_ways`,
+`test_alaska_freight_endpoints_have_source_backed_roles`,
+`test_alaska_carrier_lanes_reach_new_freight_markets`,
+`test_alaska_pass_through_fuel_towns_have_no_board_offers`,
+`test_alaska_stand_in_markets_preserve_authored_facilities`,
+`test_alcan_public_lots_use_travel_center_or_truck_parking`, and
 `test_fairbanks_has_curated_freight_job_endpoints` in
 [`data_world.rs`](crates/ff-core/tests/it/data_world.rs), plus the generated-job
 endpoint test in [`models/jobs/tests.rs`](crates/ff-core/src/models/jobs/tests.rs).
-These pass in the audited Windows run. Remaining data limitations are
-recorded in the [Phase A plan](docs/alcan-corridor-scaffold-plan.md) and
-[Phase B plan](docs/alcan-phase-b-anchorage-plan.md).
+Remaining data limitations are recorded in the [Phase A plan](docs/alcan-corridor-scaffold-plan.md)
+and [Phase B plan](docs/alcan-phase-b-anchorage-plan.md).
 
 ### Twin parcel / STAA doubles (Track A)
 

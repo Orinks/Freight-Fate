@@ -132,7 +132,10 @@ fn test_regional_and_local_hires_stay_in_country_and_radius() {
 fn test_alaska_is_served_by_alaska_carriers_only() {
     let world = world();
     for city in alaska_cities(world) {
-        assert!(is_offerable_home_city(world, &city), "{city} not offered");
+        assert!(
+            is_offerable_home_city(world, &city) || city == "deadhorse_ak_us",
+            "{city} not offered"
+        );
         for c in carrier_catalog().values() {
             if c.hires_in(world, &city) {
                 assert!(is_alaska_carrier(world, c), "{} hires in {city}", c.key);
