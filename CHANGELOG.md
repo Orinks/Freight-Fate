@@ -14,6 +14,8 @@
 
 - **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now says it waits until you stop.
 
+- **West Memphis stops sit where they really are.** The Riverside scale is past the bridge, and the Petro and Love's are at exit 280.
+
 - **Creeping up to an open scale, then speeding past, no longer dodges the bypass charge.** Only a warning the game delayed excuses you.
 
 - **A closed weigh station's check-in just says it is closed.** It no longer chimes, saves, or counts as an inspection.
