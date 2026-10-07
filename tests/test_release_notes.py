@@ -900,7 +900,11 @@ def test_career_19_release_requires_and_verifies_every_platform_archive():
     assert "--prerelease" in create["run"]
     assert "is_prerelease == 'true'" in create["if"]
     stable = next(step for step in release["steps"] if step.get("name") == "Create stable release")
-    assert 'gh release create "$TAG" release-assets/*' in stable["run"]
+    assert "for f in release-assets/*; do" in stable["run"]
+    assert 'gh release create "$TAG" "${assets[@]}"' in stable["run"]
+    # The plain Mac copy is the arm64 app again; its label says so, since
+    # GitHub shows the label where the file name would be.
+    assert "(in-game updater copy, same app as the macos-arm64 zip)" in stable["run"]
     assert "--prerelease" not in stable["run"]
     assert "is_prerelease == 'false'" in stable["if"]
     assert "Freight Fate $VERSION" in stable["run"]
