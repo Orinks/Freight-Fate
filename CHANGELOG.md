@@ -30,6 +30,8 @@
 
 - **The update check skips a preview snapshot that changes nothing you would notice.** A snapshot that only repeats your version is no longer offered.
 
+- **What's new for an update from an older preview snapshot lists what you are really getting.** It reads the notes of each release since your copy.
+
 ## 1.9.3 - 2026-10-06
 
 ### Added

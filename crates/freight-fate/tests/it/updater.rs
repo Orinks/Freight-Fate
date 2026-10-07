@@ -593,7 +593,13 @@ fn test_19_snapshot_with_no_user_facing_changes_is_not_offered_over_its_stable()
         "2026-10-07T04:15:32Z",
         &ALL_ASSETS,
     );
-    let stable = stable_at("v1.9.3", "2026-10-07T00:04:35Z");
+    let stable = release_with(
+        "v1.9.3",
+        false,
+        "## Fixes\n- **Snow chains stay on.**",
+        "2026-10-07T00:04:35Z",
+        &ALL_ASSETS,
+    );
     let older = release_with(
         "1.9-tester-20261006",
         true,
@@ -601,7 +607,14 @@ fn test_19_snapshot_with_no_user_facing_changes_is_not_offered_over_its_stable()
         "2026-10-06T04:16:00Z",
         &ALL_ASSETS,
     );
-    let releases = vec![quiet.clone(), stable.clone(), older];
+    let oldest = release_with(
+        "1.9-tester-20261005",
+        true,
+        "## Fixed\n- **Scales.**",
+        "2026-10-05T04:16:00Z",
+        &ALL_ASSETS,
+    );
+    let releases = vec![quiet.clone(), stable.clone(), older, oldest];
 
     let on_stable = BuildInfo::new("v1.9.3", "dev", "2026-10-07");
     assert!(snapshot_update_from(&releases, Some(&on_stable), "1.9.3", None, &env()).is_none());
@@ -612,6 +625,30 @@ fn test_19_snapshot_with_no_user_facing_changes_is_not_offered_over_its_stable()
     let info = snapshot_update_from(&releases, Some(&before), "1.9.0", None, &env())
         .expect("the stable's fixes arrive through the snapshot");
     assert_eq!(info.tag, "1.9-tester-20261007");
+    // What's new reads what this copy is getting, not "No user-facing changes".
+    assert_eq!(
+        info.notes,
+        [
+            "Freight Fate version 1.9.3",
+            "Fixes",
+            "Snow chains stay on."
+        ]
+    );
+
+    let further_back = BuildInfo::new("1.9-tester-20261005", "dev", "2026-10-05");
+    let info = snapshot_update_from(&releases, Some(&further_back), "1.9.0", None, &env())
+        .expect("the snapshot still carries the stable");
+    assert_eq!(
+        info.notes,
+        [
+            "Freight Fate version 1.9.3",
+            "Fixes",
+            "Snow chains stay on.",
+            "Freight Fate 1.9 tester snapshot 2026-10-06",
+            "Added",
+            "LWorks Radio.",
+        ]
+    );
 
     // A later snapshot with real changes is offered over the stable as before.
     let real = release_with(

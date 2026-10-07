@@ -652,7 +652,7 @@ pub fn stable_update_from(
     if parse_version(&tag) <= parse_version(current_version) {
         return None;
     }
-    let title = format!("Freight Fate version {}", tag.trim_start_matches('v'));
+    let title = stable_title(&tag);
     update_from_release(release, &title, env)
 }
 
@@ -844,20 +844,75 @@ fn carries_news_since_build(
     if build.is_some_and(|build| tag_name(snapshot) == build.tag) {
         return true; // a re-cut under this copy's own tag; the commit decided
     }
-    releases.iter().any(|release| {
+    let mut news = news_between(releases, build_ts, &snapshot_ts, career_19);
+    news.next().is_some()
+}
+
+/// A release on this career line with something a player notices: a stable
+/// release, or a snapshot whose notes are not the quiet line.
+fn is_news(release: &Value, career_19: bool) -> bool {
+    let tag = tag_name(release);
+    if is_prerelease(release) {
+        !snapshot_tag_date(&tag, career_19).is_empty() && !is_quiet_snapshot(release)
+    } else if career_19 {
+        version_major_minor_is_19(&tag)
+    } else {
+        parse_version(&tag) > vec![0]
+    }
+}
+
+/// The releases with news published after `build_ts`, up to and including
+/// `snapshot_ts`.
+fn news_between<'a>(
+    releases: &'a [Value],
+    build_ts: &'a str,
+    snapshot_ts: &'a str,
+    career_19: bool,
+) -> impl Iterator<Item = &'a Value> {
+    releases.iter().filter(move |release| {
         let published = release_timestamp(Some(release));
-        if published.as_str() <= build_ts || published > snapshot_ts {
-            return false;
-        }
-        let tag = tag_name(release);
-        if is_prerelease(release) {
-            !snapshot_tag_date(&tag, career_19).is_empty() && !is_quiet_snapshot(release)
-        } else if career_19 {
-            version_major_minor_is_19(&tag)
-        } else {
-            parse_version(&tag) > vec![0]
-        }
+        published.as_str() > build_ts
+            && published.as_str() <= snapshot_ts
+            && is_news(release, career_19)
     })
+}
+
+/// What's new for a quiet snapshot offered to an older copy: the notes of
+/// every release with news since that copy, newest first, each under its
+/// spoken name. The quiet line alone would tell that player nothing changed
+/// when a stable release's fixes arrive with it. `None` when there are none.
+fn notes_since_build(
+    snapshot: &Value,
+    releases: &[Value],
+    build: Option<&BuildInfo>,
+    build_ts: &str,
+    career_19: bool,
+) -> Option<Vec<String>> {
+    let snapshot_ts = release_timestamp(Some(snapshot));
+    if !is_quiet_snapshot(snapshot)
+        || build_ts.is_empty()
+        || snapshot_ts.is_empty()
+        || build.is_some_and(|build| tag_name(snapshot) == build.tag)
+    {
+        return None;
+    }
+    let mut news: Vec<&Value> = news_between(releases, build_ts, &snapshot_ts, career_19).collect();
+    news.sort_by_key(|release| std::cmp::Reverse(release_timestamp(Some(release))));
+    let notes: Vec<String> = news
+        .into_iter()
+        .flat_map(|release| {
+            let tag = tag_name(release);
+            let title = if is_prerelease(release) {
+                snapshot_title(career_19, &spoken_ymd(&snapshot_tag_date(&tag, career_19)))
+            } else {
+                stable_title(&tag)
+            };
+            std::iter::once(title).chain(flatten_markdown(
+                release.get("body").and_then(Value::as_str),
+            ))
+        })
+        .collect();
+    (!notes.is_empty()).then_some(notes)
 }
 
 /// A snapshot re-cut under the tag this copy carries (a second run on
@@ -927,7 +982,7 @@ pub fn snapshot_update_from(
         if stable_leads {
             if stable_newer_than_build(stable, build, &build_date, &build_ts) {
                 let tag = tag_name(stable);
-                let title = format!("Freight Fate version {}", tag.trim_start_matches('v'));
+                let title = stable_title(&tag);
                 return update_from_release(stable, &title, env);
             }
             return None; // already on the newest stable; nothing newer on dev
@@ -940,10 +995,19 @@ pub fn snapshot_update_from(
         {
             let date = snapshot_tag_date(&tag_name(snapshot), career_19);
             let spoken = spoken_ymd(&date);
-            return update_from_release(snapshot, &snapshot_title(career_19, &spoken), env);
+            let mut info = update_from_release(snapshot, &snapshot_title(career_19, &spoken), env)?;
+            if let Some(notes) = notes_since_build(snapshot, releases, build, &build_ts, career_19)
+            {
+                info.notes = notes;
+            }
+            return Some(info);
         }
     }
     None
+}
+
+fn stable_title(tag: &str) -> String {
+    format!("Freight Fate version {}", tag.trim_start_matches('v'))
 }
 
 fn snapshot_title(career_19: bool, spoken: &str) -> String {
