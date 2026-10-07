@@ -247,18 +247,28 @@ pub const CLASSROOM_FATIGUE_FACTOR: f64 = 0.5;
 /// Longest single class day, in minutes. Schools teach in day-length blocks.
 pub const COURSE_CLASS_DAY_MAX_MIN: f64 = 8.0 * 60.0;
 
+/// Local hour a multi-day course's class day starts: 8 AM to 4 PM. Schools
+/// teach in the daytime and students sleep at night.
+pub const COURSE_CLASS_DAY_START_LOCAL_H: f64 = 8.0;
+
 /// A course this long or longer (minutes) runs as several class days with a
 /// night's sleep between them, not one unbroken stretch awake.
+///
+/// This is a cliff: walking in at 50 at 8 AM, a 599-minute course ends near
+/// 84.4 and a 600-minute one at 27.6, the fixed daytime class day. No course
+/// sits near it -- the single-day courses run 4 to 8 hours, the multi-day
+/// one 24.
 pub const COURSE_MULTI_DAY_MIN: f64 = 10.0 * 60.0;
 
 /// Fatigue when a course of `minutes` starting at local hour
 /// `start_local_hours` ends, given `arrival` fatigue.
 ///
 /// A short course adds classroom-rate awake fatigue to what the driver
-/// walked in with. A course of [`COURSE_MULTI_DAY_MIN`] or more is several
-/// class days with sleep between, so only the last class day counts -- at
-/// most [`COURSE_CLASS_DAY_MAX_MIN`] over the final span of the course --
-/// and it replaces the arrival fatigue rather than adding to it.
+/// walked in with, on the real clock: a short course can run into the
+/// evening. A course of [`COURSE_MULTI_DAY_MIN`] or more is several class
+/// days with sleep between, so only the last class day counts, scored as a
+/// fixed 8 AM to 4 PM local block whatever hour the course started, and it
+/// replaces the arrival fatigue rather than adding to it.
 ///
 /// `scale(hours_since_course_start)` multiplies each minute's rate on top
 /// of the classroom factor: food and drink buffs, the driving mode's
@@ -272,14 +282,29 @@ pub fn course_fatigue(
     let minutes = finite_minutes(minutes);
     let classroom = |h: f64| CLASSROOM_FATIGUE_FACTOR * scale(h);
     if minutes >= COURSE_MULTI_DAY_MIN {
-        let class_min = minutes.min(COURSE_CLASS_DAY_MAX_MIN);
-        let offset_h = (minutes - class_min) / 60.0;
-        let gain = awake_fatigue_gain_scaled(start_local_hours + offset_h, class_min, |h| {
+        let class_start = last_class_day_start(start_local_hours, minutes);
+        let offset_h = class_start - start_local_hours;
+        let gain = awake_fatigue_gain_scaled(class_start, COURSE_CLASS_DAY_MAX_MIN, |h| {
             classroom(offset_h + h)
         });
         gain.clamp(0.0, 100.0)
     } else {
         (arrival + awake_fatigue_gain_scaled(start_local_hours, minutes, classroom)).min(100.0)
+    }
+}
+
+/// Local hours at which a multi-day course's last class day starts: the
+/// latest 8 AM whose class day ends by the end of the course, or, if none
+/// fits after the start, the first 8 AM after it. Only buff timing reads
+/// where the block falls; the class day itself is always daytime.
+fn last_class_day_start(start_local_hours: f64, minutes: f64) -> f64 {
+    let day_h = COURSE_CLASS_DAY_MAX_MIN / 60.0;
+    let latest_start = start_local_hours + minutes / 60.0 - day_h;
+    let latest = latest_start - (latest_start - COURSE_CLASS_DAY_START_LOCAL_H).rem_euclid(24.0);
+    if latest >= start_local_hours {
+        latest
+    } else {
+        start_local_hours + (COURSE_CLASS_DAY_START_LOCAL_H - start_local_hours).rem_euclid(24.0)
     }
 }
 
