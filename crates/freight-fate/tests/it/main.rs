@@ -149,6 +149,8 @@ mod states_driving_rest_choice_scenarios;
 mod states_driving_retarder;
 mod states_driving_road;
 mod states_driving_rollover;
+mod states_driving_scale_pairs;
+mod states_driving_scale_reminder;
 mod states_driving_speech_ladder;
 mod states_driving_speed_keeper_sweep;
 mod states_driving_status_screens;

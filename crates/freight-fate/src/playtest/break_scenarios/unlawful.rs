@@ -174,7 +174,7 @@ pub fn scale_bypass_to_the_end() -> Outcome {
     // And the harder half: a distance is a claim about now. Once the scale is
     // behind the truck, a line still offering its exit is telling the driver
     // to do something impossible.
-    let past = rig.said("Weigh station in");
+    let past = rig.said("Hamburg Scale in");
     if past > 0 && rig.drive.trip.position_mi > SCALE_MI + 1.0 {
         findings.push(format!(
             "{past} scale-exit lines are still offering an exit the truck has passed"
