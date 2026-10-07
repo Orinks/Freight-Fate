@@ -2251,8 +2251,8 @@ branch. The older Phase A/B plan checklists are not a live completion list.
       bare OSM speed values are interpreted as km/h; Alaska's 55 mph fallback
       applies only to the Alaska stretch of a cross-border leg.
 - [x] **British Columbia's heavy-truck speed limiter.** Covered trucks are
-      capped at 105 km/h independently of posted road limits; Yukon has no
-      statutory limiter.
+      capped at 105 km/h independently of posted road limits. No Yukon
+      limiter requirement was found, so Yukon has none.
 - [x] **Canadian diesel prices for BC and Yukon.** Prices use Statistics
       Canada's 2025 annual averages for Vancouver and Whitehorse.
 - [x] **Phase B1: Tok Cutoff and Glenn Highway to Anchorage.** Tok to
