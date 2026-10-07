@@ -347,10 +347,12 @@ fn test_traffic_context_and_warning_are_grounded_in_lead_vehicle() {
     // Pinned whole, call included: this stretch of I-65 out of Chicago has
     // three lanes and no closure, so the lane change is a move the driver can
     // actually make and the dodge call is the right one. A bare "Brake!" here
-    // would mean the open-lane test had stopped seeing the road.
+    // would mean the open-lane test had stopped seeing the road. From the
+    // right lane of three, the lane a tap lands in is the middle lane, and
+    // the call names it the way the L key does.
     assert_eq!(
         hazards[0].text(),
-        "Change lanes or brake! Brake lights right ahead. Left lane open."
+        "Change lanes or brake! Brake lights right ahead. Middle lane open."
     );
     assert_eq!(hazards[0].data.dodgeable, Some(true));
     assert!(hazards[0].data.traffic.is_some());
