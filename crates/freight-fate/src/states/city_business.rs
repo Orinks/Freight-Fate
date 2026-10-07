@@ -18,12 +18,15 @@ use ff_core::models::solvency::{apply_return_to_company_driving, company_return_
 use ff_core::models::trailers::{TrailerType, DEFAULT_TRAILER_PROGRAMS, TRAILER_CATALOG};
 use ff_core::models::trucks::{TruckModel, Upgrade, TRUCK_CATALOG, UPGRADE_CATALOG};
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
+use ff_core::sim::driving_modes::tuning_for_time_scale;
+use ff_core::sim::hos;
+use ff_core::sim::timezones::to_local;
 
 use crate::app::GameContext;
 use crate::impl_state_for_menu;
 use crate::meaningful_play::MeaningfulPlayReason;
 use crate::states::base::{Label, Menu, MenuCore, MenuItem};
-use crate::states::city::{profile, profile_mut, py_capitalize};
+use crate::states::city::{city_local_zone, profile, profile_mut, py_capitalize};
 
 fn save_business_change(ctx: &mut GameContext) {
     ctx.mark_meaningful_play(MeaningfulPlayReason::BusinessChanged);
@@ -1121,15 +1124,27 @@ impl EndorsementCourseState {
         };
         crate::states::city::record_city_duty(ctx, "off_duty", start, end, "credential course");
         let mut announcements: Vec<String> = Vec::new();
+        // Day and night follow the school's own clock, the one the city
+        // menu reads out, not the Eastern reference clock.
+        let start_local = to_local(start, city_local_zone(ctx));
+        let fatigue_mode_rate = tuning_for_time_scale(ctx.settings.time_scale).fatigue_rate;
         let money = {
             let p = profile_mut(ctx);
-            // Off duty on the hours clock too, as the logbook says: a day-long
-            // course is a full rest, a shorter one still counts toward the
-            // break and the window (2026-09-28).
+            // Off duty on the hours clock: a stretch of 10+ hours still resets
+            // HOS the way consecutive off duty does. Fatigue accrues at the
+            // classroom rate -- sitting in class is not sleep (GitHub #314) --
+            // and a multi-day course counts only its last class day, scored
+            // 8 AM to 4 PM local. Training a carrier requires is on duty (49
+            // CFR 395.2), and the clock still advances a flat course_hours:
+            // both ROADMAP debt.
             p.hos.off_duty(cred.course_hours * 60.0);
-            if cred.course_hours >= 10.0 {
-                p.fatigue = 0.0;
-            }
+            let fatigue = {
+                let p = &*p;
+                hos::course_fatigue(p.fatigue, start_local, cred.course_hours * 60.0, |h| {
+                    fatigue_mode_rate * p.fatigue_buff_rate(start + h)
+                })
+            };
+            p.fatigue = fatigue;
             let day = p.market_day();
             p.market.advance_to(day);
             if cred.wait_days > 0.0 {
@@ -1156,28 +1171,47 @@ impl EndorsementCourseState {
         };
         ctx.save_profile();
         ctx.audio.play("ui/cash");
-        if cred.wait_days > 0.0 {
-            ctx.say(&format!(
+        let mut complete = if cred.wait_days > 0.0 {
+            format!(
                 "Course complete, application submitted: {} dollars. The background check \
                  takes about {} days and clears while you drive. You have {} dollars left.",
                 fmt_grouped(cred.course_cost, 0),
                 cred.wait_days as i64,
                 fmt_grouped(money, 0)
-            ));
+            )
         } else {
-            ctx.say(&format!(
+            format!(
                 "Course complete: {} dollars, and you earned the {}. Matching freight is \
                  unlocked. You have {} dollars left.",
                 fmt_grouped(cred.course_cost, 0),
                 cred.gate_label,
                 fmt_grouped(money, 0)
-            ));
+            )
+        };
+        if let Some(cue) = course_fatigue_cue(profile(ctx).fatigue) {
+            complete.push(' ');
+            complete.push_str(cue);
         }
+        ctx.say(&complete);
         for line in announcements {
             ctx.say_with(line, crate::app::Say::queued());
         }
         ctx.award_achievement("self_paid_course");
         self.refresh(ctx, true);
+    }
+}
+
+/// The warning a course ends with when it leaves the driver drowsy or worse,
+/// on the same thresholds the road's yawn and rumble-strip cues use. It has
+/// no speech category of its own: it is appended to the course completion
+/// line, so it is heard wherever that line is.
+pub fn course_fatigue_cue(fatigue: f64) -> Option<&'static str> {
+    if fatigue >= hos::FATIGUE_SEVERE {
+        Some("You're dangerously drowsy after the course. Sleep before you drive.")
+    } else if fatigue >= hos::FATIGUE_DROWSY {
+        Some("You're drowsy after the course. Sleep before you drive.")
+    } else {
+        None
     }
 }
 

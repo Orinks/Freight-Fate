@@ -5611,11 +5611,11 @@ repository root; Markdown links are relative to this document.
       That is why the owner-operator start was placed at 18 -- it sat
       exactly where the ladder stopped paying out.
       OWNER RULING: do NOT build a fleet-management layer -- it would
-      duplicate the separate dispatch game and drag a blind player out
-      of the cab into menus. The first half is EARNING TRUST; the second
-      half is CARRYING RISK. Same cab, same road, higher stakes. Every
-      addition must pass one test: you can hear and feel the difference
-      from the driver's seat. Planned spine: harder freight classes
+      drag a blind player out of the cab into menus. The first half is
+      EARNING TRUST; the second half is CARRYING RISK. Same cab, same
+      road, higher stakes. Every addition must pass one test: you can
+      hear and feel the difference from the driver's seat. Planned spine:
+      harder freight classes
       (tanker surge first, then oversize/overweight with permits and
       route restrictions, hazmat with route bans and inspection
       scrutiny), dedicated contract lanes you can fail, owned trailers

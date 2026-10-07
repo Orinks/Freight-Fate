@@ -166,9 +166,17 @@ impl RestStopState {
             // scale its truck-stop script -- "no truck parking... Loyalty
             // program: Loyalty points: 0" -- at an open scale (owner
             // playtest, 2026-08-20).
+            //
+            // A closed scale's first row is its own name ("I-40 Weigh
+            // Station is closed"), so leading with the name as well read it
+            // twice in one breath (QA, 2026-10-07). The row says it once.
+            let row = self.current_text(ctx);
+            if row.starts_with(&self.stop.spoken_name()) {
+                parts.clear();
+            }
             parts.push("Inspection station.".to_string());
             parts.push(format!("It is {}.", clock_text(d.trip.local_hour())));
-            parts.push(self.current_text(ctx));
+            parts.push(row);
             ctx.say(&parts.join(" "));
             return;
         }
@@ -394,12 +402,24 @@ impl RestStopState {
             );
         }
         if has("inspect") && !self.visit.inspected {
-            items.push(
+            // Only an open scale has anyone to check in with. A closed one
+            // used to offer the check-in all the same and answer it as an
+            // open one did, waving a tester "straight back onto the highway"
+            // six miles short of the open scale he had been warned about
+            // (log, 2026-10-07). The closed row says so instead.
+            let item = if d.scale_is_open(&self.stop) {
                 MenuItem::new("Check in at inspection station", |s: &mut Self, ctx| {
                     s.inspect(ctx)
                 })
-                .help("Records the inspection check-in."),
-            );
+                .help("Records the inspection check-in.")
+            } else {
+                MenuItem::new(
+                    format!("{} is closed", self.stop.spoken_name()),
+                    |s: &mut Self, ctx| s.inspect(ctx),
+                )
+                .help("Nobody is at the scale house. There is nothing to check in at.")
+            };
+            items.push(item);
         }
         items.push(
             MenuItem::new("Walk around the truck", |s: &mut Self, ctx| {
@@ -1182,6 +1202,21 @@ impl RestStopState {
     }
 
     fn inspect(&mut self, ctx: &mut GameContext) {
+        // Nobody is in a closed scale house: the row says so and nothing
+        // else happens. It used to run the check-in all the same -- marking
+        // the stop inspected, playing the notify tone and saving -- for a
+        // scale that settles nothing (QA, 2026-10-07). No time, no record.
+        let open = self
+            .driving
+            .read(|d| d.scale_is_open(&self.stop))
+            .unwrap_or(false);
+        if !open {
+            ctx.say(&format!(
+                "{} is closed. Pull back onto the highway.",
+                self.stop.spoken_name()
+            ));
+            return;
+        }
         let Some((text, waved)) = self.check_in(ctx) else {
             return;
         };
@@ -1205,6 +1240,9 @@ impl RestStopState {
 
     /// The scale check-in itself, settled and saved: the spoken result, and
     /// whether the lane waved the truck through.
+    ///
+    /// Open scales only: `inspect` answers a closed one before this runs,
+    /// and Back runs it only while `check_in_pending`, which is open-only.
     fn check_in(&mut self, ctx: &mut GameContext) -> Option<(String, bool)> {
         let stop = self.stop.clone();
         let result = self.driving.clone().with(ctx, |d, ctx| {
@@ -1505,9 +1543,16 @@ impl Menu for RestStopState {
         } else {
             None
         };
+        // Leaving one scale with another open one still ahead: say which
+        // was which once the truck is back on the road (tester log,
+        // 2026-10-07: a closed scale six miles short of the announced one).
+        let here = (self.stop.stop_type == "weigh_station").then(|| self.stop.spoken_name());
         let engine_on = self
             .driving
-            .read(|d| d.trip.truck.engine_on)
+            .read(|d| {
+                d.note_scale_reannounce(here.as_deref());
+                d.trip.truck.engine_on
+            })
             .unwrap_or(false);
         ctx.audio.play("ui/menu_back");
         ctx.pop_state();

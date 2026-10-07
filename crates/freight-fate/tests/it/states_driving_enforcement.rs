@@ -1000,7 +1000,7 @@ fn test_reminder_fires_once_when_still_fast_with_no_scale_exit_armed() {
     let mut drive = a_drive(&mut app, "Jerry");
     let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
     let key = format!("weigh:{}:{:.1}", scale.name, scale.at_mi);
-    drive.weigh_station_notice_key = key.clone();
+    drive.weigh_station_noticed.insert(key.clone());
     drive.trip.truck.velocity_mps = mph_to_mps(45.0);
     app.clear_speech();
 
@@ -1012,11 +1012,11 @@ fn test_reminder_fires_once_when_still_fast_with_no_scale_exit_armed() {
     let reminders: Vec<String> = app
         .event_lines()
         .into_iter()
-        .filter(|line| line.starts_with("Weigh station in "))
+        .filter(|line| line.starts_with("Ontario Scale in "))
         .collect();
     assert_eq!(
         reminders,
-        vec!["Weigh station in half a mile. Signal for the scale exit.".to_string()]
+        vec!["Ontario Scale in half a mile. Signal for the scale exit.".to_string()]
     );
 }
 
@@ -1030,7 +1030,7 @@ fn test_reminder_speaks_the_road_actually_left() {
     let mut drive = a_drive(&mut app, "Jerry");
     let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
     let key = format!("weigh:{}:{:.1}", scale.name, scale.at_mi);
-    drive.weigh_station_notice_key = key.clone();
+    drive.weigh_station_noticed.insert(key.clone());
     drive.trip.truck.velocity_mps = mph_to_mps(45.0);
     drive.trip.position_mi = scale.at_mi - 0.15;
     app.clear_speech();
@@ -1040,11 +1040,11 @@ fn test_reminder_speaks_the_road_actually_left() {
     let reminders: Vec<String> = app
         .event_lines()
         .into_iter()
-        .filter(|line| line.starts_with("Weigh station in "))
+        .filter(|line| line.starts_with("Ontario Scale in "))
         .collect();
     assert_eq!(
         reminders,
-        vec!["Weigh station in a quarter mile. Signal for the scale exit.".to_string()]
+        vec!["Ontario Scale in a quarter mile. Signal for the scale exit.".to_string()]
     );
 }
 
@@ -1054,7 +1054,7 @@ fn test_reminder_stays_quiet_once_the_scale_exit_is_armed() {
     let mut drive = a_drive(&mut app, "Jerry");
     let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
     let key = format!("weigh:{}:{:.1}", scale.name, scale.at_mi);
-    drive.weigh_station_notice_key = key.clone();
+    drive.weigh_station_noticed.insert(key.clone());
     drive.trip.truck.velocity_mps = mph_to_mps(45.0);
     drive.exit_stop = Some(scale.clone());
     drive.exit_signal_on = true;
@@ -1071,7 +1071,7 @@ fn test_reminder_stays_quiet_below_the_bypass_speed() {
     let mut drive = a_drive(&mut app, "Jerry");
     let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
     let key = format!("weigh:{}:{:.1}", scale.name, scale.at_mi);
-    drive.weigh_station_notice_key = key.clone();
+    drive.weigh_station_noticed.insert(key.clone());
     drive.trip.truck.velocity_mps = mph_to_mps(10.0);
     app.clear_speech();
 
@@ -1087,7 +1087,7 @@ fn test_a_green_transponder_verdict_retires_the_reminder() {
     let mut drive = a_drive(&mut app, "Jerry");
     let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
     let key = format!("weigh:{}:{:.1}", scale.name, scale.at_mi);
-    drive.weigh_station_notice_key = key.clone();
+    drive.weigh_station_noticed.insert(key.clone());
     drive.trip.truck.velocity_mps = mph_to_mps(45.0);
     drive
         .weigh_station_transponder_verdict

@@ -61,6 +61,7 @@ pub use board::{
 };
 pub use close_out::CloseOutCareerState;
 pub use extras::{BobtailDestState, PayDebtState};
+pub(crate) use terminal::local_zone as city_local_zone;
 pub use terminal::CityMenuState;
 pub use truck_status::TruckStatusState;
 
