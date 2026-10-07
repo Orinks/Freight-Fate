@@ -603,40 +603,7 @@ impl Trip {
                 full
             };
         }
-        if self.pull_over_active {
-            // Lights behind you: the whole encounter runs on the real clock.
-            return full.min(1.0);
-        }
-        if self.controlled_ramp || self.controlled_turn || self.dock_run_in {
-            // A ramp ending in a light or a sign, a street corner, or the
-            // dock run-in plays out in real time: the warning must buy human
-            // reaction seconds, not compressed ones.
-            return full.min(1.0);
-        }
-        if self.severe_curve_decompression() {
-            // Same law for a hard bend (owner, 2026-07-24).
-            return full.min(1.0);
-        }
-        if self.curve_shed_active {
-            // And while curve assistance is still shedding for one. The law
-            // above lets go at the advisory plus the pacenote margin; the
-            // assist aims at the advisory itself, so the last three miles an
-            // hour were shed on the compressed clock, where the road left
-            // passes seventeen times faster than the truck slows and the
-            // only profile that still lands on the number is a full
-            // application (AZ-260 bench trace, 2026-09-18: 0.35 of the
-            // pedal one frame, all of it the next, to take off 3 mph).
-            return full.min(1.0);
-        }
-        if self.armed_exit_decompression() {
-            // And for a signalled exit (Shane, 2026-08-15).
-            return full.min(1.0);
-        }
-        if self.scale_reminder_hold() {
-            // And from an open scale's last reminder to its gore: at full
-            // compression the fixed half mile went by in three real seconds,
-            // the bypass charge landing before "Signal for the scale exit"
-            // had finished (tester log, 2026-10-07).
+        if self.real_time_override().is_some() {
             return full.min(1.0);
         }
         if self.exit_approach_release_s > 0.0 {
@@ -655,7 +622,68 @@ impl Trip {
         paced + (real - paced) * toward_real
     }
 
-    /// Whether an open scale's reminder is holding the clock to real time.
+    /// Why the clock is pinned to real time this frame, or None when it is
+    /// paced. `effective_time_scale` answers `full.min(1.0)` for every one
+    /// of these, so the name is what a session log says when a tester
+    /// reports the clock stuck at real time (issue 293). Parked waiting is
+    /// checked before this in `effective_time_scale` and is not a pin.
+    pub fn real_time_override(&self) -> Option<&'static str> {
+        if self.pull_over_active {
+            // Lights behind you: the whole encounter runs on the real clock.
+            return Some("police stop");
+        }
+        if self.controlled_ramp {
+            // A ramp ending in a light or a sign, the acceleration lane and
+            // the merge after it: the warning must buy human reaction
+            // seconds, not compressed ones. The driving state names which.
+            return Some("controlled ramp");
+        }
+        if self.controlled_turn {
+            // A street corner, from its brake point in.
+            return Some("street corner");
+        }
+        if self.dock_run_in {
+            // The run-in to the dock.
+            return Some("dock run-in");
+        }
+        if self.severe_curve_decompression() {
+            // Same law for a hard bend (owner, 2026-07-24).
+            return Some("hard bend");
+        }
+        if self.curve_shed_active {
+            // And while curve assistance is still shedding for one. The law
+            // above lets go at the advisory plus the pacenote margin; the
+            // assist aims at the advisory itself, so the last three miles an
+            // hour were shed on the compressed clock, where the road left
+            // passes seventeen times faster than the truck slows and the
+            // only profile that still lands on the number is a full
+            // application (AZ-260 bench trace, 2026-09-18: 0.35 of the
+            // pedal one frame, all of it the next, to take off 3 mph).
+            return Some("curve assist shedding speed");
+        }
+        if self.armed_exit_decompression() {
+            // And for a signalled exit (Shane, 2026-08-15).
+            return Some("signalled exit");
+        }
+        if self.scale_reminder_hold() && self.truck.speed_mph() > SCALE_BYPASS_MPH {
+            // And from an open scale's last reminder to its gore: at full
+            // compression the fixed half mile went by in three real seconds,
+            // the bypass charge landing before "Signal for the scale exit"
+            // had finished (tester log, 2026-10-07). Only while a crossing
+            // could still be charged: at or under the bypass speed it cannot,
+            // so a truck slowed or stopped short of the scale runs the
+            // ordinary low-speed pacing rather than sitting on the wall clock
+            // until it reaches the gore. Back over that speed, the pin is
+            // back before the crossing can count, and the reminder's real
+            // seconds are counted on the real clock either way.
+            return Some("scale reminder");
+        }
+        None
+    }
+
+    /// Whether an open scale's reminder hold is armed: from the reminder to
+    /// the gore, off the scale's ramp. `real_time_override` pins the clock
+    /// for it only above [`SCALE_BYPASS_MPH`].
     pub fn scale_reminder_hold(&self) -> bool {
         !self.on_ramp
             && self

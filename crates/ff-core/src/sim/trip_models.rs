@@ -26,9 +26,10 @@ pub use ramps::{
     merge_traffic_target_mph, ramp_curve_mi, ramp_speed_mph, truck_merge_speed_mph, ExitRampLayout,
     RampAdvisorySpeed, ACCELERATION_LANE_FT, ACCELERATION_LANE_GRADE_FACTOR, DECELERATION_LANE_FT,
     DECELERATION_LANE_GRADE_FACTOR, DECELERATION_LANE_RAMP_MPH, GRADE_MODEL_MAX_PCT,
-    GRADE_MODEL_MIN_PCT, MERGE_TRAFFIC_SPEED_SHARE, RAMP_CURVE_DEFLECTION_RAD,
-    RAMP_DIRECTIONAL_SHARE, RAMP_MIN_DESIGN_MPH, RAMP_QUEUE_FT, RAMP_SURFACE_SHARE,
-    RAMP_TANGENT_CLIMB_FT, TRUCK_ACCEL_ALPHA_FPS2, TRUCK_ACCEL_BETA,
+    GRADE_MODEL_MIN_PCT, MERGE_RECOVERY_MAX_MI, MERGE_RECOVERY_MAX_REAL_S,
+    MERGE_TRAFFIC_SPEED_SHARE, RAMP_CURVE_DEFLECTION_RAD, RAMP_DIRECTIONAL_SHARE,
+    RAMP_MIN_DESIGN_MPH, RAMP_QUEUE_FT, RAMP_SURFACE_SHARE, RAMP_TANGENT_CLIMB_FT,
+    TRUCK_ACCEL_ALPHA_FPS2, TRUCK_ACCEL_BETA,
 };
 
 pub const BASE_SPEED_LIMIT_MPH: f64 = 70.0;
@@ -467,6 +468,10 @@ pub const ZONE_WARNING_MAX_MI: f64 = 10.0;
 /// Clock multiplier when stopped or crawling; full pacing resumes at cruise.
 pub const LOW_SPEED_TIME_SCALE: f64 = 4.0;
 pub const FULL_COMPRESSION_MPH: f64 = 50.0;
+/// An open scale crossed faster than this is a bypass; at or under it the
+/// truck is pulling in. The scale reminder's real-time hold pins the clock
+/// only above it (`Trip::real_time_override`).
+pub const SCALE_BYPASS_MPH: f64 = 15.0;
 /// A pacing change made mid-trip waits until the truck is slower than this.
 /// Motion integrates on real seconds while the road passes at the pace, and
 /// fuel is billed at the pace, so at any one pace a hill, a coast and a

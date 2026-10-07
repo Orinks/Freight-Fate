@@ -4,11 +4,15 @@
 
 ### Fixed
 
-- **Sitting through a training course now tires you.** A day-long course no longer wipes fatigue to zero.
+- **Sitting through a training course now tires you, about half as fast as driving.** A multi-day course counts only its last class day.
+
+- **A course that leaves you drowsy now tells you to sleep before driving.** Night classes are judged by the city's local clock.
 
 - **The last weigh station warning names its scale and leaves time to take the exit in every driving mode.** Closed scales say so.
 
 - **Driving into Memphis from St. Louis no longer passes a weigh station that is not there.** The West Memphis scale is westbound I-40 only.
+
+- **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now says it waits until you stop.
 
 - **Creeping up to an open scale, then speeding past, no longer dodges the bypass charge.** Only a warning the game delayed excuses you.
 

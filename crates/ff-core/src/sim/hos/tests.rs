@@ -1247,6 +1247,58 @@ fn awake_fatigue_gain_uses_day_and_night_rates() {
 }
 
 #[test]
+fn course_fatigue_is_half_the_driving_rate_day_and_night() {
+    // An 8 h day class from 10: 0.0575/min x 480 = 27.6, landing at 37.6.
+    let day = course_fatigue(10.0, 8.0, 8.0 * 60.0, |_| 1.0);
+    assert!(approx(day, 37.6), "8 h day class: {day}");
+    assert!(approx(
+        day - 10.0,
+        CLASSROOM_FATIGUE_FACTOR * awake_fatigue_gain(8.0, 8.0 * 60.0)
+    ));
+    // 9 PM to 5 AM is all night: 0.085/min x 480 = 40.8, landing at 50.8.
+    let night = course_fatigue(10.0, 21.0, 8.0 * 60.0, |_| 1.0);
+    assert!(approx(night, 50.8), "8 h night class: {night}");
+}
+
+#[test]
+fn course_fatigue_scale_multiplies_each_minute() {
+    // A buff at rate 0.5 for the first four hours only.
+    let buffed = course_fatigue(0.0, 8.0, 8.0 * 60.0, |h| if h < 4.0 { 0.5 } else { 1.0 });
+    let plain_half = 0.0575 * 240.0;
+    assert!(approx(buffed, plain_half * 0.5 + plain_half), "{buffed}");
+}
+
+#[test]
+fn multi_day_course_counts_only_the_last_class_day() {
+    // 24 h from 7 AM: the last class day is 11 PM to 7 AM -- six night
+    // hours (0.085 x 360 = 30.6) and two dawn hours (0.0575 x 120 = 6.9).
+    let fresh = course_fatigue(0.0, 7.0, 24.0 * 60.0, |_| 1.0);
+    let tired = course_fatigue(95.0, 7.0, 24.0 * 60.0, |_| 1.0);
+    assert!(approx(fresh, 37.5), "24 h course: {fresh}");
+    assert!(
+        approx(fresh, tired),
+        "arrival fatigue is replaced, not added"
+    );
+    let expected = CLASSROOM_FATIGUE_FACTOR * awake_fatigue_gain(7.0 + 16.0, 8.0 * 60.0);
+    assert!(approx(fresh, expected));
+    // The 10 h threshold: a 10 h course is two days, a 9.9 h course is one.
+    let ten = course_fatigue(50.0, 8.0, 10.0 * 60.0, |_| 1.0);
+    assert!(approx(
+        ten,
+        CLASSROOM_FATIGUE_FACTOR * awake_fatigue_gain(10.0, 8.0 * 60.0)
+    ));
+    let under = course_fatigue(50.0, 8.0, 9.9 * 60.0, |_| 1.0);
+    assert!(under > 50.0);
+}
+
+#[test]
+fn course_fatigue_clamps_and_ignores_bad_minutes() {
+    assert_eq!(course_fatigue(95.0, 21.0, 8.0 * 60.0, |_| 1.0), 100.0);
+    assert_eq!(course_fatigue(12.0, 8.0, f64::NAN, |_| 1.0), 12.0);
+    assert_eq!(course_fatigue(12.0, 8.0, -60.0, |_| 1.0), 12.0);
+}
+
+#[test]
 fn test_fatigue_shortens_the_reaction_window() {
     assert_eq!(reaction_window_mult(0.0), 1.0);
     assert_eq!(reaction_window_mult(FATIGUE_DROWSY), 1.0);

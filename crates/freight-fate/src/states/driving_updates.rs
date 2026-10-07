@@ -24,6 +24,8 @@
 //!   resolution, and the grade advisory.
 //! * [`enforcement`] -- the dash overspeed alert, the pull-over and its
 //!   compliance tracker, weigh stations, and the run-from-the-stop opt-in.
+//! * [`pacing`] -- a mid-drive pace change, the merge handoff's bound, and
+//!   the session-log trace of the clock's real-time pins.
 //! * [`conditions`] -- hot brakes, the destination approach assist, traction
 //!   states and the chain law.
 //!
@@ -43,6 +45,7 @@ pub mod frame;
 pub mod hazards;
 pub mod lanes;
 pub mod live_sources;
+pub mod pacing;
 pub mod pending;
 pub mod radio;
 pub mod radio_channel3000;

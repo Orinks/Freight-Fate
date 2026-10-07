@@ -1,8 +1,6 @@
 //! The frame loop itself (`DrivingUpdateMixin.update`), the safety-call
 //! re-speak, and the retarder transcript trace.
 
-use ff_core::sim::season::real_clock_game_hours;
-use ff_core::sim::trip_models::PACE_CHANGE_MAX_MPH;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
 use crate::app::{GameContext, SayEvent, TRANSCRIPT_TARGET};
@@ -123,30 +121,8 @@ impl DrivingState {
                 self.begin_departure_chain(ctx, true);
             }
         }
-        // Pacing can be changed from the pause menu mid-trip, and takes
-        // effect once the truck is stopped (`PACE_CHANGE_MAX_MPH`). Entering
-        // Real time also moves the independent spoken clock to now, while the
-        // career, deadline, and HOS clocks keep their elapsed totals.
-        if ctx.settings.time_scale != self.trip.time_scale
-            && self.trip.truck.speed_mph().abs() < PACE_CHANGE_MAX_MPH
-        {
-            if ctx.settings.time_scale == 1.0 {
-                let elapsed_h = self.trip.game_minutes / 60.0;
-                let real_hours = real_clock_game_hours(None);
-                profile_mut_of(ctx).sync_calendar_to(real_hours - elapsed_h);
-                ctx.save_profile();
-                let local_hour = real_hours.rem_euclid(24.0);
-                let reference_now = local_hour - self.trip.current_timezone().offset_h;
-                let start_hour = (reference_now - elapsed_h).rem_euclid(24.0);
-                self.trip.start_hour = start_hour;
-                self.trip.traffic_manager.start_hour = start_hour;
-                if self.trip.weather.game_hours.is_some() {
-                    self.trip.weather.game_hours =
-                        Some(profile_of(ctx).calendar_game_hours() + elapsed_h);
-                }
-            }
-            self.trip.time_scale = ctx.settings.time_scale;
-        }
+        // A pace change from the pause menu waits for the truck to stop.
+        self.update_pace_change(ctx, dt);
         let tuning = tuning_for_time_scale(self.trip.time_scale);
         self.trip.hazard_scale =
             hos::hazard_scale(&ctx.settings.hos_mode) * tuning.hazard_frequency;
@@ -636,6 +612,9 @@ impl DrivingState {
             self.update_ramp_light(ctx, 0.0);
         }
         self.update_departure_ramp(ctx, moved_mi);
+        self.bound_departure_merge_recovery(moved_mi, dt);
+        // Every clock pin is settled for the frame by here.
+        self.trace_clock_override(dt);
         // Immediately after the exit watch, which is what turns a signaled
         // scale exit into a ramp. Only now can a scale crossing be told apart
         // from a check-in.

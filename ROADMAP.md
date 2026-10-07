@@ -2671,6 +2671,14 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 - [ ] **Other ELD character events.** Daily log certification, carrier
       edit approve/reject prompts, a rare ELD-malfunction paper-log day,
       and the adverse-conditions +2-hour exception wired to live weather.
+- [ ] **Training a carrier requires is work time.** Under 49 CFR 395.2,
+      training the carrier requires is on duty, not driving: it runs the
+      14-hour window and does not count toward a 10-hour reset. A course
+      the driver books and pays for on their own time can stay off duty.
+      Today every credential course logs off duty, so a long course, or two
+      short ones back to back, counts as a 10-hour reset. Course fatigue
+      was corrected separately (GitHub #314); this item is only the duty
+      status, and the owner decides how sponsored courses are logged.
 
 ### Signalling a street turn
 
