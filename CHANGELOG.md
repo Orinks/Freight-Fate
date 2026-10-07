@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- **Drivers can call dispatch while stopped for trip-specific help.** Report delays, hours, road conditions, truck trouble or load trouble.
+
 ### Changed
 
 - With no carrier, choosing Stay a company driver on the Business status screen now says "Staying on the company-driver path." instead of "Staying a company driver.", since there is no seat to stay in.
