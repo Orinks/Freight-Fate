@@ -139,9 +139,9 @@ Scope guards:
   on staying out.
 - No new meters to babysit: the cycle speaks through the existing ELD
   status key and logbook; certification and edits are single prompts.
-- The dispatch game and freightverse driver exchange read the profile: new
-  fields (`home_terminal_city`, cycle ledger) must be additive and
-  optional in the exchange format.
+- Freightverse driver-exchange readers read the profile: new fields
+  (`home_terminal_city`, cycle ledger) must be additive and optional in the
+  exchange format.
 
 ## Verification
 
