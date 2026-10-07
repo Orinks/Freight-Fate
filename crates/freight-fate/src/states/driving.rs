@@ -386,6 +386,7 @@ pub struct DrivingState {
     pub worst_damage_band: i32,
     pub limp_cap_mph: Option<f64>,
     pub limp_cruise_said: bool,
+    pub bc_limiter_said: bool,
     pub out_of_service_creep_s: f64,
     pub recovering: bool,
     // Warning state for tires, brakes, and engine. New drives start clear so

@@ -50,6 +50,15 @@ pub const PREVENTABLE_REPUTATION_PER_BAND: f64 = 1.5; // standing lost per band 
                                                       // second of comfortable braking" the dropped-speed-limit grace is built on, so
                                                       // the cap never snaps a speed out from under the driver.
 pub const LIMP_CAP_RAMP_MPH_PER_S: f64 = 2.0;
+/// British Columbia requires heavy commercial vehicles built after 1994,
+/// over 11,793 kg GVWR, to be limited to this speed from 2024-04-05.
+/// Sources: https://archive.news.gov.bc.ca/releases/news_releases_2020-2024/2024MOTI0044-000468.htm
+/// and https://www2.gov.bc.ca/assets/gov/driving-and-transportation/cvse/bulletins-notices-circulars/ctpm/bulletins/cvse-bulletin-05-2024-speed-limiters.pdf
+pub const BC_LIMITER_KMH: f64 = 105.0;
+/// The British Columbia limiter in miles per hour.
+pub const BC_LIMITER_MPH: f64 = BC_LIMITER_KMH / 1.609344;
+/// Full jurisdiction name returned by `Trip::state_at` for British Columbia.
+pub const BC_STATE_NAME: &str = "British Columbia";
 // Chaining up is done kneeling on the shoulder in the weather that made it
 // necessary. Real crews quote twenty to thirty minutes for a drive-axle set;
 // doing it in the dark by headlamp costs more time and much more out of the

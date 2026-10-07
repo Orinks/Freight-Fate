@@ -33,6 +33,7 @@ mod data_street_turns;
 mod data_surface_streets;
 mod data_world;
 mod data_world_overlay;
+mod economy;
 mod profile_integrity_export;
 mod sim_bends_hold_their_advisory;
 mod sim_billboard_placement;

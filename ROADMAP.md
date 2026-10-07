@@ -2250,6 +2250,11 @@ branch. The older Phase A/B plan checklists are not a live completion list.
 - [x] **Posted speed profiles on the Yukon and northern BC legs.** Canadian
       bare OSM speed values are interpreted as km/h; Alaska's 55 mph fallback
       applies only to the Alaska stretch of a cross-border leg.
+- [x] **British Columbia's heavy-truck speed limiter.** Covered trucks are
+      capped at 105 km/h independently of posted road limits. No Yukon
+      limiter requirement was found, so Yukon has none.
+- [x] **Canadian diesel prices for BC and Yukon.** Prices use Statistics
+      Canada's 2025 annual averages for Vancouver and Whitehorse.
 - [x] **Phase B1: Tok Cutoff and Glenn Highway to Anchorage.** Tok to
       Glennallen, Palmer, and Anchorage is connected in both directions,
       without a ferry or a detour through Fairbanks.
@@ -2272,10 +2277,11 @@ branch. The older Phase A/B plan checklists are not a live completion list.
       has curated grocery/retail, building-material, and cross-dock pins.
 - [ ] **Partial: cross-border rules and clearance.** A playable customs
       clearance/inspection flow now covers the Alaska Highway and southbound
-      Blaine ports. Canadian HOS, statutory CMV speed caps (distinct from
-      posted road limits), broader CAD/foreign exchange, and spring-breakup
-      axle restrictions remain open; the corridor does not establish Canadian
-      regulatory compliance. Full Canada and Europe remain planned.
+      Blaine ports, and BC's 105 km/h heavy-truck limiter and 2025 BC/Yukon
+      diesel prices are modeled. Canadian HOS, broader CAD/foreign exchange,
+      and spring-breakup axle restrictions remain open; the corridor does not
+      establish Canadian regulatory compliance. Full Canada and Europe remain
+      planned.
 - [ ] **Remaining corridor data work.** Refine the auto-profile
       Blaine–Surrey geometry for trucks; verify remaining Parks and Mat-Su
       fuel lots and any truck-parking capacity; and add the Whittier tunnel
@@ -2297,6 +2303,15 @@ branch. The older Phase A/B plan checklists are not a live completion list.
 - [ ] (Found along the way) Passport and FAST documents are not modeled.
 - [ ] (Found along the way) Border-penalty escalation uses lifetime counts,
       not AMPS's 12-month retention period.
+- [ ] (Found along the way) Alaska on-road diesel has no official source:
+      DCCED's survey covers gasoline and heating fuel only and excludes
+      Anchorage/Mat-Su, so Alaska keeps the Pacific Northwest price.
+- [ ] (Found along the way) The Vancouver diesel figure applies across BC and
+      probably includes Metro Vancouver's regional fuel taxes; northern BC
+      may therefore be priced high. This is unverified.
+- [ ] (Found along the way) Canadian diesel uses fixed 2025 Statistics Canada
+      averages. Offline prices do not follow the monthly series; live mode
+      moves them only with the US national price.
 
 Automated evidence: the four `test_alcan_phase_a_*` cases (including the
 Tok–Delta Junction–Fairbanks split), `test_alcan_phase_b1_tok_cutoff_glenn_to_anchorage`,
