@@ -268,6 +268,9 @@ pub trait Menu: Sized + 'static {
         let Some((key, _mods, text)) = event.key_down() else {
             return;
         };
+        if event.key_repeat() && self.held_key_moves_nothing(key) {
+            return;
+        }
         match key {
             Key::Down => self.move_by(ctx, 1),
             Key::Up => self.move_by(ctx, -1),
@@ -364,6 +367,27 @@ pub trait Menu: Sized + 'static {
             format!("{}.", item.text(self, ctx))
         } else {
             help
+        }
+    }
+
+    /// Whether an auto-repeat of this navigation key would leave the cursor
+    /// where it is.
+    ///
+    /// A key held down when a menu opens keeps auto-repeating into it. A
+    /// tester braking onto the shoulder for a scale-bypass stop was still
+    /// holding the brake when the one-row stop screen opened, and the
+    /// keyboard's repeat read "Pull back onto the highway." twenty times in
+    /// six tenths of a second, each one cutting off the last (log,
+    /// 2026-10-07). A repeat that cannot move the cursor says nothing; a
+    /// fresh press still reads the row.
+    fn held_key_moves_nothing(&self, key: Key) -> bool {
+        let core = self.menu();
+        let count = core.items.len();
+        match key {
+            Key::Up | Key::Down => count <= 1,
+            Key::Home => core.index == 0,
+            Key::End => core.index + 1 >= count,
+            _ => false,
         }
     }
 
