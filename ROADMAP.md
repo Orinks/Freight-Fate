@@ -2273,6 +2273,10 @@ branch. The older Phase A/B plan checklists are not a live completion list.
       85% limits to listed corridors by leg; dispatch derives each truck's
       axle cap, filters overweight restricted routes from the route menu, and
       does not retrofit jobs dispatched before a window.
+- [x] **Jurisdiction-aware Alaska and Canadian driver HOS.** The clock follows
+      the current jurisdiction: Alaska limits, Canadian south-of-60 and
+      north-of-60 limits, their cycle rules, and one spoken notice at each
+      rule change; lower-48 behavior remains unchanged.
 - [x] **Public lots are fuel/rest stops, not freight yards.** Curated
       `travel_center` and `truck_parking` pins have no freight cargo roles;
       Delta Junction, Coldfoot, and Soldotna are pass-through markets with no
@@ -2282,9 +2286,22 @@ branch. The older Phase A/B plan checklists are not a live completion list.
 - [ ] **Partial: cross-border rules and clearance.** A playable customs
       clearance/inspection flow now covers the Alaska Highway and southbound
       Blaine ports, and BC's 105 km/h heavy-truck limiter and 2025 BC/Yukon
-      diesel prices are modeled. Canadian HOS and broader CAD/foreign exchange
-      remain open. The corridor does not establish Canadian regulatory
-      compliance. Full Canada and Europe remain planned.
+      diesel prices are modeled. The Alaska and Canadian driver HOS clock is
+      jurisdiction-aware; remaining Canadian HOS provisions, other Canadian
+      statutory truck-speed caps, and broader CAD/foreign exchange remain
+      open. Listed Alaska spring-breakup limits are modeled, but the corridor
+      does not establish full Canadian regulatory compliance. Full Canada and
+      Europe remain planned.
+- [ ] **Canadian daily and cycle-2 rules.** Daily limits and daily off-duty
+      requirements, cycle 2, Canadian split sleeper, adverse-driving
+      extensions, and deferral are not modeled.
+- [ ] **Route-wide HOS planning.** The job planner and planning hints use one
+      rule set for the entire route rather than switching at jurisdiction
+      boundaries.
+- [ ] **Canadian rest menus.** Rest menus still offer 10 hours in Canada
+      rather than the modeled 8-hour reset.
+- [ ] **Alaska cycle restart.** The 34-hour restart is an assumption; verify
+      its applicability under Alaska's rules.
 - [ ] **Remaining corridor data work.** Refine the auto-profile
       Blaine–Surrey geometry for trucks; verify remaining Parks and Mat-Su
       fuel lots and any truck-parking capacity; and add the Whittier tunnel
@@ -2347,8 +2364,25 @@ Tok–Delta Junction–Fairbanks split), `test_alcan_phase_b1_tok_cutoff_glenn_t
 `test_fairbanks_has_curated_freight_job_endpoints` in
 [`data_world.rs`](crates/ff-core/tests/it/data_world.rs), plus the generated-job
 endpoint test in [`models/jobs/tests.rs`](crates/ff-core/src/models/jobs/tests.rs).
+HOS evidence: `jurisdiction_rules_map_and_round_trip_keys`,
+`alaska_has_fifteen_driving_hours_and_no_break_limit`,
+`canada_south_limits_and_eight_hour_rest_reset`,
+`canada_shift_limit_warns_with_jurisdiction_wording`,
+`canada_north_driving_duty_and_elapsed_limits`,
+`jurisdiction_summaries_name_the_active_rules_and_limits`,
+`cycle_window_varies_without_changing_the_eight_day_ledger`,
+`canadian_cycle_requires_thirty_six_hours_while_us_uses_thirty_four`,
+`set_rules_rearms_all_jurisdiction_warnings`,
+`alaska_split_credit_recalculates_on_duty_since_first_rest`, and
+`hos_save_keeps_the_us_key_set_and_round_trips_canadian_fields` in
+[`sim/hos/tests.rs`](crates/ff-core/src/sim/hos/tests.rs), plus
+`hos_jurisdiction_switches_at_alcan_checkpoint_and_announces_once` and
+`hos_jurisdiction_switches_silently_when_not_enforced` in
+[`states_driving_hos.rs`](crates/freight-fate/tests/it/states_driving_hos.rs).
+The corridor data cases pass in the audited Windows run. HOS coverage records
+the rule boundaries, persistence, split credit and in-drive transitions.
 Remaining data limitations are recorded in the [Phase A plan](docs/alcan-corridor-scaffold-plan.md)
-and [Phase B plan](docs/alcan-phase-b-anchorage-plan.md).
+and the [Phase B plan](docs/alcan-phase-b-anchorage-plan.md).
 
 ### Twin parcel / STAA doubles (Track A)
 

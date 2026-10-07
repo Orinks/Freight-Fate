@@ -341,6 +341,7 @@ impl DrivingState {
             hos_stop_warning_pending: None,
             hos_plan_hint_check_key: None,
             hos_plan_hint_pending: None,
+            hos_jurisdiction_initialized: false,
             enforcement_events: HashSet::new(),
             pending_border_clearance: None,
             out_of_service_count: 0,

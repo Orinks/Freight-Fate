@@ -137,7 +137,7 @@ The data schema is present in `world_source`; a playable delay or inspection flo
 | Country packs | `index.json` → US only | CA pack path; AK cities under US (or explicit AK handling); geo names for BC/YT |
 | Units | Player `imperial_units` toggle; sim stores miles | Jurisdiction truck caps beyond US state mph table; `docs/map-enrichment-recipe.md` already says non-US needs jurisdiction keys + canonical km/h defaults |
 | Currency | USD-centric money / speech | CAD purse (and FX or dual purse) is deferred; it is not required to *drive* the corridor, but pay/fuel speech will lie if ignored — flag for follow-up |
-| HOS | FMCSA-style clock | Canadian HOS / south-of-60 vs north rules not modeled; Phase A may use the US through-freight clock only as a **named HOS honesty debt** accepted for this tip. Never silently label it Canadian law or imply Canadian compliance. |
+| HOS | FMCSA-style clock | The driver clock now selects Alaska and Canadian south-/north-of-60 rules by jurisdiction. Canadian daily limits/off-duty, cycle 2, split sleeper, adverse-driving extensions and deferral remain unmodeled; route planning still uses one rule set, Canadian rest menus remain 10 hours, and Alaska's 34-hour restart is assumed. |
 | Borders | State-line cues | International border mechanic still **deferred**; need at least data hooks (above) before pretending clearance gameplay |
 | Map extracts | US Geofabrik / self-hosted ORS-Overpass for US | **Need BC / YT / AK extracts** — US extract alone cannot bake honest ALCAN geometry |
 | HANDOFF / extract gate | `data/spider/gap-fill/HANDOFF.md` cites **96 GB RAM world extract** as a Canada unblock | **Soft for Phase A** if public Overpass / routing / Geofabrik *regional* downloads already cover the ALCAN filament honestly. Escalate to a full PBF / Valhalla-class bake only when APIs fail honesty — see §5.1 |
@@ -211,7 +211,7 @@ Landed on `feat/career-2.0` after Chelsea GO (plan locks kept: Blaine primary, S
 
 ### Named honesty debts (remaining)
 
-1. **HOS:** US through-freight clock only — never labeled as Canadian HOS / south-of-60 compliance.
+1. **HOS (driver-clock debt resolved):** Phase A used the US through-freight clock. The driver clock now selects Alaska and Canadian south-/north-of-60 rules; Canadian daily requirements, cycle 2, split sleeper, adverse-driving extensions, deferral and route-wide planning remain open, Canadian rest menus still offer 10 hours, and Alaska's 34-hour restart applicability is unverified.
 2. **Units / speed:** CA statutory truck caps still unresearched on Hwy 15; Blaine↔Surrey speed_limits stay coarse `hgv:false` placeholders.
 3. **Currency:** no CAD purse / FX.
 4. **Border gameplay:** data stub only (`border_crossing` both directions); no inspection beat / clearance sim.
@@ -274,7 +274,11 @@ This north-filament table stops at Whitehorse; the Tok/Fairbanks terminus and Al
 
 No Anchorage (Phase B). Through-freight only; cities remain stand-in markets (no CA cabotage board). Soft FIX company_yard→parking/travel_center types deferred.
 
-Named honesty debts carried: US HOS through-freight clock; CA statutory truck caps; Blaine HGV refine.
+The US through-freight HOS debt is resolved for the driver clock by the
+jurisdiction-aware Alaska and Canadian rules. Remaining HOS debts are listed
+above: unmodeled Canadian provisions, route-wide planning, Canadian 10-hour
+rest menus and the unverified Alaska 34-hour restart. Other Canadian truck caps
+beyond BC's 105 km/h limiter and Blaine HGV refine also remain open.
 
 ### Blockers for next slice (Phase B Alaska / rest of Canada)
 
