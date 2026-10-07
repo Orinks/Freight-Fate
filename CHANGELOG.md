@@ -12,6 +12,16 @@
 
 - **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now says it waits until you stop.
 
+- **Creeping up to an open scale, then speeding past, no longer dodges the bypass charge.** Only a warning the game delayed excuses you.
+
+- **A closed weigh station's check-in just says it is closed.** It no longer chimes, saves, or counts as an inspection.
+
+- **Arriving at a closed weigh station says its name once.**
+
+- **The state line on the St. Louis to Memphis drive now says I-40, over the Hernando de Soto Bridge.**
+
+- **Two real Arkansas weigh stations near West Memphis are on the map.** Marion screens southbound I-55, Lehi eastbound I-40.
+
 ## 1.9.3 - 2026-10-06
 
 ### Added

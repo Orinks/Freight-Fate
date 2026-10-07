@@ -1,6 +1,6 @@
-//! The open scale's last reminder at compressed time, the re-announcement
-//! after a check-in or a pause, the closed-scale check-in, and the stop
-//! screen under a held key.
+//! The open scale's last reminder at compressed time, who made a late one
+//! late, the re-announcement after a check-in or a pause, the closed-scale
+//! check-in, and the stop screen under a held key.
 //!
 //! One tester drive (log, 2026-10-07) is the shape of every case here: an
 //! open scale announced twelve miles out, a closed scale six miles short of
@@ -191,14 +191,16 @@ fn an_open_scale_behind_a_closed_one_at_ten_times_gets_real_seconds_after_a_paus
 
 #[test]
 fn a_crossing_is_judged_only_after_the_driver_was_told_in_time() {
-    // A scale never announced, or a reminder that landed late: the driver
-    // never had the seconds, so the scale does not charge. One announced
-    // whose reminder the driver's own pace skipped still does.
-    for (noticed, reminded, age_s, charged) in [
-        (false, false, 0.0, false),
-        (true, false, 0.0, true),
-        (true, true, SCALE_REMINDER_REAL_LEAD_S - 1.0, false),
-        (true, true, SCALE_REMINDER_REAL_LEAD_S, true),
+    // A scale never announced, or a reminder the game held back until late:
+    // the driver never had the seconds, so the scale does not charge. One
+    // announced whose reminder the driver's own pace skipped or delayed
+    // still does.
+    for (noticed, reminded, held_by_game, age_s, charged) in [
+        (false, false, false, 0.0, false),
+        (true, false, false, 0.0, true),
+        (true, true, true, SCALE_REMINDER_REAL_LEAD_S - 1.0, false),
+        (true, true, false, SCALE_REMINDER_REAL_LEAD_S - 1.0, true),
+        (true, true, true, SCALE_REMINDER_REAL_LEAD_S, true),
     ] {
         let mut rig = ten_times_rig();
         let (_closed, open) = closed_then_open(&mut rig.drive);
@@ -208,6 +210,9 @@ fn a_crossing_is_judged_only_after_the_driver_was_told_in_time() {
         }
         if reminded {
             rig.drive.weigh_station_reminder_key = key.clone();
+        }
+        if held_by_game {
+            rig.drive.scale_reminder_held_by_game.insert(key.clone());
         }
         rig.drive.weigh_station_reminder_age_s = age_s;
         rig.drive.trip.position_mi = open.at_mi + 0.05;
@@ -219,7 +224,8 @@ fn a_crossing_is_judged_only_after_the_driver_was_told_in_time() {
         assert_eq!(
             rig.drive.pull_over.is_some(),
             charged,
-            "noticed {noticed}, reminded {reminded}, {age_s} s ago"
+            "noticed {noticed}, reminded {reminded}, held by the game {held_by_game}, \
+             {age_s} s ago"
         );
         assert!(rig.drive.enforcement_events.contains(&key));
     }
@@ -228,9 +234,14 @@ fn a_crossing_is_judged_only_after_the_driver_was_told_in_time() {
 #[test]
 fn a_ramp_missed_after_a_late_reminder_is_not_judged_but_one_armed_early_is() {
     // Signalled for the scale, then missed its ramp. Armed in answer to a
-    // reminder three real seconds old, the driver never had the time; armed
-    // before any reminder was needed, the miss is theirs.
-    for (reminded, charged) in [(true, false), (false, true)] {
+    // reminder three real seconds old that the game held back, the driver
+    // never had the time; armed before any reminder was needed, or after one
+    // made late by their own crawl, the miss is theirs.
+    for (reminded, held_by_game, charged) in [
+        (true, true, false),
+        (true, false, true),
+        (false, false, true),
+    ] {
         let mut rig = ten_times_rig();
         let (_closed, open) = closed_then_open(&mut rig.drive);
         let key = rig.drive.weigh_station_key(&open);
@@ -238,6 +249,9 @@ fn a_ramp_missed_after_a_late_reminder_is_not_judged_but_one_armed_early_is() {
         if reminded {
             rig.drive.weigh_station_reminder_key = key.clone();
             rig.drive.weigh_station_reminder_age_s = 3.0;
+        }
+        if held_by_game {
+            rig.drive.scale_reminder_held_by_game.insert(key.clone());
         }
         rig.drive.exit_stop = Some(open.clone());
         rig.drive.exit_signal_on = true;
@@ -253,9 +267,145 @@ fn a_ramp_missed_after_a_late_reminder_is_not_judged_but_one_armed_early_is() {
         assert_eq!(
             rig.drive.pull_over.is_some(),
             charged,
-            "reminded {reminded}"
+            "reminded {reminded}, held by the game {held_by_game}"
         );
         assert!(rig.drive.enforcement_events.contains(&key));
+    }
+}
+
+/// Drive at a pinned speed until `until` holds or the truck is past `stop_mi`.
+fn hold_for(rig: &mut Rig, mph: f64, stop_mi: f64, until: impl Fn(&Rig) -> bool) {
+    for _ in 0..200_000 {
+        rig.drive.trip.truck.velocity_mps = mph_to_mps(mph);
+        rig.step(1, DT, None);
+        if until(rig) || rig.drive.trip.position_mi > stop_mi || rig.drive.pull_over.is_some() {
+            return;
+        }
+    }
+}
+
+#[test]
+fn crawling_up_to_the_scale_then_crossing_at_speed_is_still_judged() {
+    // QA at ten times (2026-10-07): fourteen miles an hour, under the bypass
+    // speed so the reminder stayed quiet, to 0.06 of a mile out; then across
+    // at forty-five. The reminder spoke about seven real seconds before the
+    // gore and the crossing was excused for good. The notice had said pull
+    // in, and the half-mile window was thirty real seconds at any legal
+    // speed: the shortfall was the driver's own crawl.
+    let mut rig = ten_times_rig();
+    let (_closed, open) = closed_then_open(&mut rig.drive);
+    let key = rig.drive.weigh_station_key(&open);
+    rig.prepare(61.0, None);
+    rig.drive.trip.position_mi = open.at_mi - 3.0;
+    rig.drive.enforcement_prev_mi = open.at_mi - 3.0;
+
+    hold_for(&mut rig, 61.0, open.at_mi, |rig| {
+        rig.drive.trip.position_mi >= open.at_mi - 0.9
+    });
+    assert_eq!(
+        rig.said("Open weigh station ahead"),
+        1,
+        "{:?}",
+        rig.transcript()
+    );
+    let reminder = "Signal for the scale exit.";
+    assert_eq!(rig.said(reminder), 0, "{:?}", rig.transcript());
+
+    hold_for(&mut rig, 14.0, open.at_mi, |rig| {
+        rig.drive.trip.position_mi >= open.at_mi - 0.06
+    });
+    assert_eq!(
+        rig.said(reminder),
+        0,
+        "under the bypass speed the reminder stays quiet: {:?}",
+        rig.transcript()
+    );
+    assert!(rig.drive.trip.position_mi < open.at_mi);
+
+    let mut reminded_at: Option<usize> = None;
+    let mut crossed_at: Option<usize> = None;
+    for frame in 0..20_000 {
+        rig.drive.trip.truck.velocity_mps = mph_to_mps(45.0);
+        let before = rig.drive.trip.position_mi;
+        rig.step(1, DT, None);
+        if reminded_at.is_none() && rig.said(reminder) > 0 {
+            reminded_at = Some(frame);
+        }
+        if crossed_at.is_none() && before < open.at_mi && rig.drive.trip.position_mi >= open.at_mi {
+            crossed_at = Some(frame);
+        }
+        if rig.drive.pull_over.is_some() || rig.drive.trip.position_mi > open.at_mi + 0.3 {
+            break;
+        }
+    }
+    let reminded =
+        reminded_at.unwrap_or_else(|| panic!("no late reminder: {:?}", rig.transcript()));
+    let crossed = crossed_at.expect("the truck crossed the scale");
+    assert!(
+        ((crossed - reminded) as f64 * DT) < SCALE_REMINDER_REAL_LEAD_S,
+        "the case under test is a reminder too late to act on"
+    );
+    assert!(!rig.drive.scale_reminder_held_by_game.contains(&key));
+    assert!(
+        rig.drive.pull_over.is_some(),
+        "a crawl-then-speed crossing must be judged: {:?}",
+        rig.transcript()
+    );
+    assert_eq!(
+        rig.said("Scale bypass enforcement"),
+        1,
+        "{:?}",
+        rig.transcript()
+    );
+}
+
+#[test]
+fn a_notice_first_heard_inside_the_reminder_window_still_excuses_a_quick_crossing() {
+    // The game's late, not the driver's: the scale only came into range
+    // inside the reminder window (a trip starting there, a notice held back
+    // by the cab), so the reminder rides behind it with too few seconds.
+    let mut rig = ten_times_rig();
+    let (_closed, open) = closed_then_open(&mut rig.drive);
+    let key = rig.drive.weigh_station_key(&open);
+    rig.prepare(61.0, None);
+    rig.drive.trip.position_mi = open.at_mi - 0.2;
+    rig.drive.enforcement_prev_mi = open.at_mi - 0.2;
+
+    hold_for(&mut rig, 61.0, open.at_mi + 0.3, |_| false);
+
+    assert_eq!(
+        rig.said("Open weigh station ahead"),
+        1,
+        "{:?}",
+        rig.transcript()
+    );
+    assert!(rig.drive.scale_reminder_held_by_game.contains(&key));
+    assert!(rig.drive.enforcement_events.contains(&key));
+    assert!(rig.drive.pull_over.is_none(), "{:?}", rig.transcript());
+    assert_eq!(rig.said("Scale bypass enforcement"), 0);
+}
+
+#[test]
+fn a_cab_taken_inside_the_reminder_window_marks_the_reminder_the_games_late() {
+    for (hazard, mph, held) in [(true, 61.0, true), (false, 14.0, false)] {
+        let mut rig = ten_times_rig();
+        let (_closed, open) = closed_then_open(&mut rig.drive);
+        let key = rig.drive.weigh_station_key(&open);
+        rig.drive.weigh_station_noticed.insert(key.clone());
+        rig.drive.trip.position_mi = open.at_mi - 0.3;
+        rig.drive.trip.truck.velocity_mps = mph_to_mps(mph);
+        if hazard {
+            rig.drive.hazard_deadline = Some(3.0);
+        }
+
+        rig.drive
+            .check_weigh_station_enforcement(&mut rig.app.ctx, open.at_mi - 0.31);
+
+        assert_eq!(
+            rig.drive.scale_reminder_held_by_game.contains(&key),
+            held,
+            "hazard {hazard}, {mph} mph"
+        );
     }
 }
 
@@ -417,6 +567,10 @@ fn checking_in_at_a_closed_scale_says_closed_and_names_the_open_one_still_ahead(
     rig.app.clear_speech();
 
     let minutes_before = rig.drive.trip.game_minutes;
+    if let Some(profile) = rig.app.ctx.profile.as_mut() {
+        profile.active_trip = None;
+    }
+    let log = rig.app.record_audio();
     rig.with_drive_on_stack(|rig, drive: DriveRef| {
         let mut state = RestStopState::with_drive(drive, closed.clone(), false);
         let shared = rig.app.ctx.state().expect("the drive is on the stack");
@@ -439,18 +593,54 @@ fn checking_in_at_a_closed_scale_says_closed_and_names_the_open_one_still_ahead(
             rig.menu_labels()
         );
         let closed_row = format!("{CLOSED_NAME} is closed");
+        // The arrival says the scale's name once: the closed row already
+        // carries it (QA, 2026-10-07: "I-40 Weigh Station. Inspection
+        // station. ... I-40 Weigh Station is closed.").
+        let arrival: Vec<String> = rig
+            .transcript()
+            .into_iter()
+            .filter(|line| line.contains("Inspection station."))
+            .collect();
+        assert_eq!(arrival.len(), 1, "{:?}", rig.transcript());
+        assert_eq!(
+            arrival[0].matches(CLOSED_NAME).count(),
+            1,
+            "{:?}",
+            arrival[0]
+        );
+        assert!(arrival[0].contains(&closed_row), "{:?}", arrival[0]);
+        log.borrow_mut().played.clear();
         assert!(rig.select_menu_containing(&closed_row));
+        // Nothing to record: no notify tone, no inspected visit, no save.
         assert!(
-            !rig.menu_labels()
+            !log.borrow()
+                .played
+                .iter()
+                .any(|(key, ..)| key == "ui/notify"),
+            "{:?}",
+            log.borrow().played
+        );
+        assert!(
+            rig.menu_labels()
                 .iter()
                 .any(|row| row.contains(&closed_row)),
-            "heard once, the closed row leaves the menu"
+            "a closed scale settles nothing, so its row stays: {:?}",
+            rig.menu_labels()
+        );
+        assert!(
+            rig.app
+                .ctx
+                .profile
+                .as_ref()
+                .is_some_and(|profile| profile.active_trip.is_none()),
+            "a closed scale check-in is not a save"
         );
         assert!(rig.select_menu_containing("Back to the road"));
     });
 
     let closed_line = format!("{CLOSED_NAME} is closed. Pull back onto the highway.");
     assert_eq!(rig.said(&closed_line), 1, "{:?}", rig.transcript());
+    assert!(!rig.drive.stop_visit(&closed).inspected);
     assert_eq!(rig.said("wave you"), 0, "{:?}", rig.transcript());
     assert_eq!(rig.said("Inspection check-in complete"), 0);
     assert_eq!(
