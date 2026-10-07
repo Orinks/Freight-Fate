@@ -65963,7 +65963,7 @@
           {
             "at_mi": 0.0,
             "mph": 55.0,
-            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-06-23; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
             "hgv": false
           },
           {
@@ -65975,37 +65975,49 @@
           {
             "at_mi": 70.0,
             "mph": 65.0,
-            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-06-23; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 89.5,
+            "mph": 55.0,
+            "source": "Assumed 55 mph where no nearby posted OSM maxspeed sample exists in Alaska, under 13 AAC 02.275.",
+            "hgv": false
+          },
+          {
+            "at_mi": 95.0,
+            "mph": 55.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
             "hgv": false
           },
           {
             "at_mi": 105.0,
             "mph": 45.0,
-            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-06-23; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
             "hgv": false
           },
           {
             "at_mi": 115.0,
             "mph": 55.0,
-            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-06-23; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
             "hgv": false
           },
           {
             "at_mi": 125.0,
             "mph": 45.0,
-            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-06-23; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
             "hgv": false
           },
           {
             "at_mi": 160.0,
             "mph": 55.0,
-            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-06-23; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
             "hgv": false
           },
           {
             "at_mi": 385.0,
             "mph": 35.0,
-            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-06-23; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
             "hgv": false
           }
         ],

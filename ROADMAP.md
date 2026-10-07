@@ -2284,6 +2284,9 @@ branch. The older Phase A/B plan checklists are not a live completion list.
       remain unsupported; Fort St. John–Fort Nelson still has placeholder
       speed profiles; Yukon River Camp truck-parking capacity is unverified,
       and the Dalton gravel surface is not modeled.
+- [ ] (Found along the way) Older maxspeed bakes predate 0.25-mi way
+      densification and can carry a neighboring limit across long,
+      sparsely-noded ways; a re-sweep is needed.
 
 Automated evidence: the four `test_alcan_phase_a_*` cases (including the
 Tok–Delta Junction–Fairbanks split), `test_alcan_phase_b1_tok_cutoff_glenn_to_anchorage`,

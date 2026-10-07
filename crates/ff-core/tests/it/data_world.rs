@@ -1557,6 +1557,31 @@ fn test_alcan_border_identity_and_posted_speed_profiles() {
             assert!(mph <= 65.0, "{from}->{to} has a {mph} mph sample");
         }
     }
+
+    for (leg, label, sample_miles) in [
+        (tok_to_whitehorse, "Tok→Whitehorse", [90.0, 95.0, 100.0]),
+        (whitehorse_to_tok, "Whitehorse→Tok", [285.0, 290.0, 295.0]),
+    ] {
+        let samples = leg["corridor"]["speed_limits"]
+            .as_array()
+            .expect("speed-limit samples");
+        for mile in sample_miles {
+            let active = samples
+                .iter()
+                .rev()
+                .find(|sample| {
+                    sample["at_mi"]
+                        .as_f64()
+                        .is_some_and(|sample_mile| sample_mile <= mile)
+                })
+                .unwrap_or_else(|| panic!("{label} has no speed sample at mile {mile}"));
+            assert_eq!(
+                active["mph"].as_f64(),
+                Some(55.0),
+                "{label} must be 55 mph at mile {mile}"
+            );
+        }
+    }
 }
 
 #[test]

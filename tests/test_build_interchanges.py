@@ -125,16 +125,100 @@ def test_bare_maxspeed_units_follow_geofabrik_extract_region():
     assert all(
         maxspeed._is_canadian_extract(Path(f"{slug}-latest.osm.pbf")) for slug in canadian_extracts
     )
-    yukon = Path("yukon-latest.osm.pbf")
+    assert len(maxspeed.CANADIAN_MAXSPEED_REF_CODES) == 14
+    assert len(maxspeed.US_MAXSPEED_REF_CODES) == 51
     alaska = Path("alaska-latest.osm.pbf")
     assert not maxspeed._is_canadian_extract(alaska)
     assert (
-        maxspeed._parse_osm_maxspeed("90", default_kmh=maxspeed._is_canadian_extract(yukon)) == 55.0
-    )
-    assert (
-        maxspeed._parse_osm_maxspeed("55", default_kmh=maxspeed._is_canadian_extract(alaska))
+        maxspeed._parse_osm_maxspeed(
+            "90", default_kmh=maxspeed._bare_maxspeed_is_kmh({"ref": "YK 1;AK 2"}, False)
+        )
         == 55.0
     )
+    assert (
+        maxspeed._parse_osm_maxspeed(
+            "55", default_kmh=maxspeed._bare_maxspeed_is_kmh({"ref": "AK 2"}, True)
+        )
+        == 55.0
+    )
+    assert (
+        maxspeed._parse_osm_maxspeed(
+            "80",
+            default_kmh=maxspeed._bare_maxspeed_is_kmh({"source:maxspeed": "CA:rural"}, False),
+        )
+        == 50.0
+    )
+    assert (
+        maxspeed._parse_osm_maxspeed(
+            "55",
+            default_kmh=maxspeed._bare_maxspeed_is_kmh(
+                {"maxspeed:type": "US:urban", "ref": "YK 1"}, True
+            ),
+        )
+        == 55.0
+    )
+    assert (
+        maxspeed._parse_osm_maxspeed("80", default_kmh=maxspeed._bare_maxspeed_is_kmh({}, True))
+        == 50.0
+    )
+    assert (
+        maxspeed._parse_osm_maxspeed("80", default_kmh=maxspeed._bare_maxspeed_is_kmh({}, False))
+        == 80.0
+    )
+    assert (
+        maxspeed._parse_osm_maxspeed(
+            "90 km/h", default_kmh=maxspeed._bare_maxspeed_is_kmh({"ref": "AK 2"}, False)
+        )
+        == 55.0
+    )
+    assert (
+        maxspeed._parse_osm_maxspeed(
+            "55 mph", default_kmh=maxspeed._bare_maxspeed_is_kmh({"ref": "YK 1"}, True)
+        )
+        == 55.0
+    )
+    assert not maxspeed._bare_maxspeed_is_kmh({"ref": "WA 14"}, True)
+
+
+def test_overlapping_maxspeed_extracts_deduplicate_osm_ways(monkeypatch, tmp_path):
+    alaska = tmp_path / "alaska-latest.osm.pbf"
+    yukon = tmp_path / "yukon-latest.osm.pbf"
+    alaska.write_bytes(b"")
+    yukon.write_bytes(b"")
+    duplicate_ways = {
+        alaska: [
+            maxspeed.LocalMaxspeedWay(
+                osm_id=346636394,
+                coords=((62.615, -141.002), (62.415, -140.851)),
+                mph=55.0,
+                hgv=False,
+                ref="YK 1",
+            )
+        ],
+        yukon: [
+            maxspeed.LocalMaxspeedWay(
+                osm_id=346636394,
+                coords=((62.615, -141.002), (62.415, -140.851)),
+                mph=85.0,
+                hgv=False,
+                ref="YK 1",
+            )
+        ],
+    }
+    monkeypatch.setattr(
+        maxspeed,
+        "_build_maxspeed_index_from_pbf",
+        lambda path, _bounds, default_kmh, label: duplicate_ways[path],
+    )
+
+    ways = maxspeed.load_or_build_maxspeed_index(
+        [alaska, yukon], [], tmp_path / "maxspeed.json", rebuild=True
+    )
+
+    assert len(ways) == 1
+    assert ways[0].osm_id == 346636394
+    assert ways[0].mph == 55.0
+    assert maxspeed.MAXSPEED_INDEX_CACHE_VERSION == 4
 
 
 def test_alaska_unposted_speed_fallback_stays_inside_state_range(monkeypatch):
@@ -158,6 +242,96 @@ def test_alaska_unposted_speed_fallback_stays_inside_state_range(monkeypatch):
     profile = maxspeed.bake_maxspeed_for_leg(leg, {}, rate_limit=0.0)
 
     assert profile
-    assert profile[0]["at_mi"] == 300.0
+    assert profile[0]["at_mi"] == 297.5
     assert all(sample["at_mi"] >= 297.5 for sample in profile)
     assert all(sample["source"] == maxspeed.ALASKA_UNPOSTED_SPEED[1] for sample in profile)
+
+
+def test_sparse_maxspeed_way_covers_a_parallel_route(monkeypatch):
+    monkeypatch.setattr(maxspeed, "MAXSPEED_SAMPLE_STRIDE_MI", 1.0)
+    sparse_way = maxspeed.LocalMaxspeedWay(
+        osm_id=1,
+        coords=((40.0, -79.999), (_north(10.0), -79.999)),
+        mph=55.0,
+        hgv=False,
+        ref="",
+    )
+    route_way = maxspeed.LocalMaxspeedWay(
+        osm_id=2,
+        coords=tuple((_north(mile / 4), -80.0) for mile in range(41)),
+        mph=45.0,
+        hgv=False,
+        ref="",
+    )
+    geometry = [(_north(mile), -80.0, float(mile)) for mile in range(101)]
+
+    profile = maxspeed.assemble_maxspeed(
+        maxspeed.build_maxspeed_grid([sparse_way, route_way]),
+        geometry,
+        10.0,
+        "US 1",
+        source="test",
+    )
+
+    for mile in range(11):
+        active = next(sample for sample in reversed(profile) if sample["at_mi"] <= float(mile))
+        assert active["mph"] == 55.0, f"mileage {mile} only found {active['mph']} mph"
+    assert "accessed 2026-06-23" in maxspeed._maxspeed_source("fixture geometry")
+    assert "accessed 2026-10-07" in maxspeed._maxspeed_source(
+        "fixture geometry", accessed_date="2026-10-07"
+    )
+
+
+def test_maxspeed_break_samples_use_the_road_after_the_line():
+    geometry = [(_north(mile), -80.0, float(mile)) for mile in range(101)]
+    before_break = maxspeed.LocalMaxspeedWay(
+        osm_id=3,
+        coords=tuple((_north(mile), -80.0) for mile in range(70, 90)),
+        mph=65.0,
+        hgv=False,
+        ref="",
+    )
+    after_break = maxspeed.LocalMaxspeedWay(
+        osm_id=4,
+        coords=tuple((_north(mile), -80.0) for mile in range(90, 101)),
+        mph=55.0,
+        hgv=False,
+        ref="",
+    )
+
+    profile = maxspeed.assemble_maxspeed(
+        maxspeed.build_maxspeed_grid([before_break, after_break]),
+        geometry,
+        100.0,
+        "US 1",
+        source="fixture",
+        breaks=(89.5,),
+    )
+
+    at_break = [sample for sample in profile if sample["at_mi"] == 89.5]
+    assert at_break and at_break[0]["mph"] == 55.0
+    for mile in [89.5, *range(90, 101)]:
+        active = next(sample for sample in reversed(profile) if sample["at_mi"] <= mile)
+        assert active["mph"] == 55.0, f"mileage {mile} only found {active['mph']} mph"
+
+
+def test_maxspeed_break_sample_ignores_pre_break_points():
+    geometry = [(_north(mile), -80.0, float(mile)) for mile in range(101)]
+    before_break = maxspeed.LocalMaxspeedWay(
+        osm_id=5,
+        coords=tuple((_north(mile), -80.0) for mile in range(70, 90)),
+        mph=65.0,
+        hgv=False,
+        ref="",
+    )
+
+    profile = maxspeed.assemble_maxspeed(
+        maxspeed.build_maxspeed_grid([before_break]),
+        geometry,
+        100.0,
+        "US 1",
+        source="fixture",
+        breaks=(89.5,),
+    )
+
+    assert all(sample["at_mi"] < 89.5 for sample in profile)

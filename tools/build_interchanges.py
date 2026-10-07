@@ -1114,6 +1114,11 @@ def main(argv: list[str] | None = None) -> int:
         "unless --pbf is given.",
     )
     parser.add_argument(
+        "--accessed-date",
+        default=ACCESSED_DATE,
+        help="Date the OSM source extract was accessed (maxspeed provenance only).",
+    )
+    parser.add_argument(
         "--restrictions",
         action="store_true",
         help="Bake posted low-clearance (maxheight) and weight-limit "

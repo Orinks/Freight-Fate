@@ -1,6 +1,8 @@
 # ruff: noqa: F401,F403,F405,F821,I001
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import leg_geometry as lg
 from build_interchanges_base import *
 
@@ -8,6 +10,65 @@ from build_interchanges_base import *
 MAXSPEED_HIGHWAY_CLASSES = ("motorway", "trunk", "primary", "secondary")
 MAXSPEED_CORRIDOR_M = 250.0  # a maxspeed way must snap this close to a leg
 MAXSPEED_SAMPLE_STRIDE_MI = 5.0  # profile resolution along the leg
+MAXSPEED_WAY_MAX_GAP_MI = 0.25
+CANADIAN_MAXSPEED_REF_CODES = frozenset(
+    {"AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YK", "YT"}
+)
+US_MAXSPEED_REF_CODES = frozenset(
+    {
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY",
+        "DC",
+    }
+)
 # The maxspeed index spans every route in the country, so snapping all of it to
 # each leg is quadratic. A coarse lat/lon grid buckets way points (~5.5km cells)
 # so a leg only snaps ways in the cells its geometry passes through. Way points
@@ -19,7 +80,7 @@ _MAXSPEED_THIN_DEG = 0.001
 # per-leg shield match can be computed against whichever leg is being baked).
 MaxspeedPoint = tuple[float, float, float, bool, str]
 MaxspeedGrid = dict[tuple[int, int], list[MaxspeedPoint]]
-MAXSPEED_INDEX_CACHE_VERSION = 2
+MAXSPEED_INDEX_CACHE_VERSION = 4
 OSM_REGION_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
 CANADIAN_GEOFABRIK_SLUGS = (
     "alberta",
@@ -38,11 +99,14 @@ CANADIAN_GEOFABRIK_SLUGS = (
 )
 
 
-def _maxspeed_source(geometry_source: str) -> str:
+def _maxspeed_source(
+    geometry_source: str,
+    accessed_date: str = ACCESSED_DATE,
+) -> str:
     return (
         "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway "
         "ways in a local Geofabrik extract; route matching uses "
-        f"{geometry_source}; accessed {ACCESSED_DATE}; maxspeed:hgv is preferred "
+        f"{geometry_source}; accessed {accessed_date}; maxspeed:hgv is preferred "
         "where tagged. https://www.openstreetmap.org/"
     )
 
@@ -57,6 +121,7 @@ ALASKA_UNPOSTED_SPEED = (
 
 @dataclass(frozen=True, slots=True)
 class LocalMaxspeedWay:
+    osm_id: int
     coords: tuple[tuple[float, float], ...]
     mph: float
     hgv: bool
@@ -65,6 +130,7 @@ class LocalMaxspeedWay:
 
 @dataclass(frozen=True, slots=True)
 class _MaxspeedWayRaw:
+    osm_id: int
     node_ids: tuple[int, ...]
     mph: float
     hgv: bool
@@ -91,6 +157,25 @@ def _parse_osm_maxspeed(raw: Any, *, default_kmh: bool = False) -> float | None:
 
 def _is_canadian_extract(pbf_path: Path) -> bool:
     return pbf_path.name.startswith(tuple(f"{slug}-" for slug in CANADIAN_GEOFABRIK_SLUGS))
+
+
+def _bare_maxspeed_is_kmh(tags: dict[str, str], extract_is_canadian: bool) -> bool:
+    for key in ("maxspeed:type", "source:maxspeed"):
+        jurisdiction = tags.get(key, "").strip().upper()
+        if jurisdiction.startswith("CA:"):
+            return True
+        if jurisdiction.startswith("US:"):
+            return False
+
+    ref = tags.get("ref", "").split(";", 1)[0].split()
+    if ref:
+        code = ref[0].upper()
+        if code in CANADIAN_MAXSPEED_REF_CODES:
+            return True
+        if code in US_MAXSPEED_REF_CODES:
+            return False
+
+    return extract_is_canadian
 
 
 def _route_digits(highway: str) -> str:
@@ -190,11 +275,12 @@ def _build_maxspeed_index_from_pbf(
             tags = {str(k): str(v) for k, v in way.tags}
             if tags.get("highway") not in MAXSPEED_HIGHWAY_CLASSES:
                 return
-            hgv_mph = _parse_osm_maxspeed(tags.get("maxspeed:hgv"), default_kmh=default_kmh)
+            way_default_kmh = _bare_maxspeed_is_kmh(tags, default_kmh)
+            hgv_mph = _parse_osm_maxspeed(tags.get("maxspeed:hgv"), default_kmh=way_default_kmh)
             mph = (
                 hgv_mph
                 if hgv_mph is not None
-                else _parse_osm_maxspeed(tags.get("maxspeed"), default_kmh=default_kmh)
+                else _parse_osm_maxspeed(tags.get("maxspeed"), default_kmh=way_default_kmh)
             )
             if mph is None:
                 return
@@ -203,6 +289,7 @@ def _build_maxspeed_index_from_pbf(
                 return
             self.ways.append(
                 _MaxspeedWayRaw(
+                    osm_id=int(way.id),
                     node_ids=tuple(node_ids),
                     mph=mph,
                     hgv=hgv_mph is not None,
@@ -264,7 +351,15 @@ def _build_maxspeed_index_from_pbf(
             if node_id in node_handler.coords
         )
         if coords:
-            ways.append(LocalMaxspeedWay(coords=coords, mph=raw.mph, hgv=raw.hgv, ref=raw.ref))
+            ways.append(
+                LocalMaxspeedWay(
+                    osm_id=raw.osm_id,
+                    coords=coords,
+                    mph=raw.mph,
+                    hgv=raw.hgv,
+                    ref=raw.ref,
+                )
+            )
     print(f"    retained {len(ways):,} route-corridor maxspeed ways from {label}", flush=True)
     return ways
 
@@ -281,11 +376,18 @@ def _maxspeed_index_cache_path(pbf_paths: list[Path]) -> Path:
 
 
 def _maxspeed_way_to_json(way: LocalMaxspeedWay) -> dict[str, Any]:
-    return {"coords": [list(c) for c in way.coords], "mph": way.mph, "hgv": way.hgv, "ref": way.ref}
+    return {
+        "osm_id": way.osm_id,
+        "coords": [list(c) for c in way.coords],
+        "mph": way.mph,
+        "hgv": way.hgv,
+        "ref": way.ref,
+    }
 
 
 def _maxspeed_way_from_json(raw: dict[str, Any]) -> LocalMaxspeedWay:
     return LocalMaxspeedWay(
+        osm_id=int(raw["osm_id"]),
         coords=tuple((float(c[0]), float(c[1])) for c in raw.get("coords", ())),
         mph=float(raw["mph"]),
         hgv=bool(raw.get("hgv", False)),
@@ -316,16 +418,16 @@ def load_or_build_maxspeed_index(
                 flush=True,
             )
             return ways
-    ways: list[LocalMaxspeedWay] = []
+    ways_by_id: dict[int, LocalMaxspeedWay] = {}
     for i, pbf_path in enumerate(pbf_paths, start=1):
-        ways.extend(
-            _build_maxspeed_index_from_pbf(
-                pbf_path,
-                bounds,
-                default_kmh=_is_canadian_extract(pbf_path),
-                label=f"{i}/{len(pbf_paths)}",
-            )
-        )
+        for way in _build_maxspeed_index_from_pbf(
+            pbf_path,
+            bounds,
+            default_kmh=_is_canadian_extract(pbf_path),
+            label=f"{i}/{len(pbf_paths)}",
+        ):
+            ways_by_id.setdefault(way.osm_id, way)
+    ways = list(ways_by_id.values())
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     cache_path.write_text(
         json.dumps(
@@ -347,6 +449,27 @@ def _maxspeed_cell(lat: float, lon: float) -> tuple[int, int]:
     return (int(math.floor(lat / _MAXSPEED_GRID_DEG)), int(math.floor(lon / _MAXSPEED_GRID_DEG)))
 
 
+def _densify_way_coords(
+    coords: tuple[tuple[float, float], ...],
+) -> tuple[tuple[float, float], ...]:
+    if len(coords) < 2:
+        return coords
+
+    dense = [coords[0]]
+    for (start_lat, start_lon), (end_lat, end_lon) in zip(coords, coords[1:], strict=False):
+        distance = _haversine_mi(start_lat, start_lon, end_lat, end_lon)
+        segments = max(1, math.ceil(distance / MAXSPEED_WAY_MAX_GAP_MI))
+        for segment in range(1, segments + 1):
+            fraction = segment / segments
+            dense.append(
+                (
+                    start_lat + (end_lat - start_lat) * fraction,
+                    start_lon + (end_lon - start_lon) * fraction,
+                )
+            )
+    return tuple(dense)
+
+
 def build_maxspeed_grid(ways: list[LocalMaxspeedWay]) -> MaxspeedGrid:
     """Bucket way points into a coarse lat/lon grid for fast per-leg lookup.
 
@@ -357,7 +480,7 @@ def build_maxspeed_grid(ways: list[LocalMaxspeedWay]) -> MaxspeedGrid:
     for way in ways:
         ref_digits = _route_digits(way.ref)
         last: tuple[int, int] | None = None
-        for lat, lon in way.coords:
+        for lat, lon in _densify_way_coords(way.coords):
             thin = (round(lat / _MAXSPEED_THIN_DEG), round(lon / _MAXSPEED_THIN_DEG))
             if thin == last:
                 continue
@@ -376,6 +499,7 @@ def assemble_maxspeed(
     source: str = MAXSPEED_SOURCE,
     fallback: tuple[float, str] | None = None,
     fallback_range: tuple[float, float] | None = None,
+    breaks: Sequence[float] = (),
 ) -> list[dict[str, Any]]:
     """Build a step-function speed profile for a leg from snapped maxspeed ways.
 
@@ -431,10 +555,26 @@ def assemble_maxspeed(
         return max(c[1] for c in chosen), bool(hgv_pool)
 
     half = MAXSPEED_SAMPLE_STRIDE_MI
+    break_miles = tuple(sorted({float(mile) for mile in breaks if 0.0 <= float(mile) <= leg_miles}))
+
+    def on_same_side(point_mile: float, sample_mile: float) -> bool:
+        for break_mile in break_miles:
+            if sample_mile == break_mile:
+                if not break_mile <= point_mile <= break_mile + half:
+                    return False
+            elif (sample_mile < break_mile) != (point_mile < break_mile):
+                return False
+        return True
+
+    sample_miles = set(break_miles)
     picked: list[tuple[float, float, bool, str]] = []
     mile = 0.0
     while mile <= leg_miles + 1e-9:
-        window = [p for p in points if abs(p[0] - mile) <= half]
+        sample_miles.add(mile)
+        mile += MAXSPEED_SAMPLE_STRIDE_MI
+
+    for mile in sorted(sample_miles):
+        window = [p for p in points if abs(p[0] - mile) <= half and on_same_side(p[0], mile)]
         choice = choose(window)
         if choice is not None:
             mph, hgv = choice
@@ -445,10 +585,8 @@ def assemble_maxspeed(
             mph, point_source = fallback
             hgv = False
         else:
-            mile += MAXSPEED_SAMPLE_STRIDE_MI
             continue
         picked.append((round(min(leg_miles, max(0.0, mile)), 1), mph, hgv, point_source))
-        mile += MAXSPEED_SAMPLE_STRIDE_MI
 
     # OSM tags a limit (especially maxspeed:hgv) on some ways but not their
     # neighbors, so a single stride can flip the value and then flip back. That
@@ -536,11 +674,23 @@ def bake_maxspeed_for_leg(
     leg: dict[str, Any],
     grid: MaxspeedGrid,
     rate_limit: float,
+    accessed_date: str = ACCESSED_DATE,
 ) -> list[dict[str, Any]]:
     geom, geometry_source = leg_corridor_geometry_with_source(leg, rate_limit)
     if not geom:
         return []
     state_miles = leg.get("corridor", {}).get("state_miles", ())
+    state_crossings = leg.get("corridor", {}).get("state_crossings", ())
+    breaks = [
+        float(crossing["at_mi"])
+        for crossing in state_crossings
+        if crossing.get("at_mi") is not None
+    ]
+    if not breaks:
+        cumulative = 0.0
+        for entry in state_miles[:-1]:
+            cumulative += float(entry.get("miles", 0.0))
+            breaks.append(cumulative)
     alaska_miles = 0.0
     fallback_range = None
     for entry in state_miles:
@@ -555,9 +705,10 @@ def bake_maxspeed_for_leg(
         geom,
         float(leg["miles"]),
         str(leg.get("highway", "")),
-        source=_maxspeed_source(geometry_source),
+        source=_maxspeed_source(geometry_source, accessed_date),
         fallback=fallback,
         fallback_range=fallback_range,
+        breaks=breaks,
     )
 
 
@@ -620,7 +771,12 @@ def run_maxspeed(data: dict[str, Any], args: argparse.Namespace) -> int:
             flush=True,
         )
         try:
-            profile = bake_maxspeed_for_leg(leg, grid, args.rate_limit)
+            profile = bake_maxspeed_for_leg(
+                leg,
+                grid,
+                args.rate_limit,
+                accessed_date=args.accessed_date,
+            )
         except Exception as exc:  # noqa: BLE001 - one bad leg must not abort the batch
             print(f"    skipped: {type(exc).__name__}: {exc}", flush=True)
             profile = []
