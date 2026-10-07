@@ -315,22 +315,22 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
 - Use the canonical spoken noun for each concept from `docs/ontology.md`.
   Synonyms for one thing cost screen reader users a re-read. Adding a concept
   means adding a row there in the same change.
-- Never use Computer Use, desktop UI automation, or OS-level game window or
-  process interaction to validate or control Freight Fate. These tools do not
-  reliably control the game's SDL window and can disrupt a player's active
-  drive. Use the deterministic headless transcript/playtest harness,
-  automated tests, and user-provided manual validation instead. For agent-driven play against the
-  REAL game (real runtime, real audio, real menus), the sanctioned path is
-  `freightfate --agent-server`: an MCP server inside the game that gives an
-  agent a player's capabilities only -- keys in through the normal input
-  seam, ears out (both speech channels plus every earcon and cue) -- in the
-  audited playtest sandbox, never against the owner's careers. The one
-  exception is `--staging`, only when the owner asks for a site check: its
-  own `saves-agent-staging` directory, no careers and no identity copied in,
-  its own driver on the staging backend (through the orinks-net `dev`
+- Devin's testing agent may use Computer Use, desktop UI automation, and
+  OS-level process interaction to validate the real Freight Fate window and
+  packaged builds. Run those tests with isolated save data and production
+  online features disabled; never automate the owner's active game window or
+  careers. The deterministic transcript/playtest harness and automated tests
+  remain required for repeatable assertions. If desktop automation cannot
+  reliably exercise or observe a behavior, fall back to
+  `freightfate --agent-server` for agent-driven play through the normal input
+  and audio seams. Its audited sandbox never uses the owner's careers. The one
+  online exception is `--staging`, only when the owner asks for a site check:
+  its own `saves-agent-staging` directory, no careers and no identity copied
+  in, its own driver on the staging backend (through the orinks-net `dev`
   preview; the owner enters its spoken code there the first time), cloud
-  backup on, presence and Mastodon off. No agent session ever reaches production: `--online`, which carried
-  the real driver identity, was removed on 2026-09-25.
+  backup on, presence and Mastodon off. No agent session ever reaches
+  production: `--online`, which carried the real driver identity, was removed
+  on 2026-09-25.
 
 ## World and route data
 
