@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- **The update check skips a preview snapshot that changes nothing you would notice.** A snapshot that only repeats your version is no longer offered.
+
 ## 1.9.3 - 2026-10-06
 
 ### Added

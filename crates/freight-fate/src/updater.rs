@@ -812,6 +812,54 @@ fn snapshot_newer_than_build(
     true
 }
 
+/// The line the release tool writes when a snapshot's notes have nothing in
+/// them: no changelog entry since the previous snapshot or the stable release.
+const QUIET_SNAPSHOT_LINE: &str = "- No user-facing changes";
+
+fn is_quiet_snapshot(release: &Value) -> bool {
+    is_prerelease(release)
+        && stamp_str(release.get("body"))
+            .lines()
+            .any(|line| line.trim() == QUIET_SNAPSHOT_LINE)
+}
+
+/// Whether anything a player would notice was published after this copy, up
+/// to and including `snapshot`. The nightly runs even when the day's commits
+/// were CI or tests alone (1.9-tester-20261007, four hours after v1.9.3 with a
+/// build-timeout change on top), and offering that copy is an update to the
+/// same game. A stable release in between counts as news: a snapshot's notes
+/// leave out what that release already listed, yet a copy from before it still
+/// lacks those fixes. Unknown publish times on either side mean offer it.
+fn carries_news_since_build(
+    snapshot: &Value,
+    releases: &[Value],
+    build: Option<&BuildInfo>,
+    build_ts: &str,
+    career_19: bool,
+) -> bool {
+    let snapshot_ts = release_timestamp(Some(snapshot));
+    if build_ts.is_empty() || snapshot_ts.is_empty() {
+        return true;
+    }
+    if build.is_some_and(|build| tag_name(snapshot) == build.tag) {
+        return true; // a re-cut under this copy's own tag; the commit decided
+    }
+    releases.iter().any(|release| {
+        let published = release_timestamp(Some(release));
+        if published.as_str() <= build_ts || published > snapshot_ts {
+            return false;
+        }
+        let tag = tag_name(release);
+        if is_prerelease(release) {
+            !snapshot_tag_date(&tag, career_19).is_empty() && !is_quiet_snapshot(release)
+        } else if career_19 {
+            version_major_minor_is_19(&tag)
+        } else {
+            parse_version(&tag) > vec![0]
+        }
+    })
+}
+
 /// A snapshot re-cut under the tag this copy carries (a second run on
 /// the same day, such as a release candidate) points at a different commit.
 /// Unknown on either side means not newer.
@@ -887,7 +935,9 @@ pub fn snapshot_update_from(
     }
 
     if let Some(snapshot) = latest_snapshot {
-        if snapshot_newer_than_build(snapshot, build, &build_date, &build_ts) {
+        if snapshot_newer_than_build(snapshot, build, &build_date, &build_ts)
+            && carries_news_since_build(snapshot, releases, build, &build_ts, career_19)
+        {
             let date = snapshot_tag_date(&tag_name(snapshot), career_19);
             let spoken = spoken_ymd(&date);
             return update_from_release(snapshot, &snapshot_title(career_19, &spoken), env);
