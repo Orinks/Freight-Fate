@@ -461,6 +461,10 @@ Everything found before 2026-09-25 moved to
       it. The updater now skips a snapshot unless a stable release or a
       snapshot with real notes came out after the running copy, and the
       orinks.net downloads page hides such a snapshot (2026-10-07).
+- [ ] When the updater offers a tester on an older snapshot a quiet one
+      because a stable release came out in between, What's new reads "No
+      user-facing changes", which is untrue for that player: they get the
+      stable release's fixes. Speak that release's notes there instead.
 - [ ] Updater, issue 266: a stalled download now fails after sixty idle
       seconds, but its blocked read thread and socket linger until that read
       returns or the game quits. A per-read socket timeout would end both.
