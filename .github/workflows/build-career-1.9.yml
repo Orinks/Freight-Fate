@@ -712,7 +712,17 @@ jobs:
           elif git ls-remote --exit-code --tags origin "refs/tags/$BRIDGE" >/dev/null 2>&1; then
             git push origin ":refs/tags/$BRIDGE"
           fi
-          gh release create "$BRIDGE" bridge-assets/* --notes-file bridge-notes.md \
+          # GitHub shows an asset's label in place of its file name. The
+          # updaters match on the name, so the plain Mac copy keeps it and
+          # gets a label saying it is the same app as the arm64 zip.
+          assets=()
+          for f in bridge-assets/*; do
+            case "$f" in
+              *-macos.zip) assets+=("$f#$(basename "$f") (in-game updater copy, same app as the macos-arm64 zip)") ;;
+              *) assets+=("$f") ;;
+            esac
+          done
+          gh release create "$BRIDGE" "${assets[@]}" --notes-file bridge-notes.md \
             --title "Freight Fate 1.9 release candidate $(date -u +%Y-%m-%d)" \
             --prerelease --target "$COMMIT_SHA"
 
@@ -736,6 +746,16 @@ jobs:
             cp "$zip" "${zip%-macos-arm64.zip}-macos.zip"
           done
           (cd release-assets && sha256sum FreightFate-* > checksums.txt)
-          gh release create "$TAG" release-assets/* --notes-file notes.md \
+          # GitHub shows an asset's label in place of its file name. The
+          # updaters match on the name, so the plain Mac copy keeps it and
+          # gets a label saying it is the same app as the arm64 zip.
+          assets=()
+          for f in release-assets/*; do
+            case "$f" in
+              *-macos.zip) assets+=("$f#$(basename "$f") (in-game updater copy, same app as the macos-arm64 zip)") ;;
+              *) assets+=("$f") ;;
+            esac
+          done
+          gh release create "$TAG" "${assets[@]}" --notes-file notes.md \
             --title "Freight Fate $VERSION" \
             --target "$COMMIT_SHA"
