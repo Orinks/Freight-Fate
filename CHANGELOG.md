@@ -12,6 +12,10 @@
 
 - **Creeping up to an open scale, then speeding past, no longer dodges the bypass charge.** Only a warning the game delayed excuses you.
 
+- **A closed weigh station's check-in just says it is closed.** It no longer chimes, saves, or counts as an inspection.
+
+- **Arriving at a closed weigh station says its name once.**
+
 ## 1.9.3 - 2026-10-06
 
 ### Added

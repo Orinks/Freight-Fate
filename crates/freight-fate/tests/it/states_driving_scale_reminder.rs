@@ -440,6 +440,10 @@ fn checking_in_at_a_closed_scale_says_closed_and_names_the_open_one_still_ahead(
     rig.app.clear_speech();
 
     let minutes_before = rig.drive.trip.game_minutes;
+    if let Some(profile) = rig.app.ctx.profile.as_mut() {
+        profile.active_trip = None;
+    }
+    let log = rig.app.record_audio();
     rig.with_drive_on_stack(|rig, drive: DriveRef| {
         let mut state = RestStopState::with_drive(drive, closed.clone(), false);
         let shared = rig.app.ctx.state().expect("the drive is on the stack");
@@ -462,18 +466,54 @@ fn checking_in_at_a_closed_scale_says_closed_and_names_the_open_one_still_ahead(
             rig.menu_labels()
         );
         let closed_row = format!("{CLOSED_NAME} is closed");
+        // The arrival says the scale's name once: the closed row already
+        // carries it (QA, 2026-10-07: "I-40 Weigh Station. Inspection
+        // station. ... I-40 Weigh Station is closed.").
+        let arrival: Vec<String> = rig
+            .transcript()
+            .into_iter()
+            .filter(|line| line.contains("Inspection station."))
+            .collect();
+        assert_eq!(arrival.len(), 1, "{:?}", rig.transcript());
+        assert_eq!(
+            arrival[0].matches(CLOSED_NAME).count(),
+            1,
+            "{:?}",
+            arrival[0]
+        );
+        assert!(arrival[0].contains(&closed_row), "{:?}", arrival[0]);
+        log.borrow_mut().played.clear();
         assert!(rig.select_menu_containing(&closed_row));
+        // Nothing to record: no notify tone, no inspected visit, no save.
         assert!(
-            !rig.menu_labels()
+            !log.borrow()
+                .played
+                .iter()
+                .any(|(key, ..)| key == "ui/notify"),
+            "{:?}",
+            log.borrow().played
+        );
+        assert!(
+            rig.menu_labels()
                 .iter()
                 .any(|row| row.contains(&closed_row)),
-            "heard once, the closed row leaves the menu"
+            "a closed scale settles nothing, so its row stays: {:?}",
+            rig.menu_labels()
+        );
+        assert!(
+            rig.app
+                .ctx
+                .profile
+                .as_ref()
+                .is_some_and(|profile| profile.active_trip.is_none()),
+            "a closed scale check-in is not a save"
         );
         assert!(rig.select_menu_containing("Back to the road"));
     });
 
     let closed_line = format!("{CLOSED_NAME} is closed. Pull back onto the highway.");
     assert_eq!(rig.said(&closed_line), 1, "{:?}", rig.transcript());
+    assert!(!rig.drive.stop_visit(&closed).inspected);
     assert_eq!(rig.said("wave you"), 0, "{:?}", rig.transcript());
     assert_eq!(rig.said("Inspection check-in complete"), 0);
     assert_eq!(
