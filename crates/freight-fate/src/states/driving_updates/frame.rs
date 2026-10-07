@@ -602,7 +602,19 @@ impl DrivingState {
             // intent or its stopping assist armed for a later optional exit.
             self.clear_selected_stop_intent();
         }
+        // Real seconds, before the crossing is judged against them.
+        self.weigh_station_reminder_age_s += dt;
+        if self
+            .trip
+            .scale_reminder_hold_mi
+            .is_some_and(|mi| self.trip.position_mi >= mi)
+        {
+            // Past the gore even if a busy cab kept the scale check from
+            // running this frame: the real-time hold ends at the scale.
+            self.trip.scale_reminder_hold_mi = None;
+        }
         self.check_weigh_station_enforcement(ctx, pos_before);
+        self.update_scale_reannounce(ctx);
         self.check_unsafe_damage_enforcement(ctx);
         self.check_destination_exit(ctx);
         self.check_gate_approach_warning(ctx, dt);

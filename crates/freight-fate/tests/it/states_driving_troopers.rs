@@ -47,6 +47,7 @@ use freight_fate::states::driving_core::{
     DRIVE_PHASE_DELIVERY, INSPECTION_MIN, PULL_OVER_CLEAN_STOP_WARN_CHANCE,
     PULL_OVER_FULL_COMPLIANCE, PULL_OVER_LIGHTS, PURSUIT_RUN_S,
 };
+use freight_fate::states::driving_enforcement::SCALE_REMINDER_REAL_LEAD_S;
 use freight_fate::states::driving_rest_states::{
     EnforcementStopState, FelonyStopState, TrafficStopState,
 };
@@ -559,6 +560,12 @@ fn blow_past_a_scale(drive: &mut DrivingState) -> RoadStop {
     drive.trip.posts.push(post);
     drive.trip.position_mi = 10.1;
     drive.trip.truck.velocity_mps = mph_to_mps(55.0);
+    // Announced, reminded, and given the reminder's real seconds: a crossing
+    // the driver was never warned about in time is not judged at all.
+    let key = drive.weigh_station_key(&stop);
+    drive.weigh_station_notice_key = key.clone();
+    drive.weigh_station_reminder_key = key;
+    drive.weigh_station_reminder_age_s = SCALE_REMINDER_REAL_LEAD_S;
     stop
 }
 

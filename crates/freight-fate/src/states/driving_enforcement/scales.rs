@@ -1,11 +1,13 @@
 //! Weigh stations: whether one is open, how far out its notice reads, the
-//! half-mile reminder, who owns the exit key, and the screening draw at the
+//! last reminder and the real-time hold it starts, the re-announcement after
+//! a stop or a pause, who owns the exit key, and the screening draw at the
 //! scale house.
 
 use ff_core::models::safety_record::{
     inspection_selection_chance, refresh_selection_score, safety_record_text,
 };
 use ff_core::pyrandom::PyRandom;
+use ff_core::settings::short_distance_text_for;
 use ff_core::sim::enforcement_posts::{post_seed, KIND_FIXED_SCALE};
 use ff_core::sim::trip_models::{RoadStop, ENFORCEMENT_WARNING_MAX_MI, SCALE_WARNING_REAL_S};
 use ff_core::speech_pacing::SpeechCategory;
@@ -15,7 +17,10 @@ use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 use crate::states::driving_updates::live;
 
-use super::{SCALE_NOTICE_SAMPLE, WEIGH_STATION_REMINDER_MI};
+use super::{
+    SCALE_NOTICE_SAMPLE, SCALE_REMINDER_REAL_LEAD_S, WEIGH_STATION_REMINDER_MAX_MI,
+    WEIGH_STATION_REMINDER_MI,
+};
 
 impl DrivingState {
     /// Whether this weigh station is open today.
@@ -69,12 +74,51 @@ impl DrivingState {
         best
     }
 
+    /// How far out the last reminder speaks, sized in real seconds.
+    ///
+    /// The reminder starts the real-time hold (`Trip::scale_reminder_hold`),
+    /// so the clock that runs over this window is the real one, not the
+    /// trip's compressed pacing: the road it must cover is speed times that
+    /// clock times [`SCALE_REMINDER_REAL_LEAD_S`]. At every legal truck speed
+    /// that is under the half-mile floor (61 mph covers half a mile in about
+    /// thirty real seconds), so the window only grows for a truck going
+    /// faster than half a mile can hold, and never past
+    /// [`WEIGH_STATION_REMINDER_MAX_MI`].
+    pub fn scale_reminder_mi(&self) -> f64 {
+        let speed = self.trip.truck.speed_mph().max(1.0);
+        let held_clock = self.trip.time_scale.min(1.0);
+        let miles = speed * held_clock * SCALE_REMINDER_REAL_LEAD_S / 3600.0;
+        miles.clamp(WEIGH_STATION_REMINDER_MI, WEIGH_STATION_REMINDER_MAX_MI)
+    }
+
+    /// Whether a crossing of this open scale at speed may be charged.
+    ///
+    /// Audible before it can bite. Once the last reminder has spoken for this
+    /// scale, the driver gets [`SCALE_REMINDER_REAL_LEAD_S`] of real driving
+    /// to act on it before a crossing counts; a pause does not count toward
+    /// it, the drive is not running. With no reminder, the full notice is
+    /// what told the driver: a reminder skipped because they were slow or
+    /// signalled until the gore leaves the bypass theirs, but a scale never
+    /// announced at all is the game's miss.
+    pub fn scale_bypass_judgeable(&self, key: &str) -> bool {
+        if self.weigh_station_reminder_key == key {
+            self.weigh_station_reminder_age_s >= SCALE_REMINDER_REAL_LEAD_S
+        } else {
+            self.weigh_station_notice_key == key
+        }
+    }
+
     /// One short line before the bypass point, if nothing has changed.
     ///
     /// The full notice latches miles out; between it and the gore the old
     /// build said nothing at all, so a driver who mis-read the instruction
     /// crossed at speed in silence. Fires once per scale, only while the truck
     /// is still over the bypass speed with no scale exit armed.
+    ///
+    /// From this line to the gore the clock runs real
+    /// (`Trip::scale_reminder_hold_mi`): a fixed half mile on the compressed
+    /// clock was three real seconds at ten times speed, and the bypass charge
+    /// landed before the driver could reach the key (tester log, 2026-10-07).
     pub fn check_scale_reminder(
         &mut self,
         ctx: &mut GameContext,
@@ -82,7 +126,7 @@ impl DrivingState {
         ahead: f64,
         key: &str,
     ) {
-        if !(0.0 < ahead && ahead <= WEIGH_STATION_REMINDER_MI) {
+        if !(0.0 < ahead && ahead <= self.scale_reminder_mi()) {
             return;
         }
         if key != self.weigh_station_notice_key || key == self.weigh_station_reminder_key {
@@ -107,6 +151,8 @@ impl DrivingState {
             return;
         }
         self.weigh_station_reminder_key = key.to_string();
+        self.weigh_station_reminder_age_s = 0.0;
+        self.trip.scale_reminder_hold_mi = Some(stop.at_mi);
         // The distance was hard-coded to the threshold, so a reminder that
         // fired at two hundred yards still announced "half a mile" -- and
         // after the approach line above was fixed to speak a real short
@@ -137,6 +183,112 @@ impl DrivingState {
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Navigation)
                 .valid(move || live::position_mi() < scale_mi),
+        );
+    }
+
+    /// Ask for the open scale ahead to be re-announced once the cab is free.
+    ///
+    /// Called when a pause ends or the driver leaves a stop. `here` names the
+    /// weigh station being left, if the stop was one, so the line can say
+    /// which scale that was and which one is still to come.
+    ///
+    /// Only when a scale has already been announced: one that first comes
+    /// into range after the stop gets its full notice, and a re-announcement
+    /// on top of it would say the same thing twice.
+    pub fn note_scale_reannounce(&mut self, here: Option<&str>) {
+        self.scale_reannounce = self
+            .announced_open_scale_ahead()
+            .map(|_| here.unwrap_or_default().to_string());
+    }
+
+    /// The announced open scale still ahead, or None.
+    ///
+    /// Only the scale whose notice has been spoken: one inside its lookahead
+    /// but not yet announced gets its full notice from the enforcement check,
+    /// and repeating a line nobody heard the first time is not a reminder.
+    pub fn announced_open_scale_ahead(&self) -> Option<(RoadStop, f64)> {
+        if self.weigh_station_notice_key.is_empty() {
+            return None;
+        }
+        self.trip
+            .stops
+            .iter()
+            .filter(|stop| stop.stop_type == "weigh_station")
+            .find(|stop| self.weigh_station_key(stop) == self.weigh_station_notice_key)
+            .map(|stop| (stop.clone(), stop.at_mi - self.trip.position_mi))
+            .filter(|(stop, ahead)| {
+                let key = self.weigh_station_key(stop);
+                *ahead > 0.0
+                    && self.scale_is_open(stop)
+                    && !self.enforcement_events.contains(&key)
+                    && self
+                        .weigh_station_transponder_verdict
+                        .get(&key)
+                        .map(String::as_str)
+                        != Some("green")
+            })
+    }
+
+    /// After a check-in, a stop or a pause: the open scale still ahead.
+    ///
+    /// A tester checked in at a closed scale six miles short of the open one
+    /// he had been told about, was waved off, took a nine-minute pause, and
+    /// heard nothing more about the open scale until three seconds before
+    /// its bypass charge (log, 2026-10-07). The notice had been spoken once,
+    /// long before; nothing said that the scale he stopped at was not it.
+    ///
+    /// One line on the driving channel, so the ladder, the pacer and the
+    /// duck apply as they do to the notice itself. Waits while the cab has
+    /// another demand on it; dropped once the scale is behind or settled.
+    pub fn update_scale_reannounce(&mut self, ctx: &mut GameContext) {
+        if self.scale_reannounce.is_none() {
+            return;
+        }
+        if self.enforcement_bypassed(ctx) {
+            self.scale_reannounce = None;
+            return;
+        }
+        if self.enforcement_busy() {
+            return;
+        }
+        let here = self.scale_reannounce.take().unwrap_or_default();
+        let Some((stop, ahead)) = self.announced_open_scale_ahead() else {
+            return;
+        };
+        let name = stop.spoken_name();
+        if name == here {
+            return;
+        }
+        let announced = ctx.settings.short_distance_text(ahead);
+        let lead = if here.is_empty() {
+            String::new()
+        } else {
+            format!("That was {here}. ")
+        };
+        // The reminder speaks once per scale. A driver who already heard it
+        // and then lost the thread across the stop gets the instruction back
+        // with the distance; one who has not yet reached it will hear it there.
+        let key = self.weigh_station_key(&stop);
+        let instruction =
+            if self.weigh_station_reminder_key == key && !self.exit_is_armed_for(&stop) {
+                " Signal for the scale exit."
+            } else {
+                ""
+            };
+        let scale_mi = stop.at_mi;
+        let imperial = ctx.settings.imperial_units;
+        self.refresh_live_facts();
+        ctx.say_event_with(
+            format!("{lead}{name} is still ahead, open, {announced}.{instruction}"),
+            SayEvent::queued()
+                .priority(EventPriority::Route)
+                .category(SpeechCategory::Navigation)
+                // The same gate as the notice: a distance is a claim about
+                // now, and the line dies once its own words stop being true.
+                .valid(move || {
+                    let left = scale_mi - live::position_mi();
+                    left > 0.0 && short_distance_text_for(left, imperial) == announced
+                }),
         );
     }
 

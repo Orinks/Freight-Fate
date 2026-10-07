@@ -954,6 +954,15 @@ fn a_scale_stop(at_mi: f64) -> RoadStop {
     stop
 }
 
+/// Open today: a check-in at a closed scale only says it is closed.
+fn open_the_scale(drive: &freight_fate::app::SharedState, stop: &RoadStop) {
+    with_drive(drive, |d| {
+        let mut post = EnforcementPost::new(stop.at_mi, KIND_FIXED_SCALE);
+        post.anchor = stop.key();
+        d.trip.posts = vec![post];
+    });
+}
+
 /// Back to the road at an open scale runs the check-in first (owner ruling,
 /// 2026-09-28): leaving used to skip the inspection.
 #[test]
@@ -1021,6 +1030,7 @@ fn test_scale_wave_through_is_two_minutes_not_fifteen() {
     let drive = a_wear_drive(&mut app, COMPANY_DRIVER);
     let at = with_drive(&drive, |d| d.trip.position_mi);
     let stop = a_scale_stop(at);
+    open_the_scale(&drive, &stop);
     let selected = drive_and_ctx(&drive, &mut app, |d, ctx| {
         d.scale_selects_driver(ctx, &stop)
     });
@@ -1052,6 +1062,7 @@ fn test_scale_check_in_is_removed_after_one_completed_inspection() {
     let drive = a_wear_drive(&mut app, COMPANY_DRIVER);
     let at = with_drive(&drive, |d| d.trip.position_mi);
     let stop = a_scale_stop(at);
+    open_the_scale(&drive, &stop);
     let mut state = rest_stop_at(&mut app, &drive, stop);
 
     activate(&mut state, &mut app.ctx, "Check in at inspection station");
@@ -1077,6 +1088,7 @@ fn test_a_targeted_record_takes_the_inspection_lane() {
     with_drive(&drive, |d| d.trip.truck.damage_pct = 70.0);
     let at = with_drive(&drive, |d| d.trip.position_mi);
     let stop = a_scale_stop(at);
+    open_the_scale(&drive, &stop);
     let before = with_drive(&drive, |d| d.trip.game_minutes);
     let mut state = rest_stop_at(&mut app, &drive, stop);
     app.clear_speech();
@@ -1121,6 +1133,7 @@ fn test_bald_tires_in_the_lane_are_out_of_service_until_replaced() {
     let money_before = app.ctx.profile.as_ref().unwrap().money();
     let at = with_drive(&drive, |d| d.trip.position_mi);
     let stop = a_scale_stop(at);
+    open_the_scale(&drive, &stop);
     let mut state = rest_stop_at(&mut app, &drive, stop);
     app.clear_speech();
     activate(&mut state, &mut app.ctx, "Check in at inspection station");
@@ -1170,6 +1183,7 @@ fn test_a_clean_level_one_earns_a_decal_that_waves_the_next_scale_through() {
 
     let at = with_drive(&drive, |d| d.trip.position_mi);
     let stop = a_scale_stop(at);
+    open_the_scale(&drive, &stop);
     let before = with_drive(&drive, |d| d.trip.game_minutes);
     let mut state = rest_stop_at(&mut app, &drive, stop);
     app.clear_speech();

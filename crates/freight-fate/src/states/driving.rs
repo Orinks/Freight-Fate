@@ -344,6 +344,13 @@ pub struct DrivingState {
     // The half-mile "slow for the scale" nudge, latched separately so it
     // speaks once per announced scale and never re-fires on a re-approach.
     pub weigh_station_reminder_key: String,
+    // Real driving seconds since that reminder was spoken. A crossing
+    // before SCALE_REMINDER_REAL_LEAD_S of them is not judged a bypass.
+    pub weigh_station_reminder_age_s: f64,
+    // A stop or a pause just ended: re-announce the open scale still ahead
+    // once the cab is free. Holds the name of a scale just checked in at,
+    // or an empty string when there is none.
+    pub scale_reannounce: Option<String>,
     // A scale crossed with its own exit armed: judged after the exit watch
     // runs, later in the same frame, never on ramp speed alone.
     pub weigh_station_pending: Option<RoadStop>,

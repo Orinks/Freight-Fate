@@ -410,6 +410,8 @@ impl DrivingState {
             fatigue_events: 0,
             weigh_station_notice_key: String::new(),
             weigh_station_reminder_key: String::new(),
+            weigh_station_reminder_age_s: 0.0,
+            scale_reannounce: None,
             weigh_station_pending: None,
             weigh_station_transponder_verdict: HashMap::new(),
             traced_jake_stage: -1,

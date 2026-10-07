@@ -383,6 +383,8 @@ impl PauseMenuState {
         self.driving.read(|d| {
             d.trip.reset_facility_mentions();
             d.pending_ambient_events.clear();
+            // And the open scale still ahead, once (tester log, 2026-10-07).
+            d.note_scale_reannounce(None);
         });
         ctx.pop_state();
         ctx.say_with("Resumed.", Say::queued().review(false));

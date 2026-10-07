@@ -10,6 +10,8 @@
 
 - **The load you sleep for after an hours warning stays on the dispatch board.** It used to vanish when the rest ran past midnight.
 
+- **The last weigh station warning now leaves time to take the exit in every driving mode.** A closed scale says it is closed.
+
 ## 1.9.2 - 2026-10-05
 
 ### Added

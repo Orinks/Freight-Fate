@@ -1210,6 +1210,20 @@ impl RestStopState {
         let result = self.driving.clone().with(ctx, |d, ctx| {
             d.stop_visit(&stop).inspected = true;
             ctx.audio.play("ui/notify");
+            // Nobody is in a closed scale house to wave anyone anywhere, so
+            // it costs nothing and goes on no record. It used to answer as
+            // an open one did -- "Officers wave you straight back onto the
+            // highway" -- which told a tester the scale he had been warned
+            // about was done, six miles short of it (log, 2026-10-07).
+            if !d.scale_is_open(&stop) {
+                return (
+                    format!(
+                        "{} is closed. Pull back onto the highway.",
+                        stop.spoken_name()
+                    ),
+                    false,
+                );
+            }
             // A valid decal is waved through on sight (CVSA Operational
             // Policy 5), unless the record is targeted.
             if d.decal_waves_through(ctx) {
@@ -1505,9 +1519,16 @@ impl Menu for RestStopState {
         } else {
             None
         };
+        // Leaving one scale with another open one still ahead: say which
+        // was which once the truck is back on the road (tester log,
+        // 2026-10-07: a closed scale six miles short of the announced one).
+        let here = (self.stop.stop_type == "weigh_station").then(|| self.stop.spoken_name());
         let engine_on = self
             .driving
-            .read(|d| d.trip.truck.engine_on)
+            .read(|d| {
+                d.note_scale_reannounce(here.as_deref());
+                d.trip.truck.engine_on
+            })
             .unwrap_or(false);
         ctx.audio.play("ui/menu_back");
         ctx.pop_state();

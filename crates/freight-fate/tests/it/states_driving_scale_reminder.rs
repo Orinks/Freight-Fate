@@ -1,0 +1,486 @@
+//! The open scale's last reminder at compressed time, the re-announcement
+//! after a check-in or a pause, the closed-scale check-in, and the stop
+//! screen under a held key.
+//!
+//! One tester drive (log, 2026-10-07) is the shape of every case here: an
+//! open scale announced twelve miles out, a closed scale six miles short of
+//! it that the driver checked in at anyway and was told "Officers wave you
+//! straight back onto the highway", a nine-minute pause, then "Weigh station
+//! in half a mile" three real seconds before the bypass lights at ten times
+//! real speed -- and the stop screen reading its only row twenty times while
+//! the brake key was still held.
+
+use ff_core::models::jobs::{Job, CARGO_CATALOG};
+use ff_core::models::profile::Profile;
+use ff_core::sim::enforcement_posts::{EnforcementPost, KIND_FIXED_SCALE, METHOD_SCALE_SCREEN};
+use ff_core::sim::trip_models::RoadStop;
+use ff_core::sim::weather::WeatherKind;
+
+use freight_fate::app::testing::TestApp;
+use freight_fate::playtest::breaker::{Rig, RigOptions, DT};
+use freight_fate::states::base::{InputEvent, Key, Mods};
+use freight_fate::states::driving::DrivingState;
+use freight_fate::states::driving_core::DRIVE_PHASE_DELIVERY;
+use freight_fate::states::driving_enforcement::{
+    SCALE_REMINDER_REAL_LEAD_S, WEIGH_STATION_REMINDER_MAX_MI, WEIGH_STATION_REMINDER_MI,
+};
+use freight_fate::states::driving_menu_states::DriveRef;
+use freight_fate::states::driving_pause_states::PauseMenuState;
+use freight_fate::states::driving_rest_states::{EnforcementStopState, RestStopState};
+
+const MPS_PER_MPH: f64 = 1.0 / 2.23694;
+const CLOSED_MI: f64 = 4.0;
+const OPEN_MI: f64 = 10.0;
+const CLOSED_NAME: &str = "I-55 Weigh Station";
+const OPEN_NAME: &str = "I-40 Weigh Station";
+
+fn mph_to_mps(mph: f64) -> f64 {
+    mph * MPS_PER_MPH
+}
+
+fn a_scale(name: &str, at_mi: f64) -> RoadStop {
+    let mut stop = RoadStop::new(name, at_mi, "weigh_station");
+    stop.actions = vec!["inspect".to_string()];
+    stop.parking = "none".to_string();
+    stop
+}
+
+fn open_post(stop: &RoadStop) -> EnforcementPost {
+    let mut post = EnforcementPost::new(stop.at_mi, KIND_FIXED_SCALE);
+    post.method = METHOD_SCALE_SCREEN.to_string();
+    post.reach_mi = 1.0;
+    post.staffed = true;
+    post.anchor = stop.key();
+    post
+}
+
+/// The tester's road: a closed scale, then the open one six miles on.
+fn closed_then_open(drive: &mut DrivingState) -> (RoadStop, RoadStop) {
+    let closed = a_scale(CLOSED_NAME, CLOSED_MI);
+    let open = a_scale(OPEN_NAME, OPEN_MI);
+    drive.trip.stops = vec![closed.clone(), open.clone()];
+    drive.trip.posts = vec![open_post(&open)];
+    (closed, open)
+}
+
+/// A rig at ten times real speed. Seed 1 is a trip whose bypass roll is
+/// caught at the open scale, so a judged crossing is a heard one.
+fn ten_times_rig() -> Rig {
+    let mut rig = Rig::new(RigOptions {
+        seed: 1,
+        ..RigOptions::default()
+    });
+    rig.app.ctx.settings.time_scale = 10.0;
+    rig.drive.trip.time_scale = 10.0;
+    rig
+}
+
+/// One frame at a pinned 61 mph: the driver ignores every instruction.
+fn hold_61_for(rig: &mut Rig, frames: usize, until: impl Fn(&Rig) -> bool) -> usize {
+    for frame in 0..frames {
+        rig.drive.trip.truck.velocity_mps = mph_to_mps(61.0);
+        rig.step(1, DT, None);
+        if until(rig) {
+            return frame + 1;
+        }
+    }
+    frames
+}
+
+fn first_index(rig: &Rig, needle: &str) -> Option<usize> {
+    rig.transcript()
+        .iter()
+        .position(|line| line.contains(needle))
+}
+
+/// Open the pause menu over the rig's drive and choose "Resume driving".
+fn pause_and_resume(rig: &mut Rig) {
+    rig.with_drive_on_stack(|rig, drive: DriveRef| {
+        let state = PauseMenuState::with_drive(drive);
+        rig.app.ctx.push_state(state);
+        rig.app.ctx.run_deferred();
+        assert!(
+            rig.select_menu_containing("Resume driving"),
+            "{:?}",
+            rig.menu_labels()
+        );
+    });
+}
+
+// -- (a) the reminder's real seconds ------------------------------------------------
+
+#[test]
+fn an_open_scale_behind_a_closed_one_at_ten_times_gets_real_seconds_after_a_pause() {
+    let mut rig = ten_times_rig();
+    let (closed, open) = closed_then_open(&mut rig.drive);
+    rig.prepare(61.0, None);
+
+    // Twelve miles is inside the capped lookahead, so the notice for the
+    // open scale lands first; the closed one between is crossed in silence
+    // and never judged.
+    hold_61_for(&mut rig, 20_000, |rig| {
+        rig.drive.trip.position_mi > CLOSED_MI + 3.5
+    });
+    assert_eq!(
+        rig.said("Open weigh station ahead"),
+        1,
+        "{:?}",
+        rig.transcript()
+    );
+    let closed_key = rig.drive.weigh_station_key(&closed);
+    assert!(!rig.drive.enforcement_events.contains(&closed_key));
+    assert!(rig.drive.pull_over.is_none());
+    assert!(
+        rig.drive.trip.effective_time_scale() > 5.0,
+        "the approach is meant to run compressed: {}",
+        rig.drive.trip.effective_time_scale()
+    );
+
+    // The tester's pause, about two and a half miles short of the scale.
+    pause_and_resume(&mut rig);
+    hold_61_for(&mut rig, 3, |_| false);
+    let reannounce = format!("{OPEN_NAME} is still ahead, open, ");
+    assert_eq!(rig.said(&reannounce), 1, "{:?}", rig.transcript());
+
+    // Drive on with no signal, counting real frames from the reminder.
+    let mut reminder_frame: Option<usize> = None;
+    let mut judged_frame: Option<usize> = None;
+    let mut crossed_frame: Option<usize> = None;
+    for frame in 0..40_000 {
+        rig.drive.trip.truck.velocity_mps = mph_to_mps(61.0);
+        let before = rig.drive.trip.position_mi;
+        rig.step(1, DT, None);
+        if reminder_frame.is_none() && rig.said("Signal for the scale exit.") > 0 {
+            reminder_frame = Some(frame);
+            assert!(
+                rig.drive.trip.effective_time_scale() <= 1.0,
+                "the reminder must put the clock on real time"
+            );
+        }
+        if crossed_frame.is_none()
+            && before < open.at_mi
+            && rig.drive.trip.position_mi >= open.at_mi
+        {
+            crossed_frame = Some(frame);
+        }
+        if judged_frame.is_none() && rig.said("Scale bypass enforcement") > 0 {
+            judged_frame = Some(frame);
+            break;
+        }
+        if rig.drive.trip.position_mi > open.at_mi + 0.5 {
+            break;
+        }
+    }
+    let reminder = reminder_frame.unwrap_or_else(|| panic!("no reminder: {:?}", rig.transcript()));
+    let crossed = crossed_frame.expect("the truck reached the scale");
+    let judged = judged_frame.unwrap_or_else(|| {
+        panic!(
+            "a reminded, ignored open scale must still be judged: {:?}",
+            rig.transcript()
+        )
+    });
+    let lead_s = (crossed - reminder) as f64 * DT;
+    assert!(
+        lead_s >= SCALE_REMINDER_REAL_LEAD_S,
+        "only {lead_s:.1} real seconds from the reminder to the gore"
+    );
+    assert!((judged - reminder) as f64 * DT >= SCALE_REMINDER_REAL_LEAD_S);
+    assert!(first_index(&rig, &reannounce) < first_index(&rig, "Signal for the scale exit."));
+}
+
+#[test]
+fn a_crossing_is_judged_only_after_the_driver_was_told_in_time() {
+    // A scale never announced, or a reminder that landed late: the driver
+    // never had the seconds, so the scale does not charge. One announced
+    // whose reminder the driver's own pace skipped still does.
+    for (noticed, reminded, age_s, charged) in [
+        (false, false, 0.0, false),
+        (true, false, 0.0, true),
+        (true, true, SCALE_REMINDER_REAL_LEAD_S - 1.0, false),
+        (true, true, SCALE_REMINDER_REAL_LEAD_S, true),
+    ] {
+        let mut rig = ten_times_rig();
+        let (_closed, open) = closed_then_open(&mut rig.drive);
+        let key = rig.drive.weigh_station_key(&open);
+        if noticed {
+            rig.drive.weigh_station_notice_key = key.clone();
+        }
+        if reminded {
+            rig.drive.weigh_station_reminder_key = key.clone();
+        }
+        rig.drive.weigh_station_reminder_age_s = age_s;
+        rig.drive.trip.position_mi = open.at_mi + 0.05;
+        rig.drive.trip.truck.velocity_mps = mph_to_mps(61.0);
+
+        rig.drive
+            .check_weigh_station_enforcement(&mut rig.app.ctx, open.at_mi - 0.05);
+
+        assert_eq!(
+            rig.drive.pull_over.is_some(),
+            charged,
+            "noticed {noticed}, reminded {reminded}, {age_s} s ago"
+        );
+        assert!(rig.drive.enforcement_events.contains(&key));
+    }
+}
+
+#[test]
+fn a_ramp_missed_after_a_late_reminder_is_not_judged_but_one_armed_early_is() {
+    // Signalled for the scale, then missed its ramp. Armed in answer to a
+    // reminder three real seconds old, the driver never had the time; armed
+    // before any reminder was needed, the miss is theirs.
+    for (reminded, charged) in [(true, false), (false, true)] {
+        let mut rig = ten_times_rig();
+        let (_closed, open) = closed_then_open(&mut rig.drive);
+        let key = rig.drive.weigh_station_key(&open);
+        rig.drive.weigh_station_notice_key = key.clone();
+        if reminded {
+            rig.drive.weigh_station_reminder_key = key.clone();
+            rig.drive.weigh_station_reminder_age_s = 3.0;
+        }
+        rig.drive.exit_stop = Some(open.clone());
+        rig.drive.exit_signal_on = true;
+        rig.drive.trip.position_mi = open.at_mi + 0.05;
+        rig.drive.trip.truck.velocity_mps = mph_to_mps(61.0);
+
+        rig.drive
+            .check_weigh_station_enforcement(&mut rig.app.ctx, open.at_mi - 0.05);
+        assert!(rig.drive.weigh_station_pending.is_some());
+        rig.drive.exit_stop = None; // the exit watch called it a miss
+        rig.drive.resolve_weigh_station_bypass(&mut rig.app.ctx);
+
+        assert_eq!(
+            rig.drive.pull_over.is_some(),
+            charged,
+            "reminded {reminded}"
+        );
+        assert!(rig.drive.enforcement_events.contains(&key));
+    }
+}
+
+#[test]
+fn the_reminder_window_is_sized_from_the_real_clock() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app);
+    drive.trip.time_scale = 10.0;
+    // At any legal truck speed the half mile already holds the lead on the
+    // real clock the reminder starts.
+    drive.trip.truck.velocity_mps = mph_to_mps(61.0);
+    assert_eq!(drive.scale_reminder_mi(), WEIGH_STATION_REMINDER_MI);
+    assert!(drive.scale_reminder_mi() / 61.0 * 3600.0 >= SCALE_REMINDER_REAL_LEAD_S);
+    // Faster than half a mile can hold, the window grows -- to a ceiling.
+    drive.trip.truck.velocity_mps = mph_to_mps(160.0);
+    let window = drive.scale_reminder_mi();
+    assert!(window > WEIGH_STATION_REMINDER_MI && window <= WEIGH_STATION_REMINDER_MAX_MI);
+    assert!(window / 160.0 * 3600.0 >= SCALE_REMINDER_REAL_LEAD_S - 1e-9);
+}
+
+// -- (b) and (c): the check-in, and what comes after it ------------------------------
+
+#[test]
+fn checking_in_at_a_closed_scale_says_closed_and_names_the_open_one_still_ahead() {
+    let mut rig = ten_times_rig();
+    let (closed, open) = closed_then_open(&mut rig.drive);
+    // The open scale was announced miles back.
+    rig.drive.weigh_station_notice_key = rig.drive.weigh_station_key(&open);
+    rig.drive.trip.position_mi = closed.at_mi;
+    rig.drive.trip.truck.velocity_mps = 0.0;
+    rig.drive.trip.truck.set_parking_brake();
+    rig.app.clear_speech();
+
+    let minutes_before = rig.drive.trip.game_minutes;
+    rig.with_drive_on_stack(|rig, drive: DriveRef| {
+        let mut state = RestStopState::with_drive(drive, closed.clone(), false);
+        let shared = rig.app.ctx.state().expect("the drive is on the stack");
+        {
+            let mut borrowed = shared.borrow_mut();
+            let driving = borrowed
+                .as_any_mut()
+                .downcast_mut::<DrivingState>()
+                .expect("the rig's drive");
+            state.enter_over_drive(&mut rig.app.ctx, driving);
+        }
+        rig.app.ctx.push_state_with(state, false);
+        rig.app.ctx.run_deferred();
+        assert!(rig.select_menu_containing("Check in at inspection station"));
+        assert!(
+            !rig.menu_labels()
+                .iter()
+                .any(|row| row.contains("Check in at inspection station")),
+            "a done check-in leaves the menu"
+        );
+        assert!(rig.select_menu_containing("Back to the road"));
+    });
+
+    let closed_line = format!("{CLOSED_NAME} is closed. Pull back onto the highway.");
+    assert_eq!(rig.said(&closed_line), 1, "{:?}", rig.transcript());
+    assert_eq!(rig.said("wave you"), 0, "{:?}", rig.transcript());
+    assert_eq!(rig.said("Inspection check-in complete"), 0);
+    assert_eq!(
+        rig.drive.trip.game_minutes, minutes_before,
+        "a closed scale costs no time"
+    );
+
+    // Back on the road, the open one is named once, after the stop.
+    rig.step(2, DT, None);
+    let expected =
+        format!("[event] That was {CLOSED_NAME}. {OPEN_NAME} is still ahead, open, 6.0 miles.");
+    let heard: Vec<String> = rig
+        .transcript()
+        .into_iter()
+        .filter(|line| line.contains("still ahead, open"))
+        .collect();
+    assert_eq!(heard, vec![expected]);
+}
+
+#[test]
+fn a_pause_with_no_open_scale_announced_adds_nothing() {
+    let mut rig = ten_times_rig();
+    let (_closed, open) = closed_then_open(&mut rig.drive);
+    rig.drive.truck_mut().velocity_mps = mph_to_mps(61.0);
+    pause_and_resume(&mut rig);
+    // Not announced yet: the notice, not a re-announcement, is what speaks
+    // it -- on this very frame, and only once.
+    assert!(rig.drive.scale_reannounce.is_none());
+    rig.step(2, DT, None);
+    assert_eq!(
+        rig.said("Open weigh station ahead"),
+        1,
+        "{:?}",
+        rig.transcript()
+    );
+    assert_eq!(rig.said("still ahead, open"), 0, "{:?}", rig.transcript());
+
+    // Past the scale, nothing to re-announce either.
+    rig.drive.weigh_station_notice_key = rig.drive.weigh_station_key(&open);
+    rig.drive.trip.position_mi = open.at_mi + 0.2;
+    pause_and_resume(&mut rig);
+    rig.step(2, DT, None);
+    assert_eq!(rig.said("still ahead, open"), 0, "{:?}", rig.transcript());
+}
+
+#[test]
+fn a_pause_after_the_reminder_brings_the_instruction_back() {
+    let mut rig = ten_times_rig();
+    let (_closed, open) = closed_then_open(&mut rig.drive);
+    let key = rig.drive.weigh_station_key(&open);
+    rig.drive.weigh_station_notice_key = key.clone();
+    rig.drive.weigh_station_reminder_key = key;
+    rig.drive.trip.position_mi = open.at_mi - 0.5;
+    rig.drive.trip.truck.velocity_mps = mph_to_mps(61.0);
+    rig.app.clear_speech();
+
+    pause_and_resume(&mut rig);
+    rig.step(1, DT, None);
+    let heard: Vec<String> = rig
+        .transcript()
+        .into_iter()
+        .filter(|line| line.contains("still ahead, open"))
+        .collect();
+    assert_eq!(
+        heard,
+        vec![format!(
+            "[event] {OPEN_NAME} is still ahead, open, half a mile. Signal for the scale exit."
+        )]
+    );
+}
+
+// -- (d) the stop screen under a held key ----------------------------------------------
+
+fn a_drive(app: &mut TestApp) -> DrivingState {
+    let world = app.ctx.world;
+    let mut profile = Profile::named_in("Held Key", "Buffalo");
+    profile.tutorial_done = true;
+    app.ctx.profile = Some(profile);
+    let route = world
+        .supported_route("Buffalo", "Rochester", None)
+        .expect("the world routes")
+        .expect("Buffalo to Rochester is supported");
+    let mut job = Job::new(
+        CARGO_CATALOG
+            .get("general")
+            .expect("the general cargo type"),
+        12.0,
+        "Buffalo",
+        "company yard",
+        "Rochester",
+        route.miles(),
+        1000.0,
+        12.0,
+    );
+    job.destination_location = "Rochester freight market".to_string();
+    let mut drive = DrivingState::new(
+        &mut app.ctx,
+        job,
+        route,
+        Some(0),
+        DRIVE_PHASE_DELIVERY,
+        Some(12.0),
+    );
+    drive.trip.set_npc_vehicles(Vec::new());
+    drive.trip.weather.current = WeatherKind::Clear;
+    drive.trip.posts = Vec::new();
+    drive
+}
+
+fn held(key: Key) -> InputEvent {
+    InputEvent::KeyDown {
+        key,
+        mods: Mods::NONE,
+        text: None,
+        repeat: true,
+    }
+}
+
+#[test]
+fn a_held_brake_key_does_not_read_the_stop_screen_row_over_and_over() {
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app);
+    drive.trip_seed = 1; // caught: the bypass stop is deterministic
+    let open = a_scale(OPEN_NAME, 10.0);
+    drive.trip.stops = vec![open.clone()];
+    drive.trip.posts = vec![open_post(&open)];
+    let key = drive.weigh_station_key(&open);
+    drive.weigh_station_notice_key = key.clone();
+    drive.weigh_station_reminder_key = key;
+    drive.weigh_station_reminder_age_s = SCALE_REMINDER_REAL_LEAD_S;
+    drive.trip.position_mi = 10.1;
+    drive.trip.truck.velocity_mps = mph_to_mps(55.0);
+    drive.check_weigh_station_enforcement(&mut app.ctx, 9.9);
+    assert!(drive.pull_over.is_some());
+
+    app.clear_speech();
+    drive.trip.truck.velocity_mps = 0.0;
+    drive.update_pull_over(&mut app.ctx, 1.0, true);
+    app.ctx.run_deferred();
+    let top = app.ctx.state().expect("the stop screen");
+    assert!(top.borrow().as_any().is::<EnforcementStopState>());
+
+    // The brake key is still down: the keyboard's own repeat, every 34 ms.
+    for _ in 0..20 {
+        app.dispatch_to_state(&held(Key::Down));
+    }
+    let count = |app: &TestApp, needle: &str| {
+        app.speech()
+            .transcript_lines()
+            .iter()
+            .filter(|line| line.contains(needle))
+            .count()
+    };
+    assert_eq!(
+        count(&app, "Pull back onto the highway."),
+        1,
+        "{:?}",
+        app.speech().transcript_lines()
+    );
+    assert_eq!(
+        count(&app, "Fine: "),
+        1,
+        "{:?}",
+        app.speech().transcript_lines()
+    );
+
+    // A fresh press is the player asking: it still reads the row.
+    app.dispatch_to_state(&InputEvent::key(Key::Down));
+    assert_eq!(count(&app, "Pull back onto the highway."), 2);
+}

@@ -13,6 +13,7 @@ use ff_core::speech_text::overspeed_nag;
 use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
+use crate::states::driving_enforcement::SCALE_REMINDER_REAL_LEAD_S;
 use crate::states::driving_updates::{limit_drop_speech_latency_s, live};
 
 impl DrivingState {
@@ -420,6 +421,13 @@ impl DrivingState {
                 }
             }
             self.check_scale_reminder(ctx, &stop, ahead, &key);
+            if self.trip.scale_reminder_hold_mi == Some(stop.at_mi)
+                && (ahead <= 0.0 || self.exit_is_armed_for(&stop))
+            {
+                // Past the gore, or signalled for its ramp, where the armed
+                // exit's own real-time window takes the clock over.
+                self.trip.scale_reminder_hold_mi = None;
+            }
             if self.enforcement_events.contains(&key) {
                 continue;
             }
@@ -449,6 +457,28 @@ impl DrivingState {
                     // tester was fined for blowing past a scale while he was
                     // on its ramp at eighteen (log, 2026-08-10).
                     self.weigh_station_pending = Some(stop.clone());
+                    continue;
+                }
+                if !self.scale_bypass_judgeable(&key) {
+                    // Audible before it can bite. The driver was never told
+                    // about this scale, or heard "Signal for the scale exit"
+                    // too few real seconds ago to have acted on it -- a notice
+                    // held back by a busy cab, a reminder that landed late.
+                    // That is the game's miss, not the driver's bypass.
+                    let heard = if self.weigh_station_reminder_key == key {
+                        format!(
+                            "reminder only {:.1} real s before",
+                            self.weigh_station_reminder_age_s
+                        )
+                    } else {
+                        "never announced".to_string()
+                    };
+                    log::info!(
+                        "scale crossing not judged: {} at mile {:.2}, {heard}",
+                        stop.name,
+                        stop.at_mi
+                    );
+                    self.enforcement_events.insert(key);
                     continue;
                 }
                 self.enforcement_events.insert(key);
@@ -570,7 +600,7 @@ impl DrivingState {
         if self.enforcement_events.contains(&key) {
             return;
         }
-        self.enforcement_events.insert(key);
+        self.enforcement_events.insert(key.clone());
         if self
             .ramp_stop
             .as_ref()
@@ -580,6 +610,23 @@ impl DrivingState {
         }
         if self.pull_over.is_some() {
             return; // already stopped this frame; one demand on the driver
+        }
+        if self.weigh_station_reminder_key == key
+            && self.weigh_station_reminder_age_s < SCALE_REMINDER_REAL_LEAD_S
+        {
+            // Signalled in answer to a reminder that came too late to make
+            // the ramp: the same miss on the game's side as an unarmed
+            // crossing inside the reminder's real seconds. A driver who armed
+            // before any reminder was needed knew about the scale all along,
+            // and a missed ramp is still theirs.
+            log::info!(
+                "scale crossing not judged: {} at mile {:.2}, armed after a reminder only \
+                 {:.1} real s before",
+                stop.name,
+                stop.at_mi,
+                self.weigh_station_reminder_age_s
+            );
+            return;
         }
         self.charge_weigh_station_bypass(ctx, &stop);
     }
