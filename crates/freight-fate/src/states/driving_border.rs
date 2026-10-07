@@ -100,15 +100,24 @@ impl DrivingState {
             return true;
         }
 
-        // AMPS retains C023 records for 12 months; the game simplifies that
-        // to lifetime per-profile counts for each country.
-        let (fine, penalty) = border_penalty_and_record(ctx, &booth);
         if self.enforcement_bypassed(ctx) {
-            self.stop_for_border(ctx);
-            self.open_border_clearance(ctx, booth);
+            if self.pull_over.is_some() {
+                self.pending_border_clearance = Some(booth);
+            } else {
+                self.stop_for_border(ctx);
+                self.open_border_clearance(ctx, booth);
+            }
             return true;
         }
 
+        if self.pull_over.is_some() {
+            self.pending_border_clearance = Some(booth);
+            return true;
+        }
+
+        // AMPS retains C023 records for 12 months; the game simplifies that
+        // to lifetime per-profile counts for each country.
+        let (fine, penalty) = border_penalty_and_record(ctx, &booth);
         self.pending_border_clearance = Some(booth.clone());
         let summary = format!(
             "At {}, {} stopped the truck for running the customs booth: {}.",
@@ -125,7 +134,7 @@ impl DrivingState {
             &summary,
             fine,
             hos::HOS_REPUTATION_HIT,
-            "Officers walked you back to the booth and processed the truck. Back on the highway.",
+            "Officers walk you back to the customs booth.",
             &lights_message,
         );
         true

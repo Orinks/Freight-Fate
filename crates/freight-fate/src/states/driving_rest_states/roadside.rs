@@ -290,8 +290,19 @@ impl Menu for TrafficStopState {
     }
 
     fn go_back(&mut self, ctx: &mut GameContext) {
+        let driving = self.driving.clone();
+        let border_clearance_pending = driving
+            .read(|d| d.pending_border_clearance.is_some())
+            .unwrap_or(false);
         ctx.pop_state();
         ctx.say_with("Back on the highway. Watch your speed.", Say::new());
+        if border_clearance_pending {
+            driving.with(ctx, |d, ctx| {
+                if let Some(booth) = d.pending_border_clearance.take() {
+                    d.open_border_clearance(ctx, booth);
+                }
+            });
+        }
     }
 }
 

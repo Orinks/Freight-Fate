@@ -1,4 +1,4 @@
-use ff_core::achievements::increment_stat;
+use ff_core::achievements::{increment_stat, int_stat};
 use ff_core::sim::trip_models::BorderBooth;
 
 use freight_fate::playtest::{key_event, PlaytestHarness, RouteSetup};
@@ -6,7 +6,7 @@ use freight_fate::states::base::Key;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_border::{border_secondary_referral, BorderClearanceState};
 use freight_fate::states::driving_core::{BORDER_PRIMARY_MIN, BORDER_SECONDARY_EXTRA_MIN};
-use freight_fate::states::driving_rest_states::EnforcementStopState;
+use freight_fate::states::driving_rest_states::{EnforcementStopState, TrafficStopState};
 
 const MPS_PER_MPH: f64 = 1.0 / 2.23694;
 
@@ -242,7 +242,80 @@ fn running_the_alcan_port_charges_the_first_us_penalty() {
     );
     assert!(transcript.contains("5,000"), "{transcript}");
     return_to_clearance(&mut harness);
+    assert!(
+        harness
+            .transcript_text()
+            .contains("Officers walk you back to the customs booth."),
+        "{}",
+        harness.transcript_text()
+    );
     clear_booth(&mut harness);
+}
+
+#[test]
+fn bypassed_border_running_does_not_increment_the_us_stat() {
+    let mut harness = border_drive("whitehorse_yt_ca", "tok_ak_us");
+    harness.app.ctx.settings.hos_mode = "debug_off".to_string();
+    let booth = booth_named(&harness, "Alcan Port of Entry");
+
+    harness.with_drive(|drive, ctx| {
+        drive.trip.position_mi = booth.at_mi;
+        drive.trip.truck.velocity_mps = mph_to_mps(55.0);
+        assert!(drive.check_border_booth_crossing(ctx, booth.at_mi - 0.01));
+    });
+
+    harness.expect_state::<BorderClearanceState>("bypassing the Alcan running penalty");
+    let profile = harness
+        .app
+        .ctx
+        .profile
+        .as_mut()
+        .expect("the drive has a profile");
+    assert_eq!(int_stat(profile, "border_reports_missed_us"), 0);
+}
+
+#[test]
+fn active_speeding_stop_is_preserved_and_customs_opens_afterward() {
+    let mut harness = border_drive("whitehorse_yt_ca", "tok_ak_us");
+    let booth = booth_named(&harness, "Alcan Port of Entry");
+
+    harness.with_drive(|drive, ctx| {
+        drive.trip.position_mi = booth.at_mi - 0.01;
+        drive.trip.truck.velocity_mps = mph_to_mps(55.0);
+        drive.begin_pull_over(ctx, 45.0);
+        assert_eq!(drive.pull_over_kind, "speeding");
+        assert_eq!(drive.pull_over_fine, 0.0);
+
+        drive.trip.position_mi = booth.at_mi;
+        assert!(drive.check_border_booth_crossing(ctx, booth.at_mi - 0.01));
+        assert_eq!(drive.pull_over_kind, "speeding");
+        assert_eq!(drive.pull_over_fine, 0.0);
+        assert!(drive
+            .enforcement_events
+            .contains(&format!("border-booth:{}", booth.key)));
+        assert_eq!(
+            drive
+                .pending_border_clearance
+                .as_ref()
+                .map(|pending| pending.key.as_str()),
+            Some(booth.key.as_str())
+        );
+    });
+
+    harness.with_drive(|drive, ctx| {
+        drive.trip.truck.velocity_mps = 0.0;
+        drive.update_pull_over(ctx, 1.0, false);
+    });
+    harness.expect_state::<TrafficStopState>("resolving the existing speeding stop");
+    harness.select_menu_item("Pull back onto the highway");
+    harness.expect_state::<BorderClearanceState>("opening customs after the speeding stop");
+    let profile = harness
+        .app
+        .ctx
+        .profile
+        .as_mut()
+        .expect("the drive has a profile");
+    assert_eq!(int_stat(profile, "border_reports_missed_us"), 0);
 }
 
 #[test]

@@ -262,7 +262,7 @@ pub fn run_the_border() -> Outcome {
     }) {
         findings.push("the port-running summary omitted its booth, agency or penalty".to_string());
     }
-    if rig.said("Officers walked you back to the booth") == 0 {
+    if rig.said("Officers walk you back to the customs booth.") == 0 {
         findings.push("the return-to-booth message was not spoken".to_string());
     }
     let note = format!(
