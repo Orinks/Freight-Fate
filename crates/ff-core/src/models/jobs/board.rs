@@ -7,13 +7,14 @@ use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 
 use crate::data::lcv_turnpikes::cargo_requires_lcv_turnpike;
+use crate::data::seasonal_weight::{seasonal_gvw_cap_kg, strictest_on_route};
 use crate::data::world::World;
 use crate::data::world_models::{City, Location};
 use crate::models::business_constants::DIRECT_FREIGHT_PAY_MULT;
 use crate::models::carriers::carrier;
 use crate::models::jobs::{
     cargo_type, dispatch_deadline_hours, market_tag_cargo_bonus, minimum_pay_for_level, plan_hos,
-    CargoType, Job, DEADLINE_DISPATCH_SLACK_RANGE, FACILITY_SELECTION_WEIGHTS,
+    CargoType, Job, SeasonalWeightLimit, DEADLINE_DISPATCH_SLACK_RANGE, FACILITY_SELECTION_WEIGHTS,
     HELD_CREDENTIAL_CARGO_WEIGHT, HELD_CREDENTIAL_FACILITY_BONUS, HOOKUP_FEE, LEVEL_DISTANCE_CAPS,
     LEVEL_DISTANCE_CAP_STEP_MI, LONG_HAUL_MILES, MAX_DISPATCH_DISTANCE_MI, MIN_JOB_DISTANCE_MI,
     PREMIUM_LANE_LEVEL, PREMIUM_LANE_LONG_HAUL_BIAS, SPECIALIZED_FREIGHT_LEVEL,
@@ -25,7 +26,7 @@ use crate::pyfmt::round_py_n;
 use crate::pyrandom::PyRandom;
 use crate::sim::hos::HosClock;
 use crate::sim::vehicle::{
-    combination_tare_kg, TrailerSet, TruckSpecs, KG_PER_TON, TRAILER_TARE_KG,
+    combination_tare_kg, TrailerSet, TruckSpecs, TruckState, KG_PER_TON, TRAILER_TARE_KG,
 };
 
 /// `(destination, route miles, route leg count)`.
@@ -98,6 +99,7 @@ pub struct JobBoard<'w> {
     // The driver's live shift clock: deadlines plan around the hours already
     // burned, the way a real dispatcher asks what you have left.
     pub hos: Option<HosClock>,
+    calendar_hours: Option<f64>,
     rng: PyRandom,
 }
 
@@ -107,6 +109,7 @@ impl<'w> JobBoard<'w> {
         JobBoard {
             world,
             hos: hos.cloned(),
+            calendar_hours: None,
             rng: match seed {
                 Some(seed) => PyRandom::new_from_i64(seed),
                 None => PyRandom::new_unseeded(),
@@ -117,6 +120,11 @@ impl<'w> JobBoard<'w> {
     /// `JobBoard(world, seed=seed)`.
     pub fn seeded(world: &'w World, seed: i64) -> Self {
         Self::new(world, Some(seed), None)
+    }
+
+    pub fn with_calendar_hours(mut self, hours: f64) -> Self {
+        self.calendar_hours = Some(hours);
+        self
     }
 
     /// How many distinct places a driver at `level` can be sent to from
@@ -797,11 +805,24 @@ impl<'w> JobBoard<'w> {
         // tractor, a test load). Turnpike doubles are priced on the lanes
         // the route menu will offer, and a lane with no recorded LCV cap in
         // every state is no job at all, never an 80,000 lb one.
-        let set = if cargo_requires_lcv_turnpike(cargo.key) {
+        let mut set = if cargo_requires_lcv_turnpike(cargo.key) {
             TrailerSet::for_cargo_between(cargo.key, self.world, origin, destination)?
         } else {
             TrailerSet::for_cargo_on_route(cargo.key, self.world, route.as_ref())?
         };
+        let seasonal_weight_limit = self
+            .calendar_hours
+            .zip(route.as_ref())
+            .and_then(|(hours, route)| strictest_on_route(route, hours))
+            .map(|restriction| {
+                let mut truck = TruckState::new(TruckSpecs::default());
+                truck.trailer_set = set;
+                set.legal_gvw_kg = seasonal_gvw_cap_kg(&truck, restriction.percent);
+                SeasonalWeightLimit {
+                    highway: restriction.highway.to_string(),
+                    percent: restriction.percent,
+                }
+            });
         let tare = combination_tare_kg(&TruckSpecs::default()) - TRAILER_TARE_KG + set.tare_kg;
         let max_tons = ((set.legal_gvw_kg - tare) / KG_PER_TON).max(0.0);
         let hi = cargo.weight_tons.1.min(max_tons);
@@ -864,6 +885,7 @@ impl<'w> JobBoard<'w> {
         job.deadline_covers_rest = covers_rest;
         job.origin_spoken = self.world.spoken_city(origin, Some(true));
         job.destination_spoken = self.world.spoken_city(destination, Some(true));
+        job.seasonal_weight_limit = seasonal_weight_limit;
         Some(job)
     }
 }

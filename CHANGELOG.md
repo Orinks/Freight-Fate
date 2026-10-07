@@ -27,6 +27,8 @@
 
 - **Trucks now stop for customs at the border on the Alaska Highway and southbound at Blaine.** Driving past the booth brings a penalty.
 
+- **Alaska's spring weight limits now apply.** From April to mid-June, loads on thawing Alaska highways are lighter, and offers name the road setting the limit.
+
 - **Diesel in British Columbia and the Yukon now costs what it does there.** Canadian pumps also tell you the price in Canadian dollars a litre.
 
 - **Heavy trucks in British Columbia are now speed-limited to 105 kilometres an hour, as the law requires.**

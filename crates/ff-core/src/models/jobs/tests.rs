@@ -1302,9 +1302,16 @@ fn job_payload_round_trips_and_legacy_payloads_fill_in() {
     job.origin_spoken = "Chicago, Illinois".to_string();
     job.destination_location = "Milwaukee Cross-Dock".to_string();
     job.bobtail = true;
+    job.seasonal_weight_limit = Some(SeasonalWeightLimit {
+        highway: "Richardson Highway".to_string(),
+        percent: 85,
+    });
     let payload = job_payload(&job);
     let back = job_from_payload(&payload).unwrap();
     assert_eq!(back, job);
+    assert!(job.describe_plain().contains(
+        "Spring weight limits on the Richardson Highway: axles held to 85 percent of legal."
+    ));
 
     let mut legacy = Map::new();
     legacy.insert("cargo".into(), Value::from("general"));
@@ -1315,6 +1322,7 @@ fn job_payload_round_trips_and_legacy_payloads_fill_in() {
     legacy.insert("pay".into(), Value::from(800.0));
     legacy.insert("deadline_game_h".into(), Value::from(6.0));
     let old = job_from_payload(&legacy).unwrap();
+    assert!(old.seasonal_weight_limit.is_none());
     assert_eq!(old.origin_location, "Chicago freight market");
     assert_eq!(old.origin_type, "metro_market");
     assert_eq!(old.describe_plain().split(' ').next(), Some("10"));
@@ -1324,6 +1332,86 @@ fn job_payload_round_trips_and_legacy_payloads_fill_in() {
     let mut cityless = legacy.clone();
     cityless.remove("origin");
     assert!(job_from_payload(&cityless).is_none());
+
+    let mut malformed = legacy;
+    malformed.insert(
+        "seasonal_weight_limit".into(),
+        Value::String("not a limit".to_string()),
+    );
+    assert!(job_from_payload(&malformed)
+        .unwrap()
+        .seasonal_weight_limit
+        .is_none());
+}
+
+fn seasonal_hours(month: u32, day: u32, hour: f64) -> f64 {
+    use chrono::Datelike;
+
+    let ordinal = f64::from(
+        chrono::NaiveDate::from_ymd_opt(2001, month, day)
+            .expect("test date is valid")
+            .ordinal(),
+    );
+    (ordinal - 80.0).rem_euclid(365.0) * 24.0 + hour
+}
+
+#[test]
+fn seeded_alaska_board_caps_restricted_jobs_only_during_the_window() {
+    use crate::data::seasonal_weight::{seasonal_gvw_cap_kg, strictest_on_route};
+    use crate::sim::vehicle::{TrailerSet, TruckSpecs, TruckState, KG_PER_TON};
+
+    let seed = 34;
+    let active_hours = seasonal_hours(5, 1, 12.0);
+    let active_jobs = JobBoard::seeded(world(), seed)
+        .with_calendar_hours(active_hours)
+        .offers("valdez_ak_us", ALL, OfferOptions::level(30));
+    let mut restricted_jobs = 0;
+    for job in &active_jobs {
+        let route = supported(job).expect("board job has a supported route");
+        let Some(restriction) = strictest_on_route(&route, active_hours) else {
+            assert!(job.seasonal_weight_limit.is_none());
+            continue;
+        };
+        restricted_jobs += 1;
+        let limit = job
+            .seasonal_weight_limit
+            .as_ref()
+            .expect("restricted dispatch stores its seasonal limit");
+        assert_eq!(limit.highway, restriction.highway);
+        assert_eq!(limit.percent, restriction.percent);
+
+        let set = if crate::data::lcv_turnpikes::cargo_requires_lcv_turnpike(job.cargo.key) {
+            TrailerSet::for_cargo_between(job.cargo.key, world(), &job.origin, &job.destination)
+                .expect("board-compatible trailer set")
+        } else {
+            TrailerSet::for_cargo_on_route(job.cargo.key, world(), Some(&route))
+                .expect("board-compatible trailer set")
+        };
+        let mut truck = TruckState::new(TruckSpecs::default());
+        truck.trailer_set = set;
+        truck.cargo_kg = job.weight_tons * KG_PER_TON;
+        let cap = seasonal_gvw_cap_kg(&truck, limit.percent);
+        assert!(
+            truck.gross_mass_kg() <= cap + 1e-6,
+            "{} to {}: gross {} exceeds seasonal cap {}",
+            job.origin,
+            job.destination,
+            truck.gross_mass_kg(),
+            cap
+        );
+    }
+    assert!(
+        restricted_jobs > 0,
+        "seed must include a restricted outbound job"
+    );
+
+    let inactive_jobs = JobBoard::seeded(world(), seed)
+        .with_calendar_hours(seasonal_hours(7, 1, 12.0))
+        .offers("valdez_ak_us", ALL, OfferOptions::level(30));
+    assert!(!inactive_jobs.is_empty());
+    assert!(inactive_jobs
+        .iter()
+        .all(|job| job.seasonal_weight_limit.is_none()));
 }
 
 #[test]

@@ -47,6 +47,7 @@ use ff_core::music::crc32;
 use ff_core::playtest_levers::{forced_dispatch_destination, resolve_city_forgiving};
 use ff_core::pyfmt::{fmt_f, fmt_grouped, py_int, round_py_n};
 use ff_core::sim::hos::limits;
+use ff_core::sim::season::player_calendar_hours;
 
 use crate::app::{GameContext, Say};
 use crate::bindings::Action;
@@ -89,6 +90,15 @@ pub(crate) fn profile(ctx: &GameContext) -> &Profile {
     ctx.profile
         .as_ref()
         .expect("the terminal screens run with a loaded career")
+}
+
+pub(crate) fn dispatch_calendar_hours(ctx: &mut GameContext) -> f64 {
+    let p = profile(ctx);
+    player_calendar_hours(
+        p.game_hours,
+        Some(p.calendar_game_hours()),
+        ctx.real_weather_provider().is_some() && ctx.settings.live_weather_controls_calendar,
+    )
 }
 
 pub(crate) fn profile_mut(ctx: &mut GameContext) -> &mut Profile {
@@ -462,7 +472,8 @@ pub fn open_freight_market(ctx: &mut GameContext) -> Vec<Job> {
     if let Some(seed) = seed {
         ctx.dispatch_board_seed = Some(seed.wrapping_add(1));
     }
-    let mut board = JobBoard::new(world, seed, Some(&hos));
+    let mut board =
+        JobBoard::new(world, seed, Some(&hos)).with_calendar_hours(dispatch_calendar_hours(ctx));
     let mut lever_note = String::new();
     let mut jobs: Option<Vec<Job>> = None;
     if let Some(cache) = cache.as_ref().and_then(Value::as_object) {

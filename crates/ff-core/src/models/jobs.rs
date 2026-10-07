@@ -151,6 +151,14 @@ pub struct Job {
     // have needed one). Spoken so the long number reads as the law, not
     // dispatcher generosity.
     pub deadline_covers_rest: bool,
+    pub seasonal_weight_limit: Option<SeasonalWeightLimit>,
+}
+
+/// Seasonal weight restriction recorded when a job is dispatched.
+#[derive(Debug, Clone, PartialEq)]
+pub struct SeasonalWeightLimit {
+    pub highway: String,
+    pub percent: u8,
 }
 
 /// The keyword arguments of `Job.describe`, each with its Python default.
@@ -203,6 +211,7 @@ impl Job {
             origin_spoken: String::new(),
             destination_spoken: String::new(),
             deadline_covers_rest: false,
+            seasonal_weight_limit: None,
         }
     }
 
@@ -269,6 +278,15 @@ impl Job {
         } else {
             format!(" {}", opts.trailer_note)
         };
+        let seasonal_weight =
+            self.seasonal_weight_limit
+                .as_ref()
+                .map_or_else(String::new, |limit| {
+                    format!(
+                        " Spring weight limits on the {}: axles held to {} percent of legal.",
+                        limit.highway, limit.percent
+                    )
+                });
         let pay = opts.display_pay.unwrap_or(self.pay);
         let pay_label = if opts.pay_label.is_empty() {
             "Pays"
@@ -286,7 +304,7 @@ impl Job {
             ". "
         };
         format!(
-            "{prefix}{} tons of {} {origin} {dest}. {distance}. {pay_label} {} dollars. Deadline {} hours{rest}Equipment: {}.{trailer}{preview}{market}{endorsement}",
+            "{prefix}{} tons of {} {origin} {dest}. {distance}. {pay_label} {} dollars. Deadline {} hours{rest}Equipment: {}.{trailer}{seasonal_weight}{preview}{market}{endorsement}",
             fmt_f(self.weight_tons, 0),
             self.spoken_cargo_label(),
             fmt_grouped(pay, 0),
@@ -494,6 +512,12 @@ pub fn job_payload(job: &Job) -> Map<String, Value> {
         "bobtail": job.bobtail,
         "assigned": job.assigned,
         "deadline_covers_rest": job.deadline_covers_rest,
+        "seasonal_weight_limit": job.seasonal_weight_limit.as_ref().map(|limit| {
+            json!({
+                "highway": limit.highway.as_str(),
+                "percent": limit.percent,
+            })
+        }),
     });
     match value {
         Value::Object(map) => map,
@@ -567,6 +591,17 @@ pub fn job_from_payload(data: &Map<String, Value>) -> Option<Job> {
     job.origin_spoken = str_or(data, "origin_spoken", "");
     job.destination_spoken = str_or(data, "destination_spoken", "");
     job.deadline_covers_rest = data.get("deadline_covers_rest").is_some_and(py_truthy);
+    job.seasonal_weight_limit = data
+        .get("seasonal_weight_limit")
+        .and_then(Value::as_object)
+        .and_then(|limit| {
+            let highway = limit.get("highway")?.as_str()?;
+            let percent = u8::try_from(limit.get("percent")?.as_u64()?).ok()?;
+            (1..=100).contains(&percent).then(|| SeasonalWeightLimit {
+                highway: highway.to_string(),
+                percent,
+            })
+        });
     Some(job)
 }
 
