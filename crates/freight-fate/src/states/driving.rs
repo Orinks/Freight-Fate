@@ -346,8 +346,14 @@ pub struct DrivingState {
     // speaks once per announced scale and never re-fires on a re-approach.
     pub weigh_station_reminder_key: String,
     // Real driving seconds since that reminder was spoken. A crossing
-    // before SCALE_REMINDER_REAL_LEAD_S of them is not judged a bypass.
+    // before SCALE_REMINDER_REAL_LEAD_S of them is not judged a bypass,
+    // but only when the game itself held that reminder back.
     pub weigh_station_reminder_age_s: f64,
+    // Open scales whose last reminder the game held back: the notice only
+    // latched inside the reminder window, or the cab was taken (a stop, a
+    // ramp, a hazard, a departure lane) while the truck was inside it. A
+    // reminder made late by the driver's own crawl or signal is not here.
+    pub scale_reminder_held_by_game: HashSet<String>,
     // A stop or a pause just ended: re-announce the open scale still ahead
     // once the cab is free. Holds the name of a scale just checked in at,
     // or an empty string when there is none.

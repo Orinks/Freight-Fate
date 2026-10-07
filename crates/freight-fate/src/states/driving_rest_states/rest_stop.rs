@@ -166,9 +166,17 @@ impl RestStopState {
             // scale its truck-stop script -- "no truck parking... Loyalty
             // program: Loyalty points: 0" -- at an open scale (owner
             // playtest, 2026-08-20).
+            //
+            // A closed scale's first row is its own name ("I-40 Weigh
+            // Station is closed"), so leading with the name as well read it
+            // twice in one breath (QA, 2026-10-07). The row says it once.
+            let row = self.current_text(ctx);
+            if row.starts_with(&self.stop.spoken_name()) {
+                parts.clear();
+            }
             parts.push("Inspection station.".to_string());
             parts.push(format!("It is {}.", clock_text(d.trip.local_hour())));
-            parts.push(self.current_text(ctx));
+            parts.push(row);
             ctx.say(&parts.join(" "));
             return;
         }
@@ -1194,6 +1202,21 @@ impl RestStopState {
     }
 
     fn inspect(&mut self, ctx: &mut GameContext) {
+        // Nobody is in a closed scale house: the row says so and nothing
+        // else happens. It used to run the check-in all the same -- marking
+        // the stop inspected, playing the notify tone and saving -- for a
+        // scale that settles nothing (QA, 2026-10-07). No time, no record.
+        let open = self
+            .driving
+            .read(|d| d.scale_is_open(&self.stop))
+            .unwrap_or(false);
+        if !open {
+            ctx.say(&format!(
+                "{} is closed. Pull back onto the highway.",
+                self.stop.spoken_name()
+            ));
+            return;
+        }
         let Some((text, waved)) = self.check_in(ctx) else {
             return;
         };
@@ -1217,25 +1240,14 @@ impl RestStopState {
 
     /// The scale check-in itself, settled and saved: the spoken result, and
     /// whether the lane waved the truck through.
+    ///
+    /// Open scales only: `inspect` answers a closed one before this runs,
+    /// and Back runs it only while `check_in_pending`, which is open-only.
     fn check_in(&mut self, ctx: &mut GameContext) -> Option<(String, bool)> {
         let stop = self.stop.clone();
         let result = self.driving.clone().with(ctx, |d, ctx| {
             d.stop_visit(&stop).inspected = true;
             ctx.audio.play("ui/notify");
-            // Nobody is in a closed scale house to wave anyone anywhere, so
-            // it costs nothing and goes on no record. It used to answer as
-            // an open one did -- "Officers wave you straight back onto the
-            // highway" -- which told a tester the scale he had been warned
-            // about was done, six miles short of it (log, 2026-10-07).
-            if !d.scale_is_open(&stop) {
-                return (
-                    format!(
-                        "{} is closed. Pull back onto the highway.",
-                        stop.spoken_name()
-                    ),
-                    false,
-                );
-            }
             // A valid decal is waved through on sight (CVSA Operational
             // Policy 5), unless the record is targeted.
             if d.decal_waves_through(ctx) {
