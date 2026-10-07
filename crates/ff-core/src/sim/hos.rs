@@ -193,6 +193,32 @@ pub fn fatigue_rate_per_min(night: bool) -> f64 {
     }
 }
 
+/// Fatigue points gained while awake for `minutes` of game time starting at
+/// `start_game_hours`. Uses [`fatigue_rate_per_min`] with the same day/night
+/// clock as driving, so sitting awake off duty matches the road model.
+pub fn awake_fatigue_gain(start_game_hours: f64, minutes: f64) -> f64 {
+    let minutes = if minutes.is_finite() {
+        minutes.max(0.0)
+    } else {
+        0.0
+    };
+    if minutes <= 0.0 {
+        return 0.0;
+    }
+    let whole = minutes.floor() as i64;
+    let mut gain = 0.0;
+    for i in 0..whole {
+        let hour = start_game_hours + (i as f64) / 60.0;
+        gain += fatigue_rate_per_min(is_night(hour));
+    }
+    let frac = minutes - whole as f64;
+    if frac > 0.0 {
+        let hour = start_game_hours + (whole as f64) / 60.0;
+        gain += fatigue_rate_per_min(is_night(hour)) * frac;
+    }
+    gain
+}
+
 /// Scale factor for hazard reaction windows: 1.0 fresh, 0.6 exhausted.
 pub fn reaction_window_mult(fatigue: f64) -> f64 {
     if fatigue <= FATIGUE_DROWSY {

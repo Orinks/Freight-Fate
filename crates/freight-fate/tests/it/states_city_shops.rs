@@ -19,6 +19,7 @@ use ff_core::models::carrier_fleet::assigned_truck_key;
 use ff_core::models::profile::Profile;
 use ff_core::models::trailers::{trailer_type, DEFAULT_TRAILER_PROGRAMS};
 use ff_core::models::trucks::truck_model_or_panic;
+use ff_core::sim::hos;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::Key;
 use freight_fate::states::city::{
@@ -871,6 +872,60 @@ fn endorsement_courses_price_each_unearned_endorsement() {
     assert!(
         help.contains("unlocks fresh food and refrigerated goods"),
         "{help}"
+    );
+}
+
+#[test]
+fn course_hours_add_awake_fatigue_and_long_courses_do_not_wipe_it() {
+    // GitHub #314: courses booked off-duty HOS time but never added awake
+    // fatigue, and a 10h+ course zeroed fatigue as if class were sleep.
+    let mut app = TestApp::new();
+    career(&mut app, "Course Fatigue", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        p.set_money(50_000.0);
+        p.fatigue = 10.0;
+        p.game_hours = 8.0; // daytime stretch for a clean 8 h day-rate gain
+    }
+    app.push_state(EndorsementCourseState::new());
+    select::<EndorsementCourseState>(&mut app, "Flatbed securement certificate course:");
+    let after_8 = profile(&app).fatigue;
+    let expected_8 = (10.0 + hos::awake_fatigue_gain(8.0, 8.0 * 60.0)).min(100.0);
+    assert!(
+        (after_8 - expected_8).abs() < 1e-9,
+        "8 h course: got {after_8}, want {expected_8}"
+    );
+    assert!(
+        after_8 > 10.0,
+        "8 h course must raise fatigue, got {after_8}"
+    );
+
+    // LCV is the 24 h course. Keep the HOS off-duty treatment; fatigue must
+    // rise (and clamp), never reset to zero.
+    {
+        let p = profile_mut(&mut app);
+        p.fatigue = 40.0;
+        p.game_hours = 8.0;
+        p.career.xp = LEVEL_XP[19]; // level 20
+        p.career
+            .purchased_endorsements
+            .push("doubles_triples".to_string());
+        p.set_money(50_000.0);
+    }
+    // Rebuild the menu against the new eligibility.
+    app.pop_state();
+    app.push_state(EndorsementCourseState::new());
+    select::<EndorsementCourseState>(&mut app, "Lcv certificate course:");
+    let after_24 = profile(&app).fatigue;
+    let expected_24 = (40.0 + hos::awake_fatigue_gain(8.0, 24.0 * 60.0)).min(100.0);
+    assert!(
+        (after_24 - expected_24).abs() < 1e-9,
+        "24 h course: got {after_24}, want {expected_24}"
+    );
+    assert_ne!(after_24, 0.0, "24 h course must not wipe fatigue to zero");
+    assert!(
+        after_24 > 40.0,
+        "24 h course must raise fatigue, got {after_24}"
     );
 }
 
