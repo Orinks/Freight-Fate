@@ -22,11 +22,11 @@
 //! | `park_away_from_stops(driving, ...)` | the road is left with the one stop BEHIND the truck, which is the condition that helper hunts for |
 
 use ff_core::models::enforcement;
-use ff_core::sim::hos;
+use ff_core::sim::hos::{self, HosRules};
 use ff_core::sim::trip_models::{RoadStop, TripEvent, TripEventData, TripEventKind};
 use ff_core::sim::weather::WeatherKind;
 use freight_fate::controller::ControllerButton;
-use freight_fate::playtest::harness::{PlaytestHarness, StartDelivery};
+use freight_fate::playtest::harness::{PlaytestHarness, RouteSetup, StartDelivery};
 use freight_fate::states::base::{InputEvent, Key, Menu};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::HAZARD_MIN_REACTION_S;
@@ -187,6 +187,88 @@ fn press_t(harness: &mut PlaytestHarness) {
 fn hours_frame(harness: &mut PlaytestHarness, dt: f64) {
     harness.advance_clock(dt);
     harness.with_drive(move |d, ctx| d.update_hours_and_fatigue(ctx, dt));
+}
+
+fn whitehorse_tok_drive() -> PlaytestHarness {
+    let mut harness = PlaytestHarness::new();
+    harness.start_route(
+        "whitehorse_yt_ca",
+        "tok_ak_us",
+        RouteSetup::seeded(2202).cities(&["whitehorse_yt_ca", "tok_ak_us"]),
+    );
+    harness.with_drive(|drive, _| {
+        drive.departure_checked = true;
+        drive.trip.position_mi = 297.4;
+    });
+    harness.clear_speech();
+    harness
+}
+
+#[test]
+fn hos_jurisdiction_switches_at_alcan_checkpoint_and_announces_once() {
+    let mut harness = whitehorse_tok_drive();
+    harness.with_drive(|drive, ctx| drive.update_hours_and_fatigue(ctx, 0.0));
+    assert_eq!(
+        harness.app.ctx.profile.as_ref().unwrap().hos.rules,
+        HosRules::CanadaNorth60
+    );
+    assert!(harness
+        .app
+        .event_calls()
+        .iter()
+        .all(|(text, _)| !text.contains("hours rules")));
+
+    harness.with_drive(|drive, ctx| {
+        drive.trip.position_mi = 297.6;
+        drive.update_hours_and_fatigue(ctx, 0.0);
+        drive.update_hours_and_fatigue(ctx, 0.0);
+    });
+    assert_eq!(
+        harness.app.ctx.profile.as_ref().unwrap().hos.rules,
+        HosRules::Alaska
+    );
+    let announcements: Vec<_> = harness
+        .app
+        .event_calls()
+        .into_iter()
+        .filter(|(text, _)| {
+            text == "Alaska hours rules now apply: up to 15 hours of driving and 20 on duty \
+                     after 10 hours off, with no 30-minute break."
+        })
+        .collect();
+    assert_eq!(
+        announcements,
+        vec![(
+            "Alaska hours rules now apply: up to 15 hours of driving and 20 on duty \
+         after 10 hours off, with no 30-minute break."
+                .to_string(),
+            false,
+        )]
+    );
+}
+
+#[test]
+fn hos_jurisdiction_switches_silently_when_not_enforced() {
+    let mut harness = whitehorse_tok_drive();
+    harness.app.ctx.settings.hos_mode = "off".to_string();
+    harness.with_drive(|drive, ctx| drive.update_hours_and_fatigue(ctx, 0.0));
+    assert_eq!(
+        harness.app.ctx.profile.as_ref().unwrap().hos.rules,
+        HosRules::CanadaNorth60
+    );
+    harness.with_drive(|drive, ctx| {
+        drive.trip.position_mi = 297.6;
+        drive.update_hours_and_fatigue(ctx, 0.0);
+    });
+    assert_eq!(
+        harness.app.ctx.profile.as_ref().unwrap().hos.rules,
+        HosRules::Alaska
+    );
+    assert!(harness
+        .app
+        .event_calls()
+        .iter()
+        .all(|(text, _)| !text.contains("hours rules now apply")));
 }
 
 // -- the warnings the drive speaks ---------------------------------------------------

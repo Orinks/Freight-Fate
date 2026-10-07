@@ -193,6 +193,7 @@ pub struct DrivingState {
     pub hos_stop_warning_pending: Option<String>,
     pub hos_plan_hint_check_key: Option<String>,
     pub hos_plan_hint_pending: Option<String>,
+    pub hos_jurisdiction_initialized: bool,
     pub enforcement_events: HashSet<String>,
     pub out_of_service_count: i64,
     pub drowsy_said: bool,
