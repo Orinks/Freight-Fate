@@ -2687,6 +2687,12 @@ here 2026-09-25. Details stay in the linked dated sections.
 
 [Read this section in the detailed roadmap](docs/roadmap-details.md#career-dispatch-and-business).
 
+- [x] **Offline call dispatch groundwork.** A stopped driver can send a
+      structured delay, hours, road, truck or load request and receive an
+      immediate trip-specific local answer.
+- [ ] **Route calls to a Dispatch player when available.** Deliver the same
+      structured request asynchronously, with a short wait and the local
+      dispatcher as the automatic fallback.
 - [ ] **Partial: reopen and finish driving school.** The sandboxed
       practice-road foundation and one Rolling Basics lesson exist, with
       profile restoration, stage progression, and manual-start tests in
