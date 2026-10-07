@@ -6,6 +6,8 @@
 
 - **The last weigh station warning now leaves time to take the exit in every driving mode.** A closed scale says it is closed.
 
+- **Driving into Memphis from St. Louis no longer passes a weigh station that is not there.** The West Memphis scale is westbound I-40 only.
+
 ## 1.9.3 - 2026-10-06
 
 ### Added
