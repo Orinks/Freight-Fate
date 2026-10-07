@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Sitting through a training course now tires you.** A day-long course no longer wipes fatigue to zero.
+
 ## 1.9.3 - 2026-10-06
 
 ### Added
@@ -9,8 +13,6 @@
 - **LWorks Radio is on the dial.** Upbeat hits from the nineties and two thousands, with an eighties lunch hour, wherever you drive.
 
 ### Fixed
-
-- **Sitting through a training course now tires you.** A day-long course no longer wipes fatigue to zero.
 
 - **The load you sleep for after an hours warning stays on the dispatch board.** It used to vanish when the rest ran past midnight.
 
