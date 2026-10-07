@@ -45815,8 +45815,8 @@
             "at_mi": 2.3,
             "from_state": "Tennessee",
             "state": "Arkansas",
-            "place": "Tennessee-Arkansas line on I-55",
-            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
+            "place": "Tennessee-Arkansas line on I-40",
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/. Highway read 2026-10-07 from OpenStreetMap way refs (Overpass): this leg leaves Memphis on I-40 over the Hernando de Soto Bridge (way 1523781654, ref I 40), and the mainline stays ref I 40 alone until the I-55 junction at exit 279A west of here, where the I 40;I 55 concurrency begins. Was labelled I-55, the leg's own highway."
           },
           {
             "at_mi": 74.7,
@@ -45836,8 +45836,8 @@
               "Weigh Station"
             ],
             "via": "",
-            "highway": "I-55",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "highway": "I-40",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ Highway read 2026-10-07 from OpenStreetMap way refs (Overpass): this leg leaves Memphis on I-40 over the Hernando de Soto Bridge (way 1523781654, ref I 40), and the mainline stays ref I 40 alone until the I-55 junction at exit 279A west of here, where the I 40;I 55 concurrency begins. Was labelled I-55, the leg's own highway.",
             "ramp_advisory_forward": 25.0,
             "ramp_advisory_backward": 25.0,
             "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
@@ -45866,8 +45866,8 @@
             "name": "",
             "destinations": [],
             "via": "",
-            "highway": "I-55",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "highway": "I-40",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ Highway read 2026-10-07 from OpenStreetMap way refs (Overpass): this leg leaves Memphis on I-40 over the Hernando de Soto Bridge (way 1523781654, ref I 40), and the mainline stays ref I 40 alone until the I-55 junction at exit 279A west of here, where the I 40;I 55 concurrency begins. Was labelled I-55, the leg's own highway.",
             "ramp_advisory_forward": 25.0,
             "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
             "ramp_control": "stop",

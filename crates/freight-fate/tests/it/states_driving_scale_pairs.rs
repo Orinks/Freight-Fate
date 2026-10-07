@@ -197,14 +197,17 @@ fn st_louis_memphis_little_rock() -> Rig {
 }
 
 fn scales_near_memphis(rig: &Rig) -> Vec<(String, f64)> {
-    rig.drive
+    let mut scales: Vec<(String, f64)> = rig
+        .drive
         .trip
         .stops
         .iter()
         .filter(|stop| stop.stop_type == "weigh_station")
         .filter(|stop| (stop.at_mi - ST_LOUIS_TO_MEMPHIS_MI).abs() < 15.0)
         .map(|stop| (stop.name.clone(), stop.at_mi))
-        .collect()
+        .collect();
+    scales.sort_by(|a, b| a.1.total_cmp(&b.1));
+    scales
 }
 
 #[test]
@@ -222,6 +225,60 @@ fn st_louis_to_little_rock_through_memphis_has_one_scale_at_west_memphis() {
     assert!(
         (at_mi - (ST_LOUIS_TO_MEMPHIS_MI + 2.4)).abs() < 0.05,
         "the scale is 2.4 miles past Memphis, westbound: {at_mi}"
+    );
+}
+
+/// A drive on the real road between `cities`, as the rig sets one up.
+fn real_route(cities: &[&str]) -> Rig {
+    let mut rig = ten_times_rig();
+    let route = rig
+        .app
+        .ctx
+        .world
+        .route_from_cities(cities)
+        .expect("the route is in the world");
+    let job = Job::new(
+        CARGO_CATALOG
+            .get("general")
+            .expect("the general cargo type"),
+        12.0,
+        "Origin",
+        "company yard",
+        "Destination",
+        route.miles(),
+        1000.0,
+        12.0,
+    );
+    let drive = DrivingState::new(
+        &mut rig.app.ctx,
+        job,
+        route,
+        Some(1),
+        DRIVE_PHASE_DELIVERY,
+        None,
+    );
+    *rig.drive = drive;
+    rig
+}
+
+#[test]
+fn st_louis_to_memphis_crosses_into_tennessee_on_i_40() {
+    // The last miles into Memphis are I-40 over the Hernando de Soto
+    // Bridge; I-55 has already left at the West Memphis junction. The state
+    // line cue said "Tennessee-Arkansas line on I-55" (QA, 2026-10-07).
+    let rig = real_route(&["st_louis_mo_us", "memphis_tn_us"]);
+    let total = rig.drive.trip.total_miles();
+    let into_tennessee: Vec<String> = rig
+        .drive
+        .trip
+        .navigation_cues
+        .iter()
+        .filter(|cue| cue.kind == "state_crossing" && cue.at_mi > total - 5.0)
+        .map(|cue| cue.near_text.clone())
+        .collect();
+    assert_eq!(
+        into_tennessee,
+        vec!["Crossing into Tennessee near Tennessee-Arkansas line on I-40.".to_string()]
     );
 }
 

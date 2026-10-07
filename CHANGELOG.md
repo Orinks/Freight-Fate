@@ -16,6 +16,8 @@
 
 - **Arriving at a closed weigh station says its name once.**
 
+- **The state line on the St. Louis to Memphis drive now says I-40, over the Hernando de Soto Bridge.**
+
 ## 1.9.3 - 2026-10-06
 
 ### Added
