@@ -8231,6 +8231,184 @@
           "source_note": "Wasilla AK Parks Highway pass-through stand-in. Not a Mat-Su job-board market \u2014 Palmer remains the sole Mat-Su market. Holiday / Three Bears / Fishers Big Lake lots remain unverified for diesel AND tractor parking (ALCAN Phase B plan). Do not invent parking capacity. No fuel pin."
         }
       ]
+    },
+    "delta_junction_ak_us": {
+      "spoken_city": "Delta Junction",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 64.0373478,
+      "lon": -145.732157,
+      "source_note": "Place name and centroid coordinates read from local Geofabrik Alaska OpenStreetMap place feature 150916769, accessed 2026-10-07; state/country are read as Alaska, US, and the region is assigned from the game's pacific_northwest map-region classification.",
+      "locations": [
+        {
+          "name": "Three Bears Delta Junction",
+          "type": "travel_center",
+          "lat": 64.0409252,
+          "lon": -145.7336269,
+          "source_note": "Three Bears operator page https://threebearsalaska.com/stores/three-bears-delta-junction-2/ confirms public diesel and 24/7 pumps at 2340 Nistler Road. Local Geofabrik Alaska OSM fuel feature 479382014 is nearby but does not tag diesel; Overture did not identify the exact station. Parking/capacity are not verified and are not claimed; no cargo roles."
+        }
+      ]
+    },
+    "valdez_ak_us": {
+      "spoken_city": "Valdez",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 61.1299396,
+      "lon": -146.349363,
+      "source_note": "Place name and centroid coordinates read from local Geofabrik Alaska OpenStreetMap place feature 150918679, accessed 2026-10-07; state/country are read as Alaska, US, and the region is assigned from the game's pacific_northwest map-region classification.",
+      "locations": [
+        {
+          "name": "Ryan J. Sontag Valdez Container Terminal",
+          "type": "terminal",
+          "lat": 61.1271,
+          "lon": -146.2972,
+          "ships": [
+            "container",
+            "general",
+            "construction"
+          ],
+          "receives": [
+            "container",
+            "general",
+            "construction"
+          ],
+          "source_note": "City of Valdez terminal page https://www.valdezak.gov/296/Ryan-J-Sontag-Valdez-Container-Terminal and its official terminal brochure (1460 Container Terminal Road; published coordinates 61.1271,-146.2972; floating freight pier). The local Geofabrik Alaska OSM extract identifies terminal relation 11301693; Overture did not identify the exact terminal. Container, general, and construction freight roles follow the official terminal description."
+        }
+      ]
+    },
+    "seward_ak_us": {
+      "spoken_city": "Seward",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 60.1013952,
+      "lon": -149.4404281,
+      "source_note": "Place name and centroid coordinates read from local Geofabrik Alaska OpenStreetMap place feature 150921353, accessed 2026-10-07; state/country are read as Alaska, US, and the region is assigned from the game's pacific_northwest map-region classification.",
+      "locations": [
+        {
+          "name": "Alaska Railroad Seward Freight Dock",
+          "type": "terminal",
+          "lat": 60.1215,
+          "lon": -149.4261,
+          "ships": [
+            "general"
+          ],
+          "receives": [
+            "general"
+          ],
+          "source_note": "Alaska Railroad 2024 Seward Freight Dock Expansion fact sheet https://www.alaskarailroad.com/sites/default/files/FCTSHT_2024_Seward_Freight_Dock_Expansion_FactSheet.pdf documents cargo staging/transfer and roll-on/roll-off freight operations. The berth location is matched to local Geofabrik Alaska OSM freight-dock track features 1157424039 and 1157424040; Overture did not return an exact dock. General freight roles only."
+        },
+        {
+          "name": "Essential One Seward",
+          "type": "travel_center",
+          "lat": 60.1248351,
+          "lon": -149.4377273,
+          "source_note": "Shoreside Petroleum operator page https://www.shoresidepetroleum.com/fuel-stations/essential-one-seward confirms gasoline and diesel at 1801 Seward Highway. Local Geofabrik Alaska OSM way 1306965054 matches the diesel/gasoline station and large-vehicle access; Overture did not return an exact fuel point. Parking/capacity are not verified and are not claimed; no cargo roles."
+        }
+      ]
+    },
+    "soldotna_ak_us": {
+      "spoken_city": "Soldotna",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 60.4847228,
+      "lon": -151.065349,
+      "source_note": "Place name and centroid coordinates read from local Geofabrik Alaska OpenStreetMap place feature 150919792, accessed 2026-10-07; state/country are read as Alaska, US, and the region is assigned from the game's pacific_northwest map-region classification.",
+      "locations": [
+        {
+          "name": "Essential One Soldotna",
+          "type": "travel_center",
+          "lat": 60.4910507,
+          "lon": -151.1583708,
+          "source_note": "Shoreside Petroleum operator page https://www.shoresidepetroleum.com/fuel-stations/essential-one-soldotna confirms gasoline and diesel at 43442 K Beach Road; coordinates are read from the operator page\u2019s embedded map. Local OSM and the filtered Overture search did not identify the exact fuel point. Parking/capacity are not verified and are not claimed; no cargo roles."
+        }
+      ]
+    },
+    "kenai_ak_us": {
+      "spoken_city": "Kenai",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 60.5544444,
+      "lon": -151.258333,
+      "source_note": "Place name and centroid coordinates read from local Geofabrik Alaska OpenStreetMap place feature 150920412, accessed 2026-10-07; state/country are read as Alaska, US, and the region is assigned from the game's pacific_northwest map-region classification.",
+      "locations": [
+        {
+          "name": "Carlile Kenai Shipping Terminal",
+          "type": "cross_dock",
+          "lat": 60.54652708,
+          "lon": -151.21596948,
+          "ships": [
+            "general"
+          ],
+          "receives": [
+            "general"
+          ],
+          "source_note": "Carlile operator page https://www.carlile.biz/contact-and-terminals/kenai/ confirms 1216 Bridge Access Road and freight receiving, storage, distribution, FTL and LTL service. Local Geofabrik Alaska OSM building way 424614663 matches the address/name; Overture also returned Carlile at that address. General freight only; no unsupported cargo classes inferred."
+        }
+      ]
+    },
+    "homer_ak_us": {
+      "spoken_city": "Homer",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 59.6454064,
+      "lon": -151.5445643,
+      "source_note": "Place name and centroid coordinates read from local Geofabrik Alaska OpenStreetMap place feature 150917881, accessed 2026-10-07; state/country are read as Alaska, US, and the region is assigned from the game's pacific_northwest map-region classification.",
+      "locations": [
+        {
+          "name": "Port of Homer Deep Water Freight Dock",
+          "type": "terminal",
+          "lat": 59.6069444,
+          "lon": -151.4277778,
+          "ships": [
+            "general"
+          ],
+          "receives": [
+            "general"
+          ],
+          "source_note": "City of Homer page https://www.cityofhomer-ak.gov/port/deep-water-dock-scheduling identifies the Deep Water Dock as the Freight Dock at 4667 Freight Dock Road and publishes dockage, berth, depth, and crane details; official city dock material gives 59\u00b036\u203225\u2033N, 151\u00b025\u203240\u2033W. Local OSM contains Freight Dock Road but no exact berth feature; Overture returned Port & Harbor records but no exact freight dock. General freight only, from the official Freight Dock designation; no commodity classes inferred."
+        },
+        {
+          "name": "Essential One Homer",
+          "type": "travel_center",
+          "lat": 59.6426074,
+          "lon": -151.5376601,
+          "source_note": "Shoreside Petroleum operator page https://www.shoresidepetroleum.com/fuel-stations/essential-one-homer confirms gasoline and diesel at 94 Sterling Highway; coordinates are read from the operator page\u2019s embedded map. Local OSM and the filtered Overture search did not identify the exact fuel point. Parking/capacity are not verified and are not claimed; no cargo roles."
+        }
+      ]
+    },
+    "coldfoot_ak_us": {
+      "spoken_city": "Coldfoot",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 67.2533607,
+      "lon": -150.1800263,
+      "source_note": "Place name and centroid coordinates read from local Geofabrik Alaska OpenStreetMap place feature 150917268, accessed 2026-10-07; state/country are read as Alaska, US, and the region is assigned from the game's pacific_northwest map-region classification.",
+      "locations": [
+        {
+          "name": "Coldfoot Camp Fuel",
+          "type": "travel_center",
+          "lat": 67.2516115,
+          "lon": -150.1779408,
+          "source_note": "Coldfoot Camp amenities page https://www.coldfootcamp.com/amenities confirms gasoline and diesel 24/7. Local Geofabrik Alaska OSM fuel node 410734041 is tagged for diesel/gasoline and large-vehicle access; Overture found the camp nearby, not the exact pump. Parking/capacity are not verified and are not claimed; no cargo roles."
+        }
+      ]
+    },
+    "deadhorse_ak_us": {
+      "spoken_city": "Deadhorse",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 70.1999496,
+      "lon": -148.461816,
+      "source_note": "Place name and centroid coordinates read from local Geofabrik Alaska OpenStreetMap place feature 150918086, accessed 2026-10-07; state/country are read as Alaska, US, and the region is assigned from the game's pacific_northwest map-region classification.",
+      "locations": []
     }
   }
 }

@@ -21,11 +21,22 @@ MaxspeedPoint = tuple[float, float, float, bool, str]
 MaxspeedGrid = dict[tuple[int, int], list[MaxspeedPoint]]
 MAXSPEED_INDEX_CACHE_VERSION = 1
 OSM_REGION_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
-MAXSPEED_SOURCE = (
-    "OpenStreetMap maxspeed tags on the corridor highway ways, read from a local "
-    f"Geofabrik extract and snapped to the checked-in route geometry archive, accessed "
-    f"{ACCESSED_DATE}; maxspeed:hgv preferred where tagged. "
-    "https://www.openstreetmap.org/"
+
+
+def _maxspeed_source(geometry_source: str) -> str:
+    return (
+        "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway "
+        "ways in a local Geofabrik extract; route matching uses "
+        f"{geometry_source}; accessed {ACCESSED_DATE}; maxspeed:hgv is preferred "
+        "where tagged. https://www.openstreetmap.org/"
+    )
+
+
+MAXSPEED_SOURCE = _maxspeed_source("route geometry")
+ALASKA_UNPOSTED_SPEED = (
+    55.0,
+    "Assumed 55 mph where no nearby posted OSM maxspeed sample exists in Alaska, "
+    "under 13 AAC 02.275.",
 )
 
 
@@ -331,6 +342,8 @@ def assemble_maxspeed(
     geom: list[tuple[float, float, float]],
     leg_miles: float,
     highway: str,
+    source: str = MAXSPEED_SOURCE,
+    fallback: tuple[float, str] | None = None,
 ) -> list[dict[str, Any]]:
     """Build a step-function speed profile for a leg from snapped maxspeed ways.
 
@@ -371,7 +384,7 @@ def assemble_maxspeed(
             if best_d * 1609.34 <= MAXSPEED_CORRIDOR_M:
                 on_shield = bool(shield) and ref_digits == shield
                 points.append((best_cum / total * leg_miles, mph, hgv, on_shield))
-    if not points:
+    if not points and fallback is None:
         return []
 
     def choose(cands: list[tuple[float, float, bool, bool]]) -> tuple[float, bool] | None:
@@ -386,13 +399,21 @@ def assemble_maxspeed(
         return max(c[1] for c in chosen), bool(hgv_pool)
 
     half = MAXSPEED_SAMPLE_STRIDE_MI
-    picked: list[tuple[float, float, bool]] = []  # (at_mi, mph, hgv)
+    picked: list[tuple[float, float, bool, str]] = []
     mile = 0.0
     while mile <= leg_miles + 1e-9:
         window = [p for p in points if abs(p[0] - mile) <= half]
         choice = choose(window)
         if choice is not None:
-            picked.append((round(min(leg_miles, max(0.0, mile)), 1), choice[0], choice[1]))
+            mph, hgv = choice
+            point_source = source
+        elif fallback is not None:
+            mph, point_source = fallback
+            hgv = False
+        else:
+            mile += MAXSPEED_SAMPLE_STRIDE_MI
+            continue
+        picked.append((round(min(leg_miles, max(0.0, mile)), 1), mph, hgv, point_source))
         mile += MAXSPEED_SAMPLE_STRIDE_MI
 
     # OSM tags a limit (especially maxspeed:hgv) on some ways but not their
@@ -401,13 +422,18 @@ def assemble_maxspeed(
     # lone blip whose neighbors agree before collapsing into the step function.
     smoothed = [s[1:] for s in picked]
     for i in range(1, len(smoothed) - 1):
-        if smoothed[i] != smoothed[i - 1] and smoothed[i - 1] == smoothed[i + 1]:
+        if smoothed[i][:2] != smoothed[i - 1][:2] and smoothed[i - 1][:2] == smoothed[i + 1][:2]:
             smoothed[i] = smoothed[i - 1]
 
     profile: list[dict[str, Any]] = []
-    for (at_mi, _, _), (mph, hgv) in zip(picked, smoothed, strict=True):
-        if not (profile and profile[-1]["mph"] == mph and profile[-1]["hgv"] == hgv):
-            profile.append({"at_mi": at_mi, "mph": mph, "source": MAXSPEED_SOURCE, "hgv": hgv})
+    for (at_mi, _, _, _), (mph, hgv, point_source) in zip(picked, smoothed, strict=True):
+        if not (
+            profile
+            and profile[-1]["mph"] == mph
+            and profile[-1]["hgv"] == hgv
+            and profile[-1]["source"] == point_source
+        ):
+            profile.append({"at_mi": at_mi, "mph": mph, "source": point_source, "hgv": hgv})
     return profile
 
 
@@ -439,27 +465,37 @@ def _interpolated_geometry(
     return out
 
 
-def leg_corridor_geometry(
+def leg_corridor_geometry_with_source(
     leg: dict[str, Any],
     rate_limit: float,
-) -> list[tuple[float, float, float]] | None:
+) -> tuple[list[tuple[float, float, float]] | None, str]:
     """The dense corridor polyline a builder should match features against.
 
     The archived polyline first: it IS the road the leg drives, at full curve
     fidelity, and it is the only source that stays right after a reroute. A
     cached OSRM response is keyed to the route that was baked, so on a
     rerouted leg it is either a miss or -- worse -- a confident description of
-    the old road. Interpolating between 25-mile route points is the last
-    resort: it cuts every corner, and a feature the chord swings away from is
-    simply not found.
+    the old road. Interpolating between stored route points is the last resort:
+    it cuts corners, and a feature the chord swings away from is not found.
     """
     archived = lg.corridor_geometry(leg)
     if archived:
-        return archived
+        return archived, "the checked-in corridor geometry archive"
     route_points = list(leg.get("corridor", {}).get("route_points", ()))
-    return _osrm_geometry(route_points, rate_limit, cached_only=True) or _interpolated_geometry(
-        route_points
+    osrm = _osrm_geometry(route_points, rate_limit, cached_only=True)
+    if osrm:
+        return osrm, "cached OSRM route geometry"
+    return (
+        _interpolated_geometry(route_points),
+        "linear interpolation of the stored route_points from loaded-semi Valhalla geometry",
     )
+
+
+def leg_corridor_geometry(
+    leg: dict[str, Any],
+    rate_limit: float,
+) -> list[tuple[float, float, float]] | None:
+    return leg_corridor_geometry_with_source(leg, rate_limit)[0]
 
 
 def bake_maxspeed_for_leg(
@@ -467,10 +503,23 @@ def bake_maxspeed_for_leg(
     grid: MaxspeedGrid,
     rate_limit: float,
 ) -> list[dict[str, Any]]:
-    geom = leg_corridor_geometry(leg, rate_limit)
+    geom, geometry_source = leg_corridor_geometry_with_source(leg, rate_limit)
     if not geom:
         return []
-    return assemble_maxspeed(grid, geom, float(leg["miles"]), str(leg.get("highway", "")))
+    state_miles = leg.get("corridor", {}).get("state_miles", ())
+    fallback = (
+        ALASKA_UNPOSTED_SPEED
+        if any(entry.get("state") == "Alaska" for entry in state_miles)
+        else None
+    )
+    return assemble_maxspeed(
+        grid,
+        geom,
+        float(leg["miles"]),
+        str(leg.get("highway", "")),
+        source=_maxspeed_source(geometry_source),
+        fallback=fallback,
+    )
 
 
 def run_maxspeed(data: dict[str, Any], args: argparse.Namespace) -> int:
