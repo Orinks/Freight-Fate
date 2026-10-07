@@ -53,7 +53,7 @@ use crate::states::main_menu::MainMenuState;
 pub const PICKUP_CHECK_IN_MIN: f64 = 15.0;
 pub const PICKUP_LOADING_MIN: f64 = 60.0;
 pub const SEASONAL_WEIGHT_REROUTE_NOTE: &str =
-    "Routes where spring weight limits would put this load over are not offered.";
+    "Routes where spring weight limits would make this load overweight are not offered.";
 pub const PICKUP_LOADING_WAIT_S: f64 = 1.5;
 
 /// Whether this job's pickup facility is still in the world data.

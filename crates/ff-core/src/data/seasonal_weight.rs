@@ -7,8 +7,9 @@
 //! these 2026 month/day dates.
 //!
 //! Not modeled: Anchorage/Mat-Su area-wide limits on unlisted local roads
-//! (there are no local streets in the game), the LCV drive-axle provision
-//! (there are no 90-foot LCVs in Alaska), and the seven-day en-route
+//! (there are no local streets in the game), the drive-axle provision for
+//! approved longer combination vehicles (the notices name approved LCVs, but
+//! the game does not model approved Alaska LCVs), and the seven-day en-route
 //! exception. Loads dispatched before a window are approximated as not
 //! re-checked.
 

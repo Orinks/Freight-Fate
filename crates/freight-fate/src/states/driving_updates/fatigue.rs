@@ -35,11 +35,13 @@ impl DrivingState {
                 }
                 HosRules::CanadaSouth60 => {
                     "Canadian hours rules now apply: up to 13 hours of driving and 14 on duty \
-                     after 8 hours off, and no driving 16 hours after that rest."
+                     after 8 hours off, and no driving once 16 hours have passed since that \
+                     break."
                 }
                 HosRules::CanadaNorth60 => {
-                    "North of 60, Yukon hours rules apply: up to 15 hours of driving and 18 on \
-                     duty after 8 hours off, and no driving 20 hours after that rest."
+                    "Canadian north-of-60 hours rules now apply: up to 15 hours of driving and \
+                     18 on duty after 8 hours off, and no driving once 20 hours have passed \
+                     since that break."
                 }
             };
             ctx.say_event_with(
