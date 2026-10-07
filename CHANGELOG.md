@@ -10,6 +10,8 @@
 
 - **Driving into Memphis from St. Louis no longer passes a weigh station that is not there.** The West Memphis scale is westbound I-40 only.
 
+- **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now says it waits until you stop.
+
 - **Creeping up to an open scale, then speeding past, no longer dodges the bypass charge.** Only a warning the game delayed excuses you.
 
 - **A closed weigh station's check-in just says it is closed.** It no longer chimes, saves, or counts as an inspection.

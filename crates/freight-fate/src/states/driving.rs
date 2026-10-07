@@ -860,6 +860,9 @@ pub struct DrivingState {
     // than the traffic it joined. Keep the low-speed merge handoff on the
     // real-time clock until it can safely become ordinary highway driving.
     pub departure_merge_recovery: bool,
+    /// A waiting pace change, the merge handoff's bound and the clock
+    /// trace (`driving_updates::pacing`).
+    pub clock_pacing: crate::states::driving_updates::pacing::ClockPacing,
     // Lanes on our side last tick, so a road that narrows under the truck
     // can be told apart from a driver who steered into the cones.
     pub lane_count_seen: Option<i64>,
