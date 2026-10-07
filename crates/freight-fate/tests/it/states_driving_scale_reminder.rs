@@ -360,6 +360,80 @@ fn crawling_up_to_the_scale_then_crossing_at_speed_is_still_judged() {
 }
 
 #[test]
+fn a_hazard_after_the_reminder_excuses_the_crossing_unless_the_driver_crawled_first() {
+    // QA (2026-10-07): the reminder spoke half a mile out, a hazard held the
+    // cab from 0.48 to 0.15 of a mile, and the crossing was charged -- the
+    // hazard ate most of the real seconds the reminder promised. A reminder
+    // the driver's own crawl made late stays theirs, hazard or not.
+    for (crawl_first, charged) in [(false, false), (true, true)] {
+        let mut rig = ten_times_rig();
+        let (_closed, open) = closed_then_open(&mut rig.drive);
+        let key = rig.drive.weigh_station_key(&open);
+        rig.prepare(61.0, None);
+        rig.drive.trip.position_mi = open.at_mi - 3.0;
+        rig.drive.enforcement_prev_mi = open.at_mi - 3.0;
+        let reminder = "Signal for the scale exit.";
+
+        hold_for(&mut rig, 61.0, open.at_mi, |rig| {
+            rig.drive.trip.position_mi >= open.at_mi - 0.9
+        });
+        assert_eq!(rig.said(reminder), 0, "{:?}", rig.transcript());
+        let hazard_from = if crawl_first {
+            hold_for(&mut rig, 14.0, open.at_mi, |rig| {
+                rig.drive.trip.position_mi >= open.at_mi - 0.3
+            });
+            assert_eq!(rig.said(reminder), 0, "{:?}", rig.transcript());
+            0.28
+        } else {
+            0.48
+        };
+        hold_for(&mut rig, 61.0, open.at_mi, |rig| {
+            rig.drive.trip.position_mi >= open.at_mi - hazard_from
+        });
+        assert_eq!(
+            rig.said(reminder),
+            1,
+            "crawl first {crawl_first}: {:?}",
+            rig.transcript()
+        );
+        assert!(!rig.drive.scale_reminder_held_by_game.contains(&key));
+
+        // The hazard holds the cab to 0.15 of a mile, then the driver, who
+        // never touches the exit, crosses at road speed.
+        let mut crossed = false;
+        for _ in 0..20_000 {
+            let left = open.at_mi - rig.drive.trip.position_mi;
+            rig.drive.hazard_deadline = (left > 0.15).then_some(60.0);
+            rig.drive.trip.truck.velocity_mps = mph_to_mps(61.0);
+            let before = rig.drive.trip.position_mi;
+            rig.step(1, DT, None);
+            crossed |= before < open.at_mi && rig.drive.trip.position_mi >= open.at_mi;
+            if rig.drive.pull_over.is_some() || rig.drive.trip.position_mi > open.at_mi + 0.3 {
+                break;
+            }
+        }
+        assert!(crossed, "crawl first {crawl_first}: the truck crossed");
+        assert!(rig.drive.enforcement_events.contains(&key));
+        assert!(
+            rig.drive.weigh_station_reminder_age_s < SCALE_REMINDER_REAL_LEAD_S,
+            "the hazard's seconds are not the driver's: {:.1} s",
+            rig.drive.weigh_station_reminder_age_s
+        );
+        assert_eq!(
+            rig.drive.scale_reminder_held_by_game.contains(&key),
+            !crawl_first,
+            "crawl first {crawl_first}"
+        );
+        assert_eq!(
+            rig.drive.pull_over.is_some(),
+            charged,
+            "crawl first {crawl_first}: {:?}",
+            rig.transcript()
+        );
+    }
+}
+
+#[test]
 fn a_notice_first_heard_inside_the_reminder_window_still_excuses_a_quick_crossing() {
     // The game's late, not the driver's: the scale only came into range
     // inside the reminder window (a trip starting there, a notice held back

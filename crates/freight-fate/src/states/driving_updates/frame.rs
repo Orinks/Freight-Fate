@@ -578,8 +578,12 @@ impl DrivingState {
             // intent or its stopping assist armed for a later optional exit.
             self.clear_selected_stop_intent();
         }
-        // Real seconds, before the crossing is judged against them.
-        self.weigh_station_reminder_age_s += dt;
+        // Real seconds, before the crossing is judged against them. Only
+        // seconds the cab was free: a hazard or a stop after the reminder
+        // spends time the driver could not use to take the exit.
+        if !self.enforcement_busy() {
+            self.weigh_station_reminder_age_s += dt;
+        }
         if self
             .trip
             .scale_reminder_hold_mi

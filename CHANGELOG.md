@@ -24,6 +24,8 @@
 
 - **Two real Arkansas weigh stations near West Memphis are on the map.** Marion screens southbound I-55, Lehi eastbound I-40.
 
+- **A hazard after the last weigh station warning no longer costs you the bypass charge.** Time spent on the hazard does not count against you.
+
 ## 1.9.3 - 2026-10-06
 
 ### Added
