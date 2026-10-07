@@ -16,9 +16,11 @@ use ff_core::models::business::{
 };
 use ff_core::models::career::LEVEL_XP;
 use ff_core::models::carrier_fleet::assigned_truck_key;
+use ff_core::models::economy::{cad_per_litre, canada_diesel_usd_per_gal};
 use ff_core::models::profile::Profile;
 use ff_core::models::trailers::{trailer_type, DEFAULT_TRAILER_PROGRAMS};
 use ff_core::models::trucks::truck_model_or_panic;
+use ff_core::pyfmt::{fmt_f, fmt_grouped};
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::Key;
 use freight_fate::states::city::{
@@ -347,6 +349,40 @@ fn test_garage_offers_partial_fuel_and_repairs_when_cash_is_short() {
     let damage = profile(&app).truck_damage_pct();
     assert!((8.0..8.5).contains(&damage), "{damage}");
     approx(profile(&app).money(), 0.0);
+}
+
+#[test]
+fn test_whitehorse_garage_quotes_and_charges_the_yukon_diesel_price() {
+    let mut app = TestApp::new();
+    career(&mut app, "Whitehorse Fuel", "Whitehorse");
+    {
+        let p = profile_mut(&mut app);
+        p.business_status = LEASED_OWNER_OPERATOR.to_string();
+        p.owned_trucks = vec!["rig".to_string()];
+        p.set_money(50_000.0);
+        p.set_truck_fuel_gal(0.0);
+    }
+    let price = app.ctx.economy.fuel_price_at("pacific_northwest", "YT");
+    let cost = app.ctx.economy.fuel_cost_at(
+        "pacific_northwest",
+        "YT",
+        profile(&app).truck_specs().fuel_tank_gal,
+    );
+    let expected_label = format!(
+        "Refuel {} gallons for {} dollars. Diesel here is {} Canadian dollars a litre.",
+        fmt_f(profile(&app).truck_specs().fuel_tank_gal, 0),
+        fmt_grouped(cost, 0),
+        fmt_f(cad_per_litre(price), 2)
+    );
+    app.push_state(GarageState::new());
+    assert!(labels::<GarageState>(&app)
+        .iter()
+        .any(|label| label == &expected_label));
+
+    let before = profile(&app).money();
+    select::<GarageState>(&mut app, "Refuel");
+    approx(profile(&app).money(), before - cost);
+    assert!(canada_diesel_usd_per_gal("YT").is_some());
 }
 
 #[test]

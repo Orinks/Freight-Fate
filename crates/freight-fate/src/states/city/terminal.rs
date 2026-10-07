@@ -9,7 +9,9 @@ use ff_core::models::career_training::{
     is_company_training_profile, training_guidance, TrainingStage,
 };
 use ff_core::models::carrier_fleet::fleet_assignment_text;
-use ff_core::models::economy::{pay_advance_grant, pay_advance_unavailable_reason};
+use ff_core::models::economy::{
+    cad_per_litre, canada_diesel_usd_per_gal, pay_advance_grant, pay_advance_unavailable_reason,
+};
 use ff_core::models::enforcement;
 use ff_core::models::solvency;
 use ff_core::music::{select_menu_music_sequence, MenuMusicProfile};
@@ -170,17 +172,24 @@ impl CityMenuState {
     }
 
     fn garage_label(ctx: &GameContext) -> String {
-        let region = ctx
+        let (region, state_code) = ctx
             .world
             .city(&profile(ctx).current_city)
-            .map(|c| c.region.clone())
+            .map(|c| (c.region.clone(), c.state_code.clone()))
             .unwrap_or_default();
-        let price = ctx.economy.fuel_price(&region);
+        let price = ctx.economy.fuel_price_at(&region, &state_code);
         let live = if ctx.economy.live_national_price().is_some() {
             ", this week's price"
         } else {
             ""
         };
+        if canada_diesel_usd_per_gal(&state_code).is_some() {
+            return format!(
+                "Garage: fuel {} per gallon, {} Canadian dollars a litre{live}",
+                fmt_f(price, 2),
+                fmt_f(cad_per_litre(price), 2)
+            );
+        }
         format!("Garage: fuel {} per gallon{live}", fmt_f(price, 2))
     }
 

@@ -10,11 +10,11 @@
 //! through `states::city::launch_driving`.
 
 use crate::states_city_support::*;
-use ff_core::models::business::{INDEPENDENT_AUTHORITY, LEASED_OWNER_OPERATOR};
+use ff_core::models::business::{COMPANY_DRIVER, INDEPENDENT_AUTHORITY, LEASED_OWNER_OPERATOR};
 use ff_core::models::career::LEVEL_XP;
 use ff_core::models::carriers::fallback_carrier_for;
 use ff_core::models::dispatch_policy::{NEW_HIRE_DECLINE_BUDGET, SENIOR_LOAD_CHOICE_LEVEL};
-use ff_core::models::economy::{PAY_ADVANCE_ELIGIBLE_BELOW, PAY_ADVANCE_LIMIT};
+use ff_core::models::economy::{cad_per_litre, PAY_ADVANCE_ELIGIBLE_BELOW, PAY_ADVANCE_LIMIT};
 use ff_core::models::enforcement;
 use ff_core::models::jobs::{
     board_offer_count, cargo_type, job_payload, make_reposition_job, Job, JobBoard, OfferOptions,
@@ -23,6 +23,7 @@ use ff_core::models::jobs::{
 use ff_core::models::profile::Profile;
 use ff_core::models::solvency;
 use ff_core::models::start_options::pay_plan_for_key;
+use ff_core::pyfmt::fmt_f;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{Key, Menu, SimpleMenuState};
 use freight_fate::states::career_setback::CareerSetbackNoticeState;
@@ -73,6 +74,46 @@ fn entry_announcement(app: &TestApp) -> String {
     let lines = app.main_lines();
     let tail = lines.len().saturating_sub(2);
     lines[tail..].join(" ")
+}
+
+fn terminal_garage_label(app: &mut TestApp, city: &str) -> String {
+    career(app, "Fuel Price Terminal", city);
+    {
+        let p = profile_mut(app);
+        p.business_status = COMPANY_DRIVER.to_string();
+        p.carrier_key = "chatanika_freight".to_string();
+        p.carrier_name = "Chatanika Freight Lines".to_string();
+    }
+    let menu = CityMenuState::new(&app.ctx, false);
+    app.push_state(menu);
+    labels::<CityMenuState>(app)
+        .into_iter()
+        .find(|label| label.starts_with("Garage: fuel "))
+        .expect("the terminal garage row")
+}
+
+#[test]
+fn test_terminal_garage_price_names_canadian_dollars_only_in_canada() {
+    let mut canada = TestApp::new();
+    let whitehorse = terminal_garage_label(&mut canada, "Whitehorse");
+    let price = canada.ctx.economy.fuel_price_at("pacific_northwest", "YT");
+    assert_eq!(
+        whitehorse,
+        format!(
+            "Garage: fuel {} per gallon, {} Canadian dollars a litre",
+            fmt_f(price, 2),
+            fmt_f(cad_per_litre(price), 2)
+        )
+    );
+
+    drop(canada);
+    let mut us = TestApp::new();
+    let seattle = terminal_garage_label(&mut us, "Seattle");
+    let price = us.ctx.economy.fuel_price_at("pacific_northwest", "WA");
+    assert_eq!(
+        seattle,
+        format!("Garage: fuel {} per gallon", fmt_f(price, 2))
+    );
 }
 
 // -- tests/test_dispatch_autonomy.py -------------------------------------------------

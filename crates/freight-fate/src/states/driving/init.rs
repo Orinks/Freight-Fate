@@ -440,6 +440,7 @@ impl DrivingState {
             worst_damage_band: damage_band,
             limp_cap_mph: None,
             limp_cruise_said: false,
+            bc_limiter_said: false,
             out_of_service_creep_s: 0.0,
             recovering: false,
             maintenance_levels: [0; 3],

@@ -9,7 +9,9 @@
 //! `tests/test_trip_resume.py`.
 
 use ff_core::models::business::{COMPANY_DRIVER, LEASED_OWNER_OPERATOR};
+use ff_core::models::economy::cad_per_litre;
 use ff_core::models::economy::{PAY_ADVANCE_ELIGIBLE_BELOW, PAY_ADVANCE_LIMIT};
+use ff_core::pyfmt::{fmt_f, fmt_grouped};
 use ff_core::sim::hos;
 use ff_core::sim::trip_models::RoadStop;
 use freight_fate::controller::ControllerButton;
@@ -1193,6 +1195,104 @@ fn test_refuel_is_allowed_once_the_tractor_engine_is_off() {
         "{:?}",
         app.main_lines()
     );
+}
+
+#[test]
+fn test_canadian_pump_label_and_charge_use_the_local_diesel_price() {
+    let mut app = TestApp::new();
+    let drive = a_drive_between(&mut app, "Prince George", "Dawson Creek", "BC Fuel");
+    {
+        let profile = app.ctx.profile.as_mut().expect("a career");
+        profile.business_status = LEASED_OWNER_OPERATOR.to_string();
+        profile.owned_trucks = vec!["rig".to_string()];
+        profile.set_money(50_000.0);
+    }
+    let (region, jurisdiction, need) = with_drive(&drive, |d| {
+        d.trip.truck.fuel_gal = d.trip.truck.specs.fuel_tank_gal - 10.0;
+        d.trip.truck.engine_on = false;
+        (
+            d.trip.current_region().to_string(),
+            d.trip.state_at(None),
+            d.trip.truck.specs.fuel_tank_gal - d.trip.truck.fuel_gal,
+        )
+    });
+    assert_eq!(jurisdiction, "British Columbia");
+    let cost = app.ctx.economy.fuel_cost_at(&region, &jurisdiction, need) + 35.0;
+    let price = app.ctx.economy.fuel_price_at(&region, &jurisdiction);
+    let before = app.ctx.profile.as_ref().expect("a career").money();
+    let at = with_drive(&drive, |d| d.trip.position_mi);
+    let mut state = RestStopState::with_drive(
+        DriveRef::of(&drive),
+        travel_center("BC Fuel Stop", at),
+        false,
+    );
+
+    let label = build_labels(&mut state, &mut app.ctx)
+        .into_iter()
+        .find(|line| line.starts_with("Refuel "))
+        .expect("the pump row");
+    assert!(
+        label.starts_with(&format!(
+            "Refuel 10 gallons for {} dollars. Diesel here is ",
+            fmt_grouped(cost, 0)
+        )),
+        "{label}"
+    );
+    assert!(
+        label.contains(&format!(
+            "{} Canadian dollars a litre.",
+            fmt_f(cad_per_litre(price), 2)
+        )),
+        "{label}"
+    );
+
+    activate(&mut state, &mut app.ctx, "Refuel");
+    let after = app.ctx.profile.as_ref().expect("a career").money();
+    assert!((before - after - cost).abs() < 1e-6);
+    with_drive(&drive, |d| {
+        assert_eq!(d.trip.truck.fuel_gal, d.trip.truck.specs.fuel_tank_gal);
+    });
+
+    drop(app);
+    let mut us_app = TestApp::new();
+    let us_drive = a_drive_between(&mut us_app, "Seattle", "Spokane", "WA Fuel");
+    {
+        let profile = us_app.ctx.profile.as_mut().expect("a career");
+        profile.business_status = LEASED_OWNER_OPERATOR.to_string();
+        profile.owned_trucks = vec!["rig".to_string()];
+    }
+    let (us_region, us_jurisdiction, us_at) = with_drive(&us_drive, |d| {
+        d.trip.truck.fuel_gal = d.trip.truck.specs.fuel_tank_gal - 10.0;
+        (
+            d.trip.current_region().to_string(),
+            d.trip.state_at(None),
+            d.trip.position_mi,
+        )
+    });
+    assert_eq!(us_jurisdiction, "Washington");
+    let us_cost = us_app
+        .ctx
+        .economy
+        .fuel_cost_at(&us_region, &us_jurisdiction, 10.0)
+        + 35.0;
+    let mut us_state = RestStopState::with_drive(
+        DriveRef::of(&us_drive),
+        travel_center("WA Fuel Stop", us_at),
+        false,
+    );
+    let us_label = build_labels(&mut us_state, &mut us_app.ctx)
+        .into_iter()
+        .find(|line| line.starts_with("Refuel "))
+        .expect("the Washington pump row");
+    assert!(
+        us_label.starts_with(&format!(
+            "Refuel 10 gallons for {} dollars. Full tank: ",
+            fmt_grouped(us_cost, 0)
+        )),
+        "{us_label}"
+    );
+    assert!(us_label.ends_with("pounds under the gross-weight limit"));
+    assert!(!us_label.contains("Canadian"));
 }
 
 #[test]
