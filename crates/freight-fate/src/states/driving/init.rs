@@ -10,6 +10,7 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::Arc;
 
+use ff_core::data::seasonal_weight::seasonal_gvw_cap_kg;
 use ff_core::data::world_models::Route;
 use ff_core::models::cargo_condition::cargo_fragility;
 use ff_core::models::jobs::Job;
@@ -94,6 +95,11 @@ impl DrivingState {
         if phase == DRIVE_PHASE_DELIVERY && !job.bobtail {
             truck.trailer_set =
                 TrailerSet::legacy_trip_on_route(job.cargo.key, ctx.world, Some(&route));
+            // A None limit is the en-route exception for jobs dispatched
+            // before a window; do not retrofit a cap while the truck is moving.
+            if let Some(limit) = &job.seasonal_weight_limit {
+                truck.trailer_set.legal_gvw_kg = seasonal_gvw_cap_kg(&truck, limit.percent);
+            }
         }
         truck.transmission.automatic = ctx.settings.automatic_transmission;
         // How well this freight survives being thrown about. Fed to the truck

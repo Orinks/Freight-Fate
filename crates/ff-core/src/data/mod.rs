@@ -13,6 +13,7 @@ pub mod lcv_turnpikes;
 pub mod legacy_aliases;
 pub mod national_network;
 pub mod regions;
+pub mod seasonal_weight;
 pub mod state_welcome;
 pub mod stop_twins;
 pub mod street_limits;

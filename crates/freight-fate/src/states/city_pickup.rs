@@ -13,6 +13,7 @@ use ff_core::data::national_network::{
     filter_staa_doubles_routes, route_outside_lower_48, STAA_DOUBLES_CORRIDOR_REFUSAL,
     STAA_DOUBLES_REROUTE_NOTE, STAA_DOUBLES_ROUTE_REFUSAL,
 };
+use ff_core::data::seasonal_weight::{seasonal_gvw_cap_kg, strictest_on_route};
 use ff_core::data::world::World;
 use ff_core::data::world_models::Route;
 use ff_core::models::business_constants::is_owner_operator;
@@ -33,7 +34,7 @@ use ff_core::sim::route_roadwork::{
 use ff_core::sim::season::{adjust_for_calendar, real_clock_game_hours, temperature_c};
 use ff_core::sim::surge::{liquid_load_for, LiquidCargo};
 use ff_core::sim::trip_traffic::TrafficProvider;
-use ff_core::sim::vehicle::{TrailerSet, TruckState};
+use ff_core::sim::vehicle::{TrailerSet, TruckState, KG_PER_TON};
 use ff_core::sim::weather::WeatherSystem;
 
 use crate::app::GameContext;
@@ -43,13 +44,16 @@ use crate::impl_state_for_menu;
 use crate::meaningful_play::MeaningfulPlayReason;
 use crate::states::base::{InputEvent, Key, Menu, MenuCore, MenuItem, TimedMessageState};
 use crate::states::city::{
-    base_menu_enter, base_menu_handle_event, launch_driving, profile, profile_mut, CityMenuState,
-    DrivingLaunch, LaunchAnnouncement, LoadedDepartureResume, DRIVE_PHASE_DELIVERY,
+    base_menu_enter, base_menu_handle_event, dispatch_calendar_hours, launch_driving, profile,
+    profile_mut, CityMenuState, DrivingLaunch, LaunchAnnouncement, LoadedDepartureResume,
+    DRIVE_PHASE_DELIVERY,
 };
 use crate::states::main_menu::MainMenuState;
 
 pub const PICKUP_CHECK_IN_MIN: f64 = 15.0;
 pub const PICKUP_LOADING_MIN: f64 = 60.0;
+pub const SEASONAL_WEIGHT_REROUTE_NOTE: &str =
+    "Routes where spring weight limits would put this load over are not offered.";
 pub const PICKUP_LOADING_WAIT_S: f64 = 1.5;
 
 /// Whether this job's pickup facility is still in the world data.
@@ -832,6 +836,46 @@ impl PickupFacilityState {
         } else {
             (routes, None)
         };
+        let mut seasonal_routes_removed = false;
+        let routes = if self.job.bobtail {
+            routes
+        } else {
+            let before = routes.len();
+            let hours = dispatch_calendar_hours(ctx);
+            let filtered: Vec<Route> = routes
+                .iter()
+                .filter(|route| {
+                    let Some(restriction) = strictest_on_route(route, hours) else {
+                        return true;
+                    };
+                    let mut truck = self.truck.clone();
+                    truck.trailer_set = TrailerSet::legacy_trip_on_route(
+                        self.job.cargo.key,
+                        ctx.world,
+                        Some(route),
+                    );
+                    truck.cargo_kg = self.job.weight_tons * KG_PER_TON;
+                    truck.gross_mass_kg() <= seasonal_gvw_cap_kg(&truck, restriction.percent)
+                })
+                .cloned()
+                .collect();
+            if filtered.is_empty() {
+                routes
+            } else {
+                seasonal_routes_removed = filtered.len() < before;
+                filtered
+            }
+        };
+        let mut reroute_note = staa_note.map(str::to_string);
+        if seasonal_routes_removed {
+            match &mut reroute_note {
+                Some(note) => {
+                    note.push(' ');
+                    note.push_str(SEASONAL_WEIGHT_REROUTE_NOTE);
+                }
+                None => reroute_note = Some(SEASONAL_WEIGHT_REROUTE_NOTE.to_string()),
+            }
+        }
         // The world ranks the options by distance; dispatch re-ranks them by
         // the construction the state 511 feeds report on each, the way a
         // dispatcher checks 511 before naming the lane.
@@ -842,7 +886,7 @@ impl PickupFacilityState {
             let construction = dispatch_route_line(&routes, &routing, ctx.world, &ctx.settings);
             let route = routes[routing.pick()].clone();
             let mut lead = String::new();
-            if let Some(note) = staa_note {
+            if let Some(note) = reroute_note.as_deref() {
                 lead.push_str(note);
                 lead.push(' ');
             }
@@ -870,7 +914,7 @@ impl PickupFacilityState {
             return;
         }
         let mut planning = String::new();
-        if let Some(note) = staa_note {
+        if let Some(note) = reroute_note.as_deref() {
             planning.push_str(note);
             planning.push(' ');
         }

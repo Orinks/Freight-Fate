@@ -1,5 +1,6 @@
 //! Gross-weight advice spoken before dispatch acceptance.
 
+use ff_core::data::seasonal_weight::seasonal_gvw_cap_kg;
 use ff_core::data::world::World;
 use ff_core::models::jobs::Job;
 use ff_core::models::profile::Profile;
@@ -21,6 +22,9 @@ pub(super) fn load_weight_margin(world: &World, p: &Profile, job: &Job) -> Strin
             .to_string();
     };
     truck.trailer_set = set;
+    if let Some(limit) = &job.seasonal_weight_limit {
+        truck.trailer_set.legal_gvw_kg = seasonal_gvw_cap_kg(&truck, limit.percent);
+    }
     let margin_kg = truck.gross_weight_margin_with_cargo_kg(job.weight_tons * KG_PER_TON);
     let side = if margin_kg >= 0.0 { "under" } else { "over" };
     let mut text = format!(
@@ -31,6 +35,13 @@ pub(super) fn load_weight_margin(world: &World, p: &Profile, job: &Job) -> Strin
         text.push_str(&format!(
             " The limit for this set of doubles on the lanes offered is {} pounds, counting both \
              trailers and the converter dolly.",
+            fmt_grouped(truck.trailer_set.legal_gvw_lb().round(), 0)
+        ));
+    }
+    if let Some(limit) = &job.seasonal_weight_limit {
+        text.push_str(&format!(
+            " Spring weight limits on the {} hold this truck to {} pounds gross.",
+            limit.highway,
             fmt_grouped(truck.trailer_set.legal_gvw_lb().round(), 0)
         ));
     }

@@ -2269,6 +2269,10 @@ branch. The older Phase A/B plan checklists are not a live completion list.
       Coldfoot to Deadhorse. Paid miles remain separate from loaded-semi
       router distances. Verified freight endpoints serve Valdez, Kenai,
       Seward, and Homer.
+- [x] **Alaska's 2026 spring-breakup weight limits.** DOT&PF notices apply
+      85% limits to listed corridors by leg; dispatch derives each truck's
+      axle cap, filters overweight restricted routes from the route menu, and
+      does not retrofit jobs dispatched before a window.
 - [x] **Public lots are fuel/rest stops, not freight yards.** Curated
       `travel_center` and `truck_parking` pins have no freight cargo roles;
       Delta Junction, Coldfoot, and Soldotna are pass-through markets with no
@@ -2278,10 +2282,9 @@ branch. The older Phase A/B plan checklists are not a live completion list.
 - [ ] **Partial: cross-border rules and clearance.** A playable customs
       clearance/inspection flow now covers the Alaska Highway and southbound
       Blaine ports, and BC's 105 km/h heavy-truck limiter and 2025 BC/Yukon
-      diesel prices are modeled. Canadian HOS, broader CAD/foreign exchange,
-      and spring-breakup axle restrictions remain open; the corridor does not
-      establish Canadian regulatory compliance. Full Canada and Europe remain
-      planned.
+      diesel prices are modeled. Canadian HOS and broader CAD/foreign exchange
+      remain open. The corridor does not establish Canadian regulatory
+      compliance. Full Canada and Europe remain planned.
 - [ ] **Remaining corridor data work.** Refine the auto-profile
       Blaine–Surrey geometry for trucks; verify remaining Parks and Mat-Su
       fuel lots and any truck-parking capacity; and add the Whittier tunnel
@@ -2312,6 +2315,21 @@ branch. The older Phase A/B plan checklists are not a live completion list.
 - [ ] (Found along the way) Canadian diesel uses fixed 2025 Statistics Canada
       averages. Offline prices do not follow the monthly series; live mode
       moves them only with the US national price.
+- [ ] (Found along the way) Every career year replays the 2026 spring-breakup
+      dates rather than shifting the notices to new annual dates.
+- [ ] (Found along the way) Anchorage/Mat-Su/Kenai area-wide 75%/50% limits
+      on unlisted local roads are not modeled; there are no local streets in
+      the game.
+- [ ] (Found along the way) The LCV 90-foot drive-axle provision is not
+      modeled.
+- [ ] (Found along the way) Doubles use a conservative percentage of legal
+      gross weight because the axle model does not split their axle groups.
+- [ ] (Found along the way) Seasonal limits apply to the strictest restriction
+      on each mapped leg, not to milepost segments within a leg.
+- [ ] (Found along the way) The Kenai Spur MP 0–5 end date is ambiguous in the
+      June 8 notice; the game keeps the restriction through June 15.
+- [ ] (Found along the way) The Palmer–Wasilla route retraces the Palmer–Wasilla
+      Highway, which would put it under the unmodeled Mat-Su area-wide limit.
 
 Automated evidence: the four `test_alcan_phase_a_*` cases (including the
 Tok–Delta Junction–Fairbanks split), `test_alcan_phase_b1_tok_cutoff_glenn_to_anchorage`,
