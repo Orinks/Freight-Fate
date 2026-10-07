@@ -8,6 +8,8 @@
 
 ### Fixed
 
+- **Sitting through a training course now tires you.** A day-long course no longer wipes fatigue to zero.
+
 - **The load you sleep for after an hours warning stays on the dispatch board.** It used to vanish when the rest ran past midnight.
 
 ## 1.9.2 - 2026-10-05

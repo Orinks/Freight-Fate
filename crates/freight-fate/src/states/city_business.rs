@@ -18,6 +18,7 @@ use ff_core::models::solvency::{apply_return_to_company_driving, company_return_
 use ff_core::models::trailers::{TrailerType, DEFAULT_TRAILER_PROGRAMS, TRAILER_CATALOG};
 use ff_core::models::trucks::{TruckModel, Upgrade, TRUCK_CATALOG, UPGRADE_CATALOG};
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
+use ff_core::sim::hos;
 
 use crate::app::GameContext;
 use crate::impl_state_for_menu;
@@ -1123,13 +1124,12 @@ impl EndorsementCourseState {
         let mut announcements: Vec<String> = Vec::new();
         let money = {
             let p = profile_mut(ctx);
-            // Off duty on the hours clock too, as the logbook says: a day-long
-            // course is a full rest, a shorter one still counts toward the
-            // break and the window (2026-09-28).
+            // Off duty on the hours clock: a stretch of 10+ hours still resets
+            // HOS the way consecutive off duty does. Fatigue accrues at the
+            // awake rate — sitting in class is not sleep (GitHub #314).
             p.hos.off_duty(cred.course_hours * 60.0);
-            if cred.course_hours >= 10.0 {
-                p.fatigue = 0.0;
-            }
+            let gain = hos::awake_fatigue_gain(start, cred.course_hours * 60.0);
+            p.fatigue = (p.fatigue + gain).min(100.0);
             let day = p.market_day();
             p.market.advance_to(day);
             if cred.wait_days > 0.0 {
