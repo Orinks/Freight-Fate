@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import importlib.util
 import io
+import json
 import plistlib
 import subprocess
 import urllib.error
@@ -281,10 +282,9 @@ def test_music_download_config_uses_public_defaults(monkeypatch):
     # host, made while the variable was Preview-only, 503d every platform of
     # the snapshot build -- so if this pin ever has to move back, check the
     # route with curl rather than checking that its file deployed.
-    assert build_release.music_download_config() == (
-        "https://www.orinks.net/downloads/music.pak",
-        "251a9883dc82f39e4b0e51b3d5b3d788f9dce5b931f04c14526cb71087dda77d",
-    )
+    url, sha = build_release.music_download_config()
+    assert url == "https://www.orinks.net/downloads/music.pak"
+    assert sha == build_release.DEFAULT_MUSIC_SHA256
 
 
 def test_music_download_config_allows_independent_overrides():
@@ -498,7 +498,7 @@ def test_cargo_command_honours_the_target_dir(tmp_path):
 
 
 def test_prepare_rust_release_dependencies_fetches_bass_then_music(monkeypatch):
-    """Release builds restore native audio before fetching the music pack."""
+    """Release builds restore native audio before fetching the music and Channel 3000 packs."""
     build_release = load_build_release_module()
     calls = []
     monkeypatch.setattr(
@@ -507,12 +507,16 @@ def test_prepare_rust_release_dependencies_fetches_bass_then_music(monkeypatch):
         lambda command, **kwargs: calls.append((command, kwargs)),
     )
     monkeypatch.setattr(build_release, "ensure_music_pack", lambda: calls.append(("music", {})))
+    monkeypatch.setattr(
+        build_release, "ensure_channel3000_pack", lambda: calls.append(("channel3000", {}))
+    )
 
     build_release.prepare_rust_release_dependencies()
 
     assert calls[0][0] == [build_release.sys.executable, str(build_release.TOOLS / "fetch_bass.py")]
     assert calls[0][1] == {"cwd": build_release.ROOT, "check": True}
     assert calls[1][0] == "music"
+    assert calls[2][0] == "channel3000"
 
 
 def test_windows_release_wrapper_is_the_complete_beginner_command():
@@ -654,6 +658,7 @@ def test_macos_stage_is_a_player_ready_app_bundle(tmp_path, monkeypatch):
     track_everything(tmp_path)
     (package_dir / "assets" / "sounds.pak").write_bytes(b"FFPK1 sounds")
     (package_dir / "assets" / "music.pak").write_bytes(b"FFPK1 music")
+    (package_dir / "assets" / "channel3000.pak").write_bytes(b"FFPK1 c3k")
     profile_dir = tmp_path / "target" / "release"
     make_macos_profile(profile_dir)
     baked = make_container(tmp_path / "world.ffdata", build_release)
@@ -677,10 +682,13 @@ def test_macos_stage_is_a_player_ready_app_bundle(tmp_path, monkeypatch):
     ]
     resources = app / "Contents" / "Resources"
     build_release.stamp_build_info(app, "1.9-tester-20260830", resources)
+    stamp = json.loads((resources / "build_info.json").read_text(encoding="utf-8"))
+    assert stamp["commit"] == build_release.build_commit()
     build_release.stage_release_docs(app, resources)
     assert (resources / "freight_fate" / "data" / "world.ffdata").is_file()
     assert (resources / "freight_fate" / "sounds.pak").is_file()
     assert (resources / "freight_fate" / "music.pak").is_file()
+    assert (resources / "freight_fate" / "channel3000.pak").is_file()
     assert (resources / "SOUND_CREDITS.md").is_file()
     for name in (
         "build_info.json",
@@ -707,9 +715,7 @@ def test_macos_stage_is_a_player_ready_app_bundle(tmp_path, monkeypatch):
     assert info["CFBundleIdentifier"] == "net.orinks.freight-fate"
     assert info["CFBundleVersion"] == "2026.08.30"
     assert info["CFBundleGetInfoString"] == "Freight Fate 1.9.0 (1.9-tester-20260830)"
-    assert info["NSAppleEventsUsageDescription"] == (
-        "Freight Fate uses VoiceOver to speak menus, driving information, and alerts."
-    )
+    assert "NSAppleEventsUsageDescription" not in info
     assert "LSMinimumSystemVersion" not in info
 
 
@@ -763,6 +769,7 @@ def test_macos_stage_refuses_a_dynamically_linked_sdl(tmp_path, monkeypatch):
     track_everything(tmp_path)
     (package_dir / "assets" / "sounds.pak").write_bytes(b"FFPK1 sounds")
     (package_dir / "assets" / "music.pak").write_bytes(b"FFPK1 music")
+    (package_dir / "assets" / "channel3000.pak").write_bytes(b"FFPK1 c3k")
     profile_dir = tmp_path / "target" / "release"
     make_macos_profile(profile_dir)
     baked = make_container(tmp_path / "world.ffdata", build_release)
@@ -807,6 +814,7 @@ def test_linux_stage_ships_bass_and_its_decoders(tmp_path, monkeypatch):
     track_everything(tmp_path)
     (package_dir / "assets" / "sounds.pak").write_bytes(b"FFPK1 sounds")
     (package_dir / "assets" / "music.pak").write_bytes(b"FFPK1 music")
+    (package_dir / "assets" / "channel3000.pak").write_bytes(b"FFPK1 c3k")
     profile_dir = tmp_path / "target" / "release"
     make_linux_profile(profile_dir)
     baked = make_container(tmp_path / "world.ffdata", build_release)
@@ -889,6 +897,7 @@ def test_linux_stage_refuses_a_dynamically_linked_sdl(tmp_path, monkeypatch):
     track_everything(tmp_path)
     (package_dir / "assets" / "sounds.pak").write_bytes(b"FFPK1 sounds")
     (package_dir / "assets" / "music.pak").write_bytes(b"FFPK1 music")
+    (package_dir / "assets" / "channel3000.pak").write_bytes(b"FFPK1 c3k")
     profile_dir = tmp_path / "target" / "release"
     make_linux_profile(profile_dir)
     baked = make_container(tmp_path / "world.ffdata", build_release)
@@ -933,6 +942,7 @@ def test_linux_archive_verifier_rejects_a_rust_tarball_missing_a_library(tmp_pat
         "USER_MANUAL.md",
         "freight_fate/sounds.pak",
         "freight_fate/music.pak",
+        "freight_fate/channel3000.pak",
         build_release.RUST_BAKED_FILE_ENTRY,
         *(name for name in build_release.LINUX_REQUIRED_LIBRARIES if name != missing_name),
     ]
@@ -981,6 +991,7 @@ def test_linux_archive_verifier_checks_the_arm64_rust_tarball_too(tmp_path):
         "USER_MANUAL.md",
         "freight_fate/sounds.pak",
         "freight_fate/music.pak",
+        "freight_fate/channel3000.pak",
         build_release.RUST_BAKED_FILE_ENTRY,
         *(name for name in build_release.LINUX_REQUIRED_LIBRARIES if name != "libbass.so"),
     ]
@@ -1120,6 +1131,22 @@ def test_apple_silicon_stable_archive_keeps_legacy_suffix(tmp_path, monkeypatch)
     assert out.name == "FreightFate-v1.8.8-macos.zip"
 
 
+def test_apple_silicon_stable_19_archive_matches_the_workflow_upload(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    app.mkdir()
+    monkeypatch.setattr(build_release, "DIST", tmp_path / "dist")
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+    monkeypatch.setattr(build_release.platform, "machine", lambda: "arm64")
+    monkeypatch.setattr(build_release.subprocess, "run", lambda *_args, **_kwargs: None)
+    (tmp_path / "dist").mkdir()
+
+    out = build_release.archive(app, "v1.9.0")
+
+    # build-career-1.9.yml uploads only `*-macos-arm64.zip` and fails on none.
+    assert out.name == "FreightFate-v1.9.0-macos-arm64.zip"
+
+
 def test_intel_macos_archive_keeps_legacy_suffix(tmp_path, monkeypatch):
     build_release = load_build_release_module()
     app = tmp_path / "FreightFate.app"
@@ -1152,12 +1179,15 @@ def test_macos_uses_non_launch_verification_before_archive(tmp_path, monkeypatch
     monkeypatch.setattr(build_release, "smoke_check", lambda _app: events.append("smoke"))
     monkeypatch.setattr(build_release, "strip_user_data", lambda _app: events.append("strip"))
     monkeypatch.setattr(build_release, "sign_distribution", lambda _app: events.append("sign"))
+    monkeypatch.setattr(
+        build_release, "notarize_distribution", lambda _app: events.append("notarize")
+    )
     monkeypatch.setattr(build_release, "archive", lambda *_args: archive)
     monkeypatch.setattr(build_release, "verify_archive", lambda _archive: events.append("archive"))
 
     build_release.build_rust("test", None, False, macos_non_launch_verify=True)
 
-    assert events == ["stamp", "docs", "verify", "strip", "sign", "archive"]
+    assert events == ["stamp", "docs", "verify", "strip", "sign", "notarize", "archive"]
 
 
 def test_windows_keeps_packaged_process_smoke(tmp_path, monkeypatch):
@@ -1215,6 +1245,7 @@ def test_full_macos_bundle_verification_reads_packs_from_resources(tmp_path, mon
         "SOUND_CREDITS.md",
         "freight_fate/sounds.pak",
         "freight_fate/music.pak",
+        "freight_fate/channel3000.pak",
         "freight_fate/assets/sounds/CREDITS.md",
     )
     for relative in required:
@@ -1229,7 +1260,7 @@ def test_full_macos_bundle_verification_reads_packs_from_resources(tmp_path, mon
             opened.append(Path(path))
 
         def names(self):
-            return ["engine_classic/idle.ogg", "music/road_song.ogg"]
+            return ["engine_classic/idle.ogg", "music/road_song.ogg", "c3k/day_show_01.opus"]
 
     fake_assets = type("FakeAssets", (), {"SoundPack": FakeSoundPack})
     fake_tool = type("FakeTool", (), {"_load_assets_pack": staticmethod(lambda: fake_assets)})
@@ -1241,6 +1272,7 @@ def test_full_macos_bundle_verification_reads_packs_from_resources(tmp_path, mon
     assert opened == [
         resources / "freight_fate" / "sounds.pak",
         resources / "freight_fate" / "music.pak",
+        resources / "freight_fate" / "channel3000.pak",
     ]
 
 
@@ -1280,6 +1312,7 @@ def test_macos_staged_payload_rejects_each_missing_runtime_library(
         "SOUND_CREDITS.md",
         "freight_fate/sounds.pak",
         "freight_fate/music.pak",
+        "freight_fate/channel3000.pak",
         "freight_fate/assets/sounds/CREDITS.md",
     )
     for relative in required:
@@ -1313,6 +1346,7 @@ def write_macos_archive(
         f"{payload_root}/USER_MANUAL.md": b"manual",
         f"{payload_root}/freight_fate/sounds.pak": b"sounds",
         f"{payload_root}/freight_fate/music.pak": b"music",
+        f"{payload_root}/freight_fate/channel3000.pak": b"c3k",
         f"{payload_root}/freight_fate/data/world.ffdata": b"FFDATA",
     }
     if include_icon:
@@ -1388,7 +1422,7 @@ def test_macos_signing_verifies_the_final_bundle(tmp_path, monkeypatch):
     )
     monkeypatch.setattr(build_release, "verify_macos_native_dependencies", lambda _app: None)
 
-    build_release.sign_distribution(app)
+    build_release.sign_distribution(app, environ={})
 
     assert calls == [
         (["codesign", "--force", "--deep", "--sign", "-", str(app)], {"check": True}),
@@ -1397,6 +1431,131 @@ def test_macos_signing_verifies_the_final_bundle(tmp_path, monkeypatch):
             {"check": True},
         ),
     ]
+
+
+def test_macos_developer_id_signing_seals_libraries_before_the_bundle(tmp_path, monkeypatch):
+    """Notarization rejects --deep: each dylib is signed alone, then the app."""
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    (app / "Contents" / "MacOS").mkdir(parents=True)
+    (app / "Contents" / "MacOS" / "FreightFate").write_bytes(b"")
+    frameworks = app / "Contents" / "Frameworks"
+    frameworks.mkdir()
+    for name in ("libbass.dylib", "libbassopus.dylib"):
+        (frameworks / name).write_bytes(b"")
+    calls = []
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+    monkeypatch.setattr(
+        build_release.subprocess, "run", lambda command, **_kwargs: calls.append(command)
+    )
+    monkeypatch.setattr(build_release, "verify_macos_native_dependencies", lambda _app: None)
+    identity = "Developer ID Application: Test (TEAM123456)"
+
+    build_release.sign_distribution(
+        app,
+        environ={"MACOS_SIGN_IDENTITY": identity, "MACOS_SIGN_KEYCHAIN": "/tmp/ci.keychain-db"},
+    )
+
+    def signed(target):
+        return [
+            "codesign",
+            "--force",
+            "--options",
+            "runtime",
+            "--timestamp",
+            "--keychain",
+            "/tmp/ci.keychain-db",
+            "--sign",
+            identity,
+            str(target),
+        ]
+
+    assert calls == [
+        signed(frameworks / "libbass.dylib"),
+        signed(frameworks / "libbassopus.dylib"),
+        signed(app),
+        ["codesign", "--verify", "--deep", "--strict", str(app)],
+    ]
+    assert not any("--deep" in command and "--sign" in command for command in calls)
+
+
+def test_macos_notarization_is_skipped_without_credentials(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    calls = []
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+    monkeypatch.setattr(build_release.subprocess, "run", lambda *args, **_kw: calls.append(args))
+
+    build_release.notarize_distribution(tmp_path / "FreightFate.app", environ={})
+
+    assert calls == []
+
+
+def test_macos_notarization_refuses_half_configured_credentials(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+
+    with pytest.raises(RuntimeError, match="MACOS_NOTARY_ISSUER_ID"):
+        build_release.notarize_distribution(
+            tmp_path / "FreightFate.app",
+            environ={
+                "MACOS_SIGN_IDENTITY": "Developer ID Application: Test (TEAM123456)",
+                "MACOS_NOTARY_KEY_PATH": "/tmp/AuthKey.p8",
+                "MACOS_NOTARY_KEY_ID": "ABC123DEFG",
+            },
+        )
+
+
+NOTARY_ENV = {
+    "MACOS_SIGN_IDENTITY": "Developer ID Application: Test (TEAM123456)",
+    "MACOS_NOTARY_KEY_PATH": "/tmp/AuthKey.p8",
+    "MACOS_NOTARY_KEY_ID": "ABC123DEFG",
+    "MACOS_NOTARY_ISSUER_ID": "00000000-0000-0000-0000-000000000000",
+}
+
+
+def fake_notary(monkeypatch, build_release, status):
+    calls = []
+
+    def run(command, **_kwargs):
+        calls.append(command)
+        stdout = ""
+        if command[:3] == ["xcrun", "notarytool", "submit"]:
+            stdout = json.dumps({"id": "sub-1", "status": status})
+        return subprocess.CompletedProcess(command, 0, stdout=stdout, stderr="")
+
+    monkeypatch.setattr(build_release.sys, "platform", "darwin")
+    monkeypatch.setattr(build_release.subprocess, "run", run)
+    return calls
+
+
+def test_macos_notarization_staples_and_assesses_an_accepted_app(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    calls = fake_notary(monkeypatch, build_release, "Accepted")
+
+    build_release.notarize_distribution(app, environ=NOTARY_ENV)
+
+    tools = [command[:3] for command in calls]
+    assert tools[0][0] == "ditto"
+    assert tools[1] == ["xcrun", "notarytool", "submit"]
+    assert "--wait" in calls[1]
+    assert calls[2:] == [
+        ["xcrun", "stapler", "staple", str(app)],
+        ["xcrun", "stapler", "validate", str(app)],
+        ["spctl", "--assess", "--type", "execute", "--verbose=2", str(app)],
+    ]
+
+
+def test_macos_notarization_fails_the_build_when_apple_rejects(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    calls = fake_notary(monkeypatch, build_release, "Invalid")
+
+    with pytest.raises(RuntimeError, match="Invalid"):
+        build_release.notarize_distribution(app, environ=NOTARY_ENV)
+
+    assert calls[-1][:4] == ["xcrun", "notarytool", "log", "sub-1"]
+    assert not any(command[:2] == ["xcrun", "stapler"] for command in calls)
 
 
 def test_secret_scan_rejects_planted_credentials(tmp_path):
@@ -1432,3 +1591,103 @@ def test_secret_scan_passes_a_clean_payload_and_skips_binaries(tmp_path):
     # opaque media, and false positives would train everyone to ignore it.
     (staged / "freight_fate" / "sounds.pak").write_bytes(b"FFPK1 ghp_" + b"c" * 36)
     build_release.verify_no_shipped_secrets(staged)
+
+
+@pytest.mark.parametrize(
+    ("label", "tag", "channel", "version"),
+    [
+        # The tag push passes the tag itself; v1.9.0 once stamped `vv1.9.0`
+        # with pyproject's `1.9.0.dev0`, and the game offered itself forever.
+        ("v1.9.1", "v1.9.1", "stable", "1.9.1"),
+        ("1.9.1", "v1.9.1", "stable", "1.9.1"),
+        ("1.9-tester-20261005", "1.9-tester-20261005", "dev", None),
+    ],
+)
+def test_build_info_stamp_names_the_release(tmp_path, label, tag, channel, version):
+    build_release = load_build_release_module()
+    build_release.stamp_build_info(tmp_path, label, tmp_path)
+    info = json.loads((tmp_path / "build_info.json").read_text(encoding="utf-8"))
+    assert info["tag"] == tag
+    assert info["channel"] == channel
+    assert info["package_version"] == (version or build_release.project_version())
+
+
+def test_stable_mac_bundle_reports_the_tag_version(tmp_path):
+    build_release = load_build_release_module()
+    app = tmp_path / "FreightFate.app"
+    build_release.write_macos_info_plist(app, "v1.9.1")
+    with (app / "Contents" / "Info.plist").open("rb") as stream:
+        info = plistlib.load(stream)
+    assert info["CFBundleShortVersionString"] == "1.9.1"
+    assert info["CFBundleVersion"] == "1.9.1"
+
+
+def test_channel3000_download_config_uses_public_defaults(monkeypatch):
+    build_release = load_build_release_module()
+    monkeypatch.delenv("FREIGHT_FATE_CHANNEL3000_URL", raising=False)
+    monkeypatch.delenv("FREIGHT_FATE_CHANNEL3000_SHA256", raising=False)
+    url, sha = build_release.channel3000_download_config()
+    assert url == "https://www.orinks.net/downloads/channel3000.pak"
+    assert sha == build_release.DEFAULT_CHANNEL3000_SHA256
+    assert len(sha) == 64
+
+
+def test_channel3000_download_config_rejects_a_non_hex_digest():
+    build_release = load_build_release_module()
+    with pytest.raises(
+        RuntimeError,
+        match="FREIGHT_FATE_CHANNEL3000_SHA256 must be a 64-character hexadecimal digest",
+    ):
+        build_release.channel3000_download_config(
+            {"FREIGHT_FATE_CHANNEL3000_SHA256": "not-a-digest"}
+        )
+
+
+def test_ensure_channel3000_pack_installs_a_verified_download(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    pack = tmp_path / "channel3000.pak"
+    payload = b"approved channel 3000 pack"
+    monkeypatch.setenv("FREIGHT_FATE_CHANNEL3000_URL", "https://example.test/channel3000.pak")
+    monkeypatch.setenv(
+        "FREIGHT_FATE_CHANNEL3000_SHA256", build_release.hashlib.sha256(payload).hexdigest()
+    )
+
+    def download(request, destination):
+        assert request.full_url == "https://example.test/channel3000.pak"
+        Path(destination).write_bytes(payload)
+
+    monkeypatch.setattr(build_release, "download_to_path", download)
+    build_release.ensure_channel3000_pack(pack)
+
+    assert pack.read_bytes() == payload
+    assert list(tmp_path.glob("*.download")) == []
+
+
+def test_ensure_channel3000_pack_names_itself_when_the_download_fails(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    pack = tmp_path / "channel3000.pak"
+    monkeypatch.setenv("FREIGHT_FATE_CHANNEL3000_SHA256", "a" * 64)
+
+    def fail_download(url, _destination):
+        raise urllib.error.HTTPError(url, 404, "Not Found", None, None)
+
+    monkeypatch.setattr(build_release, "download_to_path", fail_download)
+    with pytest.raises(
+        RuntimeError, match="Channel 3000 pack download failed with HTTP status 404"
+    ):
+        build_release.ensure_channel3000_pack(pack)
+    assert not pack.exists()
+
+
+def test_ensure_channel3000_pack_rejects_a_mismatched_download(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    pack = tmp_path / "channel3000.pak"
+    monkeypatch.setenv("FREIGHT_FATE_CHANNEL3000_SHA256", "a" * 64)
+    monkeypatch.setattr(
+        build_release,
+        "download_to_path",
+        lambda _url, destination: Path(destination).write_bytes(b"unapproved pack"),
+    )
+    with pytest.raises(RuntimeError, match="channel3000.pak failed SHA-256 verification"):
+        build_release.ensure_channel3000_pack(pack)
+    assert not pack.exists()

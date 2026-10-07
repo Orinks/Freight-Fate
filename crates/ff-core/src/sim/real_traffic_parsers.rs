@@ -60,6 +60,10 @@ pub struct TrafficEvent {
     pub work_type: String,
     /// "alternating", "single lane", "shoulder", "full closure"
     pub closure: String,
+    /// The one direction of travel the event holds, as the road is signed:
+    /// "North", "South", "East" or "West". Empty when it holds both ways or
+    /// the feed does not say.
+    pub direction: String,
 }
 
 impl TrafficEvent {
@@ -146,6 +150,7 @@ impl TrafficEvent {
             location_text: chain_str(data, &["location_text"], ""),
             work_type: chain_str(data, &["work_type"], ""),
             closure: chain_str(data, &["closure"], ""),
+            direction: String::new(),
         })
     }
 }
@@ -215,6 +220,7 @@ pub fn parse_construction_events(data: &Value, _state: &str) -> Vec<TrafficEvent
             location_text,
             work_type,
             closure,
+            direction: String::new(),
         });
     }
     events
@@ -336,6 +342,7 @@ pub fn parse_iteris_construction_events(data: &Value, state: &str) -> Vec<Traffi
             location_text,
             work_type,
             closure,
+            direction: String::new(),
         });
     }
     construction_events
@@ -521,6 +528,7 @@ pub fn parse_cars_events(data: &Value, _state: &str, construction: bool) -> Vec<
             location_text,
             work_type,
             closure,
+            direction: String::new(),
         });
     }
     events

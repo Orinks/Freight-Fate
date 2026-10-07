@@ -5,10 +5,27 @@
 
 use std::sync::{Arc, Mutex};
 
+use chrono::{DateTime, Utc};
 use serde_json::{json, Value};
 
 use super::{NetError, Transport};
 use ff_core::sim::real_traffic::Clock;
+
+thread_local! {
+    static SERVER_TIME: std::cell::Cell<Option<Option<DateTime<Utc>>>> =
+        const { std::cell::Cell::new(None) };
+}
+
+/// Stand in for orinks.net's clock on this thread (`None` = never heard
+/// from the server), so a test can settle a delivery on a real-world date
+/// without the network. Per thread, so parallel tests never see each other's.
+pub fn set_server_time(at: Option<DateTime<Utc>>) {
+    SERVER_TIME.with(|cell| cell.set(Some(at)));
+}
+
+pub(super) fn server_time_override() -> Option<Option<DateTime<Utc>>> {
+    SERVER_TIME.with(std::cell::Cell::get)
+}
 
 /// One recorded request: `(url, payload, headers)`, as the Python tests
 /// unpacked them.

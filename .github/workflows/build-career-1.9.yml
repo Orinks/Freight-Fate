@@ -25,6 +25,10 @@ on:
         description: "Branch to build (a dry run is the way to try one)"
         type: string
         default: dev
+      release_candidate:
+        description: "Also publish as the 1.9 release candidate under nightly-YYYYMMDD, where 1.8 developer-snapshot players' updater finds it"
+        type: boolean
+        default: false
   # Stable releases: push a v*.*.* tag on the commit to ship. Do not invent
   # the tag from a schedule or dispatch -- only an explicit tag push cuts a
   # stable GitHub release (no --prerelease, notes from the version block).
@@ -220,7 +224,10 @@ jobs:
     needs: prepare
     if: needs.prepare.outputs.should_build == 'true'
     runs-on: macos-26
-    timeout-minutes: 60
+    # Notarization waits up to 45 minutes (tools/build_release.py) and starts
+    # about 16 minutes in, so the job outlasts it and a slow Apple queue ends
+    # in Apple's own verdict and log, not a GitHub timeout (v1.9.3 hit 60).
+    timeout-minutes: 75
     env:
       FREIGHT_FATE_NO_SPEECH: "1"
       SDL_VIDEODRIVER: dummy
@@ -274,6 +281,59 @@ jobs:
       - name: Test Rust workspace
         run: cargo test -p ff-core -p freight-fate
 
+      - name: Import the Developer ID signing credentials
+        # Signs as "Developer ID Application: Joshua Tubbs" and notarizes
+        # with the App Store Connect key, so Gatekeeper opens the app without
+        # the Open Anyway step. The certificate goes into a throwaway keychain
+        # and the key into RUNNER_TEMP, never the checkout or the bundle.
+        shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          IS_PRERELEASE: ${{ needs.prepare.outputs.is_prerelease }}
+        run: |
+          if [ -z "$MACOS_CERT_P12_BASE64" ] || [ -z "$ASC_KEY_P8_BASE64" ]; then
+            if [ "$IS_PRERELEASE" = "false" ]; then
+              echo "A stable release must be Developer ID signed and notarized; the signing secrets are missing." >&2
+              exit 1
+            fi
+            echo "::warning::Signing secrets are not configured; this Mac build is ad-hoc signed and not notarized."
+            exit 0
+          fi
+          keychain="$RUNNER_TEMP/freight-fate-signing.keychain-db"
+          keychain_password="$(uuidgen)"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          echo "$MACOS_CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/developer_id.p12"
+          security import "$RUNNER_TEMP/developer_id.p12" -k "$keychain" \
+            -P "$MACOS_CERT_PASSWORD" -T /usr/bin/codesign
+          rm -f "$RUNNER_TEMP/developer_id.p12"
+          # The G2 intermediate is not in macOS's system keychain; without it
+          # the identity is untrusted and codesign finds nothing to sign with.
+          curl -fsSL https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer \
+            -o "$RUNNER_TEMP/DeveloperIDG2CA.cer"
+          security import "$RUNNER_TEMP/DeveloperIDG2CA.cer" -k "$keychain"
+          security set-key-partition-list -S apple-tool:,apple: -s \
+            -k "$keychain_password" "$keychain" >/dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          identity="Developer ID Application: Joshua Tubbs ($APPLE_TEAM_ID)"
+          security find-identity -v -p codesigning "$keychain" | grep -F "$identity"
+          key_path="$RUNNER_TEMP/AuthKey_$ASC_KEY_ID.p8"
+          echo "$ASC_KEY_P8_BASE64" | base64 --decode > "$key_path"
+          chmod 600 "$key_path"
+          {
+            echo "MACOS_SIGN_IDENTITY=$identity"
+            echo "MACOS_SIGN_KEYCHAIN=$keychain"
+            echo "MACOS_NOTARY_KEY_PATH=$key_path"
+            echo "MACOS_NOTARY_KEY_ID=$ASC_KEY_ID"
+            echo "MACOS_NOTARY_ISSUER_ID=$ASC_ISSUER_ID"
+          } >> "$GITHUB_ENV"
+
       - name: Build the macOS release
         # --smoke boots the PACKAGED app for five frames with dummy drivers:
         # real dylib loading, real data, real boot. The old non-launch mode
@@ -292,6 +352,15 @@ jobs:
           ./target/release/freightfate --list-speech-backends | tee speech-backends.txt
           grep -q "^AVSpeech " speech-backends.txt
 
+      - name: Remove the signing credentials
+        if: always()
+        shell: bash
+        run: |
+          if [ -n "${MACOS_SIGN_KEYCHAIN:-}" ]; then
+            security delete-keychain "$MACOS_SIGN_KEYCHAIN" || true
+          fi
+          rm -f "${MACOS_NOTARY_KEY_PATH:-/nonexistent}"
+
       - uses: actions/upload-artifact@v7
         with:
           name: macOS-arm64
@@ -305,8 +374,8 @@ jobs:
     # 22.04, not latest: the executable carries its build host's glibc as a
     # floor (2.35 here), and one built on 24.04 would refuse to start on any
     # distribution still shipping an older release, with no useful error.
-    # SDL2 and Prism (with gcc 13's libstdc++) are compiled in; what else is
-    # linked is the host's speech-dispatcher client.
+    # SDL2 and Prism (with gcc 13's libstdc++) are compiled in; Prism opens
+    # the player's Speech Dispatcher at run time rather than linking it.
     #
     # Two native builds, one per CPU: x86_64 for PCs and aarch64 for the
     # Blazie BT Speak and BT Braille (Debian on a Raspberry Pi Compute
@@ -385,8 +454,9 @@ jobs:
       # 22.04 stops at 12, so gcc 13 comes from Ubuntu's toolchain PPA and
       # crates/freight-fate/build.rs links its libstdc++ statically -- the
       # player's system libstdc++ can be as old as 22.04's. Prism builds its
-      # speech-dispatcher backend only when the development package is here;
-      # without it Linux players would get no speech. Its Orca backend needs
+      # Speech Dispatcher backend (headers only; it opens the library at run
+      # time) only when the development package is here; without it Linux
+      # players would get no speech. Its Orca backend needs
       # glibmm 2.68, which 22.04 does not carry, so it is left out; Orca
       # users hear the game through Speech Dispatcher instead.
       - name: Install Prism build dependencies
@@ -605,6 +675,57 @@ jobs:
             --title "Freight Fate 1.9 tester snapshot $(date -u +%Y-%m-%d)" \
             --prerelease --target "$COMMIT_SHA"
 
+      # The 1.8 updater's developer-snapshot channel looks only at the 20
+      # newest releases for a `nightly-YYYYMMDD` prerelease, and on a Mac
+      # for an asset ending `-macos.zip`; it has never heard of
+      # `1.9-tester-*`. This republishes the same archives under that name
+      # so a 1.8 nightly player is offered 1.9. Every 1.8 Mac build was
+      # Apple Silicon only, so the arm64 app is the right one for them. The
+      # archives keep their own build_info.json, so once installed the game
+      # follows `1.9-tester-*` like any tester build.
+      - name: Publish the release candidate for 1.8 developer snapshots
+        if: ${{ inputs.dry_run != true && inputs.release_candidate && needs.prepare.outputs.is_prerelease == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          COMMIT_SHA: ${{ needs.prepare.outputs.commit_sha }}
+        run: |
+          BRIDGE="nightly-${TAG#1.9-tester-}"
+          mkdir bridge-assets
+          cp release-assets/FreightFate-* bridge-assets/
+          for zip in bridge-assets/FreightFate-*-macos-arm64.zip; do
+            cp "$zip" "${zip%-macos-arm64.zip}-macos.zip"
+          done
+          (cd bridge-assets && sha256sum FreightFate-* > checksums.txt)
+
+          VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'].split('.dev')[0])")
+          python3 tools/release_notes.py stable --version "$VERSION" --output stable-notes.md
+          {
+            echo "Freight Fate 1.9 release candidate. Careers from 1.8 do not carry over to 1.9, so you start a new career; your 1.8 career files are left as they are."
+            echo
+            cat stable-notes.md
+          } > bridge-notes.md
+          python3 tools/release_notes.py check-size --input bridge-notes.md --max-characters 125000
+
+          if gh release view "$BRIDGE" >/dev/null 2>&1; then
+            gh release delete "$BRIDGE" -y --cleanup-tag
+          elif git ls-remote --exit-code --tags origin "refs/tags/$BRIDGE" >/dev/null 2>&1; then
+            git push origin ":refs/tags/$BRIDGE"
+          fi
+          # GitHub shows an asset's label in place of its file name. The
+          # updaters match on the name, so the plain Mac copy keeps it and
+          # gets a label saying it is the same app as the arm64 zip.
+          assets=()
+          for f in bridge-assets/*; do
+            case "$f" in
+              *-macos.zip) assets+=("$f#$(basename "$f") (in-game updater copy, same app as the macos-arm64 zip)") ;;
+              *) assets+=("$f") ;;
+            esac
+          done
+          gh release create "$BRIDGE" "${assets[@]}" --notes-file bridge-notes.md \
+            --title "Freight Fate 1.9 release candidate $(date -u +%Y-%m-%d)" \
+            --prerelease --target "$COMMIT_SHA"
+
       - name: Create stable release
         if: ${{ inputs.dry_run != true && needs.prepare.outputs.is_prerelease == 'false' }}
         env:
@@ -618,6 +739,23 @@ jobs:
             echo "Release $TAG already exists; refusing to replace a stable release." >&2
             exit 1
           fi
-          gh release create "$TAG" release-assets/* --notes-file notes.md \
+          # Every stable updater on a Mac, 1.8's and 1.9's alike, looks for
+          # an asset ending `-macos.zip`; without this copy no Mac install is
+          # ever offered the release. The arm64 name stays for the snapshots.
+          for zip in release-assets/FreightFate-*-macos-arm64.zip; do
+            cp "$zip" "${zip%-macos-arm64.zip}-macos.zip"
+          done
+          (cd release-assets && sha256sum FreightFate-* > checksums.txt)
+          # GitHub shows an asset's label in place of its file name. The
+          # updaters match on the name, so the plain Mac copy keeps it and
+          # gets a label saying it is the same app as the arm64 zip.
+          assets=()
+          for f in release-assets/*; do
+            case "$f" in
+              *-macos.zip) assets+=("$f#$(basename "$f") (in-game updater copy, same app as the macos-arm64 zip)") ;;
+              *) assets+=("$f") ;;
+            esac
+          done
+          gh release create "$TAG" "${assets[@]}" --notes-file notes.md \
             --title "Freight Fate $VERSION" \
             --target "$COMMIT_SHA"

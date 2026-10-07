@@ -171,7 +171,13 @@ impl DrivingState {
             effective_mph = effects.safe_speed_mph;
             exit_note = format!(" in the {}", self.trip.weather.current.value());
         }
-        ctx.audio.play_with("ui/notify", 0.5, 0.0);
+        if transition_label.is_some() {
+            // Cruise retaking the pedals on its own speaks as a confirmation;
+            // its tone goes with the words.
+            ctx.play_event_cue(Some(SpeechCategory::Confirmation), "ui/notify", 0.5, 0.0);
+        } else {
+            ctx.audio.play_with("ui/notify", 0.5, 0.0);
+        }
         let message = format!(
             "Adaptive cruise {} at {}{exit_note}. Following gap {gap:.0} seconds.",
             if transition_label.is_some() {
@@ -186,7 +192,16 @@ impl DrivingState {
             // handoff as the keeper's resume line (driving_speed_control 291,
             // already ROUTE). The quiet rung still silences it by category;
             // ROUTE only stops a busy channel eating it at standard.
-            self.say_route_confirmation(ctx, &format!("{label}. {message}"));
+            self.say_route_confirmation(
+                ctx,
+                SpokenMessage::with_terse(
+                    format!("{label}. {message}"),
+                    format!(
+                        "Cruise resuming, {}.",
+                        ctx.settings.speed_value(effective_mph)
+                    ),
+                ),
+            );
         } else {
             self.say_plain(ctx, message);
         }
@@ -213,8 +228,12 @@ impl DrivingState {
                 return;
             }
         }
-        if self.cruise_mph.is_none() && self.keeper_mph.is_none() {
-            self.say_plain(ctx, "Adaptive cruise off. Press K to set it.");
+        // A paused session is not off: the dial sets the speed it resumes at
+        // below. Telling a paused driver to press K sent them to the key that
+        // switches it off (2026-09-28).
+        if self.cruise_mph.is_none() && self.keeper_mph.is_none() && !self.speed_control_armed {
+            let key = ctx.control_name(crate::bindings::Action::Cruise);
+            self.say_plain(ctx, format!("Adaptive cruise off. Press {key} to set it."));
             return;
         }
         let base = match self.speed_control_target_mph {
@@ -488,7 +507,13 @@ impl DrivingState {
                     let eased = ctx.settings.speed_text(*ahead_mph);
                     self.say_route_confirmation(
                         ctx,
-                        &format!("{reason}; speed keeper easing to {eased}."),
+                        SpokenMessage::with_terse(
+                            format!("{reason}; speed keeper easing to {eased}."),
+                            format!(
+                                "Speed keeper easing to {}.",
+                                ctx.settings.speed_value(*ahead_mph)
+                            ),
+                        ),
                     );
                     // This line already named the number for a plain posted-limit
                     // drop; the arrival "Speed limit reduced to X" would otherwise

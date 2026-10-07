@@ -47,9 +47,10 @@
 //! direction, radius, or lane ordinal, and `docs/nav-phrasing-brief.md` forbids
 //! speaking a lane ordinal that was never harvested.
 
-use ff_core::data::corners::corner_speed_mph;
+use ff_core::data::corners::{corner_radius_ft, corner_speed_mph, ASSUMED_TURN_DEG};
 use ff_core::data::curves::RouteCurve;
 use ff_core::sim::trip_models::{NavigationCue, FACILITY_ACCESS_LIMIT_MPH};
+use ff_core::sim::turn_guide::{TurnShape, TurnSide};
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
 use crate::app::{GameContext, SayEvent};
@@ -99,7 +100,7 @@ pub const TURN_NOW_MI: f64 = 0.05;
 pub const TURN_GUIDE_LEAD_MI: f64 = ff_core::sim::turn_guide::LEAD_MI;
 pub const TURN_GUIDE_DEMAND: f64 = 0.9;
 /// An exit ramp peels right; the lane model already pushes the truck that way,
-/// so the road bed leans with it instead of sitting dead centre.
+/// so the engine leans with it instead of sitting dead centre.
 pub const RAMP_GUIDE_DEMAND: f64 = 0.45;
 
 /// `_is_judged_turn(cue)`: a baked street maneuver with a real side to it.
@@ -185,6 +186,105 @@ impl DrivingState {
             })
             .min_by(|a, b| a.at_mi.total_cmp(&b.at_mi))
             .cloned()
+    }
+
+    /// A street corner's shape: the angle the map measured at the junction
+    /// (a square corner when it could not) and the WB-67 design radius for
+    /// it from `data::corners`, the same geometry that sets its advise speed.
+    pub fn corner_shape(&self, cue: &NavigationCue, side: TurnSide) -> TurnShape {
+        let degrees = self
+            .trip
+            .route
+            .legs
+            .get(self.turn_leg_index(cue))
+            .map(|leg| leg.local_turn_deg)
+            .filter(|deg| *deg > 0.0)
+            .unwrap_or(ASSUMED_TURN_DEG);
+        TurnShape {
+            side,
+            deflection_deg: degrees,
+            radius_ft: corner_radius_ft(degrees),
+        }
+    }
+
+    /// The road's own bend at a street corner the truck is inside, as the
+    /// lane model takes it: one over the radius, positive turning right, over
+    /// the arc the corner sweeps. Zero anywhere else.
+    ///
+    /// The lane had no corners in it. The engine leaned into one and asked
+    /// for a turn's worth of wheel, but the road under the truck ran straight
+    /// on, so a driver who steered as asked only drove across their own lane
+    /// and then heard the lean point back the other way (forum report 448,
+    /// 2026-09-30). A corner bends the lane's road like a mapped bend now:
+    /// nothing steering it runs wide, and curve assistance takes it.
+    ///
+    /// Read from the cues directly rather than the corner judging, whose
+    /// latches can close a corner before the truck is through its arc.
+    pub fn street_corner_curvature(&self) -> f64 {
+        let into = |cue: &NavigationCue| self.trip.position_mi - cue.at_mi;
+        self.trip
+            .navigation_cues
+            .iter()
+            .filter(|cue| is_judged_turn(cue) && into(cue) >= 0.0)
+            .find_map(|cue| {
+                let side = TurnSide::parse(&cue.direction)?;
+                let shape = self.corner_shape(cue, side);
+                let arc_mi = shape.radius_ft * shape.deflection_deg.to_radians() / 5280.0;
+                (into(cue) < arc_mi).then(|| side.sign() / shape.radius_ft)
+            })
+            .unwrap_or(0.0)
+    }
+
+    /// The side a hold toward follows the road for (`LaneKeeping::
+    /// turn_in_play`): the turn the engine leans for, or failing that the
+    /// nearest turn ahead the driver has already been told about.
+    ///
+    /// From the call, not from the lean's lead. The instinct is to hold the
+    /// moment the game says turn, and "Right turn onto South Dakota Street,
+    /// one mile" held right steered a truck a mile short of the corner off the
+    /// road; "Sharp left, half a mile" held left changed lanes into the
+    /// median (owner's drives, 2026-09-30). Called, the hold waits straight
+    /// on in its lane until the turn arrives.
+    pub fn hold_turn_side(&mut self) -> f64 {
+        if let Some(shape) = self.turn_guide_input(false).shape {
+            return shape.side.sign();
+        }
+        let position = self.trip.position_mi;
+        let (limit, _) = self.trip.speed_limit_at(position);
+        let mut nearest: Option<(f64, f64)> = None;
+        let mut consider = |ahead: f64, side: Option<TurnSide>| {
+            if let Some(side) = side.filter(|_| ahead > 0.0) {
+                if nearest.is_none_or(|(held, _)| ahead < held) {
+                    nearest = Some((ahead, side.sign()));
+                }
+            }
+        };
+        for cue in self
+            .trip
+            .navigation_cues
+            .iter()
+            .filter(|cue| is_judged_turn(cue))
+        {
+            let called = self.turn_advised.contains(&cue.key)
+                || ["advance", "near"].iter().any(|half| {
+                    self.trip
+                        .announced_navigation
+                        .contains(&format!("{}:{half}", cue.key))
+                });
+            if called {
+                consider(cue.at_mi - position, TurnSide::parse(&cue.direction));
+            }
+        }
+        for bend in self.trip.curves.iter().filter(|bend| !bend.connector) {
+            // A bend the road warns about, whose call has gone out.
+            if (bend.advisory_mph as f64) < limit && self.trip.curve_called(bend) {
+                consider(
+                    bend.start_mi - position,
+                    TurnSide::parse(&bend.direction.to_string()),
+                );
+            }
+        }
+        nearest.map_or(0.0, |(_, sign)| sign)
     }
 
     /// `_turn_leg_index(cue)`.

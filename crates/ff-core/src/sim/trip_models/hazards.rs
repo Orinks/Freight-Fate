@@ -54,6 +54,18 @@ impl OpenSide {
         self != OpenSide::Neither
     }
 
+    /// The lane a pass takes, as a step from the truck's lane: `1` is one
+    /// lane left (lane 0 is the right lane), `-1` one lane right. Left
+    /// wherever left is open, the side traffic passes on; right only where
+    /// it is the one lane open.
+    pub fn pass_step(self) -> Option<i64> {
+        match self {
+            OpenSide::Left | OpenSide::Either => Some(1),
+            OpenSide::Right => Some(-1),
+            OpenSide::Neither => None,
+        }
+    }
+
     /// The lane answer, in the L key's own words ("left lane open", see
     /// docs/ontology.md), so the call and the readout never disagree.
     pub fn spoken(self) -> &'static str {
@@ -63,6 +75,24 @@ impl OpenSide {
             OpenSide::Either => "Either lane open.",
             OpenSide::Neither => "No lane open.",
         }
+    }
+
+    /// [`Self::spoken`] for a truck in `lane` of `count`, naming the open
+    /// neighbour the way the L key and a lane change do: on a road three
+    /// wide, the lane left of the right lane is the middle lane, and "Left
+    /// lane open." then a move into "the middle lane" read as two different
+    /// lanes (agent drive to Uvalde, 2026-10-06).
+    pub fn spoken_from(self, lane: i64, count: i64) -> String {
+        let neighbour = match self {
+            OpenSide::Left => lane + 1,
+            OpenSide::Right => lane - 1,
+            OpenSide::Either | OpenSide::Neither => return self.spoken().to_string(),
+        };
+        let mut name = crate::sim::lane::lane_label(neighbour, count).to_string();
+        if let Some(first) = name.get_mut(0..1) {
+            first.make_ascii_uppercase();
+        }
+        format!("{name} lane open.")
     }
 }
 

@@ -465,6 +465,19 @@ fn pedal_and_wait_for_refuse_a_missing_duration() {
 }
 
 #[test]
+fn key_probe_parses_start_and_report_and_refuses_anything_else() {
+    for (action, start) in [("start", true), ("report", false)] {
+        let mut args = serde_json::Map::new();
+        args.insert("action".into(), action.into());
+        match build_command("key_probe", &args) {
+            Ok(Command::KeyProbe { start: got }) => assert_eq!(got, start),
+            _ => panic!("{action} is not a key_probe command"),
+        }
+    }
+    assert!(build_command("key_probe", &serde_json::Map::new()).is_err());
+}
+
+#[test]
 fn the_tool_list_carries_the_driving_tools() {
     let script = rpc(1, "tools/list", "{}");
     let (tx, _rx) = mpsc::channel();
@@ -485,6 +498,7 @@ fn the_tool_list_carries_the_driving_tools() {
         "status",
         "operator_keys",
         "lockstep",
+        "key_probe",
     ] {
         assert!(names.iter().any(|n| n == name), "{name} in {names:?}");
     }

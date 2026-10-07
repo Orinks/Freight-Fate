@@ -3,12 +3,18 @@
 //! Main thread only -- see the threading note in [`crate::speech`].
 
 use std::env;
+use std::time::Duration;
 
 use super::backend::{
     narrator_running, pick_backend_gated, pick_event_backend, preserve_backend_default_pitch,
     usable, PrismRegistry, VoiceBackend, VoiceFeatures, VoiceRegistry,
 };
 use super::{PreviewFeature, SpeechSink, EVENT_BACKEND, REFRESH_INTERVAL_S};
+
+/// How long the first lines wait when the game starts on VoiceOver. VoiceOver
+/// reads the newly focused game window aloud as the game opens, and that cuts
+/// off any announcement already posted: the opening screen went unheard.
+const VOICEOVER_STARTUP_HOLD: Duration = Duration::from_millis(1500);
 
 /// The observer's terminal stream is written at the real speech-sink
 /// boundary. That includes a backend-refresh announcement, but excludes
@@ -331,6 +337,13 @@ impl Speech {
 impl SpeechSink for Speech {
     fn available(&self) -> bool {
         self.backend.is_some()
+    }
+
+    fn startup_hold(&self) -> Duration {
+        match &self.backend {
+            Some(backend) if backend.name().starts_with("VoiceOver") => VOICEOVER_STARTUP_HOLD,
+            _ => Duration::ZERO,
+        }
     }
 
     fn backend_name(&self) -> String {
@@ -667,6 +680,12 @@ impl SpeechSink for Speech {
     fn stop(&mut self) {
         Self::stop_backend(self.backend.as_mut());
         Self::stop_backend(self.event_backend.as_mut());
+    }
+
+    fn is_speaking(&self) -> bool {
+        self.backend
+            .as_ref()
+            .is_some_and(|backend| backend.is_speaking().unwrap_or(false))
     }
 
     fn shutdown(&mut self) {

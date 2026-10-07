@@ -43,14 +43,14 @@ use freight_fate::states::driving_updates::{
 /// through the same recording backend rather than growing a second copy.
 #[derive(Default)]
 pub(super) struct Calls {
-    played: Vec<(String, f64)>,
+    pub(super) played: Vec<(String, f64)>,
     /// `play_bank(base, volume)`, kept apart from `played` the way Python's
     /// two separate stubs did.
     banks: Vec<(String, f64)>,
     /// `("start", channel, key, volume)` / `("vol", channel, volume)` /
     /// `("stop", channel)`, flattened into one ordered log the way the Python
     /// cases collected them.
-    loops: Vec<LoopCall>,
+    pub(super) loops: Vec<LoopCall>,
     reverse: Vec<&'static str>,
     engine_rpm: Vec<(f64, f64)>,
     pub(super) engine_pan: Vec<f64>,
@@ -65,7 +65,7 @@ pub(super) struct Calls {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-enum LoopCall {
+pub(super) enum LoopCall {
     Start(u32, String, f64),
     Volume(u32, f64),
     Rate(u32, f64),

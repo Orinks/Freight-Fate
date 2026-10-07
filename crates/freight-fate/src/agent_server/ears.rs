@@ -51,8 +51,8 @@ fn pan_text(pan: f64) -> &'static str {
 ///
 /// A one-shot says its side once and is done, but the road bed and the engine
 /// are panned EVERY FRAME, and together they are the whole steering instrument
-/// with lane keeping off: the bed leans toward where the wheel should go, and
-/// the engine sits where the truck is in its lane. Reporting either raw would
+/// with lane keeping off: the engine leans toward where the wheel should go,
+/// and the bed sits where the truck is in its lane. Reporting either raw would
 /// bury the transcript; reporting neither -- which is what this did until
 /// 2026-09-18 -- left an agent deaf to the one channel it was asked to test.
 /// Quantised to quarters, a slewing guide reports about as often as a player
@@ -172,6 +172,9 @@ impl SpeechSink for TeeSpeech {
     fn shutdown(&mut self) {
         self.inner.shutdown();
     }
+    fn shutdown_pumping(&mut self, pump: &mut dyn FnMut()) {
+        self.inner.shutdown_pumping(pump);
+    }
 }
 
 // -- the audio tee --------------------------------------------------------------------
@@ -271,6 +274,21 @@ impl Audio for TeeAudio {
         let soft = if volume < 0.4 { ", soft" } else { "" };
         self.hear(format!("[sound] {base}{}{soft}", pan_text(pan)));
         self.inner.play_bank_with(base, fallback, volume, pan);
+    }
+    // The held-cue pair reaches the engine as itself. Left to the trait's
+    // defaults, a repeat-when-idle came through as a plain play, so in the
+    // agent server every blinker click started a fresh copy over the one
+    // still sounding (owner, 2026-10-01: the blinker "played twice over each
+    // other"), and a held cue's pan never followed the move.
+    fn play_if_idle(&mut self, key: &str, volume: f64, pan: f64) {
+        let soft = if volume < 0.4 { ", soft" } else { "" };
+        self.hear(format!("[sound] {key}{}{soft}", pan_text(pan)));
+        self.hold_cue(key);
+        self.inner.play_if_idle(key, volume, pan);
+    }
+    fn update_cue(&mut self, key: &str, volume: f64, pan: f64) {
+        self.hold_cue(key);
+        self.inner.update_cue(key, volume, pan);
     }
     fn set_engine_duck(&mut self, duck: f64) {
         self.inner.set_engine_duck(duck);
@@ -597,8 +615,8 @@ mod tests {
 
     #[test]
     fn the_steering_guide_reaches_an_agents_ears() {
-        // With lane keeping off the road bed leans toward where the wheel
-        // should go and the engine sits where the truck is in its lane. Those
+        // With lane keeping off the engine leans toward where the wheel
+        // should go and the road bed sits where the truck is in its lane. Those
         // two are the whole instrument, and an agent asked to test steering
         // heard NEITHER until 2026-09-18: one-shots reported their side, but
         // the continuous pans went straight through to the backend.
@@ -644,6 +662,25 @@ mod tests {
         assert_eq!(
             heard.matches("[bed] vehicle/road pans").count(),
             2,
+            "{heard}"
+        );
+    }
+
+    #[test]
+    fn a_repeating_cue_reaches_the_engine_held_not_as_a_fresh_play() {
+        // A blinker click is play-if-idle: the engine starts it only when the
+        // last one has finished, and holds it as a cue. Through the tee it
+        // used to arrive as a plain play, held by nobody, and every click
+        // stacked a second copy on the first.
+        let ears = Ears::shared();
+        let mut audio = tee_audio(&ears);
+        audio.play_if_idle("vehicle/turn_signal", 0.8, -0.6);
+        assert!(audio.inner.cue_held("vehicle/turn_signal"));
+        audio.release_cue("vehicle/turn_signal");
+        let heard = drain_ears(&ears);
+        assert_eq!(
+            heard.matches("[cue] vehicle/turn_signal holds").count(),
+            1,
             "{heard}"
         );
     }

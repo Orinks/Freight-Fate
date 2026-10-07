@@ -48,6 +48,7 @@ use crate::cloud_saves::{BackupAnnouncements, CloudSaves};
 use crate::controller::ControllerManager;
 use crate::discord_presence::DiscordPresence;
 use crate::duty_watch::DutyWatch;
+use crate::jaws_script::JawsScript;
 use crate::meaningful_play::MeaningfulPlayReason;
 use crate::net::UreqTransport;
 use crate::online_journal::{queue_achievement, JournalOutbox};
@@ -110,6 +111,8 @@ pub struct Services {
     /// The background watch on the drivers list (the "Say when drivers go
     /// on or off duty" row).
     pub duty: DutyWatch,
+    /// The optional JAWS arrow-key script (Settings, Speech).
+    pub jaws_script: JawsScript,
     pub cloud: CloudSaves,
     pub journal: JournalOutbox,
     pub mastodon: JournalOutbox,
@@ -173,9 +176,6 @@ pub struct GameContext {
     /// Whether the game mix is currently stepped down under the event voice
     /// (Settings > Audio; see `engage_speech_duck`).
     pub(crate) speech_ducked: bool,
-    /// Deadline for a duck an earcon opened, in real seconds. Zero when the
-    /// duck belongs to a spoken line, which the pacer's projection ends.
-    pub(crate) earcon_duck_until: f64,
     /// True only while a control the player actually pressed is being
     /// handled. See `player_asked`: a readout somebody asked for cuts the
     /// line in progress even at the wheel, where unasked-for lines queue.
@@ -237,14 +237,8 @@ pub struct ContextParts {
 
 impl GameContext {
     pub fn new(parts: ContextParts) -> Self {
-        // The S4 ladder's earcons (LADDER_EARCONS) can play from any screen
-        // the silencing gate fires on, not only the Learn game sounds screen
-        // that used to be the sole registrant. Idempotent and cheap, so doing
-        // it once here means the drive never has to wait on that screen
-        // having been visited first.
-        ff_core::ladder_earcons::register_ladder_earcons();
-        // Same reason, same shape: the guide tone must exist before a drive
-        // starts, not only after the Learn screen has been opened.
+        // The guide tone must exist before a drive starts, not only after
+        // the Learn game sounds screen has been opened. Idempotent and cheap.
         ff_core::lane_guide_tone::register_lane_guide_tone();
         Self {
             speech: parts.speech,
@@ -269,7 +263,6 @@ impl GameContext {
             input: HeldKeys::default(),
             running: false,
             speech_ducked: false,
-            earcon_duck_until: 0.0,
             speech_requested: false,
             ladder_said: HashSet::new(),
             ladder_last: HashMap::new(),
@@ -786,8 +779,11 @@ impl GameContext {
     /// the pad button when a controller is active and the control has one,
     /// else the keyboard key (the keyboard always stays active).
     pub fn control_name(&self, action: crate::bindings::Action) -> String {
-        if self.controller.device() == ff_core::input_hints::CONTROLLER && action.on_pad() {
+        let device = self.controller.device();
+        if device == ff_core::input_hints::CONTROLLER && action.on_pad() {
             self.bindings.pad_spoken(action)
+        } else if device == ff_core::input_hints::TOUCH {
+            self.bindings.touch_noun(action)
         } else {
             self.bindings.spoken(action)
         }
@@ -796,8 +792,11 @@ impl GameContext {
     /// Name a control for a spoken prompt, following the active device and
     /// whatever key or button the player has it on.
     pub fn control_hint(&self, action: &str) -> String {
-        let moved = if self.controller.device() == ff_core::input_hints::CONTROLLER {
+        let device = self.controller.device();
+        let moved = if device == ff_core::input_hints::CONTROLLER {
             self.bindings.hint_pad_phrase(action)
+        } else if device == ff_core::input_hints::TOUCH {
+            self.bindings.hint_touch_phrase(action)
         } else {
             self.bindings.hint_key_phrase(action)
         };

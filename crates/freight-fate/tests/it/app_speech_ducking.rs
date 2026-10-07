@@ -9,10 +9,10 @@
 //! duck scales -- is `tests/audio_speech_ducking.rs`.)
 
 use ff_core::settings::Settings;
-use ff_core::speech_pacing::{monotonic_seconds, SpeechCategory};
+use ff_core::speech_pacing::SpeechCategory;
 use freight_fate::app::testing::{AudioLog, FakeClock, TestApp};
 use freight_fate::app::{Say, SayEvent};
-use freight_fate::audio::{EARCON_DUCK_S, SPEECH_DUCK_LEVEL};
+use freight_fate::audio::SPEECH_DUCK_LEVEL;
 
 fn rig(app: &mut TestApp) -> (AudioLog, FakeClock) {
     app.ctx.settings.sapi_events = true;
@@ -86,65 +86,31 @@ fn test_a_suppressed_repeat_does_not_duck() {
 }
 
 #[test]
-fn test_an_earcon_gets_the_room_the_words_it_replaces_would_have_had() {
-    // Tester Shane, 2026-08-17: "some of the sounds when you put speech in
-    // quiet mode have been significantly lowered." A spoken line ducks
-    // engine, weather and radio while it talks; a silenced line returned
-    // from say_event before reaching that duck, so its earcon played
-    // against the full road bed.
-    let mut app = TestApp::new();
-    let audio = app.record_audio();
-    app.ctx.settings.duck_audio_for_speech = true;
-    app.ctx.settings.driving_speech = "urgent_only".to_string(); // confirmation -> earcon
+fn test_a_line_the_rung_silences_leaves_the_mix_alone() {
+    // Nothing plays in place of a silenced line any more (owner,
+    // 2026-10-03), so there is nothing to make room for: stepping the road
+    // back for a line nobody hears would read as the engine dipping for no
+    // reason.
+    for rung in ["quiet", "urgent_only"] {
+        let mut app = TestApp::new();
+        let audio = app.record_audio();
+        app.ctx.settings.duck_audio_for_speech = true;
+        app.ctx.settings.driving_speech = rung.to_string();
 
-    app.ctx.say_event_with(
-        "Automatic braking.",
-        SayEvent::queued().category(SpeechCategory::Confirmation),
-    );
+        app.ctx.say_event_with(
+            "Traffic ahead, adaptive cruise reducing speed.",
+            SayEvent::queued().category(SpeechCategory::Traffic),
+        );
 
-    let ducks = audio.borrow().ducks.clone();
-    assert!(
-        !ducks.is_empty(),
-        "the earcon played against an unducked mix"
-    );
-    assert_eq!(*ducks.last().unwrap(), SPEECH_DUCK_LEVEL);
-    assert!(app.ctx.speech_ducked());
-    app.shutdown();
+        assert!(audio.borrow().ducks.is_empty(), "{rung}");
+        assert!(audio.borrow().played.is_empty(), "{rung}");
+        assert!(!app.ctx.speech_ducked(), "{rung}");
+        app.shutdown();
+    }
 }
 
 #[test]
-fn test_the_earcon_duck_lets_go_on_its_own() {
-    // It cannot lean on the pacer's projection, because a silenced line has
-    // no voice to project -- so it holds for its own short window and
-    // releases. A duck that never released would leave the road permanently
-    // halved.
-    let window = EARCON_DUCK_S;
-    assert!(window <= 0.5, "longer than any ladder earcon needs");
-
-    let mut app = TestApp::new();
-    let audio = app.record_audio();
-    app.ctx.settings.duck_audio_for_speech = true;
-    app.ctx.settings.driving_speech = "urgent_only".to_string();
-
-    app.ctx.say_event_with(
-        "Automatic braking.",
-        SayEvent::queued().category(SpeechCategory::Confirmation),
-    );
-    assert!(app.ctx.speech_ducked());
-
-    // Still inside the window: the mix stays back.
-    app.ctx.update_speech_duck();
-    assert!(app.ctx.speech_ducked());
-
-    app.ctx.set_earcon_duck_until(monotonic_seconds() - 0.01);
-    app.ctx.update_speech_duck();
-    assert!(!app.ctx.speech_ducked());
-    assert_eq!(*audio.borrow().ducks.last().unwrap(), 1.0);
-    app.shutdown();
-}
-
-#[test]
-#[ignore = "Python swept its own source text for the setting check at every duck engage point; a source sweep has no Rust equivalent. The Rust engage points are engage_earcon_duck / engage_speech_duck, both gated, plus the driving-state ducks"]
+#[ignore = "Python swept its own source text for the setting check at every duck engage point; a source sweep has no Rust equivalent. The Rust engage point is engage_speech_duck, gated, plus the driving-state ducks"]
 fn test_nothing_anywhere_ducks_when_the_player_turned_ducking_off() {}
 
 #[test]
@@ -166,31 +132,6 @@ fn test_with_ducking_off_an_earcon_leaves_the_mix_alone() {
         audio.borrow().ducks
     );
     assert!(!app.ctx.speech_ducked());
-    app.shutdown();
-}
-
-#[test]
-fn test_a_say_path_earcon_gets_the_same_room_as_an_event_one() {
-    // Cruise and stop confirmations ride say_with, not say_event. The Aug 19
-    // earcon duck covered only the event channel, so quiet-mode notes on the
-    // main say path still played against the full road bed.
-    let mut app = TestApp::new();
-    let audio = app.record_audio();
-    app.ctx.settings.duck_audio_for_speech = true;
-    app.ctx.settings.driving_speech = "urgent_only".to_string();
-
-    app.ctx.say_with(
-        "Cruise set.",
-        Say::new().category(SpeechCategory::Confirmation),
-    );
-
-    let ducks = audio.borrow().ducks.clone();
-    assert!(
-        !ducks.is_empty(),
-        "the say-path earcon played against an unducked mix"
-    );
-    assert_eq!(*ducks.last().unwrap(), SPEECH_DUCK_LEVEL);
-    assert!(app.ctx.speech_ducked());
     app.shutdown();
 }
 

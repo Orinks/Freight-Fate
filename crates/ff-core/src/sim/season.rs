@@ -92,7 +92,17 @@ pub fn day_of_year(game_hours: f64) -> f64 {
 /// `now` defaults to the local wall clock (`datetime.datetime.now()`).
 pub fn real_clock_game_hours(now: Option<NaiveDateTime>) -> f64 {
     let now = now.unwrap_or_else(|| Local::now().naive_local());
-    let doy = f64::from(now.ordinal()); // 1..366
+    // The month and day, placed on the career's 365-day year: the real
+    // ordinal ran one day ahead of it from March 1 of a leap year, so every
+    // live date was spoken a day late and December 31 read "January 1"
+    // (seasonal audit, 2026-10-01). February 29 reads as the 28th.
+    let day = if now.month() == 2 {
+        now.day().min(28)
+    } else {
+        now.day()
+    };
+    let doy = NaiveDate::from_ymd_opt(2001, now.month(), day)
+        .map_or(f64::from(now.ordinal()), |date| f64::from(date.ordinal()));
     let hour = f64::from(now.hour()) + f64::from(now.minute()) / 60.0;
     let days_offset = (doy - CAREER_START_DAY_OF_YEAR).rem_euclid(DAYS_PER_YEAR);
     days_offset * 24.0 + hour
@@ -151,6 +161,18 @@ pub fn weekday_name(game_hours: f64) -> &'static str {
     WEEKDAY_NAMES[day_of_week(game_hours)]
 }
 
+/// The real weekday for a point on the live calendar clock
+/// (`real_clock_game_hours`), counted from the real date `now`. That clock
+/// keeps the day of the year but not the year, so `weekday_name` read it on
+/// 2001's weekdays, three days off 2026's (seasonal audit, 2026-10-01).
+pub fn real_weekday_name(live_hours: f64, now: Option<NaiveDateTime>) -> &'static str {
+    let now = now.unwrap_or_else(|| Local::now().naive_local());
+    let now_hours = real_clock_game_hours(Some(now));
+    let days = ((now_hours.rem_euclid(24.0) + (live_hours - now_hours)) / 24.0).floor() as i64;
+    let date = now.date() + chrono::Duration::days(days);
+    WEEKDAY_NAMES[date.weekday().num_days_from_monday() as usize]
+}
+
 /// Saturday or Sunday: commuter rush hours do not form.
 pub fn is_weekend(game_hours: f64) -> bool {
     day_of_week(game_hours) >= 5
@@ -188,7 +210,7 @@ const MONTH_NAMES: [&str; 12] = [
 
 /// The 2001 calendar date for a point on the clock: the career runs a fixed
 /// 365-day (non-leap) year mapped onto 2001, where January 1 is day-of-year 1.
-fn calendar_date(game_hours: f64) -> NaiveDate {
+pub fn calendar_date(game_hours: f64) -> NaiveDate {
     let doy = day_of_year(game_hours).trunc() as i64;
     let jan_1 = NaiveDate::from_ymd_opt(2001, 1, 1).expect("2001-01-01 is a valid date");
     jan_1 + chrono::Duration::days((doy - 1).rem_euclid(365))
@@ -203,14 +225,21 @@ pub fn date_text(game_hours: f64) -> String {
     format!("{} {}", MONTH_NAMES[date.month0() as usize], date.day())
 }
 
-/// Whether the career calendar has landed on a Friday the thirteenth.
-///
-/// The career runs the same fixed 365-day year every lap, mapped onto 2001,
-/// so the unlucky dates are the ones 2001 had -- and they come round again
-/// each career year, which is what a superstition wants anyway.
-pub fn is_friday_the_thirteenth(game_hours: f64) -> bool {
-    let date = calendar_date(game_hours);
+/// Whether a real calendar date is a Friday the thirteenth. The superstition
+/// belongs to the day the player is living, so the badge reads the real date,
+/// not the career calendar.
+pub fn is_friday_the_thirteenth(date: NaiveDate) -> bool {
     date.day() == 13 && date.weekday() == Weekday::Fri
+}
+
+/// Whether a real calendar date falls in National Truck Driver Appreciation
+/// Week: the American Trucking Associations hold it Sunday to Saturday from
+/// the second Sunday of September (September 13-19 in 2026).
+pub fn is_truck_driver_appreciation_week(date: NaiveDate) -> bool {
+    let Some(sunday) = NaiveDate::from_weekday_of_month_opt(date.year(), 9, Weekday::Sun, 2) else {
+        return false;
+    };
+    (sunday..sunday + chrono::Duration::days(7)).contains(&date)
 }
 
 /// Which year of the career this clock falls in (1 on the first lap of the
@@ -289,11 +318,11 @@ pub fn adjust_for_calendar(
         return adjusted;
     };
     let current_season = season(game_hours);
+    // Out of season, snow becomes dry overcast, never rain: it only got here
+    // by being at or below freezing, and "rain, 14 degrees" was the readout a
+    // cold March night produced (seasonal audit, 2026-10-01).
     if adjusted == WeatherKind::Snow && current_season != "winter" {
-        return match temp_c {
-            Some(t) if t < 6.0 => WeatherKind::Rain,
-            _ => WeatherKind::Cloudy,
-        };
+        return WeatherKind::Cloudy;
     }
     if adjusted == WeatherKind::Thunderstorm && current_season != "summer" {
         return WeatherKind::HeavyRain;
@@ -347,6 +376,26 @@ mod tests {
         assert_eq!(date_text(24.0 * 100.0), "June 29"); // a hundred days on
                                                         // The fixed 365-day year wraps cleanly back to the start.
         assert_eq!(date_text(24.0 * DAYS_PER_YEAR), "March 21");
+    }
+
+    #[test]
+    fn appreciation_week_is_the_weeks_the_ata_announced() {
+        // ATA's published dates: the second full Sunday-to-Saturday week.
+        for (year, first) in [(2023, 10), (2024, 8), (2025, 14), (2026, 13)] {
+            let day = |d: u32| NaiveDate::from_ymd_opt(year, 9, d).unwrap();
+            assert!(!is_truck_driver_appreciation_week(day(first - 1)), "{year}");
+            assert!(is_truck_driver_appreciation_week(day(first)), "{year}");
+            assert!(is_truck_driver_appreciation_week(day(first + 6)), "{year}");
+            assert!(!is_truck_driver_appreciation_week(day(first + 7)), "{year}");
+        }
+    }
+
+    #[test]
+    fn friday_the_thirteenth_is_the_real_date() {
+        let date = |m, d| NaiveDate::from_ymd_opt(2026, m, d).unwrap();
+        assert!(is_friday_the_thirteenth(date(11, 13)));
+        assert!(!is_friday_the_thirteenth(date(10, 13))); // a Tuesday
+        assert!(!is_friday_the_thirteenth(date(11, 6))); // a Friday
     }
 
     #[test]
@@ -511,9 +560,15 @@ mod tests {
     fn test_calendar_guard_keeps_snow_in_winter_and_storms_in_summer() {
         let summer = Some(hours_for_day(200.0));
         let winter = Some(hours_for_day(15.0));
+        // Out of season at minus ten it is dry overcast, never "rain, 14
+        // degrees".
         assert_eq!(
             adjust_for_calendar(WeatherKind::Snow, Some(-10.0), summer),
-            WeatherKind::Rain
+            WeatherKind::Cloudy
+        );
+        assert_eq!(
+            adjust_for_calendar(WeatherKind::HeavyRain, Some(-10.0), summer),
+            WeatherKind::Cloudy
         );
         assert_eq!(
             adjust_for_calendar(WeatherKind::Thunderstorm, Some(25.0), winter),
@@ -568,6 +623,38 @@ mod tests {
             real_clock_game_hours(Some(jul)).rem_euclid(24.0),
             15.0
         ));
+    }
+
+    #[test]
+    fn test_a_leap_year_keeps_the_live_date_on_the_right_day() {
+        // The real ordinal runs a day ahead from March 1 of a leap year; the
+        // spoken date must not.
+        let at = |y, m, d| {
+            real_clock_game_hours(Some(
+                NaiveDate::from_ymd_opt(y, m, d)
+                    .unwrap()
+                    .and_hms_opt(12, 0, 0)
+                    .unwrap(),
+            ))
+        };
+        assert_eq!(date_text(at(2028, 3, 1)), date_text(at(2027, 3, 1)));
+        assert_eq!(date_text(at(2028, 12, 31)), "December 31");
+        assert_eq!(date_text(at(2028, 2, 29)), "February 28");
+    }
+
+    #[test]
+    fn test_the_live_calendar_names_the_real_weekday() {
+        // October 1, 2026 is a Thursday; four days on is Monday. 2001's
+        // calendar would have called them Monday and Friday.
+        let now = NaiveDate::from_ymd_opt(2026, 10, 1)
+            .unwrap()
+            .and_hms_opt(22, 0, 0)
+            .unwrap();
+        let live = real_clock_game_hours(Some(now));
+        assert_eq!(real_weekday_name(live, Some(now)), "Thursday");
+        assert_eq!(real_weekday_name(live + 4.0 * 24.0, Some(now)), "Monday");
+        // Two hours on crosses midnight into Friday.
+        assert_eq!(real_weekday_name(live + 2.0, Some(now)), "Friday");
     }
 
     /// Minimal stand-in; no city set, so it stays offline.
@@ -741,12 +828,8 @@ mod tests {
     }
 
     #[test]
-    fn test_weekday_name_and_friday_the_thirteenth_follow_the_2001_calendar() {
+    fn test_weekday_name_follows_the_2001_calendar() {
         assert_eq!(weekday_name(0.0), "Wednesday");
         assert_eq!(weekday_name(2.0 * 24.0), "Friday");
-        // 2001-04-13 was a Friday: day-of-year 103, 23 career days in.
-        assert!(is_friday_the_thirteenth(23.0 * 24.0 + 6.0));
-        assert!(!is_friday_the_thirteenth(22.0 * 24.0));
-        assert!(!is_friday_the_thirteenth(0.0));
     }
 }

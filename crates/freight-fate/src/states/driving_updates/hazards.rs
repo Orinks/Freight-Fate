@@ -7,7 +7,7 @@ use ff_core::sim::driving_modes::tuning_for_time_scale;
 use ff_core::sim::trip_models::HAZARDS;
 use ff_core::sim::vehicle::BrakeApplication;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
-use ff_core::speech_text::terse_silent;
+use ff_core::speech_text::{terse_silent, SpokenMessage};
 
 use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
@@ -579,7 +579,7 @@ impl DrivingState {
                 .priority(EventPriority::Route)
                 .category(SpeechCategory::Confirmation),
         );
-        ctx.award_achievement("hazard_avoided");
+        ctx.award_driving_achievement("hazard_avoided");
         self.hazard_names.clear();
     }
 
@@ -631,7 +631,7 @@ impl DrivingState {
             let hint = if side.is_open() {
                 format!(
                     "It is still in your lane. Nearly stop, or change lanes. {}",
-                    side.spoken()
+                    self.trip.open_side_spoken(side)
                 )
             } else {
                 "It is still in your lane. Nearly stop.".to_string()
@@ -729,9 +729,10 @@ impl DrivingState {
             severity *= tuning_for_time_scale(self.trip.time_scale).collision_damage;
             ctx.controller.rumble.impact(severity);
             self.trip.truck.apply_collision(severity, true);
-            let mut message = format!(
-                "Collision! The truck took damage. Total damage {:.0} percent.",
-                self.trip.truck.damage_pct
+            let damage = self.trip.truck.damage_pct;
+            let mut message = SpokenMessage::with_terse(
+                format!("Collision! The truck took damage. Total damage {damage:.0} percent."),
+                format!("Collision! Damage {damage:.0} percent."),
             );
             // A dodgeable hazard's announcement leaves the session armed --
             // see `handle_trip_event` -- on the promise that only braking
@@ -745,9 +746,12 @@ impl DrivingState {
             // stopped being answerable the moment it hit the truck.
             if self.speed_control_armed || self.cruise_mph.is_some() || self.keeper_mph.is_some() {
                 self.disarm_speed_control(ctx);
-                message = format!("{message} Automatic speed control canceled.");
+                message = SpokenMessage::with_terse(
+                    format!("{} Automatic speed control canceled.", message.normal),
+                    format!("{} Cruise off.", message.render(true)),
+                );
             }
-            self.last_event_message = message.clone();
+            self.last_event_message = message.normal.clone();
             // valid: a damage total is only true at the moment it was
             // computed. A rescue replaying it after ANOTHER collision stated
             // a percentage the truck had already left behind (adversarial

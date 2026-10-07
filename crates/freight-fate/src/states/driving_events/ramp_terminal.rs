@@ -10,7 +10,7 @@ use ff_core::sim::trip_route_helpers::INTERCHANGE_IDENTITY_MI;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 use ff_core::units::spoken_feet_or_meters;
 
-use crate::app::{GameContext, SayEvent};
+use crate::app::{GameContext, IntoSpoken, SayEvent};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
 
@@ -99,13 +99,13 @@ impl DrivingState {
     /// and a traffic light for the truck stop 0.1 mile on, and the driver
     /// heard both (agent drive, 2026-09-23).
     fn ramp_rng(&self, stop: &RoadStop) -> PyRandom {
+        // Both in the route's frame: the record's own mile is leg-local, and
+        // the destination (which never carries `interchange_mi`) seeded off
+        // it while the truck stop on the same exit seeded off the route mile
+        // (2026-09-28).
         let exit_mi = stop
             .interchange_mi
-            .or_else(|| {
-                self.trip
-                    .interchange_at(stop.at_mi, 0.15)
-                    .map(|interchange| interchange.at_mi)
-            })
+            .or_else(|| self.trip.interchange_mile_at(stop.at_mi, 0.15))
             .unwrap_or(stop.at_mi);
         PyRandom::new_from_i64((self.trip_seed << 16) ^ (exit_mi * 100.0) as i64)
     }
@@ -969,12 +969,23 @@ impl DrivingState {
         ctx.say_event_with(message.to_string(), opts);
     }
 
-    /// One ROUTE-priority confirmation line.
-    pub(crate) fn say_route_confirmation(&self, ctx: &mut GameContext, message: &str) {
+    /// One ROUTE-priority confirmation line. A `SpokenMessage` pair gives
+    /// the quiet rungs its short form.
+    pub(crate) fn say_route_confirmation(&self, ctx: &mut GameContext, message: impl IntoSpoken) {
+        self.say_route_line(ctx, message, SpeechCategory::Confirmation);
+    }
+
+    /// One ROUTE-priority line in a category of the caller's choosing.
+    pub(crate) fn say_route_line(
+        &self,
+        ctx: &mut GameContext,
+        message: impl IntoSpoken,
+        category: SpeechCategory,
+    ) {
         self.refresh_live_facts();
         let mut opts = SayEvent::queued().priority(EventPriority::Route);
-        opts.category = Some(SpeechCategory::Confirmation);
-        ctx.say_event_with(message.to_string(), opts);
+        opts.category = Some(category);
+        ctx.say_event_with(message, opts);
     }
 
     /// A line about the truck held at the bar ("holding for your gap",

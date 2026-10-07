@@ -56,7 +56,8 @@ current idle, start, and shutdown cues.
 | Cross traffic at ramp ends (car, pickup, box truck, semi, motorcycle, bus, tractor) | `traffic/car_cross.ogg`, `traffic/pickup_cross.ogg`, `traffic/box_truck_cross.ogg`, `traffic/semi_cross.ogg`, `traffic/motorcycle_cross.ogg`, `traffic/bus_cross.ogg`, `traffic/tractor_cross.ogg` | ElevenLabs Sound Effects API crossing cues (a vehicle driving through in front of the stopped truck, panned by the game), 2026-09-11; replaced the numpy stand-ins that shipped from 2026-08-20 |
 | Lane drift | `vehicle/lane_drift.ogg` | ElevenLabs-generated directional lane drift beep |
 | Lane centered | `vehicle/lane_centered.ogg` | ElevenLabs-generated centered-lane confirmation chime |
-| Turn signal | `vehicle/turn_signal.ogg` | ElevenLabs-generated in-cab indicator clicks for exit and pull-over signaling |
+| Turn signal | `vehicle/turn_signal.ogg` | Original synthesized flasher cycle, a relay tick then a softer tock, rendered with the genny CLI from `sound-test/turn_signal.json` (2026-09-29); replaced an ElevenLabs-generated click recording |
+| Blinker off | `vehicle/turn_signal_off.ogg` | Original synthesized turn signal stalk click, rendered with the genny CLI from `sound-test/turn_signal.json` (2026-09-29) |
 | Tire screech | `vehicle/tire_screech.ogg` | ElevenLabs-generated emergency-braking skid for microsleep forced stops |
 | Brake squeal | `vehicle/brake_squeal.ogg` | ElevenLabs-generated overheated-brake squeal past the fade temperature |
 | Air pressurization fill | `vehicle/air_pressurize.ogg` | Original parametric DSP loop (seeded frequency-domain synthesis, `sound-test/air_fallback.py`); superseded by the Career 1.9 sound-pack version |
@@ -104,7 +105,7 @@ not distributed in this repository.
 | Ramp light red | `events/ramp_light_red.ogg` | ElevenLabs-generated low two-tone stop cue for a red ramp-terminal light |
 | Ramp light green | `events/ramp_light_green.ogg` | ElevenLabs-generated go cue for a green ramp-terminal light, loudness-normalized |
 | Police siren | `events/police_siren.ogg` | ElevenLabs-generated trooper pull-over siren wail |
-| CB radio chatter | `events/cb_radio_chatter.ogg` | ElevenLabs-generated CB squelch and chatter for bear and enforcement heads-up cues |
+| CB radio chatter | `events/cb_radio_chatter.ogg` | Original synthesized CB squelch tail, the burst a receiver makes when the other driver lets go of the mic, rendered with the genny CLI from `sound-test/cb_squelch.json` (2026-10-01); replaced an ElevenLabs-generated squelch-and-chatter recording |
 | Spike strip | `events/spike_strip.ogg` | ElevenLabs-generated spike-strip puncture/air-hiss for felony stops |
 | Hazard clear | `events/hazard_clear.ogg` | ElevenLabs-generated confirmation cue when a hazard has been safely passed |
 | Rest stop at night | `poi/rest_stop_night.ogg` | Parked rest-stop ambience loop |

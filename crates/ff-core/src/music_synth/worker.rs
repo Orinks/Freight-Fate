@@ -84,6 +84,13 @@ impl SynthWorker {
 
     /// Signal, stop accepting work, then wait at most `bound`.
     pub fn shutdown(&mut self, bound: Duration) {
+        self.shutdown_pumping(bound, &mut || {});
+    }
+
+    /// [`shutdown`](Self::shutdown) with `pump` called each wait slice, so
+    /// a caller on the main thread can keep the window answering the OS
+    /// through the join (issue 266).
+    pub fn shutdown_pumping(&mut self, bound: Duration, pump: &mut dyn FnMut()) {
         self.cancel.store(true, Ordering::SeqCst);
         self.tx = None; // disconnects the channel; the thread's recv ends
         let Some(handle) = self.handle.take() else {
@@ -92,6 +99,7 @@ impl SynthWorker {
         log::info!("shutdown: synthesized music worker signalled");
         let started = Instant::now();
         while !handle.is_finished() && started.elapsed() < bound {
+            pump();
             std::thread::sleep(Duration::from_millis(10));
         }
         if handle.is_finished() {

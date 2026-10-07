@@ -549,6 +549,16 @@
             "spoken": "Passing Sunset"
           },
           {
+            "name": "Vermilionville (from Alexandria)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 78.0,
+            "spoken": "Billboard: Vermilionville, ahead in Lafayette. A bayou village kept between seventeen sixty-five and eighteen ninety, Acadian, Creole and Native. Leave the century in the truck.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Arnaudville",
             "at_mi": 78.4,
             "off_mi": 7.33,
@@ -2109,8 +2119,11 @@
             "name": "Red River",
             "category": "river",
             "kind": "point",
-            "at_mi": 11.9,
-            "spoken": "Crossing the Red River"
+            "at_mi": 1.0,
+            "spoken": "Crossing the Red River",
+            "lat": 31.31001,
+            "lon": -92.43836,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 164115522 (Red River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pollock",
@@ -2183,13 +2196,6 @@
             "spoken": "Entering Grayson"
           },
           {
-            "name": "Ouachita River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 59.9,
-            "spoken": "Crossing the Ouachita River"
-          },
-          {
             "name": "Columbia",
             "at_mi": 63.8,
             "off_mi": 0.01,
@@ -2197,6 +2203,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151352038, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Columbia"
+          },
+          {
+            "name": "Ouachita River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 64.1,
+            "spoken": "Crossing the Ouachita River",
+            "lat": 32.10836,
+            "lon": -92.0748,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon way 978437187 (Ouachita River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Richwood",
@@ -2714,18 +2730,14 @@
             "spoken": "Passing Colfax"
           },
           {
-            "name": "Cane River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 33.4,
-            "spoken": "Crossing the Cane River"
-          },
-          {
             "name": "Old River",
             "category": "river",
             "kind": "point",
-            "at_mi": 33.4,
-            "spoken": "Crossing the Old River"
+            "at_mi": 38.5,
+            "spoken": "Crossing the Old River",
+            "lat": 31.57364,
+            "lon": -92.99518,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1218673869 (Old River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Montgomery",
@@ -2735,6 +2747,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151686442, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Montgomery"
+          },
+          {
+            "name": "Natchitoches (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 41.0,
+            "spoken": "Billboard: Natchitoches, ahead, the oldest European settlement in the Louisiana Purchase. It was founded four years before New Orleans, and it brings that up.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Provencal",
@@ -3723,8 +3745,11 @@
             "name": "The Tallest Capitol",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 3.0,
-            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised."
+            "at_mi": 2.7,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Tiger Stadium",
@@ -3824,6 +3849,16 @@
             "spoken": "Passing Livingston"
           },
           {
+            "name": "Tickfaw River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 32.5,
+            "spoken": "Crossing the Tickfaw River",
+            "lat": 30.47471,
+            "lon": -90.67425,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 916867629 (Tickfaw River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Killian",
             "at_mi": 37.2,
             "off_mi": 8.14,
@@ -3860,20 +3895,6 @@
             "spoken": "Passing Springfield"
           },
           {
-            "name": "Tickfaw River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.0,
-            "spoken": "Crossing the Tickfaw River"
-          },
-          {
-            "name": "Tangipahoa River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.0,
-            "spoken": "Crossing the Tangipahoa River"
-          },
-          {
             "name": "Tickfaw",
             "at_mi": 44.0,
             "off_mi": 6.81,
@@ -3890,6 +3911,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151584868, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ponchatoula"
+          },
+          {
+            "name": "Tangipahoa River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 52.6,
+            "spoken": "Crossing the Tangipahoa River",
+            "lat": 30.48018,
+            "lon": -90.33849,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 769794837 (Tangipahoa River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "The Abita Mystery House (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.0,
+            "spoken": "Billboard: The Abita Mystery House, ahead in Abita Springs. An old gas station leads to fifty thousand odd objects and Buford the Bassigator. No fishing.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Madisonville",
@@ -3910,6 +3951,16 @@
             "spoken": "Passing Covington"
           },
           {
+            "name": "Tchefuncte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 66.4,
+            "spoken": "Crossing the Tchefuncte River",
+            "lat": 30.43898,
+            "lon": -90.11711,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1071662893 (Tchefuncte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Abita Springs",
             "at_mi": 69.8,
             "off_mi": 4.08,
@@ -3917,20 +3968,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151341847, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Abita Springs"
-          },
-          {
-            "name": "Black River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 70.6,
-            "spoken": "Crossing the Black River"
-          },
-          {
-            "name": "Tchefuncte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 70.6,
-            "spoken": "Crossing the Tchefuncte River"
           },
           {
             "name": "Mandeville",
@@ -3951,6 +3988,16 @@
             "spoken": "Passing Lacombe"
           },
           {
+            "name": "The Abita Mystery House (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 83.0,
+            "spoken": "Billboard: The Abita Mystery House, ahead in Abita Springs. An old gas station leads to fifty thousand odd objects and Buford the Bassigator. No fishing.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Slidell",
             "at_mi": 88.6,
             "off_mi": 2.41,
@@ -3958,6 +4005,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153504270, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Slidell"
+          },
+          {
+            "name": "The Infinity Science Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 89.8,
+            "spoken": "Billboard: The Infinity Science Center, ahead at the welcome center. NASA tests its biggest rocket engines just up the road. Yours is quieter.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pearl River",
@@ -3969,6 +4026,16 @@
             "spoken": "Passing Pearl River"
           },
           {
+            "name": "West Pearl River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 93.5,
+            "spoken": "Crossing the West Pearl River",
+            "lat": 30.29767,
+            "lon": -89.70233,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163641017 (West Pearl River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Pearlington",
             "at_mi": 98.0,
             "off_mi": 4.08,
@@ -3978,11 +4045,14 @@
             "spoken": "Passing Pearlington"
           },
           {
-            "name": "West Pearl River",
-            "category": "river",
+            "name": "The Infinity Science Center (westbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 99.7,
-            "spoken": "Crossing the West Pearl River"
+            "at_mi": 109.8,
+            "spoken": "Billboard: The Infinity Science Center, ahead at the welcome center. NASA tests its biggest rocket engines just up the road. Yours is quieter.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Waveland",
@@ -4015,8 +4085,11 @@
             "name": "Wolf River",
             "category": "river",
             "kind": "point",
-            "at_mi": 125.3,
-            "spoken": "Crossing the Wolf River"
+            "at_mi": 124.8,
+            "spoken": "Crossing the Wolf River",
+            "lat": 30.41469,
+            "lon": -89.20301,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 26442048 (Wolf River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "interchanges": [
@@ -4565,11 +4638,13 @@
         "state_miles": [
           {
             "state": "Louisiana",
-            "miles": 97.2
+            "miles": 97.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Mississippi",
-            "miles": 38.8
+            "miles": 38.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
@@ -4578,7 +4653,7 @@
             "from_state": "Louisiana",
             "state": "Mississippi",
             "place": "Louisiana-Mississippi line on I-12",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -5838,6 +5913,16 @@
             "spoken": "Passing Addis"
           },
           {
+            "name": "The Tallest Capitol (from New Orleans)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Saint George",
             "at_mi": 11.7,
             "off_mi": 0.93,
@@ -5926,13 +6011,6 @@
             "spoken": "Passing Sorrento"
           },
           {
-            "name": "Blind River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 30.3,
-            "spoken": "Crossing the Blind River"
-          },
-          {
             "name": "Convent",
             "at_mi": 33.2,
             "off_mi": 9.28,
@@ -5940,6 +6018,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151713467, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Convent"
+          },
+          {
+            "name": "Blind River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 38.5,
+            "spoken": "Crossing the Blind River",
+            "lat": 30.13031,
+            "lon": -90.71568,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 468917779 (Blind River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lutcher",
@@ -8191,6 +8279,16 @@
         ],
         "landmarks": [
           {
+            "name": "The Tallest Capitol (from Shreveport)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Brusly",
             "at_mi": 4.9,
             "off_mi": 3.71,
@@ -8266,8 +8364,11 @@
             "name": "Atchafalaya River",
             "category": "river",
             "kind": "point",
-            "at_mi": 41.0,
-            "spoken": "Crossing the Atchafalaya River"
+            "at_mi": 38.8,
+            "spoken": "Crossing the Atchafalaya River",
+            "lat": 30.54633,
+            "lon": -91.74947,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163557179 (Atchafalaya River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Port Barre",
@@ -8376,20 +8477,6 @@
             "spoken": "Passing Boyce"
           },
           {
-            "name": "Red River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 130.1,
-            "spoken": "Crossing the Red River"
-          },
-          {
-            "name": "Cane River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 130.1,
-            "spoken": "Crossing the Cane River"
-          },
-          {
             "name": "Colfax",
             "at_mi": 133.3,
             "off_mi": 5.9,
@@ -8399,6 +8486,16 @@
             "spoken": "Passing Colfax"
           },
           {
+            "name": "Natchitoches (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 150.0,
+            "spoken": "Billboard: Natchitoches, ahead, the oldest European settlement in the Louisiana Purchase. It was founded four years before New Orleans, and it brings that up.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Natchez",
             "at_mi": 156.3,
             "off_mi": 3.11,
@@ -8406,13 +8503,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151733602, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Natchez"
-          },
-          {
-            "name": "Old River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 161.8,
-            "spoken": "Crossing the Old River"
           },
           {
             "name": "Provencal",
@@ -8449,6 +8539,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151518148, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Powhatan"
+          },
+          {
+            "name": "Natchitoches (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 174.0,
+            "spoken": "Billboard: Natchitoches, ahead, the oldest European settlement in the Louisiana Purchase. It was founded four years before New Orleans, and it brings that up.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pleasant Hill",
@@ -9178,20 +9278,6 @@
             "spoken": "Passing Ponchatoula"
           },
           {
-            "name": "Little Natalbany River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 5.9,
-            "spoken": "Crossing the Little Natalbany River"
-          },
-          {
-            "name": "Natalbany River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 5.9,
-            "spoken": "Crossing the Natalbany River"
-          },
-          {
             "name": "Springfield",
             "at_mi": 7.8,
             "off_mi": 3.47,
@@ -9208,6 +9294,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151762445, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rome"
+          },
+          {
+            "name": "Natalbany River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 8.3,
+            "spoken": "Crossing the Natalbany River",
+            "lat": 30.4791,
+            "lon": -90.55827,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 367000062 (Natalbany River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Albany",
@@ -9231,8 +9327,11 @@
             "name": "Tickfaw River",
             "category": "river",
             "kind": "point",
-            "at_mi": 18.8,
-            "spoken": "Crossing the Tickfaw River"
+            "at_mi": 15.6,
+            "spoken": "Crossing the Tickfaw River",
+            "lat": 30.47498,
+            "lon": -90.67423,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 916867629 (Tickfaw River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Livingston",
@@ -9280,13 +9379,6 @@
             "spoken": "Passing Watson"
           },
           {
-            "name": "Amite River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 32.1,
-            "spoken": "Crossing the Amite River"
-          },
-          {
             "name": "Denham Springs",
             "at_mi": 33.1,
             "off_mi": 2.11,
@@ -9294,6 +9386,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151334266, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Denham Springs"
+          },
+          {
+            "name": "Amite River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 35.5,
+            "spoken": "Crossing the Amite River",
+            "lat": 30.4477,
+            "lon": -90.98627,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1028766208 (Amite River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Prairieville",
@@ -9339,6 +9441,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151573013, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Saint Gabriel"
+          },
+          {
+            "name": "The Tallest Capitol (from Hammond)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Plaquemine",
@@ -10686,6 +10798,26 @@
             "spoken": "Passing Killian"
           },
           {
+            "name": "Middendorf's (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Billboard: Middendorf's, next exit at Manchac. Thin fried catfish beside Lake Maurepas since nineteen thirty-four. Thick is on the menu too, for the stubborn.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Middendorf's (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.6,
+            "spoken": "Billboard: Middendorf's, next exit at Manchac. Thin fried catfish beside Lake Maurepas since nineteen thirty-four. Thick is on the menu too, for the stubborn.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "LaPlace",
             "at_mi": 32.13,
             "off_mi": 3.02,
@@ -11504,13 +11636,6 @@
             "spoken": "Passing Gonzales"
           },
           {
-            "name": "Mississippi River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 52.8,
-            "spoken": "Crossing the Mississippi River"
-          },
-          {
             "name": "White Castle",
             "at_mi": 58.3,
             "off_mi": 0.14,
@@ -11570,6 +11695,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151360637, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brusly"
+          },
+          {
+            "name": "The Tallest Capitol (from Houma)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 79.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Mississippi River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 80.5,
+            "spoken": "Crossing the Mississippi River",
+            "lat": 30.43946,
+            "lon": -91.19833,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1028791914 (Mississippi River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Saint George",
@@ -12304,13 +12449,6 @@
             "spoken": "Passing Belle Chasse"
           },
           {
-            "name": "Mississippi River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 53.3,
-            "spoken": "Crossing the Mississippi River"
-          },
-          {
             "name": "Braithwaite",
             "at_mi": 53.3,
             "off_mi": 7.04,
@@ -12336,6 +12474,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153813191, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Chalmette"
+          },
+          {
+            "name": "Mississippi River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 56.0,
+            "spoken": "Crossing the Mississippi River",
+            "lat": 29.93889,
+            "lon": -90.05824,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163762082 (Mississippi River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lakeview",
@@ -13525,8 +13673,21 @@
             "name": "Vermilion River",
             "category": "river",
             "kind": "point",
-            "at_mi": 6.7,
-            "spoken": "Crossing the Vermilion River"
+            "at_mi": 4.7,
+            "spoken": "Crossing the Vermilion River",
+            "lat": 30.27056,
+            "lon": -91.98388,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 422880310 (Vermilion River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Breaux Bridge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.9,
+            "spoken": "Billboard: Breaux Bridge, next exit. The state legislature named it the crawfish capital of the world in nineteen fifty-nine. Nobody has filed an appeal.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Arnaudville",
@@ -13536,6 +13697,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151603036, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Arnaudville"
+          },
+          {
+            "name": "Breaux Bridge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: Breaux Bridge, next exit. The state legislature named it the crawfish capital of the world in nineteen fifty-nine. Nobody has filed an appeal.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Parks",
@@ -13556,6 +13727,16 @@
             "spoken": "Passing Cecilia"
           },
           {
+            "name": "Vermilionville (from Baton Rouge)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.0,
+            "spoken": "Billboard: Vermilionville, ahead in Lafayette. A bayou village kept between seventeen sixty-five and eighteen ninety, Acadian, Creole and Native. Leave the century in the truck.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Henderson",
             "at_mi": 16.7,
             "off_mi": 0.7,
@@ -13568,8 +13749,11 @@
             "name": "Atchafalaya River",
             "category": "river",
             "kind": "point",
-            "at_mi": 24.3,
-            "spoken": "Crossing the Atchafalaya River"
+            "at_mi": 21.4,
+            "spoken": "Crossing the Atchafalaya River",
+            "lat": 30.3434,
+            "lon": -91.71786,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163557180 (Atchafalaya River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Livonia",
@@ -13599,13 +13783,6 @@
             "spoken": "Entering Grosse Tete"
           },
           {
-            "name": "Mississippi River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 49.8,
-            "spoken": "Crossing the Mississippi River"
-          },
-          {
             "name": "Brusly",
             "at_mi": 50.9,
             "off_mi": 3.68,
@@ -13631,6 +13808,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151364047, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Plaquemine"
+          },
+          {
+            "name": "The Tallest Capitol (from Lafayette)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Mississippi River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 53.5,
+            "spoken": "Crossing the Mississippi River",
+            "lat": 30.43958,
+            "lon": -91.19833,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1028791914 (Mississippi River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Saint George",
@@ -15538,6 +15735,16 @@
             "spoken": "Passing Maurice"
           },
           {
+            "name": "Vermilionville (from Beaumont)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.5,
+            "spoken": "Billboard: Vermilionville, ahead in Lafayette. A bayou village kept between seventeen sixty-five and eighteen ninety, Acadian, Creole and Native. Leave the century in the truck.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Duson",
             "at_mi": 12.1,
             "off_mi": 0.68,
@@ -15545,6 +15752,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151571474, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Duson"
+          },
+          {
+            "name": "Rayne (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 14.8,
+            "spoken": "Billboard: Rayne, next exit, frog capital of the world. More than a hundred painted frogs, and a giant metal one tipping his hat. Wave back.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Church Point",
@@ -15565,6 +15782,16 @@
             "spoken": "Passing Rayne"
           },
           {
+            "name": "Rayne (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.0,
+            "spoken": "Billboard: Rayne, next exit, frog capital of the world. More than a hundred painted frogs, and a giant metal one tipping his hat. Wave back.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Estherwood",
             "at_mi": 29.8,
             "off_mi": 3.38,
@@ -15572,6 +15799,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151364260, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Estherwood"
+          },
+          {
+            "name": "Gator Chateau (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: Gator Chateau, ahead in Jennings. Hold a baby alligator, free. At seven feet they go back to the marsh. Visit before then.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Morse",
@@ -15610,6 +15847,16 @@
             "spoken": "Passing Mermentau"
           },
           {
+            "name": "Gator Chateau (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.7,
+            "spoken": "Billboard: Gator Chateau, next exit in Jennings. Hold a baby alligator, free. At seven feet they go back to the marsh. Visit before then.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Roanoke",
             "at_mi": 46.6,
             "off_mi": 0.88,
@@ -15646,13 +15893,6 @@
             "spoken": "Passing Hayes"
           },
           {
-            "name": "Calcasieu River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 67.4,
-            "spoken": "Crossing the Calcasieu River"
-          },
-          {
             "name": "Moss Bluff",
             "at_mi": 72.6,
             "off_mi": 4.27,
@@ -15662,11 +15902,41 @@
             "spoken": "Passing Moss Bluff"
           },
           {
+            "name": "Creole Nature Trail (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 74.5,
+            "spoken": "Billboard: The Creole Nature Trail, ahead in Sulphur. A hundred eighty miles of marsh and beach road, alligators included. Admire them from the cab.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Calcasieu River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 76.9,
+            "spoken": "Crossing the Calcasieu River",
+            "lat": 30.23714,
+            "lon": -93.24663,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163762040 (Calcasieu River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Brimstone Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 85.1,
             "spoken": "Brimstone Museum ahead"
+          },
+          {
+            "name": "Creole Nature Trail (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 87.5,
+            "spoken": "Billboard: The Creole Nature Trail, next exit in Sulphur. A hundred eighty miles of marsh and beach road, alligators included. Admire them from the cab.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Vinton",
@@ -15685,6 +15955,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151873755, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Starks"
+          },
+          {
+            "name": "Shangri La (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.7,
+            "spoken": "Billboard: Shangri La Botanical Gardens, ahead in Orange. Two hundred fifty acres of gardens and bayou, and admission is free. Paradise usually costs more.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Sabine River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 105.9,
+            "spoken": "Crossing the Sabine River",
+            "lat": 30.12778,
+            "lon": -93.7014,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 834979888 (Sabine River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Forest Heights",
@@ -15723,18 +16013,24 @@
             "spoken": "Passing Mauriceville"
           },
           {
-            "name": "Sabine River",
-            "category": "river",
+            "name": "Shangri La (eastbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 119.3,
-            "spoken": "Crossing the Sabine River"
+            "at_mi": 117.1,
+            "spoken": "Billboard: Shangri La Botanical Gardens, ahead in Orange. Two hundred fifty acres of gardens and bayou, and admission is free. Paradise usually costs more.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
-            "name": "Neches River",
-            "category": "river",
+            "name": "Spindletop Gladys City (westbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 119.3,
-            "spoken": "Crossing the Neches River"
+            "at_mi": 121.5,
+            "spoken": "Billboard: Spindletop Gladys City, ahead in Beaumont. The nineteen oh-one gusher started the Texas oil boom. The replica gushes water. Easier to clean up.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Port Neches",
@@ -15744,6 +16040,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151575415, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Port Neches"
+          },
+          {
+            "name": "Fire Museum of Texas (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 124.0,
+            "spoken": "Billboard: The Fire Museum of Texas, ahead in Beaumont. Out front, a twenty-four-foot fire hydrant that really works. Do not park in front of it.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pine Forest",
@@ -15762,6 +16068,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151752899, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Nederland"
+          },
+          {
+            "name": "Neches River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 130.8,
+            "spoken": "Crossing the Neches River",
+            "lat": 30.09481,
+            "lon": -94.09092,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1154513962 (Neches River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Rose Hill Acres",
@@ -17459,11 +17775,34 @@
             "spoken": "Passing Carencro"
           },
           {
-            "name": "Atchafalaya River",
-            "category": "river",
+            "name": "Breaux Bridge (eastbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 13.3,
-            "spoken": "Crossing the Atchafalaya River"
+            "at_mi": 7.5,
+            "spoken": "Billboard: Breaux Bridge, next exit. The state legislature named it the crawfish capital of the world in nineteen fifty-nine. Nobody has filed an appeal.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Vermilionville (from New Orleans)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Vermilionville, ahead in Lafayette. A bayou village kept between seventeen sixty-five and eighteen ninety, Acadian, Creole and Native. Leave the century in the truck.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Breaux Bridge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.8,
+            "spoken": "Billboard: Breaux Bridge, next exit. The state legislature named it the crawfish capital of the world in nineteen fifty-nine. Nobody has filed an appeal.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cecilia",
@@ -17484,6 +17823,16 @@
             "spoken": "Passing Henderson"
           },
           {
+            "name": "Atchafalaya River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 21.5,
+            "spoken": "Crossing the Atchafalaya River",
+            "lat": 30.3434,
+            "lon": -91.71786,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163557180 (Atchafalaya River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Maringouin",
             "at_mi": 35.4,
             "off_mi": 6.22,
@@ -17502,11 +17851,14 @@
             "spoken": "Entering Grosse Tete"
           },
           {
-            "name": "Mississippi River",
-            "category": "river",
+            "name": "The Tallest Capitol (eastbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 40.5,
-            "spoken": "Crossing the Mississippi River"
+            "at_mi": 50.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Brusly",
@@ -17525,6 +17877,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151469145, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Addis"
+          },
+          {
+            "name": "Mississippi River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 53.8,
+            "spoken": "Crossing the Mississippi River",
+            "lat": 30.43956,
+            "lon": -91.19833,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1028791914 (Mississippi River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "The Tallest Capitol (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.8,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "LSU AgCenter Botanic Gardens and Museum",
@@ -18213,6 +18585,16 @@
             "spoken": "Passing Roanoke"
           },
           {
+            "name": "Gator Chateau (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.0,
+            "spoken": "Billboard: Gator Chateau, next exit in Jennings. Hold a baby alligator, free. At seven feet they go back to the marsh. Visit before then.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Zigler Art Museum",
             "category": "museum",
             "kind": "point",
@@ -18265,6 +18647,16 @@
             "spoken": "Passing Morse"
           },
           {
+            "name": "Gator Chateau (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.0,
+            "spoken": "Billboard: Gator Chateau, ahead in Jennings. Hold a baby alligator, free. At seven feet they go back to the marsh. Visit before then.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Estherwood",
             "at_mi": 45.8,
             "off_mi": 3.35,
@@ -18272,6 +18664,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151364260, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Estherwood"
+          },
+          {
+            "name": "Rayne (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.5,
+            "spoken": "Billboard: Rayne, next exit, frog capital of the world. More than a hundred painted frogs, and a giant metal one tipping his hat. Wave back.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Rayne",
@@ -18292,6 +18694,16 @@
             "spoken": "Passing Church Point"
           },
           {
+            "name": "Rayne (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.5,
+            "spoken": "Billboard: Rayne, next exit, frog capital of the world. More than a hundred painted frogs, and a giant metal one tipping his hat. Wave back.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Duson",
             "at_mi": 63.5,
             "off_mi": 0.67,
@@ -18299,6 +18711,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151571474, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Duson"
+          },
+          {
+            "name": "Vermilionville (from Lake Charles)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 65.8,
+            "spoken": "Billboard: Vermilionville, ahead in Lafayette. A bayou village kept between seventeen sixty-five and eighteen ninety, Acadian, Creole and Native. Leave the century in the truck.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cankton",
@@ -19407,11 +19829,24 @@
             "spoken": "Passing Moss Bluff"
           },
           {
+            "name": "Creole Nature Trail (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 1.8,
+            "spoken": "Billboard: The Creole Nature Trail, ahead in Sulphur. A hundred eighty miles of marsh and beach road, alligators included. Admire them from the cab.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Calcasieu River",
             "category": "river",
             "kind": "point",
-            "at_mi": 4.2,
-            "spoken": "Crossing the Calcasieu River"
+            "at_mi": 2.4,
+            "spoken": "Crossing the Calcasieu River",
+            "lat": 30.23713,
+            "lon": -93.24663,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163762040 (Calcasieu River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Brimstone Museum",
@@ -19430,6 +19865,16 @@
             "spoken": "Passing Starks"
           },
           {
+            "name": "Shangri La (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.0,
+            "spoken": "Billboard: Shangri La Botanical Gardens, ahead in Orange. Two hundred fifty acres of gardens and bayou, and admission is free. Paradise usually costs more.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Deweyville",
             "at_mi": 28.0,
             "off_mi": 11.62,
@@ -19442,8 +19887,11 @@
             "name": "Sabine River",
             "category": "river",
             "kind": "point",
-            "at_mi": 31.0,
-            "spoken": "Crossing the Sabine River"
+            "at_mi": 30.7,
+            "spoken": "Crossing the Sabine River",
+            "lat": 30.12761,
+            "lon": -93.70134,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 834979888 (Sabine River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Forest Heights",
@@ -19688,11 +20136,13 @@
         "state_miles": [
           {
             "state": "Louisiana",
-            "miles": 30.7
+            "miles": 30.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 4.3
+            "miles": 4.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
@@ -19701,7 +20151,7 @@
             "from_state": "Louisiana",
             "state": "Texas",
             "place": "Louisiana-Texas line on I-10",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -20234,20 +20684,22 @@
         "state_miles": [
           {
             "state": "Louisiana",
-            "miles": 69.7
+            "miles": 73.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Mississippi",
-            "miles": 8.3
+            "miles": 4.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 69.7,
+            "at_mi": 73.3,
             "from_state": "Louisiana",
             "state": "Mississippi",
             "place": "Louisiana-Mississippi line on I-20",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -20280,13 +20732,6 @@
             "spoken": "Passing Swartz"
           },
           {
-            "name": "Bouef River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 10.3,
-            "spoken": "Crossing the Bouef River"
-          },
-          {
             "name": "Start",
             "at_mi": 15.6,
             "off_mi": 0.66,
@@ -20294,6 +20739,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151602974, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Start"
+          },
+          {
+            "name": "Bouef River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 18.6,
+            "spoken": "Crossing the Bouef River",
+            "lat": 32.46815,
+            "lon": -91.8114,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 751804304 (Bouef River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Oak Ridge",
@@ -20326,8 +20781,11 @@
             "name": "Tensas River",
             "category": "river",
             "kind": "point",
-            "at_mi": 52.5,
-            "spoken": "Crossing the Tensas River"
+            "at_mi": 48.6,
+            "spoken": "Crossing the Tensas River",
+            "lat": 32.41923,
+            "lon": -91.30232,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 638792561 (Tensas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Richmond",
@@ -20348,18 +20806,24 @@
             "spoken": "Passing Afton"
           },
           {
+            "name": "Vicksburg National Military Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.0,
+            "spoken": "Billboard: Vicksburg National Military Park, ahead. A sixteen-mile road around the siege lines of eighteen sixty-three, and a Union gunboat raised from the river.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Mississippi River",
             "category": "river",
             "kind": "point",
-            "at_mi": 70.4,
-            "spoken": "Crossing the Mississippi River"
-          },
-          {
-            "name": "Yazoo River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 70.4,
-            "spoken": "Crossing the Yazoo River"
+            "at_mi": 73.3,
+            "spoken": "Crossing the Mississippi River",
+            "lat": 32.31413,
+            "lon": -90.9066,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 27736266 (Mississippi River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -21965,6 +22429,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151518148, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Powhatan"
+          },
+          {
+            "name": "Natchitoches (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.0,
+            "spoken": "Billboard: Natchitoches, ahead, the oldest European settlement in the Louisiana Purchase. It was founded four years before New Orleans, and it brings that up.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Marthaville",
@@ -23609,20 +24083,22 @@
         "state_miles": [
           {
             "state": "Louisiana",
-            "miles": 237.4
+            "miles": 235.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 110.6
+            "miles": 112.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 237.4,
+            "at_mi": 235.8,
             "from_state": "Louisiana",
             "state": "Texas",
             "place": "Louisiana-Texas line on I-10",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -25659,8 +26135,11 @@
             "name": "Blind River",
             "category": "river",
             "kind": "point",
-            "at_mi": 43.1,
-            "spoken": "Crossing the Blind River"
+            "at_mi": 42.9,
+            "spoken": "Crossing the Blind River",
+            "lat": 30.13073,
+            "lon": -90.71516,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 468917779 (Blind River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Sorrento",
@@ -25699,11 +26178,34 @@
             "spoken": "Passing Saint George"
           },
           {
+            "name": "The Tallest Capitol (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 77.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Mississippi River",
             "category": "river",
             "kind": "point",
-            "at_mi": 71.8,
-            "spoken": "Crossing the Mississippi River"
+            "at_mi": 81.5,
+            "spoken": "Crossing the Mississippi River",
+            "lat": 30.43998,
+            "lon": -91.19829,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1028791918 (Mississippi River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "The Tallest Capitol (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 86.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Grosse Tete",
@@ -25718,8 +26220,11 @@
             "name": "Atchafalaya River",
             "category": "river",
             "kind": "point",
-            "at_mi": 101.9,
-            "spoken": "Crossing the Atchafalaya River"
+            "at_mi": 113.8,
+            "spoken": "Crossing the Atchafalaya River",
+            "lat": 30.34371,
+            "lon": -91.7183,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163557180 (Atchafalaya River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Henderson",
@@ -25740,6 +26245,36 @@
             "spoken": "Passing Cecilia"
           },
           {
+            "name": "Breaux Bridge (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 124.0,
+            "spoken": "Billboard: Breaux Bridge, next exit. The state legislature named it the crawfish capital of the world in nineteen fifty-nine. Nobody has filed an appeal.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Vermilionville (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 127.0,
+            "spoken": "Billboard: Vermilionville, ahead in Lafayette. A bayou village kept between seventeen sixty-five and eighteen ninety, Acadian, Creole and Native. Leave the century in the truck.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Breaux Bridge (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 127.5,
+            "spoken": "Billboard: Breaux Bridge, next exit. The state legislature named it the crawfish capital of the world in nineteen fifty-nine. Nobody has filed an appeal.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Scott",
             "at_mi": 137.4,
             "off_mi": 0.79,
@@ -25758,6 +26293,26 @@
             "spoken": "Passing Duson"
           },
           {
+            "name": "Vermilionville (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.0,
+            "spoken": "Billboard: Vermilionville, ahead in Lafayette. A bayou village kept between seventeen sixty-five and eighteen ninety, Acadian, Creole and Native. Leave the century in the truck.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Rayne (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.5,
+            "spoken": "Billboard: Rayne, next exit, frog capital of the world. More than a hundred painted frogs, and a giant metal one tipping his hat. Wave back.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Rayne",
             "at_mi": 147.9,
             "off_mi": 1.21,
@@ -25767,6 +26322,16 @@
             "spoken": "Passing Rayne"
           },
           {
+            "name": "Rayne (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 150.5,
+            "spoken": "Billboard: Rayne, next exit, frog capital of the world. More than a hundred painted frogs, and a giant metal one tipping his hat. Wave back.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Estherwood",
             "at_mi": 160.2,
             "off_mi": 3.38,
@@ -25774,6 +26339,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151364260, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Estherwood"
+          },
+          {
+            "name": "Gator Chateau (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 160.5,
+            "spoken": "Billboard: Gator Chateau, ahead in Jennings. Hold a baby alligator, free. At seven feet they go back to the marsh. Visit before then.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Mermentau",
@@ -25810,11 +26385,44 @@
             "spoken": "Passing Welsh"
           },
           {
+            "name": "Gator Chateau (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 184.0,
+            "spoken": "Billboard: Gator Chateau, ahead in Jennings. Hold a baby alligator, free. At seven feet they go back to the marsh. Visit before then.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Creole Nature Trail (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 204.0,
+            "spoken": "Billboard: The Creole Nature Trail, ahead in Sulphur. A hundred eighty miles of marsh and beach road, alligators included. Admire them from the cab.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Calcasieu River",
             "category": "river",
             "kind": "point",
-            "at_mi": 220.2,
-            "spoken": "Crossing the Calcasieu River"
+            "at_mi": 207.1,
+            "spoken": "Crossing the Calcasieu River",
+            "lat": 30.2366,
+            "lon": -93.24659,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163762040 (Calcasieu River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Creole Nature Trail (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 217.0,
+            "spoken": "Billboard: The Creole Nature Trail, next exit in Sulphur. A hundred eighty miles of marsh and beach road, alligators included. Admire them from the cab.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Vinton",
@@ -25826,6 +26434,26 @@
             "spoken": "Passing Vinton"
           },
           {
+            "name": "Shangri La (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 231.4,
+            "spoken": "Billboard: Shangri La Botanical Gardens, ahead in Orange. Two hundred fifty acres of gardens and bayou, and admission is free. Paradise usually costs more.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Sabine River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 235.8,
+            "spoken": "Crossing the Sabine River",
+            "lat": 30.1277,
+            "lon": -93.70137,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 834979888 (Sabine River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Orangefield",
             "at_mi": 244.6,
             "off_mi": 3.4,
@@ -25835,18 +26463,64 @@
             "spoken": "Passing Orangefield"
           },
           {
-            "name": "Sabine River",
-            "category": "river",
+            "name": "Shangri La (eastbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 249.3,
-            "spoken": "Crossing the Sabine River"
+            "at_mi": 247.1,
+            "spoken": "Billboard: Shangri La Botanical Gardens, ahead in Orange. Two hundred fifty acres of gardens and bayou, and admission is free. Paradise usually costs more.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Spindletop Gladys City (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 252.3,
+            "spoken": "Billboard: Spindletop Gladys City, ahead in Beaumont. The nineteen oh-one gusher started the Texas oil boom. The replica gushes water. Easier to clean up.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Fire Museum of Texas (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 254.9,
+            "spoken": "Billboard: The Fire Museum of Texas, ahead in Beaumont. Out front, a twenty-four-foot fire hydrant that really works. Do not park in front of it.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Neches River",
             "category": "river",
             "kind": "point",
-            "at_mi": 249.3,
-            "spoken": "Crossing the Neches River"
+            "at_mi": 260.6,
+            "spoken": "Crossing the Neches River",
+            "lat": 30.09513,
+            "lon": -94.09088,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 875955197 (Neches River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Fire Museum of Texas (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 270.9,
+            "spoken": "Billboard: The Fire Museum of Texas, ahead in Beaumont. Out front, a twenty-four-foot fire hydrant that really works. Do not park in front of it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Spindletop Gladys City (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 274.3,
+            "spoken": "Billboard: Spindletop Gladys City, ahead in Beaumont. The nineteen oh-one gusher started the Texas oil boom. The replica gushes water. Easier to clean up.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Nome",
@@ -25903,6 +26577,16 @@
             "spoken": "Passing Crosby"
           },
           {
+            "name": "San Jacinto River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 328.5,
+            "spoken": "Crossing the San Jacinto River",
+            "lat": 29.86627,
+            "lon": -95.09363,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 109673443 (San Jacinto River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Sheldon",
             "at_mi": 330.4,
             "off_mi": 0.97,
@@ -25910,13 +26594,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151419173, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sheldon"
-          },
-          {
-            "name": "San Jacinto River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 334.1,
-            "spoken": "Crossing the San Jacinto River"
           },
           {
             "name": "Jacinto City",
@@ -27585,6 +28262,16 @@
             "spoken": "Passing Calhoun"
           },
           {
+            "name": "Duck Commander (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.0,
+            "spoken": "Billboard: Duck Commander, ahead in West Monroe. The Robertsons' duck call company, with a museum of fifteen galleries about Duck Dynasty. Beards optional.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Claiborne",
             "at_mi": 27.61,
             "off_mi": 0.36,
@@ -27597,8 +28284,11 @@
             "name": "Ouachita River",
             "category": "river",
             "kind": "point",
-            "at_mi": 30.7,
-            "spoken": "Crossing the Ouachita River"
+            "at_mi": 32.3,
+            "spoken": "Crossing the Ouachita River",
+            "lat": 32.49572,
+            "lon": -92.11721,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163640977 (Ouachita River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Richwood",
@@ -29409,20 +30099,22 @@
         "state_miles": [
           {
             "state": "Louisiana",
-            "miles": 20.5
+            "miles": 20.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 167.5
+            "miles": 167.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 20.5,
+            "at_mi": 20.6,
             "from_state": "Louisiana",
             "state": "Texas",
             "place": "Louisiana-Texas line on I-20",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -30965,8 +31657,21 @@
             "name": "Sabine River",
             "category": "river",
             "kind": "point",
-            "at_mi": 65.4,
-            "spoken": "Crossing the Sabine River"
+            "at_mi": 63.4,
+            "spoken": "Crossing the Sabine River",
+            "lat": 32.43334,
+            "lon": -94.75984,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 377922637 (Sabine River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "World's Richest Acre (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.8,
+            "spoken": "Billboard: Kilgore, next exit. Downtown keeps a block of oil derricks standing on the World's Richest Acre. At Christmas they wear lighted stars.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "White Oak",
@@ -30976,6 +31681,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151888180, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing White Oak"
+          },
+          {
+            "name": "World's Richest Acre (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.8,
+            "spoken": "Billboard: Kilgore, next exit. Downtown keeps a block of oil derricks standing on the World's Richest Acre. At Christmas they wear lighted stars.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gladewater",
@@ -31014,6 +31729,16 @@
             "spoken": "Passing Van"
           },
           {
+            "name": "First Monday Trade Days (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 127.3,
+            "spoken": "Billboard: First Monday Trade Days, next exit in Canton. Trading here since the eighteen fifties, the weekend before the first Monday. Close enough.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Fruitvale",
             "at_mi": 129.3,
             "off_mi": 7.84,
@@ -31039,6 +31764,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151446276, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Myrtle Springs"
+          },
+          {
+            "name": "First Monday Trade Days (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 138.8,
+            "spoken": "Billboard: First Monday Trade Days, ahead in Canton. Trading here since the eighteen fifties, the weekend before the first Monday. Close enough.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wills Point",
@@ -31140,6 +31875,16 @@
             "spoken": "Passing Heath"
           },
           {
+            "name": "East Fork Trinity River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 170.0,
+            "spoken": "Crossing the East Fork Trinity River",
+            "lat": 32.77442,
+            "lon": -96.50285,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 704735699 (East Fork Trinity River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Sunnyvale",
             "at_mi": 173.5,
             "off_mi": 0.8,
@@ -31147,13 +31892,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151582850, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sunnyvale"
-          },
-          {
-            "name": "East Fork Trinity River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 175.0,
-            "spoken": "Crossing the East Fork Trinity River"
           },
           {
             "name": "Rowlett",
@@ -32187,15 +32925,21 @@
             "name": "Red River",
             "category": "river",
             "kind": "point",
-            "at_mi": 8.12,
-            "spoken": "Crossing the Red River"
+            "at_mi": 1.8,
+            "spoken": "Crossing the Red River",
+            "lat": 32.51245,
+            "lon": -93.73835,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163874736 (Red River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Flat River",
             "category": "river",
             "kind": "point",
-            "at_mi": 8.12,
-            "spoken": "Crossing the Flat River"
+            "at_mi": 8.1,
+            "spoken": "Crossing the Flat River",
+            "lat": 32.53709,
+            "lon": -93.63985,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 895093103 (Flat River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Haughton",
@@ -33792,13 +34536,6 @@
             "spoken": "Passing Ida"
           },
           {
-            "name": "Sulphur River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 45.4,
-            "spoken": "Crossing the Sulphur River"
-          },
-          {
             "name": "Bloomburg",
             "at_mi": 47.3,
             "off_mi": 9.43,
@@ -33806,6 +34543,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151569865, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bloomburg"
+          },
+          {
+            "name": "Sulphur River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 48.3,
+            "spoken": "Crossing the Sulphur River",
+            "lat": 33.14903,
+            "lon": -93.89086,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 317747174 (Sulphur River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Wake Village",
@@ -34750,8 +35497,21 @@
             "name": "Calcasieu River",
             "category": "river",
             "kind": "point",
-            "at_mi": 8.2,
-            "spoken": "Crossing the Calcasieu River"
+            "at_mi": 9.7,
+            "spoken": "Crossing the Calcasieu River",
+            "lat": 30.23702,
+            "lon": -93.24662,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163762040 (Calcasieu River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Creole Nature Trail (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.5,
+            "spoken": "Billboard: The Creole Nature Trail, ahead in Sulphur. A hundred eighty miles of marsh and beach road, alligators included. Admire them from the cab.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Moss Bluff",

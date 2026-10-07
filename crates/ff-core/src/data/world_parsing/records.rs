@@ -12,9 +12,9 @@ use crate::data::world_constants::{
     lookup, set_contains, RAW_POI_TEXT_MARKERS, STOP_DIRECTIONS, TOLL_METHOD_LABELS,
 };
 use crate::data::world_models::{
-    DataError, ElevationSample, GradeSegment, HpmsTerrain, Interchange, Landmark, LaneSegment,
-    RouteCheckpoint, RoutePoint, RouteRestriction, StateCrossing, StateMileage, TollEvent,
-    TrafficVolumeSample,
+    BillboardBan, DataError, ElevationSample, GradeSegment, HpmsTerrain, Interchange, Landmark,
+    LaneSegment, RouteCheckpoint, RoutePoint, RouteRestriction, StateCrossing, StateMileage,
+    TollEvent, TrafficVolumeSample,
 };
 use crate::pyfmt::{fmt_f, py_str_float};
 
@@ -273,6 +273,53 @@ pub fn parse_restrictions(
     Ok(samples)
 }
 
+pub fn parse_billboard_bans(
+    raw_samples: &[Value],
+    leg_miles: f64,
+    from_city: &str,
+    to_city: &str,
+) -> Result<Vec<BillboardBan>, DataError> {
+    let mut bans = raw_samples
+        .iter()
+        .map(|raw| {
+            let raw = object(raw, from_city, to_city, "billboard ban")?;
+            let from_mi = req_float(raw, "from_mi")?;
+            let to_mi = req_float(raw, "to_mi")?;
+            if from_mi < 0.0 || to_mi <= from_mi || to_mi > leg_miles {
+                return Err(DataError::value(format!(
+                    "{from_city} to {to_city} billboard ban has invalid range {}-{}",
+                    py_str_float(from_mi),
+                    py_str_float(to_mi)
+                )));
+            }
+            let name = get_str(raw, "name");
+            let source = get_str(raw, "source");
+            if name.trim().is_empty() || source.trim().is_empty() {
+                return Err(DataError::value(format!(
+                    "{from_city} to {to_city} billboard ban needs a name and source"
+                )));
+            }
+            Ok(BillboardBan {
+                from_mi,
+                to_mi,
+                name,
+                source,
+            })
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    bans.sort_by(|a, b| {
+        a.from_mi
+            .partial_cmp(&b.from_mi)
+            .expect("finite billboard-ban mileposts")
+            .then_with(|| {
+                a.to_mi
+                    .partial_cmp(&b.to_mi)
+                    .expect("finite billboard-ban mileposts")
+            })
+    });
+    Ok(bans)
+}
+
 pub fn parse_traffic_volume(
     raw: &Value,
     leg_miles: f64,
@@ -499,6 +546,23 @@ pub fn parse_landmark(
             "{from_city} to {to_city} landmark {rname} has a negative off_mi"
         )));
     }
+    // A billboard faces the traffic it was written for; see `Landmark`.
+    let directions: Vec<String> = if raw.contains_key("directions") {
+        get_str_list(raw, "directions")
+    } else if category == "billboard_sign" {
+        vec!["forward".to_string()]
+    } else {
+        vec!["both".to_string()]
+    };
+    if directions.is_empty()
+        || directions.iter().any(|d| !set_contains(STOP_DIRECTIONS, d))
+        || (directions.iter().any(|d| d == "both") && directions.len() > 1)
+    {
+        return Err(DataError::value(format!(
+            "{from_city} to {to_city} landmark {rname} has invalid directions {}",
+            py_repr_list(&directions)
+        )));
+    }
     Ok(Landmark {
         name,
         at_mi,
@@ -506,6 +570,7 @@ pub fn parse_landmark(
         kind,
         spoken,
         off_mi,
+        directions,
     })
 }
 

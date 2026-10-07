@@ -1,8 +1,6 @@
 //! The frame loop itself (`DrivingUpdateMixin.update`), the safety-call
 //! re-speak, and the retarder transcript trace.
 
-use ff_core::sim::season::real_clock_game_hours;
-use ff_core::sim::trip_models::PACE_CHANGE_MAX_MPH;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
 use crate::app::{GameContext, SayEvent, TRANSCRIPT_TARGET};
@@ -123,30 +121,8 @@ impl DrivingState {
                 self.begin_departure_chain(ctx, true);
             }
         }
-        // Pacing can be changed from the pause menu mid-trip, and takes
-        // effect once the truck is stopped (`PACE_CHANGE_MAX_MPH`). Entering
-        // Real time also moves the independent spoken clock to now, while the
-        // career, deadline, and HOS clocks keep their elapsed totals.
-        if ctx.settings.time_scale != self.trip.time_scale
-            && self.trip.truck.speed_mph().abs() < PACE_CHANGE_MAX_MPH
-        {
-            if ctx.settings.time_scale == 1.0 {
-                let elapsed_h = self.trip.game_minutes / 60.0;
-                let real_hours = real_clock_game_hours(None);
-                profile_mut_of(ctx).sync_calendar_to(real_hours - elapsed_h);
-                ctx.save_profile();
-                let local_hour = real_hours.rem_euclid(24.0);
-                let reference_now = local_hour - self.trip.current_timezone().offset_h;
-                let start_hour = (reference_now - elapsed_h).rem_euclid(24.0);
-                self.trip.start_hour = start_hour;
-                self.trip.traffic_manager.start_hour = start_hour;
-                if self.trip.weather.game_hours.is_some() {
-                    self.trip.weather.game_hours =
-                        Some(profile_of(ctx).calendar_game_hours() + elapsed_h);
-                }
-            }
-            self.trip.time_scale = ctx.settings.time_scale;
-        }
+        // A pace change from the pause menu waits for the truck to stop.
+        self.update_pace_change(ctx, dt);
         let tuning = tuning_for_time_scale(self.trip.time_scale);
         self.trip.hazard_scale =
             hos::hazard_scale(&ctx.settings.hos_mode) * tuning.hazard_frequency;
@@ -455,6 +431,9 @@ impl DrivingState {
                 SayEvent::new().category(SpeechCategory::Confirmation),
             );
         }
+        if self.trip.truck.transmission.automatic && self.trip.truck.speed_mph().abs() > 1.0 {
+            self.drove_automatic = true;
+        }
 
         // The clutch is fixed on Shift, read as the key itself: the held-key
         // tracker sees the key before any modifier flag, and the harness holds
@@ -469,8 +448,12 @@ impl DrivingState {
         } else {
             0.0
         };
-        let clutch_disengaged =
-            self.trip.truck.transmission.clutch > 0.5 || self.trip.truck.transmission.shifting();
+        // Neutral on a manual is a disengaged clutch too: nothing reaches the
+        // wheels, so cruise and the keeper only raced the engine.
+        let clutch_disengaged = self.trip.truck.transmission.clutch > 0.5
+            || self.trip.truck.transmission.shifting()
+            || (!self.trip.truck.transmission.automatic
+                && self.trip.truck.transmission.in_neutral());
         self.update_lane(ctx, dt);
         // `update_lane` can complete a held-wheel crossing. Mirror that
         // discrete result before cruise reads the traffic bubble: steering
@@ -529,13 +512,40 @@ impl DrivingState {
             was_low_air,
             was_spring_brake,
         );
+        self.check_low_fuel_warning(ctx);
         if was_on && !self.trip.truck.engine_on {
             ctx.audio.engine_stop();
             if self.trip.truck.stalled {
-                let text = format!(
-                    "Engine stalled. Press {} to restart.",
-                    ctx.control_hint("engine")
-                );
+                let tr = &self.trip.truck.transmission;
+                // A manual only stalls in fourth or taller, and restarting it
+                // there with the clutch out stalls it again the next frame.
+                // Shifting up from there only goes taller, so the line routes
+                // through neutral, which needs no clutch, then up into first.
+                // The pad has no neutral: it steps down to first on the
+                // clutch instead (2026-09-28).
+                let text = if tr.automatic || tr.in_neutral() {
+                    format!(
+                        "Engine stalled. Press {} to restart.",
+                        ctx.control_hint("engine")
+                    )
+                } else if ctx.controller.device() == ff_core::input_hints::CONTROLLER {
+                    format!(
+                        "Engine stalled. Hold {}, press {} to restart, and shift down to first \
+                         with {} before letting the clutch out.",
+                        ctx.control_hint("clutch"),
+                        ctx.control_hint("engine"),
+                        ctx.control_name(Action::ShiftDown)
+                    )
+                } else {
+                    format!(
+                        "Engine stalled. Press {} for neutral and {} to restart, then hold {} \
+                         and press {} for first gear.",
+                        ctx.control_hint("neutral"),
+                        ctx.control_hint("engine"),
+                        ctx.control_hint("clutch"),
+                        ctx.control_hint("gear_first")
+                    )
+                };
                 ctx.say_event_with(text, SayEvent::new().category(SpeechCategory::Safety));
             } else if self.trip.truck.fuel_gal <= 0.0 {
                 self.handle_out_of_fuel(ctx);
@@ -569,10 +579,22 @@ impl DrivingState {
             // intent or its stopping assist armed for a later optional exit.
             self.clear_selected_stop_intent();
         }
+        // Real seconds, before the crossing is judged against them.
+        self.weigh_station_reminder_age_s += dt;
+        if self
+            .trip
+            .scale_reminder_hold_mi
+            .is_some_and(|mi| self.trip.position_mi >= mi)
+        {
+            // Past the gore even if a busy cab kept the scale check from
+            // running this frame: the real-time hold ends at the scale.
+            self.trip.scale_reminder_hold_mi = None;
+        }
         if self.check_border_booth_crossing(ctx, pos_before) {
             return;
         }
         self.check_weigh_station_enforcement(ctx, pos_before);
+        self.update_scale_reannounce(ctx);
         self.check_unsafe_damage_enforcement(ctx);
         self.check_destination_exit(ctx);
         self.check_gate_approach_warning(ctx, dt);
@@ -590,6 +612,9 @@ impl DrivingState {
             self.update_ramp_light(ctx, 0.0);
         }
         self.update_departure_ramp(ctx, moved_mi);
+        self.bound_departure_merge_recovery(moved_mi, dt);
+        // Every clock pin is settled for the frame by here.
+        self.trace_clock_override(dt);
         // Immediately after the exit watch, which is what turns a signaled
         // scale exit into a ramp. Only now can a scale crossing be told apart
         // from a check-in.
@@ -670,6 +695,15 @@ impl DrivingState {
         live::set_position_mi(self.trip.position_mi);
         live::set_speed_mph(self.trip.truck.speed_mph());
         live::set_hazard_active(self.hazard_deadline.is_some());
+        live::set_move_lockout(if !self.trip.truck.engine_on {
+            live::LOCKOUT_ENGINE_OFF
+        } else if !self.trip.truck.air_ready() {
+            live::LOCKOUT_AIR
+        } else if self.trip.truck.parking_brake {
+            live::LOCKOUT_PARKING_BRAKE
+        } else {
+            0
+        });
         live::set_arrival_menu_open(self.arrival_menu_open);
         live::set_gate_stop_prompted(self.arrival_full_stop_said);
         live::set_on_ramp(self.ramp_mi.is_some());

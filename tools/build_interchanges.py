@@ -477,6 +477,15 @@ def _shield_pattern(highway: str) -> str | None:
     return f"I {m.group(1)}([^0-9]|$)"
 
 
+def _eligible_for_interchange_discovery(
+    leg: dict[str, Any], local_mode: bool, explicitly_selected: bool
+) -> bool:
+    if _shield_pattern(str(leg.get("highway", ""))) is not None:
+        return True
+    corridor = leg.get("corridor", {})
+    return local_mode and (explicitly_selected or bool(corridor.get("interchanges")))
+
+
 def _sample_points(geom: list[tuple[float, float, float]]) -> list[tuple[float, float]]:
     points: list[tuple[float, float]] = []
     next_at = 0.0
@@ -1173,12 +1182,8 @@ def main(argv: list[str] | None = None) -> int:
     local_mode = bool(args.pbf or args.local_index_cache)
     for leg in legs:
         corridor = leg.setdefault("corridor", {})
-        # The local extract matches junctions by position, not by shield, so
-        # a leg that already carries exits under a label that is no longer
-        # an Interstate (relabelled for the road it drives now) is re-derived
-        # like any other. Only the Overpass crawl needs the shield.
-        if _shield_pattern(str(leg.get("highway", ""))) is None and not (
-            local_mode and corridor.get("interchanges")
+        if not _eligible_for_interchange_discovery(
+            leg, local_mode=local_mode, explicitly_selected=bool(args.only)
         ):
             continue
         eligible += 1

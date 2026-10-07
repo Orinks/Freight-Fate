@@ -57,6 +57,17 @@ pub fn type_prefix_is_redundant(label: &str, name: &str) -> bool {
     label_words.iter().all(|word| name_words.contains(word))
 }
 
+/// A spoken city with a leading "the" for phrases like "the {city} service
+/// area", unless the name already starts with its own article: "the
+/// Chicago", but "The Dalles", never "the The Dalles".
+pub fn the_city(city: &str) -> String {
+    if city.starts_with("The ") {
+        city.to_string()
+    } else {
+        format!("the {city}")
+    }
+}
+
 /// A facility's name with its type prefix, unless the prefix is redundant.
 pub fn typed_name(label: &str, name: &str, sep: &str) -> String {
     if type_prefix_is_redundant(label, name) {
@@ -244,7 +255,12 @@ pub fn hazard_call(call: &str, body: &str) -> SpokenMessage {
 /// "Brake!" stays in terse for the reason it always has (see
 /// `TONE_IMPLIED_CALLS`): quiet must not leave a noun phrase with no verb.
 pub fn in_lane_hazard_call(body: &str, side: OpenSide) -> SpokenMessage {
-    let answer = side.spoken();
+    in_lane_hazard_call_named(body, side, side.spoken())
+}
+
+/// [`in_lane_hazard_call`] with the lane answer already worded for the road
+/// (see `OpenSide::spoken_from`).
+pub fn in_lane_hazard_call_named(body: &str, side: OpenSide, answer: &str) -> SpokenMessage {
     if side.is_open() {
         SpokenMessage::with_terse(
             format!("{HAZARD_DODGE_CALL} {body} {answer}"),
@@ -254,6 +270,19 @@ pub fn in_lane_hazard_call(body: &str, side: OpenSide) -> SpokenMessage {
         let normal = format!("Brake! {body} {answer}");
         SpokenMessage::with_terse(normal.clone(), normal)
     }
+}
+
+/// The same call when lane keeping on full answers it by passing: the thing
+/// and where, then what the truck is doing ("Slow car right ahead. Passing
+/// on the left."). No "Change lanes or brake!" -- the truck is the one
+/// changing lanes -- and terse is the same line. None where no lane is open.
+pub fn passing_hazard_call(body: &str, side: OpenSide) -> Option<SpokenMessage> {
+    let side = if side.pass_step()? > 0 {
+        "left"
+    } else {
+        "right"
+    };
+    Some(SpokenMessage::new(format!("{body} Passing on the {side}.")))
 }
 
 // -- traffic lead cues --------------------------------------------------------
@@ -686,6 +715,13 @@ mod tests {
     //! and `tests/test_driving_speech_ladder.py`.
     use super::*;
 
+    #[test]
+    fn test_the_city_keeps_a_name_that_carries_its_own_article() {
+        assert_eq!(the_city("The Dalles"), "The Dalles");
+        assert_eq!(the_city("Chicago"), "the Chicago");
+        assert_eq!(the_city("Theodore"), "the Theodore");
+    }
+
     // -- the hazard call (R8) --------------------------------------------------
 
     #[test]
@@ -713,6 +749,27 @@ mod tests {
     }
 
     #[test]
+    fn test_on_a_road_three_wide_the_call_names_the_lane_a_tap_lands_in() {
+        // Agent drive to Uvalde, 2026-10-06: from the right lane of three the
+        // call said "Left lane open." and the tap then said "Changing to the
+        // middle lane." The answer names the lane the L key would.
+        assert_eq!(OpenSide::Left.spoken_from(0, 3), "Middle lane open.");
+        assert_eq!(OpenSide::Right.spoken_from(2, 3), "Middle lane open.");
+        assert_eq!(OpenSide::Left.spoken_from(1, 3), "Left lane open.");
+        assert_eq!(OpenSide::Right.spoken_from(1, 3), "Right lane open.");
+        assert_eq!(OpenSide::Either.spoken_from(1, 3), "Either lane open.");
+        // Two wide, nothing changes.
+        assert_eq!(OpenSide::Left.spoken_from(0, 2), "Left lane open.");
+        assert_eq!(OpenSide::Right.spoken_from(1, 2), "Right lane open.");
+        let named = OpenSide::Left.spoken_from(0, 3);
+        assert_eq!(
+            in_lane_hazard_call_named("A sudden lane closure ahead.", OpenSide::Left, &named)
+                .normal,
+            "Change lanes or brake! A sudden lane closure ahead. Middle lane open."
+        );
+    }
+
+    #[test]
     fn test_with_no_lane_open_the_call_is_brake_and_says_so_in_both_modes() {
         // Nowhere to go: the "Brake!" family, and the driver is told not to
         // reach for a lane change. "Brake!" survives terse, as it always has.
@@ -724,6 +781,16 @@ mod tests {
 
     /// The Python half that reads `main_menu_help.py` stays with the help
     /// port; the phrase itself is pinned here.
+    #[test]
+    fn test_the_passing_call_names_the_side_the_truck_takes() {
+        let left = passing_hazard_call("Slow car right ahead.", OpenSide::Either).unwrap();
+        assert_eq!(left.normal, "Slow car right ahead. Passing on the left.");
+        assert_eq!(left.terse, None);
+        let right = passing_hazard_call("Slow semi ahead.", OpenSide::Right).unwrap();
+        assert_eq!(right.normal, "Slow semi ahead. Passing on the right.");
+        assert!(passing_hazard_call("Slow car ahead.", OpenSide::Neither).is_none());
+    }
+
     #[test]
     fn test_the_dodge_call_is_the_phrase_the_help_teaches() {
         assert_eq!(

@@ -24,9 +24,11 @@ env:
 jobs:
   retry:
     name: Retry once after delay
+    # A job that hits its timeout ends the run as `cancelled`, not `failure`
+    # (2026-10-02: a hung Fedora ARM boot cost that night's snapshot).
     if: >-
       github.event.workflow_run.event == 'schedule' &&
-      github.event.workflow_run.conclusion == 'failure' &&
+      contains(fromJSON('["failure", "cancelled", "timed_out"]'), github.event.workflow_run.conclusion) &&
       github.event.workflow_run.run_attempt == 1
     runs-on: ubuntu-latest
     timeout-minutes: 55

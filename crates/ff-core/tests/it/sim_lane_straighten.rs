@@ -32,12 +32,23 @@ fn holding_it_points_the_truck_down_the_road() {
 }
 
 #[test]
-fn without_it_the_heading_carries_the_truck_off() {
+fn letting_go_does_the_same_and_only_a_held_key_keeps_the_heading() {
+    // Since 2026-09-30 letting go straightens too: a heading nobody can see
+    // outlived every key and took the owner off the road three drives running.
     let mut lane = pointing_off();
     run(&mut lane, 2.0);
+    assert!(lane.yaw_rad.abs() < 0.01, "heading {}", lane.yaw_rad);
+    assert_eq!(lane.lane, 0, "offset {}", lane.offset);
+    // A steer held that way keeps a heading -- the one that crosses a lane in
+    // LANE_CHANGE_S -- and carries the truck over.
+    let mut lane = pointing_off();
+    for _ in 0..(3.0 / DT) as usize {
+        lane.steering = -1.0;
+        lane.update(DT, MPS, RoadConditions::default(), "off", false);
+    }
     assert!(lane.yaw_rad.abs() > 0.05, "heading {}", lane.yaw_rad);
     assert_eq!(
         lane.lane, 1,
-        "the heading should carry it into the left lane"
+        "the held heading should carry it into the left lane"
     );
 }

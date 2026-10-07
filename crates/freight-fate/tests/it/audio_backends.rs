@@ -13,7 +13,7 @@ use std::rc::Rc;
 use std::time::Duration;
 
 use bass_sys::safe;
-use ff_core::ladder_earcons::{register_ladder_earcons, CONFIRMATION_NOTE_KEY};
+use ff_core::lane_guide_tone::{register_lane_guide_tone, LANE_GUIDE_TONE_KEY};
 use ff_core::music::ALL_MUSIC_TRACKS;
 use ff_core::pyrandom::PyRandom;
 use freight_fate::audio::*;
@@ -246,6 +246,7 @@ fn test_asset_length_matches_a_real_decode_of_the_same_clip() {
         "driver/yawn",
         "events/spike_strip",
         "vehicle/signal_tone",
+        "vehicle/turn_signal_off",
         "vehicle/bar_solid",
     ] {
         let decoded = shipped_duration_s(key).unwrap();
@@ -259,11 +260,11 @@ fn test_asset_length_matches_a_real_decode_of_the_same_clip() {
 
 #[test]
 fn test_asset_length_covers_synthesized_cues_and_shrugs_at_unknown_keys() {
-    // The Python test registered the enforcement signature; the ladder
-    // earcons are the synthesized cues this build carries.
-    register_ladder_earcons();
+    // The Python test registered the enforcement signature; the lane guide
+    // tone is a synthesized cue this build carries.
+    register_lane_guide_tone();
     assert!(
-        asset_length_s(CONFIRMATION_NOTE_KEY) > 0.0,
+        asset_length_s(LANE_GUIDE_TONE_KEY) > 0.0,
         "a generated cue has a length too"
     );
     assert_eq!(asset_length_s("nothing/at_all"), 0.0);

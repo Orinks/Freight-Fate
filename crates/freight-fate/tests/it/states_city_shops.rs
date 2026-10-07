@@ -21,6 +21,7 @@ use ff_core::models::profile::Profile;
 use ff_core::models::trailers::{trailer_type, DEFAULT_TRAILER_PROGRAMS};
 use ff_core::models::trucks::truck_model_or_panic;
 use ff_core::pyfmt::{fmt_f, fmt_grouped};
+use ff_core::sim::hos;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::Key;
 use freight_fate::states::city::{
@@ -716,10 +717,18 @@ fn test_bought_truck_starts_fresh_and_each_keeps_its_own_condition() {
 
 // -- tests/test_truck_dealer_menu.py ---------------------------------------------------
 
+/// An owner-operator in a company driver's seat.
+fn owner_operator(app: &mut TestApp) {
+    let p = profile_mut(app);
+    p.business_status = LEASED_OWNER_OPERATOR.to_string();
+    p.owned_trucks = vec!["rig".to_string()];
+}
+
 #[test]
 fn test_the_terminal_menu_offers_truck_dealer_directly() {
     let mut app = TestApp::new();
     career(&mut app, "Dale", "Buffalo");
+    owner_operator(&mut app);
     let mut menu = CityMenuState::new(&app.ctx, false);
     let rows = built_labels(&mut app, &mut menu);
 
@@ -727,10 +736,35 @@ fn test_the_terminal_menu_offers_truck_dealer_directly() {
     assert!(!rows.iter().any(|t| t == "Drive to city services"));
 }
 
+/// The carrier assigns a company driver's tractor, tires and trailer, so the
+/// owner's shopping stays off their menus until the buy-in (owner,
+/// 2026-09-28).
+#[test]
+fn test_a_company_driver_is_not_shown_owner_operator_shops() {
+    let mut app = TestApp::new();
+    career(&mut app, "Dale", "Buffalo");
+    profile_mut(&mut app).business_status = COMPANY_DRIVER.to_string();
+    let mut menu = CityMenuState::new(&app.ctx, false);
+    let rows = built_labels(&mut app, &mut menu);
+    assert!(!rows.iter().any(|t| t == "Truck dealer"), "{rows:?}");
+    assert!(rows.iter().any(|t| t == "Business status"), "{rows:?}");
+
+    app.push_state(GarageState::new());
+    let rows = labels::<GarageState>(&app);
+    for hidden in ["Upgrades", "Trucks", "Trailer programs"] {
+        assert!(!rows.iter().any(|t| t == hidden), "{hidden}: {rows:?}");
+    }
+    assert!(
+        !rows.iter().any(|t| t.starts_with("Tire compound")),
+        "{rows:?}"
+    );
+}
+
 #[test]
 fn test_the_truck_dealer_item_pushes_truck_shop_state() {
     let mut app = TestApp::new();
     career(&mut app, "Dale", "Buffalo");
+    owner_operator(&mut app);
     let city = CityMenuState::new(&app.ctx, false);
     app.push_state(city);
     activate::<CityMenuState>(&mut app, "Truck dealer");
@@ -796,6 +830,7 @@ fn test_truck_shop_entry_stays_plain_from_the_garage() {
         .city_service("Indianapolis", "truck_dealer")
         .expect("Indianapolis has a dealer");
     assert!(!dealer.fallback);
+    owner_operator(&mut app);
 
     app.push_state(GarageState::new());
     app.clear_speech();
@@ -956,6 +991,129 @@ fn endorsement_courses_price_each_unearned_endorsement() {
         help.contains("unlocks fresh food and refrigerated goods"),
         "{help}"
     );
+}
+
+/// Book the flatbed course (8 h) in `city` at absolute `game_hours` with
+/// `fatigue` on arrival. Returns the fatigue after and the completion line.
+fn take_flatbed_course(
+    city: &str,
+    game_hours: f64,
+    fatigue: f64,
+    setup: impl FnOnce(&mut TestApp),
+) -> (f64, String) {
+    let mut app = TestApp::new();
+    career(&mut app, "Course Fatigue", city);
+    app.ctx.settings.time_scale = 20.0; // Standard pressure unless setup says otherwise
+    {
+        let p = profile_mut(&mut app);
+        p.set_money(50_000.0);
+        p.fatigue = fatigue;
+        p.game_hours = game_hours;
+    }
+    setup(&mut app);
+    app.push_state(EndorsementCourseState::new());
+    select::<EndorsementCourseState>(&mut app, "Flatbed securement certificate course:");
+    let line = app
+        .speech()
+        .lines()
+        .into_iter()
+        .rfind(|l| l.starts_with("Course complete"))
+        .expect("a completion line");
+    (profile(&app).fatigue, line)
+}
+
+#[test]
+fn course_fatigue_runs_at_the_classroom_rate_day_and_night() {
+    // GitHub #314: a course is awake time, not sleep, but a classroom has no
+    // driving vigilance load, so it runs at half the driving rate. Chicago
+    // is Central: 8.0 Eastern is 7 AM local, a clean 8 h of day.
+    let (day, line) = take_flatbed_course("Chicago", 8.0, 10.0, |_| {});
+    approx(day, 10.0 + 0.0575 * 480.0); // 37.6
+    approx(
+        day,
+        10.0 + hos::CLASSROOM_FATIGUE_FACTOR * hos::awake_fatigue_gain(7.0, 8.0 * 60.0),
+    );
+    assert!(!line.contains("drowsy"), "{line}");
+
+    // 22.0 Eastern is 9 PM Central: 9 PM to 5 AM is all night.
+    let (night, line) = take_flatbed_course("Chicago", 22.0, 10.0, |_| {});
+    approx(night, 10.0 + 0.085 * 480.0); // 50.8
+    assert!(!line.contains("drowsy"), "{line}");
+}
+
+#[test]
+fn multi_day_course_counts_only_the_last_class_day() {
+    // LCV is the 24 h course: class days with sleep between, so the driver
+    // leaves with the last class day's fatigue, whatever they walked in
+    // with. HOS still books it off duty.
+    let mut app = TestApp::new();
+    career(&mut app, "Course Fatigue", "Chicago");
+    app.ctx.settings.time_scale = 20.0;
+    {
+        let p = profile_mut(&mut app);
+        p.fatigue = 95.0;
+        p.game_hours = 8.0; // 7 AM Central; the last class day is 11 PM to 7 AM
+        p.career.xp = LEVEL_XP[19]; // level 20
+        p.career
+            .purchased_endorsements
+            .push("doubles_triples".to_string());
+        p.set_money(50_000.0);
+    }
+    app.push_state(EndorsementCourseState::new());
+    select::<EndorsementCourseState>(&mut app, "Lcv certificate course:");
+    let after_24 = profile(&app).fatigue;
+    // Six night hours (0.085 x 360 = 30.6) and two dawn hours (0.0575 x 120 = 6.9).
+    approx(after_24, 37.5);
+    approx(
+        after_24,
+        hos::course_fatigue(0.0, 7.0, 24.0 * 60.0, |_| 1.0),
+    );
+    assert_ne!(after_24, 0.0, "a course must not wipe fatigue to zero");
+}
+
+#[test]
+fn course_day_and_night_follow_the_western_city_clock() {
+    // 5.0 Eastern is dawn (day rate) on the Eastern clock, but 2 AM in Los
+    // Angeles: three night hours before the Pacific dawn.
+    let (west, _) = take_flatbed_course("Los Angeles", 5.0, 10.0, |_| {});
+    approx(west, 10.0 + 0.085 * 180.0 + 0.0575 * 300.0); // 42.55
+    let eastern_clock = 10.0 + 0.0575 * 480.0; // what the Eastern clock gave: 37.6
+    assert!(west > eastern_clock + 4.0, "{west}");
+}
+
+#[test]
+fn course_fatigue_honors_food_buffs_and_relaxed_mode() {
+    // A fatigue buff at half rate that wears off four hours into class, and
+    // Relaxed pressure (0.8 of the fatigue rate) on top.
+    let (after, _) = take_flatbed_course("Chicago", 8.0, 10.0, |app| {
+        app.ctx.settings.time_scale = 10.0;
+        profile_mut(app).add_timed_buff(serde_json::json!({
+            "group": "fatigue", "rate": 0.5, "expires_h": 12.0
+        }));
+    });
+    approx(after, 10.0 + 0.8 * (0.0575 * 240.0 * 0.5 + 0.0575 * 240.0)); // 26.56
+}
+
+#[test]
+fn course_completion_warns_when_it_leaves_you_drowsy() {
+    // 25 + 40.8 night = 65.8, past the drowsy threshold.
+    let (drowsy, line) = take_flatbed_course("Chicago", 22.0, 25.0, |_| {});
+    assert!((hos::FATIGUE_DROWSY..hos::FATIGUE_SEVERE).contains(&drowsy));
+    assert!(
+        line.ends_with("You're drowsy after the course. Sleep before you drive."),
+        "{line}"
+    );
+    // 50 + 40.8 = 90.8, past severe.
+    let (severe, line) = take_flatbed_course("Chicago", 22.0, 50.0, |_| {});
+    assert!(severe >= hos::FATIGUE_SEVERE);
+    assert!(
+        line.ends_with("You're dangerously drowsy after the course. Sleep before you drive."),
+        "{line}"
+    );
+    // Just under: 19 + 40.8 = 59.8 stays quiet.
+    let (under, line) = take_flatbed_course("Chicago", 22.0, 19.0, |_| {});
+    assert!(under < hos::FATIGUE_DROWSY);
+    assert!(!line.contains("drowsy"), "{line}");
 }
 
 #[test]

@@ -164,6 +164,10 @@ pub enum Command {
     Lockstep {
         on: bool,
     },
+    /// Start the key probe, or stop it and report (`app::key_probe`).
+    KeyProbe {
+        start: bool,
+    },
     Listen,
     Menu,
     Observe,
@@ -766,13 +770,10 @@ impl AgentPolicy {
                 }
                 Command::Lockstep { on } => {
                     self.lockstep = on;
-                    let _ = reply.send(Ok(if on {
-                        "Lockstep is on: the world waits between tool calls. Time passes only \
-                         inside wait, pedal, wait_for, and the frames a call scripts."
-                    } else {
-                        "Lockstep is off: the road runs on the wall clock again."
-                    }
-                    .to_string()));
+                    let _ = reply.send(Ok(protocol::lockstep_reply(on)));
+                }
+                Command::KeyProbe { start } => {
+                    let _ = reply.send(Ok(input.key_probe(start)));
                 }
                 Command::Quit => {
                     let _ = reply.send(Ok("Quitting the game.".to_string()));

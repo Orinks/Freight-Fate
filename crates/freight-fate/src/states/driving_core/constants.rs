@@ -5,7 +5,9 @@
 
 use ff_core::sim::enforcement_observe::OBSERVE_LEEWAY_MPH;
 use ff_core::sim::hos;
-use ff_core::sim::trip_models::{DESTINATION_LOCAL_APPROACH_MI, RAMP_MAX_MPH as TRIP_RAMP_MAX_MPH};
+use ff_core::sim::trip_models::{
+    DESTINATION_LOCAL_APPROACH_MI, RAMP_MAX_MPH as TRIP_RAMP_MAX_MPH, SCALE_BYPASS_MPH,
+};
 
 pub const HAZARD_SAFE_MPH: f64 = 25.0;
 // A fixed object in your lane -- debris, a stopped vehicle -- cannot be
@@ -93,6 +95,9 @@ pub const ROAD_TIRE_MIN: f64 = 75.0;
 pub const ROAD_BRAKE_COST_PER_PCT: f64 = 55.0; // road-shop premium over the garage's 40
 pub const ROAD_BRAKE_MIN: f64 = 120.0;
 pub const FUEL_STOP_MIN: f64 = 20.0; // fueling is on-duty-not-driving work
+/// Fraction of tank remaining that fires the once-per-threshold low-fuel cue.
+/// Re-arms only after a refill climbs back above this line.
+pub const LOW_FUEL_WARN_FRACTION: f64 = 0.15;
 pub const INSPECTION_MIN: f64 = 15.0; // inspection lane: they take you in
 /// The driver's own pre-trip walk-around, on duty. ASSUMED: 49 CFR 396.13
 /// sets no time; carriers budget about fifteen minutes.
@@ -141,6 +146,10 @@ pub const EXIT_TAPER_MI: f64 = 300.0 / 5280.0;
 /// (MUTCD 11th ed. 2E.23, 1/2 mi). X commits to the exit wherever it is
 /// pressed; this is only when the blinker runs.
 pub const EXIT_BLINKER_MI: f64 = EXIT_COUNTDOWN_MILESTONES_MI[2];
+/// How far out lane keeping on full starts moving to the right lane for an
+/// exit it is taking: the countdown's first anchor, where a manual driver is
+/// asked for the same lane.
+pub const EXIT_KEEP_RIGHT_MI: f64 = EXIT_COUNTDOWN_MILESTONES_MI[0];
 pub const EXIT_CANCEL_GUARD_MI: f64 = 1.0; // inside this, X keeps the signal; a second press cancels
 pub const EXIT_TAP_HOLD_S: f64 = 0.35; // a Right press this short is a tap, not held steering
 pub const AEB_BUDGET_MARGIN: f64 = 1.2; // emergency braking leads the physics budget by this factor
@@ -409,7 +418,8 @@ pub const UNLOADING_WAIT_S: f64 = 1.5;
 // on, holding the wheel across the lane line is the lane change; with assist
 // off, a Left/Right arrow tap runs a timed change with signal clicks.
 pub const LANE_MIN_MPH: f64 = 10.0; // below this there is nothing to steer
-pub const LANE_TAP_CHANGE_S: f64 = 2.5; // assist-off timed drift across the line
+                                    // A full-lane-keeping tap change, and the pace a held key crosses a lane at.
+pub const LANE_TAP_CHANGE_S: f64 = ff_core::sim::lane::LANE_CHANGE_S;
 pub const LANE_SIGNAL_CLICK_S: f64 = 0.45; // turn-signal cadence during a tap change
 pub const MERGE_WINDOW_S: f64 = 8.0; // time to vacate a coned-off lane after the warning
 pub const MERGE_BARRELS_DAMAGE: f64 = 0.25; // collision severity for riding into the barrels
@@ -751,7 +761,9 @@ pub const PURSUIT_RUN_MIN_MPH: f64 = 30.0;
 pub const FAILURE_TO_STOP_DAMAGE_PCT: f64 = 12.0;
 pub const FAILURE_TO_STOP_PROCESSING_MIN: f64 = 180.0;
 pub const WEIGH_STATION_NOTICE_MI: f64 = 2.0;
-pub const WEIGH_STATION_BYPASS_MPH: f64 = 15.0;
+// The sim layer owns the number: the scale reminder's real-time hold lets go
+// at the same speed a crossing stops counting as a bypass.
+pub const WEIGH_STATION_BYPASS_MPH: f64 = SCALE_BYPASS_MPH;
 // ASSUMPTION: CBP's wait-times feed has no Alcan entry; no per-port commercial processing time is published.
 pub const BORDER_PRIMARY_MIN: f64 = 10.0;
 // ASSUMPTION: no published per-port secondary-inspection processing time exists.

@@ -7,7 +7,7 @@ use ff_core::speech_pacing::SpeechCategory;
 
 use crate::app::{GameContext, Say};
 use crate::states::base::TimedMessageState;
-use crate::states::driving::DrivingState;
+use crate::states::driving::{DrivingState, StopVisit};
 use crate::states::driving_core::*;
 use crate::states::driving_rest_states::RestFocus;
 
@@ -221,6 +221,14 @@ impl DrivingState {
             }
         }
 
+        // The departure streets are a trip of their own, swapped out at the
+        // on-ramp merge: a plan made here landed on the wrong trip and was
+        // cancelled a frame later with a false "past your planned stop".
+        // Planning waits for the highway, as the HOS hints already do.
+        if self.departure_chain {
+            return;
+        }
+
         // HOS advice can choose a compatible break-only stop or a comfortable
         // sleep stop before the legal fallback. Outside that opt-in case, T
         // keeps choosing the NEXT sleep-capable stop ahead, however far.
@@ -359,6 +367,18 @@ impl DrivingState {
             (Some(key), Some(stop)) => *key == stop.key(),
             _ => false,
         }
+    }
+
+    /// This visit's record at `stop`, fresh when it is a different stop.
+    pub fn stop_visit(&mut self, stop: &RoadStop) -> &mut StopVisit {
+        let key = stop.key();
+        if self.stop_visit.key != key {
+            self.stop_visit = StopVisit {
+                key,
+                ..StopVisit::default()
+            };
+        }
+        &mut self.stop_visit
     }
 
     /// Speak the selected stop and the HOS purpose when this press chose it.

@@ -1000,7 +1000,7 @@ fn test_reminder_fires_once_when_still_fast_with_no_scale_exit_armed() {
     let mut drive = a_drive(&mut app, "Jerry");
     let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
     let key = format!("weigh:{}:{:.1}", scale.name, scale.at_mi);
-    drive.weigh_station_notice_key = key.clone();
+    drive.weigh_station_noticed.insert(key.clone());
     drive.trip.truck.velocity_mps = mph_to_mps(45.0);
     app.clear_speech();
 
@@ -1012,11 +1012,11 @@ fn test_reminder_fires_once_when_still_fast_with_no_scale_exit_armed() {
     let reminders: Vec<String> = app
         .event_lines()
         .into_iter()
-        .filter(|line| line.starts_with("Weigh station in "))
+        .filter(|line| line.starts_with("Ontario Scale in "))
         .collect();
     assert_eq!(
         reminders,
-        vec!["Weigh station in half a mile. Signal for the scale exit.".to_string()]
+        vec!["Ontario Scale in half a mile. Signal for the scale exit.".to_string()]
     );
 }
 
@@ -1030,7 +1030,7 @@ fn test_reminder_speaks_the_road_actually_left() {
     let mut drive = a_drive(&mut app, "Jerry");
     let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
     let key = format!("weigh:{}:{:.1}", scale.name, scale.at_mi);
-    drive.weigh_station_notice_key = key.clone();
+    drive.weigh_station_noticed.insert(key.clone());
     drive.trip.truck.velocity_mps = mph_to_mps(45.0);
     drive.trip.position_mi = scale.at_mi - 0.15;
     app.clear_speech();
@@ -1040,11 +1040,11 @@ fn test_reminder_speaks_the_road_actually_left() {
     let reminders: Vec<String> = app
         .event_lines()
         .into_iter()
-        .filter(|line| line.starts_with("Weigh station in "))
+        .filter(|line| line.starts_with("Ontario Scale in "))
         .collect();
     assert_eq!(
         reminders,
-        vec!["Weigh station in a quarter mile. Signal for the scale exit.".to_string()]
+        vec!["Ontario Scale in a quarter mile. Signal for the scale exit.".to_string()]
     );
 }
 
@@ -1054,7 +1054,7 @@ fn test_reminder_stays_quiet_once_the_scale_exit_is_armed() {
     let mut drive = a_drive(&mut app, "Jerry");
     let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
     let key = format!("weigh:{}:{:.1}", scale.name, scale.at_mi);
-    drive.weigh_station_notice_key = key.clone();
+    drive.weigh_station_noticed.insert(key.clone());
     drive.trip.truck.velocity_mps = mph_to_mps(45.0);
     drive.exit_stop = Some(scale.clone());
     drive.exit_signal_on = true;
@@ -1071,7 +1071,7 @@ fn test_reminder_stays_quiet_below_the_bypass_speed() {
     let mut drive = a_drive(&mut app, "Jerry");
     let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
     let key = format!("weigh:{}:{:.1}", scale.name, scale.at_mi);
-    drive.weigh_station_notice_key = key.clone();
+    drive.weigh_station_noticed.insert(key.clone());
     drive.trip.truck.velocity_mps = mph_to_mps(10.0);
     app.clear_speech();
 
@@ -1087,7 +1087,7 @@ fn test_a_green_transponder_verdict_retires_the_reminder() {
     let mut drive = a_drive(&mut app, "Jerry");
     let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
     let key = format!("weigh:{}:{:.1}", scale.name, scale.at_mi);
-    drive.weigh_station_notice_key = key.clone();
+    drive.weigh_station_noticed.insert(key.clone());
     drive.trip.truck.velocity_mps = mph_to_mps(45.0);
     drive
         .weigh_station_transponder_verdict
@@ -1305,6 +1305,44 @@ fn test_a_signaled_speed_valid_open_scale_enters_its_ramp() {
     );
     assert!(drive.ramp_mi.is_some());
     assert!(!drive.exit_signal_on);
+}
+
+#[test]
+fn test_a_scale_taken_at_the_taper_is_not_crossed_again_on_the_way_out() {
+    // Steered into the exit lane where it opened, 300 feet short of the gore.
+    // The ramp holds the highway odometer, so the truck rejoined short of the
+    // scale, crossed it pulling away, and was charged with bypassing the
+    // scale it had just checked in at.
+    let mut app = TestApp::new();
+    let mut drive = a_drive(&mut app, "Taper Scale");
+    let (scale, _) = with_scale(&mut drive, 10.0, 11.0, true);
+    drive.trip.position_mi = scale.at_mi - EXIT_TAPER_MI;
+    drive.trip.truck.velocity_mps = mph_to_mps(40.0);
+    drive.exit_stop = Some(scale.clone());
+    drive.exit_signal_on = true;
+    drive.exit_lane_entered = true;
+    drive.exit_taper_said = true;
+
+    drive.update_exit(&mut app.ctx, 0.02, 0.1);
+
+    assert_eq!(
+        drive.ramp_stop.as_ref().map(RoadStop::key),
+        Some(scale.key())
+    );
+    assert!(drive.trip.position_mi >= scale.at_mi);
+
+    // Checked in, back on the road, and past 15 pulling away.
+    drive.ramp_mi = None;
+    drive.ramp_stop = None;
+    let previous = drive.trip.position_mi;
+    drive.trip.position_mi += 0.01;
+    drive.trip.truck.velocity_mps = mph_to_mps(25.0);
+    drive.check_weigh_station_enforcement(&mut app.ctx, previous);
+
+    assert!(!drive
+        .enforcement_events
+        .contains(&drive.weigh_station_key(&scale)));
+    assert!(drive.pull_over.is_none());
 }
 
 #[test]

@@ -65,7 +65,9 @@ pub(super) fn slide(handle: u32, attrib: u32, value: f64, ms: u32) -> Result<(),
 
 /// The BASSHLS plugin file name on this platform.
 fn bass_hls_plugin_name() -> &'static str {
-    if cfg!(windows) {
+    if cfg!(target_os = "ios") {
+        "basshls.framework"
+    } else if cfg!(windows) {
         "basshls.dll"
     } else if cfg!(target_os = "macos") {
         "libbasshls.dylib"

@@ -505,7 +505,7 @@ fn test_the_carriers_record_review_holds_the_iron_and_names_the_day_it_ages_out(
         "{spoken}"
     );
     assert!(
-        spoken.contains("Keep the record clean until the oldest ages out"),
+        spoken.contains("Keep the record clean until the hold lifts"),
         "{spoken}"
     );
     assert!(spoken.contains("comes back to you"), "{spoken}");

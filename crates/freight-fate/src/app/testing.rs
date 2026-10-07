@@ -255,6 +255,8 @@ impl TestApp {
         // app without knowing it exists.
         let settings = Settings {
             online_offer_seen: true,
+            // The one-time Driving assistance picker likewise.
+            assist_preset_chosen: true,
             // The live diesel feed is on by default for players; a test app
             // must not ask the network for it on every frame (the guard
             // would refuse it, noisily, from a worker thread). Tests that

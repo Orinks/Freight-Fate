@@ -690,6 +690,16 @@
             "spoken": "Passing Baltimore Highlands"
           },
           {
+            "name": "Patapsco River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 5.3,
+            "spoken": "Crossing the Patapsco River",
+            "lat": 39.22929,
+            "lon": -76.65053,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 1185777 (Patapsco River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Elkridge",
             "at_mi": 6.2,
             "off_mi": 2.64,
@@ -744,20 +754,6 @@
             "spoken": "Passing Brooklyn Park"
           },
           {
-            "name": "Patapsco River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 9.7,
-            "spoken": "Crossing the Patapsco River"
-          },
-          {
-            "name": "Magothy River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 9.7,
-            "spoken": "Crossing the Magothy River"
-          },
-          {
             "name": "Pasadena",
             "at_mi": 16.1,
             "off_mi": 1.81,
@@ -765,6 +761,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158561282, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Pasadena"
+          },
+          {
+            "name": "Magothy River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 16.5,
+            "spoken": "Crossing the Magothy River",
+            "lat": 39.11788,
+            "lon": -76.57681,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 943951626 (Magothy River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Gambrills",
@@ -837,13 +843,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158435015, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cape Saint Claire"
-          },
-          {
-            "name": "Little Magothy River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 30.6,
-            "spoken": "Crossing the Little Magothy River"
           },
           {
             "name": "Chester",
@@ -4152,20 +4151,22 @@
         "state_miles": [
           {
             "state": "Maryland",
-            "miles": 105.2
+            "miles": 100.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Pennsylvania",
-            "miles": 141.8
+            "miles": 146.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 105.2,
+            "at_mi": 100.9,
             "from_state": "Maryland",
             "state": "Pennsylvania",
             "place": "Maryland-Pennsylvania line on I-70",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -5506,8 +5507,11 @@
             "name": "Patapsco River",
             "category": "river",
             "kind": "point",
-            "at_mi": 14.0,
-            "spoken": "Crossing the Patapsco River"
+            "at_mi": 13.6,
+            "spoken": "Crossing the Patapsco River",
+            "lat": 39.30479,
+            "lon": -76.79631,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 921533896 (Patapsco River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cooksville",
@@ -5546,13 +5550,6 @@
             "spoken": "Passing Monrovia"
           },
           {
-            "name": "Monocacy River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 43.5,
-            "spoken": "Crossing the Monocacy River"
-          },
-          {
             "name": "Spring Ridge",
             "at_mi": 45.0,
             "off_mi": 0.17,
@@ -5569,6 +5566,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158368052, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bartonsville"
+          },
+          {
+            "name": "Monocacy River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 45.7,
+            "spoken": "Crossing the Monocacy River",
+            "lat": 39.40426,
+            "lon": -77.36599,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 983449563 (Monocacy River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Braddock Heights",
@@ -5596,6 +5603,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158316704, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Breezewood"
+          },
+          {
+            "name": "The Bedford Coffee Pot (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 131.3,
+            "spoken": "Billboard: The Bedford Coffee Pot, ahead. A coffee pot building from nineteen twenty-seven. It has been a bar and a bus stop, never a coffee shop.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Earlston",
@@ -5641,6 +5658,16 @@
             "spoken": "Passing Manns Choice"
           },
           {
+            "name": "The Bedford Coffee Pot (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 153.1,
+            "spoken": "Billboard: The Bedford Coffee Pot, ahead. A coffee pot building from nineteen twenty-seven. It has been a bar and a bus stop, never a coffee shop.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "New Baltimore",
             "at_mi": 159.4,
             "off_mi": 0.15,
@@ -5650,6 +5677,26 @@
             "spoken": "Entering New Baltimore"
           },
           {
+            "name": "Flight Ninety-Three National Memorial",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 178.8,
+            "spoken": "You are passing near Shanksville, where the Flight Ninety-Three National Memorial honors the forty passengers and crew of September eleventh, two thousand one.",
+            "directions": [
+              "both"
+            ]
+          },
+          {
+            "name": "Fallingwater (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 188.5,
+            "spoken": "Billboard: Fallingwater, ahead, south of the Donegal exit. Frank Lloyd Wright built the house right over a waterfall. The waterfall was not consulted.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Donegal",
             "at_mi": 198.4,
             "off_mi": 0.16,
@@ -5657,6 +5704,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158642358, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Donegal"
+          },
+          {
+            "name": "Fallingwater (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 200.6,
+            "spoken": "Billboard: Fallingwater, next exit, nineteen miles south. Frank Lloyd Wright built the house right over a waterfall. The waterfall was not consulted.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "New Stanton",
@@ -8250,31 +8307,22 @@
         "state_miles": [
           {
             "state": "Maryland",
-            "miles": 37.9
-          },
-          {
-            "state": "District of Columbia",
-            "miles": 14.6
+            "miles": 43.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Virginia",
-            "miles": 101.5
+            "miles": 110.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 37.9,
+            "at_mi": 43.3,
             "from_state": "Maryland",
-            "state": "District of Columbia",
-            "place": "Maryland-District of Columbia line on I-95",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
-          },
-          {
-            "at_mi": 52.5,
-            "from_state": "District of Columbia",
             "state": "Virginia",
-            "place": "District of Columbia-Virginia line on I-95",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "place": "Maryland-Virginia line on I-95",
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -9683,18 +9731,24 @@
             "spoken": "Passing Relay"
           },
           {
-            "name": "Patuxent River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.5,
-            "spoken": "Crossing the Patuxent River"
-          },
-          {
             "name": "Little Patuxent River",
             "category": "river",
             "kind": "point",
-            "at_mi": 13.5,
-            "spoken": "Crossing the Little Patuxent River"
+            "at_mi": 16.3,
+            "spoken": "Crossing the Little Patuxent River",
+            "lat": 39.15652,
+            "lon": -76.83366,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon way 964438673 (Little Patuxent River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Patuxent River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 19.9,
+            "spoken": "Crossing the Patuxent River",
+            "lat": 39.11547,
+            "lon": -76.87355,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 53473747 (Patuxent River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "West Laurel",
@@ -9733,6 +9787,16 @@
             "spoken": "Passing Hillandale"
           },
           {
+            "name": "Northwest Branch Anacostia River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 30.2,
+            "spoken": "Crossing the Northwest Branch Anacostia River",
+            "lat": 39.01751,
+            "lon": -76.9942,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 991394720 (Northwest Branch Anacostia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Four Corners",
             "at_mi": 31.0,
             "off_mi": 0.25,
@@ -9769,20 +9833,6 @@
             "spoken": "Entering North Chevy Chase"
           },
           {
-            "name": "Northwest Branch Anacostia River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 38.1,
-            "spoken": "Crossing the Northwest Branch Anacostia River"
-          },
-          {
-            "name": "Potomac River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 38.1,
-            "spoken": "Crossing the Potomac River"
-          },
-          {
             "name": "Cabin John",
             "at_mi": 41.5,
             "off_mi": 0.61,
@@ -9790,6 +9840,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158635966, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cabin John"
+          },
+          {
+            "name": "Potomac River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 43.2,
+            "spoken": "Crossing the Potomac River",
+            "lat": 38.96913,
+            "lon": -77.17965,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 87759945 (Potomac River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Idylwood",
@@ -9864,6 +9924,16 @@
             "spoken": "Entering Lorton"
           },
           {
+            "name": "The National Museum of the Marine Corps (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 67.8,
+            "spoken": "Billboard: The National Museum of the Marine Corps, ahead at Triangle. Free admission, every day but Thanksgiving and Christmas. Stand up straight on the way in.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Potomac Mills",
             "at_mi": 70.7,
             "off_mi": 0.27,
@@ -9918,11 +9988,14 @@
             "spoken": "Entering Boswell's Corner"
           },
           {
-            "name": "Rappahannock River",
-            "category": "river",
+            "name": "The National Museum of the Marine Corps (northbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 87.6,
-            "spoken": "Crossing the Rappahannock River"
+            "at_mi": 89.8,
+            "spoken": "Billboard: The National Museum of the Marine Corps, ahead at Triangle. Free admission, every day but Thanksgiving and Christmas. Stand up straight on the way in.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Southern Gateway",
@@ -9934,6 +10007,16 @@
             "spoken": "Entering Southern Gateway"
           },
           {
+            "name": "Rappahannock River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 95.8,
+            "spoken": "Crossing the Rappahannock River",
+            "lat": 38.32654,
+            "lon": -77.50114,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 160832873 (Rappahannock River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Massaponax",
             "at_mi": 105.3,
             "off_mi": 0.44,
@@ -9941,6 +10024,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158242317, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Massaponax"
+          },
+          {
+            "name": "Po River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 108.7,
+            "spoken": "Crossing the Po River",
+            "lat": 38.14605,
+            "lon": -77.50651,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 37942385 (Po River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Thornburg",
@@ -9955,22 +10048,11 @@
             "name": "Matta River",
             "category": "river",
             "kind": "point",
-            "at_mi": 114.9,
-            "spoken": "Crossing the Matta River"
-          },
-          {
-            "name": "Po River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 114.9,
-            "spoken": "Crossing the Po River"
-          },
-          {
-            "name": "North Anna River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 114.9,
-            "spoken": "Crossing the North Anna River"
+            "at_mi": 110.9,
+            "spoken": "Crossing the Matta River",
+            "lat": 38.11496,
+            "lon": -77.51741,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 37940363 (Matta River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ruther Glen",
@@ -9980,6 +10062,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158349522, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ruther Glen"
+          },
+          {
+            "name": "North Anna River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 127.1,
+            "spoken": "Crossing the North Anna River",
+            "lat": 37.8902,
+            "lon": -77.45842,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 152288777 (North Anna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Doswell",
@@ -11511,13 +11603,6 @@
             "spoken": "Entering Arbutus"
           },
           {
-            "name": "Patapsco River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 6.1,
-            "spoken": "Crossing the Patapsco River"
-          },
-          {
             "name": "Relay",
             "at_mi": 7.6,
             "off_mi": 0.62,
@@ -11525,6 +11610,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158449110, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Relay"
+          },
+          {
+            "name": "Patapsco River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 8.1,
+            "spoken": "Crossing the Patapsco River",
+            "lat": 39.22554,
+            "lon": -76.71768,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 400082756 (Patapsco River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Elkridge",
@@ -11536,6 +11631,26 @@
             "spoken": "Passing Elkridge"
           },
           {
+            "name": "Little Patuxent River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 16.0,
+            "spoken": "Crossing the Little Patuxent River",
+            "lat": 39.15672,
+            "lon": -76.83373,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1378217064 (Little Patuxent River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Middle Patuxent River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 16.8,
+            "spoken": "Crossing the Middle Patuxent River",
+            "lat": 39.14765,
+            "lon": -76.84253,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 940070496 (Middle Patuxent River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Savage",
             "at_mi": 17.0,
             "off_mi": 1.18,
@@ -11545,27 +11660,6 @@
             "spoken": "Passing Savage"
           },
           {
-            "name": "Patuxent River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 18.6,
-            "spoken": "Crossing the Patuxent River"
-          },
-          {
-            "name": "Middle Patuxent River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 18.6,
-            "spoken": "Crossing the Middle Patuxent River"
-          },
-          {
-            "name": "Little Patuxent River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 18.6,
-            "spoken": "Crossing the Little Patuxent River"
-          },
-          {
             "name": "North Laurel",
             "at_mi": 19.1,
             "off_mi": 1.15,
@@ -11573,6 +11667,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157596033, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing North Laurel"
+          },
+          {
+            "name": "Patuxent River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 19.7,
+            "spoken": "Crossing the Patuxent River",
+            "lat": 39.11539,
+            "lon": -76.87348,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 53473747 (Patuxent River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "West Laurel",
@@ -12971,13 +13075,6 @@
             "spoken": "Hancock Museum ahead"
           },
           {
-            "name": "Potomac River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.6,
-            "spoken": "Crossing the Potomac River"
-          },
-          {
             "name": "Sideling Hill",
             "category": "highway_marker",
             "kind": "point",
@@ -13757,14 +13854,14 @@
       "corridor": {
         "checkpoints": [
           {
-            "name": "Green Spring",
+            "name": "Oldtown",
             "at_mi": 14.8,
-            "type": "place",
-            "state": "West Virginia",
-            "highway": "US-50",
-            "lat": 39.5318,
-            "lon": -78.6164,
-            "source": "Real town on US-50 between cumberland_md_us and winchester_va_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.76 mi off-route at closest approach)."
+            "type": "hamlet",
+            "state": "Maryland",
+            "highway": "MD-51",
+            "lat": 39.54148,
+            "lon": -78.6114,
+            "source": "OpenStreetMap place=hamlet node 158321976 (Oldtown, Maryland); road verified on OSM way 290576590 ref MD 51 in Geofabrik us-latest 2026-09-29.; real place on MD-51 between cumberland_md_us and winchester_va_us; position matched to the nearest point on the archived dense route geometry (0.12 mi off-route at closest approach)."
           },
           {
             "name": "Paw Paw",
@@ -14832,13 +14929,6 @@
             "spoken": "Entering Spring Gap"
           },
           {
-            "name": "Potomac River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 22.0,
-            "spoken": "Crossing the Potomac River"
-          },
-          {
             "name": "Little Orleans",
             "at_mi": 25.6,
             "off_mi": 6.85,
@@ -14848,11 +14938,24 @@
             "spoken": "Passing Little Orleans"
           },
           {
+            "name": "Potomac River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 26.0,
+            "spoken": "Crossing the Potomac River",
+            "lat": 39.53869,
+            "lon": -78.45556,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 510834298 (Potomac River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Cacapon River",
             "category": "river",
             "kind": "point",
-            "at_mi": 36.0,
-            "spoken": "Crossing the Cacapon River"
+            "at_mi": 37.9,
+            "spoken": "Crossing the Cacapon River",
+            "lat": 39.40297,
+            "lon": -78.41768,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 231284716 (Cacapon River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Capon Bridge",
@@ -15018,31 +15121,34 @@
         "state_miles": [
           {
             "state": "Maryland",
-            "miles": 25.5
+            "miles": 26.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "West Virginia",
-            "miles": 18.1
+            "miles": 18.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Virginia",
-            "miles": 18.4
+            "miles": 17.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 25.5,
+            "at_mi": 26.0,
             "from_state": "Maryland",
             "state": "West Virginia",
             "place": "Maryland-West Virginia line on US-50",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
-            "at_mi": 43.6,
+            "at_mi": 44.1,
             "from_state": "West Virginia",
             "state": "Virginia",
             "place": "West Virginia-Virginia line on US-50",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -16096,6 +16202,16 @@
             "spoken": "Passing Ballenger Creek"
           },
           {
+            "name": "Monocacy River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 28.3,
+            "spoken": "Crossing the Monocacy River",
+            "lat": 39.40422,
+            "lon": -77.36598,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 983449563 (Monocacy River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Bartonsville",
             "at_mi": 28.7,
             "off_mi": 0.82,
@@ -16103,13 +16219,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158368052, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bartonsville"
-          },
-          {
-            "name": "Monocacy River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 29.2,
-            "spoken": "Crossing the Monocacy River"
           },
           {
             "name": "Spring Ridge",
@@ -16218,6 +16327,16 @@
             "spoken": "Passing Ellicott City"
           },
           {
+            "name": "Patapsco River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 60.6,
+            "spoken": "Crossing the Patapsco River",
+            "lat": 39.30441,
+            "lon": -76.79614,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 1185777 (Patapsco River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Milford Mill",
             "at_mi": 62.2,
             "off_mi": 2.82,
@@ -16252,13 +16371,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158249557, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ilchester"
-          },
-          {
-            "name": "Patapsco River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 67.2,
-            "spoken": "Crossing the Patapsco River"
           },
           {
             "name": "Arbutus",
@@ -18056,6 +18168,16 @@
             "spoken": "Passing Dickinson"
           },
           {
+            "name": "The Army Heritage and Education Center (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.8,
+            "spoken": "Billboard: The Army Heritage and Education Center, ahead in Carlisle. Free admission, and an outdoor trail of real tanks and trenches. Those tanks are parked for good.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Plainfield",
             "at_mi": 49.2,
             "off_mi": 2.52,
@@ -18099,6 +18221,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 25716549, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mechanicsburg"
+          },
+          {
+            "name": "The Army Heritage and Education Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 66.8,
+            "spoken": "Billboard: The Army Heritage and Education Center, ahead in Carlisle. Free admission, and an outdoor trail of real tanks and trenches. Those tanks are parked for good.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Cove",
@@ -20276,6 +20408,16 @@
         ],
         "landmarks": [
           {
+            "name": "Salisbury Zoo (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.5,
+            "spoken": "Billboard: The Salisbury Zoo, ahead in Salisbury. Open all year, and admission is free. The animals are the only ones on the clock.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mardela Springs",
             "at_mi": 12.1,
             "off_mi": 0.28,
@@ -20285,13 +20427,6 @@
             "spoken": "Entering Mardela Springs"
           },
           {
-            "name": "Chicamacomico River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 15.1,
-            "spoken": "Crossing the Chicamacomico River"
-          },
-          {
             "name": "Vienna",
             "at_mi": 16.3,
             "off_mi": 0.58,
@@ -20299,6 +20434,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158564769, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Vienna"
+          },
+          {
+            "name": "Chicamacomico River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 20.1,
+            "spoken": "Crossing the Chicamacomico River",
+            "lat": 38.51178,
+            "lon": -75.87939,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 154856374 (Chicamacomico River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Assateague Island (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.0,
+            "spoken": "Billboard: Assateague Island, by Ocean City, thirty miles past Salisbury. Wild horses run the beach. Stay a school bus length back. They bite.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "East New Market",
@@ -20319,6 +20474,16 @@
             "spoken": "Passing Secretary"
           },
           {
+            "name": "Trimper Rides (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.0,
+            "spoken": "Billboard: Trimper Rides, on the Ocean City boardwalk, thirty miles east of Salisbury. The carousel has turned since nineteen twelve. Still going nowhere.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Algonquin",
             "at_mi": 32.2,
             "off_mi": 1.97,
@@ -20326,6 +20491,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158310699, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Algonquin"
+          },
+          {
+            "name": "Choptank River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 32.8,
+            "spoken": "Crossing the Choptank River",
+            "lat": 38.57864,
+            "lon": -76.05753,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 87200605 (Choptank River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Dolle's Candyland (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.0,
+            "spoken": "Billboard: Dolle's Candyland, Ocean City boardwalk, thirty miles east of Salisbury. Salt water taffy since nineteen ten. Your fillings have been warned.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Trappe",
@@ -20337,11 +20522,24 @@
             "spoken": "Entering Trappe"
           },
           {
-            "name": "Choptank River",
-            "category": "river",
+            "name": "Fisher's Popcorn (eastbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 44.4,
-            "spoken": "Crossing the Choptank River"
+            "at_mi": 41.6,
+            "spoken": "Billboard: Fisher's Popcorn, Ocean City boardwalk, thirty miles east of Salisbury. Caramel corn from copper kettles since nineteen thirty-seven. Your steering wheel will never recover.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Life-Saving Station Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.0,
+            "spoken": "Billboard: The Life-Saving Station Museum, Ocean City inlet, thirty miles east of Salisbury. The surfmen rowed out into storms. You only have to drive.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Historical Society of Talbot County Museum",
@@ -20351,6 +20549,26 @@
             "spoken": "Historical Society of Talbot County Museum ahead"
           },
           {
+            "name": "Old Wye Mill (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.6,
+            "spoken": "Billboard: Old Wye Mill, ahead. The oldest water-powered grist mill still grinding in the country, open May through October. The river works for free.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Thrasher's French Fries (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.7,
+            "spoken": "Billboard: Thrasher's French Fries, on the Ocean City boardwalk, thirty miles east of Salisbury. Salt and vinegar since nineteen twenty-nine. Do not ask for ketchup.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Cordova",
             "at_mi": 53.8,
             "off_mi": 3.5,
@@ -20358,6 +20576,46 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 157560465, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cordova"
+          },
+          {
+            "name": "Ocean City boardwalk (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 57.0,
+            "spoken": "Billboard: Ocean City, thirty miles east of Salisbury on Route Fifty. Two and a half miles of boardwalk. The first one rolled up for storage.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Wye East River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 59.1,
+            "spoken": "Crossing the Wye East River",
+            "lat": 38.95018,
+            "lon": -76.06724,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 738108621 (Wye East River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Old Wye Mill (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.2,
+            "spoken": "Billboard: Old Wye Mill, ahead. The oldest water-powered grist mill still grinding in the country, open May through October. The river works for free.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Wye River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 64.1,
+            "spoken": "Crossing the Wye River",
+            "lat": 38.9821,
+            "lon": -76.1492,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 739049286 (Wye River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Queenstown",
@@ -20394,20 +20652,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158618110, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Chester"
-          },
-          {
-            "name": "Wye East River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 72.4,
-            "spoken": "Crossing the Wye East River"
-          },
-          {
-            "name": "Wye River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 72.4,
-            "spoken": "Crossing the Wye River"
           },
           {
             "name": "Stevensville",
@@ -20491,6 +20735,16 @@
             "spoken": "Passing Arden on the Severn"
           },
           {
+            "name": "Magothy River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 93.0,
+            "spoken": "Crossing the Magothy River",
+            "lat": 39.11785,
+            "lon": -76.57667,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 943951626 (Magothy River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Pasadena",
             "at_mi": 93.4,
             "off_mi": 1.67,
@@ -20498,13 +20752,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158561282, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Pasadena"
-          },
-          {
-            "name": "Magothy River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 98.1,
-            "spoken": "Crossing the Magothy River"
           },
           {
             "name": "Brooklyn Park",

@@ -235,6 +235,22 @@ pub fn feed_key(district: u8) -> String {
     format!("{CALTRANS_STATE}/d{district}")
 }
 
+/// The feed keys construction in `state` along `points` is read from: the
+/// state's own, or for California the districts within `radius_mi` of the
+/// points, so the whole state never fetches. Dispatch warms these same keys
+/// before it reads them.
+pub fn construction_feed_keys(state: &str, points: &[(f64, f64)], radius_mi: f64) -> Vec<String> {
+    let state = state.trim().to_lowercase();
+    if state == CALTRANS_STATE {
+        districts_near_route(points, radius_mi)
+            .into_iter()
+            .map(feed_key)
+            .collect()
+    } else {
+        vec![state]
+    }
+}
+
 /// The district a feed key names, if it names one.
 pub fn district_of_feed_key(key: &str) -> Option<u8> {
     key.strip_prefix(CALTRANS_STATE)?

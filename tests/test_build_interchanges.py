@@ -35,6 +35,24 @@ def _leg(miles: float) -> dict:
     return {"from": "a_pa_us", "to": "b_pa_us", "highway": "I-80", "miles": miles}
 
 
+def test_local_only_can_build_first_interchanges_for_non_interstate_leg():
+    leg = {"highway": "US-7", "corridor": {"interchanges": []}}
+
+    assert not bi._eligible_for_interchange_discovery(
+        leg, local_mode=True, explicitly_selected=False
+    )
+    assert bi._eligible_for_interchange_discovery(leg, local_mode=True, explicitly_selected=True)
+    assert not bi._eligible_for_interchange_discovery(
+        leg, local_mode=False, explicitly_selected=True
+    )
+
+
+def test_local_mode_can_refresh_existing_non_interstate_interchanges():
+    leg = {"highway": "US-7", "corridor": {"interchanges": [{"exit_ref": "5"}]}}
+
+    assert bi._eligible_for_interchange_discovery(leg, local_mode=True, explicitly_selected=False)
+
+
 def test_prefilter_boxes_follow_the_polyline_not_the_route_points(monkeypatch):
     # Route points on a straight line; the road itself bows 70 miles north.
     leg = {

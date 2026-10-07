@@ -91,7 +91,7 @@ meridian_ms_us` (157), `jackson_ms_us -> hattiesburg_ms_us` (91).
 ### Bates House of Turkey
 - treatment: billboard
 - leg: montgomery_al_us -> mobile_al_us
-- at_mi: 95
+- at_mi: 41
 - spoken: Billboard: Bates House of Turkey is ahead. It serves turkey sandwiches, turkey plates, turkey pie, and proof that Thanksgiving does not require permission from November.
 - describe: Bates House of Turkey in Greenville has served turkey-focused Southern meals to highway travelers for generations.
 **** verify exact route proximity and operating status before bake.

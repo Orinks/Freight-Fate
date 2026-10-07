@@ -458,6 +458,14 @@ impl DrivingState {
         // up where it got to.
         self.advance_radio_airtime(dt);
         if self.radio.enabled && self.trip.truck.engine_on {
+            // The dial has left what the cab plays: check reception now,
+            // before playback retunes to the fallback and hides the loss. In
+            // Synthesized mode the fallback is the Roadhouse, which playback
+            // took up in the frames between checks, so a station fading out
+            // switched with nothing said (2026-09-28).
+            if self.radio.tuned_station().id != self.radio_station_id {
+                self.radio_signal_timer = 0.0;
+            }
             self.update_radio_reception(ctx, dt);
             self.update_radio_playback(ctx, night, dt);
             self.update_radio_fringe(ctx, dt);

@@ -32,6 +32,7 @@ use crate::app::GameContext;
 pub use crate::app::Say;
 use crate::controller::{ControllerAxis, ControllerButton};
 use crate::discord_presence::PresenceState;
+use crate::touch::Gesture;
 
 mod menu;
 
@@ -306,6 +307,9 @@ pub enum InputEvent {
     /// never leave a pedal down.
     WindowFocusLost,
     Quit,
+    /// A touch gesture on iPhone or iPad. The state takes it with
+    /// [`State::handle_gesture`], or the app presses the key it stands for.
+    Gesture(Gesture),
 }
 
 impl InputEvent {
@@ -440,6 +444,12 @@ pub trait State: AsAny {
     fn exit(&mut self, _ctx: &mut GameContext) {}
 
     fn handle_event(&mut self, _ctx: &mut GameContext, _event: &InputEvent) {}
+
+    /// A touch gesture this screen answers itself. `false` (every screen but
+    /// the drive) has the app press the gesture's key instead.
+    fn handle_gesture(&mut self, _ctx: &mut GameContext, _gesture: Gesture) -> bool {
+        false
+    }
 
     /// Controller buttons a plain keyboard-driven state understands,
     /// translated into the key events it already handles. This keeps simple

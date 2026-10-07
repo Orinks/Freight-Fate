@@ -28,6 +28,8 @@ impl DrivingState {
         self.note_instruction_demonstrated(ctx, "help");
         if ctx.controller.device() == "controller" {
             self.speak_controller_help(ctx);
+        } else if ctx.controller.device() == ff_core::input_hints::TOUCH {
+            self.speak_touch_help(ctx);
         } else {
             self.speak_keyboard_help(ctx);
         }
@@ -86,7 +88,9 @@ impl DrivingState {
         text.push_str("Braking cancels the session. At the planned pickup it pauses and ");
         text.push_str("resumes once you depart. ");
         text.push_str("Plus and minus, including the keypad keys, change the open-road ");
-        text.push_str("target by five; it never holds above the posted limit. Control ");
+        text.push_str(
+            "target by five; it never holds more than five over the posted limit. Control ",
+        );
         text.push_str("with plus or minus, by one. ");
         text.push_str(&format!(
             "{} resumes the last cruise speed. ",
@@ -149,7 +153,7 @@ impl DrivingState {
         ));
         text.push_str(&objective_help);
         text.push_str(&format!(
-            "{} speed, active speed-control mode, and target, and with the signal on, \
+            "{} speed, active speed-control mode, and target, and with the signal set, \
              how far to the exit. ",
             n(Action::Speed)
         ));
@@ -261,7 +265,7 @@ impl DrivingState {
         text.push_str("nearly to a stop and ease around. ");
         let rest = n(Action::Rest);
         text.push_str(&format!(
-            "{rest} plans the recommended break or sleep stop when HOS planning hints are on; otherwise it plans the next sleep-capable stop while rolling. {exit} "
+            "{rest} plans the recommended break or sleep stop when hours of service planning hints are on; otherwise it plans the next sleep-capable stop while rolling. {exit} "
         ));
         text.push_str(&format!(
             "signals for its exit. Stopped at a route stop, {rest} opens its menu: "
@@ -290,7 +294,7 @@ impl DrivingState {
             "automatic mode. {} switches between automatic and manual ",
             n(Action::TransmissionMode)
         ));
-        text.push_str("shifting. Escape pause menu. ");
+        text.push_str("shifting. Escape pause menu. F2 lists every driving command by name. ");
         if !self.trip.truck.transmission.automatic {
             text.push_str(&format!(
                 "Hold Left Shift for clutch, then {} to shift up or {} to shift down, \
@@ -389,7 +393,7 @@ impl DrivingState {
             n(Action::ParkingBrake)
         ));
         text.push_str(&format!(
-            "brake, {} plans a recommended break or sleep stop when HOS planning hints are on, or the next sleep stop otherwise; stopped at a stop, it opens its actions. ",
+            "brake, {} plans a recommended break or sleep stop when hours of service planning hints are on, or the next sleep stop otherwise; stopped at a stop, it opens its actions. ",
             n(Action::Rest)
         ));
         text.push_str("Away from route points while fully stopped, it opens ");
@@ -404,6 +408,36 @@ impl DrivingState {
             "Any of these buttons can be moved under Settings, Gameplay, Controls, \
              Controller buttons.",
         );
+        ctx.say(&text);
+    }
+}
+
+impl DrivingState {
+    /// The touch-screen layout, from the player's own touch bindings.
+    pub fn speak_touch_help(&mut self, ctx: &mut GameContext) {
+        let mut text = String::from(
+            "Touch and hold the top half of the screen for the gas, the bottom half for \
+             the brake. Swipe left or right to steer, unless lane keeping is on full. ",
+        );
+        for gesture in crate::bindings::touch_slots() {
+            let (Some(name), Some(command)) = (
+                crate::bindings::touch_gesture_name(gesture),
+                ctx.bindings.touch_command(gesture),
+            ) else {
+                continue;
+            };
+            if command != crate::bindings::TouchCommand::Nothing {
+                text.push_str(&format!("{name}: {}. ", command.label()));
+            }
+        }
+        text.push_str(
+            "Two-finger swipe down pauses, two-finger swipe up is this help, two-finger \
+             swipes left and right review messages, and three-finger swipes left and right \
+             tune the radio. A three-finger tap lists every driving command: swipe to one \
+             and double tap to run it. ",
+        );
+        text.push_str(&self.objective_help(ctx));
+        text.push_str("Gestures can be moved in Settings, Gameplay, Controls, Touch gestures.");
         ctx.say(&text);
     }
 }

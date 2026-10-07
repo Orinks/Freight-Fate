@@ -16,6 +16,21 @@
 
 pub const KEYBOARD: &str = "keyboard";
 pub const CONTROLLER: &str = "controller";
+/// The iPhone or iPad screen, with no keyboard or controller in use.
+pub const TOUCH: &str = "touch";
+
+/// action -> touch phrase, for the controls that are fixed gestures (the
+/// pedal holds, double tap, the two-finger swipes). Every other touch
+/// phrase comes from the player's touch bindings or the driving command
+/// list, in `freight-fate`'s bindings.
+pub const TOUCH_HINTS: &[(&str, &str)] = &[
+    ("accelerate", "the top half of the screen"),
+    ("brake", "a hold on the bottom half of the screen"),
+    ("emergency_brake", "a hold on the bottom half of the screen"),
+    ("confirm", "a double tap"),
+    ("pause", "a two-finger swipe down"),
+    ("help", "a two-finger swipe up"),
+];
 
 /// action -> (keyboard phrase, controller phrase)
 pub const HINTS: &[(&str, (&str, &str))] = &[
@@ -60,6 +75,11 @@ pub const HINTS: &[(&str, (&str, &str))] = &[
 /// action name itself if it is not in the table (so a typo is audible in a
 /// test rather than crashing a prompt mid-drive).
 pub fn control_hint(action: &str, device: &str) -> String {
+    if device == TOUCH {
+        if let Some((_, phrase)) = TOUCH_HINTS.iter().find(|(name, _)| *name == action) {
+            return phrase.to_string();
+        }
+    }
     let (kb, pad) = HINTS
         .iter()
         .find(|(name, _)| *name == action)
@@ -100,6 +120,11 @@ mod tests {
     #[test]
     fn test_unknown_action_is_audible_not_fatal() {
         assert_eq!(control_hint("teleport", KEYBOARD), "teleport");
+        assert_eq!(
+            control_hint("accelerate", TOUCH),
+            "the top half of the screen"
+        );
+        assert_eq!(control_hint("take_exit", TOUCH), "X");
         assert_eq!(control_hint("teleport", CONTROLLER), "teleport");
     }
 

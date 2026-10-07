@@ -90,6 +90,24 @@ pub fn merge_traffic_target_mph(highway_mph: f64) -> f64 {
     highway_mph.max(0.0) * MERGE_TRAFFIC_SPEED_SHARE
 }
 
+/// The longest the merge after a slow taper may keep the clock at real time,
+/// in real seconds, however the truck is driven.
+///
+/// DERIVED from Long's loaded design truck (the `TRUCK_ACCEL_*` curve
+/// above): from a standstill it reaches the merge speed of the fastest road
+/// the lane table sizes, 75 percent of 75 mph, in about 100 seconds and a
+/// mile of road. A truck that has not joined traffic by then is not still
+/// merging; it is driving slowly, and slow driving runs on the trip's own
+/// pacing. Before this bound the handoff only let go at the merge speed, so
+/// a driver who settled below it kept a relaxed haul on the wall clock for
+/// three hours (issue 293).
+pub const MERGE_RECOVERY_MAX_REAL_S: f64 = 120.0;
+
+/// The same bound in road: the mainline the truck has covered since the
+/// taper. DERIVED as above; the design truck needs about 1.03 miles from a
+/// standstill, so a mile and a half is the join with room to spare.
+pub const MERGE_RECOVERY_MAX_MI: f64 = 1.5;
+
 /// What this exact truck can reach by the taper with its actual drivetrain,
 /// load, transmission, wear, weather drag and grip, and the mapped grade.
 ///
@@ -379,6 +397,20 @@ mod tests {
     fn merge_target_tracks_traffic_speed_instead_of_a_fixed_shortfall() {
         assert_eq!(merge_traffic_target_mph(70.0), 52.5);
         assert_eq!(merge_traffic_target_mph(55.0), 41.25);
+    }
+
+    #[test]
+    fn the_merge_recovery_bound_covers_the_design_truck_join() {
+        // Long's curve in closed form from a standstill: v(t) = a/b (1 - e^-bt).
+        let (a, b) = (TRUCK_ACCEL_ALPHA_FPS2, TRUCK_ACCEL_BETA);
+        let target_fps = merge_traffic_target_mph(75.0) * 5280.0 / 3600.0;
+        let t = -(1.0 - b * target_fps / a).ln() / b;
+        let feet = a / b * t - a / (b * b) * (1.0 - (-b * t).exp());
+        assert!((t - 100.3).abs() < 0.1, "{t}");
+        assert!(t < MERGE_RECOVERY_MAX_REAL_S, "{t}");
+        assert!(feet / 5280.0 < MERGE_RECOVERY_MAX_MI, "{feet}");
+        // A bound, not a second way to stay pinned: well under three minutes.
+        const { assert!(MERGE_RECOVERY_MAX_REAL_S <= 180.0) };
     }
 
     #[test]

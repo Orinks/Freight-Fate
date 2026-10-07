@@ -19,6 +19,8 @@ use super::{hos_mut_of, profile_mut_of, profile_of, set_engine_running, DOCKING_
 
 /// Resting advances game time, so deadlines keep counting.
 ///
+/// A running engine idles through the wait and burns fuel for it, as it
+/// does at the pickup and the dock; every sleep shuts it down first.
 /// `duty_status` (a `hos::DUTY_STATUSES` name) records the rest on the
 /// logbook; `note` defaults to "".
 pub fn advance_rest_clock(
@@ -29,6 +31,10 @@ pub fn advance_rest_clock(
     note: &str,
 ) {
     let start_hour = driving.absolute_game_hour(ctx, None);
+    driving
+        .trip
+        .truck
+        .burn_idle_fuel_over_game_time(minutes * 60.0);
     driving.trip.truck.advance_parked_time(minutes);
     // Reefer/APU keep burning (and cargo temp keeps drifting) through a rest.
     let rest_s = minutes * 60.0;
@@ -59,7 +65,7 @@ pub fn secure_truck_for_stopped_menu_at(
     truck.throttle = 0.0;
     truck.brake = 1.0;
     truck.set_parking_brake();
-    driving.cancel_cruise(ctx, false);
+    driving.cancel_cruise_for_parking_brake(ctx);
     // The parking brake holds the truck now, so every assist lets go of the
     // service brake. The brake ramp keeps whatever pedal an assist is
     // holding, so a hold left latched under the menu kept the brakes on

@@ -52,6 +52,27 @@ def test_split_places_cities_legs_and_route_stop_data():
     assert _text_for(files, "us/legs.json").endswith("}\n")
 
 
+def test_corridor_billboard_bans_survive_indexing():
+    bans = [
+        {
+            "from_mi": 10.0,
+            "to_mi": 20.0,
+            "name": "Washington I-90 scenic span",
+            "source": "RCW 47.39.020 and 47.42.040",
+        }
+    ]
+    data = {
+        "cities": {"A": {"state": "New York"}},
+        "legs": [{"from": "A", "to": "A", "miles": 30, "corridor": {"billboard_bans": bans}}],
+    }
+    files = iw.build_country_files(data, _US_INDEX)
+
+    assert (
+        json.loads(_text_for(files, "us/legs.json"))["legs"][0]["corridor"]["billboard_bans"]
+        == bans
+    )
+
+
 def test_multi_country_requires_country_field():
     data = {"cities": {"A": {"state": "X"}}, "legs": []}
     index = {

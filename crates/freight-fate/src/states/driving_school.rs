@@ -37,6 +37,7 @@ use crate::impl_state_for_menu;
 use crate::states::base::{InputEvent, Menu, MenuCore, MenuItem, State};
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::{Instructor, DRIVE_PHASE_SCHOOL};
+use crate::touch::Gesture;
 
 /// Long enough that no lesson meets the end of it.
 pub const PRACTICE_ROAD_MILES: f64 = 25.0;
@@ -321,6 +322,10 @@ impl State for SchoolDrivingState {
 
     fn handle_event(&mut self, ctx: &mut GameContext, event: &InputEvent) {
         self.drive.handle_event(ctx, event);
+    }
+
+    fn handle_gesture(&mut self, ctx: &mut GameContext, gesture: Gesture) -> bool {
+        self.drive.handle_gesture(ctx, gesture)
     }
 
     fn handle_controller(&mut self, ctx: &mut GameContext, event: &InputEvent) {

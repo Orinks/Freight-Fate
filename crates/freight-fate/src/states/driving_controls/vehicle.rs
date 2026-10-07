@@ -240,7 +240,7 @@ impl DrivingState {
         }
         self.trip.truck.set_parking_brake();
         self.trip.truck.throttle = 0.0;
-        self.cancel_cruise(ctx, false);
+        self.cancel_cruise_for_parking_brake(ctx);
         let speed = self.trip.truck.speed_mph();
         if speed > DYNAMITE_MIN_MPH {
             // Dynamiting the brakes: pulling the valve at speed is NOT

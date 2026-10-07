@@ -102,7 +102,7 @@ impl DrivingState {
         });
         if let Some(before) = lost {
             // the tuned station fell past its range contour mid-drive
-            ctx.award_achievement("radio_faded_out");
+            ctx.award_driving_achievement("radio_faded_out");
             self.radio_states_held.clear();
             ctx.audio.play_with("radio/static_burst", 0.5, 0.0);
             // A driver on local radio stays on local radio: the strongest
@@ -291,6 +291,7 @@ impl DrivingState {
     /// playing. Real seconds, like the rotation it drives.
     pub fn advance_radio_airtime(&mut self, dt: f64) {
         self.radio_airtime_s += dt.max(0.0);
+        self.advance_channel3000(dt);
     }
 
     /// The key that fixes this station's running order for this trip.
@@ -359,10 +360,14 @@ impl DrivingState {
         station: &RadioStation,
         fade_ms: u32,
     ) {
-        let night = is_night(self.trip.current_hour());
+        // The local clock, as the drive's own flag is: on the trip's Eastern
+        // clock the two disagree for hours, and update_radio_playback took
+        // every frame of them as night falling and restarted the station.
+        let night = self.night_now();
         self.music_night = night;
         self.radio_station_id = station.id.clone();
         self.radio_playlist = self.station_rotation_pool(ctx, station, night);
+        self.radio_playing_key.clear();
         self.synth_music_applied = Some(self.roadhouse_synth_state(ctx));
         let cue = self.station_cue(ctx, station, &self.radio_playlist);
         let key = if cue.in_break() {
@@ -391,6 +396,10 @@ impl DrivingState {
         if station.real_stream || station.fallback {
             return;
         }
+        if Self::is_channel3000(&station) {
+            self.update_channel3000_playback(ctx);
+            return;
+        }
         if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE {
             self.update_playlist_playback(ctx, &station, dt);
             return;
@@ -411,8 +420,7 @@ impl DrivingState {
         let len = if !self.radio_break_queue.is_empty() {
             content_duration_s(&self.radio_break_queue[self.radio_break_pos])
         } else {
-            let current =
-                self.radio_playlist[self.radio_track_index % self.radio_playlist.len()].clone();
+            let current = self.current_station_track();
             self.station_track_len_s(ctx, &station, &current)
         };
         if self.radio_elapsed_s < len {
@@ -518,6 +526,7 @@ impl DrivingState {
             }
             self.radio_station_id = station.id.clone();
             self.radio_playlist = Vec::new();
+            self.radio_playing_key.clear();
             self.radio_break_queue = Vec::new();
             // A file's fade-in window would read as "finished" to
             // music_playing on some backends, and a stream has not even
@@ -730,7 +739,7 @@ impl DrivingState {
         let station = &reception.station;
         let heard = add_unique_stat(profile_mut_of(ctx), "radio_stations_heard", &station.id);
         if heard >= 25 {
-            ctx.award_achievement("radio_dial_wanderer");
+            ctx.award_driving_achievement("radio_dial_wanderer");
         }
         // A genuine skip: audible past the station's flat contour, which only
         // height can do. Any station merely ridden into its own static must
@@ -741,7 +750,7 @@ impl DrivingState {
         // range_miles.
         if let Some(distance) = reception.distance_miles {
             if station.range_miles > 0.0 && distance >= effective_range_miles(station, None) * 1.1 {
-                ctx.award_achievement("radio_fringe_catch");
+                ctx.award_driving_achievement("radio_fringe_catch");
             }
         }
         let state = self.trip.state_at(None);
@@ -756,7 +765,7 @@ impl DrivingState {
         }
         self.radio_states_held.insert(state);
         if self.radio_states_held.len() >= 3 {
-            ctx.award_achievement("radio_three_states");
+            ctx.award_driving_achievement("radio_three_states");
         }
     }
 
@@ -774,7 +783,7 @@ impl DrivingState {
         if (68.5..=69.5).contains(&speed) {
             self.nice_speed_mi += speed * dt / 3600.0;
             if self.nice_speed_mi >= 1.0 {
-                ctx.award_achievement("sixty_nine_mph");
+                ctx.award_driving_achievement("sixty_nine_mph");
             }
         } else {
             self.nice_speed_mi = 0.0;
@@ -785,16 +794,16 @@ impl DrivingState {
         if (54.5..=55.5).contains(&speed) {
             self.double_nickel_mi += speed * dt / 3600.0;
             if self.double_nickel_mi >= 1.0 {
-                ctx.award_achievement("fifty_five_mph");
+                ctx.award_driving_achievement("fifty_five_mph");
             }
         } else {
             self.double_nickel_mi = 0.0;
         }
         if speed >= 88.0 {
-            ctx.award_achievement("eighty_eight_mph");
+            ctx.award_driving_achievement("eighty_eight_mph");
         }
         if self.trip.truck.brake_temp_c >= self.trip.truck.brake_fade_onset_c() {
-            ctx.award_achievement("brake_smoke");
+            ctx.award_driving_achievement("brake_smoke");
         }
         // Two miles of real downgrade held on the engine alone. The service
         // brake touching at all resets it -- that is the whole point.
@@ -804,7 +813,7 @@ impl DrivingState {
             } else {
                 self.jake_descent_mi += speed * dt / 3600.0;
                 if self.jake_descent_mi >= 2.0 {
-                    ctx.award_achievement("jake_only_descent");
+                    ctx.award_driving_achievement("jake_only_descent");
                 }
             }
         } else if self.trip.truck.grade > -0.02 {
@@ -816,7 +825,7 @@ impl DrivingState {
             && self.pcc_phase == "building"
             && self.grade_extremes_ahead().0 >= 0.04
         {
-            ctx.award_achievement("predictive_crest");
+            ctx.award_driving_achievement("predictive_crest");
         }
     }
 
@@ -1075,6 +1084,9 @@ impl DrivingState {
         }
         let station = self.radio.current_station();
         if let Some(text) = self.synth_now_playing(ctx, &station) {
+            return text;
+        }
+        if let Some(text) = self.channel3000_now_playing(&station) {
             return text;
         }
         if !self.station_sends_song_info(&station) {

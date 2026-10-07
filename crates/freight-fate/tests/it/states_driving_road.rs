@@ -1884,6 +1884,34 @@ fn test_slip_seating_driver_is_moved_into_a_different_yard_spare() {
 }
 
 #[test]
+fn test_a_yard_spare_takes_over_the_wrecked_load_as_it_is() {
+    // A rollover scraps the load and grounds the tractor; the spare used to
+    // start the load over clean, so the receiver the driver was told would
+    // refuse it signed for it in full, and a tank load stopped surging.
+    let mut app = TestApp::new();
+    let mut drive = a_damage_drive(&mut app, COMPANY_DRIVER, 5);
+    let grounded = profile_of(&app.ctx).active_truck_key();
+    damage_rolling(&mut drive, 0.0);
+    drive.trip.truck.cargo_damage_pct = 100.0;
+    drive.trip.truck.cargo_fragility = 1.6;
+    drive.trip.truck.preventable_damage_pct = 40.0;
+    drive.trip.truck.liquid = Some(ff_core::sim::surge::LiquidLoad::new(0.5, false));
+    drive.trip.truck.damage_pct = DAMAGE_OUT_OF_SERVICE_PCT;
+
+    drive.update_damage_bands(&mut app.ctx, 1.0 / 60.0);
+
+    assert_ne!(profile_of(&app.ctx).active_truck_key(), grounded);
+    let truck = &drive.trip.truck;
+    assert_eq!(truck.cargo_damage_pct, 100.0);
+    assert_eq!(truck.cargo_fragility, 1.6);
+    assert!(truck.liquid.is_some(), "the tank load became dry freight");
+    assert!(
+        preventable_damage_charge(&drive).0 > 0.0,
+        "the deductible went"
+    );
+}
+
+#[test]
 fn test_a_driver_with_no_spare_gets_the_road_crew_instead() {
     // A level-one yard has one tractor. Grounding must still leave a way on.
     let mut app = TestApp::new();

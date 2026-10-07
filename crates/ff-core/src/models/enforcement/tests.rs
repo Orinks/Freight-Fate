@@ -539,6 +539,39 @@ fn the_spoken_standing_lines_match_the_python_f_strings() {
     );
 }
 
+/// Reported 2026-09-29: with live weather driving the calendar, a suspension
+/// said it cleared on a day already gone. The date was counted on the
+/// career's own calendar while every other date the player heard was real.
+#[test]
+fn the_clear_date_counts_from_the_calendar_the_player_hears() {
+    use crate::sim::season::{date_text, real_clock_game_hours, real_weekday_name};
+    let mut p = real_profile();
+    p.game_hours = 2000.0; // a career calendar in early June
+    p.driving_record.record_serious_violation(p.game_hours);
+    p.driving_record.record_serious_violation(p.game_hours);
+    p.live_calendar = true;
+    let cleared = real_clock_game_hours(None) + 60.0 * DAY;
+    // The weekday is the real one: the live clock keeps the day of the year,
+    // not 2001's weekdays (seasonal audit, 2026-10-01).
+    let expected = format!(
+        "{}, {}",
+        real_weekday_name(cleared, None),
+        date_text(cleared)
+    );
+    let clears = clears_text(&p);
+    assert!(clears.starts_with(&expected), "{clears} vs {expected}");
+
+    // A year-long disqualification lands on today's own date; the year is
+    // what tells the two apart.
+    let mut q = profile();
+    q.game_hours = 100.0;
+    q.record_mut().record_major_offense(100.0);
+    let today = date_text(q.calendar_now_hours());
+    let clears = clears_text(&q);
+    assert!(clears.contains(&today), "{clears}");
+    assert!(clears.ends_with(", next year"), "{clears}");
+}
+
 #[test]
 fn count_and_ordinal_words_and_days_text() {
     assert_eq!(count_word(0), "no");
@@ -840,7 +873,7 @@ fn a_record_over_the_review_floor_holds_a_company_driver_at_guarded() {
         way_back.contains("four citations in the last year"),
         "{way_back}"
     );
-    assert!(way_back.contains("ages out"), "{way_back}");
+    assert!(way_back.contains("keeps it there until"), "{way_back}");
     // The consequence line counts down to the termination floor.
     let said = record_consequence_text(&p);
     assert!(said.contains("holds your equipment back"), "{said}");
@@ -887,12 +920,40 @@ fn the_window_empties_and_the_hold_lets_go() {
     let ages_out = p
         .driving_record()
         .unwrap()
-        .window_ages_out_at(p.game_hours)
+        .window_clears_at(p.game_hours, |c, s| c + s > 0)
         .expect("something is in the window");
     assert!((ages_out - (380.0 + REVIEW_WINDOW_DAYS as f64) * DAY).abs() < 1e-6);
     p.game_hours = ages_out + 1.0;
     assert_eq!(record_band(&p), TRUST_FULL);
     assert_eq!(standing_text(&p), "Record: clean.");
+}
+
+/// The hold lifts when the record is back under the floor, not when its
+/// oldest entry leaves: a citation on day 10 and a serious violation on day
+/// 100 hold the review until the serious one ages out (2026-09-28).
+#[test]
+fn the_hold_lifts_when_the_record_is_back_under_the_floor() {
+    let mut p = profile();
+    p.game_hours = 120.0 * DAY;
+    cite(&mut p, 1, 10.0 * DAY);
+    p.record_mut().serious_violations.push(100.0 * DAY);
+    assert_eq!(record_band(&p), TRUST_GUARDED);
+    let lifts = p
+        .driving_record()
+        .unwrap()
+        .window_clears_at(p.game_hours, |c, s| {
+            c > CARRIER_REVIEW_CITATIONS || s >= CARRIER_REVIEW_SERIOUS
+        })
+        .expect("the review holds");
+    assert!((lifts - (100.0 + REVIEW_WINDOW_DAYS as f64) * DAY).abs() < 1e-6);
+    p.game_hours = (10.0 + REVIEW_WINDOW_DAYS as f64) * DAY + 1.0;
+    assert_eq!(
+        record_band(&p),
+        TRUST_GUARDED,
+        "the citation leaving is not it"
+    );
+    p.game_hours = lifts + 1.0;
+    assert_eq!(record_band(&p), TRUST_FULL);
 }
 
 #[test]
