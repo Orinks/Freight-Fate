@@ -545,6 +545,7 @@ impl DrivingState {
         // Keep the trip's spoken-distance units in step with a live settings
         // change; the setter only re-renders cues when the choice actually flips.
         self.trip.set_imperial(ctx.settings.imperial_units);
+        self.check_border_approach(ctx);
         let pos_before = self.trip.position_mi;
         // Tell the trip model which stop's exit is signaled or on the ramp so its
         // plan-cancelled warning can tell a driver who is taking the exit from one
@@ -567,6 +568,9 @@ impl DrivingState {
             // The trip model canceled a passed plan. Do not leave explicit
             // intent or its stopping assist armed for a later optional exit.
             self.clear_selected_stop_intent();
+        }
+        if self.check_border_booth_crossing(ctx, pos_before) {
+            return;
         }
         self.check_weigh_station_enforcement(ctx, pos_before);
         self.check_unsafe_damage_enforcement(ctx);

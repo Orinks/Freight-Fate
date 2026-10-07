@@ -303,6 +303,7 @@ pub struct Trip {
     pub live_alerts: Vec<crate::sim::real_weather_alerts::WeatherAlert>,
     pub traffic_pressures: Vec<TrafficPressure>,
     pub navigation_cues: Vec<NavigationCue>,
+    pub border_booths: Vec<BorderBooth>,
     pub landmarks: Vec<RoadsideCallout>,
     pub billboards: Vec<RoadsideCallout>,
     pub chain_law_areas: Vec<(f64, f64)>,
@@ -482,6 +483,7 @@ impl Trip {
             live_alerts: Vec::new(),
             traffic_pressures: Vec::new(),
             navigation_cues: Vec::new(),
+            border_booths: Vec::new(),
             landmarks: Vec::new(),
             billboards: Vec::new(),
             chain_law_areas: Vec::new(),
@@ -544,7 +546,9 @@ impl Trip {
         trip.traffic_manager.spawn_initial_traffic();
         trip.zones = trip.place_zones();
         trip.traffic_pressures = trip.place_traffic_pressures();
-        trip.navigation_cues = trip.build_navigation_cues();
+        let (navigation_cues, border_booths) = trip.build_navigation_cues_and_border_booths();
+        trip.navigation_cues = navigation_cues;
+        trip.border_booths = border_booths;
         trip.landmarks = trip.place_landmarks();
         trip.billboards = trip.place_billboards();
         trip.chain_law_areas = trip.place_chain_law_areas();

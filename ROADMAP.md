@@ -242,8 +242,8 @@ Everything found before 2026-09-25 moved to
       against deliveries; credentials against their level gates and the
       clock. Calibrate against real backups, then mark rather than refuse
       (owner, 2026-09-25).
-- [ ] A playable border-stop flow for Alcan / Beaver Creek is next; these
-      records mark the checkpoints but do not stop the driver.
+- [x] Trucks stop for customs at the Alcan / Beaver Creek ports of entry and
+      southbound at Blaine; driving past the booth brings a penalty.
 - [ ] Posted speed profiles on the BC Alaska Highway south of Fort Nelson
       still use placeholders.
 - [ ] CBSA commercial hours at Beaver Creek remain unverified and are not
@@ -2270,12 +2270,12 @@ branch. The older Phase A/B plan checklists are not a live completion list.
       freight offers until a freight endpoint is verified.
       Anchorage has a separate Port/Ship Creek freight terminal; Fairbanks
       has curated grocery/retail, building-material, and cross-dock pins.
-- [ ] **Partial: cross-border rules and clearance.** Border metadata is
-      not a playable clearance/inspection flow. Canadian HOS, statutory
-      CMV speed caps (distinct from posted road limits), CAD/foreign exchange,
-      and spring-breakup axle restrictions remain open; the corridor does not
-      establish Canadian regulatory compliance. Full Canada and Europe remain
-      planned.
+- [ ] **Partial: cross-border rules and clearance.** A playable customs
+      clearance/inspection flow now covers the Alaska Highway and southbound
+      Blaine ports. Canadian HOS, statutory CMV speed caps (distinct from
+      posted road limits), broader CAD/foreign exchange, and spring-breakup
+      axle restrictions remain open; the corridor does not establish Canadian
+      regulatory compliance. Full Canada and Europe remain planned.
 - [ ] **Remaining corridor data work.** Refine the auto-profile
       Blaine–Surrey geometry for trucks; verify remaining Parks and Mat-Su
       fuel lots and any truck-parking capacity; and add the Whittier tunnel
@@ -2290,6 +2290,13 @@ branch. The older Phase A/B plan checklists are not a live completion list.
       archive currently bake speeds against straight chords between stored
       route points; the Alcan legs now use bake-time Valhalla truck geometry
       through those points, and other archive-less legs need the same re-sweep.
+- [ ] (Found along the way) Blaine northbound CBSA Pacific Highway booth data
+      is missing.
+- [ ] (Found along the way) Border processing times and the secondary-referral
+      chance are gameplay assumptions.
+- [ ] (Found along the way) Passport and FAST documents are not modeled.
+- [ ] (Found along the way) Border-penalty escalation uses lifetime counts,
+      not AMPS's 12-month retention period.
 
 Automated evidence: the four `test_alcan_phase_a_*` cases (including the
 Tok–Delta Junction–Fairbanks split), `test_alcan_phase_b1_tok_cutoff_glenn_to_anchorage`,

@@ -290,8 +290,19 @@ impl Menu for TrafficStopState {
     }
 
     fn go_back(&mut self, ctx: &mut GameContext) {
+        let driving = self.driving.clone();
+        let border_clearance_pending = driving
+            .read(|d| d.pending_border_clearance.is_some())
+            .unwrap_or(false);
         ctx.pop_state();
         ctx.say_with("Back on the highway. Watch your speed.", Say::new());
+        if border_clearance_pending {
+            driving.with(ctx, |d, ctx| {
+                if let Some(booth) = d.pending_border_clearance.take() {
+                    d.open_border_clearance(ctx, booth);
+                }
+            });
+        }
     }
 }
 
@@ -342,12 +353,16 @@ impl EnforcementStopState {
         // Repeat offenders pay more for the same stop and nothing caps it, and
         // a construction zone doubles whatever that came to -- one schedule
         // for every citation in the game, priced in models/enforcement.
-        let fine = citation_fine(
-            params.fine,
-            career_citations(profile_of(ctx)),
-            params.construction_zone,
-            None,
-        );
+        let fine = if params.fine_is_final {
+            params.fine
+        } else {
+            citation_fine(
+                params.fine,
+                career_citations(profile_of(ctx)),
+                params.construction_zone,
+                None,
+            )
+        };
         let mut state = EnforcementStopState {
             menu: MenuCore::new(&params.title).with_intro_help(ENFORCEMENT_STOP_INTRO_HELP),
             driving: DriveRef::active(ctx),
@@ -547,9 +562,20 @@ impl Menu for EnforcementStopState {
     }
 
     fn go_back(&mut self, ctx: &mut GameContext) {
+        let driving = self.driving.clone();
+        let border_clearance_pending = driving
+            .read(|d| d.pending_border_clearance.is_some())
+            .unwrap_or(false);
         ctx.pop_state();
         let message = self.return_message.clone();
         ctx.say_with(message, Say::new());
+        if border_clearance_pending {
+            driving.with(ctx, |d, ctx| {
+                if let Some(booth) = d.pending_border_clearance.take() {
+                    d.open_border_clearance(ctx, booth);
+                }
+            });
+        }
     }
 }
 

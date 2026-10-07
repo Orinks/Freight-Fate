@@ -647,6 +647,7 @@ impl RouteCheckpoint {
         match self.checkpoint_type.as_str() {
             "highway_change" => "highway change",
             "state_line" => "state line",
+            "border" => "port of entry",
             _ => "corridor place",
         }
     }

@@ -743,6 +743,12 @@ pub const FAILURE_TO_STOP_DAMAGE_PCT: f64 = 12.0;
 pub const FAILURE_TO_STOP_PROCESSING_MIN: f64 = 180.0;
 pub const WEIGH_STATION_NOTICE_MI: f64 = 2.0;
 pub const WEIGH_STATION_BYPASS_MPH: f64 = 15.0;
+// ASSUMPTION: CBP's wait-times feed has no Alcan entry; no per-port commercial processing time is published.
+pub const BORDER_PRIMARY_MIN: f64 = 10.0;
+// ASSUMPTION: no published per-port secondary-inspection processing time exists.
+pub const BORDER_SECONDARY_EXTRA_MIN: f64 = 45.0;
+// ASSUMPTION: CBP's wait-times feed has no Alcan entry or published referral rate.
+pub const BORDER_SECONDARY_REFERRAL_CHANCE: f64 = 0.1;
 // A bypass is caught, not certain. The scale house has plate readers and
 // weigh-in-motion sensors watching the bypass lane, and dispatches a unit up
 // the corridor after a truck that ran it -- but a unit still has to catch up,

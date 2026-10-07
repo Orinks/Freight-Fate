@@ -30,6 +30,7 @@ fn params(title: &str, out_of_service: bool, inspection_on_stop: bool) -> Enforc
         out_of_service,
         warned: false,
         construction_zone: false,
+        fine_is_final: false,
         inspection_on_stop,
         inspection_level: None,
     }
