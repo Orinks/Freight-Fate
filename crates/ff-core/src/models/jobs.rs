@@ -278,15 +278,13 @@ impl Job {
         } else {
             format!(" {}", opts.trailer_note)
         };
-        let seasonal_weight =
-            self.seasonal_weight_limit
-                .as_ref()
-                .map_or_else(String::new, |limit| {
-                    format!(
-                        " Spring weight limits on the {}: axles held to {} percent of legal.",
-                        limit.highway, limit.percent
-                    )
-                });
+        let seasonal_weight = match self.seasonal_weight_limit.as_ref() {
+            Some(limit) => format!(
+                " Spring weight limits on the {}: axle loads held to {} percent of the legal limit.",
+                limit.highway, limit.percent
+            ),
+            None => String::new(),
+        };
         let pay = opts.display_pay.unwrap_or(self.pay);
         let pay_label = if opts.pay_label.is_empty() {
             "Pays"

@@ -247,6 +247,68 @@ fn hos_jurisdiction_switches_at_alcan_checkpoint_and_announces_once() {
     );
 }
 
+/// Enter a jurisdiction from a different rule set and return the one
+/// announcement the switch speaks.
+fn switch_announcement(mut harness: PlaytestHarness, from: HosRules, to: HosRules) -> String {
+    harness.with_drive(|drive, ctx| drive.update_hours_and_fatigue(ctx, 0.0));
+    assert_eq!(harness.app.ctx.profile.as_ref().unwrap().hos.rules, to);
+    harness
+        .app
+        .ctx
+        .profile
+        .as_mut()
+        .unwrap()
+        .hos
+        .set_rules(from);
+    harness.clear_speech();
+    harness.with_drive(|drive, ctx| drive.update_hours_and_fatigue(ctx, 0.0));
+    assert_eq!(harness.app.ctx.profile.as_ref().unwrap().hos.rules, to);
+    let spoken: Vec<_> = harness
+        .app
+        .event_calls()
+        .into_iter()
+        .map(|(text, _)| text)
+        .filter(|text| text.contains("hours rules"))
+        .collect();
+    assert_eq!(spoken.len(), 1, "{spoken:?}");
+    spoken[0].clone()
+}
+
+#[test]
+fn hos_north_of_60_notice_names_the_federal_canadian_rules() {
+    let spoken = switch_announcement(
+        whitehorse_tok_drive(),
+        HosRules::Alaska,
+        HosRules::CanadaNorth60,
+    );
+    assert_eq!(
+        spoken,
+        "Canadian north-of-60 hours rules now apply: up to 15 hours of driving and 18 on duty \
+         after 8 hours off, and no driving once 20 hours have passed since that break."
+    );
+    assert!(!spoken.contains("Yukon"), "{spoken}");
+}
+
+#[test]
+fn hos_south_of_60_notice_counts_sixteen_hours_from_the_break() {
+    let mut harness = PlaytestHarness::new();
+    harness.start_route(
+        "dawson_creek_bc_ca",
+        "fort_st_john_bc_ca",
+        RouteSetup::seeded(2203).cities(&["dawson_creek_bc_ca", "fort_st_john_bc_ca"]),
+    );
+    harness.with_drive(|drive, _| {
+        drive.departure_checked = true;
+        drive.trip.position_mi = 10.0;
+    });
+    let spoken = switch_announcement(harness, HosRules::Us, HosRules::CanadaSouth60);
+    assert_eq!(
+        spoken,
+        "Canadian hours rules now apply: up to 13 hours of driving and 14 on duty after 8 hours \
+         off, and no driving once 16 hours have passed since that break."
+    );
+}
+
 #[test]
 fn hos_jurisdiction_switches_silently_when_not_enforced() {
     let mut harness = whitehorse_tok_drive();

@@ -210,15 +210,18 @@ pub fn local_dispatch_response(
 fn request_summary(driving: &DrivingState, ctx: &GameContext, kind: &str) -> String {
     match kind {
         CALL_DELAY => format!(
-            "{} hours used of a {} hour delivery window.",
+            "{:.1} hours used of a {:.1} hour delivery window.",
             driving.trip.game_minutes / 60.0,
             driving.job.deadline_game_h
         ),
         CALL_HOURS => hos_of(ctx).summary(&ctx.settings.hos_mode),
-        CALL_ROAD => format!("{} miles remain.", driving.trip.remaining_miles()),
-        CALL_TRUCK => format!("Truck damage is {} percent.", driving.trip.truck.damage_pct),
+        CALL_ROAD => format!("{:.1} miles remain.", driving.trip.remaining_miles()),
+        CALL_TRUCK => format!(
+            "Truck damage is {:.0} percent.",
+            driving.trip.truck.damage_pct
+        ),
         CALL_LOAD => format!(
-            "Cargo condition is {} percent.",
+            "Cargo damage is {:.0} percent.",
             driving.trip.truck.cargo_damage_pct
         ),
         _ => "Driver requested dispatch assistance.".to_string(),
@@ -344,9 +347,9 @@ fn truck_response(driving: &DrivingState) -> (&'static str, String, JsonObject) 
 }
 
 fn load_response(driving: &DrivingState) -> (&'static str, String, JsonObject) {
-    let condition = driving.trip.truck.cargo_damage_pct;
-    let words = cargo_condition_text(condition, driving.trip.truck.liquid.is_some());
-    if condition < 1.0 {
+    let damage = driving.trip.truck.cargo_damage_pct;
+    let words = cargo_condition_text(damage, driving.trip.truck.liquid.is_some());
+    if damage < 1.0 {
         return (
             "continue",
             format!("The freight is {words}. Continue and protect it through the next stop."),
@@ -356,7 +359,7 @@ fn load_response(driving: &DrivingState) -> (&'static str, String, JsonObject) {
     (
         "protect_load",
         format!(
-            "I have the freight report as {words}, {condition:.0} percent. Slow the handling down \
+            "I have the freight report as {words}, {damage:.0} percent damaged. Slow the handling down \
              and avoid any hard stop or sharp bend you can safely avoid."
         ),
         JsonObject::from_iter([("cargo_exception_recorded".to_string(), json!(true))]),

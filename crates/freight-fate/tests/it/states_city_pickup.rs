@@ -501,6 +501,10 @@ fn seasonal_route_menu_drops_overweight_lanes_but_keeps_summer_options() {
     assert!(spring_routes
         .iter()
         .all(|route| strictest_on_route(route, active_hours).is_none()));
+    assert_eq!(
+        SEASONAL_WEIGHT_REROUTE_NOTE,
+        "Routes where spring weight limits would make this load overweight are not offered."
+    );
     assert!(spring_speech
         .iter()
         .any(|line| line.contains(SEASONAL_WEIGHT_REROUTE_NOTE)));

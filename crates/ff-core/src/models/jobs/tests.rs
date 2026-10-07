@@ -1310,7 +1310,7 @@ fn job_payload_round_trips_and_legacy_payloads_fill_in() {
     let back = job_from_payload(&payload).unwrap();
     assert_eq!(back, job);
     assert!(job.describe_plain().contains(
-        "Spring weight limits on the Richardson Highway: axles held to 85 percent of legal."
+        "Spring weight limits on the Richardson Highway: axle loads held to 85 percent of the legal limit."
     ));
 
     let mut legacy = Map::new();
