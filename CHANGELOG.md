@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- **Sitting through a training course now tires you.** A day-long course no longer wipes fatigue to zero.
+
 - **The last weigh station warning names its scale and leaves time to take the exit in every driving mode.** Closed scales say so.
 
 - **Driving into Memphis from St. Louis no longer passes a weigh station that is not there.** The West Memphis scale is westbound I-40 only.
@@ -15,8 +17,6 @@
 - **LWorks Radio is on the dial.** Upbeat hits from the nineties and two thousands, with an eighties lunch hour, wherever you drive.
 
 ### Fixed
-
-- **Sitting through a training course now tires you.** A day-long course no longer wipes fatigue to zero.
 
 - **The load you sleep for after an hours warning stays on the dispatch board.** It used to vanish when the rest ran past midnight.
 
