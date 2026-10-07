@@ -336,6 +336,7 @@ impl DrivingState {
             hos_plan_hint_check_key: None,
             hos_plan_hint_pending: None,
             enforcement_events: HashSet::new(),
+            pending_border_clearance: None,
             out_of_service_count: 0,
             drowsy_said: false,
             severe_said: false,

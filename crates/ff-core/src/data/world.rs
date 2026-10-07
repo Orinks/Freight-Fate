@@ -762,6 +762,14 @@ impl World {
                     continue;
                 }
                 let nxt = leg.other(&city);
+                let has_forward_leg = legs.iter().any(|candidate| {
+                    candidate.a.as_str() == city
+                        && candidate.b.as_str() == nxt
+                        && (!require_metadata || self.leg_metadata_complete(candidate))
+                });
+                if leg.a.as_str() != city && has_forward_leg {
+                    continue;
+                }
                 let mut cost = if has_penalties {
                     leg.miles
                         * penalties
@@ -827,10 +835,12 @@ impl World {
         let mut legs: Vec<Arc<Leg>> = Vec::new();
         for pair in cities.windows(2) {
             let (a, b) = (&pair[0], &pair[1]);
-            let leg = self
-                .adjacency
-                .get(a)
-                .and_then(|legs| legs.iter().find(|x| x.other(a) == b))?;
+            let leg = self.adjacency.get(a).and_then(|legs| {
+                // Both directions may carry separate corridor records.
+                legs.iter()
+                    .find(|leg| leg.a.as_str() == a && leg.b.as_str() == b)
+                    .or_else(|| legs.iter().find(|leg| leg.other(a) == b))
+            })?;
             legs.push(Arc::clone(leg));
         }
         Some(Route::new(cities, legs))

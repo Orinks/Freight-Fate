@@ -29,6 +29,150 @@ fn pool(
 }
 
 #[test]
+fn test_border_booths_follow_inbound_country_crossings() {
+    let world = world();
+    let direct_trip = |from: &str, toward: &str| {
+        let leg = world
+            .legs
+            .iter()
+            .find(|leg| leg.a == from && leg.b == toward)
+            .unwrap_or_else(|| panic!("directed leg {from} -> {toward} exists"))
+            .as_ref()
+            .clone();
+        let route = Route::from_legs(vec![from.to_string(), toward.to_string()], vec![leg]);
+        let mut truck = TruckState::default();
+        truck.transmission.automatic = true;
+        truck.start_engine();
+        Trip::new(
+            route,
+            truck,
+            default_weather(),
+            TripOptions {
+                world: Some(world),
+                ..TripOptions::seeded(17)
+            },
+        )
+    };
+    let cases = [
+        (
+            "tok_ak_us",
+            "whitehorse_yt_ca",
+            Some((
+                "Beaver Creek Port of Entry",
+                107.8,
+                "CA",
+                "Canada Border Services Agency",
+            )),
+        ),
+        (
+            "whitehorse_yt_ca",
+            "tok_ak_us",
+            Some((
+                "Alcan Port of Entry",
+                297.5,
+                "US",
+                "U.S. Customs and Border Protection",
+            )),
+        ),
+        ("blaine_wa_us", "surrey_bc_ca", None),
+        (
+            "surrey_bc_ca",
+            "blaine_wa_us",
+            Some((
+                "Blaine Pacific Highway POE",
+                12.8,
+                "US",
+                "U.S. Customs and Border Protection",
+            )),
+        ),
+    ];
+    let mut booth_count = 0;
+    for (from, toward, expected) in cases {
+        let trip = direct_trip(from, toward);
+        match expected {
+            Some((name, at_mi, country, agency)) => {
+                assert_eq!(trip.border_booths.len(), 1, "{from} -> {toward}");
+                let booth = &trip.border_booths[0];
+                assert_eq!(booth.name, name);
+                assert!((booth.at_mi - at_mi).abs() < 0.001);
+                assert_eq!(booth.entering_country, country);
+                assert_eq!(booth.agency, agency);
+                assert!(!trip.navigation_cues.iter().any(|cue| {
+                    cue.kind == "checkpoint"
+                        && cue.near_text.starts_with("Passing ")
+                        && cue.near_text.contains(name)
+                }));
+                booth_count += trip.border_booths.len();
+            }
+            None => {
+                assert!(trip.border_booths.is_empty(), "{from} -> {toward}");
+                assert!(trip.navigation_cues.iter().any(|cue| {
+                    cue.kind == "checkpoint"
+                        && cue.near_text.starts_with("Passing ")
+                        && cue.near_text.contains("Blaine Pacific Highway POE")
+                }));
+            }
+        }
+    }
+    assert_eq!(booth_count, 3);
+
+    for route in [
+        world
+            .route_from_cities(&["whitehorse_yt_ca", "tok_ak_us"])
+            .expect("legacy Whitehorse to Tok route"),
+        world
+            .supported_route("whitehorse_yt_ca", "tok_ak_us", None)
+            .expect("supported Whitehorse to Tok route")
+            .expect("supported route exists"),
+    ] {
+        assert_eq!(route.legs.len(), 1);
+        assert_eq!(route.legs[0].a, "whitehorse_yt_ca");
+        assert_eq!(route.legs[0].b, "tok_ak_us");
+        assert_eq!(route.legs[0].checkpoints()[0].name, "Alcan Port of Entry");
+    }
+
+    let forward_leg = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "tok_ak_us" && leg.b == "whitehorse_yt_ca")
+        .expect("Tok to Whitehorse leg exists")
+        .as_ref()
+        .clone();
+    let reversed_route = Route::from_legs(
+        vec!["whitehorse_yt_ca".to_string(), "tok_ak_us".to_string()],
+        vec![forward_leg],
+    );
+    let mut truck = TruckState::default();
+    truck.start_engine();
+    let reversed_trip = Trip::new(
+        reversed_route,
+        truck,
+        default_weather(),
+        TripOptions {
+            world: Some(world),
+            ..TripOptions::seeded(17)
+        },
+    );
+    assert!(reversed_trip.border_booths.is_empty());
+    assert!(reversed_trip.navigation_cues.iter().any(|cue| {
+        cue.kind == "checkpoint"
+            && cue.near_text.starts_with("Passing ")
+            && cue.near_text.contains("Beaver Creek Port of Entry")
+    }));
+    assert_eq!(
+        ff_core::data::world_models::RouteCheckpoint::new(
+            "Port",
+            1.0,
+            "border",
+            "Yukon",
+            "Alaska Highway",
+        )
+        .label(),
+        "port of entry"
+    );
+}
+
+#[test]
 fn test_every_region_has_clear_day_hazards() {
     // Every region always has plausible clear, calm, daytime hazards: the
     // nationwide staples are never filtered out.

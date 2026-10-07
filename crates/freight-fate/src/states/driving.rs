@@ -50,7 +50,7 @@ use ff_core::sim::lane::LaneKeeping;
 use ff_core::sim::lane_guidance::LaneGuidance;
 use ff_core::sim::pedal_latch::PedalLatch;
 use ff_core::sim::trip::Trip;
-use ff_core::sim::trip_models::{ExitRampLayout, RoadStop};
+use ff_core::sim::trip_models::{BorderBooth, ExitRampLayout, RoadStop};
 use ff_core::sim::turn_guide::TurnGuide;
 
 use crate::states::driving_core::{
@@ -194,6 +194,7 @@ pub struct DrivingState {
     pub hos_plan_hint_check_key: Option<String>,
     pub hos_plan_hint_pending: Option<String>,
     pub enforcement_events: HashSet<String>,
+    pub pending_border_clearance: Option<BorderBooth>,
     pub out_of_service_count: i64,
     pub drowsy_said: bool,
     pub severe_said: bool,

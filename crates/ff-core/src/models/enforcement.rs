@@ -192,6 +192,23 @@ pub const UNSAFE_DAMAGE_FINE: f64 = 2300.0;
 /// and California and New York both pass 1,000 on a first offense; the federal
 /// exposure standing behind them reaches 10,000.
 pub const WEIGH_STATION_BYPASS_FINE: f64 = 1800.0;
+/// First US inbound-reporting violation under 19 U.S.C. 1436(b).
+/// Source: https://www.law.cornell.edu/uscode/text/19/1436.
+pub const BORDER_US_FIRST_FINE: f64 = 5_000.0;
+/// Later US inbound-reporting violations under 19 U.S.C. 1436(b).
+/// Source: https://www.law.cornell.edu/uscode/text/19/1436.
+pub const BORDER_US_REPEAT_FINE: f64 = 10_000.0;
+/// Bank of Canada FXUSDCAD 2025 average, 249 daily Valet API observations.
+pub const CAD_PER_USD: f64 = 1.3978;
+/// First CBSA AMPS C023 penalty, CAD 2,000 converted to USD at CAD_PER_USD.
+/// Source: https://www.cbsa-asfc.gc.ca/trade-commerce/amps/contraventions-infractions/c023-eng.html.
+pub const BORDER_CA_FIRST_FINE_USD: f64 = 1_431.0;
+/// Second CBSA AMPS C023 penalty, CAD 4,000 converted to USD at CAD_PER_USD.
+/// Source: https://www.cbsa-asfc.gc.ca/trade-commerce/amps/contraventions-infractions/c023-eng.html.
+pub const BORDER_CA_SECOND_FINE_USD: f64 = 2_862.0;
+/// Third-and-later CBSA AMPS C023 penalty, CAD 8,000 converted to USD at CAD_PER_USD.
+/// Source: https://www.cbsa-asfc.gc.ca/trade-commerce/amps/contraventions-infractions/c023-eng.html.
+pub const BORDER_CA_THIRD_FINE_USD: f64 = 5_723.0;
 /// Colorado's chain-law citation: 500 dollars plus a 79-dollar surcharge.
 pub const CHAIN_LAW_FINE: f64 = 580.0;
 /// Following too closely is a serious traffic violation under 49 CFR 383.51
