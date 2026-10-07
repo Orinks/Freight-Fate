@@ -1236,6 +1236,17 @@ fn test_fatigue_grows_faster_at_night() {
 }
 
 #[test]
+fn awake_fatigue_gain_uses_day_and_night_rates() {
+    // Eight daytime hours at the day rate.
+    let day_8h = awake_fatigue_gain(8.0, 8.0 * 60.0);
+    assert!(approx(day_8h, fatigue_rate_per_min(false) * 8.0 * 60.0));
+    // A full day crosses night, so it outpaces pure day rate and stays finite.
+    let day_24h = awake_fatigue_gain(8.0, 24.0 * 60.0);
+    assert!(day_24h > fatigue_rate_per_min(false) * 24.0 * 60.0);
+    assert!(day_24h.is_finite());
+}
+
+#[test]
 fn test_fatigue_shortens_the_reaction_window() {
     assert_eq!(reaction_window_mult(0.0), 1.0);
     assert_eq!(reaction_window_mult(FATIGUE_DROWSY), 1.0);
