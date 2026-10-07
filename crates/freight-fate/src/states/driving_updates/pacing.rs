@@ -1,6 +1,6 @@
 //! The clock's pacing on the road: a pace change made mid-drive, the bound
 //! on the merge handoff's real-time clock, and the session-log trace of
-//! every real-time pin (issue 293).
+//! every real-time pin (issue 293), the scale reminder's hold among them.
 //!
 //! A tester drove a relaxed haul for three hours on the wall clock: the slow
 //! merge out of the pickup yard pinned the clock to real time and only let
@@ -11,7 +11,8 @@
 use ff_core::sim::driving_modes::mode_name;
 use ff_core::sim::season::real_clock_game_hours;
 use ff_core::sim::trip_models::{
-    merge_traffic_target_mph, MERGE_RECOVERY_MAX_MI, MERGE_RECOVERY_MAX_REAL_S, PACE_CHANGE_MAX_MPH,
+    merge_traffic_target_mph, RoadStop, MERGE_RECOVERY_MAX_MI, MERGE_RECOVERY_MAX_REAL_S,
+    PACE_CHANGE_MAX_MPH,
 };
 use ff_core::speech_pacing::SpeechCategory;
 use ff_core::speech_text::SpokenMessage;
@@ -220,7 +221,8 @@ impl DrivingState {
     }
 
     /// The real-time pin in force, by name: the trip's own reason, with the
-    /// ramp law the driving state set it for.
+    /// ramp law the driving state set it for, or the scale whose reminder
+    /// is holding it.
     pub fn clock_override_reason(&self) -> Option<String> {
         let reason = self.trip.real_time_override()?;
         if reason == "controlled ramp" {
@@ -228,7 +230,21 @@ impl DrivingState {
                 return Some(format!("{reason}: {ramp}"));
             }
         }
+        if reason == "scale reminder" {
+            if let Some(scale) = self.scale_reminder_hold_stop() {
+                return Some(format!("{reason}: {}", scale.name));
+            }
+        }
         Some(reason.to_string())
+    }
+
+    /// The open scale the reminder's real-time hold runs to.
+    fn scale_reminder_hold_stop(&self) -> Option<&RoadStop> {
+        let scale_mi = self.trip.scale_reminder_hold_mi?;
+        self.trip
+            .stops
+            .iter()
+            .find(|stop| stop.stop_type == "weigh_station" && stop.at_mi == scale_mi)
     }
 
     /// Per frame: write the clock's real-time pins to the session log, the

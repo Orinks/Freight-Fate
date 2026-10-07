@@ -5,7 +5,9 @@
 
 use ff_core::sim::enforcement_observe::OBSERVE_LEEWAY_MPH;
 use ff_core::sim::hos;
-use ff_core::sim::trip_models::{DESTINATION_LOCAL_APPROACH_MI, RAMP_MAX_MPH as TRIP_RAMP_MAX_MPH};
+use ff_core::sim::trip_models::{
+    DESTINATION_LOCAL_APPROACH_MI, RAMP_MAX_MPH as TRIP_RAMP_MAX_MPH, SCALE_BYPASS_MPH,
+};
 
 pub const HAZARD_SAFE_MPH: f64 = 25.0;
 // A fixed object in your lane -- debris, a stopped vehicle -- cannot be
@@ -750,7 +752,9 @@ pub const PURSUIT_RUN_MIN_MPH: f64 = 30.0;
 pub const FAILURE_TO_STOP_DAMAGE_PCT: f64 = 12.0;
 pub const FAILURE_TO_STOP_PROCESSING_MIN: f64 = 180.0;
 pub const WEIGH_STATION_NOTICE_MI: f64 = 2.0;
-pub const WEIGH_STATION_BYPASS_MPH: f64 = 15.0;
+// The sim layer owns the number: the scale reminder's real-time hold lets go
+// at the same speed a crossing stops counting as a bypass.
+pub const WEIGH_STATION_BYPASS_MPH: f64 = SCALE_BYPASS_MPH;
 // A bypass is caught, not certain. The scale house has plate readers and
 // weigh-in-motion sensors watching the bypass lane, and dispatches a unit up
 // the corridor after a truck that ran it -- but a unit still has to catch up,

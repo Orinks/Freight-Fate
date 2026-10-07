@@ -13,7 +13,7 @@
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
 use ff_core::models::profile::Profile;
 use ff_core::sim::enforcement_posts::{EnforcementPost, KIND_FIXED_SCALE, METHOD_SCALE_SCREEN};
-use ff_core::sim::trip_models::RoadStop;
+use ff_core::sim::trip_models::{RoadStop, LOW_SPEED_TIME_SCALE, SCALE_BYPASS_MPH};
 use ff_core::sim::weather::WeatherKind;
 
 use freight_fate::app::testing::TestApp;
@@ -27,6 +27,7 @@ use freight_fate::states::driving_enforcement::{
 use freight_fate::states::driving_menu_states::DriveRef;
 use freight_fate::states::driving_pause_states::PauseMenuState;
 use freight_fate::states::driving_rest_states::{EnforcementStopState, RestStopState};
+use freight_fate::states::driving_updates::pacing::CLOCK_OVERRIDE_LOG_HOLD_S;
 
 const MPS_PER_MPH: f64 = 1.0 / 2.23694;
 const CLOSED_MI: f64 = 4.0;
@@ -273,6 +274,132 @@ fn the_reminder_window_is_sized_from_the_real_clock() {
     let window = drive.scale_reminder_mi();
     assert!(window > WEIGH_STATION_REMINDER_MI && window <= WEIGH_STATION_REMINDER_MAX_MI);
     assert!(window / 160.0 * 3600.0 >= SCALE_REMINDER_REAL_LEAD_S - 1e-9);
+}
+
+// -- (a) the hold in the clock's trace -------------------------------------------------
+
+/// The open scale announced, a mile and a half out at 61 and ten times real
+/// speed, driven on until its last reminder has spoken and the hold is on.
+fn reminded_of_the_open_scale() -> (Rig, RoadStop) {
+    let mut rig = ten_times_rig();
+    let (_closed, open) = closed_then_open(&mut rig.drive);
+    let key = rig.drive.weigh_station_key(&open);
+    rig.drive.weigh_station_noticed.insert(key);
+    rig.drive.trip.position_mi = open.at_mi - 1.5;
+    rig.prepare(61.0, None);
+    hold_61_for(&mut rig, 20_000, |rig| {
+        rig.drive.trip.scale_reminder_hold_mi.is_some()
+    });
+    assert!(
+        rig.said("Signal for the scale exit.") > 0,
+        "{:?}",
+        rig.transcript()
+    );
+    assert!(rig.drive.trip.position_mi < open.at_mi);
+    (rig, open)
+}
+
+fn hold_scale_text() -> String {
+    format!("scale reminder: {OPEN_NAME}")
+}
+
+#[test]
+fn the_scale_reminder_hold_is_a_named_clock_override_and_its_trace_starts_and_ends() {
+    let (mut rig, open) = reminded_of_the_open_scale();
+    assert_eq!(rig.drive.trip.real_time_override(), Some("scale reminder"));
+    assert_eq!(
+        rig.drive.clock_override_reason(),
+        Some(hold_scale_text()),
+        "the session log names the scale holding the clock"
+    );
+    assert_eq!(rig.drive.trip.effective_time_scale(), 1.0);
+
+    // Held past the trace's own hold, the start is written once.
+    let log_hold_frames = (CLOCK_OVERRIDE_LOG_HOLD_S / DT) as usize + 2;
+    hold_61_for(&mut rig, log_hold_frames, |_| false);
+    assert_eq!(
+        rig.drive.clock_pacing.override_reason,
+        Some(hold_scale_text())
+    );
+    assert!(rig.drive.clock_pacing.override_logged, "start logged");
+    assert!(rig.drive.trip.position_mi < open.at_mi);
+
+    // Already judged, so the crossing below is the end of the hold and
+    // nothing else: no police stop takes the clock over at the gore.
+    let key = rig.drive.weigh_station_key(&open);
+    rig.drive.enforcement_events.insert(key);
+    hold_61_for(&mut rig, 20_000, |rig| {
+        rig.drive.trip.position_mi > open.at_mi + 0.05
+    });
+    assert!(rig.drive.pull_over.is_none());
+    assert_eq!(rig.drive.trip.scale_reminder_hold_mi, None);
+    assert_eq!(rig.drive.trip.real_time_override(), None);
+    assert_eq!(
+        rig.drive.clock_pacing.override_reason, None,
+        "the trace saw the hold end at the scale"
+    );
+    assert!(!rig.drive.clock_pacing.override_logged);
+    assert!(rig.drive.trip.effective_time_scale() > 5.0);
+}
+
+#[test]
+fn a_truck_stopped_inside_the_reminder_half_mile_runs_the_low_speed_clock() {
+    // QA, 2026-10-07: a truck stopped short of the scale after its reminder
+    // sat on the wall clock until it reached the gore, where any other
+    // stopped truck runs at the low-speed pacing.
+    let (mut rig, open) = reminded_of_the_open_scale();
+    let stopped_frames = (5.0 / DT) as usize;
+    for _ in 0..stopped_frames {
+        rig.drive.trip.truck.velocity_mps = 0.0;
+        rig.step(1, DT, None);
+    }
+    rig.drive.trip.truck.velocity_mps = 0.0;
+    assert!(rig.drive.trip.position_mi < open.at_mi);
+    assert!(
+        rig.drive.trip.scale_reminder_hold(),
+        "still armed to the gore"
+    );
+    assert_eq!(rig.drive.trip.real_time_override(), None);
+    assert_eq!(rig.drive.clock_override_reason(), None);
+    assert_eq!(rig.drive.trip.effective_time_scale(), LOW_SPEED_TIME_SCALE);
+    assert_eq!(
+        rig.drive.clock_pacing.override_reason, None,
+        "the trace saw the hold let go"
+    );
+
+    // The line is the bypass speed: under it a crossing is not charged, so
+    // the clock is paced; over it the hold pins real time again before a
+    // crossing can count.
+    rig.drive.trip.truck.velocity_mps = mph_to_mps(SCALE_BYPASS_MPH - 0.5);
+    assert_eq!(rig.drive.trip.real_time_override(), None);
+    assert!(rig.drive.trip.effective_time_scale() > LOW_SPEED_TIME_SCALE);
+    rig.drive.trip.truck.velocity_mps = mph_to_mps(SCALE_BYPASS_MPH + 0.5);
+    assert_eq!(rig.drive.trip.real_time_override(), Some("scale reminder"));
+    assert_eq!(rig.drive.trip.effective_time_scale(), 1.0);
+
+    // Pulled away at road speed, the hold is back by name.
+    hold_61_for(&mut rig, 3, |_| false);
+    assert_eq!(rig.drive.clock_override_reason(), Some(hold_scale_text()));
+
+    // Crawled through the gore under the bypass speed: paced the whole way,
+    // and not a bypass.
+    let crawl = 10.0;
+    for _ in 0..40_000 {
+        rig.drive.trip.truck.velocity_mps = mph_to_mps(crawl);
+        rig.step(1, DT, None);
+        if rig.drive.trip.position_mi < open.at_mi {
+            rig.drive.trip.truck.velocity_mps = mph_to_mps(crawl);
+            assert_eq!(rig.drive.trip.real_time_override(), None);
+            assert!(rig.drive.trip.effective_time_scale() > LOW_SPEED_TIME_SCALE);
+        }
+        if rig.drive.trip.position_mi > open.at_mi + 0.05 {
+            break;
+        }
+    }
+    assert!(rig.drive.trip.position_mi > open.at_mi);
+    assert!(rig.drive.pull_over.is_none(), "{:?}", rig.transcript());
+    assert_eq!(rig.said("Scale bypass enforcement"), 0);
+    assert_eq!(rig.drive.trip.scale_reminder_hold_mi, None);
 }
 
 // -- (b) and (c): the check-in, and what comes after it ------------------------------

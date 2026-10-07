@@ -468,6 +468,10 @@ pub const ZONE_WARNING_MAX_MI: f64 = 10.0;
 /// Clock multiplier when stopped or crawling; full pacing resumes at cruise.
 pub const LOW_SPEED_TIME_SCALE: f64 = 4.0;
 pub const FULL_COMPRESSION_MPH: f64 = 50.0;
+/// An open scale crossed faster than this is a bypass; at or under it the
+/// truck is pulling in. The scale reminder's real-time hold pins the clock
+/// only above it (`Trip::real_time_override`).
+pub const SCALE_BYPASS_MPH: f64 = 15.0;
 /// A pacing change made mid-trip waits until the truck is slower than this.
 /// Motion integrates on real seconds while the road passes at the pace, and
 /// fuel is billed at the pace, so at any one pace a hill, a coast and a

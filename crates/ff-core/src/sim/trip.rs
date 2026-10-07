@@ -606,13 +606,6 @@ impl Trip {
         if self.real_time_override().is_some() {
             return full.min(1.0);
         }
-        if self.scale_reminder_hold() {
-            // And from an open scale's last reminder to its gore: at full
-            // compression the fixed half mile went by in three real seconds,
-            // the bypass charge landing before "Signal for the scale exit"
-            // had finished (tester log, 2026-10-07).
-            return full.min(1.0);
-        }
         if self.exit_approach_release_s > 0.0 {
             // Coming back up to pace after an approach, not snapping to it.
             let real = full.min(1.0);
@@ -672,10 +665,25 @@ impl Trip {
             // And for a signalled exit (Shane, 2026-08-15).
             return Some("signalled exit");
         }
+        if self.scale_reminder_hold() && self.truck.speed_mph() > SCALE_BYPASS_MPH {
+            // And from an open scale's last reminder to its gore: at full
+            // compression the fixed half mile went by in three real seconds,
+            // the bypass charge landing before "Signal for the scale exit"
+            // had finished (tester log, 2026-10-07). Only while a crossing
+            // could still be charged: at or under the bypass speed it cannot,
+            // so a truck slowed or stopped short of the scale runs the
+            // ordinary low-speed pacing rather than sitting on the wall clock
+            // until it reaches the gore. Back over that speed, the pin is
+            // back before the crossing can count, and the reminder's real
+            // seconds are counted on the real clock either way.
+            return Some("scale reminder");
+        }
         None
     }
 
-    /// Whether an open scale's reminder is holding the clock to real time.
+    /// Whether an open scale's reminder hold is armed: from the reminder to
+    /// the gore, off the scale's ramp. `real_time_override` pins the clock
+    /// for it only above [`SCALE_BYPASS_MPH`].
     pub fn scale_reminder_hold(&self) -> bool {
         !self.on_ramp
             && self
