@@ -38497,8 +38497,8 @@
         {
           "name": "Love's Travel Stop West Memphis",
           "type": "travel_center",
-          "at_mi": 8.1,
-          "source": "Love's Travel Stop West Memphis official location page, I-40 Exit 280, lists truck services and parking: https://www.loves.com/locations/ar/west-memphis/loves-travel-stop-west-memphis-450; Store coordinates read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 450 at West Memphis; matched by position, the only Love's within 5 mi of mile 8.1 of this leg (1.7 mi); coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
+          "at_mi": 6.4,
+          "source": "Love's Travel Stop West Memphis official location page, I-40 Exit 280, lists truck services and parking: https://www.loves.com/locations/ar/west-memphis/loves-travel-stop-west-memphis-450; Store coordinates read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Love's store 450 at West Memphis; matched by position, the only Love's within 5 mi of mile 8.1 of this leg (1.7 mi), the position it then carried; coordinates read from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py. at_mi derived 2026-10-07: those store coordinates projected onto this leg's archived dense route geometry (world_data/us/geometry/tn.jsonl, 721 ft off the line), cumulative distance rescaled to leg miles, 6.36, just past exit 280's westbound gore (OpenStreetMap highway=motorway_junction node 116842234, 6.01). The old 8.1 was 1.7 mi west of the store.",
           "actions": [
             "park",
             "save",
@@ -38775,8 +38775,8 @@
         {
           "name": "I-40 Weigh Station",
           "type": "weigh_station",
-          "at_mi": 2.4,
-          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost. Station and direction read 2026-10-07 from the Arkansas Highway Police weigh station list (Code of Arkansas Rules, permit rules appendix, https://codeofarrules.arkansas.gov/Rules/AppendixDocument?appendixID=226&partID=1006): this is Riverside, Interstate 40 westbound at mile 283, the first ramp west of the Hernando de Soto Bridge, with no eastbound side (eastbound I-40 is screened at Lehi, mile 274). It applies leaving Memphis only, so directions is forward, not both.",
+          "at_mi": 3.2,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost. Station and direction read 2026-10-07 from the Arkansas Highway Police weigh station list (Code of Arkansas Rules, permit rules appendix, https://codeofarrules.arkansas.gov/Rules/AppendixDocument?appendixID=226&partID=1006): this is Riverside, Interstate 40 westbound at mile 283, the first ramp west of the Hernando de Soto Bridge, with no eastbound side (eastbound I-40 is screened at Lehi, mile 274). It applies leaving Memphis only, so directions is forward, not both. Position re-read 2026-10-07 from OpenStreetMap via the public Overpass API: the scale ramp (way 943052841, destination=Weigh Station, hgv=designated) leaves the westbound I-40 carriageway (way 943052840, ref I 40, drawn east to west) at highway=motorway_junction node 116871691 (35.1531424, -90.0829316); the weighbridges (ways 943052851 and 943052853) sit on the ramp, which merges back onto I-40 West at node 498743406. at_mi derived: that node projected onto this leg's archived dense route geometry (world_data/us/geometry/tn.jsonl, 4 ft off the line), cumulative distance rescaled to leg miles, 3.15. The old 2.4 sat on the Hernando de Soto Bridge.",
           "actions": [
             "inspect"
           ],
@@ -39281,7 +39281,7 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "interchanges": [
           {
-            "at_mi": 2.4,
+            "at_mi": 3.2,
             "exit_ref": "",
             "name": "",
             "destinations": [
@@ -39289,7 +39289,7 @@
             ],
             "via": "",
             "highway": "I-40",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ Position re-read 2026-10-07 from OpenStreetMap via the public Overpass API: the scale ramp (way 943052841, destination=Weigh Station, hgv=designated) leaves the westbound I-40 carriageway (way 943052840, ref I 40, drawn east to west) at highway=motorway_junction node 116871691 (35.1531424, -90.0829316); the weighbridges (ways 943052851 and 943052853) sit on the ramp, which merges back onto I-40 West at node 498743406. at_mi derived: that node projected onto this leg's archived dense route geometry (world_data/us/geometry/tn.jsonl, 4 ft off the line), cumulative distance rescaled to leg miles, 3.15. The old 2.4 snap sat on the Hernando de Soto Bridge. The ramp_* fields were walked 2026-06-23 from the old snap and end at nodes 620883507 and 203622602 on the Memphis bank of the river; they were not re-walked here.",
             "ramp_advisory_forward": 25.0,
             "ramp_advisory_backward": 25.0,
             "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
@@ -45846,7 +45846,7 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "interchanges": [
           {
-            "at_mi": 2.4,
+            "at_mi": 3.2,
             "exit_ref": "",
             "name": "",
             "destinations": [
@@ -45854,7 +45854,7 @@
             ],
             "via": "",
             "highway": "I-40",
-            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ Highway read 2026-10-07 from OpenStreetMap way refs (Overpass): this leg leaves Memphis on I-40 over the Hernando de Soto Bridge (way 1523781654, ref I 40), and the mainline stays ref I 40 alone until the I-55 junction at exit 279A west of here, where the I 40;I 55 concurrency begins. Was labelled I-55, the leg's own highway.",
+            "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ Highway read 2026-10-07 from OpenStreetMap way refs (Overpass): this leg leaves Memphis on I-40 over the Hernando de Soto Bridge (way 1523781654, ref I 40), and the mainline stays ref I 40 alone until the I-55 junction at exit 279A west of here, where the I 40;I 55 concurrency begins. Was labelled I-55, the leg's own highway. Position re-read 2026-10-07 from OpenStreetMap via the public Overpass API: the scale ramp (way 943052841, destination=Weigh Station, hgv=designated) leaves the westbound I-40 carriageway (way 943052840, ref I 40, drawn east to west) at highway=motorway_junction node 116871691 (35.1531424, -90.0829316); the weighbridges (ways 943052851 and 943052853) sit on the ramp, which merges back onto I-40 West at node 498743406. at_mi derived: that node projected onto this leg's archived dense route geometry (world_data/us/geometry/tn.jsonl, 4 ft off the line), cumulative distance rescaled to leg miles, 3.15. The old 2.4 snap sat on the Hernando de Soto Bridge. The ramp_* fields were walked 2026-06-23 from the old snap and end at nodes 620883507 and 203622602 on the Memphis bank of the river; they were not re-walked here.",
             "ramp_advisory_forward": 25.0,
             "ramp_advisory_backward": 25.0,
             "ramp_advisory_source": "OpenStreetMap maxspeed:advisory on the motorway_link way at this exit (read; directional suffix resolved from OSM way direction into leg direction), from a local Geofabrik extract, accessed 2026-06-23: https://www.openstreetmap.org/",
@@ -47867,8 +47867,8 @@
         {
           "name": "Petro Stopping Center West Memphis",
           "type": "travel_center",
-          "at_mi": 3.0,
-          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Petro store 0311 at West Memphis; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py.",
+          "at_mi": 6.1,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Store identity read from OpenStreetMap (Geofabrik Arkansas extract dated 2026-06-22, read 2026-09-17): Petro store 0311 at West Memphis; town read from the mapped site's branch name; matched by coordinate, 0.01 mi from the mapped site. CAT Scale read from OpenStreetMap (amenity=weighbridge, brand CAT Scale) within 0.25 mi of the store; Overpass snapshot 2026-09-24, tools/cat_scales.py. at_mi derived 2026-10-07: the store's coordinates projected onto this leg's archived dense route geometry (world_data/us/geometry/tn.jsonl, 645 ft off the line), cumulative distance rescaled to leg miles, 6.10, at exit 280 (OpenStreetMap highway=motorway_junction node 116842234, 6.01). The old 3.0 was on the bridge approach, 3.1 mi east of the store.",
           "parking": "likely",
           "actions": [
             "park",
@@ -48287,8 +48287,8 @@
         {
           "name": "I-40 Weigh Station",
           "type": "weigh_station",
-          "at_mi": 2.4,
-          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost. Station and direction read 2026-10-07 from the Arkansas Highway Police weigh station list (Code of Arkansas Rules, permit rules appendix, https://codeofarrules.arkansas.gov/Rules/AppendixDocument?appendixID=226&partID=1006): this is Riverside, Interstate 40 westbound at mile 283, the first ramp west of the Hernando de Soto Bridge, with no eastbound side (eastbound I-40 is screened at Lehi, mile 274). It applies leaving Memphis only, so directions is forward, not both. The same junction as the Memphis to Little Rock leg's I-40 Weigh Station, derived: this leg leaves Memphis on I-40 over the Hernando de Soto Bridge and its archived route geometry is identical to that leg's for the first seven miles (Tennessee-Arkansas line at 2.3 mi, this junction at 2.4 mi, exit 281 at 4.7 mi on both). Renamed from I-55 Weigh Station because the ramp is on I-40 before I-55 joins. Southbound I-55 is screened at Marion, mile 9, per the same list; that station is not on this leg yet.",
+          "at_mi": 3.2,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost. Station and direction read 2026-10-07 from the Arkansas Highway Police weigh station list (Code of Arkansas Rules, permit rules appendix, https://codeofarrules.arkansas.gov/Rules/AppendixDocument?appendixID=226&partID=1006): this is Riverside, Interstate 40 westbound at mile 283, the first ramp west of the Hernando de Soto Bridge, with no eastbound side (eastbound I-40 is screened at Lehi, mile 274). It applies leaving Memphis only, so directions is forward, not both. The same junction as the Memphis to Little Rock leg's I-40 Weigh Station, derived: this leg leaves Memphis on I-40 over the Hernando de Soto Bridge and its archived route geometry is identical to that leg's for the first seven miles (Tennessee-Arkansas line at 2.3 mi, this junction at 3.2 mi, exit 281 at 4.7 mi on both). Renamed from I-55 Weigh Station because the ramp is on I-40 before I-55 joins. Southbound I-55 is screened at Marion, mile 9, per the same list; that station is not on this leg yet. Position re-read 2026-10-07 from OpenStreetMap via the public Overpass API: the scale ramp (way 943052841, destination=Weigh Station, hgv=designated) leaves the westbound I-40 carriageway (way 943052840, ref I 40, drawn east to west) at highway=motorway_junction node 116871691 (35.1531424, -90.0829316); the weighbridges (ways 943052851 and 943052853) sit on the ramp, which merges back onto I-40 West at node 498743406. at_mi derived: that node projected onto this leg's archived dense route geometry (world_data/us/geometry/tn.jsonl, 4 ft off the line), cumulative distance rescaled to leg miles, 3.15. The old 2.4 sat on the Hernando de Soto Bridge.",
           "actions": [
             "inspect"
           ],

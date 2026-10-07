@@ -228,11 +228,14 @@ fn st_louis_to_little_rock_through_memphis_has_one_scale_at_west_memphis() {
         (marion_mi - (ST_LOUIS_TO_MEMPHIS_MI - 11.3)).abs() < 0.05,
         "Marion is 11.3 miles short of Memphis, southbound: {marion_mi}"
     );
+    // Riverside's ramp leaves westbound I-40 at OSM junction node
+    // 116871691, 3.15 miles out on the leg geometry. The old 2.4 put it on
+    // the Hernando de Soto Bridge itself.
     let (name, at_mi) = &scales[1];
     assert_eq!(name, "I-40 Weigh Station");
     assert!(
-        (at_mi - (ST_LOUIS_TO_MEMPHIS_MI + 2.4)).abs() < 0.05,
-        "the scale is 2.4 miles past Memphis, westbound: {at_mi}"
+        (at_mi - (ST_LOUIS_TO_MEMPHIS_MI + 3.2)).abs() < 0.05,
+        "the scale is 3.2 miles past Memphis, westbound: {at_mi}"
     );
 }
 

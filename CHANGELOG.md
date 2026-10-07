@@ -20,6 +20,8 @@
 
 - **Two real Arkansas weigh stations near West Memphis are on the map.** Marion screens southbound I-55, Lehi eastbound I-40.
 
+- **West Memphis stops sit where they really are.** The Riverside scale is past the bridge, and the Petro and Love's are at exit 280.
+
 ## 1.9.3 - 2026-10-06
 
 ### Added
