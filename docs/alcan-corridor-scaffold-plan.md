@@ -259,6 +259,7 @@ This north-filament table stops at Whitehorse; the Tok/Fairbanks terminus and Al
 ### Mileage / geometry source (north)
 
 - Public Valhalla truck costing (`valhalla1.openstreetmap.de`, loaded-semi options) 2026-09-22; paid miles match router (±5 mi band rounded).
+- Maxspeed rebakes on archive-less Alcan legs use public Valhalla truck geometry through the stored route points.
 - Elevation: Open-Meteo elevation API along densified shape (~30 mi samples).
 - City lat integrity ceiling raised to `66.0` for Fairbanks (~64.8°N); lon floor lowered to `-150.0` for Interior AK (~-147.7). Anchorage still Phase B.
 
