@@ -567,13 +567,49 @@
             "miles": 12.0
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 318.7 mi; paid miles 319. Alaska Highway ALCAN Phase A through-freight filament (no border on this leg; Poker Creek AK / Beaver Creek YT border deferred until CA\u2192US Tok attach).",
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 318.7 mi; paid miles 319. Alaska Highway ALCAN Phase A through-freight filament (no border on this leg; the Alcan / Beaver Creek crossing is represented on the Whitehorse\u2194Tok legs).",
         "landmarks": [],
         "speed_limits": [
           {
-            "at_mi": 1.0,
-            "mph": 56,
-            "source": "Coarse placeholder ~90 km/h rural BC/YT Alaska Highway truck context for Phase A north filament; CA statutory truck caps still a named honesty debt (not a harvested maxspeed:hgv tag).",
+            "at_mi": 0.0,
+            "mph": 60.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-06-23; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 75.0,
+            "mph": 50.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-06-23; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 175.0,
+            "mph": 60.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-06-23; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 190.0,
+            "mph": 30.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-06-23; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 205.0,
+            "mph": 60.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-06-23; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 295.0,
+            "mph": 45.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-06-23; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 310.0,
+            "mph": 60.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses linear interpolation of the stored route_points from loaded-semi Valhalla geometry; accessed 2026-06-23; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
             "hgv": false
           }
         ],

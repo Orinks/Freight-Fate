@@ -19,8 +19,23 @@ _MAXSPEED_THIN_DEG = 0.001
 # per-leg shield match can be computed against whichever leg is being baked).
 MaxspeedPoint = tuple[float, float, float, bool, str]
 MaxspeedGrid = dict[tuple[int, int], list[MaxspeedPoint]]
-MAXSPEED_INDEX_CACHE_VERSION = 1
+MAXSPEED_INDEX_CACHE_VERSION = 2
 OSM_REGION_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
+CANADIAN_GEOFABRIK_SLUGS = (
+    "alberta",
+    "british-columbia",
+    "manitoba",
+    "new-brunswick",
+    "newfoundland-and-labrador",
+    "northwest-territories",
+    "nova-scotia",
+    "nunavut",
+    "ontario",
+    "prince-edward-island",
+    "quebec",
+    "saskatchewan",
+    "yukon",
+)
 
 
 def _maxspeed_source(geometry_source: str) -> str:
@@ -59,7 +74,7 @@ class _MaxspeedWayRaw:
 _PARSE_OSM_MAXSPEED = None
 
 
-def _parse_osm_maxspeed(raw: Any) -> float | None:
+def _parse_osm_maxspeed(raw: Any, *, default_kmh: bool = False) -> float | None:
     """The canonical maxspeed normalizer, borrowed from enrich_routes.py."""
     global _PARSE_OSM_MAXSPEED
     if _PARSE_OSM_MAXSPEED is None:
@@ -71,7 +86,11 @@ def _parse_osm_maxspeed(raw: Any) -> float | None:
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         _PARSE_OSM_MAXSPEED = module.parse_osm_maxspeed
-    return _PARSE_OSM_MAXSPEED(raw)
+    return _PARSE_OSM_MAXSPEED(raw, default_kmh=default_kmh)
+
+
+def _is_canadian_extract(pbf_path: Path) -> bool:
+    return pbf_path.name.startswith(tuple(f"{slug}-" for slug in CANADIAN_GEOFABRIK_SLUGS))
 
 
 def _route_digits(highway: str) -> str:
@@ -134,6 +153,7 @@ def _pbf_for_states(states: set[str], region_dir: Path) -> list[Path]:
 def _build_maxspeed_index_from_pbf(
     pbf_path: Path,
     bounds: list[LocalBounds],
+    default_kmh: bool,
     label: str = "1/1",
 ) -> list[LocalMaxspeedWay]:
     """Mainline highway ways carrying a usable ``maxspeed`` near the routes.
@@ -170,8 +190,12 @@ def _build_maxspeed_index_from_pbf(
             tags = {str(k): str(v) for k, v in way.tags}
             if tags.get("highway") not in MAXSPEED_HIGHWAY_CLASSES:
                 return
-            hgv_mph = _parse_osm_maxspeed(tags.get("maxspeed:hgv"))
-            mph = hgv_mph if hgv_mph is not None else _parse_osm_maxspeed(tags.get("maxspeed"))
+            hgv_mph = _parse_osm_maxspeed(tags.get("maxspeed:hgv"), default_kmh=default_kmh)
+            mph = (
+                hgv_mph
+                if hgv_mph is not None
+                else _parse_osm_maxspeed(tags.get("maxspeed"), default_kmh=default_kmh)
+            )
             if mph is None:
                 return
             node_ids = [int(ref.ref) for ref in way.nodes if getattr(ref, "ref", None) is not None]
@@ -294,7 +318,14 @@ def load_or_build_maxspeed_index(
             return ways
     ways: list[LocalMaxspeedWay] = []
     for i, pbf_path in enumerate(pbf_paths, start=1):
-        ways.extend(_build_maxspeed_index_from_pbf(pbf_path, bounds, label=f"{i}/{len(pbf_paths)}"))
+        ways.extend(
+            _build_maxspeed_index_from_pbf(
+                pbf_path,
+                bounds,
+                default_kmh=_is_canadian_extract(pbf_path),
+                label=f"{i}/{len(pbf_paths)}",
+            )
+        )
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     cache_path.write_text(
         json.dumps(
@@ -344,6 +375,7 @@ def assemble_maxspeed(
     highway: str,
     source: str = MAXSPEED_SOURCE,
     fallback: tuple[float, str] | None = None,
+    fallback_range: tuple[float, float] | None = None,
 ) -> list[dict[str, Any]]:
     """Build a step-function speed profile for a leg from snapped maxspeed ways.
 
@@ -407,7 +439,9 @@ def assemble_maxspeed(
         if choice is not None:
             mph, hgv = choice
             point_source = source
-        elif fallback is not None:
+        elif fallback is not None and (
+            fallback_range is None or fallback_range[0] <= mile <= fallback_range[1]
+        ):
             mph, point_source = fallback
             hgv = False
         else:
@@ -507,11 +541,15 @@ def bake_maxspeed_for_leg(
     if not geom:
         return []
     state_miles = leg.get("corridor", {}).get("state_miles", ())
-    fallback = (
-        ALASKA_UNPOSTED_SPEED
-        if any(entry.get("state") == "Alaska" for entry in state_miles)
-        else None
-    )
+    alaska_miles = 0.0
+    fallback_range = None
+    for entry in state_miles:
+        miles = float(entry.get("miles", 0.0))
+        if entry.get("state") == "Alaska":
+            start = fallback_range[0] if fallback_range is not None else alaska_miles
+            fallback_range = (start, alaska_miles + miles)
+        alaska_miles += miles
+    fallback = ALASKA_UNPOSTED_SPEED if fallback_range is not None else None
     return assemble_maxspeed(
         grid,
         geom,
@@ -519,6 +557,7 @@ def bake_maxspeed_for_leg(
         str(leg.get("highway", "")),
         source=_maxspeed_source(geometry_source),
         fallback=fallback,
+        fallback_range=fallback_range,
     )
 
 

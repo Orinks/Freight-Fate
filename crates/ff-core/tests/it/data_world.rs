@@ -70,6 +70,18 @@ fn assert_route_sequence_and_paid_miles(
     );
 }
 
+fn raw_world_leg<'a>(
+    shards: &'a [serde_json::Value],
+    from: &str,
+    to: &str,
+) -> &'a serde_json::Value {
+    shards
+        .iter()
+        .flat_map(|shard| shard["legs"].as_array().expect("world data legs"))
+        .find(|leg| leg["from"].as_str() == Some(from) && leg["to"].as_str() == Some(to))
+        .unwrap_or_else(|| panic!("missing world data leg {from}->{to}"))
+}
+
 fn has_only_public_lots(city: &City) -> bool {
     !city.locations.is_empty()
         && city.locations.iter().all(|location| {
@@ -1248,7 +1260,7 @@ fn test_alcan_phase_a_north_filament_to_whitehorse() {
             "missing directed north ALCAN leg {a}->{b}"
         );
     }
-    // Tok/Fairbanks + Poker Creek border land in
+    // Tok/Fairbanks + Alcan / Beaver Creek border land in
     // test_alcan_phase_a_terminus_to_fairbanks (Phase A AK terminus slice).
     let fsj_fn = world
         .legs
@@ -1376,24 +1388,24 @@ fn test_alcan_phase_a_terminus_to_fairbanks() {
         (tok_delta.miles + delta_fairbanks.miles - 202.0).abs() > 1.0,
         "Tok split miles keep the authored 204-mile milepost total"
     );
-    // Poker Creek / Beaver Creek border_crossing on both CA↔US directions.
+    // Alcan / Beaver Creek border_crossing on both CA↔US directions.
     let yt = include_str!("../../../../data/world_data/ca/legs/YT.json");
     let ak = include_str!("../../../../data/world_data/us/legs/AK.json");
     assert!(
         yt.contains("\"from\": \"whitehorse_yt_ca\"")
             && yt.contains("\"to\": \"tok_ak_us\"")
-            && yt.contains("poker_creek_beaver_creek")
+            && yt.contains("alcan_beaver_creek")
             && yt.contains("through_freight")
             && yt.contains("\"cabotage\": \"forbidden\""),
-        "CA→US Whitehorse→Tok must carry poker_creek_beaver_creek through_freight border stub"
+        "CA→US Whitehorse→Tok must carry alcan_beaver_creek through_freight border stub"
     );
     assert!(
         ak.contains("\"from\": \"tok_ak_us\"")
             && ak.contains("\"to\": \"whitehorse_yt_ca\"")
-            && ak.contains("poker_creek_beaver_creek")
+            && ak.contains("alcan_beaver_creek")
             && ak.contains("through_freight")
             && ak.contains("\"cabotage\": \"forbidden\""),
-        "US→CA Tok→Whitehorse must carry poker_creek_beaver_creek through_freight border stub"
+        "US→CA Tok→Whitehorse must carry alcan_beaver_creek through_freight border stub"
     );
     let wh_tok = world
         .legs
@@ -1436,6 +1448,115 @@ fn test_alcan_phase_a_terminus_to_fairbanks() {
         .locations
         .iter()
         .any(|loc| loc.name.contains("Sourdough") || loc.name.contains("Airport")));
+}
+
+#[test]
+fn test_alcan_border_identity_and_posted_speed_profiles() {
+    let shards = [
+        serde_json::from_str::<serde_json::Value>(include_str!(
+            "../../../../data/world_data/us/legs/AK.json"
+        ))
+        .expect("AK legs JSON"),
+        serde_json::from_str::<serde_json::Value>(include_str!(
+            "../../../../data/world_data/ca/legs/YT.json"
+        ))
+        .expect("YT legs JSON"),
+        serde_json::from_str::<serde_json::Value>(include_str!(
+            "../../../../data/world_data/ca/legs/BC.json"
+        ))
+        .expect("BC legs JSON"),
+    ];
+    let whitehorse_to_tok = raw_world_leg(&shards, "whitehorse_yt_ca", "tok_ak_us");
+    let tok_to_whitehorse = raw_world_leg(&shards, "tok_ak_us", "whitehorse_yt_ca");
+
+    for leg in [whitehorse_to_tok, tok_to_whitehorse] {
+        for metadata in [&leg["border_crossing"], &leg["corridor"]["border_crossing"]] {
+            assert_eq!(metadata["id"].as_str(), Some("alcan_beaver_creek"));
+            assert!(metadata["ports"]
+                .as_array()
+                .expect("border ports")
+                .iter()
+                .any(|port| port.as_str() == Some("alcan_beaver_creek")));
+        }
+    }
+
+    let alcan = whitehorse_to_tok["corridor"]["checkpoints"]
+        .as_array()
+        .expect("Whitehorse→Tok checkpoints")
+        .iter()
+        .find(|checkpoint| checkpoint["name"].as_str() == Some("Alcan Port of Entry"))
+        .expect("Alcan Port of Entry checkpoint");
+    assert_eq!(alcan["at_mi"].as_f64(), Some(297.5));
+    assert_eq!(alcan["state"].as_str(), Some("Alaska"));
+    assert!(alcan["source"]
+        .as_str()
+        .expect("Alcan checkpoint source")
+        .contains("4212502894"));
+    assert!(alcan["source"]
+        .as_str()
+        .expect("Alcan checkpoint source")
+        .contains("https://www.cbp.gov/about/contact/ports/alcan-alaska-3104"));
+
+    let beaver = tok_to_whitehorse["corridor"]["checkpoints"]
+        .as_array()
+        .expect("Tok→Whitehorse checkpoints")
+        .iter()
+        .find(|checkpoint| checkpoint["name"].as_str() == Some("Beaver Creek Port of Entry"))
+        .expect("Beaver Creek Port of Entry checkpoint");
+    let beaver_mile = beaver["at_mi"].as_f64().expect("Beaver Creek at_mi");
+    assert!(89.5 < beaver_mile && beaver_mile < 120.0);
+    assert_eq!(beaver["state"].as_str(), Some("Yukon"));
+    assert_eq!(beaver["lat"].as_f64(), Some(62.4089932));
+    assert_eq!(beaver["lon"].as_f64(), Some(-140.859717));
+    assert!(beaver["source"]
+        .as_str()
+        .expect("Beaver Creek checkpoint source")
+        .contains("3531514528"));
+
+    for (leg, at_mi) in [(tok_to_whitehorse, 89.5), (whitehorse_to_tok, 297.5)] {
+        let crossings = leg["corridor"]["state_crossings"]
+            .as_array()
+            .expect("Alaska–Yukon state crossings");
+        assert_eq!(crossings.len(), 1);
+        assert_eq!(crossings[0]["at_mi"].as_f64(), Some(at_mi));
+        assert_eq!(
+            crossings[0]["place"].as_str(),
+            Some("Alaska–Yukon border on the Alaska Highway at Alcan, Alaska")
+        );
+    }
+
+    for leg in [tok_to_whitehorse, whitehorse_to_tok] {
+        for section in ["checkpoints", "state_crossings"] {
+            for entry in leg["corridor"][section]
+                .as_array()
+                .expect("border text array")
+            {
+                for field in ["name", "place", "source"] {
+                    if let Some(text) = entry[field].as_str() {
+                        assert!(!text.contains("Poker Creek"), "{section}.{field}: {text}");
+                    }
+                }
+            }
+        }
+    }
+
+    for (from, to) in [
+        ("tok_ak_us", "whitehorse_yt_ca"),
+        ("whitehorse_yt_ca", "tok_ak_us"),
+        ("watson_lake_yt_ca", "whitehorse_yt_ca"),
+        ("whitehorse_yt_ca", "watson_lake_yt_ca"),
+        ("watson_lake_yt_ca", "fort_nelson_bc_ca"),
+        ("fort_nelson_bc_ca", "watson_lake_yt_ca"),
+    ] {
+        let samples = raw_world_leg(&shards, from, to)["corridor"]["speed_limits"]
+            .as_array()
+            .expect("speed-limit samples");
+        assert!(!samples.is_empty(), "{from}->{to} has no speed samples");
+        for sample in samples {
+            let mph = sample["mph"].as_f64().expect("speed sample mph");
+            assert!(mph <= 65.0, "{from}->{to} has a {mph} mph sample");
+        }
+    }
 }
 
 #[test]

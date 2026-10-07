@@ -8,7 +8,10 @@ the archive keeps a vertex only every few miles on a straight; and one exit
 number seen twice along a leg was averaged into a single exit between them.
 """
 
+from pathlib import Path
+
 import build_interchanges as bi
+import build_interchanges_maxspeed as maxspeed
 
 MI_PER_DEG_LAT = bi._haversine_mi(40.0, -80.0, 41.0, -80.0)
 
@@ -101,3 +104,60 @@ def test_one_exit_number_twice_on_a_leg_is_two_exits():
     dense = [(_north(mi), -80.0, float(mi)) for mi in range(81)]
     exits = bi.discover_leg(_leg(80.0), 0.0, index, geom=dense)
     assert [round(ix["at_mi"]) for ix in exits] == [10, 60]
+
+
+def test_bare_maxspeed_units_follow_geofabrik_extract_region():
+    canadian_extracts = (
+        "alberta",
+        "british-columbia",
+        "manitoba",
+        "new-brunswick",
+        "newfoundland-and-labrador",
+        "northwest-territories",
+        "nova-scotia",
+        "nunavut",
+        "ontario",
+        "prince-edward-island",
+        "quebec",
+        "saskatchewan",
+        "yukon",
+    )
+    assert all(
+        maxspeed._is_canadian_extract(Path(f"{slug}-latest.osm.pbf")) for slug in canadian_extracts
+    )
+    yukon = Path("yukon-latest.osm.pbf")
+    alaska = Path("alaska-latest.osm.pbf")
+    assert not maxspeed._is_canadian_extract(alaska)
+    assert (
+        maxspeed._parse_osm_maxspeed("90", default_kmh=maxspeed._is_canadian_extract(yukon)) == 55.0
+    )
+    assert (
+        maxspeed._parse_osm_maxspeed("55", default_kmh=maxspeed._is_canadian_extract(alaska))
+        == 55.0
+    )
+
+
+def test_alaska_unposted_speed_fallback_stays_inside_state_range(monkeypatch):
+    leg = {
+        "miles": 387.0,
+        "highway": "Alaska Highway",
+        "corridor": {
+            "state_miles": [
+                {"state": "Yukon", "miles": 297.5},
+                {"state": "Alaska", "miles": 89.5},
+            ]
+        },
+    }
+    geometry = [(63.0, -142.0, 0.0), (64.0, -141.0, 387.0)]
+    monkeypatch.setattr(
+        maxspeed,
+        "leg_corridor_geometry_with_source",
+        lambda _leg, _rate_limit: (geometry, "fixture route geometry"),
+    )
+
+    profile = maxspeed.bake_maxspeed_for_leg(leg, {}, rate_limit=0.0)
+
+    assert profile
+    assert profile[0]["at_mi"] == 300.0
+    assert all(sample["at_mi"] >= 297.5 for sample in profile)
+    assert all(sample["source"] == maxspeed.ALASKA_UNPOSTED_SPEED[1] for sample in profile)
