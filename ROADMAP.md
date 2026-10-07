@@ -2679,6 +2679,11 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       short ones back to back, counts as a 10-hour reset. Course fatigue
       was corrected separately (GitHub #314); this item is only the duty
       status, and the owner decides how sponsored courses are logged.
+- [ ] **A multi-day course ends at 4 PM on its last class day.** Course
+      fatigue scores the last class day as 8 AM to 4 PM local, but the
+      clock still moves ahead a flat course length: the 24-hour course
+      started at 9 PM ends at 9 PM the next day, not at 4 PM. End the clock
+      at 4 PM local on the last class day, and log the duty time to match.
 
 ### Signalling a street turn
 
