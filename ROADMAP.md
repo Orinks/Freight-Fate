@@ -2889,6 +2889,10 @@ branch. The older Phase A/B plan checklists are not a live completion list.
       through those points, and other archive-less legs need the same re-sweep.
 - [ ] (Found along the way) Blaine northbound CBSA Pacific Highway booth data
       is missing.
+- [ ] (Found along the way) The 33 Phase B3 freight and fuel endpoints
+      (Valdez, Kenai, Seward, Homer, Soldotna, Delta Junction, Coldfoot,
+      Deadhorse) have no `facility_approaches.json` chains yet; the last
+      approach bake predates them. Re-route them from the Alaska extract.
 - [ ] (Found along the way) Border processing times and the secondary-referral
       chance are gameplay assumptions.
 - [ ] (Found along the way) Passport and FAST documents are not modeled.
