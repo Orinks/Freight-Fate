@@ -38776,14 +38776,14 @@
           "name": "I-40 Weigh Station",
           "type": "weigh_station",
           "at_mi": 2.4,
-          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost. Station and direction read 2026-10-07 from the Arkansas Highway Police weigh station list (Code of Arkansas Rules, permit rules appendix, https://codeofarrules.arkansas.gov/Rules/AppendixDocument?appendixID=226&partID=1006): this is Riverside, Interstate 40 westbound at mile 283, the first ramp west of the Hernando de Soto Bridge, with no eastbound side (eastbound I-40 is screened at Lehi, mile 274). It applies leaving Memphis only, so directions is forward, not both.",
           "actions": [
             "inspect"
           ],
           "services": [],
           "parking": "none",
           "directions": [
-            "both"
+            "forward"
           ],
           "vehicle_access": "tractor_trailer"
         }
@@ -48268,17 +48268,17 @@
           "vehicle_access": "tractor_trailer"
         },
         {
-          "name": "I-55 Weigh Station",
+          "name": "I-40 Weigh Station",
           "type": "weigh_station",
           "at_mi": 2.4,
-          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost. Station and direction read 2026-10-07 from the Arkansas Highway Police weigh station list (Code of Arkansas Rules, permit rules appendix, https://codeofarrules.arkansas.gov/Rules/AppendixDocument?appendixID=226&partID=1006): this is Riverside, Interstate 40 westbound at mile 283, the first ramp west of the Hernando de Soto Bridge, with no eastbound side (eastbound I-40 is screened at Lehi, mile 274). It applies leaving Memphis only, so directions is forward, not both. The same junction as the Memphis to Little Rock leg's I-40 Weigh Station, derived: this leg leaves Memphis on I-40 over the Hernando de Soto Bridge and its archived route geometry is identical to that leg's for the first seven miles (Tennessee-Arkansas line at 2.3 mi, this junction at 2.4 mi, exit 281 at 4.7 mi on both). Renamed from I-55 Weigh Station because the ramp is on I-40 before I-55 joins. Southbound I-55 is screened at Marion, mile 9, per the same list; that station is not on this leg yet.",
           "actions": [
             "inspect"
           ],
           "services": [],
           "parking": "none",
           "directions": [
-            "both"
+            "forward"
           ],
           "vehicle_access": "tractor_trailer"
         }

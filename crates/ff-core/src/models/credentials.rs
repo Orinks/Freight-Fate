@@ -70,7 +70,7 @@ pub struct Credential {
     /// The earliest level the course can be booked.
     pub min_level: i64,
     pub course_cost: f64,
-    /// Time the course takes, advanced on the clock like a night's sleep.
+    /// Time the course takes; the game clock advances by this many hours.
     pub course_hours: f64,
     /// Credentials that must already be held before booking.
     pub prereqs: &'static [&'static str],

@@ -11,7 +11,7 @@ use crate::sim::trip_models::*;
 use crate::sim::trip_route_helpers::stop_offset_for_direction;
 use crate::sim::weather::WeatherKind;
 use crate::speech_text::{
-    hazard_call, in_lane_hazard_call, passing_hazard_call, toll_charged, SpokenMessage,
+    hazard_call, in_lane_hazard_call_named, passing_hazard_call, toll_charged, SpokenMessage,
 };
 
 impl Trip {
@@ -341,7 +341,7 @@ impl Trip {
                 // "Or change lanes" is only true advice where there is
                 // somewhere to send it (playtest report, US-285, 2026-08-12).
                 let body = format!("{} {where_}.", py_capitalize(&reason));
-                let message = in_lane_hazard_call(&body, side);
+                let message = in_lane_hazard_call_named(&body, side, &self.open_side_spoken(side));
                 self.emit(
                     TripEventKind::Hazard,
                     message,
@@ -397,7 +397,7 @@ impl Trip {
                 .unwrap_or_default();
             let body = format!("{first}{}.", chars.as_str());
             let message = if in_lane {
-                in_lane_hazard_call(&body, side)
+                in_lane_hazard_call_named(&body, side, &self.open_side_spoken(side))
             } else {
                 hazard_call("Brake now!", &body)
             };

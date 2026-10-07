@@ -330,6 +330,11 @@ pub struct Trip {
     pub lane_steers: Option<bool>,
     /// Road left to an exit the driver has signalled for.
     pub exit_approach_mi: Option<f64>,
+    /// The milepost of an open weigh station whose last reminder has been
+    /// spoken. From that line to the gore the clock runs real, so the
+    /// reminder buys the driver real seconds to signal at any pacing. Set by
+    /// the game; past the milepost, or on a ramp, it holds nothing.
+    pub scale_reminder_hold_mi: Option<f64>,
     pub exit_approach_release_s: f64,
     pub announced_chain_law: HashSet<String>,
     pub announced_curves: HashSet<String>,
@@ -495,6 +500,7 @@ impl Trip {
             curve_shed_active: false,
             lane_steers: None,
             exit_approach_mi: None,
+            scale_reminder_hold_mi: None,
             exit_approach_release_s: 0.0,
             announced_chain_law: HashSet::new(),
             announced_curves: HashSet::new(),
@@ -600,6 +606,13 @@ impl Trip {
         if self.real_time_override().is_some() {
             return full.min(1.0);
         }
+        if self.scale_reminder_hold() {
+            // And from an open scale's last reminder to its gore: at full
+            // compression the fixed half mile went by in three real seconds,
+            // the bypass charge landing before "Signal for the scale exit"
+            // had finished (tester log, 2026-10-07).
+            return full.min(1.0);
+        }
         if self.exit_approach_release_s > 0.0 {
             // Coming back up to pace after an approach, not snapping to it.
             let real = full.min(1.0);
@@ -660,6 +673,14 @@ impl Trip {
             return Some("signalled exit");
         }
         None
+    }
+
+    /// Whether an open scale's reminder is holding the clock to real time.
+    pub fn scale_reminder_hold(&self) -> bool {
+        !self.on_ramp
+            && self
+                .scale_reminder_hold_mi
+                .is_some_and(|scale_mi| self.position_mi < scale_mi)
     }
 
     pub fn imperial(&self) -> bool {

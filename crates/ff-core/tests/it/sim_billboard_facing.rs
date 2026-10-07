@@ -384,3 +384,34 @@ fn test_the_keys_hear_their_sights_but_carry_no_billboards() {
         assert!(!heard.spoken.starts_with("Billboard"), "{}", heard.spoken);
     }
 }
+
+#[test]
+fn test_a_placed_sign_ends_in_one_period_not_two() {
+    // Heard on the agent drive to Uvalde (2026-10-06): the Gruene Hall sign's
+    // copy already ends in a sentence, and placing it added a second period,
+    // which a screen reader can voice as "dot dot".
+    for cities in [
+        ["san_antonio_tx_us", "austin_tx_us"],
+        ["austin_tx_us", "san_antonio_tx_us"],
+    ] {
+        let trip = trip_through(&cities);
+        assert!(
+            trip.landmarks
+                .iter()
+                .any(|c| c.spoken.contains("Gruene Hall")),
+            "{cities:?}: no Gruene Hall sign"
+        );
+        for callout in &trip.landmarks {
+            assert!(
+                !callout.spoken.ends_with(".."),
+                "{cities:?}: {}",
+                callout.spoken
+            );
+            assert!(
+                callout.spoken.ends_with(['.', '!', '?']),
+                "{cities:?}: {}",
+                callout.spoken
+            );
+        }
+    }
+}

@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Sitting through a training course now tires you.** A day-long course no longer wipes fatigue to zero.
+
+- **The last weigh station warning names its scale and leaves time to take the exit in every driving mode.** Closed scales say so.
+
+- **Driving into Memphis from St. Louis no longer passes a weigh station that is not there.** The West Memphis scale is westbound I-40 only.
+
+- **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now says it waits until you stop.
+
+## 1.9.3 - 2026-10-06
+
 ### Added
 
 - **LWorks Radio is on the dial.** Upbeat hits from the nineties and two thousands, with an eighties lunch hour, wherever you drive.
@@ -10,7 +22,9 @@
 
 - **The load you sleep for after an hours warning stays on the dispatch board.** It used to vanish when the rest ran past midnight.
 
-- **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now says it waits until you stop.
+- **On a three-lane road, a hazard call names the lane you can move into.** From the right lane it now says middle lane open, matching the lane change.
+
+- **Roadside billboards end with a single period.** Some used to end with two, which a screen reader could read as dot dot.
 
 ## 1.9.2 - 2026-10-05
 
