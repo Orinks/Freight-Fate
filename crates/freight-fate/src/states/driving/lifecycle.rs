@@ -187,6 +187,7 @@ impl DrivingState {
         }
         self.entered_once = true;
         self.log_assist_configuration(ctx);
+        self.log_pace_configuration(ctx);
         self.refresh_exit_hint(ctx);
         ctx.clear_music_rotation();
         ctx.audio.stop_music_with(800);

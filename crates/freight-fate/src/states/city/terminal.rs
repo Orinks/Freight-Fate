@@ -60,7 +60,8 @@ pub struct CityMenuState {
     backup_watch: Option<(String, i64, f64)>,
 }
 
-fn local_zone(ctx: &GameContext) -> TimeZone {
+/// The wall-clock zone of the city the driver is standing in.
+pub(crate) fn local_zone(ctx: &GameContext) -> TimeZone {
     ctx.world
         .city(&profile(ctx).current_city)
         .map(|city| city_zone(city))

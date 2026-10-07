@@ -196,27 +196,91 @@ pub fn fatigue_rate_per_min(night: bool) -> f64 {
 /// Fatigue points gained while awake for `minutes` of game time starting at
 /// `start_game_hours`. Uses [`fatigue_rate_per_min`] with the same day/night
 /// clock as driving, so sitting awake off duty matches the road model.
+///
+/// Pass a local wall-clock hour (`timezones::to_local`) so day and night
+/// follow the sun where the driver actually is.
 pub fn awake_fatigue_gain(start_game_hours: f64, minutes: f64) -> f64 {
-    let minutes = if minutes.is_finite() {
-        minutes.max(0.0)
-    } else {
-        0.0
-    };
+    awake_fatigue_gain_scaled(start_game_hours, minutes, |_| 1.0)
+}
+
+/// [`awake_fatigue_gain`] with each minute's rate multiplied by
+/// `scale(hours_since_start)`, for factors that change part way through the
+/// stretch (a coffee buff wearing off, say).
+pub fn awake_fatigue_gain_scaled(
+    start_game_hours: f64,
+    minutes: f64,
+    scale: impl Fn(f64) -> f64,
+) -> f64 {
+    let minutes = finite_minutes(minutes);
     if minutes <= 0.0 {
         return 0.0;
     }
     let whole = minutes.floor() as i64;
     let mut gain = 0.0;
     for i in 0..whole {
-        let hour = start_game_hours + (i as f64) / 60.0;
-        gain += fatigue_rate_per_min(is_night(hour));
+        let offset = (i as f64) / 60.0;
+        gain += fatigue_rate_per_min(is_night(start_game_hours + offset)) * scale(offset);
     }
     let frac = minutes - whole as f64;
     if frac > 0.0 {
-        let hour = start_game_hours + (whole as f64) / 60.0;
-        gain += fatigue_rate_per_min(is_night(hour)) * frac;
+        let offset = (whole as f64) / 60.0;
+        gain += fatigue_rate_per_min(is_night(start_game_hours + offset)) * scale(offset) * frac;
     }
     gain
+}
+
+fn finite_minutes(minutes: f64) -> f64 {
+    if minutes.is_finite() {
+        minutes.max(0.0)
+    } else {
+        0.0
+    }
+}
+
+/// Share of the continuous-driving fatigue rate a classroom day costs.
+///
+/// ASSUMED tuning, not a measured figure. [`fatigue_rate_per_min`] is the
+/// rate for driving, which carries a vigilance load a seat in a classroom
+/// does not; half that rate puts an 8-hour day class taken at 10 near 38.
+pub const CLASSROOM_FATIGUE_FACTOR: f64 = 0.5;
+
+/// Longest single class day, in minutes. Schools teach in day-length blocks.
+pub const COURSE_CLASS_DAY_MAX_MIN: f64 = 8.0 * 60.0;
+
+/// A course this long or longer (minutes) runs as several class days with a
+/// night's sleep between them, not one unbroken stretch awake.
+pub const COURSE_MULTI_DAY_MIN: f64 = 10.0 * 60.0;
+
+/// Fatigue when a course of `minutes` starting at local hour
+/// `start_local_hours` ends, given `arrival` fatigue.
+///
+/// A short course adds classroom-rate awake fatigue to what the driver
+/// walked in with. A course of [`COURSE_MULTI_DAY_MIN`] or more is several
+/// class days with sleep between, so only the last class day counts -- at
+/// most [`COURSE_CLASS_DAY_MAX_MIN`] over the final span of the course --
+/// and it replaces the arrival fatigue rather than adding to it.
+///
+/// `scale(hours_since_course_start)` multiplies each minute's rate on top
+/// of the classroom factor: food and drink buffs, the driving mode's
+/// fatigue setting.
+pub fn course_fatigue(
+    arrival: f64,
+    start_local_hours: f64,
+    minutes: f64,
+    scale: impl Fn(f64) -> f64,
+) -> f64 {
+    let minutes = finite_minutes(minutes);
+    let classroom = |h: f64| CLASSROOM_FATIGUE_FACTOR * scale(h);
+    if minutes >= COURSE_MULTI_DAY_MIN {
+        let class_min = minutes.min(COURSE_CLASS_DAY_MAX_MIN);
+        let offset_h = (minutes - class_min) / 60.0;
+        let gain = awake_fatigue_gain_scaled(start_local_hours + offset_h, class_min, |h| {
+            classroom(offset_h + h)
+        });
+        gain.clamp(0.0, 100.0)
+    } else {
+        (arrival + awake_fatigue_gain_scaled(start_local_hours, minutes, classroom)).min(100.0)
+    }
 }
 
 /// Scale factor for hazard reaction windows: 1.0 fresh, 0.6 exhausted.

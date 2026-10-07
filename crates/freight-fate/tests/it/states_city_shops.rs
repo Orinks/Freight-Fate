@@ -875,58 +875,127 @@ fn endorsement_courses_price_each_unearned_endorsement() {
     );
 }
 
-#[test]
-fn course_hours_add_awake_fatigue_and_long_courses_do_not_wipe_it() {
-    // GitHub #314: courses booked off-duty HOS time but never added awake
-    // fatigue, and a 10h+ course zeroed fatigue as if class were sleep.
+/// Book the flatbed course (8 h) in `city` at absolute `game_hours` with
+/// `fatigue` on arrival. Returns the fatigue after and the completion line.
+fn take_flatbed_course(
+    city: &str,
+    game_hours: f64,
+    fatigue: f64,
+    setup: impl FnOnce(&mut TestApp),
+) -> (f64, String) {
     let mut app = TestApp::new();
-    career(&mut app, "Course Fatigue", "Chicago");
+    career(&mut app, "Course Fatigue", city);
+    app.ctx.settings.time_scale = 20.0; // Standard pressure unless setup says otherwise
     {
         let p = profile_mut(&mut app);
         p.set_money(50_000.0);
-        p.fatigue = 10.0;
-        p.game_hours = 8.0; // daytime stretch for a clean 8 h day-rate gain
+        p.fatigue = fatigue;
+        p.game_hours = game_hours;
     }
+    setup(&mut app);
     app.push_state(EndorsementCourseState::new());
     select::<EndorsementCourseState>(&mut app, "Flatbed securement certificate course:");
-    let after_8 = profile(&app).fatigue;
-    let expected_8 = (10.0 + hos::awake_fatigue_gain(8.0, 8.0 * 60.0)).min(100.0);
-    assert!(
-        (after_8 - expected_8).abs() < 1e-9,
-        "8 h course: got {after_8}, want {expected_8}"
-    );
-    assert!(
-        after_8 > 10.0,
-        "8 h course must raise fatigue, got {after_8}"
-    );
+    let line = app
+        .speech()
+        .lines()
+        .into_iter()
+        .rfind(|l| l.starts_with("Course complete"))
+        .expect("a completion line");
+    (profile(&app).fatigue, line)
+}
 
-    // LCV is the 24 h course. Keep the HOS off-duty treatment; fatigue must
-    // rise (and clamp), never reset to zero.
+#[test]
+fn course_fatigue_runs_at_the_classroom_rate_day_and_night() {
+    // GitHub #314: a course is awake time, not sleep, but a classroom has no
+    // driving vigilance load, so it runs at half the driving rate. Chicago
+    // is Central: 8.0 Eastern is 7 AM local, a clean 8 h of day.
+    let (day, line) = take_flatbed_course("Chicago", 8.0, 10.0, |_| {});
+    approx(day, 10.0 + 0.0575 * 480.0); // 37.6
+    approx(
+        day,
+        10.0 + hos::CLASSROOM_FATIGUE_FACTOR * hos::awake_fatigue_gain(7.0, 8.0 * 60.0),
+    );
+    assert!(!line.contains("drowsy"), "{line}");
+
+    // 22.0 Eastern is 9 PM Central: 9 PM to 5 AM is all night.
+    let (night, line) = take_flatbed_course("Chicago", 22.0, 10.0, |_| {});
+    approx(night, 10.0 + 0.085 * 480.0); // 50.8
+    assert!(!line.contains("drowsy"), "{line}");
+}
+
+#[test]
+fn multi_day_course_counts_only_the_last_class_day() {
+    // LCV is the 24 h course: class days with sleep between, so the driver
+    // leaves with the last class day's fatigue, whatever they walked in
+    // with. HOS still books it off duty.
+    let mut app = TestApp::new();
+    career(&mut app, "Course Fatigue", "Chicago");
+    app.ctx.settings.time_scale = 20.0;
     {
         let p = profile_mut(&mut app);
-        p.fatigue = 40.0;
-        p.game_hours = 8.0;
+        p.fatigue = 95.0;
+        p.game_hours = 8.0; // 7 AM Central; the last class day is 11 PM to 7 AM
         p.career.xp = LEVEL_XP[19]; // level 20
         p.career
             .purchased_endorsements
             .push("doubles_triples".to_string());
         p.set_money(50_000.0);
     }
-    // Rebuild the menu against the new eligibility.
-    app.pop_state();
     app.push_state(EndorsementCourseState::new());
     select::<EndorsementCourseState>(&mut app, "Lcv certificate course:");
     let after_24 = profile(&app).fatigue;
-    let expected_24 = (40.0 + hos::awake_fatigue_gain(8.0, 24.0 * 60.0)).min(100.0);
-    assert!(
-        (after_24 - expected_24).abs() < 1e-9,
-        "24 h course: got {after_24}, want {expected_24}"
+    // Six night hours (0.085 x 360 = 30.6) and two dawn hours (0.0575 x 120 = 6.9).
+    approx(after_24, 37.5);
+    approx(
+        after_24,
+        hos::course_fatigue(0.0, 7.0, 24.0 * 60.0, |_| 1.0),
     );
-    assert_ne!(after_24, 0.0, "24 h course must not wipe fatigue to zero");
+    assert_ne!(after_24, 0.0, "a course must not wipe fatigue to zero");
+}
+
+#[test]
+fn course_day_and_night_follow_the_western_city_clock() {
+    // 5.0 Eastern is dawn (day rate) on the Eastern clock, but 2 AM in Los
+    // Angeles: three night hours before the Pacific dawn.
+    let (west, _) = take_flatbed_course("Los Angeles", 5.0, 10.0, |_| {});
+    approx(west, 10.0 + 0.085 * 180.0 + 0.0575 * 300.0); // 42.55
+    let eastern_clock = 10.0 + 0.0575 * 480.0; // what the Eastern clock gave: 37.6
+    assert!(west > eastern_clock + 4.0, "{west}");
+}
+
+#[test]
+fn course_fatigue_honors_food_buffs_and_relaxed_mode() {
+    // A fatigue buff at half rate that wears off four hours into class, and
+    // Relaxed pressure (0.8 of the fatigue rate) on top.
+    let (after, _) = take_flatbed_course("Chicago", 8.0, 10.0, |app| {
+        app.ctx.settings.time_scale = 10.0;
+        profile_mut(app).add_timed_buff(serde_json::json!({
+            "group": "fatigue", "rate": 0.5, "expires_h": 12.0
+        }));
+    });
+    approx(after, 10.0 + 0.8 * (0.0575 * 240.0 * 0.5 + 0.0575 * 240.0)); // 26.56
+}
+
+#[test]
+fn course_completion_warns_when_it_leaves_you_drowsy() {
+    // 25 + 40.8 night = 65.8, past the drowsy threshold.
+    let (drowsy, line) = take_flatbed_course("Chicago", 22.0, 25.0, |_| {});
+    assert!((hos::FATIGUE_DROWSY..hos::FATIGUE_SEVERE).contains(&drowsy));
     assert!(
-        after_24 > 40.0,
-        "24 h course must raise fatigue, got {after_24}"
+        line.ends_with("You're drowsy after the course. Sleep before you drive."),
+        "{line}"
     );
+    // 50 + 40.8 = 90.8, past severe.
+    let (severe, line) = take_flatbed_course("Chicago", 22.0, 50.0, |_| {});
+    assert!(severe >= hos::FATIGUE_SEVERE);
+    assert!(
+        line.ends_with("You're dangerously drowsy after the course. Sleep before you drive."),
+        "{line}"
+    );
+    // Just under: 19 + 40.8 = 59.8 stays quiet.
+    let (under, line) = take_flatbed_course("Chicago", 22.0, 19.0, |_| {});
+    assert!(under < hos::FATIGUE_DROWSY);
+    assert!(!line.contains("drowsy"), "{line}");
 }
 
 #[test]

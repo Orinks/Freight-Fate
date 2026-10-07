@@ -653,6 +653,7 @@ impl DrivingState {
             departure_merge_road_mph: 0.0,
             departure_cruise_handoff_mph: None,
             departure_merge_recovery: false,
+            clock_pacing: Default::default(),
             lane_count_seen: None,
             lane_before_narrow: None,
             merge_taper_warned: None,
