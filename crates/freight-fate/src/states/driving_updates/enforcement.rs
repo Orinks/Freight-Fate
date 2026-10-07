@@ -311,13 +311,17 @@ impl DrivingState {
             let key = self.weigh_station_key(&stop);
             if ahead > 0.0
                 && ahead <= self.scale_notice_lookahead_mi(ctx)
-                && key != self.weigh_station_notice_key
+                && !self.weigh_station_noticed.contains(&key)
                 && self.scale_is_open(&stop)
             {
                 // Only an OPEN scale is spoken. A closed one gets the thinner,
                 // drier approach bed and nothing said -- the swell says
                 // "scale", and the absence of speech is what says "closed".
-                self.weigh_station_notice_key = key.clone();
+                // A set, not one key: two open scales inside the lookahead
+                // used to take turns overwriting a single key, each frame
+                // re-announcing the other, and the nearer one's reminder
+                // never fired because its key was never the one held.
+                self.weigh_station_noticed.insert(key.clone());
                 // Its own earcon, not the shared inspection cue: testers
                 // could not tell "the scale is ahead" apart from "you are
                 // being looked at for something else" (owner ruling,
@@ -561,8 +565,10 @@ impl DrivingState {
             // rescued -- but only while the scale is still ahead to pull
             // in to.
             self.refresh_live_facts();
+            // Named, like the notice it follows: with two scales near, "the
+            // scale" did not say which one the light was for.
             ctx.say_event_with(
-                "Red light. Pull in to the scale.",
+                format!("Red light. Pull in to {}.", stop.name),
                 SayEvent::queued()
                     .priority(EventPriority::Route)
                     .category(SpeechCategory::Navigation)

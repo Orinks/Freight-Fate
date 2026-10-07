@@ -394,12 +394,24 @@ impl RestStopState {
             );
         }
         if has("inspect") && !self.visit.inspected {
-            items.push(
+            // Only an open scale has anyone to check in with. A closed one
+            // used to offer the check-in all the same and answer it as an
+            // open one did, waving a tester "straight back onto the highway"
+            // six miles short of the open scale he had been warned about
+            // (log, 2026-10-07). The closed row says so instead.
+            let item = if d.scale_is_open(&self.stop) {
                 MenuItem::new("Check in at inspection station", |s: &mut Self, ctx| {
                     s.inspect(ctx)
                 })
-                .help("Records the inspection check-in."),
-            );
+                .help("Records the inspection check-in.")
+            } else {
+                MenuItem::new(
+                    format!("{} is closed", self.stop.spoken_name()),
+                    |s: &mut Self, ctx| s.inspect(ctx),
+                )
+                .help("Nobody is at the scale house. There is nothing to check in at.")
+            };
+            items.push(item);
         }
         items.push(
             MenuItem::new("Walk around the truck", |s: &mut Self, ctx| {

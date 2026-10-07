@@ -408,7 +408,7 @@ impl DrivingState {
             pull_over_run_s: 0.0,
             record_events: Vec::new(),
             fatigue_events: 0,
-            weigh_station_notice_key: String::new(),
+            weigh_station_noticed: HashSet::new(),
             weigh_station_reminder_key: String::new(),
             weigh_station_reminder_age_s: 0.0,
             scale_reannounce: None,

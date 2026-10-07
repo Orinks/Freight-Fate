@@ -104,7 +104,7 @@ impl DrivingState {
         if self.weigh_station_reminder_key == key {
             self.weigh_station_reminder_age_s >= SCALE_REMINDER_REAL_LEAD_S
         } else {
-            self.weigh_station_notice_key == key
+            self.weigh_station_noticed.contains(key)
         }
     }
 
@@ -129,7 +129,7 @@ impl DrivingState {
         if !(0.0 < ahead && ahead <= self.scale_reminder_mi()) {
             return;
         }
-        if key != self.weigh_station_notice_key || key == self.weigh_station_reminder_key {
+        if !self.weigh_station_noticed.contains(key) || key == self.weigh_station_reminder_key {
             return;
         }
         if self.trip.truck.speed_mph() <= WEIGH_STATION_BYPASS_MPH {
@@ -172,8 +172,12 @@ impl DrivingState {
         // adversarial battery heard the reminder replayed after the bypass
         // charge had already been written.
         let scale_mi = stop.at_mi;
+        // Named: with another scale anywhere near -- a closed one first, or
+        // a second open one inside the lookahead -- "Weigh station in half a
+        // mile" did not say which, and a tester checked in at the wrong one.
         let text = format!(
-            "Weigh station in {}. Signal for the scale exit.",
+            "{} in {}. Signal for the scale exit.",
+            stop.name,
             ctx.settings.short_distance_text(ahead)
         );
         self.refresh_live_facts();
@@ -201,24 +205,21 @@ impl DrivingState {
             .map(|_| here.unwrap_or_default().to_string());
     }
 
-    /// The announced open scale still ahead, or None.
+    /// The nearest announced open scale still ahead, or None.
     ///
-    /// Only the scale whose notice has been spoken: one inside its lookahead
+    /// Only a scale whose notice has been spoken: one inside its lookahead
     /// but not yet announced gets its full notice from the enforcement check,
     /// and repeating a line nobody heard the first time is not a reminder.
     pub fn announced_open_scale_ahead(&self) -> Option<(RoadStop, f64)> {
-        if self.weigh_station_notice_key.is_empty() {
-            return None;
-        }
         self.trip
             .stops
             .iter()
             .filter(|stop| stop.stop_type == "weigh_station")
-            .find(|stop| self.weigh_station_key(stop) == self.weigh_station_notice_key)
             .map(|stop| (stop.clone(), stop.at_mi - self.trip.position_mi))
             .filter(|(stop, ahead)| {
                 let key = self.weigh_station_key(stop);
                 *ahead > 0.0
+                    && self.weigh_station_noticed.contains(&key)
                     && self.scale_is_open(stop)
                     && !self.enforcement_events.contains(&key)
                     && self
@@ -227,6 +228,7 @@ impl DrivingState {
                         .map(String::as_str)
                         != Some("green")
             })
+            .min_by(|a, b| a.1.total_cmp(&b.1))
     }
 
     /// After a check-in, a stop or a pause: the open scale still ahead.

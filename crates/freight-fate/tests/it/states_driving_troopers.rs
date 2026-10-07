@@ -563,7 +563,7 @@ fn blow_past_a_scale(drive: &mut DrivingState) -> RoadStop {
     // Announced, reminded, and given the reminder's real seconds: a crossing
     // the driver was never warned about in time is not judged at all.
     let key = drive.weigh_station_key(&stop);
-    drive.weigh_station_notice_key = key.clone();
+    drive.weigh_station_noticed.insert(key.clone());
     drive.weigh_station_reminder_key = key;
     drive.weigh_station_reminder_age_s = SCALE_REMINDER_REAL_LEAD_S;
     stop

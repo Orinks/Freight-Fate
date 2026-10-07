@@ -151,7 +151,7 @@ pub fn scale_pull_over_stands_down_exit() -> Outcome {
     // out, the reminder more than its real seconds ago: the crossing is
     // the driver's to answer for.
     let key = rig.drive.weigh_station_key(&scale);
-    rig.drive.weigh_station_notice_key = key.clone();
+    rig.drive.weigh_station_noticed.insert(key.clone());
     rig.drive.weigh_station_reminder_key = key;
     rig.drive.weigh_station_reminder_age_s = SCALE_REMINDER_REAL_LEAD_S;
     rig.drive.enforcement_prev_mi = rig.drive.trip.position_mi;

@@ -340,7 +340,8 @@ pub struct DrivingState {
     // on a road the player has already left.
     pub record_events: Vec<String>,
     pub fatigue_events: i64, // run-off-road microsleeps this trip
-    pub weigh_station_notice_key: String,
+    // Every open scale whose notice has been spoken this trip, by key.
+    pub weigh_station_noticed: HashSet<String>,
     // The half-mile "slow for the scale" nudge, latched separately so it
     // speaks once per announced scale and never re-fires on a re-approach.
     pub weigh_station_reminder_key: String,

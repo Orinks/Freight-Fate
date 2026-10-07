@@ -203,7 +203,7 @@ fn a_crossing_is_judged_only_after_the_driver_was_told_in_time() {
         let (_closed, open) = closed_then_open(&mut rig.drive);
         let key = rig.drive.weigh_station_key(&open);
         if noticed {
-            rig.drive.weigh_station_notice_key = key.clone();
+            rig.drive.weigh_station_noticed.insert(key.clone());
         }
         if reminded {
             rig.drive.weigh_station_reminder_key = key.clone();
@@ -233,7 +233,7 @@ fn a_ramp_missed_after_a_late_reminder_is_not_judged_but_one_armed_early_is() {
         let mut rig = ten_times_rig();
         let (_closed, open) = closed_then_open(&mut rig.drive);
         let key = rig.drive.weigh_station_key(&open);
-        rig.drive.weigh_station_notice_key = key.clone();
+        rig.drive.weigh_station_noticed.insert(key.clone());
         if reminded {
             rig.drive.weigh_station_reminder_key = key.clone();
             rig.drive.weigh_station_reminder_age_s = 3.0;
@@ -282,7 +282,8 @@ fn checking_in_at_a_closed_scale_says_closed_and_names_the_open_one_still_ahead(
     let mut rig = ten_times_rig();
     let (closed, open) = closed_then_open(&mut rig.drive);
     // The open scale was announced miles back.
-    rig.drive.weigh_station_notice_key = rig.drive.weigh_station_key(&open);
+    let open_key = rig.drive.weigh_station_key(&open);
+    rig.drive.weigh_station_noticed.insert(open_key);
     rig.drive.trip.position_mi = closed.at_mi;
     rig.drive.trip.truck.velocity_mps = 0.0;
     rig.drive.trip.truck.set_parking_brake();
@@ -302,12 +303,21 @@ fn checking_in_at_a_closed_scale_says_closed_and_names_the_open_one_still_ahead(
         }
         rig.app.ctx.push_state_with(state, false);
         rig.app.ctx.run_deferred();
-        assert!(rig.select_menu_containing("Check in at inspection station"));
+        // Nobody to check in with: no check-in row, a row that says closed.
         assert!(
             !rig.menu_labels()
                 .iter()
                 .any(|row| row.contains("Check in at inspection station")),
-            "a done check-in leaves the menu"
+            "{:?}",
+            rig.menu_labels()
+        );
+        let closed_row = format!("{CLOSED_NAME} is closed");
+        assert!(rig.select_menu_containing(&closed_row));
+        assert!(
+            !rig.menu_labels()
+                .iter()
+                .any(|row| row.contains(&closed_row)),
+            "heard once, the closed row leaves the menu"
         );
         assert!(rig.select_menu_containing("Back to the road"));
     });
@@ -352,7 +362,8 @@ fn a_pause_with_no_open_scale_announced_adds_nothing() {
     assert_eq!(rig.said("still ahead, open"), 0, "{:?}", rig.transcript());
 
     // Past the scale, nothing to re-announce either.
-    rig.drive.weigh_station_notice_key = rig.drive.weigh_station_key(&open);
+    let open_key = rig.drive.weigh_station_key(&open);
+    rig.drive.weigh_station_noticed.insert(open_key);
     rig.drive.trip.position_mi = open.at_mi + 0.2;
     pause_and_resume(&mut rig);
     rig.step(2, DT, None);
@@ -364,7 +375,7 @@ fn a_pause_after_the_reminder_brings_the_instruction_back() {
     let mut rig = ten_times_rig();
     let (_closed, open) = closed_then_open(&mut rig.drive);
     let key = rig.drive.weigh_station_key(&open);
-    rig.drive.weigh_station_notice_key = key.clone();
+    rig.drive.weigh_station_noticed.insert(key.clone());
     rig.drive.weigh_station_reminder_key = key;
     rig.drive.trip.position_mi = open.at_mi - 0.5;
     rig.drive.trip.truck.velocity_mps = mph_to_mps(61.0);
@@ -441,7 +452,7 @@ fn a_held_brake_key_does_not_read_the_stop_screen_row_over_and_over() {
     drive.trip.stops = vec![open.clone()];
     drive.trip.posts = vec![open_post(&open)];
     let key = drive.weigh_station_key(&open);
-    drive.weigh_station_notice_key = key.clone();
+    drive.weigh_station_noticed.insert(key.clone());
     drive.weigh_station_reminder_key = key;
     drive.weigh_station_reminder_age_s = SCALE_REMINDER_REAL_LEAD_S;
     drive.trip.position_mi = 10.1;
