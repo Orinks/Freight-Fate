@@ -1,13 +1,80 @@
 # ruff: noqa: F401,F403,F405,F821,I001
 from __future__ import annotations
 
+import hashlib
+import json
+import math
+from collections.abc import Sequence
+from pathlib import Path
+
 import leg_geometry as lg
+import reroute_leg
+import straw_curve_sample as scs
 from build_interchanges_base import *
 
 
 MAXSPEED_HIGHWAY_CLASSES = ("motorway", "trunk", "primary", "secondary")
 MAXSPEED_CORRIDOR_M = 250.0  # a maxspeed way must snap this close to a leg
 MAXSPEED_SAMPLE_STRIDE_MI = 5.0  # profile resolution along the leg
+MAXSPEED_WAY_MAX_GAP_MI = 0.25
+CANADIAN_MAXSPEED_REF_CODES = frozenset(
+    {"AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YK", "YT"}
+)
+US_MAXSPEED_REF_CODES = frozenset(
+    {
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY",
+        "DC",
+    }
+)
 # The maxspeed index spans every route in the country, so snapping all of it to
 # each leg is quadratic. A coarse lat/lon grid buckets way points (~5.5km cells)
 # so a leg only snaps ways in the cells its geometry passes through. Way points
@@ -17,17 +84,38 @@ _MAXSPEED_GRID_DEG = 0.05
 _MAXSPEED_THIN_DEG = 0.001
 # A grid point: lat, lon, mph, hgv, and the way's route-number digits (so the
 # per-leg shield match can be computed against whichever leg is being baked).
-MaxspeedPoint = tuple[float, float, float, bool, str]
+MaxspeedPoint = tuple[float, float, float, bool, str, int]
 MaxspeedGrid = dict[tuple[int, int], list[MaxspeedPoint]]
-MAXSPEED_INDEX_CACHE_VERSION = 1
+MAXSPEED_INDEX_CACHE_VERSION = 4
 OSM_REGION_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
+MAXSPEED_VALHALLA_GEOMETRY_CACHE = OSM_REGION_CACHE_DIR / "maxspeed-valhalla-geometry.json"
+MAXSPEED_VALHALLA_GEOMETRY_CACHE_VERSION = 1
+VALHALLA_GEOMETRY_SOURCE = "public Valhalla truck route geometry through the stored route_points"
+CANADIAN_GEOFABRIK_SLUGS = (
+    "alberta",
+    "british-columbia",
+    "manitoba",
+    "new-brunswick",
+    "newfoundland-and-labrador",
+    "northwest-territories",
+    "nova-scotia",
+    "nunavut",
+    "ontario",
+    "prince-edward-island",
+    "quebec",
+    "saskatchewan",
+    "yukon",
+)
 
 
-def _maxspeed_source(geometry_source: str) -> str:
+def _maxspeed_source(
+    geometry_source: str,
+    accessed_date: str = ACCESSED_DATE,
+) -> str:
     return (
         "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway "
         "ways in a local Geofabrik extract; route matching uses "
-        f"{geometry_source}; accessed {ACCESSED_DATE}; maxspeed:hgv is preferred "
+        f"{geometry_source}; accessed {accessed_date}; maxspeed:hgv is preferred "
         "where tagged. https://www.openstreetmap.org/"
     )
 
@@ -42,6 +130,7 @@ ALASKA_UNPOSTED_SPEED = (
 
 @dataclass(frozen=True, slots=True)
 class LocalMaxspeedWay:
+    osm_id: int
     coords: tuple[tuple[float, float], ...]
     mph: float
     hgv: bool
@@ -50,6 +139,7 @@ class LocalMaxspeedWay:
 
 @dataclass(frozen=True, slots=True)
 class _MaxspeedWayRaw:
+    osm_id: int
     node_ids: tuple[int, ...]
     mph: float
     hgv: bool
@@ -59,7 +149,7 @@ class _MaxspeedWayRaw:
 _PARSE_OSM_MAXSPEED = None
 
 
-def _parse_osm_maxspeed(raw: Any) -> float | None:
+def _parse_osm_maxspeed(raw: Any, *, default_kmh: bool = False) -> float | None:
     """The canonical maxspeed normalizer, borrowed from enrich_routes.py."""
     global _PARSE_OSM_MAXSPEED
     if _PARSE_OSM_MAXSPEED is None:
@@ -71,7 +161,30 @@ def _parse_osm_maxspeed(raw: Any) -> float | None:
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         _PARSE_OSM_MAXSPEED = module.parse_osm_maxspeed
-    return _PARSE_OSM_MAXSPEED(raw)
+    return _PARSE_OSM_MAXSPEED(raw, default_kmh=default_kmh)
+
+
+def _is_canadian_extract(pbf_path: Path) -> bool:
+    return pbf_path.name.startswith(tuple(f"{slug}-" for slug in CANADIAN_GEOFABRIK_SLUGS))
+
+
+def _bare_maxspeed_is_kmh(tags: dict[str, str], extract_is_canadian: bool) -> bool:
+    for key in ("maxspeed:type", "source:maxspeed"):
+        jurisdiction = tags.get(key, "").strip().upper()
+        if jurisdiction.startswith("CA:"):
+            return True
+        if jurisdiction.startswith("US:"):
+            return False
+
+    ref = tags.get("ref", "").split(";", 1)[0].split()
+    if ref:
+        code = ref[0].upper()
+        if code in CANADIAN_MAXSPEED_REF_CODES:
+            return True
+        if code in US_MAXSPEED_REF_CODES:
+            return False
+
+    return extract_is_canadian
 
 
 def _route_digits(highway: str) -> str:
@@ -134,6 +247,7 @@ def _pbf_for_states(states: set[str], region_dir: Path) -> list[Path]:
 def _build_maxspeed_index_from_pbf(
     pbf_path: Path,
     bounds: list[LocalBounds],
+    default_kmh: bool,
     label: str = "1/1",
 ) -> list[LocalMaxspeedWay]:
     """Mainline highway ways carrying a usable ``maxspeed`` near the routes.
@@ -170,8 +284,13 @@ def _build_maxspeed_index_from_pbf(
             tags = {str(k): str(v) for k, v in way.tags}
             if tags.get("highway") not in MAXSPEED_HIGHWAY_CLASSES:
                 return
-            hgv_mph = _parse_osm_maxspeed(tags.get("maxspeed:hgv"))
-            mph = hgv_mph if hgv_mph is not None else _parse_osm_maxspeed(tags.get("maxspeed"))
+            way_default_kmh = _bare_maxspeed_is_kmh(tags, default_kmh)
+            hgv_mph = _parse_osm_maxspeed(tags.get("maxspeed:hgv"), default_kmh=way_default_kmh)
+            mph = (
+                hgv_mph
+                if hgv_mph is not None
+                else _parse_osm_maxspeed(tags.get("maxspeed"), default_kmh=way_default_kmh)
+            )
             if mph is None:
                 return
             node_ids = [int(ref.ref) for ref in way.nodes if getattr(ref, "ref", None) is not None]
@@ -179,6 +298,7 @@ def _build_maxspeed_index_from_pbf(
                 return
             self.ways.append(
                 _MaxspeedWayRaw(
+                    osm_id=int(way.id),
                     node_ids=tuple(node_ids),
                     mph=mph,
                     hgv=hgv_mph is not None,
@@ -240,7 +360,15 @@ def _build_maxspeed_index_from_pbf(
             if node_id in node_handler.coords
         )
         if coords:
-            ways.append(LocalMaxspeedWay(coords=coords, mph=raw.mph, hgv=raw.hgv, ref=raw.ref))
+            ways.append(
+                LocalMaxspeedWay(
+                    osm_id=raw.osm_id,
+                    coords=coords,
+                    mph=raw.mph,
+                    hgv=raw.hgv,
+                    ref=raw.ref,
+                )
+            )
     print(f"    retained {len(ways):,} route-corridor maxspeed ways from {label}", flush=True)
     return ways
 
@@ -257,11 +385,18 @@ def _maxspeed_index_cache_path(pbf_paths: list[Path]) -> Path:
 
 
 def _maxspeed_way_to_json(way: LocalMaxspeedWay) -> dict[str, Any]:
-    return {"coords": [list(c) for c in way.coords], "mph": way.mph, "hgv": way.hgv, "ref": way.ref}
+    return {
+        "osm_id": way.osm_id,
+        "coords": [list(c) for c in way.coords],
+        "mph": way.mph,
+        "hgv": way.hgv,
+        "ref": way.ref,
+    }
 
 
 def _maxspeed_way_from_json(raw: dict[str, Any]) -> LocalMaxspeedWay:
     return LocalMaxspeedWay(
+        osm_id=int(raw["osm_id"]),
         coords=tuple((float(c[0]), float(c[1])) for c in raw.get("coords", ())),
         mph=float(raw["mph"]),
         hgv=bool(raw.get("hgv", False)),
@@ -292,9 +427,16 @@ def load_or_build_maxspeed_index(
                 flush=True,
             )
             return ways
-    ways: list[LocalMaxspeedWay] = []
+    ways_by_id: dict[int, LocalMaxspeedWay] = {}
     for i, pbf_path in enumerate(pbf_paths, start=1):
-        ways.extend(_build_maxspeed_index_from_pbf(pbf_path, bounds, label=f"{i}/{len(pbf_paths)}"))
+        for way in _build_maxspeed_index_from_pbf(
+            pbf_path,
+            bounds,
+            default_kmh=_is_canadian_extract(pbf_path),
+            label=f"{i}/{len(pbf_paths)}",
+        ):
+            ways_by_id.setdefault(way.osm_id, way)
+    ways = list(ways_by_id.values())
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     cache_path.write_text(
         json.dumps(
@@ -316,6 +458,27 @@ def _maxspeed_cell(lat: float, lon: float) -> tuple[int, int]:
     return (int(math.floor(lat / _MAXSPEED_GRID_DEG)), int(math.floor(lon / _MAXSPEED_GRID_DEG)))
 
 
+def _densify_way_coords(
+    coords: tuple[tuple[float, float], ...],
+) -> tuple[tuple[float, float], ...]:
+    if len(coords) < 2:
+        return coords
+
+    dense = [coords[0]]
+    for (start_lat, start_lon), (end_lat, end_lon) in zip(coords, coords[1:], strict=False):
+        distance = _haversine_mi(start_lat, start_lon, end_lat, end_lon)
+        segments = max(1, math.ceil(distance / MAXSPEED_WAY_MAX_GAP_MI))
+        for segment in range(1, segments + 1):
+            fraction = segment / segments
+            dense.append(
+                (
+                    start_lat + (end_lat - start_lat) * fraction,
+                    start_lon + (end_lon - start_lon) * fraction,
+                )
+            )
+    return tuple(dense)
+
+
 def build_maxspeed_grid(ways: list[LocalMaxspeedWay]) -> MaxspeedGrid:
     """Bucket way points into a coarse lat/lon grid for fast per-leg lookup.
 
@@ -326,13 +489,13 @@ def build_maxspeed_grid(ways: list[LocalMaxspeedWay]) -> MaxspeedGrid:
     for way in ways:
         ref_digits = _route_digits(way.ref)
         last: tuple[int, int] | None = None
-        for lat, lon in way.coords:
+        for lat, lon in _densify_way_coords(way.coords):
             thin = (round(lat / _MAXSPEED_THIN_DEG), round(lon / _MAXSPEED_THIN_DEG))
             if thin == last:
                 continue
             last = thin
             grid.setdefault(_maxspeed_cell(lat, lon), []).append(
-                (lat, lon, way.mph, way.hgv, ref_digits)
+                (lat, lon, way.mph, way.hgv, ref_digits, way.osm_id)
             )
     return grid
 
@@ -344,6 +507,9 @@ def assemble_maxspeed(
     highway: str,
     source: str = MAXSPEED_SOURCE,
     fallback: tuple[float, str] | None = None,
+    fallback_range: tuple[float, float] | None = None,
+    breaks: Sequence[float] = (),
+    matched_way_ids: set[int] | None = None,
 ) -> list[dict[str, Any]]:
     """Build a step-function speed profile for a leg from snapped maxspeed ways.
 
@@ -373,7 +539,7 @@ def assemble_maxspeed(
         candidates = grid.get(cell)
         if not candidates:
             continue
-        for lat, lon, mph, hgv, ref_digits in candidates:
+        for lat, lon, mph, hgv, ref_digits, osm_id in candidates:
             best_d = float("inf")
             best_cum = 0.0
             for ncell in neighbors(_maxspeed_cell(lat, lon)):
@@ -384,6 +550,8 @@ def assemble_maxspeed(
             if best_d * 1609.34 <= MAXSPEED_CORRIDOR_M:
                 on_shield = bool(shield) and ref_digits == shield
                 points.append((best_cum / total * leg_miles, mph, hgv, on_shield))
+                if matched_way_ids is not None:
+                    matched_way_ids.add(osm_id)
     if not points and fallback is None:
         return []
 
@@ -399,22 +567,46 @@ def assemble_maxspeed(
         return max(c[1] for c in chosen), bool(hgv_pool)
 
     half = MAXSPEED_SAMPLE_STRIDE_MI
+    break_miles = tuple(sorted({float(mile) for mile in breaks if 0.0 <= float(mile) <= leg_miles}))
+
+    def on_same_side(point_mile: float, sample_mile: float) -> bool:
+        return all(
+            (sample_mile < break_mile) == (point_mile < break_mile) for break_mile in break_miles
+        )
+
+    sample_miles = set(break_miles)
     picked: list[tuple[float, float, bool, str]] = []
     mile = 0.0
     while mile <= leg_miles + 1e-9:
-        window = [p for p in points if abs(p[0] - mile) <= half]
-        choice = choose(window)
+        sample_miles.add(mile)
+        mile += MAXSPEED_SAMPLE_STRIDE_MI
+
+    for mile in sorted(sample_miles):
+        if mile in break_miles:
+            window = [p for p in points if mile <= p[0] <= mile + half and on_same_side(p[0], mile)]
+            choice = choose(window)
+        else:
+            window = [p for p in points if abs(p[0] - mile) <= half and on_same_side(p[0], mile)]
+            choice = choose(window)
+
         if choice is not None:
             mph, hgv = choice
             point_source = source
-        elif fallback is not None:
+        elif fallback is not None and (
+            fallback_range is None
+            or (
+                fallback_range[0] <= mile
+                and (
+                    mile < fallback_range[1]
+                    or (fallback_range[1] == leg_miles and mile <= fallback_range[1])
+                )
+            )
+        ):
             mph, point_source = fallback
             hgv = False
         else:
-            mile += MAXSPEED_SAMPLE_STRIDE_MI
             continue
         picked.append((round(min(leg_miles, max(0.0, mile)), 1), mph, hgv, point_source))
-        mile += MAXSPEED_SAMPLE_STRIDE_MI
 
     # OSM tags a limit (especially maxspeed:hgv) on some ways but not their
     # neighbors, so a single stride can flip the value and then flip back. That
@@ -465,9 +657,113 @@ def _interpolated_geometry(
     return out
 
 
+def _valhalla_geometry_is_valid(
+    shape: list[list[float]],
+    route_points: list[dict[str, Any]],
+    leg_miles: float,
+) -> bool:
+    if len(shape) < 2 or leg_miles <= 0:
+        return False
+    cumulative_m = scs._cumulative_m(shape)
+    route_miles = cumulative_m[-1] / 1609.344
+    if route_miles <= 0 or abs(route_miles - leg_miles) / leg_miles > 0.03:
+        return False
+    for point in route_points:
+        distance = min(
+            _haversine_mi(float(point["lat"]), float(point["lon"]), float(lat), float(lon))
+            for lon, lat in shape
+        )
+        if distance > 0.5:
+            return False
+    return True
+
+
+def _rescale_valhalla_geometry(
+    shape: list[list[float]],
+    leg_miles: float,
+) -> list[tuple[float, float, float]]:
+    cumulative_m = scs._cumulative_m(shape)
+    raw_miles = cumulative_m[-1] / 1609.344
+    scale = (leg_miles / raw_miles) if leg_miles else 1.0
+    return [
+        (float(lat), float(lon), cumulative_m[index] / 1609.344 * scale)
+        for index, (lon, lat) in enumerate(shape)
+    ]
+
+
+def _valhalla_geometry_for_leg(
+    leg: dict[str, Any],
+    cache_path: Path | None = None,
+) -> list[tuple[float, float, float]] | None:
+    route_points = list(leg.get("corridor", {}).get("route_points", ()))
+    if len(route_points) < 2:
+        return None
+
+    cache_path = cache_path or MAXSPEED_VALHALLA_GEOMETRY_CACHE
+    digest = hashlib.sha256(
+        json.dumps(route_points, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    cache_key = f"{lg.leg_id_of(leg)}:{digest}"
+    cache: dict[str, Any] = {"version": MAXSPEED_VALHALLA_GEOMETRY_CACHE_VERSION, "geometries": {}}
+    try:
+        loaded = json.loads(cache_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        loaded = None
+    if (
+        isinstance(loaded, dict)
+        and loaded.get("version") == MAXSPEED_VALHALLA_GEOMETRY_CACHE_VERSION
+        and isinstance(loaded.get("geometries"), dict)
+    ):
+        cache = loaded
+
+    geometries = cache["geometries"]
+    raw_shape = geometries.get(cache_key)
+    shape: list[list[float]] | None = None
+    if isinstance(raw_shape, list):
+        try:
+            cached_shape = [[float(vertex[0]), float(vertex[1])] for vertex in raw_shape]
+        except (IndexError, TypeError, ValueError):
+            cached_shape = []
+        if _valhalla_geometry_is_valid(cached_shape, route_points, float(leg["miles"])):
+            shape = cached_shape
+
+    if shape is None:
+        joined: list[list[float]] = []
+        for start, end in zip(route_points, route_points[1:], strict=False):
+            fetched = reroute_leg.fetch_route(
+                {"lat": float(start["lat"]), "lon": float(start["lon"])},
+                {"lat": float(end["lat"]), "lon": float(end["lon"])},
+            )
+            if fetched is None:
+                return None
+            segment = [[float(vertex[0]), float(vertex[1])] for vertex in fetched[0]]
+            if len(segment) < 2:
+                return None
+            if joined and all(
+                math.isclose(left, right, abs_tol=1e-6)
+                for left, right in zip(joined[-1], segment[0], strict=True)
+            ):
+                segment = segment[1:]
+            joined.extend(segment)
+        if not _valhalla_geometry_is_valid(joined, route_points, float(leg["miles"])):
+            return None
+        shape = joined
+        geometries[cache_key] = shape
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text(
+            json.dumps(cache, sort_keys=True, separators=(",", ":")) + "\n",
+            encoding="utf-8",
+        )
+
+    return _rescale_valhalla_geometry(shape, float(leg["miles"]))
+
+
 def leg_corridor_geometry_with_source(
     leg: dict[str, Any],
     rate_limit: float,
+    *,
+    valhalla_geometry: bool = False,
+    valhalla_cache_path: Path | None = None,
 ) -> tuple[list[tuple[float, float, float]] | None, str]:
     """The dense corridor polyline a builder should match features against.
 
@@ -475,13 +771,18 @@ def leg_corridor_geometry_with_source(
     fidelity, and it is the only source that stays right after a reroute. A
     cached OSRM response is keyed to the route that was baked, so on a
     rerouted leg it is either a miss or -- worse -- a confident description of
-    the old road. Interpolating between stored route points is the last resort:
-    it cuts corners, and a feature the chord swings away from is not found.
+    the old road. Maxspeed baking can instead fetch a validated Valhalla truck
+    shape through the stored route points. Interpolation is the last resort: it
+    cuts corners, and a feature the chord swings away from is not found.
     """
     archived = lg.corridor_geometry(leg)
     if archived:
         return archived, "the checked-in corridor geometry archive"
     route_points = list(leg.get("corridor", {}).get("route_points", ()))
+    if valhalla_geometry:
+        valhalla = _valhalla_geometry_for_leg(leg, valhalla_cache_path)
+        if valhalla:
+            return valhalla, VALHALLA_GEOMETRY_SOURCE
     osrm = _osrm_geometry(route_points, rate_limit, cached_only=True)
     if osrm:
         return osrm, "cached OSRM route geometry"
@@ -502,28 +803,59 @@ def bake_maxspeed_for_leg(
     leg: dict[str, Any],
     grid: MaxspeedGrid,
     rate_limit: float,
+    accessed_date: str = ACCESSED_DATE,
+    valhalla_geometry: bool = False,
+    valhalla_cache_path: Path | None = None,
+    matched_way_ids: set[int] | None = None,
 ) -> list[dict[str, Any]]:
-    geom, geometry_source = leg_corridor_geometry_with_source(leg, rate_limit)
+    if valhalla_geometry:
+        geom, geometry_source = leg_corridor_geometry_with_source(
+            leg,
+            rate_limit,
+            valhalla_geometry=True,
+            valhalla_cache_path=valhalla_cache_path,
+        )
+    else:
+        geom, geometry_source = leg_corridor_geometry_with_source(leg, rate_limit)
     if not geom:
         return []
     state_miles = leg.get("corridor", {}).get("state_miles", ())
-    fallback = (
-        ALASKA_UNPOSTED_SPEED
-        if any(entry.get("state") == "Alaska" for entry in state_miles)
-        else None
-    )
+    state_crossings = leg.get("corridor", {}).get("state_crossings", ())
+    breaks = [
+        float(crossing["at_mi"])
+        for crossing in state_crossings
+        if crossing.get("at_mi") is not None
+    ]
+    if not breaks:
+        cumulative = 0.0
+        for entry in state_miles[:-1]:
+            cumulative += float(entry.get("miles", 0.0))
+            breaks.append(cumulative)
+    alaska_miles = 0.0
+    fallback_range = None
+    for entry in state_miles:
+        miles = float(entry.get("miles", 0.0))
+        if entry.get("state") == "Alaska":
+            start = fallback_range[0] if fallback_range is not None else alaska_miles
+            fallback_range = (start, alaska_miles + miles)
+        alaska_miles += miles
+    fallback = ALASKA_UNPOSTED_SPEED if fallback_range is not None else None
     return assemble_maxspeed(
         grid,
         geom,
         float(leg["miles"]),
         str(leg.get("highway", "")),
-        source=_maxspeed_source(geometry_source),
+        source=_maxspeed_source(geometry_source, accessed_date),
         fallback=fallback,
+        fallback_range=fallback_range,
+        breaks=breaks,
+        matched_way_ids=matched_way_ids,
     )
 
 
 def run_maxspeed(data: dict[str, Any], args: argparse.Namespace) -> int:
     legs = data["legs"]
+    use_valhalla_geometry = bool(getattr(args, "valhalla_geometry", False))
     if args.only:
         legs = select_only(legs, args.only)
 
@@ -580,15 +912,53 @@ def run_maxspeed(data: dict[str, Any], args: argparse.Namespace) -> int:
             f"[{processed}/{len(target_legs)}] {leg['from']}->{leg['to']} ({leg['highway']})",
             flush=True,
         )
+        chord_way_ids: set[int] | None = None
+        if use_valhalla_geometry and not lg.corridor_geometry(leg):
+            geometry, geometry_source = leg_corridor_geometry_with_source(
+                leg,
+                args.rate_limit,
+                valhalla_geometry=True,
+            )
+            if not geometry or geometry_source != VALHALLA_GEOMETRY_SOURCE:
+                raise SystemExit(
+                    f"Valhalla geometry fetch or validation failed for "
+                    f"{leg['from']}->{leg['to']}; selected fallback: {geometry_source}"
+                )
+            chord = _interpolated_geometry(list(leg.get("corridor", {}).get("route_points", ())))
+            chord_way_ids = set()
+            if chord:
+                assemble_maxspeed(
+                    grid,
+                    chord,
+                    float(leg["miles"]),
+                    str(leg.get("highway", "")),
+                    matched_way_ids=chord_way_ids,
+                )
+        matched_way_ids: set[int] = set()
         try:
-            profile = bake_maxspeed_for_leg(leg, grid, args.rate_limit)
+            profile = bake_maxspeed_for_leg(
+                leg,
+                grid,
+                args.rate_limit,
+                accessed_date=args.accessed_date,
+                valhalla_geometry=use_valhalla_geometry,
+                matched_way_ids=matched_way_ids,
+            )
         except Exception as exc:  # noqa: BLE001 - one bad leg must not abort the batch
             print(f"    skipped: {type(exc).__name__}: {exc}", flush=True)
             profile = []
         if profile:
             leg.setdefault("corridor", {})["speed_limits"] = profile
             baked += 1
-            print(f"    {len(profile)} speed-limit samples", flush=True)
+            if chord_way_ids is not None:
+                print(
+                    f"    {len(profile)} speed-limit samples; matched ways: "
+                    f"{len(chord_way_ids)} before (chord), "
+                    f"{len(matched_way_ids)} after (Valhalla)",
+                    flush=True,
+                )
+            else:
+                print(f"    {len(profile)} speed-limit samples", flush=True)
         else:
             print("    no on-corridor maxspeed; keeping the heuristic", flush=True)
         if args.write and baked and processed % 10 == 0:

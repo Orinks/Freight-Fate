@@ -1114,6 +1114,19 @@ def main(argv: list[str] | None = None) -> int:
         "unless --pbf is given.",
     )
     parser.add_argument(
+        "--valhalla-geometry",
+        action="store_true",
+        help=(
+            "Use public Valhalla truck geometry through stored route_points "
+            "for maxspeed legs without an archived shape."
+        ),
+    )
+    parser.add_argument(
+        "--accessed-date",
+        default=ACCESSED_DATE,
+        help="Date the OSM source extract was accessed (maxspeed provenance only).",
+    )
+    parser.add_argument(
         "--restrictions",
         action="store_true",
         help="Bake posted low-clearance (maxheight) and weight-limit "
@@ -1140,6 +1153,8 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     args = parser.parse_args(argv)
+    if args.valhalla_geometry and not args.maxspeed:
+        parser.error("--valhalla-geometry requires --maxspeed")
 
     data = load_world()
     if args.ramp_controls:

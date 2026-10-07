@@ -14,7 +14,7 @@ Original B1/B2 authoring branch: `feat/career-2.0`. Daytime public APIs first (O
 | --- | --- | --- |
 | `tok_ak_us` | — | Tok; Young's Chevron stand-in (Alaska Hwy) |
 | `fairbanks_ak_us` | — | Phase A terminus; Sourdough Fuel 1688 Airport Way stand-in |
-| `whitehorse_yt_ca` ↔ `tok_ak_us` | **387** | Border `poker_creek_beaver_creek`, through_freight, cabotage forbidden (both ways) |
+| `whitehorse_yt_ca` ↔ `tok_ak_us` | **387** | Border `alcan_beaver_creek`, through_freight, cabotage forbidden (both ways); Alcan checkpoint at mi 297.5 toward Tok, Beaver Creek at mi 107.8 toward Whitehorse; international line at mi 89.5 from Tok |
 | `tok_ak_us` ↔ `delta_junction_ak_us` | **108** | Alaska Highway, milepost-paid |
 | `delta_junction_ak_us` ↔ `fairbanks_ak_us` | **96** | Richardson Highway, milepost-paid |
 | `tok_ak_us` ↔ `fairbanks_ak_us` direct | Retired | Split at Delta Junction; 108 + 96 = 204 paid mi versus the former 202-mi composite. Keep the 2-mi residual; do not redistribute it. |
@@ -180,8 +180,11 @@ Geometry uses public Valhalla truck costing with loaded-semi options, and
 route points and Open-Meteo elevation samples follow that shape. Grade
 segments and overall terrain are derived from sampled elevations. Posted OSM
 speed limits are read where tagged, preferring `maxspeed:hgv`; unposted Alaska
-coverage assumes 55 mph under 13 AAC 02.275. This is not a blanket Dalton
-50-mph limit from the BLM guide. Atigun Pass samples peak at 4,904.9 feet
+coverage assumes 55 mph under 13 AAC 02.275, and that fallback is confined to
+the Alaska portion of cross-border legs. Bare Canadian OSM speeds are
+interpreted as km/h; the six Yukon and northern BC Alaska Highway legs now use
+posted profiles where tagged. This is not a blanket Dalton 50-mph limit from
+the BLM guide. Atigun Pass samples peak at 4,904.9 feet
 (Coldfoot-route mile 70.8 northbound and 168.2 southbound); a nearby audited
 grade reaches 13.98%. State miles are derived from paid miles.
 
@@ -250,10 +253,12 @@ Prefer `truck_parking` / `travel_center` types for public lots — **not** `comp
 ### Carried from Phase A
 
 1. US HOS through-freight clock (not Canadian law).
-2. CA truck caps unresearched on Hwy 15 / ALCAN CA segments.
+2. CA statutory truck caps unresearched on Hwy 15 / ALCAN segments; these are
+   distinct from the posted road-speed profiles.
 3. Blaine cross-border HGV refine still open.
 4. No CAD purse / FX.
-5. Border gameplay stub only (`border_crossing` data).
+5. Border gameplay stub only (`border_crossing` data); the checkpoints do not
+   yet create a playable stop.
 6. Stand-in markets on corridor pass-throughs.
 7. Soft location-type debt for public lots **resolved**: ALCAN public stops use `travel_center` / `truck_parking`; invented pass-through stand-ins may remain `company_yard`.
 

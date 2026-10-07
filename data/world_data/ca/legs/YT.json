@@ -155,13 +155,55 @@
             "miles": 307.0
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 318.7 mi; paid miles 319. Alaska Highway ALCAN Phase A through-freight filament (no border on this leg; Poker Creek AK / Beaver Creek YT border deferred until CA\u2192US Tok attach).",
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 318.7 mi; paid miles 319. Alaska Highway ALCAN Phase A through-freight filament (no border on this leg; the Alcan / Beaver Creek crossing is represented on the Whitehorse\u2194Tok legs).",
         "landmarks": [],
         "speed_limits": [
           {
-            "at_mi": 1.0,
-            "mph": 56,
-            "source": "Coarse placeholder ~90 km/h rural BC/YT Alaska Highway truck context for Phase A north filament; CA statutory truck caps still a named honesty debt (not a harvested maxspeed:hgv tag).",
+            "at_mi": 0.0,
+            "mph": 60.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 12.0,
+            "mph": 45.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 25.0,
+            "mph": 60.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 120.0,
+            "mph": 30.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 125.0,
+            "mph": 45.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 130.0,
+            "mph": 60.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 155.0,
+            "mph": 50.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 245.0,
+            "mph": 60.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
             "hgv": false
           }
         ],
@@ -321,13 +363,19 @@
             "miles": 273.0
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 272.6 mi; paid miles 273. Alaska Highway ALCAN Phase A through-freight filament (no border on this leg; Poker Creek AK / Beaver Creek YT border deferred until CA\u2192US Tok attach).",
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 272.6 mi; paid miles 273. Alaska Highway ALCAN Phase A through-freight filament (no border on this leg; the Alcan / Beaver Creek crossing is represented on the Whitehorse\u2194Tok legs).",
         "landmarks": [],
         "speed_limits": [
           {
-            "at_mi": 1.0,
-            "mph": 56,
-            "source": "Coarse placeholder ~90 km/h rural BC/YT Alaska Highway truck context for Phase A north filament; CA statutory truck caps still a named honesty debt (not a harvested maxspeed:hgv tag).",
+            "at_mi": 0.0,
+            "mph": 60.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 270.0,
+            "mph": 55.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
             "hgv": false
           }
         ],
@@ -503,14 +551,14 @@
         ],
         "checkpoints": [
           {
-            "name": "Poker Creek / Beaver Creek (Alcan Port of Entry)",
+            "name": "Alcan Port of Entry",
             "at_mi": 297.5,
             "type": "border",
             "state": "Alaska",
             "highway": "Alaska Highway",
             "lat": 62.62063,
             "lon": -141.00756,
-            "source": "Alcan Port of Entry (US CBP) at Poker Creek AK on the Alaska Highway; pairs with Canada Border Services at Beaver Creek YT. OSM barrier=border_control matched to public Valhalla truck-costing geometry (development-time)."
+            "source": "U.S. Customs and Border Protection, Alcan Alaska Port of Entry (port 3104): https://www.cbp.gov/about/contact/ports/alcan-alaska-3104; OSM node 4212502894 (Milepost 1221.8)."
           }
         ],
         "state_miles": [
@@ -523,13 +571,55 @@
             "miles": 89.5
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 386.8 mi; paid miles 387. Alaska Highway ALCAN Phase A through-freight filament Whitehorse\u2192Tok via Poker Creek AK / Beaver Creek YT border (border_crossing id poker_creek_beaver_creek). Named honesty debts carried: US HOS through-freight clock; CA truck caps; Blaine HGV refine.",
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 386.8 mi; paid miles 387. Alaska Highway ALCAN Phase A through-freight filament Whitehorse\u2192Tok via the Alcan / Beaver Creek border (border_crossing id alcan_beaver_creek). Named honesty debts carried: US HOS through-freight clock; CA truck caps; Blaine HGV refine.",
         "landmarks": [],
         "speed_limits": [
           {
-            "at_mi": 1.0,
-            "mph": 56,
-            "source": "Coarse placeholder ~90 km/h rural YT Alaska Highway truck context until the Alcan Port of Entry, then ~55 mph AK rural; CA statutory truck caps still a named honesty debt (not a harvested maxspeed:hgv tag).",
+            "at_mi": 0.0,
+            "mph": 45.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 5.0,
+            "mph": 55.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 255.0,
+            "mph": 45.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 265.0,
+            "mph": 55.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 297.5,
+            "mph": 55.0,
+            "source": "Assumed 55 mph where no nearby posted OSM maxspeed sample exists in Alaska, under 13 AAC 02.275.",
+            "hgv": false
+          },
+          {
+            "at_mi": 305.0,
+            "mph": 65.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 325.0,
+            "mph": 55.0,
+            "source": "Assumed 55 mph where no nearby posted OSM maxspeed sample exists in Alaska, under 13 AAC 02.275.",
+            "hgv": false
+          },
+          {
+            "at_mi": 365.0,
+            "mph": 65.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
             "hgv": false
           }
         ],
@@ -542,27 +632,27 @@
             "at_mi": 297.5,
             "from_state": "Yukon",
             "state": "Alaska",
-            "place": "Poker Creek AK / Beaver Creek YT (Alcan Port of Entry) on the Alaska Highway",
-            "source": "International border on the continuous Alaska Highway truck path at Alcan Port of Entry (Poker Creek); Canada Border Services Beaver Creek is ~18 mi prior. Position from OSM border_control matched to public Valhalla truck-costing geometry (development-time)."
+            "place": "Alaska\u2013Yukon border on the Alaska Highway at Alcan, Alaska",
+            "source": "Alaska\u2013Yukon border on the Alaska Highway at Alcan, Alaska; international line matched to loaded-semi Valhalla route geometry (development-time)."
           }
         ],
         "border_crossing": {
-          "id": "poker_creek_beaver_creek",
+          "id": "alcan_beaver_creek",
           "from_country": "CA",
           "to_country": "US",
           "ports": [
-            "poker_creek_beaver_creek"
+            "alcan_beaver_creek"
           ],
           "mode": "through_freight",
           "cabotage": "forbidden"
         }
       },
       "border_crossing": {
-        "id": "poker_creek_beaver_creek",
+        "id": "alcan_beaver_creek",
         "from_country": "CA",
         "to_country": "US",
         "ports": [
-          "poker_creek_beaver_creek"
+          "alcan_beaver_creek"
         ],
         "mode": "through_freight",
         "cabotage": "forbidden"
@@ -709,13 +799,25 @@
             "miles": 273.0
           }
         ],
-        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 272.6 mi; paid miles 273. Alaska Highway ALCAN Phase A through-freight filament (no border on this leg; Poker Creek AK / Beaver Creek YT border deferred until CA\u2192US Tok attach).",
+        "source": "Development-time public Valhalla truck costing over OpenStreetMap (valhalla1.openstreetmap.de, loaded-semi options matching tools/reroute_leg.py), sampled 2026-09-22. Router reported 272.6 mi; paid miles 273. Alaska Highway ALCAN Phase A through-freight filament (no border on this leg; the Alcan / Beaver Creek crossing is represented on the Whitehorse\u2194Tok legs).",
         "landmarks": [],
         "speed_limits": [
           {
-            "at_mi": 1.0,
-            "mph": 56,
-            "source": "Coarse placeholder ~90 km/h rural BC/YT Alaska Highway truck context for Phase A north filament; CA statutory truck caps still a named honesty debt (not a harvested maxspeed:hgv tag).",
+            "at_mi": 0.0,
+            "mph": 50.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 5.0,
+            "mph": 55.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
+            "hgv": false
+          },
+          {
+            "at_mi": 10.0,
+            "mph": 60.0,
+            "source": "Read from OpenStreetMap maxspeed/maxspeed:hgv tags on on-corridor highway ways in a local Geofabrik extract; route matching uses public Valhalla truck route geometry through the stored route_points; accessed 2026-10-07; maxspeed:hgv is preferred where tagged. https://www.openstreetmap.org/",
             "hgv": false
           }
         ],

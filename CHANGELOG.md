@@ -46,7 +46,7 @@
 - **The rear trailer of a set of doubles swings harder than the tractor.** At 40 miles per hour and up, a hard swerve (full lock held, or one way and then the other) or a sharp snap back from partial lane keeping can whip the rear trailer and shift its freight. Every whip is spoken and shown the moment it starts, so freight never shifts without a warning. A tap of the steering keys or an ordinary keyboard lane change does not whip loaded pups, and turnpike doubles swing less still. Only your own steering whips the set: a curve taken at its advisory speed never does, and taking one too fast is the rollover and curve warnings' job. Gusts sway the rear trailer too, and a light or empty set sways harder (up to twice as hard when empty) and whips at least as easily as a loaded one. The same set with the same load sways the same on every turnpike, whatever its weight limit. The tractor itself drifts in the wind just as it does with a single trailer. Full lane keeping changes lanes gently and never whips the set. Reverse is refused with doubles hooked, and you hear why.
 
 - Phase A ALCAN north: `fort_nelson_bc_ca`, `watson_lake_yt_ca`, and `whitehorse_yt_ca` pass-throughs with bidirectional Alaska Highway legs (239 / 319 / 273 mi) from public Valhalla truck costing on `feat/career-2.0`.
-- Phase A ALCAN AK terminus: `tok_ak_us` + `fairbanks_ak_us` with bidirectional Alaska Highway legs (387 / 202 mi) from public Valhalla truck costing; `border_crossing` id `poker_creek_beaver_creek` (through_freight, cabotage forbidden) both ways on Whitehorse↔Tok; no Anchorage.
+- Phase A ALCAN AK terminus: `tok_ak_us` + `fairbanks_ak_us` with bidirectional Alaska Highway legs (387 / 202 mi) from public Valhalla truck costing; `border_crossing` id `alcan_beaver_creek` (through_freight, cabotage forbidden) both ways on Whitehorse↔Tok; no Anchorage.
 - Phase A ALCAN inland: `prince_george_bc_ca`, `dawson_creek_bc_ca` (Mile 0), and `fort_st_john_bc_ca` pass-throughs with bidirectional Hwy 1/97 / John Hart / Alaska Highway legs (465 / 254 / 45 mi) from public Valhalla truck costing on `feat/career-2.0`.
 - Phase A ALCAN tip: Blaine Pacific Highway entry nodes and legs (`bellingham_wa_us` → `blaine_wa_us` → `surrey_bc_ca`) with honest public-OSRM mileages on `feat/career-2.0`.
 - Phase A ALCAN FIX 1–3: southbound reverse edges (`surrey_bc_ca`→`blaine_wa_us`→`bellingham_wa_us`) with matching border metadata; Surrey City truck parking and TA Express Blaine as curated stand-in yards; Hwy 15 / Pacific Highway labeling preferred for this POE.
@@ -204,6 +204,9 @@
 - **Chain truck stops are announced with their town.** You hear Love's Travel Stop Rolla where you heard only Love's Travel Stop.
 
 ### Fixed
+
+- **The Alaska Highway border crossing now has its real name, the Alcan port.** Heading into Canada, you pass the Beaver Creek border post instead.
+- **Yukon and northern British Columbia roads now follow their posted speed limits.**
 
 - **Save notices show their text on screen.** The driving record, save conversion, and turnpike program notices were spoken but showed only their title and OK.
 

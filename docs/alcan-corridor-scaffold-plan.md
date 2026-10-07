@@ -1,6 +1,11 @@
 # ALCAN corridor scaffold plan (through-freight only)
 
-Status: **Phase A tip KEEP + FIX 1–3 landed**; **inland to Dawson Creek Mile 0 landed**; **north filament to Whitehorse landed**; **AK terminus Tok + Fairbanks landed** on `feat/career-2.0` (… ↔ Whitehorse ↔ Poker Creek/Beaver Creek ↔ Tok ↔ Fairbanks). Phase A continuous Lower-48→Fairbanks ~2222 mi **KEEP**. **Phase B plan** (Anchorage join): see [`docs/alcan-phase-b-anchorage-plan.md`](./alcan-phase-b-anchorage-plan.md) — **B1 Tok Cutoff/Glenn → Anchorage** and **B2 Parks** (nenana/healy/wasilla; Cantwell collapsed; Parks milepost-paid checksum 358) world_data landed. No full Canada board.
+The Alaska Highway crossing is the Alcan Port of Entry (CBP port 3104, OSM
+node 4212502894); the Beaver Creek CBSA post (node 3531514528) lies beyond
+the international line toward Whitehorse. Poker Creek is the separate
+seasonal Top of the World Highway crossing.
+
+Status: **Phase A tip KEEP + FIX 1–3 landed**; **inland to Dawson Creek Mile 0 landed**; **north filament to Whitehorse landed**; **AK terminus Tok + Fairbanks landed** on `feat/career-2.0` (… ↔ Whitehorse ↔ Alcan/Beaver Creek ↔ Tok ↔ Fairbanks). Phase A continuous Lower-48→Fairbanks ~2222 mi **KEEP**. **Phase B plan** (Anchorage join): see [`docs/alcan-phase-b-anchorage-plan.md`](./alcan-phase-b-anchorage-plan.md) — **B1 Tok Cutoff/Glenn → Anchorage** and **B2 Parks** (nenana/healy/wasilla; Cantwell collapsed; Parks milepost-paid checksum 358) world_data landed. No full Canada board.
 
 Owner sequence (locked): **(1) this ALCAN corridor → (2) map Alaska → (3) rest of Canada → (4) Europe (#195).**
 Do not jump ahead. Ruth verifies every step.
@@ -90,16 +95,16 @@ Direction shown northbound; expect matching southbound edges when the graph land
 3. `dawson_creek_bc_ca` → `fort_nelson_bc_ca` (Alaska Hwy)
 4. `fort_nelson_bc_ca` → `watson_lake_yt_ca`
 5. `watson_lake_yt_ca` → `whitehorse_yt_ca`
-6. `whitehorse_yt_ca` → **(Poker Creek AK / Beaver Creek YT border)** → `tok_ak_us`
+6. `whitehorse_yt_ca` → **(Alcan / Beaver Creek border)** → `tok_ak_us`
 7. `tok_ak_us` → `fairbanks_ak_us`
 
-No Seattle→Fairbanks skip. No short-hop “ALCAN” that omits Mile 0 / Whitehorse / the Poker Creek–Beaver Creek crossing, and no compressed `dawson_creek_bc_ca` → `tok_ak_us` proxy. The first legs must preserve verified, routed ALCAN road mileage through each corridor segment; do not substitute straight-line, guessed, or short-hop distances.
+No Seattle→Fairbanks skip. No short-hop “ALCAN” that omits Mile 0 / Whitehorse / the Alcan–Beaver Creek crossing, and no compressed `dawson_creek_bc_ca` → `tok_ak_us` proxy. The first legs must preserve verified, routed ALCAN road mileage through each corridor segment; do not substitute straight-line, guessed, or short-hop distances.
 
 ---
 
 ## 4. Border-crossing data shape (proposal)
 
-Goal: model Blaine/Sumas and Poker Creek/Beaver Creek **without** Canada domestic cabotage.
+Goal: model Blaine/Sumas and Alcan/Beaver Creek **without** Canada domestic cabotage.
 
 Suggested leg (or leg-segment) metadata — names indicative, not schema freeze:
 
@@ -118,10 +123,10 @@ Rules of thumb for the cut:
 
 - Crossing is **on the continuous path** (delay / inspection beat later); it is not a menu teleport.
 - **Through-freight only** in Phase A: loads that enter Canada must be international through movements (Lower 48 ↔ Alaska via the corridor), not CA domestic pickup/delivery for a US carrier fantasy board.
-- Second crossing on the same corridor: `poker_creek_beaver_creek` with `from_country: CA`, `to_country: US`.
+- Second crossing on the same corridor: `alcan_beaver_creek` with `from_country: CA`, `to_country: US`.
 - Do not mint full career economies on Canadian pass-through towns in Phase A.
 
-Exact schema lands with the first city/leg PR **after** Ruth cuts this plan — not in this tip.
+The data schema is present in `world_source`; a playable delay or inspection flow remains deferred.
 
 ---
 
@@ -153,7 +158,7 @@ For ALCAN / CA / AK world-data work **after Ruth cuts this plan**:
 ## 6. Out of scope / dishonest traps (Ruth will reject)
 
 - Teleport / skip-Canada Lower 48 → Alaska.
-- Short-hop “ALCAN” missing Dawson Creek, Whitehorse, or Poker Creek/Beaver Creek.
+- Short-hop “ALCAN” missing Dawson Creek, Whitehorse, or Alcan/Beaver Creek.
 - Full Canada dispatch board in Phase A.
 - US cabotage fantasy inside Canada (domestic CA loads for the US through-freight slice).
 - Tourism lodges as tractor stops without truck parking.
@@ -249,11 +254,12 @@ Ruth GO after KEEP on inland tip `4b375017`. Daytime public Valhalla truck costi
 | `fort_nelson_bc_ca` ↔ `watson_lake_yt_ca` | **319** | Alaska Highway (BC→YT); both directions; public Valhalla truck; coarse `state_miles` + `state_crossings` near Contact Creek / Lower Post |
 | `watson_lake_yt_ca` ↔ `whitehorse_yt_ca` | **273** | Alaska Highway; both directions; public Valhalla truck |
 
-No Tok / Fairbanks. No Poker Creek AK / Beaver Creek YT `border_crossing` yet (CA→US attach deferred). Through-freight only; cities remain stand-in markets (no CA cabotage board). Soft FIX company_yard→parking/travel_center types deferred.
+This north-filament table stops at Whitehorse; the Tok/Fairbanks terminus and Alcan / Beaver Creek border are recorded below. Through-freight only; cities remain stand-in markets (no CA cabotage board). Soft FIX company_yard→parking/travel_center types deferred.
 
 ### Mileage / geometry source (north)
 
 - Public Valhalla truck costing (`valhalla1.openstreetmap.de`, loaded-semi options) 2026-09-22; paid miles match router (±5 mi band rounded).
+- Maxspeed rebakes on archive-less Alcan legs use public Valhalla truck geometry through the stored route points.
 - Elevation: Open-Meteo elevation API along densified shape (~30 mi samples).
 - City lat integrity ceiling raised to `66.0` for Fairbanks (~64.8°N); lon floor lowered to `-150.0` for Interior AK (~-147.7). Anchorage still Phase B.
 
@@ -263,12 +269,12 @@ No Tok / Fairbanks. No Poker Creek AK / Beaver Creek YT `border_crossing` yet (C
 | --- | --- | --- |
 | `tok_ak_us` | — | Alaska Highway entry; Young's Chevron stand-in fuel/parking |
 | `fairbanks_ak_us` | — | Phase A AK terminus; Sourdough Fuel (1688 Airport Way) stand-in |
-| `whitehorse_yt_ca` ↔ `tok_ak_us` | **387** | Alaska Highway both directions; `border_crossing` id `poker_creek_beaver_creek`, mode `through_freight`, cabotage `forbidden` (both ways); Alcan POE at ~297.5 mi northbound |
+| `whitehorse_yt_ca` ↔ `tok_ak_us` | **387** | Alaska Highway both directions; `border_crossing` id `alcan_beaver_creek`, mode `through_freight`, cabotage `forbidden` (both ways); Alcan checkpoint at mi 297.5 toward Tok, Beaver Creek checkpoint at mi 107.8 toward Whitehorse; border line at mi 89.5 from Tok |
 | `tok_ak_us` ↔ `fairbanks_ak_us` | **202** | Alaska Highway / Richardson Highway (AK-2); both directions; public Valhalla truck |
 
 No Anchorage (Phase B). Through-freight only; cities remain stand-in markets (no CA cabotage board). Soft FIX company_yard→parking/travel_center types deferred.
 
-Named honesty debts carried: US HOS through-freight clock; CA truck caps; Blaine HGV refine.
+Named honesty debts carried: US HOS through-freight clock; CA statutory truck caps; Blaine HGV refine.
 
 ### Blockers for next slice (Phase B Alaska / rest of Canada)
 

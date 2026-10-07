@@ -242,6 +242,12 @@ Everything found before 2026-09-25 moved to
       against deliveries; credentials against their level gates and the
       clock. Calibrate against real backups, then mark rather than refuse
       (owner, 2026-09-25).
+- [ ] A playable border-stop flow for Alcan / Beaver Creek is next; these
+      records mark the checkpoints but do not stop the driver.
+- [ ] Posted speed profiles on the BC Alaska Highway south of Fort Nelson
+      still use placeholders.
+- [ ] CBSA commercial hours at Beaver Creek remain unverified and are not
+      modeled.
 
 ### Release gate record
 
@@ -2236,9 +2242,14 @@ branch. The older Phase A/B plan checklists are not a live completion list.
 - [x] **Phase A: bidirectional ALCAN corridor to Fairbanks.** Bellingham
       through Blaine/Pacific Highway, Surrey, Prince George, Dawson Creek,
       Fort St. John, Fort Nelson, Watson Lake, Whitehorse, and Tok to
-      Fairbanks. Both border crossings carry metadata in both directions.
+      Fairbanks. Both crossings carry through-freight metadata in both
+      directions. The Alaska Highway line is identified as Alcan, with the
+      Beaver Creek post represented on the Tok-to-Whitehorse approach.
       Canadian towns are pass-through fuel/rest stops; US dispatch still
       offers US destinations, allowing US-to-US routes through Canada.
+- [x] **Posted speed profiles on the Yukon and northern BC legs.** Canadian
+      bare OSM speed values are interpreted as km/h; Alaska's 55 mph fallback
+      applies only to the Alaska stretch of a cross-border leg.
 - [x] **Phase B1: Tok Cutoff and Glenn Highway to Anchorage.** Tok to
       Glennallen, Palmer, and Anchorage is connected in both directions,
       without a ferry or a detour through Fairbanks.
@@ -2261,20 +2272,29 @@ branch. The older Phase A/B plan checklists are not a live completion list.
       has curated grocery/retail, building-material, and cross-dock pins.
 - [ ] **Partial: cross-border rules and clearance.** Border metadata is
       not a playable clearance/inspection flow. Canadian HOS, statutory
-      truck-speed caps, CAD/foreign exchange, and spring-breakup axle
-      restrictions remain open; the corridor does not establish Canadian
-      regulatory compliance. Full Canada and Europe remain planned.
+      CMV speed caps (distinct from posted road limits), CAD/foreign exchange,
+      and spring-breakup axle restrictions remain open; the corridor does not
+      establish Canadian regulatory compliance. Full Canada and Europe remain
+      planned.
 - [ ] **Remaining corridor data work.** Refine the auto-profile
       Blaine–Surrey geometry for trucks; verify remaining Parks and Mat-Su
       fuel lots and any truck-parking capacity; and add the Whittier tunnel
       and Haines/Skagway ferry routes in a later slice. Exact Deadhorse
       Carlile, Valdez/Deadhorse diesel, and Soldotna receive-only retail pins
-      remain unsupported; Yukon River Camp truck-parking capacity is
-      unverified, and the Dalton gravel surface is not modeled.
+      remain unsupported; Fort St. John–Fort Nelson still has placeholder
+      speed profiles; Yukon River Camp truck-parking capacity is unverified,
+      and the Dalton gravel surface is not modeled.
+- [ ] (Found along the way) Older maxspeed bakes predate 0.25-mi way
+      densification and can carry a neighboring limit across long,
+      sparsely-noded ways; a re-sweep is needed. Legs without a geometry
+      archive currently bake speeds against straight chords between stored
+      route points; the Alcan legs now use bake-time Valhalla truck geometry
+      through those points, and other archive-less legs need the same re-sweep.
 
 Automated evidence: the four `test_alcan_phase_a_*` cases (including the
 Tok–Delta Junction–Fairbanks split), `test_alcan_phase_b1_tok_cutoff_glenn_to_anchorage`,
 `test_alcan_phase_b2_parks_to_anchorage`, the B3 tests
+`test_alcan_border_identity_and_posted_speed_profiles`,
 `test_alaska_b3_city_labels_and_metadata`,
 `test_alaska_kenai_peninsula_routes_use_paid_miles_both_ways`,
 `test_alaska_valdez_routes_use_paid_miles_both_ways`,
