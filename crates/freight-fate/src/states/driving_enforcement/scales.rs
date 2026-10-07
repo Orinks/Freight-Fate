@@ -100,12 +100,57 @@ impl DrivingState {
     /// what told the driver: a reminder skipped because they were slow or
     /// signalled until the gore leaves the bypass theirs, but a scale never
     /// announced at all is the game's miss.
+    ///
+    /// The real seconds only excuse a reminder the GAME made late
+    /// (`scale_reminder_held_by_game`). A tester crawled at fourteen to 0.06
+    /// of a mile, under the bypass speed so the reminder stayed quiet, then
+    /// crossed at forty-five: the reminder spoke seven real seconds out and
+    /// the crossing was excused for good (QA, 2026-10-07). The window was
+    /// half a mile of real clock -- thirty seconds at any legal speed -- and
+    /// the driver spent it under fifteen, after a notice that already said
+    /// pull in. That reminder is late by the driver's own pace, so the
+    /// crossing is judged as if it had never been needed.
     pub fn scale_bypass_judgeable(&self, key: &str) -> bool {
         if self.weigh_station_reminder_key == key {
             self.weigh_station_reminder_age_s >= SCALE_REMINDER_REAL_LEAD_S
+                || !self.scale_reminder_held_by_game.contains(key)
         } else {
             self.weigh_station_noticed.contains(key)
         }
+    }
+
+    /// The cab is taken while the truck is inside an open scale's reminder
+    /// window: the reminder that follows is the game's late, not the
+    /// driver's.
+    ///
+    /// Runs on the frames the scale check is held off (a pull-over, a ramp,
+    /// a hazard or microsleep window, the arrival menu) and on a departure
+    /// lane, where a truck pulling out of a facility is slow because it is
+    /// supposed to be. Only announced, open, not-yet-reminded scales; a
+    /// green transponder light needs no reminder at all.
+    pub fn note_scale_reminders_held_by_game(&mut self) {
+        let window = self.scale_reminder_mi();
+        let held: Vec<String> = self
+            .trip
+            .stops
+            .iter()
+            .filter(|stop| stop.stop_type == "weigh_station")
+            .filter(|stop| {
+                let ahead = stop.at_mi - self.trip.position_mi;
+                0.0 < ahead && ahead <= window && self.scale_is_open(stop)
+            })
+            .map(|stop| self.weigh_station_key(stop))
+            .filter(|key| {
+                self.weigh_station_noticed.contains(key)
+                    && *key != self.weigh_station_reminder_key
+                    && self
+                        .weigh_station_transponder_verdict
+                        .get(key)
+                        .map(String::as_str)
+                        != Some("green")
+            })
+            .collect();
+        self.scale_reminder_held_by_game.extend(held);
     }
 
     /// One short line before the bypass point, if nothing has changed.

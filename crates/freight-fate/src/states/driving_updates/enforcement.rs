@@ -296,8 +296,19 @@ impl DrivingState {
         // One demand on the driver at a time. This guarded on the stop and the
         // ramp but not on a running hazard deadline, so a scale could speak
         // over a braking window the player had two seconds to make.
-        if self.enforcement_bypassed(ctx) || self.enforcement_busy() {
+        if self.enforcement_bypassed(ctx) {
             return;
+        }
+        if self.enforcement_busy() {
+            // The reminder cannot speak while the cab is taken; one that
+            // lands late because of it is the game's late, not the driver's.
+            self.note_scale_reminders_held_by_game();
+            return;
+        }
+        if self.departure_ramp_mi.is_some() {
+            // Pulling out of a facility, slow on purpose: a reminder held
+            // under the bypass speed here is not a crawl past the scale.
+            self.note_scale_reminders_held_by_game();
         }
         let stops: Vec<RoadStop> = self
             .trip
@@ -322,6 +333,12 @@ impl DrivingState {
                 // re-announcing the other, and the nearer one's reminder
                 // never fired because its key was never the one held.
                 self.weigh_station_noticed.insert(key.clone());
+                if ahead <= self.scale_reminder_mi() {
+                    // First heard inside the reminder window: the reminder
+                    // rides right behind it, and any shortfall in its real
+                    // seconds is the game's.
+                    self.scale_reminder_held_by_game.insert(key.clone());
+                }
                 // Its own earcon, not the shared inspection cue: testers
                 // could not tell "the scale is ahead" apart from "you are
                 // being looked at for something else" (owner ruling,
@@ -466,12 +483,15 @@ impl DrivingState {
                 if !self.scale_bypass_judgeable(&key) {
                     // Audible before it can bite. The driver was never told
                     // about this scale, or heard "Signal for the scale exit"
-                    // too few real seconds ago to have acted on it -- a notice
-                    // held back by a busy cab, a reminder that landed late.
-                    // That is the game's miss, not the driver's bypass.
+                    // too few real seconds ago to have acted on it because
+                    // the game held it back -- a notice that latched late, a
+                    // cab taken inside the window. That is the game's miss,
+                    // not the driver's bypass. A reminder made late by the
+                    // driver's own crawl does not land here; see
+                    // `scale_bypass_judgeable`.
                     let heard = if self.weigh_station_reminder_key == key {
                         format!(
-                            "reminder only {:.1} real s before",
+                            "reminder only {:.1} real s before, held back by the game",
                             self.weigh_station_reminder_age_s
                         )
                     } else {
@@ -619,12 +639,14 @@ impl DrivingState {
         }
         if self.weigh_station_reminder_key == key
             && self.weigh_station_reminder_age_s < SCALE_REMINDER_REAL_LEAD_S
+            && self.scale_reminder_held_by_game.contains(&key)
         {
-            // Signalled in answer to a reminder that came too late to make
-            // the ramp: the same miss on the game's side as an unarmed
-            // crossing inside the reminder's real seconds. A driver who armed
-            // before any reminder was needed knew about the scale all along,
-            // and a missed ramp is still theirs.
+            // Signalled in answer to a reminder the game held back until too
+            // late to make the ramp: the same miss on the game's side as an
+            // unarmed crossing inside the reminder's real seconds. A driver
+            // who armed before any reminder was needed knew about the scale
+            // all along, and a reminder late only because of their own crawl
+            // buys nothing either; a missed ramp is still theirs.
             log::info!(
                 "scale crossing not judged: {} at mile {:.2}, armed after a reminder only \
                  {:.1} real s before",

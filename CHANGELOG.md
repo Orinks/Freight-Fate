@@ -10,6 +10,8 @@
 
 - **Driving into Memphis from St. Louis no longer passes a weigh station that is not there.** The West Memphis scale is westbound I-40 only.
 
+- **Creeping up to an open scale, then speeding past, no longer dodges the bypass charge.** Only a warning the game delayed excuses you.
+
 ## 1.9.3 - 2026-10-06
 
 ### Added
