@@ -574,6 +574,9 @@ fn has_no_carrier<P: StandingProfile + ?Sized>(profile: &P) -> bool {
 /// `solvency::hard_capped`), so their last-chance line says that instead of
 /// "deciding whether to keep you".
 pub fn trust_band_text_for<P: StandingProfile + ?Sized>(profile: &P, band: &str) -> String {
+    if let Some(text) = licence_trust_text(profile, band) {
+        return text;
+    }
     if band == TRUST_LAST_CHANCE && kept_on_sufferance(profile) {
         let carrier = match profile.carrier_name().trim() {
             "" => "Your carrier",
@@ -587,6 +590,34 @@ pub fn trust_band_text_for<P: StandingProfile + ?Sized>(profile: &P, band: &str)
     trust_band_text(band).to_string()
 }
 
+/// The last-chance line when a pulled CDL is what put the driver there.
+///
+/// The carrier does not weigh a suspension or a disqualification against
+/// the seat (`carrier_termination_due` never reads the licence): it simply
+/// has no loads for a driver who cannot drive, and a lifetime
+/// disqualification ends dispatch for good. "The carrier is deciding whether
+/// to keep you" said neither. `None` when the licence is clear, or when the
+/// carrier really is weighing the seat over the record or the service.
+fn licence_trust_text<P: StandingProfile + ?Sized>(profile: &P, band: &str) -> Option<String> {
+    let record = profile.driving_record()?;
+    if band != TRUST_LAST_CHANCE || !record.suspended(profile.game_hours()) {
+        return None;
+    }
+    if record.lifetime_disqualified {
+        return Some(
+            "Dispatch trust: none. With a lifetime CDL disqualification there is no dispatch."
+                .to_string(),
+        );
+    }
+    if carrier_termination_due(profile) {
+        return None;
+    }
+    Some(format!(
+        "Dispatch trust: last chance. No loads at all while your CDL is {}.",
+        status_verb(record)
+    ))
+}
+
 /// [`trust_text`] for this driver: the sufferance wording where it applies,
 /// and [`NO_CARRIER_TRUST_TEXT`] with no carrier.
 pub fn trust_text_for<P: StandingProfile + ?Sized>(profile: &P, reputation: f64) -> String {
@@ -595,7 +626,8 @@ pub fn trust_text_for<P: StandingProfile + ?Sized>(profile: &P, reputation: f64)
     }
     let band = trust_band(reputation);
     let text = trust_band_text_for(profile, band);
-    if band == TRUST_FULL {
+    // Clean runs rebuild service, not a pulled licence.
+    if band == TRUST_FULL || licence_trust_text(profile, band).is_some() {
         return text;
     }
     format!("{text} Clean on-time runs rebuild it.")
@@ -941,8 +973,11 @@ pub fn standing_way_back<P: StandingProfile + ?Sized>(profile: &P) -> String {
             return "Your CDL is disqualified for life, so the seat is not coming back."
                 .to_string();
         }
+        let record = record_of(profile);
         return format!(
-            "Your CDL is suspended, so the yard holds your seat until it clears {clears}."
+            "Your CDL is {}, so the yard holds your seat until the {} ends {clears}.",
+            status_verb(record),
+            status_noun(record)
         );
     }
     if cause == CAUSE_RECORD {

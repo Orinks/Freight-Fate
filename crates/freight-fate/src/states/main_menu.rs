@@ -267,6 +267,14 @@ pub fn world_entry_state(ctx: &mut GameContext, queue_entry_announcement: bool) 
             );
             return share(CityMenuState::new(ctx, true));
         }
+        // A trip saved on a CDL that has since been pulled -- a save from
+        // before a mid-drive suspension ended the run -- does not resume:
+        // it closes out the way the roadside does, in the city the run left
+        // from.
+        if let Some(line) = closed_out_pulled_licence_trip(ctx) {
+            ctx.say(&line);
+            return share(CityMenuState::new(ctx, true));
+        }
         let snapshot = ctx
             .profile
             .as_ref()
@@ -323,6 +331,24 @@ pub fn world_entry_state(ctx: &mut GameContext, queue_entry_announcement: bool) 
     // spoken just before this state is chosen, so its entry announcement
     // queues behind that line instead of cutting it off.
     share(CityMenuState::new(ctx, queue_entry_announcement))
+}
+
+/// Close out a saved trip the CDL no longer allows, and say so. `None`
+/// (nothing touched) while the CDL is clear.
+fn closed_out_pulled_licence_trip(ctx: &mut GameContext) -> Option<String> {
+    let refusal = crate::states::city::cdl_drive_refusal(ctx)?;
+    let city = {
+        let p = ctx.profile.as_mut()?;
+        p.active_trip = None;
+        p.pay_advance_used_for_load = false;
+        p.current_city.clone()
+    };
+    ctx.save_profile();
+    let city = ctx.world.spoken_city(&city, None);
+    Some(format!(
+        "Your saved run cannot go on: dispatch takes the load back, and a relief driver \
+         takes the truck back to {city}. {refusal}"
+    ))
 }
 
 /// Write a one-time fair-deadline repair back into the saved active trip.

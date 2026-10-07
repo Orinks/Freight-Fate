@@ -212,6 +212,14 @@ pub struct LoadedDriveOptions {
 /// dispatch-assigned route path so air-brake, engine, and speed-control
 /// snapshots carry over identically on both.
 pub fn start_loaded_drive(ctx: &mut GameContext, job: Job, route: Route, opts: LoadedDriveOptions) {
+    // Backstop: a CDL pulled since the load was accepted keeps the truck at
+    // the dock. The drive that pulled it already ends on the shoulder, so
+    // this only catches a career that reached the dock some other way.
+    if let Some(line) = crate::states::city::cdl_drive_refusal(ctx) {
+        ctx.audio.play("ui/error");
+        ctx.say(&line);
+        return;
+    }
     let mut launch = DrivingLaunch::new(
         job,
         route,

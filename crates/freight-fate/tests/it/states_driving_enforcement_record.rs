@@ -230,7 +230,7 @@ fn test_a_stop_that_suspends_the_cdl_does_not_send_you_back_out_driving() {
     assert!(
         labels
             .iter()
-            .any(|label| label.to_lowercase().contains("terminal")),
+            .any(|label| label == "Hand the truck to the relief driver"),
         "{labels:?}"
     );
 }
