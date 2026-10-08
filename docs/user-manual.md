@@ -2018,7 +2018,8 @@ is skipped rather than stopping the music -- a stream is given time to connect
 first, so it is never skipped for being slow. If nothing in a playlist will
 play, the radio says so and names the folder rather than going quietly silent.
 Opening the Radio status screen re-reads the folder, so a playlist you add or
-fix mid-drive appears on the dial without starting a new run. Personal
+fix mid-drive appears on the dial without starting a new run. Until you have
+one, that screen reads out the folder's full location. Personal
 playlists ride the same streamer-safe gate as real streams -- turning the mode
 on hides them, because the game cannot vouch for what your files are licensed
 for. Ctrl with any tune key jumps straight to the Your playlists category.

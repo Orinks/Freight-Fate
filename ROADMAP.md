@@ -55,6 +55,10 @@ bookmarks usable.
 - [ ] (Found along the way) Owner listening pass on the traffic sounds and
       the freeway bed: `TRAFFIC_SOUND_PEAK`, `TRAFFIC_BED_PEAK` and the
       per-class loudness are first guesses, set without ears.
+- [x] The radio status screen names the Playlists folder's full location
+      while no personal playlist is on the dial and streamer-safe mode is
+      off (issue #289: a player saw the shuffle setting and could not find
+      how to add music at all).
 
 - [x] Channel 3000 on 87.7 (owner, 2026-10-06): the owner's TV programming on
       a daypart schedule by the truck's local hour, from its own

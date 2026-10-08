@@ -6,6 +6,8 @@
 
 - **Interstates now have the sound of distant traffic, louder on busier stretches.**
 
+- **The radio status screen says where your own playlist files go until you have one on the dial.**
+
 ### Changed
 
 - **Tire noise on the road is louder at highway speed.**
