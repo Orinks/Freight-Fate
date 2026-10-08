@@ -78,7 +78,8 @@ impl Seek for MaskedFile {
 /// A masked pack read entry by entry from its file.
 pub struct StreamedPack {
     archive: Mutex<ZipArchive<MaskedFile>>,
-    names: HashSet<String>,
+    names: Vec<String>,
+    name_set: HashSet<String>,
 }
 
 impl StreamedPack {
@@ -94,15 +95,22 @@ impl StreamedPack {
             pos: 0,
         };
         let archive = ZipArchive::new(masked)?;
-        let names = archive.file_names().map(str::to_string).collect();
+        let names: Vec<String> = archive.file_names().map(str::to_string).collect();
+        let name_set = names.iter().cloned().collect();
         Ok(Self {
             archive: Mutex::new(archive),
             names,
+            name_set,
         })
     }
 
+    /// The pack's entry names, in zip directory order.
+    pub fn names(&self) -> Vec<String> {
+        self.names.clone()
+    }
+
     pub fn has(&self, name: &str) -> bool {
-        self.names.contains(name)
+        self.name_set.contains(name)
     }
 
     pub fn len(&self) -> usize {
