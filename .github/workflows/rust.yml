@@ -30,7 +30,8 @@
 #     every facility exit, every kind of destination, ~96 job origins --
 #     and the sixteen of them in the game crate cost as much as the other
 #     2,400 tests together. They still run in full on the nightly Career 1.9
-#     snapshot (`build-career-1.9.yml`, which sets no cfg), on a manual
+#     snapshot (`build-career-1.9.yml`'s Windows job, which sets no cfg;
+#     its Mac and Linux jobs pass `--cfg ci_quick` too), on a manual
 #     `workflow_dispatch` of this workflow, and in any local `cargo test`.
 #   * sccache caches the workspace crates' own compilation by content, so a
 #     commit that leaves ff-core alone (most of them) does not rebuild it.
