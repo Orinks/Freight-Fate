@@ -56,13 +56,13 @@ under their siblings, but their peaks are already near full scale, so static
 gain cannot close the gap (on the roadmap). No whole-bus mismatch was big
 enough to change a bus constant.
 
-## Traffic voices (2026-10-08)
+## Traffic sounds (2026-10-08)
 
 The traffic loops (`traffic/*_loop`) were given static gain to -20 LUFS for a
 car and a little more for heavier vehicles (semi +3 dB, bus +2, box truck
 +1.5, tractor and motorcycle +1, pickup +0.5), and the freeway bed
-(`traffic/highway_bed`) to -22 LUFS. The game scales each voice by distance
-from its vehicle (`TRAFFIC_VOICE_PEAK` one lane over, falling as one over the
+(`traffic/highway_bed`) to -22 LUFS. The game scales each one by distance
+from its vehicle (`TRAFFIC_SOUND_PEAK` one lane over, falling as one over the
 distance) and the bed by the road's traffic presence (`TRAFFIC_BED_PEAK` at
 the busiest road), so those two constants are where a listening pass tunes
 them.

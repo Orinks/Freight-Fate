@@ -1,6 +1,6 @@
 {
-  "_about": "Traffic voices (2026-10-08): one steady loop per traffic class, the sound of that vehicle holding its distance at highway speed. The game runs one per nearby NPC vehicle and sets its level, pan and pitch every frame from where the vehicle really is, so the sound moves with the car instead of being a one-shot fired when it crosses the bumper. Mono on purpose: the game pans. Render with the genny CLI (github.com/ogomez92/genny): genny render sound-test/traffic_voices.json, then encode each WAV to Ogg Vorbis (ffmpeg -c:a libvorbis -q:a 5). Tires and wind lead and the engine sits under them, as at 60 mph from the next lane; a heavy vehicle is lower and rougher, a motorcycle is mostly engine.",
-  "out_dir": "build/sound-test/traffic_voices",
+  "_about": "Traffic sounds (2026-10-08): one steady loop per traffic class, the sound of that vehicle holding its distance at highway speed. The game runs one per nearby NPC vehicle and sets its level, pan and pitch every frame from where the vehicle really is, so the sound moves with the car instead of being a one-shot fired when it crosses the bumper. Mono on purpose: the game pans. Render with the genny CLI (github.com/ogomez92/genny): genny render sound-test/traffic_sounds.json, then encode each WAV to Ogg Vorbis (ffmpeg -c:a libvorbis -q:a 5). Tires and wind lead and the engine sits under them, as at 60 mph from the next lane; a heavy vehicle is lower and rougher, a motorcycle is mostly engine.",
+  "out_dir": "build/sound-test/traffic_sounds",
   "normalize": -3,
   "loop": 0.4,
   "sounds": [

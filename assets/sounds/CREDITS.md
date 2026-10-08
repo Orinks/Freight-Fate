@@ -36,7 +36,7 @@ current idle, start, and shutdown cues.
 
 | Sound | File | Description |
 | --- | --- | --- |
-| Truck idle, interior | `engine_classic/idle.ogg` | In-cab idle loop, shared by Darren Duff; ships in-repo as the classic engine voice (was `engine/idle.ogg` until the rebuilt engine landed 2026-07-27) |
+| Truck idle, interior | `engine_classic/idle.ogg` | In-cab idle loop, shared by Darren Duff; ships in-repo as the classic engine sound (was `engine/idle.ogg` until the rebuilt engine landed 2026-07-27) |
 | Truck start, interior | `engine/start.ogg` | In-cab engine-start cue, shared by Darren Duff |
 | Truck shutdown, interior | `engine/shutdown.ogg` | In-cab shutdown cue, shared by Darren Duff |
 | Truck horn, interior | `vehicle/horn.ogg` | In-cab horn cue (trimmed from Take 2), shared by Darren Duff |
@@ -54,8 +54,8 @@ current idle, start, and shutdown cues.
 | State trooper pass-by | `traffic/trooper_pass.ogg` | ElevenLabs-generated patrol-car pass-by cue without siren |
 | Pickup, motorcycle, bus and tractor pass-bys | `traffic/pickup_pass.ogg`, `traffic/motorcycle_pass.ogg`, `traffic/bus_pass.ogg`, `traffic/tractor_pass.ogg` | ElevenLabs Sound Effects API pass-by cues, 2026-09-11; replaced the deterministic numpy stand-ins (tools/generate_sounds.py, still the no-key fallback) that shipped under the same keys from 2026-08-20 |
 | Cross traffic at ramp ends (car, pickup, box truck, semi, motorcycle, bus, tractor) | `traffic/car_cross.ogg`, `traffic/pickup_cross.ogg`, `traffic/box_truck_cross.ogg`, `traffic/semi_cross.ogg`, `traffic/motorcycle_cross.ogg`, `traffic/bus_cross.ogg`, `traffic/tractor_cross.ogg` | ElevenLabs Sound Effects API crossing cues (a vehicle driving through in front of the stopped truck, panned by the game), 2026-09-11; replaced the numpy stand-ins that shipped from 2026-08-20 |
-| Traffic voices (car, pickup, box truck, semi, motorcycle, bus, tractor, patrol car) | `traffic/car_loop.ogg`, `traffic/pickup_loop.ogg`, `traffic/box_truck_loop.ogg`, `traffic/semi_loop.ogg`, `traffic/motorcycle_loop.ogg`, `traffic/bus_loop.ogg`, `traffic/tractor_loop.ogg`, `traffic/trooper_loop.ogg` | Original synthesized steady loops of a vehicle holding its distance at road speed (tires, wind and a modelled engine), rendered with the genny CLI from `sound-test/traffic_voices.json` (2026-10-08); the game sets each one's level, pan and pitch from a real NPC vehicle every frame |
-| Freeway traffic bed | `traffic/highway_bed.ogg` | Original synthesized distant-traffic wash, rendered with the genny CLI from `sound-test/traffic_voices.json` (2026-10-08) |
+| Traffic sounds (car, pickup, box truck, semi, motorcycle, bus, tractor, patrol car) | `traffic/car_loop.ogg`, `traffic/pickup_loop.ogg`, `traffic/box_truck_loop.ogg`, `traffic/semi_loop.ogg`, `traffic/motorcycle_loop.ogg`, `traffic/bus_loop.ogg`, `traffic/tractor_loop.ogg`, `traffic/trooper_loop.ogg` | Original synthesized steady loops of a vehicle holding its distance at road speed (tires, wind and a modelled engine), rendered with the genny CLI from `sound-test/traffic_sounds.json` (2026-10-08); the game sets each one's level, pan and pitch from a real NPC vehicle every frame |
+| Freeway traffic bed | `traffic/highway_bed.ogg` | Original synthesized distant-traffic wash, rendered with the genny CLI from `sound-test/traffic_sounds.json` (2026-10-08) |
 | Lane drift | `vehicle/lane_drift.ogg` | ElevenLabs-generated directional lane drift beep |
 | Lane centered | `vehicle/lane_centered.ogg` | ElevenLabs-generated centered-lane confirmation chime |
 | Turn signal | `vehicle/turn_signal.ogg` | Original synthesized flasher cycle, a relay tick then a softer tock, rendered with the genny CLI from `sound-test/turn_signal.json` (2026-09-29); replaced an ElevenLabs-generated click recording |

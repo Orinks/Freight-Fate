@@ -785,11 +785,11 @@ pub struct DrivingState {
     pub wrong_way_mi: f64,
     pub wrong_way_said_at: f64,
 
-    // ---- driving_traffic_voices.rs ------------------------------------------------------
-    // Which vehicle each traffic voice is following (`main:<key>` or
+    // ---- driving_traffic_sounds.rs ------------------------------------------------------
+    // Which vehicle each traffic sound is following (`main:<key>` or
     // `cross:<id>`), the freeway bed's smoothed level, and how far the truck
     // has rolled down the current exit ramp. Per-stint, not saved.
-    pub traffic_voices: [Option<String>; 3],
+    pub traffic_sounds: [Option<String>; 3],
     pub traffic_bed_volume: f64,
     pub traffic_ramp_rolled_ft: f64,
 

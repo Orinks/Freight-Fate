@@ -624,7 +624,7 @@ impl DrivingState {
         self.update_wrong_way(ctx, dt);
         // After the trip has moved the truck and stepped the bubble, so the
         // voices sit where the vehicles are this frame.
-        self.update_traffic_voices(ctx, dt);
+        self.update_traffic_sounds(ctx, dt);
         // Right after the voices, and for the same reason: the lane the driver
         // moved out of is only open once the bubble has been stepped.
         self.update_lane_gap(ctx, dt);

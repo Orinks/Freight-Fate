@@ -615,7 +615,7 @@ impl DrivingState {
             gate_miss_count: 0,
             wrong_way_mi: 0.0,
             wrong_way_said_at: 0.0,
-            traffic_voices: [None, None, None],
+            traffic_sounds: [None, None, None],
             traffic_bed_volume: 0.0,
             traffic_ramp_rolled_ft: 0.0,
             lane_gap_watch: None,

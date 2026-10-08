@@ -789,7 +789,7 @@ pub const SELF_EXPLANATORY: &[(&str, &str)] = &[
     ("engine/idle", "It is an engine and it sounds like one."),
     (
         "engine_classic/idle",
-        "The same engine, in its earlier voice.",
+        "The same engine, in its earlier sound.",
     ),
     (
         "engine/low",
@@ -807,8 +807,8 @@ pub const SELF_EXPLANATORY: &[(&str, &str)] = &[
     ),
     (
         "engine/jake_1600_synth",
-        "The classic jake voice: the same three staged entries play it when \
-         Settings, Audio has Engine brake voice set to classic, through the \
+        "The classic jake sound: the same three staged entries play it when \
+         Settings, Audio has Engine brake sound set to classic, through the \
          same key-resolution routing the drive uses. Not a second cue.",
     ),
     ("weather/*", "Rain, wind, snow and thunder name themselves."),
@@ -877,20 +877,20 @@ pub const SELF_EXPLANATORY: &[(&str, &str)] = &[
     ("traffic/motorcycle_cross", "As the car cross."),
     ("traffic/bus_cross", "As the car cross."),
     ("traffic/tractor_cross", "As the car cross."),
-    // Traffic voices follow real NPC vehicles every frame (2026-10-08): a
+    // Traffic sounds follow real NPC vehicles every frame (2026-10-08): a
     // vehicle sounds like a vehicle where it is, and the bed under them is
     // the road being as busy as it is.
     (
         "traffic/car_loop",
         "A vehicle near the cab sounds like one, where it is.",
     ),
-    ("traffic/pickup_loop", "As the car voice."),
-    ("traffic/box_truck_loop", "As the car voice."),
-    ("traffic/semi_loop", "As the car voice."),
-    ("traffic/motorcycle_loop", "As the car voice."),
-    ("traffic/bus_loop", "As the car voice."),
-    ("traffic/tractor_loop", "As the car voice."),
-    ("traffic/trooper_loop", "As the car voice."),
+    ("traffic/pickup_loop", "As the car loop."),
+    ("traffic/box_truck_loop", "As the car loop."),
+    ("traffic/semi_loop", "As the car loop."),
+    ("traffic/motorcycle_loop", "As the car loop."),
+    ("traffic/bus_loop", "As the car loop."),
+    ("traffic/tractor_loop", "As the car loop."),
+    ("traffic/trooper_loop", "As the car loop."),
     (
         "traffic/highway_bed",
         "Distant freeway traffic: texture, not a decision.",

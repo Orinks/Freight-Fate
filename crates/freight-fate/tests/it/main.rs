@@ -158,7 +158,7 @@ mod states_driving_status_screens;
 mod states_driving_stop_menus;
 mod states_driving_street_controls;
 mod states_driving_traffic_rate;
-mod states_driving_traffic_voices;
+mod states_driving_traffic_sounds;
 mod states_driving_trip_resume;
 mod states_driving_troopers;
 mod states_driving_turns;

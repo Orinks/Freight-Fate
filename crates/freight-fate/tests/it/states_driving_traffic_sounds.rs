@@ -1,4 +1,4 @@
-//! `states/driving_traffic_voices.rs`: the traffic you hear follows the NPC
+//! `states/driving_traffic_sounds.rs`: the traffic you hear follows the NPC
 //! vehicles the bubble actually holds (owner, 2026-10-08).
 
 use ff_core::models::business::LEASED_OWNER_OPERATOR;
@@ -8,10 +8,10 @@ use ff_core::sim::cross_traffic::{CrossTraffic, CrossVehicle, CROSS_CLASSES};
 use ff_core::sim::traffic_manager::TrafficVehicle;
 
 use freight_fate::app::testing::{AudioLog, RecordedLoop, TestApp};
-use freight_fate::audio::{CH_TRAFFIC_BED, CH_TRAFFIC_VOICES};
+use freight_fate::audio::{CH_TRAFFIC_BED, CH_TRAFFIC_SOUNDS};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::*;
-use freight_fate::states::driving_traffic_voices::traffic_voice_key;
+use freight_fate::states::driving_traffic_sounds::traffic_sound_key;
 
 const FRAME: f64 = 1.0 / 60.0;
 
@@ -75,15 +75,15 @@ fn car(
     .with_lane(lane)
 }
 
-fn voices(log: &AudioLog) -> Vec<RecordedLoop> {
+fn sounds(log: &AudioLog) -> Vec<RecordedLoop> {
     let log = log.borrow();
-    CH_TRAFFIC_VOICES
+    CH_TRAFFIC_SOUNDS
         .iter()
         .filter_map(|ch| log.loops.get(ch).cloned())
         .collect()
 }
 
-fn voice_on(log: &AudioLog, channel: u32) -> Option<RecordedLoop> {
+fn sound_on(log: &AudioLog, channel: u32) -> Option<RecordedLoop> {
     log.borrow().loops.get(&channel).cloned()
 }
 
@@ -92,8 +92,8 @@ fn test_a_car_alongside_on_the_left_is_heard_on_the_left() {
     let mut app = TestApp::new();
     let (mut drive, log) = a_freeway_drive(&mut app);
     drive.trip.traffic_manager.vehicles = vec![car("probe:left", 0.0, 70.0, 1, "car", &drive)];
-    drive.update_traffic_voices(&mut app.ctx, FRAME);
-    let heard = voices(&log);
+    drive.update_traffic_sounds(&mut app.ctx, FRAME);
+    let heard = sounds(&log);
     assert_eq!(heard.len(), 1, "{heard:?}");
     assert_eq!(heard[0].key, "traffic/car_loop");
     assert!(heard[0].pan < -0.5, "{heard:?}");
@@ -101,7 +101,7 @@ fn test_a_car_alongside_on_the_left_is_heard_on_the_left() {
 }
 
 #[test]
-fn test_each_class_has_its_own_voice() {
+fn test_each_class_has_its_own_sound() {
     for (class, expected) in [
         ("car", "traffic/car_loop"),
         ("box truck", "traffic/box_truck_loop"),
@@ -109,23 +109,23 @@ fn test_each_class_has_its_own_voice() {
         ("semi", "traffic/semi_loop"),
         ("state trooper", "traffic/trooper_loop"),
     ] {
-        assert_eq!(traffic_voice_key(class), expected, "{class}");
+        assert_eq!(traffic_sound_key(class), expected, "{class}");
     }
     // Every crossroad class too: none falls back to the car by accident.
     for (class, _, _) in CROSS_CLASSES {
-        let key = traffic_voice_key(class);
+        let key = traffic_sound_key(class);
         assert!(class == "car" || key != "traffic/car_loop", "{class}");
     }
 }
 
 #[test]
-fn test_every_voice_is_in_the_sound_pack() {
+fn test_every_sound_is_in_the_sound_pack() {
     let pack = ff_core::assets_pack::open_default().expect("the committed sound pack");
     let mut keys: Vec<&str> = CROSS_CLASSES
         .iter()
-        .map(|(class, _, _)| traffic_voice_key(class))
+        .map(|(class, _, _)| traffic_sound_key(class))
         .collect();
-    keys.extend(["state trooper", "semi", "box truck"].map(traffic_voice_key));
+    keys.extend(["state trooper", "semi", "box truck"].map(traffic_sound_key));
     keys.push("traffic/highway_bed");
     for key in keys {
         assert!(
@@ -144,8 +144,8 @@ fn test_a_pass_swells_alongside_and_drops_in_pitch_going_away() {
     let mut samples = Vec::new();
     for ft in [-300.0, -100.0, 0.0, 100.0, 300.0] {
         drive.trip.traffic_manager.vehicles = vec![car("probe:pass", ft, 75.0, 1, "semi", &drive)];
-        drive.update_traffic_voices(&mut app.ctx, FRAME);
-        let heard = voices(&log);
+        drive.update_traffic_sounds(&mut app.ctx, FRAME);
+        let heard = sounds(&log);
         assert_eq!(heard.len(), 1, "{ft}: {heard:?}");
         samples.push(heard[0].clone());
     }
@@ -157,36 +157,36 @@ fn test_a_pass_swells_alongside_and_drops_in_pitch_going_away() {
 }
 
 #[test]
-fn test_a_voice_stays_on_its_vehicle_and_goes_quiet_when_it_leaves() {
+fn test_a_sound_stays_on_its_vehicle_and_goes_quiet_when_it_leaves() {
     let mut app = TestApp::new();
     let (mut drive, log) = a_freeway_drive(&mut app);
     drive.trip.traffic_manager.vehicles = vec![
         car("probe:a", -40.0, 70.0, 1, "car", &drive),
         car("probe:b", 200.0, 60.0, 0, "semi", &drive),
     ];
-    drive.update_traffic_voices(&mut app.ctx, FRAME);
-    let slots = drive.traffic_voices.clone();
+    drive.update_traffic_sounds(&mut app.ctx, FRAME);
+    let slots = drive.traffic_sounds.clone();
     let semi_slot = slots
         .iter()
         .position(|slot| slot.as_deref() == Some("main:probe:b"))
-        .expect("the semi has a voice");
+        .expect("the semi has a sound");
     // The car pulls up past the semi: nearest-first order changes, slots do not.
     drive.trip.traffic_manager.vehicles[0].position_mi = drive.trip.position_mi + 250.0 / 5280.0;
-    drive.update_traffic_voices(&mut app.ctx, FRAME);
-    assert_eq!(drive.traffic_voices, slots);
+    drive.update_traffic_sounds(&mut app.ctx, FRAME);
+    assert_eq!(drive.traffic_sounds, slots);
     assert_eq!(
-        voice_on(&log, CH_TRAFFIC_VOICES[semi_slot]).map(|v| v.key),
+        sound_on(&log, CH_TRAFFIC_SOUNDS[semi_slot]).map(|v| v.key),
         Some("traffic/semi_loop".to_string())
     );
-    // The semi drops a long way back: its voice stops.
+    // The semi drops a long way back: its sound stops.
     drive.trip.traffic_manager.vehicles[1].position_mi = drive.trip.position_mi - 0.5;
-    drive.update_traffic_voices(&mut app.ctx, FRAME);
-    assert!(voice_on(&log, CH_TRAFFIC_VOICES[semi_slot]).is_none());
-    assert_eq!(voices(&log).len(), 1);
+    drive.update_traffic_sounds(&mut app.ctx, FRAME);
+    assert!(sound_on(&log, CH_TRAFFIC_SOUNDS[semi_slot]).is_none());
+    assert_eq!(sounds(&log).len(), 1);
 }
 
 #[test]
-fn test_only_the_nearest_three_have_voices() {
+fn test_only_the_nearest_three_have_sounds() {
     let mut app = TestApp::new();
     let (mut drive, log) = a_freeway_drive(&mut app);
     drive.trip.traffic_manager.vehicles = (0..6)
@@ -201,9 +201,9 @@ fn test_only_the_nearest_three_have_voices() {
             )
         })
         .collect();
-    drive.update_traffic_voices(&mut app.ctx, FRAME);
-    assert_eq!(voices(&log).len(), 3);
-    let followed: Vec<String> = drive.traffic_voices.iter().flatten().cloned().collect();
+    drive.update_traffic_sounds(&mut app.ctx, FRAME);
+    assert_eq!(sounds(&log).len(), 3);
+    let followed: Vec<String> = drive.traffic_sounds.iter().flatten().cloned().collect();
     for near in ["main:probe:0", "main:probe:1", "main:probe:2"] {
         assert!(followed.iter().any(|id| id == near), "{followed:?}");
     }
@@ -217,22 +217,22 @@ fn test_on_an_exit_ramp_the_mainline_is_off_to_the_left_and_fades() {
     let (mut drive, log) = a_freeway_drive(&mut app);
     drive.ramp_mi = Some(0.4);
     drive.trip.traffic_manager.vehicles = vec![car("probe:main", 0.0, 65.0, 0, "car", &drive)];
-    drive.update_traffic_voices(&mut app.ctx, FRAME);
-    let at_the_gore = voices(&log);
+    drive.update_traffic_sounds(&mut app.ctx, FRAME);
+    let at_the_gore = sounds(&log);
     assert_eq!(at_the_gore.len(), 1);
     assert!(at_the_gore[0].pan < -0.5, "{at_the_gore:?}");
     // A few hundred feet down the ramp the freeway is fainter...
     for _ in 0..240 {
-        drive.update_traffic_voices(&mut app.ctx, FRAME);
+        drive.update_traffic_sounds(&mut app.ctx, FRAME);
     }
-    let down_the_ramp = voices(&log);
+    let down_the_ramp = sounds(&log);
     assert!(
         down_the_ramp.is_empty() || down_the_ramp[0].volume < at_the_gore[0].volume / 2.0,
         "{at_the_gore:?} then {down_the_ramp:?}"
     );
-    // ...and back on the mainline the voices read lanes again.
+    // ...and back on the mainline the sounds read lanes again.
     drive.ramp_mi = None;
-    drive.update_traffic_voices(&mut app.ctx, FRAME);
+    drive.update_traffic_sounds(&mut app.ctx, FRAME);
     assert_eq!(drive.traffic_ramp_rolled_ft, 0.0);
 }
 
@@ -262,8 +262,8 @@ fn test_cross_traffic_sweeps_from_the_side_it_came_from() {
     let mut heard = Vec::new();
     for ft in [-200.0, 0.0, 200.0] {
         drive.cross_bubble = Some(a_crossing(ft, "left"));
-        drive.update_traffic_voices(&mut app.ctx, FRAME);
-        let crossing: Vec<RecordedLoop> = voices(&log)
+        drive.update_traffic_sounds(&mut app.ctx, FRAME);
+        let crossing: Vec<RecordedLoop> = sounds(&log)
             .into_iter()
             .filter(|v| v.key == "traffic/pickup_loop")
             .collect();
@@ -281,8 +281,8 @@ fn test_cross_traffic_sweeps_from_the_side_it_came_from() {
 
     // From the right it is the mirror image.
     drive.cross_bubble = Some(a_crossing(-200.0, "right"));
-    drive.update_traffic_voices(&mut app.ctx, FRAME);
-    let from_right = voices(&log)
+    drive.update_traffic_sounds(&mut app.ctx, FRAME);
+    let from_right = sounds(&log)
         .into_iter()
         .find(|v| v.key == "traffic/pickup_loop")
         .expect("the pickup is heard");
@@ -290,7 +290,7 @@ fn test_cross_traffic_sweeps_from_the_side_it_came_from() {
 }
 
 #[test]
-fn test_the_interstate_has_distant_traffic_under_the_voices() {
+fn test_the_interstate_has_distant_traffic_under_the_sounds() {
     let mut app = TestApp::new();
     let (mut drive, log) = a_freeway_drive(&mut app);
     assert!(
@@ -298,14 +298,14 @@ fn test_the_interstate_has_distant_traffic_under_the_voices() {
         "Buffalo to Rochester runs the Thruway"
     );
     for _ in 0..600 {
-        drive.update_traffic_voices(&mut app.ctx, FRAME);
+        drive.update_traffic_sounds(&mut app.ctx, FRAME);
     }
-    let bed = voice_on(&log, CH_TRAFFIC_BED).expect("the freeway bed is playing");
+    let bed = sound_on(&log, CH_TRAFFIC_BED).expect("the freeway bed is playing");
     assert_eq!(bed.key, "traffic/highway_bed");
     assert!(
         (bed.volume - drive.traffic_bed_target()).abs() < 0.02,
         "{bed:?}"
     );
-    drive.reset_traffic_voices(&mut app.ctx);
-    assert!(voice_on(&log, CH_TRAFFIC_BED).is_none());
+    drive.reset_traffic_sounds(&mut app.ctx);
+    assert!(sound_on(&log, CH_TRAFFIC_BED).is_none());
 }

@@ -1,6 +1,6 @@
 //! The traffic you hear is the traffic that is there.
 //!
-//! Every NPC vehicle near the cab gets a voice: one steady loop for its class
+//! Every NPC vehicle near the cab gets a sound: one steady loop for its class
 //! (`traffic/<class>_loop`), whose level, pan and pitch are set every frame
 //! from where that vehicle really is. A car coming up the left lane swells in
 //! the left ear, is loudest alongside, and fades ahead with its pitch dropping
@@ -21,7 +21,7 @@
 //! away as the ramp leaves it, so it fades out down the ramp instead of
 //! driving through the truck.
 //!
-//! Under the voices sits the freeway's own distant traffic, a bed whose level
+//! Under the sounds sits the freeway's own distant traffic, a bed whose level
 //! is the road's real presence ([`TrafficManager::freeway_presence_at`]), so a
 //! busy interstate sounds busy and a quiet one at three in the morning does
 //! not. Off a freeway there is no bed.
@@ -33,16 +33,16 @@
 //! [`TrafficManager::freeway_presence_at`]: ff_core::sim::traffic_manager::TrafficManager::freeway_presence_at
 
 use crate::app::GameContext;
-use crate::audio::{CH_TRAFFIC_BED, CH_TRAFFIC_VOICES};
+use crate::audio::{CH_TRAFFIC_BED, CH_TRAFFIC_SOUNDS};
 use crate::states::driving::DrivingState;
 
-/// Beyond this a vehicle is part of the bed, not a voice of its own.
-pub const TRAFFIC_VOICE_HEAR_FT: f64 = 450.0;
-/// Closest a voice is treated as: one lane over, alongside.
-pub const TRAFFIC_VOICE_REF_FT: f64 = 12.0;
-/// A voice's level at [`TRAFFIC_VOICE_REF_FT`]. It falls with distance, so a
+/// Beyond this a vehicle is part of the bed, not a sound of its own.
+pub const TRAFFIC_SOUND_HEAR_FT: f64 = 450.0;
+/// Closest a sound is treated as: one lane over, alongside.
+pub const TRAFFIC_SOUND_REF_FT: f64 = 12.0;
+/// A sound's level at [`TRAFFIC_SOUND_REF_FT`]. It falls with distance, so a
 /// car a hundred feet back is about a tenth of this.
-pub const TRAFFIC_VOICE_PEAK: f64 = 0.45;
+pub const TRAFFIC_SOUND_PEAK: f64 = 0.45;
 /// Lane width, for how far over the next lane is.
 pub const LANE_WIDTH_FT: f64 = 12.0;
 /// Where an exit ramp leaves the mainline: the gore, a lane's width past the
@@ -75,7 +75,7 @@ pub struct HeardVehicle {
 }
 
 /// The loop for a traffic class, falling back to the car.
-pub fn traffic_voice_key(vehicle_class: &str) -> &'static str {
+pub fn traffic_sound_key(vehicle_class: &str) -> &'static str {
     match vehicle_class.trim().to_lowercase().as_str() {
         "semi" => "traffic/semi_loop",
         "box truck" | "service vehicle" => "traffic/box_truck_loop",
@@ -90,21 +90,21 @@ pub fn traffic_voice_key(vehicle_class: &str) -> &'static str {
 
 /// Level for a vehicle `distance_ft` away: falling as one over the distance,
 /// and eased to nothing over the last stretch before the hearing edge so a
-/// voice never appears or vanishes with a step.
-pub fn traffic_voice_volume(distance_ft: f64) -> f64 {
-    if distance_ft >= TRAFFIC_VOICE_HEAR_FT {
+/// sound never appears or vanishes with a step.
+pub fn traffic_sound_volume(distance_ft: f64) -> f64 {
+    if distance_ft >= TRAFFIC_SOUND_HEAR_FT {
         return 0.0;
     }
-    let near = TRAFFIC_VOICE_PEAK * TRAFFIC_VOICE_REF_FT / distance_ft.max(TRAFFIC_VOICE_REF_FT);
+    let near = TRAFFIC_SOUND_PEAK * TRAFFIC_SOUND_REF_FT / distance_ft.max(TRAFFIC_SOUND_REF_FT);
     let edge =
-        ((TRAFFIC_VOICE_HEAR_FT - distance_ft) / (TRAFFIC_VOICE_HEAR_FT * 0.3)).clamp(0.0, 1.0);
+        ((TRAFFIC_SOUND_HEAR_FT - distance_ft) / (TRAFFIC_SOUND_HEAR_FT * 0.3)).clamp(0.0, 1.0);
     near * edge
 }
 
 /// Pan for a vehicle `across_ft` to the side (negative left) and `along_ft`
 /// ahead or behind: hard to its side when alongside, toward the middle when
 /// it is far up or down the road, as a real one sounds.
-pub fn traffic_voice_pan(across_ft: f64, along_ft: f64) -> f64 {
+pub fn traffic_sound_pan(across_ft: f64, along_ft: f64) -> f64 {
     let distance = across_ft.hypot(along_ft);
     if distance <= 0.0 {
         return 0.0;
@@ -115,7 +115,7 @@ pub fn traffic_voice_pan(across_ft: f64, along_ft: f64) -> f64 {
 /// Playback rate: a slower vehicle sounds lower, and one closing on the cab
 /// a few percent higher than one pulling away. `approach_mph` is how fast the
 /// distance is shrinking, in real miles per hour.
-pub fn traffic_voice_rate(vehicle_mph: f64, approach_mph: f64) -> f64 {
+pub fn traffic_sound_rate(vehicle_mph: f64, approach_mph: f64) -> f64 {
     let pace = 0.8 + 0.2 * (vehicle_mph.abs() / 60.0).clamp(0.0, 1.25);
     let doppler =
         (1.0 + approach_mph / SPEED_OF_SOUND_MPH).clamp(1.0 - DOPPLER_LIMIT, 1.0 + DOPPLER_LIMIT);
@@ -129,8 +129,8 @@ fn rolling_share(vehicle_mph: f64) -> f64 {
 }
 
 impl DrivingState {
-    pub fn reset_traffic_voices(&mut self, ctx: &mut GameContext) {
-        for (slot, channel) in self.traffic_voices.iter_mut().zip(CH_TRAFFIC_VOICES) {
+    pub fn reset_traffic_sounds(&mut self, ctx: &mut GameContext) {
+        for (slot, channel) in self.traffic_sounds.iter_mut().zip(CH_TRAFFIC_SOUNDS) {
             if slot.take().is_some() {
                 ctx.audio.stop_loop_with(channel, 200);
             }
@@ -164,7 +164,7 @@ impl DrivingState {
                 (-lanes * LANE_WIDTH_FT, vehicle.speed_mph - truck_mph)
             };
             let distance = along.hypot(across);
-            if distance >= TRAFFIC_VOICE_HEAR_FT {
+            if distance >= TRAFFIC_SOUND_HEAR_FT {
                 continue;
             }
             // d(distance)/dt along the road: a vehicle ahead moving away, or
@@ -178,11 +178,11 @@ impl DrivingState {
             let approach = -closing_mph * along_share;
             heard.push(HeardVehicle {
                 id: format!("main:{}", vehicle.key),
-                key: traffic_voice_key(&vehicle.vehicle_class),
+                key: traffic_sound_key(&vehicle.vehicle_class),
                 distance_ft: distance,
-                volume: traffic_voice_volume(distance) * rolling_share(vehicle.speed_mph),
-                pan: traffic_voice_pan(across, along),
-                rate: traffic_voice_rate(vehicle.speed_mph, approach),
+                volume: traffic_sound_volume(distance) * rolling_share(vehicle.speed_mph),
+                pan: traffic_sound_pan(across, along),
+                rate: traffic_sound_rate(vehicle.speed_mph, approach),
             });
         }
         if let (Some(bubble), true) = (self.cross_bubble.as_ref(), self.terminal_live()) {
@@ -195,7 +195,7 @@ impl DrivingState {
                 let toward = if entered_left { 1.0 } else { -1.0 };
                 let across = vehicle.position_mi * 5280.0 * toward;
                 let distance = across.hypot(setback);
-                if distance >= TRAFFIC_VOICE_HEAR_FT {
+                if distance >= TRAFFIC_SOUND_HEAR_FT {
                     continue;
                 }
                 let across_share = if distance > 0.0 {
@@ -206,11 +206,11 @@ impl DrivingState {
                 let approach = -vehicle.speed_mph * toward * across_share;
                 heard.push(HeardVehicle {
                     id: format!("cross:{}", vehicle.id),
-                    key: traffic_voice_key(vehicle.vehicle_class),
+                    key: traffic_sound_key(vehicle.vehicle_class),
                     distance_ft: distance,
-                    volume: traffic_voice_volume(distance) * rolling_share(vehicle.speed_mph),
-                    pan: traffic_voice_pan(across, setback),
-                    rate: traffic_voice_rate(vehicle.speed_mph, approach),
+                    volume: traffic_sound_volume(distance) * rolling_share(vehicle.speed_mph),
+                    pan: traffic_sound_pan(across, setback),
+                    rate: traffic_sound_rate(vehicle.speed_mph, approach),
                 });
             }
         }
@@ -219,21 +219,21 @@ impl DrivingState {
         heard
     }
 
-    /// Give the nearest vehicles their voices and set each one from where its
+    /// Give the nearest vehicles their sounds and set each one from where its
     /// vehicle is. Runs after the trip has stepped the bubble, so the
     /// positions are this frame's.
-    pub fn update_traffic_voices(&mut self, ctx: &mut GameContext, dt: f64) {
+    pub fn update_traffic_sounds(&mut self, ctx: &mut GameContext, dt: f64) {
         if self.ramp_mi.is_some() {
             self.traffic_ramp_rolled_ft += self.trip.truck.velocity_mps.abs() * dt * 3.28084;
         } else {
             self.traffic_ramp_rolled_ft = 0.0;
         }
         let mut heard = self.heard_traffic();
-        heard.truncate(CH_TRAFFIC_VOICES.len());
+        heard.truncate(CH_TRAFFIC_SOUNDS.len());
 
         // A vehicle keeps its slot while it stays among the nearest; the
         // slots it leaves go quiet, and a newcomer takes a free one.
-        for (slot, channel) in self.traffic_voices.iter_mut().zip(CH_TRAFFIC_VOICES) {
+        for (slot, channel) in self.traffic_sounds.iter_mut().zip(CH_TRAFFIC_SOUNDS) {
             let kept = slot
                 .as_ref()
                 .is_some_and(|id| heard.iter().any(|v| &v.id == id));
@@ -243,20 +243,20 @@ impl DrivingState {
         }
         for vehicle in heard {
             let index = match self
-                .traffic_voices
+                .traffic_sounds
                 .iter()
                 .position(|slot| slot.as_deref() == Some(vehicle.id.as_str()))
             {
                 Some(index) => index,
-                None => match self.traffic_voices.iter().position(Option::is_none) {
+                None => match self.traffic_sounds.iter().position(Option::is_none) {
                     Some(index) => {
-                        self.traffic_voices[index] = Some(vehicle.id.clone());
+                        self.traffic_sounds[index] = Some(vehicle.id.clone());
                         index
                     }
                     None => continue,
                 },
             };
-            let channel = CH_TRAFFIC_VOICES[index];
+            let channel = CH_TRAFFIC_SOUNDS[index];
             // start_loop dedupes on a running key, so this is also the level
             // update, and it restarts the loop if anything stopped it.
             ctx.audio

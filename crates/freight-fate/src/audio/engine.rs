@@ -12,7 +12,7 @@ use super::{
     asset_bytes, Audio, AudioBackend, AudioError, BassBackend, Buses, KeyProbe, NullBackend,
     SustainLoopSpec, VolumeUpdate, ALERT_HOLD_TIMEOUT_S, BASS_NO_SOUND_DEVICE, CH_AIR, CH_ALERT,
     CH_AMBIENT, CH_EDGE, CH_HORN, CH_JAKE, CH_LANE_GUIDE, CH_RADIO_FX, CH_ROAD, CH_SCALE, CH_SURGE,
-    CH_TRAFFIC_BED, CH_TRAFFIC_VOICES, CH_WEATHER, CH_WEATHER_B, CUE_HOLD_TIMEOUT_S, HORN_LOOP,
+    CH_TRAFFIC_BED, CH_TRAFFIC_SOUNDS, CH_WEATHER, CH_WEATHER_B, CUE_HOLD_TIMEOUT_S, HORN_LOOP,
     JAKE_BAND_PREFIX, JAKE_CLASSIC_KEY, JAKE_RECORDED_KEY, SFX_EXTENSIONS,
 };
 
@@ -779,11 +779,11 @@ impl Audio for AudioEngine {
             // explicitly by its owner in `exit_drive` instead).
             CH_SCALE,
             CH_LANE_GUIDE,
-            // Traffic voices and the freeway bed: the driving state sets
+            // Traffic sounds and the freeway bed: the driving state sets
             // them every frame and restarts them when the drive resumes.
-            CH_TRAFFIC_VOICES[0],
-            CH_TRAFFIC_VOICES[1],
-            CH_TRAFFIC_VOICES[2],
+            CH_TRAFFIC_SOUNDS[0],
+            CH_TRAFFIC_SOUNDS[1],
+            CH_TRAFFIC_SOUNDS[2],
             CH_TRAFFIC_BED,
         ] {
             self.stop_loop_with(ch, 400);

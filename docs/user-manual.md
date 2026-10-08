@@ -1863,8 +1863,8 @@ quiets it, and settling back under the limit disarms it.
 | Weather sounds volume | Rain, wind, thunder, snow, and fog sounds. |
 
 | Engine sounds volume | Engine start, shutdown, and running engine sounds. |
-| Engine voice | Real plays the engine recorded from a working truck cab, following the RPM through its range. Classic keeps the original engine sound. Changes apply immediately, even while driving. |
-| Engine brake voice | Recorded, the default, plays the real engine brake growl. Classic plays the synthesized growl from earlier versions. Changes apply at once, even while driving. |
+| Engine sound | Real plays the engine recorded from a working truck cab, following the RPM through its range. Classic keeps the original engine sound. Changes apply immediately, even while driving. |
+| Engine brake sound | Recorded, the default, plays the real engine brake growl. Classic plays the synthesized growl from earlier versions. Changes apply at once, even while driving. |
 | Music volume | Menu and facility background music volume. |
 
 | Music source | Original, the default, plays the licensed menu and Roadhouse music. Synthesized has menus and the Roadhouse play music the game composes itself, with no voiced breaks, plus the original three tracks from Freight Fate 1.5. Changes take effect at once, even mid-drive. See below for what Synthesized mode does to the radio dial. |

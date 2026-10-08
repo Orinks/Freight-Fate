@@ -10,6 +10,8 @@
 
 - **Tire noise on the road is louder at highway speed.**
 
+- **The Engine voice and Engine brake voice settings are now called Engine sound and Engine brake sound.**
+
 ### Fixed
 
 - **Training classes now leave you tired, about half as fast as driving does.** If a class leaves you drowsy, you are told to sleep before you drive.

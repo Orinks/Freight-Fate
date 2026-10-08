@@ -444,8 +444,8 @@ impl DrivingState {
     ///
     /// Real seconds, like the light: the terminal already stops the clock
     /// compressing, and a gap that shrank at 4x would be unreadable. What the
-    /// driver hears of it is the traffic voices
-    /// (`driving_traffic_voices.rs`): each crossing vehicle is panned and
+    /// driver hears of it is the traffic sounds
+    /// (`driving_traffic_sounds.rs`): each crossing vehicle is panned and
     /// levelled from where it is every frame, so the gap IS the audio.
     pub fn update_cross_bubble(&mut self, dt: f64) {
         if self.cross_bubble.is_none() {
