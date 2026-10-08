@@ -4,7 +4,7 @@
 
 use ff_core::data::world_models::Interchange;
 use ff_core::pyrandom::PyRandom;
-use ff_core::sim::cross_traffic::{cross_sound_lead_s, CrossTraffic, CrossVehicle};
+use ff_core::sim::cross_traffic::{CrossTraffic, CrossVehicle};
 use ff_core::sim::trip_models::RoadStop;
 use ff_core::sim::trip_route_helpers::INTERCHANGE_IDENTITY_MI;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
@@ -325,7 +325,7 @@ impl DrivingState {
                 dt
             };
         }
-        self.update_cross_bubble(ctx, dt);
+        self.update_cross_bubble(dt);
         if !self.terminal_live() || self.ramp_terminal_done {
             return;
         }
@@ -443,11 +443,11 @@ impl DrivingState {
     /// Run the crossroad's own traffic while the terminal is live.
     ///
     /// Real seconds, like the light: the terminal already stops the clock
-    /// compressing, and a gap that shrank at 4x would be unreadable. Each
-    /// vehicle fires its crossing cue half a cue-length before it reaches the
-    /// conflict point, panned to the ear it comes from, so the peak of the
-    /// doppler lands on the actual crossing -- the gap IS the audio.
-    pub fn update_cross_bubble(&mut self, ctx: &mut GameContext, dt: f64) {
+    /// compressing, and a gap that shrank at 4x would be unreadable. What the
+    /// driver hears of it is the traffic voices
+    /// (`driving_traffic_voices.rs`): each crossing vehicle is panned and
+    /// levelled from where it is every frame, so the gap IS the audio.
+    pub fn update_cross_bubble(&mut self, dt: f64) {
         if self.cross_bubble.is_none() {
             return;
         }
@@ -466,39 +466,8 @@ impl DrivingState {
                 bubble.player_has_green = green;
             }
         }
-        let ramp_mi = self.terminal_gap_mi().unwrap_or(0.0) + RAMP_ACCESS_MI;
-        // The crossroad fades in down the ramp: nothing until the terminal
-        // callout distance, full presence at the bar.
-        let closeness = 1.0 - 1.0f64.min(0.0f64.max(ramp_mi) / RAMP_CONTROL_ANNOUNCE_MI);
-        let mut cues: Vec<(&'static str, f64, f64)> = Vec::new();
         if let Some(bubble) = self.cross_bubble.as_mut() {
             bubble.update(dt);
-            if closeness <= 0.05 {
-                return;
-            }
-            for vehicle in bubble.vehicles.iter_mut() {
-                if vehicle.sound_started || vehicle.position_mi >= 0.0 || vehicle.speed_mph <= 1.0 {
-                    continue;
-                }
-                let eta = -vehicle.position_mi * 3600.0 / vehicle.speed_mph;
-                if eta > cross_sound_lead_s(vehicle.vehicle_class).unwrap_or(1.2) {
-                    continue;
-                }
-                vehicle.sound_started = true;
-                cues.push((
-                    vehicle.vehicle_class,
-                    0.25 + 0.6 * closeness,
-                    if vehicle.from_side == "left" {
-                        -0.7
-                    } else {
-                        0.7
-                    },
-                ));
-            }
-        }
-        for (vehicle_class, volume, pan) in cues {
-            let key = format!("traffic/{}_cross", vehicle_class.replace(' ', "_"));
-            ctx.audio.play_with(&key, volume, pan);
         }
     }
 

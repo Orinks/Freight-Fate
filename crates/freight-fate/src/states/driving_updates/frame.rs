@@ -623,9 +623,9 @@ impl DrivingState {
         // distance it counts back is the distance the trip actually lost.
         self.update_wrong_way(ctx, dt);
         // After the trip has moved the truck and stepped the bubble, so the
-        // crossing this reads is the one that just happened.
-        self.update_traffic_passes(ctx, dt);
-        // Right after the passes, and for the same reason: the lane the driver
+        // voices sit where the vehicles are this frame.
+        self.update_traffic_voices(ctx, dt);
+        // Right after the voices, and for the same reason: the lane the driver
         // moved out of is only open once the bubble has been stepped.
         self.update_lane_gap(ctx, dt);
 

@@ -877,6 +877,24 @@ pub const SELF_EXPLANATORY: &[(&str, &str)] = &[
     ("traffic/motorcycle_cross", "As the car cross."),
     ("traffic/bus_cross", "As the car cross."),
     ("traffic/tractor_cross", "As the car cross."),
+    // Traffic voices follow real NPC vehicles every frame (2026-10-08): a
+    // vehicle sounds like a vehicle where it is, and the bed under them is
+    // the road being as busy as it is.
+    (
+        "traffic/car_loop",
+        "A vehicle near the cab sounds like one, where it is.",
+    ),
+    ("traffic/pickup_loop", "As the car voice."),
+    ("traffic/box_truck_loop", "As the car voice."),
+    ("traffic/semi_loop", "As the car voice."),
+    ("traffic/motorcycle_loop", "As the car voice."),
+    ("traffic/bus_loop", "As the car voice."),
+    ("traffic/tractor_loop", "As the car voice."),
+    ("traffic/trooper_loop", "As the car voice."),
+    (
+        "traffic/highway_bed",
+        "Distant freeway traffic: texture, not a decision.",
+    ),
     (
         "poi/facility_gate",
         "Ambient bed for a place the game has already named.",

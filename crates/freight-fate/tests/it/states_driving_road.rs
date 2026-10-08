@@ -1,8 +1,7 @@
-//! The small road mixins: `states/driving_traffic_pass.rs`,
-//! `states/driving_lane_gap.rs`, `states/driving_wrong_way.rs`,
+//! The small road mixins: `states/driving_lane_gap.rs`, `states/driving_wrong_way.rs`,
 //! `states/driving_engine_brake.rs` and `states/driving_damage.rs`.
 //!
-//! Ported from `tests/test_traffic_pass_cues.py`, `test_lane_return_gap.py`,
+//! Ported from `tests/test_lane_return_gap.py`,
 //! `test_lane_discrete.py` (the lane-gap cases), `test_engine_brake_zones.py`
 //! and `test_driving_damage_bands.py` -- everything in them a real
 //! `DrivingState` answers without the per-frame loop or a menu state.
@@ -25,7 +24,7 @@ use ff_core::sim::vehicle::{
     DAMAGE_OUT_OF_SERVICE_PCT,
 };
 
-use freight_fate::app::testing::{AudioLog, TestApp};
+use freight_fate::app::testing::TestApp;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::*;
 use freight_fate::states::driving_damage::{
@@ -38,7 +37,6 @@ use freight_fate::states::driving_engine_brake::{
 use freight_fate::states::driving_lane_gap::{
     LANE_GAP_ACT_REAL_S, LANE_GAP_CUE_MIN_GAP_S, LANE_GAP_MARGIN_MI,
 };
-use freight_fate::states::driving_traffic_pass::TRAFFIC_PASS_MIN_GAP_S;
 use freight_fate::states::driving_wrong_way::{
     WRONG_WAY_REMIND_MI, WRONG_WAY_STOP_RADIUS_MI, WRONG_WAY_TRAFFIC_MI, WRONG_WAY_WARN_MI,
 };
@@ -88,15 +86,6 @@ fn a_drive(app: &mut TestApp, name: &str) -> DrivingState {
 }
 
 /// Every `traffic/` cue the audio backend was asked for, with its pan.
-fn traffic_cues(log: &AudioLog) -> Vec<(String, f64)> {
-    log.borrow()
-        .played
-        .iter()
-        .filter(|(key, _, _)| key.starts_with("traffic/"))
-        .map(|(key, _, pan)| (key.clone(), *pan))
-        .collect()
-}
-
 /// `_roll_with_jake(d, mile=...)`: the truck at `mile`, rolling at road speed
 /// with the driver's own retarder on.
 fn roll_with_jake(drive: &mut DrivingState, mile: f64) {
@@ -132,199 +121,6 @@ fn logged_since(app: &TestApp, from: usize) -> Vec<String> {
         .iter()
         .map(|message| message.text.clone())
         .collect()
-}
-
-// -- driving_traffic_pass.py ----------------------------------------------------------
-
-/// `_driving` + `_pass_once` of `test_traffic_pass_cues.py`: Denver to Salt
-/// Lake City with the truck at mile 20.
-fn a_pass_drive(app: &mut TestApp) -> (DrivingState, AudioLog) {
-    let world = app.ctx.world;
-    let mut profile = Profile::named_in("Passer", "Denver");
-    profile.tutorial_done = true;
-    profile.business_status = LEASED_OWNER_OPERATOR.to_string();
-    app.ctx.profile = Some(profile);
-    let route = world
-        .route_from_cities(&["Denver", "Salt Lake City"])
-        .expect("Denver to Salt Lake City is a route");
-    let job = Job::new(
-        CARGO_CATALOG
-            .get("general")
-            .expect("the general cargo type"),
-        12.0,
-        "Denver",
-        "yard",
-        "Salt Lake City",
-        200.0,
-        900.0,
-        12.0,
-    );
-    let mut drive = DrivingState::new(
-        &mut app.ctx,
-        job,
-        route,
-        Some(99),
-        DRIVE_PHASE_DELIVERY,
-        Some(10.0),
-    );
-    drive.trip.truck.set_air_ready(false);
-    drive.trip.position_mi = 20.0;
-    drive.trip.set_npc_vehicles(Vec::new());
-    let log = app.record_audio();
-    (drive, log)
-}
-
-/// Walk one vehicle from ahead of the truck to behind it.
-fn pass_once(drive: &mut DrivingState, app: &mut TestApp, vehicle_class: &str, lane: i64) {
-    let ahead = 0.2;
-    let speed = 75.0;
-    let vehicle = TrafficVehicle::new(
-        &format!("probe:{vehicle_class}"),
-        drive.trip.position_mi + ahead,
-        speed,
-        speed,
-        -lane,
-        "passing",
-        vehicle_class,
-    )
-    .with_lane(lane);
-    drive.trip.traffic_manager.vehicles = vec![vehicle];
-    drive.update_traffic_passes(&mut app.ctx, 1.0 / 60.0);
-    drive.trip.traffic_manager.vehicles[0].position_mi = drive.trip.position_mi - ahead;
-    drive.update_traffic_passes(&mut app.ctx, 1.0 / 60.0);
-}
-
-#[test]
-fn test_a_semi_going_by_plays_the_semi_cue() {
-    let mut app = TestApp::new();
-    let (mut drive, log) = a_pass_drive(&mut app);
-
-    pass_once(&mut drive, &mut app, "semi", 1);
-
-    assert!(traffic_cues(&log)
-        .iter()
-        .any(|(key, _)| key == "traffic/semi_pass"));
-}
-
-#[test]
-fn test_each_class_gets_its_own_whoosh() {
-    for (vehicle_class, expected) in [
-        ("car", "traffic/car_pass"),
-        ("box truck", "traffic/box_truck_pass"),
-        ("semi", "traffic/semi_pass"),
-    ] {
-        let mut app = TestApp::new();
-        let (mut drive, log) = a_pass_drive(&mut app);
-        pass_once(&mut drive, &mut app, vehicle_class, 1);
-        assert!(
-            traffic_cues(&log).iter().any(|(key, _)| key == expected),
-            "{vehicle_class}"
-        );
-    }
-}
-
-#[test]
-fn test_the_cue_is_panned_to_the_side_it_passed_on() {
-    let mut app = TestApp::new();
-    let (mut drive, log) = a_pass_drive(&mut app);
-
-    pass_once(&mut drive, &mut app, "car", 1); // left of a truck in lane 0
-
-    let cues = traffic_cues(&log);
-    assert!(!cues.is_empty());
-    assert!(cues[0].1 < 0.0);
-}
-
-#[test]
-fn test_a_vehicle_is_only_whooshed_once() {
-    // A truck alongside in slow traffic can cross the bumper repeatedly.
-    let mut app = TestApp::new();
-    let (mut drive, log) = a_pass_drive(&mut app);
-    drive.trip.traffic_manager.vehicles =
-        vec![TrafficVehicle::new("probe:car", 20.2, 75.0, 75.0, -1, "passing", "car").with_lane(1)];
-
-    for offset in [0.2, -0.2, 0.2, -0.2] {
-        drive.trip.traffic_manager.vehicles[0].position_mi = 20.0 + offset;
-        drive.update_traffic_passes(&mut app.ctx, 1.0 / 60.0);
-    }
-
-    assert_eq!(traffic_cues(&log).len(), 1);
-}
-
-#[test]
-fn test_troopers_are_left_to_the_enforcement_layer() {
-    // It already gives them a marker the civilian clips deliberately lack.
-    let mut app = TestApp::new();
-    let (mut drive, log) = a_pass_drive(&mut app);
-
-    pass_once(&mut drive, &mut app, "state trooper", 1);
-
-    assert!(!traffic_cues(&log)
-        .iter()
-        .any(|(key, _)| key == "traffic/trooper_pass"));
-}
-
-#[test]
-fn test_close_passes_do_not_machine_gun() {
-    // Ten times pacing turns a populated road into a whoosh every 2 seconds.
-    let mut app = TestApp::new();
-    let (mut drive, log) = a_pass_drive(&mut app);
-    drive.trip.traffic_manager.vehicles = (0..6)
-        .map(|i| {
-            TrafficVehicle::new(
-                &format!("probe:{i}"),
-                20.2,
-                75.0,
-                75.0,
-                -1,
-                "passing",
-                "car",
-            )
-            .with_lane(1)
-        })
-        .collect();
-    drive.update_traffic_passes(&mut app.ctx, 1.0 / 60.0);
-    for vehicle in &mut drive.trip.traffic_manager.vehicles {
-        vehicle.position_mi = 19.8;
-    }
-    drive.update_traffic_passes(&mut app.ctx, 1.0 / 60.0);
-
-    assert_eq!(traffic_cues(&log).len(), 1);
-}
-
-#[test]
-fn test_the_cooldown_lets_the_next_one_through() {
-    let mut app = TestApp::new();
-    let (mut drive, log) = a_pass_drive(&mut app);
-
-    pass_once(&mut drive, &mut app, "car", 1);
-    drive.update_traffic_passes(&mut app.ctx, TRAFFIC_PASS_MIN_GAP_S);
-    pass_once(&mut drive, &mut app, "semi", 1);
-
-    let names: Vec<String> = traffic_cues(&log).into_iter().map(|(key, _)| key).collect();
-    assert!(names.iter().any(|key| key == "traffic/car_pass"));
-    assert!(names.iter().any(|key| key == "traffic/semi_pass"));
-}
-
-#[test]
-fn test_a_vehicle_holding_station_never_whooshes() {
-    let mut app = TestApp::new();
-    let (mut drive, log) = a_pass_drive(&mut app);
-    drive.trip.traffic_manager.vehicles = vec![TrafficVehicle::new(
-        "probe:steady",
-        20.5,
-        60.0,
-        60.0,
-        0,
-        "cruising",
-        "semi",
-    )];
-
-    for _ in 0..20 {
-        drive.update_traffic_passes(&mut app.ctx, 1.0 / 60.0);
-    }
-
-    assert!(traffic_cues(&log).is_empty());
 }
 
 // -- driving_lane_gap.py --------------------------------------------------------------

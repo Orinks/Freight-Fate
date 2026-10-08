@@ -32,7 +32,7 @@ pub mod driving_siren;
 pub mod driving_speed_control;
 pub mod driving_stop_detail;
 pub mod driving_stops;
-pub mod driving_traffic_pass;
+pub mod driving_traffic_voices;
 pub mod driving_turns;
 pub mod driving_updates;
 pub mod driving_wrong_way;

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added
+
+- **Interstates now have the sound of distant traffic, louder on busier stretches.**
+
+### Changed
+
+- **Tire noise on the road is louder at highway speed.**
+
 ### Fixed
 
 - **Sitting through a training course now tires you, about half as fast as driving.** A multi-day course counts only its last daytime class day.
@@ -27,6 +35,10 @@
 - **Two real Arkansas weigh stations near West Memphis are on the map.** Marion screens southbound I-55, Lehi eastbound I-40.
 
 - **A hazard after the last weigh station warning no longer costs you the bypass charge.** Time spent on the hazard does not count against you.
+
+- **Passing traffic now sounds where the vehicle really is.** You hear it come up beside you, then fade as it pulls ahead.
+
+- **Traffic sounds on exit ramps now match the cars.** The freeway fades off to your left, and cross traffic at the ramp end sweeps across in front of you.
 
 - **The update check skips a preview snapshot that changes nothing you would notice.** A snapshot that only repeats your version is no longer offered.
 

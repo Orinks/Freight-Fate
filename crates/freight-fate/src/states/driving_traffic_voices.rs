@@ -1,0 +1,317 @@
+//! The traffic you hear is the traffic that is there.
+//!
+//! Every NPC vehicle near the cab gets a voice: one steady loop for its class
+//! (`traffic/<class>_loop`), whose level, pan and pitch are set every frame
+//! from where that vehicle really is. A car coming up the left lane swells in
+//! the left ear, is loudest alongside, and fades ahead with its pitch dropping
+//! as it pulls away; a car crossing in front of a truck stopped at a ramp end
+//! sweeps from the ear it came from to the other one, loudest at the
+//! crossing. Nothing is scheduled ahead, so nothing can land early or late.
+//!
+//! This replaced one-shot whooshes (owner, 2026-10-08: "the sounds aren't
+//! synced with the NPC traffic"). Those fired when a vehicle crossed the
+//! bumper, but each recording peaked somewhere different, from a tenth of a
+//! second to well over a second in, so the loudest moment arrived after the
+//! car was already gone at ten times pacing; a six-second cooldown dropped
+//! most passes outright; and on an exit ramp, where the highway odometer
+//! holds, every mainline car still "passed" the truck dead centre as if it
+//! drove through the cab.
+//!
+//! On a ramp the mainline stays where it is: off to the left, getting farther
+//! away as the ramp leaves it, so it fades out down the ramp instead of
+//! driving through the truck.
+//!
+//! Under the voices sits the freeway's own distant traffic, a bed whose level
+//! is the road's real presence ([`TrafficManager::freeway_presence_at`]), so a
+//! busy interstate sounds busy and a quiet one at three in the morning does
+//! not. Off a freeway there is no bed.
+//!
+//! Earcons, never sentences, for the reason the old whooshes gave: nothing
+//! follows from hearing a car go by, and the spoken budget belongs to things
+//! that cost money.
+//!
+//! [`TrafficManager::freeway_presence_at`]: ff_core::sim::traffic_manager::TrafficManager::freeway_presence_at
+
+use crate::app::GameContext;
+use crate::audio::{CH_TRAFFIC_BED, CH_TRAFFIC_VOICES};
+use crate::states::driving::DrivingState;
+
+/// Beyond this a vehicle is part of the bed, not a voice of its own.
+pub const TRAFFIC_VOICE_HEAR_FT: f64 = 450.0;
+/// Closest a voice is treated as: one lane over, alongside.
+pub const TRAFFIC_VOICE_REF_FT: f64 = 12.0;
+/// A voice's level at [`TRAFFIC_VOICE_REF_FT`]. It falls with distance, so a
+/// car a hundred feet back is about a tenth of this.
+pub const TRAFFIC_VOICE_PEAK: f64 = 0.45;
+/// Lane width, for how far over the next lane is.
+pub const LANE_WIDTH_FT: f64 = 12.0;
+/// Where an exit ramp leaves the mainline: the gore, a lane's width past the
+/// right lane's edge.
+pub const RAMP_SPLIT_FT: f64 = 24.0;
+/// Sideways feet a ramp gains per foot along it: about a twenty-degree split.
+pub const RAMP_DIVERGENCE: f64 = 0.35;
+/// The crossroad is this far past a ramp's stop bar.
+pub const CROSS_SETBACK_FT: f64 = 30.0;
+const SPEED_OF_SOUND_MPH: f64 = 767.0;
+/// Doppler is felt, not measured: kept to a few percent so a fast closing
+/// speed never turns a car into a siren.
+const DOPPLER_LIMIT: f64 = 0.05;
+/// How quickly the bed follows the road, in seconds to close most of a gap.
+const BED_SMOOTH_S: f64 = 2.0;
+/// The bed's level at the busiest road the model has.
+pub const TRAFFIC_BED_PEAK: f64 = 0.4;
+const BED_FLOOR: f64 = 0.01;
+
+/// One vehicle worth hearing this frame.
+#[derive(Debug, Clone, PartialEq)]
+pub struct HeardVehicle {
+    /// Stable for as long as the vehicle exists: `main:<key>` or `cross:<id>`.
+    pub id: String,
+    pub key: &'static str,
+    pub distance_ft: f64,
+    pub volume: f64,
+    pub pan: f64,
+    pub rate: f64,
+}
+
+/// The loop for a traffic class, falling back to the car.
+pub fn traffic_voice_key(vehicle_class: &str) -> &'static str {
+    match vehicle_class.trim().to_lowercase().as_str() {
+        "semi" => "traffic/semi_loop",
+        "box truck" | "service vehicle" => "traffic/box_truck_loop",
+        "pickup" => "traffic/pickup_loop",
+        "motorcycle" => "traffic/motorcycle_loop",
+        "bus" => "traffic/bus_loop",
+        "tractor" => "traffic/tractor_loop",
+        "state trooper" => "traffic/trooper_loop",
+        _ => "traffic/car_loop",
+    }
+}
+
+/// Level for a vehicle `distance_ft` away: falling as one over the distance,
+/// and eased to nothing over the last stretch before the hearing edge so a
+/// voice never appears or vanishes with a step.
+pub fn traffic_voice_volume(distance_ft: f64) -> f64 {
+    if distance_ft >= TRAFFIC_VOICE_HEAR_FT {
+        return 0.0;
+    }
+    let near = TRAFFIC_VOICE_PEAK * TRAFFIC_VOICE_REF_FT / distance_ft.max(TRAFFIC_VOICE_REF_FT);
+    let edge =
+        ((TRAFFIC_VOICE_HEAR_FT - distance_ft) / (TRAFFIC_VOICE_HEAR_FT * 0.3)).clamp(0.0, 1.0);
+    near * edge
+}
+
+/// Pan for a vehicle `across_ft` to the side (negative left) and `along_ft`
+/// ahead or behind: hard to its side when alongside, toward the middle when
+/// it is far up or down the road, as a real one sounds.
+pub fn traffic_voice_pan(across_ft: f64, along_ft: f64) -> f64 {
+    let distance = across_ft.hypot(along_ft);
+    if distance <= 0.0 {
+        return 0.0;
+    }
+    (0.85 * across_ft / distance).clamp(-0.85, 0.85)
+}
+
+/// Playback rate: a slower vehicle sounds lower, and one closing on the cab
+/// a few percent higher than one pulling away. `approach_mph` is how fast the
+/// distance is shrinking, in real miles per hour.
+pub fn traffic_voice_rate(vehicle_mph: f64, approach_mph: f64) -> f64 {
+    let pace = 0.8 + 0.2 * (vehicle_mph.abs() / 60.0).clamp(0.0, 1.25);
+    let doppler =
+        (1.0 + approach_mph / SPEED_OF_SOUND_MPH).clamp(1.0 - DOPPLER_LIMIT, 1.0 + DOPPLER_LIMIT);
+    pace * doppler
+}
+
+/// A standing vehicle has no tire roar: an idling queue is quieter than one
+/// rolling.
+fn rolling_share(vehicle_mph: f64) -> f64 {
+    0.25 + 0.75 * (vehicle_mph.abs() / 45.0).clamp(0.0, 1.0)
+}
+
+impl DrivingState {
+    pub fn reset_traffic_voices(&mut self, ctx: &mut GameContext) {
+        for (slot, channel) in self.traffic_voices.iter_mut().zip(CH_TRAFFIC_VOICES) {
+            if slot.take().is_some() {
+                ctx.audio.stop_loop_with(channel, 200);
+            }
+        }
+        if self.traffic_bed_volume > 0.0 {
+            ctx.audio.stop_loop_with(CH_TRAFFIC_BED, 400);
+        }
+        self.traffic_bed_volume = 0.0;
+        self.traffic_ramp_rolled_ft = 0.0;
+    }
+
+    /// Every vehicle near enough to hear, nearest first.
+    pub fn heard_traffic(&self) -> Vec<HeardVehicle> {
+        let mut heard = Vec::new();
+        let truck_mph = self.trip.truck.speed_mph();
+        let on_ramp = self.ramp_mi.is_some();
+        let player_lane = self.trip.traffic_manager.player_lane;
+        for vehicle in &self.trip.traffic_manager.vehicles {
+            let along = (vehicle.position_mi - self.trip.position_mi) * 5280.0;
+            // Lane indices count leftward, so a higher lane is to the left.
+            let (across, closing_mph) = if on_ramp {
+                // The odometer holds on the ramp: the mainline streams past a
+                // standing point at its own speed, off to the left and
+                // farther each foot the truck rolls down the ramp.
+                let over = (vehicle.lane.max(0) as f64 + 0.5) * LANE_WIDTH_FT
+                    + RAMP_SPLIT_FT
+                    + self.traffic_ramp_rolled_ft * RAMP_DIVERGENCE;
+                (-over, vehicle.speed_mph)
+            } else {
+                let lanes = (vehicle.lane - player_lane) as f64;
+                (-lanes * LANE_WIDTH_FT, vehicle.speed_mph - truck_mph)
+            };
+            let distance = along.hypot(across);
+            if distance >= TRAFFIC_VOICE_HEAR_FT {
+                continue;
+            }
+            // d(distance)/dt along the road: a vehicle ahead moving away, or
+            // behind and gaining, changes it by `closing` times the share of
+            // the distance that lies along the road.
+            let along_share = if distance > 0.0 {
+                along / distance
+            } else {
+                0.0
+            };
+            let approach = -closing_mph * along_share;
+            heard.push(HeardVehicle {
+                id: format!("main:{}", vehicle.key),
+                key: traffic_voice_key(&vehicle.vehicle_class),
+                distance_ft: distance,
+                volume: traffic_voice_volume(distance) * rolling_share(vehicle.speed_mph),
+                pan: traffic_voice_pan(across, along),
+                rate: traffic_voice_rate(vehicle.speed_mph, approach),
+            });
+        }
+        if let (Some(bubble), true) = (self.cross_bubble.as_ref(), self.terminal_live()) {
+            let setback =
+                self.terminal_gap_mi().unwrap_or(0.0).max(0.0) * 5280.0 + CROSS_SETBACK_FT;
+            for vehicle in &bubble.vehicles {
+                // Cross traffic drives toward positive positions; the side it
+                // came from is where a negative position puts it.
+                let entered_left = vehicle.from_side == "left";
+                let toward = if entered_left { 1.0 } else { -1.0 };
+                let across = vehicle.position_mi * 5280.0 * toward;
+                let distance = across.hypot(setback);
+                if distance >= TRAFFIC_VOICE_HEAR_FT {
+                    continue;
+                }
+                let across_share = if distance > 0.0 {
+                    across / distance
+                } else {
+                    0.0
+                };
+                let approach = -vehicle.speed_mph * toward * across_share;
+                heard.push(HeardVehicle {
+                    id: format!("cross:{}", vehicle.id),
+                    key: traffic_voice_key(vehicle.vehicle_class),
+                    distance_ft: distance,
+                    volume: traffic_voice_volume(distance) * rolling_share(vehicle.speed_mph),
+                    pan: traffic_voice_pan(across, setback),
+                    rate: traffic_voice_rate(vehicle.speed_mph, approach),
+                });
+            }
+        }
+        heard.retain(|v| v.volume > 0.0);
+        heard.sort_by(|a, b| a.distance_ft.total_cmp(&b.distance_ft));
+        heard
+    }
+
+    /// Give the nearest vehicles their voices and set each one from where its
+    /// vehicle is. Runs after the trip has stepped the bubble, so the
+    /// positions are this frame's.
+    pub fn update_traffic_voices(&mut self, ctx: &mut GameContext, dt: f64) {
+        if self.ramp_mi.is_some() {
+            self.traffic_ramp_rolled_ft += self.trip.truck.velocity_mps.abs() * dt * 3.28084;
+        } else {
+            self.traffic_ramp_rolled_ft = 0.0;
+        }
+        let mut heard = self.heard_traffic();
+        heard.truncate(CH_TRAFFIC_VOICES.len());
+
+        // A vehicle keeps its slot while it stays among the nearest; the
+        // slots it leaves go quiet, and a newcomer takes a free one.
+        for (slot, channel) in self.traffic_voices.iter_mut().zip(CH_TRAFFIC_VOICES) {
+            let kept = slot
+                .as_ref()
+                .is_some_and(|id| heard.iter().any(|v| &v.id == id));
+            if !kept && slot.take().is_some() {
+                ctx.audio.stop_loop_with(channel, 250);
+            }
+        }
+        for vehicle in heard {
+            let index = match self
+                .traffic_voices
+                .iter()
+                .position(|slot| slot.as_deref() == Some(vehicle.id.as_str()))
+            {
+                Some(index) => index,
+                None => match self.traffic_voices.iter().position(Option::is_none) {
+                    Some(index) => {
+                        self.traffic_voices[index] = Some(vehicle.id.clone());
+                        index
+                    }
+                    None => continue,
+                },
+            };
+            let channel = CH_TRAFFIC_VOICES[index];
+            // start_loop dedupes on a running key, so this is also the level
+            // update, and it restarts the loop if anything stopped it.
+            ctx.audio
+                .start_loop_with(channel, vehicle.key, vehicle.volume, 150);
+            ctx.audio.set_loop_pan(channel, vehicle.pan);
+            ctx.audio.set_loop_rate(channel, vehicle.rate);
+            if let Some(id) = vehicle.id.strip_prefix("cross:") {
+                if let Some(bubble) = self.cross_bubble.as_mut() {
+                    for v in bubble.vehicles.iter_mut() {
+                        if v.id.to_string() == id {
+                            v.sound_started = true;
+                        }
+                    }
+                }
+            }
+        }
+        self.update_traffic_bed(ctx, dt);
+    }
+
+    /// What the freeway's distant traffic should be at, before smoothing.
+    pub fn traffic_bed_target(&self) -> f64 {
+        let presence = self
+            .trip
+            .traffic_manager
+            .freeway_presence_at(self.trip.position_mi);
+        let mut level = TRAFFIC_BED_PEAK * presence;
+        if self.ramp_mi.is_some() {
+            // Down the ramp the freeway falls behind; at the ramp's end it is
+            // still there, faintly, past the crossroad.
+            let away = (self.traffic_ramp_rolled_ft / 1200.0).clamp(0.0, 1.0);
+            level *= 1.0 - 0.7 * away;
+        }
+        level
+    }
+
+    fn update_traffic_bed(&mut self, ctx: &mut GameContext, dt: f64) {
+        let target = self.traffic_bed_target();
+        let blend = if dt > 0.0 {
+            (dt / BED_SMOOTH_S).min(1.0)
+        } else {
+            1.0
+        };
+        self.traffic_bed_volume += (target - self.traffic_bed_volume) * blend;
+        if self.traffic_bed_volume < BED_FLOOR {
+            if self.traffic_bed_volume > 0.0 && target < BED_FLOOR {
+                ctx.audio.stop_loop_with(CH_TRAFFIC_BED, 800);
+                self.traffic_bed_volume = 0.0;
+            }
+            return;
+        }
+        ctx.audio.start_loop_with(
+            CH_TRAFFIC_BED,
+            "traffic/highway_bed",
+            self.traffic_bed_volume,
+            800,
+        );
+    }
+}

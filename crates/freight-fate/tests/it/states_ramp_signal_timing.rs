@@ -248,6 +248,7 @@ fn red_clearance_empties_the_conflict_window_before_green() {
                 crossed: false,
                 committed: false,
                 sound_started: false,
+                id: 1,
             });
             drive.cross_bubble = Some(bubble);
             drive.ramp_light_timer = drive.ramp_light_red_s() - RAMP_LIGHT_RED_CLEARANCE_S;

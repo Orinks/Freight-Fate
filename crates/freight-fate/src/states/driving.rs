@@ -785,13 +785,13 @@ pub struct DrivingState {
     pub wrong_way_mi: f64,
     pub wrong_way_said_at: f64,
 
-    // ---- driving_traffic_pass.py: `_reset_traffic_passes` ------------------------------
-    // Which end of the truck each bubble vehicle was on last frame (the
-    // relative mile), and which have already been given their whoosh.
-    // Per-stint, not saved.
-    pub traffic_pass_side: HashMap<String, f64>,
-    pub traffic_passed_keys: HashSet<String>,
-    pub traffic_pass_cooldown_s: f64,
+    // ---- driving_traffic_voices.rs ------------------------------------------------------
+    // Which vehicle each traffic voice is following (`main:<key>` or
+    // `cross:<id>`), the freeway bed's smoothed level, and how far the truck
+    // has rolled down the current exit ramp. Per-stint, not saved.
+    pub traffic_voices: [Option<String>; 3],
+    pub traffic_bed_volume: f64,
+    pub traffic_ramp_rolled_ft: f64,
 
     // ---- driving_lane_gap.py: `_reset_lane_gap` ----------------------------------------
     // The lane a completed change moved out of, and the vehicle that was

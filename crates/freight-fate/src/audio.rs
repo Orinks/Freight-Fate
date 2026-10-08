@@ -73,6 +73,9 @@ pub const CH_SIREN: u32 = 17; // the held enforcement siren, panned and levelled
 pub const CH_SCALE: u32 = 18; // weigh-station approach bed, swelling on real seconds
 pub const CH_SURGE: u32 = 19; // liquid running in a tank trailer: gated, silent on other freight
 pub const CH_LANE_GUIDE: u32 = 20; // optional lane-guide tone, panned by the guide (off by default)
+/// One voice per nearby NPC vehicle, set every frame from where it is.
+pub const CH_TRAFFIC_VOICES: [u32; 3] = [21, 22, 23];
+pub const CH_TRAFFIC_BED: u32 = 24; // the freeway's distant traffic, by its real presence
 
 // Everything above must be inside the reservation. set_reserved(n) protects
 // channels 0..n-1 from find_channel, and this sat at 14 while CH_RADIO_FX,

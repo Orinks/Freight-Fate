@@ -49,8 +49,21 @@ compensating for its level.
 | weather/rain_light | +6 dB | 21 dB under heavy rain at the same weather volume; nearly inaudible over the engine |
 | weather/snow_wind | +7 dB | 27 dB under heavy rain; raised to its peak ceiling |
 | poi/rest_stop_night | +6 dB | 10 dB under the daytime rest stop bed it replaces at night |
+| vehicle/road | +6 dB | 2026-10-08: about 15 dB under the engine at highway speed, so the road was barely there (owner: "we need road sounds on the interstate") |
 
 Left as they are: the shift-sound bank variants 09, 11 and 15 read 5 to 11 dB
 under their siblings, but their peaks are already near full scale, so static
 gain cannot close the gap (on the roadmap). No whole-bus mismatch was big
 enough to change a bus constant.
+
+## Traffic voices (2026-10-08)
+
+The traffic loops (`traffic/*_loop`) were given static gain to -20 LUFS for a
+car and a little more for heavier vehicles (semi +3 dB, bus +2, box truck
++1.5, tractor and motorcycle +1, pickup +0.5), and the freeway bed
+(`traffic/highway_bed`) to -22 LUFS. The game scales each voice by distance
+from its vehicle (`TRAFFIC_VOICE_PEAK` one lane over, falling as one over the
+distance) and the bed by the road's traffic presence (`TRAFFIC_BED_PEAK` at
+the busiest road), so those two constants are where a listening pass tunes
+them.
+

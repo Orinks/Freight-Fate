@@ -41,6 +41,21 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Traffic voices (owner, 2026-10-08: "the sounds aren't synced with the
+      NPC traffic"): the three nearest NPC vehicles each run a steady class
+      loop whose level, pan and pitch are set every frame from where the
+      vehicle is, mainline and ramp-end cross traffic alike, replacing the
+      bumper-crossing whooshes and the timed crossing one-shots (whose
+      recordings peaked anywhere from 0.1 s to 1.7 s in, and whose cooldown
+      dropped most passes). On an exit ramp the mainline sits to the left and
+      fades down the ramp instead of passing through the cab. Interstates and
+      divided multi-lane highways carry a distant-traffic bed at the road's
+      real presence, and the road bed is 6 dB louder. Loops rendered with
+      genny (`sound-test/traffic_voices.json`); levels in `docs/audio-levels.md`.
+- [ ] (Found along the way) Owner listening pass on the traffic voices and
+      the freeway bed: `TRAFFIC_VOICE_PEAK`, `TRAFFIC_BED_PEAK` and the
+      per-class loudness are first guesses, set without ears.
+
 - [x] Channel 3000 on 87.7 (owner, 2026-10-06): the owner's TV programming on
       a daypart schedule by the truck's local hour, from its own
       `channel3000.pak`, opened on first tune-in; off the dial without the
@@ -2634,6 +2649,12 @@ terminal becomes the anchor of that week instead of a spawn point.
       the home terminal: short home-region runs, home every night, no
       cycle pressure, lower pay -- weighted toward new hires in the
       assigned-dispatch levels.
+
+- [ ] genny's instruments in Synthesized music (owner, 2026-10-08): the game
+      already composes endless seeded pieces in Rust (`ff_core::music_synth`);
+      porting genny's voiced instruments, drums and styles into that renderer
+      would give the synth mode a real band. genny is Python, so it is a port,
+      not an embed.
 
 ### Personal conveyance and duty-purpose correction
 
