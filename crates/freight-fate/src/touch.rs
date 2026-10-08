@@ -158,13 +158,11 @@ impl Gesture {
         })
     }
 
-    /// The key a hold keeps down.
+    /// The fixed pedal key a hold keeps down.
     pub fn held_key(self) -> Option<Key> {
         match self {
             Gesture::HoldUpperBegan => Some(Key::Up),
             Gesture::HoldLowerBegan => Some(Key::Down),
-            Gesture::EmergencyBrakeHoldBegan => Some(Key::B),
-            Gesture::HornHoldBegan => Some(Key::H),
             _ => None,
         }
     }
@@ -409,6 +407,7 @@ mod tests {
     fn emergency_brake_and_horn_holds_are_left_for_live_bindings() {
         for gesture in [Gesture::EmergencyBrakeHoldBegan, Gesture::HornHoldBegan] {
             let mut touch = TouchInput::new();
+            assert_eq!(gesture.held_key(), None);
             assert_eq!(
                 touch.handle(gesture).events,
                 vec![InputEvent::Gesture(gesture)]
@@ -440,9 +439,12 @@ mod tests {
     }
 
     #[test]
-    fn a_lift_with_nothing_held_says_nothing() {
+    fn a_lift_without_a_pedal_reaches_the_live_binding_handler() {
         let mut touch = TouchInput::new();
-        assert_eq!(touch.handle(Gesture::HoldEnded), TouchOutput::default());
+        assert_eq!(
+            touch.handle(Gesture::HoldEnded).events,
+            vec![InputEvent::Gesture(Gesture::HoldEnded)]
+        );
     }
 
     #[test]

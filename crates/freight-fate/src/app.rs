@@ -32,7 +32,7 @@ use crate::online_presence::{IdentityStore, OnlinePresence, OnlinePresenceOption
 use crate::speech::{NullSpeech, SpeechSink};
 use crate::states::base::{InputEvent, Key, Mods, State};
 use crate::states::driving::DrivingState;
-use crate::states::main_menu::ConfirmQuitState;
+use crate::states::main_menu::{ConfirmQuitState, TouchPracticeState};
 use crate::touch::Gesture;
 
 pub mod boot_timing;
@@ -787,6 +787,21 @@ impl App {
     /// a controller button is pressed.
     pub fn dispatch_gesture(&mut self, gesture: Gesture) {
         self.ctx.controller.note_touch();
+        if self
+            .ctx
+            .state()
+            .is_some_and(|state| state.borrow().as_any().is::<TouchPracticeState>())
+        {
+            let state = self
+                .ctx
+                .state()
+                .expect("the touch practice state is still on top");
+            let taken = state.borrow_mut().handle_gesture(&mut self.ctx, gesture);
+            self.ctx.run_deferred();
+            if taken {
+                return;
+            }
+        }
         if let Some(action) = match gesture {
             Gesture::EmergencyBrakeHoldBegan => Some(crate::bindings::Action::EmergencyBrake),
             Gesture::HornHoldBegan => Some(crate::bindings::Action::Horn),

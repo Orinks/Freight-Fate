@@ -352,7 +352,6 @@ extern "C" {
     fn ff_touch_install(window: *mut std::ffi::c_void) -> i32;
     fn ff_touch_next() -> i32;
     fn ff_touch_set_haptics(enabled: i32);
-    fn ff_touch_haptic(kind: i32);
 }
 
 #[cfg(target_os = "ios")]
@@ -363,17 +362,6 @@ pub(crate) fn set_touch_haptics(enabled: bool) {
 
 #[cfg(not(target_os = "ios"))]
 pub(crate) fn set_touch_haptics(_enabled: bool) {}
-
-#[cfg(target_os = "ios")]
-#[allow(dead_code)]
-pub(crate) fn touch_haptic(kind: i32) {
-    // SAFETY: the UIKit shim accepts one documented feedback kind.
-    unsafe { ff_touch_haptic(kind) };
-}
-
-#[cfg(not(target_os = "ios"))]
-#[allow(dead_code)]
-pub(crate) fn touch_haptic(_kind: i32) {}
 
 /// Lay the gesture surface (`ios/ff_touch.m`) over SDL's view.
 #[cfg(target_os = "ios")]
@@ -393,7 +381,6 @@ fn install_touch_surface(window: &sdl2::video::Window) {
     if unsafe { ff_touch_install(ui_window) } == 0 {
         log::warn!("touch: the gesture surface could not be installed");
     }
-    set_touch_haptics(true);
 }
 
 #[cfg(target_os = "ios")]

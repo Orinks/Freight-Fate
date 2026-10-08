@@ -11,7 +11,9 @@ use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_menu_states::DrivingCommandsState;
 use freight_fate::states::driving_pause_states::PauseMenuState;
-use freight_fate::states::main_menu::{TouchCommandPickerState, TouchGesturesState};
+use freight_fate::states::main_menu::{
+    TouchCommandPickerState, TouchGesturesState, TouchPracticeState,
+};
 use freight_fate::touch::{Gesture, TouchInput};
 
 const MPH_PER_MPS: f64 = 2.236_936_292_054_402;
@@ -204,6 +206,63 @@ fn emergency_and_horn_holds_follow_rebound_keys() {
     assert!(harness.app.ctx.input.physically_down(Key::H));
     touch(&mut harness, &mut input, Gesture::HoldEnded);
     assert!(!harness.app.ctx.input.physically_down(Key::H));
+}
+
+#[test]
+fn touch_practice_takes_pedal_and_bound_holds_before_they_press_keys() {
+    let mut harness = a_drive("Touch Practice Holds");
+    assert!(matches!(
+        harness
+            .app
+            .ctx
+            .bindings
+            .set_chord(Action::EmergencyBrake, Chord::plain(Key::Z)),
+        freight_fate::bindings::Rebind::Done
+    ));
+    harness.app.push_state(TouchPracticeState::new());
+    harness.clear_speech();
+
+    harness.app.dispatch_gesture(Gesture::HoldUpperBegan);
+    assert!(
+        harness.transcript().iter().any(|line| line == "Gas."),
+        "{:?}",
+        harness.transcript()
+    );
+    assert!(!harness.app.ctx.input.physically_down(Key::Up));
+
+    harness.clear_speech();
+    harness
+        .app
+        .dispatch_gesture(Gesture::EmergencyBrakeHoldBegan);
+    assert!(
+        harness
+            .transcript()
+            .iter()
+            .any(|line| line == "Emergency brake."),
+        "{:?}",
+        harness.transcript()
+    );
+    assert!(!harness.app.ctx.input.physically_down(Key::Z));
+}
+
+#[test]
+fn gas_hold_swipe_left_changes_lanes_with_full_lane_keeping() {
+    let mut harness = a_drive("Touch Lane Change");
+    rolling(&mut harness, 55.0);
+    harness.app.ctx.settings.lane_keeping = "full".to_string();
+    harness.with_drive(|drive, _| {
+        drive.lane.lane_count = 2;
+        drive.lane.lane = 0;
+    });
+    let mut input = TouchInput::new();
+
+    touch(&mut harness, &mut input, Gesture::HoldUpperBegan);
+    touch(&mut harness, &mut input, Gesture::UpperHoldSwipeLeft);
+
+    assert_eq!(
+        harness.with_drive(|drive, _| drive.lane_change_target),
+        Some(1)
+    );
 }
 
 #[test]

@@ -6,9 +6,12 @@
 // off. The standard VoiceOver actions (double tap to activate, swipe up and
 // down on an adjustable element, the two-finger scrub, the magic tap, the
 // three-finger scroll) are answered too, for when direct touch is not
-// active. Holding anywhere is gas; tap, then hold anywhere is brake, and a second finger
-// tapping, double tapping or swiping while the pedal is held is a gesture of
-// its own (hold gas to 20, tap with a second finger for cruise).
+// active. Hold one finger anywhere for gas; tap, then hold anywhere for
+// brake; hold two fingers for the emergency brake; and hold three for the
+// horn. No screen position is used, apart from relative distances for slop
+// and swipes. A second finger tapping, double tapping or swiping while the
+// pedal is held is a gesture of its own (hold gas to 20, tap with a second
+// finger for cruise).
 // Every gesture is queued as a small integer code; the Rust side
 // (`touch.rs`) drains the queue each frame and hands each gesture to the
 // game. Speech never comes from here: Prism speaks through VoiceOver's
@@ -120,8 +123,8 @@ int32_t ff_touch_next(void) {
     return code;
 }
 
-// The pedals are location-independent. One finger held still is gas. A quick
-// tap followed by a new touch down within FF_DOUBLE_TAP_SECONDS is brake.
+// The pedals are location-independent. One finger held still is gas. Tap,
+// then hold a new touch within FF_DOUBLE_TAP_SECONDS for brake.
 // While either stays down, a second finger's taps and swipes are read here
 // too, since the recognizer that owns the held touch is the one UIKit keeps
 // feeding new touches to. A second tap waits FF_DOUBLE_TAP_SECONDS for a
@@ -147,7 +150,8 @@ static const CGFloat FF_SWIPE_DISTANCE = 36.0;
     CGPoint _secondStart;
     NSTimeInterval _secondStartTime;
     NSTimer *_tapTimer;
-    NSTimeInterval _brakeArmedAt;
+    NSTimer *_brakeWindowTimer;
+    BOOL _brakeWindowOpen;
 }
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
@@ -155,8 +159,10 @@ static const CGFloat FF_SWIPE_DISTANCE = 36.0;
         if (!_pedal) {
             _pedal = touch;
             _pedalStart = [touch locationInView:self.view];
-            BOOL brake = _brakeArmedAt > 0 && touch.timestamp - _brakeArmedAt <= FF_DOUBLE_TAP_SECONDS;
-            _brakeArmedAt = 0;
+            BOOL brake = _brakeWindowOpen;
+            [_brakeWindowTimer invalidate];
+            _brakeWindowTimer = nil;
+            _brakeWindowOpen = NO;
             _base = brake ? FF_LOWER_HOLD_BASE : FF_UPPER_HOLD_BASE;
             _holdTimer = [NSTimer scheduledTimerWithTimeInterval:FF_HOLD_SECONDS
                                                           target:self
@@ -201,9 +207,30 @@ static const CGFloat FF_SWIPE_DISTANCE = 36.0;
     }
     if ([touches containsObject:_pedal]) {
         if (self.state == UIGestureRecognizerStatePossible) {
-            _brakeArmedAt = _pedal.timestamp;
+            if (_base == FF_LOWER_HOLD_BASE) {
+                self.state = UIGestureRecognizerStateFailed;
+            } else {
+                _pedal = nil;
+                [_holdTimer invalidate];
+                _holdTimer = nil;
+                _brakeWindowOpen = YES;
+                _brakeWindowTimer = [NSTimer scheduledTimerWithTimeInterval:FF_DOUBLE_TAP_SECONDS
+                                                                       target:self
+                                                                     selector:@selector(brakeWindowElapsed)
+                                                                     userInfo:nil
+                                                                      repeats:NO];
+            }
+        } else {
+            [self pedalLifted:UIGestureRecognizerStateEnded];
         }
-        [self pedalLifted:UIGestureRecognizerStateEnded];
+    }
+}
+
+- (void)brakeWindowElapsed {
+    _brakeWindowTimer = nil;
+    _brakeWindowOpen = NO;
+    if (self.state == UIGestureRecognizerStatePossible && !_pedal) {
+        self.state = UIGestureRecognizerStateFailed;
     }
 }
 
@@ -283,6 +310,9 @@ static const CGFloat FF_SWIPE_DISTANCE = 36.0;
     _holdTimer = nil;
     [_tapTimer invalidate];
     _tapTimer = nil;
+    [_brakeWindowTimer invalidate];
+    _brakeWindowTimer = nil;
+    _brakeWindowOpen = NO;
     _pedal = nil;
     _second = nil;
 }
@@ -361,30 +391,27 @@ static const CGFloat FF_SWIPE_DISTANCE = 36.0;
     FFPedalRecognizer *pedal = [[FFPedalRecognizer alloc] initWithTarget:nil action:nil];
     [oneSingle requireGestureRecognizerToFail:pedal];
     [self addGestureRecognizer:pedal];
-    [self addHoldWithTouches:2 code:FF_EMERGENCY_BRAKE_HOLD_BEGAN magicTap:twoDouble];
-    [self addHoldWithTouches:3 code:FF_HORN_HOLD_BEGAN magicTap:twoDouble];
+    [self addHoldWithTouches:2 code:FF_EMERGENCY_BRAKE_HOLD_BEGAN];
+    [self addHoldWithTouches:3 code:FF_HORN_HOLD_BEGAN];
 }
 
-- (void)addHoldWithTouches:(NSUInteger)touches code:(int32_t)code magicTap:(UITapGestureRecognizer *)magicTap {
+- (void)addHoldWithTouches:(NSUInteger)touches code:(int32_t)code {
     UILongPressGestureRecognizer *hold = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(held:)];
     hold.numberOfTouchesRequired = touches;
     hold.minimumPressDuration = FF_HOLD_SECONDS;
     hold.allowableMovement = FF_HOLD_SLOP;
     [hold setValue:@(code) forKey:@"ffCode"];
-    [hold requireGestureRecognizerToFail:magicTap];
     [self addGestureRecognizer:hold];
 }
 
 - (void)held:(UILongPressGestureRecognizer *)hold {
+    int32_t code = [[hold valueForKey:@"ffCode"] intValue];
     if (hold.state == UIGestureRecognizerStateBegan) {
-        ff_push([[hold valueForKey:@"ffCode"] intValue]);
-        ff_touch_haptic([[hold valueForKey:@"ffCode"] intValue] == FF_EMERGENCY_BRAKE_HOLD_BEGAN ? 2 : 0);
+        ff_push(code);
+        ff_touch_haptic(code == FF_EMERGENCY_BRAKE_HOLD_BEGAN ? 2 : 0);
     } else if (hold.state == UIGestureRecognizerStateEnded || hold.state == UIGestureRecognizerStateCancelled) {
         ff_push(FF_HOLD_ENDED);
-        int32_t code = [[hold valueForKey:@"ffCode"] intValue];
-        if (code != FF_EMERGENCY_BRAKE_HOLD_BEGAN && code != FF_HORN_HOLD_BEGAN) {
-            ff_touch_haptic(0);
-        }
+        ff_touch_haptic(0);
     }
 }
 
