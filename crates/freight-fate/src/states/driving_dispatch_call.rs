@@ -52,6 +52,7 @@ impl DispatchCallState {
 
     fn answer(&mut self, ctx: &mut GameContext, kind: &'static str) {
         if self.pending.is_some() {
+            ctx.say("Still waiting for a dispatcher.");
             return;
         }
         let identity = ctx
@@ -475,7 +476,21 @@ fn remote_dispatch_response(
     let effects = if effective == local.decision {
         local.effects.clone()
     } else {
-        JsonObject::new()
+        match (request.kind.as_str(), effective.as_str()) {
+            ("delay", "watch" | "late_update") => {
+                JsonObject::from_iter([("late_update_recorded".to_string(), json!(true))])
+            }
+            ("load_trouble", "protect_load") => {
+                JsonObject::from_iter([("cargo_exception_recorded".to_string(), json!(true))])
+            }
+            ("truck_trouble", "repair_authorized")
+                if facts.truck_damage_pct > FIELD_REPAIR_DAMAGE_PCT =>
+            {
+                JsonObject::from_iter([("roadside_repair_authorized".to_string(), json!(true))])
+            }
+            ("hours", "stop") | ("road_conditions", "caution") => local.effects.clone(),
+            _ => JsonObject::new(),
+        }
     };
     let responded_at = Utc::now().to_rfc3339();
     let response_id = stable_id(
@@ -735,6 +750,22 @@ mod tests {
         assert_eq!(remote.decision, "late_update");
         assert_eq!(remote.responder_id, "remote_dispatch");
         assert_eq!(remote.source_game, "remote_dispatch");
+        assert_eq!(
+            remote.effects.get("late_update_recorded"),
+            Some(&json!(true))
+        );
+
+        let watch = remote_dispatch_response(
+            &request(CALL_DELAY),
+            &response("continue", "local continue"),
+            facts(),
+            "80 miles",
+            "watch",
+        );
+        assert_eq!(
+            watch.effects.get("late_update_recorded"),
+            Some(&json!(true))
+        );
 
         let caution = remote_dispatch_response(
             &request(CALL_ROAD),
@@ -747,6 +778,7 @@ mod tests {
             caution.message,
             "There's no active warning on my board, but take it easy out there; 80 miles remain."
         );
+        assert!(caution.effects.is_empty());
     }
 
     #[test]
@@ -764,6 +796,22 @@ mod tests {
         );
         assert_eq!(stop.decision, "stop");
         assert_eq!(stop.message, "You are out of legal time. Park safely now.");
+
+        let mut local_hours = response("plan_rest", "Local rest plan.");
+        local_hours.effects = JsonObject::from_iter([
+            ("limit_kind".to_string(), json!("driving")),
+            ("remaining_minutes".to_string(), json!(12.0)),
+        ]);
+        let escalated_stop = remote_dispatch_response(
+            &request(CALL_HOURS),
+            &local_hours,
+            facts(),
+            "80 miles",
+            "stop",
+        );
+        assert_eq!(escalated_stop.decision, "stop");
+        assert_eq!(escalated_stop.effects, local_hours.effects);
+
         assert!(!roadside_mechanic_needed(
             "repair_authorized",
             FIELD_REPAIR_DAMAGE_PCT
@@ -787,10 +835,16 @@ mod tests {
             "Your dispatcher authorized a roadside repair, but the truck doesn't need one yet. \
              Watch the gauges and stop if it worsens."
         );
+        assert!(truck.effects.is_empty());
         assert!(!roadside_mechanic_needed(
             &truck.decision,
             truck_facts.truck_damage_pct
         ));
+        let authorized = remote_repair_response(FIELD_REPAIR_DAMAGE_PCT + 1.0);
+        assert_eq!(
+            authorized.effects.get("roadside_repair_authorized"),
+            Some(&json!(true))
+        );
 
         let mut load_facts = facts();
         load_facts.cargo_damage_pct = 0.5;
@@ -804,6 +858,10 @@ mod tests {
         assert_eq!(
             load.message,
             "Slow the handling down and protect the freight through the next stop."
+        );
+        assert_eq!(
+            load.effects.get("cargo_exception_recorded"),
+            Some(&json!(true))
         );
     }
 
@@ -926,5 +984,21 @@ mod tests {
         Menu::go_back(&mut state, &mut harness.app.ctx);
         assert!(cancelled.load(Ordering::SeqCst));
         assert_eq!(harness.transcript(), vec!["Hung up."]);
+    }
+
+    #[test]
+    fn another_call_while_pending_says_still_waiting() {
+        let mut harness = PlaytestHarness::new();
+        let (_sender, receiver) = mpsc::sync_channel(1);
+        let task = CallTask::from_parts(receiver, Arc::new(AtomicBool::new(false)));
+        let mut state = DispatchCallState::new(DriveRef::empty());
+        state.pending = Some(pending(task, response("continue", "Do not speak this.")));
+
+        state.answer(&mut harness.app.ctx, CALL_HOURS);
+
+        assert_eq!(
+            harness.transcript(),
+            vec!["Still waiting for a dispatcher."]
+        );
     }
 }

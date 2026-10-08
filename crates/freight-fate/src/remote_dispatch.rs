@@ -194,16 +194,22 @@ fn run(
         let _ = events.send(WorkerEvent::Failed);
         return;
     };
-    if call_id.is_empty() || created.get("ringUntil").and_then(Value::as_i64).is_none() {
+    if call_id.is_empty() {
         let _ = events.send(WorkerEvent::Failed);
+        return;
+    }
+
+    let cancel_url = format!("{base}/api/freight-fate/dispatch-calls/cancel");
+    if created.get("ringUntil").and_then(Value::as_i64).is_none() {
+        fail_call(transport, &cancel_url, identity, call_id, &headers, events);
         return;
     }
 
     let started = clock.now();
     let status_url = format!("{base}/api/freight-fate/dispatch-calls/status");
-    let cancel_url = format!("{base}/api/freight-fate/dispatch-calls/cancel");
     let mut claimed_until = None;
     let mut announced_claim = false;
+    let mut consecutive_poll_failures = 0;
     loop {
         if cancel.load(Ordering::SeqCst) {
             cancel_call(transport, &cancel_url, identity, call_id, &headers);
@@ -213,7 +219,7 @@ fn run(
         let deadline = claimed_until.unwrap_or(started + timing.ring_window);
         let now = clock.now();
         if now >= deadline {
-            let _ = events.send(WorkerEvent::Failed);
+            fail_call(transport, &cancel_url, identity, call_id, &headers, events);
             return;
         }
         clock.wait(timing.poll_interval.min(deadline - now));
@@ -231,12 +237,22 @@ fn run(
             let _ = events.send(WorkerEvent::Cancelled);
             return;
         }
-        let Ok(status) = status else {
-            let _ = events.send(WorkerEvent::Failed);
-            return;
+        let status = match status {
+            Ok(status) => {
+                consecutive_poll_failures = 0;
+                status
+            }
+            Err(error) if retry_status_poll(&error) && consecutive_poll_failures < 2 => {
+                consecutive_poll_failures += 1;
+                continue;
+            }
+            Err(_) => {
+                fail_call(transport, &cancel_url, identity, call_id, &headers, events);
+                return;
+            }
         };
         let Some(state) = status.get("status").and_then(Value::as_str) else {
-            let _ = events.send(WorkerEvent::Failed);
+            fail_call(transport, &cancel_url, identity, call_id, &headers, events);
             return;
         };
         match state {
@@ -248,6 +264,7 @@ fn run(
                 if !announced_claim {
                     announced_claim = true;
                     if events.send(WorkerEvent::Claimed).is_err() {
+                        cancel_call(transport, &cancel_url, identity, call_id, &headers);
                         return;
                     }
                 }
@@ -262,22 +279,44 @@ fn run(
                     return;
                 }
                 let Some(decision) = status.get("decision").and_then(Value::as_str) else {
-                    let _ = events.send(WorkerEvent::Failed);
+                    fail_call(transport, &cancel_url, identity, call_id, &headers, events);
                     return;
                 };
                 if decision_is_valid(kind, decision) {
                     let _ = events.send(WorkerEvent::Answered(decision.to_string()));
                 } else {
-                    let _ = events.send(WorkerEvent::Failed);
+                    fail_call(transport, &cancel_url, identity, call_id, &headers, events);
                 }
                 return;
             }
             _ => {
-                let _ = events.send(WorkerEvent::Failed);
+                fail_call(transport, &cancel_url, identity, call_id, &headers, events);
                 return;
             }
         }
     }
+}
+
+fn retry_status_poll(error: &crate::net::NetError) -> bool {
+    match error {
+        crate::net::NetError::Http { code, .. } => !(400..500).contains(code),
+        crate::net::NetError::Other { type_name, .. } => {
+            !matches!(type_name.as_str(), "JSONDecodeError" | "UnicodeDecodeError")
+        }
+        _ => true,
+    }
+}
+
+fn fail_call(
+    transport: &dyn Transport,
+    cancel_url: &str,
+    identity: &OnlineIdentity,
+    call_id: &str,
+    headers: &[(String, String)],
+    events: &SyncSender<WorkerEvent>,
+) {
+    cancel_call(transport, cancel_url, identity, call_id, headers);
+    let _ = events.send(WorkerEvent::Failed);
 }
 
 fn cancel_call(
@@ -506,6 +545,12 @@ mod tests {
             &AtomicBool::new(false),
         );
         assert_eq!(ring.0, vec![WorkerEvent::Failed]);
+        assert!(ring
+            .1
+            .last()
+            .unwrap()
+            .0
+            .ends_with("/api/freight-fate/dispatch-calls/cancel"));
         let claimed = run_fake(
             std::iter::once(Ok(
                 json!({"callId": "call-123456789012345678901234", "ringUntil": 10}),
@@ -518,13 +563,59 @@ mod tests {
     }
 
     #[test]
+    fn two_transient_poll_errors_then_answered_uses_the_answer() {
+        let mut retry_timing = timing();
+        retry_timing.ring_window = Duration::from_secs(12);
+        let result = run_fake(
+            [
+                Ok(json!({"callId": "call-123456789012345678901234", "ringUntil": 10})),
+                Err(crate::net::NetError::http(500)),
+                Err(crate::net::NetError::http(500)),
+                Ok(json!({"status": "answered", "decision": "continue"})),
+            ],
+            retry_timing,
+            &AtomicBool::new(false),
+        );
+        assert_eq!(
+            result.0,
+            vec![
+                WorkerEvent::Claimed,
+                WorkerEvent::Answered("continue".to_string())
+            ]
+        );
+    }
+
+    #[test]
+    fn three_transient_poll_errors_fail_and_cancel() {
+        let mut retry_timing = timing();
+        retry_timing.ring_window = Duration::from_secs(12);
+        let result = run_fake(
+            [
+                Ok(json!({"callId": "call-123456789012345678901234", "ringUntil": 10})),
+                Err(crate::net::NetError::http(500)),
+                Err(crate::net::NetError::http(500)),
+                Err(crate::net::NetError::http(500)),
+            ],
+            retry_timing,
+            &AtomicBool::new(false),
+        );
+        assert_eq!(result.0, vec![WorkerEvent::Failed]);
+        assert!(result
+            .1
+            .last()
+            .unwrap()
+            .0
+            .ends_with("/api/freight-fate/dispatch-calls/cancel"));
+    }
+
+    #[test]
     fn http_errors_malformed_status_and_unknown_decisions_fail() {
         for replies in [
             vec![Err(crate::net::NetError::http(500))],
             vec![Err(crate::net::NetError::http(401))],
             vec![Err(crate::net::NetError::http(302))],
             vec![Err(crate::net::NetError::Other {
-                type_name: "serde_json::Error".to_string(),
+                type_name: "JSONDecodeError".to_string(),
                 message: "malformed JSON".to_string(),
             })],
             vec![
@@ -542,7 +633,7 @@ mod tests {
             vec![
                 Ok(json!({"callId": "call-123456789012345678901234", "ringUntil": 10})),
                 Err(crate::net::NetError::Other {
-                    type_name: "serde_json::Error".to_string(),
+                    type_name: "JSONDecodeError".to_string(),
                     message: "malformed JSON".to_string(),
                 }),
             ],
@@ -555,7 +646,7 @@ mod tests {
                 Ok(json!({"status": "answered", "decision": "invented"})),
             ],
         ] {
-            let events = run_fake(replies, timing(), &AtomicBool::new(false)).0;
+            let (events, requests) = run_fake(replies, timing(), &AtomicBool::new(false));
             assert!(
                 matches!(
                     events.as_slice(),
@@ -563,6 +654,16 @@ mod tests {
                 ),
                 "{events:?}"
             );
+            if requests.len() > 1 {
+                assert!(
+                    requests
+                        .last()
+                        .unwrap()
+                        .0
+                        .ends_with("/api/freight-fate/dispatch-calls/cancel"),
+                    "{requests:?}"
+                );
+            }
         }
     }
 
