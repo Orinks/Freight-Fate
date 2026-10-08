@@ -801,8 +801,7 @@ impl DrivingState {
 
     /// `_speak_fuel()`: F.
     pub fn speak_fuel(&mut self, ctx: &mut GameContext) {
-        let mpg = 6.0;
-        let range_mi = self.trip.truck.fuel_gal * mpg;
+        let range_mi = self.fuel_range_mi();
         let fraction = self.trip.truck.fuel_fraction() * 100.0;
         let gallons = self.trip.truck.fuel_gal;
         ctx.say(&format!(

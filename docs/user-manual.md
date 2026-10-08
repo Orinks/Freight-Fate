@@ -692,7 +692,7 @@ wherever the pad has one.
 | I | Turn the lane locator on or off: a soft tock, once a beat, panned to where the truck sits inside its lane. It keeps ticking until you turn it off. Needs lane keeping on partial or off. |
 | Enter | Arrive: accept a facility arrival once you are fully stopped. |
 | Tab | Open the driving status menu. |
-| F | Report fuel level and estimated range. |
+| F | Report fuel level and estimated range, worked out from this drive's own miles per gallon once it has driven far enough to measure them. |
 | C | Report clock, deadline, estimated arrival, and the one hours-of-service limit that comes first. For the first few presses it also names the three keys below, then stops. |
 | Alt+A | Report time at the wheel so far this shift, and time on duty. |
 | Alt+S | Report when your 30 minute break is due, or that a break will not help. |

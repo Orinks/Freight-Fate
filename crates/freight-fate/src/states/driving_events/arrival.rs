@@ -48,6 +48,91 @@ impl DrivingState {
         ctx.say_event_with(message, SayEvent::new().category(SpeechCategory::Safety));
     }
 
+    /// Miles per gallon this run is really getting: its own average once it
+    /// has driven and burned enough to measure, else [`ASSUMED_RANGE_MPG`].
+    /// The run's average already carries the load, the climbs and the
+    /// idling, which a flat figure cannot.
+    pub fn range_mpg(&self) -> f64 {
+        let used = self.trip.fuel_used_gal;
+        let driven = self.trip.position_mi;
+        if used >= RANGE_MEASURE_MIN_GAL && driven >= RANGE_MEASURE_MIN_MI {
+            (driven / used).clamp(RANGE_MPG_FLOOR, RANGE_MPG_CEILING)
+        } else {
+            ASSUMED_RANGE_MPG
+        }
+    }
+
+    /// Miles the fuel in the tank reaches at [`Self::range_mpg`].
+    pub fn fuel_range_mi(&self) -> f64 {
+        self.trip.truck.fuel_gal.max(0.0) * self.range_mpg()
+    }
+
+    /// Miles to the nearest fuel stop ahead this rig can use, if any.
+    pub fn next_fuel_stop_mi(&self) -> Option<f64> {
+        self.trip
+            .stops
+            .iter()
+            .filter(|stop| {
+                stop.actions.iter().any(|a| a == "fuel") && stop.accessible_to(self.trip.bobtail)
+            })
+            .map(|stop| stop.at_mi - self.trip.position_mi)
+            .filter(|ahead| *ahead >= 0.0)
+            .min_by(f64::total_cmp)
+    }
+
+    /// The fuel range, the miles it has to cover, and the next fuel stop
+    /// when that comes before the destination.
+    pub fn fuel_range_need(&self) -> (f64, f64, Option<f64>) {
+        let remaining = self.trip.remaining_miles();
+        let next_fuel = self.next_fuel_stop_mi().filter(|ahead| *ahead < remaining);
+        (
+            self.fuel_range_mi(),
+            next_fuel.unwrap_or(remaining),
+            next_fuel,
+        )
+    }
+
+    /// Warns once when the fuel range falls short of the next fuel stop, or
+    /// of the destination when no fuel stop comes first. Latched until the
+    /// range clears what it needs by a fifth, so a refill re-arms it and the
+    /// run's average wobbling across the line does not.
+    pub fn check_fuel_range_warning(&mut self, ctx: &mut GameContext) {
+        if self.trip.truck.fuel_gal <= 0.0 {
+            return;
+        }
+        let (range, needed, next_fuel) = self.fuel_range_need();
+        if range >= needed * 1.2 {
+            self.fuel_range_short_said = false;
+            return;
+        }
+        if range >= needed || self.fuel_range_short_said {
+            return;
+        }
+        self.fuel_range_short_said = true;
+        let range_text = ctx.settings.distance_text(range, false);
+        let terse = self.terse_speech(ctx);
+        let message = match next_fuel {
+            Some(ahead) => {
+                let ahead_text = ctx.settings.distance_text(ahead, false);
+                if terse {
+                    format!("Fuel range {range_text}, next fuel {ahead_text}.")
+                } else {
+                    format!(
+                        "Fuel range about {range_text}, short of the next fuel stop, \
+                         {ahead_text} ahead."
+                    )
+                }
+            }
+            None if terse => format!("Fuel range {range_text}, short of the destination."),
+            None => format!(
+                "Fuel range about {range_text}, short of the destination, with no fuel \
+                 stop ahead on this route."
+            ),
+        };
+        ctx.audio.play("ui/warning");
+        ctx.say_event_with(message, SayEvent::new().category(SpeechCategory::Safety));
+    }
+
     /// `_handle_out_of_fuel()`.
     pub fn handle_out_of_fuel(&mut self, ctx: &mut GameContext) {
         if self.rescue_offered {

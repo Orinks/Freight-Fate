@@ -427,10 +427,14 @@ Everything found before 2026-09-25 moved to
       alone on x86_64 and in its module; the source of the nondeterminism is
       not found yet.
 
-- [ ] Low fuel warning could also fire when remaining range is shorter than
+- [x] Low fuel warning could also fire when remaining range is shorter than
       the distance to the next fuel-capable stop (issue #272 shipped the
-      once-per-threshold 15 percent cue first; honest loaded range for the
-      range-based alternate is still open).
+      once-per-threshold 15 percent cue first). Shipped for 1.9.4
+      (2026-10-08): the range is the run's own miles per gallon (DERIVED:
+      miles driven over gallons burned, once 15 miles and 2 gallons are in,
+      held to 3 to 10; ASSUMED 6 before that), F speaks it, and a fuel range
+      warning speaks once when it falls short of the next fuel stop this rig
+      can use, or of the destination when none comes first.
 
 - [x] More music on the Terrestrial dial (owner, 2026-10-03, from player
       feedback): 156 commercial music stations in 35 states, each heard

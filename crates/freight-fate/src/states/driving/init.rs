@@ -637,6 +637,7 @@ impl DrivingState {
             // New drives start clear so a tank already under the line still
             // earns one cue; resumed drives re-derive the latch below.
             low_fuel_said: false,
+            fuel_range_short_said: false,
             spring_brake_said: spring_brakes_active,
             brake_lockout_cue_timer: 0.0,
             brake_air_hissed: false,
