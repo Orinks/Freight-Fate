@@ -1863,8 +1863,8 @@ quiets it, and settling back under the limit disarms it.
 | Weather sounds volume | Rain, wind, thunder, snow, and fog sounds. |
 
 | Engine sounds volume | Engine start, shutdown, and running engine sounds. |
-| Engine voice | Real plays the engine recorded from a working truck cab, following the RPM through its range. Classic keeps the original engine sound. Changes apply immediately, even while driving. |
-| Engine brake voice | Recorded, the default, plays the real engine brake growl. Classic plays the synthesized growl from earlier versions. Changes apply at once, even while driving. |
+| Engine sound | Real plays the engine recorded from a working truck cab, following the RPM through its range. Classic keeps the original engine sound. Changes apply immediately, even while driving. |
+| Engine brake sound | Recorded, the default, plays the real engine brake growl. Classic plays the synthesized growl from earlier versions. Changes apply at once, even while driving. |
 | Music volume | Menu and facility background music volume. |
 
 | Music source | Original, the default, plays the licensed menu and Roadhouse music. Synthesized has menus and the Roadhouse play music the game composes itself, with no voiced breaks, plus the original three tracks from Freight Fate 1.5. Changes take effect at once, even mid-drive. See below for what Synthesized mode does to the radio dial. |
@@ -2018,7 +2018,8 @@ is skipped rather than stopping the music -- a stream is given time to connect
 first, so it is never skipped for being slow. If nothing in a playlist will
 play, the radio says so and names the folder rather than going quietly silent.
 Opening the Radio status screen re-reads the folder, so a playlist you add or
-fix mid-drive appears on the dial without starting a new run. Personal
+fix mid-drive appears on the dial without starting a new run. Until you have
+one, that screen reads out the folder's full location. Personal
 playlists ride the same streamer-safe gate as real streams -- turning the mode
 on hides them, because the game cannot vouch for what your files are licensed
 for. Ctrl with any tune key jumps straight to the Your playlists category.

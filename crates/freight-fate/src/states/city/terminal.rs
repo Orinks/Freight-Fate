@@ -123,6 +123,13 @@ impl CityMenuState {
     }
 
     fn bobtail(&mut self, ctx: &mut GameContext) {
+        // Driving empty is still driving: the same pulled CDL that stops the
+        // board stops a bobtail (ported from 2.0, PR #259).
+        if let Some(line) = crate::states::city::cdl_drive_refusal(ctx) {
+            ctx.audio.play("ui/error");
+            ctx.say(&line);
+            return;
+        }
         let mut cands = board_candidates(ctx.world, &profile(ctx).current_city);
         cands.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
         let mut nearby: Vec<String> = cands

@@ -41,6 +41,25 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Traffic sounds (owner, 2026-10-08: "the sounds aren't synced with the
+      NPC traffic"): the three nearest NPC vehicles each run a steady class
+      loop whose level, pan and pitch are set every frame from where the
+      vehicle is, mainline and ramp-end cross traffic alike, replacing the
+      bumper-crossing whooshes and the timed crossing one-shots (whose
+      recordings peaked anywhere from 0.1 s to 1.7 s in, and whose cooldown
+      dropped most passes). On an exit ramp the mainline sits to the left and
+      fades down the ramp instead of passing through the cab. Interstates and
+      divided multi-lane highways carry a distant-traffic bed at the road's
+      real presence, and the road bed is 6 dB louder. Loops rendered with
+      genny (`sound-test/traffic_sounds.json`); levels in `docs/audio-levels.md`.
+- [ ] (Found along the way) Owner listening pass on the traffic sounds and
+      the freeway bed: `TRAFFIC_SOUND_PEAK`, `TRAFFIC_BED_PEAK` and the
+      per-class loudness are first guesses, set without ears.
+- [x] The radio status screen names the Playlists folder's full location
+      while no personal playlist is on the dial and streamer-safe mode is
+      off (issue #289: a player saw the shuffle setting and could not find
+      how to add music at all).
+
 - [x] Channel 3000 on 87.7 (owner, 2026-10-06): the owner's TV programming on
       a daypart schedule by the truck's local hour, from its own
       `channel3000.pak`, opened on first tune-in; off the dial without the
@@ -486,10 +505,10 @@ Everything found before 2026-09-25 moved to
       roadside stop does; Escape on a stop that pulled the CDL no longer
       drives on; a saved run on a pulled CDL closes out instead of resuming.
       Ported from 2.0's PR #261 (2026-09-30).
-- [ ] An owner-operator can still start "Bobtail to a nearby city" on a
-      suspended or disqualified CDL; 2.0 refuses it (PR #259). On 1.9 a
-      bobtail on a pulled CDL ends at the next run-off, barrel strike,
-      roadside stop or reload (2026-09-30).
+- [x] "Bobtail to a nearby city" is refused on a suspended or disqualified
+      CDL, from the terminal and from an open bobtail menu, with the date
+      the suspension ends. Ported from 2.0's PR #259 for 1.9.4
+      (2026-10-08).
 - [ ] Placed attraction billboards speak in one direction only since
       2026-09-30; the other side hears the random pool. Signs standing at
       their attraction could be marked `both`, and the rest need copy
@@ -2634,6 +2653,12 @@ terminal becomes the anchor of that week instead of a spawn point.
       the home terminal: short home-region runs, home every night, no
       cycle pressure, lower pay -- weighted toward new hires in the
       assigned-dispatch levels.
+
+- [ ] genny's instruments in Synthesized music (owner, 2026-10-08): the game
+      already composes endless seeded pieces in Rust (`ff_core::music_synth`);
+      porting genny's voiced instruments, drums and styles into that renderer
+      would give the synth mode a real band. genny is Python, so it is a port,
+      not an embed.
 
 ### Personal conveyance and duty-purpose correction
 

@@ -678,6 +678,34 @@ fn the_original_radio_screen_is_unchanged() {
     }
 }
 
+#[test]
+fn the_radio_screen_says_where_playlists_go_until_there_is_one() {
+    let mut app = TestApp::new();
+    let folder = ff_core::models::profile::data_dir().join(ff_core::radio::PLAYLISTS_DIR_NAME);
+    let expected = format!(
+        "No playlists of your own yet. Put M3U, M3U8 or PLS playlist files in {}.",
+        folder.display()
+    );
+    let lines = radio_screen_lines(&mut app, false, false);
+    assert!(lines.iter().any(|l| l == &expected), "{lines:#?}");
+
+    // Streamer-safe mode hides playlists, so it never points at the folder.
+    let lines = radio_screen_lines(&mut app, false, true);
+    assert!(
+        !lines.iter().any(|l| l.starts_with("No playlists")),
+        "{lines:#?}"
+    );
+
+    // One playlist on the dial and the pointer goes quiet.
+    std::fs::create_dir_all(&folder).unwrap();
+    std::fs::write(folder.join("Road Mix.m3u"), "track.ogg\n").unwrap();
+    let lines = radio_screen_lines(&mut app, false, false);
+    assert!(
+        !lines.iter().any(|l| l.starts_with("No playlists")),
+        "{lines:#?}"
+    );
+}
+
 const OFF_THE_DIAL: &str =
     "Music source Synthesized: Freight Fate's own stations are off the dial.";
 

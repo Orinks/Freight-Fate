@@ -1150,6 +1150,27 @@ pub fn suspension_refusal_line<P: StandingProfile + ?Sized>(profile: &P) -> Stri
     )
 }
 
+/// Why a bobtail (a drive with no trailer to another board) is refused while
+/// the CDL is pulled. A bobtail is still driving a commercial vehicle.
+pub fn suspension_drive_refusal_line<P: StandingProfile + ?Sized>(profile: &P) -> String {
+    let record = record_of(profile);
+    if record.lifetime_disqualified {
+        return "You cannot drive with a lifetime CDL disqualification, not even bobtail."
+            .to_string();
+    }
+    let verb = status_verb(record);
+    let noun = if verb == "disqualified" {
+        "disqualification"
+    } else {
+        "suspension"
+    };
+    format!(
+        "You cannot drive, not even bobtail, while your CDL is {verb}. The {noun} ends {}. \
+         Wait out the CDL suspension is on the terminal menu.",
+        clears_text(profile)
+    )
+}
+
 /// The CDL line on the career screens: short, factual, always available.
 pub fn career_menu_status<P: StandingProfile + ?Sized>(profile: &P) -> String {
     let record = record_of(profile);

@@ -2,7 +2,21 @@
 
 ## Unreleased
 
+### Added
+
+- **Interstates now have the sound of distant traffic, louder on busier stretches.**
+
+- **The radio status screen says where your own playlist files go until you have one on the dial.**
+
+### Changed
+
+- **Tire noise on the road is louder at highway speed.**
+
+- **The Engine voice and Engine brake voice settings are now called Engine sound and Engine brake sound.**
+
 ### Fixed
+
+- **Bobtail to a nearby city is refused while your CDL is suspended or disqualified.** You hear when the suspension ends instead.
 
 - **Training classes now leave you tired, about half as fast as driving does.** If a class leaves you drowsy, you are told to sleep before you drive.
 
@@ -25,6 +39,10 @@
 - **Two real Arkansas weigh stations near West Memphis are on the map.** Marion screens southbound I-55, Lehi eastbound I-40.
 
 - **A hazard after the last weigh station warning no longer costs you the bypass charge.** Time spent on the hazard does not count against you.
+
+- **Passing traffic now sounds where the vehicle really is.** You hear it come up beside you, then fade as it pulls ahead.
+
+- **Traffic sounds on exit ramps now match the cars.** The freeway fades off to your left, and cross traffic at the ramp end sweeps across in front of you.
 
 - **The update check skips a preview snapshot that changes nothing you would notice.** A snapshot that only repeats your version is no longer offered.
 

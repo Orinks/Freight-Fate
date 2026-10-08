@@ -1,6 +1,6 @@
 //! `DrivingState.__init__` (port of `freight_fate/states/driving.py`), plus
 //! the `__init__`-time work the mixins delegated: `_enforcement_init`,
-//! `_reset_traffic_passes`, `_reset_lane_gap`, `_reset_turn_state_for_trip`.
+//! `_reset_lane_gap`, `_reset_turn_state_for_trip`.
 //!
 //! Field order follows the Python constructor, and every field the struct
 //! declares is assigned here -- no `..Default::default()`, so a field added
@@ -615,9 +615,9 @@ impl DrivingState {
             gate_miss_count: 0,
             wrong_way_mi: 0.0,
             wrong_way_said_at: 0.0,
-            traffic_pass_side: HashMap::new(),
-            traffic_passed_keys: HashSet::new(),
-            traffic_pass_cooldown_s: 0.0,
+            traffic_sounds: [None, None, None],
+            traffic_bed_volume: 0.0,
+            traffic_ramp_rolled_ft: 0.0,
             lane_gap_watch: None,
             lane_gap_prev_lane: Some(0),
             lane_gap_blocker_key: None,
