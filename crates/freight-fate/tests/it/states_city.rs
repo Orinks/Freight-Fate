@@ -29,11 +29,14 @@ use freight_fate::states::city::{
     dispatch_cache_key, open_freight_market, relay_load_for_board, CityMenuState, JobBoardState,
     JobDetailState, PayDebtState, RouteSelectState, TruckStatusState, JOB_BOARD_INTRO_HELP,
 };
+use freight_fate::states::city_pickup::PickupFacilityState;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_pause_states::{
     AbandonJobConfirmationState, PauseMenuState, ASSIGNED_REPOSITION_ABANDON_REPUTATION_PENALTY,
 };
-use freight_fate::states::main_menu::{ConfirmQuitState, MainMenuState};
+use freight_fate::states::main_menu::{
+    ConfirmQuitState, MainMenuState, TouchPracticeOfferState, TouchPracticeState,
+};
 use serde_json::{json, Map, Value};
 
 fn job(miles: f64) -> Job {
@@ -252,6 +255,66 @@ fn test_company_departure_runs_dispatch_assigned_route() {
         .main_lines()
         .iter()
         .any(|line| line.contains("Route planning to")));
+}
+
+#[test]
+fn touch_departure_offers_practice_once_and_marks_the_offer_seen() {
+    let mut app = TestApp::new();
+    new_hire(&mut app, "Touch Offer");
+    let pickup = loaded_pickup(&app, job(92.0));
+    app.ctx.controller.note_touch();
+    app.push_state(pickup);
+
+    app.dispatch_gesture(freight_fate::touch::Gesture::DoubleTap);
+
+    assert!(is::<TouchPracticeOfferState>(&app));
+    assert!(app.ctx.settings.touch_practice_offered);
+
+    app.pop_state();
+    assert!(is::<DrivingState>(&app));
+    app.pop_state();
+    assert!(is::<PickupFacilityState>(&app));
+    app.dispatch_gesture(freight_fate::touch::Gesture::DoubleTap);
+
+    assert!(is::<DrivingState>(&app));
+    assert!(!stack_has::<TouchPracticeOfferState>(&app));
+}
+
+#[test]
+fn touch_practice_offer_practice_and_skip_leave_the_driver_in_the_right_state() {
+    let mut app = TestApp::new();
+    new_hire(&mut app, "Touch Offer Choices");
+    let pickup = loaded_pickup(&app, job(92.0));
+    app.ctx.controller.note_touch();
+    app.push_state(pickup);
+    app.dispatch_gesture(freight_fate::touch::Gesture::DoubleTap);
+    assert!(is::<TouchPracticeOfferState>(&app));
+
+    app.dispatch_gesture(freight_fate::touch::Gesture::DoubleTap);
+    assert!(is::<TouchPracticeState>(&app));
+
+    app.pop_state();
+    assert!(is::<DrivingState>(&app));
+    app.push_state(TouchPracticeOfferState::new());
+
+    app.dispatch_gesture(freight_fate::touch::Gesture::SwipeDown);
+    app.dispatch_gesture(freight_fate::touch::Gesture::DoubleTap);
+    assert!(is::<DrivingState>(&app));
+}
+
+#[test]
+fn keyboard_departure_does_not_offer_touch_practice() {
+    let mut app = TestApp::new();
+    new_hire(&mut app, "Keyboard Offer");
+    let pickup = loaded_pickup(&app, job(92.0));
+    app.ctx.controller.note_touch();
+    app.ctx.controller.note_keyboard();
+    app.push_state(pickup);
+
+    key(&mut app, Key::Return);
+
+    assert!(is::<DrivingState>(&app));
+    assert!(!app.ctx.settings.touch_practice_offered);
 }
 
 #[test]

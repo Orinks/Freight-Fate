@@ -85,14 +85,15 @@ fn the_struct_carries_the_persisted_fields_in_python_order() {
     // duty_notifications and braille_only (2026-09-02) and real_fuel_prices
     // (2026-09-12), the two shortcut tables (2026-09-14),
     // radio_shuffle_playlists and steering_guide_inverted (2026-09-18), and
-    // synth_music and music_seed (2026-09-21), touch_bindings (2026-09-29)
-    // and assist_preset_chosen (2026-09-30) were added on the Rust side;
+    // synth_music and music_seed (2026-09-21), touch_bindings (2026-09-29),
+    // assist_preset_chosen (2026-09-30), and touch_haptics and
+    // touch_practice_offered (2026-10-07) were added on the Rust side;
     // lane_centering_assist was retired for 1.9.
-    assert_eq!(Settings::FIELD_NAMES.len(), 85);
+    assert_eq!(Settings::FIELD_NAMES.len(), 87);
     assert_eq!(Settings::FIELD_NAMES[0], "online_services");
     assert_eq!(Settings::FIELD_NAMES[79], "settings_layout_notice_from");
     let pairs = Settings::default().ordered_values();
-    assert_eq!(pairs.len(), 85);
+    assert_eq!(pairs.len(), 87);
     for ((name, _), field) in pairs.iter().zip(Settings::FIELD_NAMES) {
         assert_eq!(name, field);
     }
@@ -143,6 +144,7 @@ fn the_defaults_match_the_python_dataclass() {
         "controller_enabled": true, "haptics_enabled": true, "online_offer_seen": false,
         "settings_version": 3, "settings_layout_notice_from": -1,
         "key_bindings": "", "pad_bindings": "", "touch_bindings": "",
+        "touch_haptics": true, "touch_practice_offered": false,
         "steering_guide_inverted": false, "assist_preset_chosen": false
     }"#,
     )
@@ -150,7 +152,7 @@ fn the_defaults_match_the_python_dataclass() {
     let Value::Object(expected) = expected else {
         unreachable!()
     };
-    assert_eq!(expected.len(), 85);
+    assert_eq!(expected.len(), 87);
     for (name, value) in s.ordered_values() {
         assert_eq!(Some(&value), expected.get(name), "{name}");
     }
@@ -174,8 +176,8 @@ fn the_file_text_is_what_json_dump_wrote() {
     let text = s.to_file_text();
     assert!(text.starts_with("{\n  \"online_services\": true,\n  \"imperial_units\": true,\n"));
     assert!(text.ends_with(
-        "  \"pad_bindings\": \"\",\n  \"touch_bindings\": \"\",\n  \"steering_guide_inverted\": false,\n  \
-         \"assist_preset_chosen\": false,\n  \"steering_assist\": \"off\"\n}"
+        "  \"pad_bindings\": \"\",\n  \"touch_bindings\": \"\",\n  \"touch_haptics\": true,\n  \"touch_practice_offered\": false,\n  \
+         \"steering_guide_inverted\": false,\n  \"assist_preset_chosen\": false,\n  \"steering_assist\": \"off\"\n}"
     ));
     assert!(text.contains("\n  \"time_scale\": 10.0,\n"));
     assert!(text.contains("\n  \"radio_volume\": 0.25,\n"));

@@ -56,7 +56,7 @@ pub use settings::{
 };
 pub use shortcuts::{ShortcutDevice, ShortcutsState};
 pub use touch_gestures::{TouchCommandPickerState, TouchGesturesState};
-pub use touch_practice::TouchPracticeState;
+pub use touch_practice::{TouchPracticeOfferState, TouchPracticeState};
 
 pub use crate::states::main_menu_career::{
     region_menu_name, CareerStartState, HomeCityState, HomeTerminalState,

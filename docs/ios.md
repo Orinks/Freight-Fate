@@ -36,6 +36,13 @@ Outside the drive, and for the gestures the drive leaves fixed:
 | Hold two fingers anywhere | Emergency brake until you lift |
 | Hold three fingers anywhere | Horn until you lift |
 
+Before your first drive after touching the screen, the game offers Practice
+gestures. Choose it to hear each gesture's name without moving the truck, or
+skip it to start driving; either answer is remembered.
+
+Touch gestures settings include a haptics switch. Light feedback confirms
+pedals and commands; the emergency brake uses a warning buzz.
+
 Because the game screen takes touches directly, VoiceOver's scrub (two-finger
 Z) reads there as a two-finger swipe; use a two-finger swipe down to go back.
 
@@ -49,7 +56,7 @@ Controls, Touch gestures, the way keyboard keys and controller buttons can.
 |---|---|
 | While holding gas, tap with a second finger | Automatic speed control: adaptive cruise, or the speed keeper in low-speed zones |
 | While holding gas, swipe up / down with a second finger | Shift up / down |
-| While holding gas, swipe left / right with a second finger | Steer or change lanes left / right |
+| While holding gas, swipe left / right with a second finger | Steer left / right (changes lanes with lane keeping on full) |
 | While holding brake, tap with a second finger | Parking brake |
 | While holding brake, double tap with a second finger | Engine on or off |
 | Tap | Speed |
@@ -126,8 +133,8 @@ frameworks it and SDL2 need, plus clang's iOS runtime for `@available` checks.
 
 ## Manual VoiceOver test checklist
 
-- Test with VoiceOver on and off; on iOS 17 or later confirm direct touch is silent on touch.
-- Hold gas in the centre, corners, and edges; tap then hold for brake without firing single tap.
-- Test every second-finger command, gas-hold lane changes, two-finger emergency brake, and three-finger horn.
-- Verify magic tap, escape scrub, the haptics switch, and release feedback.
+- Test with VoiceOver on and off; on iOS 17 or later, confirm direct touch is silent when the screen is touched.
+- Hold gas at the centre, corners, and edges; tap then hold for brake without hearing Speed. Double tap must still be Enter.
+- Test every second-finger command, including a gas-hold lane change; then test the two-finger emergency brake and three-finger horn.
+- Verify magic tap pauses, the scrub escapes, and the haptics switch changes feedback.
 - Enter Practice gestures, verify double escape exits, and verify the first-drive practice offer appears once.
