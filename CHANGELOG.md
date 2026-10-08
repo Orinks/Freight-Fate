@@ -4,9 +4,7 @@
 
 ### Fixed
 
-- **Sitting through a training course now tires you, about half as fast as driving.** A multi-day course counts only its last daytime class day.
-
-- **A course that leaves you drowsy now tells you to sleep before driving.** Night classes are judged by the city's local clock.
+- **Training classes now leave you tired, about half as fast as driving does.** If a class leaves you drowsy, you are told to sleep before you drive.
 
 - **The last weigh station warning names its scale and leaves time to take the exit in every driving mode.** Closed scales say so.
 
