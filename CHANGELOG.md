@@ -8,9 +8,13 @@
 
 - **The radio status screen says where your own playlist files go until you have one on the dial.**
 
+- **A fuel range warning speaks when your fuel will not reach the next fuel stop.** It names your range and how far the stop is.
+
 ### Changed
 
 - **Tire noise on the road is louder at highway speed.**
+
+- **The fuel range now comes from your truck's own mileage on this drive, load and hills included.**
 
 - **The Engine voice and Engine brake voice settings are now called Engine sound and Engine brake sound.**
 

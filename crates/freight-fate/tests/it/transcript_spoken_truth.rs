@@ -737,9 +737,10 @@ fn test_the_readouts_stay_true_while_the_speed_keeper_has_the_truck() {
 
 #[test]
 fn test_the_fuel_key_promises_a_range_the_truck_can_actually_drive() {
-    // F answers "Range about N miles" from a flat 6 miles per gallon. That is
-    // a claim about THIS truck under THIS load, so it is worth measuring: a
-    // range a loaded rig cannot reach is a fuel stop a driver skips.
+    // F answers "Range about N miles" from 6 miles per gallon until the run
+    // has burned enough to measure its own. That is a claim about THIS truck
+    // under THIS load, so it is worth measuring: a range a loaded rig cannot
+    // reach is a fuel stop a driver skips.
     let mut harness = a_drive(65.0, 0.0, 1.0);
     harness.press_key(Key::E, None);
     harness.with_drive(|d, _| {
@@ -766,6 +767,13 @@ fn test_the_fuel_key_promises_a_range_the_truck_can_actually_drive() {
         measured_mpg >= 6.0 * 0.85,
         "F promises 6.0 miles per gallon; this truck returned {measured_mpg:.2} \
          over {miles:.1} level miles at cruise ({burned:.2} gallons)"
+    );
+    // Once measured, the promise is the run's own average.
+    let promised = harness.read_drive(|d| d.range_mpg());
+    let whole_run = harness.read_drive(|d| d.trip.position_mi / d.trip.fuel_used_gal);
+    assert!(
+        (promised - whole_run.clamp(3.0, 10.0)).abs() < 1e-9,
+        "F promises {promised:.2}, the run averaged {whole_run:.2}"
     );
 }
 

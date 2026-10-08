@@ -4,6 +4,7 @@
 use ff_core::data::world::get_world;
 use ff_core::models::jobs::make_reposition_job;
 use ff_core::models::profile::Profile;
+use ff_core::sim::trip_models::RoadStop;
 use ff_core::sim::weather::WeatherKind;
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::driving::DrivingState;
@@ -198,4 +199,113 @@ fn test_empty_tank_rescue_still_runs_and_skips_the_low_fuel_cue() {
     // clears on the next check and a later drop can warn again.
     drive.check_low_fuel_warning(&mut app.ctx);
     assert!(!drive.low_fuel_said);
+}
+
+// -- The fuel range against the next fuel stop -----------------------------------
+
+fn fuel_stop(name: &str, mile: f64) -> RoadStop {
+    let mut stop = RoadStop::new(name, mile, "travel_center");
+    stop.actions = vec!["fuel".into()];
+    stop
+}
+
+fn range_lines(app: &TestApp) -> Vec<String> {
+    app.event_lines()
+        .into_iter()
+        .filter(|line| line.starts_with("Fuel range"))
+        .collect()
+}
+
+/// Ten gallons at the assumed six miles per gallon: a 60 mile range.
+fn a_short_drive(app: &mut TestApp) -> DrivingState {
+    let mut drive = a_drive(app);
+    drive.trip.position_mi = 0.0;
+    drive.trip.fuel_used_gal = 0.0;
+    drive.trip.truck.fuel_gal = 10.0;
+    drive.fuel_range_short_said = false;
+    app.clear_speech();
+    drive
+}
+
+#[test]
+fn test_a_range_short_of_the_next_fuel_stop_says_so_once() {
+    let mut app = TestApp::new();
+    let mut drive = a_short_drive(&mut app);
+    assert!(drive.trip.remaining_miles() > 80.0);
+    // A bobtail-only island cannot take a rig with a trailer, so it is not
+    // the next fuel.
+    drive.trip.bobtail = false;
+    let mut blocked = fuel_stop("Bobtail only", 30.0);
+    blocked.vehicle_access = "bobtail_only".into();
+    drive.trip.stops = vec![blocked, fuel_stop("Pumps", 80.0)];
+
+    drive.check_fuel_range_warning(&mut app.ctx);
+    drive.check_fuel_range_warning(&mut app.ctx);
+
+    assert_eq!(
+        range_lines(&app),
+        vec!["Fuel range about 60 miles, short of the next fuel stop, 80 miles ahead.".to_string()]
+    );
+    assert!(drive.fuel_range_short_said);
+
+    // A refill clears the latch; the next shortfall speaks again.
+    drive.trip.truck.fuel_gal = 50.0;
+    drive.check_fuel_range_warning(&mut app.ctx);
+    assert!(!drive.fuel_range_short_said);
+}
+
+#[test]
+fn test_a_range_that_reaches_the_next_fuel_stop_stays_quiet() {
+    let mut app = TestApp::new();
+    let mut drive = a_short_drive(&mut app);
+    drive.trip.stops = vec![fuel_stop("Pumps", 50.0)];
+    drive.check_fuel_range_warning(&mut app.ctx);
+    assert!(range_lines(&app).is_empty(), "{:?}", app.event_lines());
+}
+
+#[test]
+fn test_with_no_fuel_stop_ahead_the_range_is_held_to_the_destination() {
+    let mut app = TestApp::new();
+    let mut drive = a_short_drive(&mut app);
+    drive.trip.stops = Vec::new();
+    drive.check_fuel_range_warning(&mut app.ctx);
+    assert_eq!(
+        range_lines(&app),
+        vec![
+            "Fuel range about 60 miles, short of the destination, with no fuel stop ahead \
+             on this route."
+                .to_string()
+        ]
+    );
+
+    // Terse speech keeps the numbers.
+    drop(drive);
+    drop(app);
+    let mut app = TestApp::new();
+    app.ctx.settings.driving_speech = "urgent_only".to_string();
+    let mut drive = a_short_drive(&mut app);
+    drive.trip.stops = vec![fuel_stop("Pumps", 80.0)];
+    drive.check_fuel_range_warning(&mut app.ctx);
+    assert_eq!(
+        range_lines(&app),
+        vec!["Fuel range 60 miles, next fuel 80 miles.".to_string()]
+    );
+}
+
+#[test]
+fn test_the_range_uses_the_runs_own_miles_per_gallon_once_it_has_one() {
+    let mut app = TestApp::new();
+    let mut drive = a_short_drive(&mut app);
+    assert_eq!(drive.range_mpg(), ASSUMED_RANGE_MPG);
+    // Forty miles on ten gallons: a heavy load at four miles per gallon.
+    drive.trip.position_mi = 40.0;
+    drive.trip.fuel_used_gal = 10.0;
+    assert!((drive.range_mpg() - 4.0).abs() < 1e-9);
+    assert!((drive.fuel_range_mi() - 40.0).abs() < 1e-9);
+    drive.trip.stops = vec![fuel_stop("Pumps", 90.0)];
+    drive.check_fuel_range_warning(&mut app.ctx);
+    assert_eq!(
+        range_lines(&app),
+        vec!["Fuel range about 40 miles, short of the next fuel stop, 50 miles ahead.".to_string()]
+    );
 }
