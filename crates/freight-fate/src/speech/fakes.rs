@@ -17,6 +17,10 @@ use super::backend::{BackendId, VoiceBackend, VoiceFeatures, VoiceRegistry};
 #[derive(Debug, Default)]
 pub struct FakeVoiceState {
     pub name: String,
+    /// What `name()` reports when it differs from the registry name --
+    /// Prism's VoiceOver registers as "VoiceOver" but answers
+    /// "VoiceOver (iOS)" / "VoiceOver (macOS)".
+    pub display_name: Option<String>,
     pub priority: i32,
     pub features: VoiceFeatures,
     pub voices: Vec<String>,
@@ -84,6 +88,19 @@ impl FakeVoice {
         self.state.borrow_mut().features.is_supported_at_runtime = supported;
     }
 
+    /// Give `name()` a display name different from the registered name,
+    /// the way Prism's VoiceOver answers "VoiceOver (iOS)" for the
+    /// "VoiceOver" backend.
+    pub fn set_display_name(&self, display: &str) {
+        self.state.borrow_mut().display_name = Some(display.to_string());
+    }
+
+    /// The name the backend registered under -- what `id_by_name`,
+    /// `name_of` and the candidate walk match on.
+    pub fn registry_name(&self) -> String {
+        self.state.borrow().name.clone()
+    }
+
     pub fn set_fail_output(&self, fail: bool) {
         self.state.borrow_mut().fail_output = fail;
     }
@@ -122,7 +139,11 @@ impl FakeVoice {
 
 impl VoiceBackend for FakeVoice {
     fn name(&self) -> String {
-        self.state.borrow().name.clone()
+        let state = self.state.borrow();
+        state
+            .display_name
+            .clone()
+            .unwrap_or_else(|| state.name.clone())
     }
 
     fn features(&self) -> VoiceFeatures {
@@ -245,12 +266,13 @@ impl VoiceRegistry for FakeRegistry {
     fn id_by_name(&self, name: &str) -> Option<BackendId> {
         self.order
             .iter()
-            .position(|voice| voice.name() == name)
+            .position(|voice| voice.registry_name() == name)
             .map(|index| index as BackendId + 1)
     }
 
     fn name_of(&self, id: BackendId) -> Option<String> {
-        self.index_of(id).map(|index| self.order[index].name())
+        self.index_of(id)
+            .map(|index| self.order[index].registry_name())
     }
 
     fn priority_of(&self, id: BackendId) -> i32 {

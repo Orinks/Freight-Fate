@@ -490,19 +490,23 @@ pub fn pick_backend(
     pick_backend_gated(ctx, override_name, narrator_running)
 }
 
-/// The override's backend, usable, or None -- with the same fallback logs
-/// the selection has always emitted when the request cannot be honored.
-fn requested_backend(ctx: &dyn VoiceRegistry, name: &str) -> Option<Box<dyn VoiceBackend>> {
-    match ctx.id_by_name(name).map(|id| ctx.acquire(id)) {
-        Some(Ok(backend)) => {
+/// The override's backend id and instance, usable, or None -- with the
+/// same fallback logs the selection has always emitted when the request
+/// cannot be honored.
+fn requested_backend(
+    ctx: &dyn VoiceRegistry,
+    name: &str,
+) -> Option<(BackendId, Box<dyn VoiceBackend>)> {
+    match ctx.id_by_name(name).map(|id| (id, ctx.acquire(id))) {
+        Some((id, Ok(backend))) => {
             if usable(backend.as_ref()) {
-                return Some(backend);
+                return Some((id, backend));
             }
             log::warn!(
                 "Requested speech backend {name} is not usable; falling back to automatic choice"
             );
         }
-        Some(Err(err)) => {
+        Some((_, Err(err))) => {
             log::warn!(
                 "Requested speech backend {name} not found; falling back to automatic choice: {err}"
             );
@@ -556,9 +560,22 @@ pub fn pick_backend_gated(
     override_name: Option<&str>,
     narrator_probe: fn() -> bool,
 ) -> Option<Box<dyn VoiceBackend>> {
+    pick_backend_with_id_gated(ctx, override_name, narrator_probe).map(|(_, backend)| backend)
+}
+
+/// [`pick_backend_gated`] that also returns the registry id of the chosen
+/// backend. Refresh keeps the id alongside the voice so the next health
+/// check can tell "the backend already held" apart from "a backend whose
+/// display name happens to match" -- Prism's VoiceOver registers as
+/// "VoiceOver" but answers "VoiceOver (iOS)" from `name()`.
+pub fn pick_backend_with_id_gated(
+    ctx: &dyn VoiceRegistry,
+    override_name: Option<&str>,
+    narrator_probe: fn() -> bool,
+) -> Option<(BackendId, Box<dyn VoiceBackend>)> {
     if let Some(name) = override_name.filter(|name| !name.is_empty()) {
-        if let Some(backend) = requested_backend(ctx, name) {
-            return Some(backend);
+        if let Some(picked) = requested_backend(ctx, name) {
+            return Some(picked);
         }
     }
     for backend_id in gated_candidates(ctx, narrator_probe) {
@@ -566,7 +583,7 @@ pub fn pick_backend_gated(
             continue;
         };
         if usable(backend.as_ref()) {
-            return Some(backend);
+            return Some((backend_id, backend));
         }
     }
     None
@@ -581,8 +598,9 @@ pub enum Repick {
     /// that every refresh interval is the cost this variant exists to skip.
     Keep,
     /// A different backend now wins (a screen reader started, the current
-    /// one died): the newly acquired backend to switch to.
-    Switch(Box<dyn VoiceBackend>),
+    /// one died): its registry id and the newly acquired backend to
+    /// switch to.
+    Switch(BackendId, Box<dyn VoiceBackend>),
     /// Nothing in the registry can speak right now.
     Gone,
 }
@@ -591,7 +609,7 @@ impl fmt::Debug for Repick {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Keep => f.write_str("Keep"),
-            Self::Switch(backend) => f.debug_tuple("Switch").field(backend).finish(),
+            Self::Switch(id, backend) => f.debug_tuple("Switch").field(id).field(backend).finish(),
             Self::Gone => f.write_str("Gone"),
         }
     }
@@ -604,29 +622,33 @@ impl fmt::Debug for Repick {
 /// a current backend whose live check fails is skipped and the walk
 /// continues. `current == None` behaves exactly like [`pick_backend_gated`],
 /// and an override naming the current backend keeps it while it is usable.
+///
+/// The held backend is identified by registry id, not by `name()`: a
+/// backend's display name need not match the name it registered under
+/// ("VoiceOver" vs. "VoiceOver (iOS)"), and matching by name switched to
+/// a fresh copy of the same voice every interval.
 pub fn repick_backend_gated(
     ctx: &dyn VoiceRegistry,
     override_name: Option<&str>,
     narrator_probe: fn() -> bool,
-    current: Option<&dyn VoiceBackend>,
+    current: Option<(BackendId, &dyn VoiceBackend)>,
 ) -> Repick {
-    let Some(current) = current else {
-        return match pick_backend_gated(ctx, override_name, narrator_probe) {
-            Some(backend) => Repick::Switch(backend),
+    let Some((current_id, current)) = current else {
+        return match pick_backend_with_id_gated(ctx, override_name, narrator_probe) {
+            Some((id, backend)) => Repick::Switch(id, backend),
             None => Repick::Gone,
         };
     };
-    let current_name = current.name();
     if let Some(name) = override_name.filter(|name| !name.is_empty()) {
-        if name == current_name && usable(current) {
+        if ctx.id_by_name(name) == Some(current_id) && usable(current) {
             return Repick::Keep;
         }
-        if let Some(backend) = requested_backend(ctx, name) {
-            return Repick::Switch(backend);
+        if let Some((id, backend)) = requested_backend(ctx, name) {
+            return Repick::Switch(id, backend);
         }
     }
     for backend_id in gated_candidates(ctx, narrator_probe) {
-        if name_of(ctx, backend_id) == current_name {
+        if backend_id == current_id {
             // The voice already held: keep it while its live check passes.
             // (A UIA keep also needs Narrator running, but UIA only reaches
             // this list when the probe already said yes.) When the check
@@ -640,7 +662,7 @@ pub fn repick_backend_gated(
             continue;
         };
         if usable(backend.as_ref()) {
-            return Repick::Switch(backend);
+            return Repick::Switch(backend_id, backend);
         }
     }
     Repick::Gone

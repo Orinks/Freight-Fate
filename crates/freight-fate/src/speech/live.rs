@@ -6,9 +6,9 @@ use std::env;
 use std::time::Duration;
 
 use super::backend::{
-    narrator_running, pick_backend_gated, pick_event_backend, preserve_backend_default_pitch,
-    repick_backend_gated, usable, PrismRegistry, Repick, VoiceBackend, VoiceFeatures,
-    VoiceRegistry,
+    narrator_running, pick_backend_with_id_gated, pick_event_backend,
+    preserve_backend_default_pitch, repick_backend_gated, usable, BackendId, PrismRegistry, Repick,
+    VoiceBackend, VoiceFeatures, VoiceRegistry,
 };
 use super::{PreviewFeature, SpeechSink, EVENT_BACKEND, REFRESH_INTERVAL_S};
 
@@ -51,6 +51,11 @@ pub struct Speech {
     // Declaration order is the drop order: both voices are released before
     // the context that produced them, which Prism requires.
     backend: Option<Box<dyn VoiceBackend>>,
+    /// The registry id `backend` was picked under. Kept alongside the
+    /// voice so refresh can recognize the held backend even when its
+    /// `name()` is not the registered name ("VoiceOver (iOS)" for the
+    /// "VoiceOver" backend); always `None` when `backend` is `None`.
+    backend_id: Option<BackendId>,
     event_backend: Option<Box<dyn VoiceBackend>>,
     ctx: Option<Box<dyn VoiceRegistry>>,
     override_name: Option<String>,
@@ -126,6 +131,7 @@ impl Speech {
     fn disabled_with_override(override_name: Option<String>) -> Self {
         Self {
             backend: None,
+            backend_id: None,
             event_backend: None,
             ctx: None,
             override_name,
@@ -141,11 +147,15 @@ impl Speech {
     /// a fake): the selection `Speech.__init__` runs after `prism.Context()`.
     pub fn with_registry(ctx: Box<dyn VoiceRegistry>, override_name: Option<String>) -> Self {
         let mut speech = Self::disabled_with_override(override_name);
-        speech.backend = pick_backend_gated(
+        let picked = pick_backend_with_id_gated(
             ctx.as_ref(),
             speech.override_name.as_deref(),
             speech.narrator_probe,
         );
+        if let Some((id, backend)) = picked {
+            speech.backend_id = Some(id);
+            speech.backend = Some(backend);
+        }
         speech.ctx = Some(ctx);
         match &speech.backend {
             None => {
@@ -173,8 +183,12 @@ impl Speech {
         backend: Option<Box<dyn VoiceBackend>>,
         event_backend: Option<Box<dyn VoiceBackend>>,
     ) -> Self {
+        let backend_id = backend
+            .as_ref()
+            .and_then(|backend| ctx.as_deref()?.id_by_name(&backend.name()));
         Self {
             backend,
+            backend_id,
             event_backend,
             ctx,
             override_name: None,
@@ -195,6 +209,21 @@ impl Speech {
     /// Replace the main voice outright (a test standing in for "the screen
     /// reader the game happens to hold").
     pub fn set_main_backend(&mut self, backend: Option<Box<dyn VoiceBackend>>) {
+        self.backend_id = backend
+            .as_ref()
+            .and_then(|backend| self.ctx.as_deref()?.id_by_name(&backend.name()));
+        self.backend = backend;
+    }
+
+    /// [`set_main_backend`] for a voice whose `name()` is not its registry
+    /// name -- a test's stand-in for Prism's "VoiceOver" answering
+    /// "VoiceOver (iOS)".
+    pub fn set_main_backend_with_id(
+        &mut self,
+        backend: Option<Box<dyn VoiceBackend>>,
+        id: Option<BackendId>,
+    ) {
+        self.backend_id = id;
         self.backend = backend;
     }
 
@@ -529,12 +558,14 @@ impl SpeechSink for Speech {
             // switched. Re-detect immediately and retry once so this line is not
             // lost; if nothing can speak right now, poll() keeps looking.
             self.backend = None;
+            self.backend_id = None;
             if self.refresh(false) {
                 if let Some(backend) = self.backend.as_mut() {
                     spoken =
                         Self::deliver_with_backend(backend.as_mut(), text, interrupt, braille_only);
                     if !spoken {
                         self.backend = None;
+                        self.backend_id = None;
                     }
                 }
             }
@@ -598,11 +629,12 @@ impl SpeechSink for Speech {
             return false;
         };
         let old_name = self.backend.as_ref().map(|backend| backend.name());
-        let backend = match repick_backend_gated(
+        let current = self.backend_id.zip(self.backend.as_deref());
+        let (new_id, backend) = match repick_backend_gated(
             ctx.as_ref(),
             self.override_name.as_deref(),
             self.narrator_probe,
-            self.backend.as_deref(),
+            current,
         ) {
             Repick::Gone => {
                 let Some(old_name) = old_name else {
@@ -610,6 +642,7 @@ impl SpeechSink for Speech {
                 };
                 log::warn!("Speech backend {old_name} went away and nothing else can speak");
                 self.backend = None;
+                self.backend_id = None;
                 self.event_backend = None;
                 return true;
             }
@@ -631,10 +664,22 @@ impl SpeechSink for Speech {
                 }
                 return false;
             }
-            Repick::Switch(backend) => backend,
+            Repick::Switch(id, backend) => (id, backend),
         };
         let new_name = backend.name();
+        self.backend_id = Some(new_id);
         self.backend = Some(backend);
+        if old_name.as_deref() == Some(new_name.as_str()) {
+            // The pick returned a different instance of the voice already
+            // held -- same display name, fresh instance. Rebind it without
+            // the fanfare: no switch log, no "Speech is now using".
+            let pref = self.event_pref.clone();
+            self.select_event_backend(pref.as_deref());
+            if !self.config.is_empty() {
+                self.reapply_config();
+            }
+            return false;
+        }
         log::info!(
             "Speech backend switched: {} -> {new_name}",
             old_name.as_deref().unwrap_or("none")
@@ -729,6 +774,7 @@ impl SpeechSink for Speech {
     fn shutdown(&mut self) {
         self.stop();
         self.backend = None;
+        self.backend_id = None;
         self.event_backend = None;
         self.ctx = None;
     }

@@ -11,7 +11,7 @@ use freight_fate::speech::fakes::{FakeRegistry, FakeVoice};
 use freight_fate::speech::{
     apply_speech_settings, pick_backend_gated, pick_event_backend, repick_backend_gated,
     CaptureSpeech, NullSpeech, Repick, Speech, SpeechChannel, SpeechSink, VoiceFeatures,
-    EVENT_BACKEND, REFRESH_INTERVAL_S,
+    VoiceRegistry, EVENT_BACKEND, REFRESH_INTERVAL_S,
 };
 
 const SPEAKING: VoiceFeatures = VoiceFeatures::SPEAKING;
@@ -655,10 +655,53 @@ fn repick_keeps_the_current_backend_without_reacquiring_it() {
     // screen-changed notification) each time. Keep must cost no acquire.
     let ctx = registry(true); // NVDA running and top-ranked
     let current = ctx.voice("NVDA").unwrap().boxed();
+    let id = ctx.id_by_name("NVDA").unwrap();
     ctx.reset_acquires();
-    let repick = repick_backend_gated(&ctx, None, narrator_off, Some(current.as_ref()));
+    let repick = repick_backend_gated(&ctx, None, narrator_off, Some((id, current.as_ref())));
     assert!(matches!(repick, Repick::Keep), "got {repick:?}");
     assert_eq!(ctx.acquire_count(), 0);
+}
+
+#[test]
+fn repick_keeps_when_the_display_name_differs_from_the_registry_name() {
+    // Prism's iOS VoiceOver registers as "VoiceOver" but answers
+    // "VoiceOver (iOS)" from name(). Matching the held voice by name never
+    // hit, so every refresh re-acquired and "switched" to it.
+    let voiceover = FakeVoice::new("VoiceOver", 103, SPEAKING);
+    voiceover.set_display_name("VoiceOver (iOS)");
+    let ctx = FakeRegistry::new(vec![voiceover.clone()]);
+    let current = voiceover.boxed();
+    assert_eq!(current.name(), "VoiceOver (iOS)");
+    let id = ctx.id_by_name("VoiceOver").unwrap();
+    ctx.reset_acquires();
+    let repick = repick_backend_gated(&ctx, None, narrator_off, Some((id, current.as_ref())));
+    assert!(matches!(repick, Repick::Keep), "got {repick:?}");
+    assert_eq!(ctx.acquire_count(), 0);
+}
+
+#[test]
+fn refresh_keeps_a_voice_whose_display_name_differs_from_its_registry_name() {
+    // The same mismatch through a whole Speech: several health checks in,
+    // the backend is still the held instance, nothing logged or announced.
+    let voiceover = FakeVoice::new("VoiceOver", 103, SPEAKING);
+    voiceover.set_display_name("VoiceOver (iOS)");
+    let ctx = FakeRegistry::new(vec![voiceover.clone()]);
+    let id = ctx.id_by_name("VoiceOver").unwrap();
+    let mut s = Speech::from_parts(Some(Box::new(ctx.clone())), None, None);
+    s.set_main_backend_with_id(Some(voiceover.boxed()), Some(id));
+    ctx.reset_acquires();
+    for _ in 0..3 {
+        s.poll(REFRESH_INTERVAL_S);
+    }
+    assert_eq!(s.backend_name(), "VoiceOver (iOS)");
+    assert!(
+        !voiceover
+            .spoken()
+            .iter()
+            .any(|(text, _)| text.contains("Speech is now using")),
+        "spoken: {:?}",
+        voiceover.spoken()
+    );
 }
 
 #[test]
@@ -667,9 +710,15 @@ fn repick_switches_to_a_higher_priority_backend_that_started() {
     // mid-session and the next check must hand speech to it.
     let ctx = registry(false);
     let current = ctx.voice("ONE_CORE").unwrap().boxed();
+    let current_id = ctx.id_by_name("ONE_CORE").unwrap();
     ctx.voice("NVDA").unwrap().set_runtime_supported(true);
-    match repick_backend_gated(&ctx, None, narrator_off, Some(current.as_ref())) {
-        Repick::Switch(backend) => assert_eq!(backend.name(), "NVDA"),
+    match repick_backend_gated(
+        &ctx,
+        None,
+        narrator_off,
+        Some((current_id, current.as_ref())),
+    ) {
+        Repick::Switch(_, backend) => assert_eq!(backend.name(), "NVDA"),
         other => panic!("expected a switch to NVDA, got {other:?}"),
     }
 }
@@ -680,14 +729,25 @@ fn repick_moves_on_when_the_current_backend_dies() {
     let sapi = FakeVoice::new("SAPI", 97, SPEAKING);
     let ctx = FakeRegistry::new(vec![nvda.clone(), sapi.clone()]);
     let current = nvda.boxed();
+    let current_id = ctx.id_by_name("NVDA").unwrap();
     nvda.set_runtime_supported(false);
-    match repick_backend_gated(&ctx, None, narrator_off, Some(current.as_ref())) {
-        Repick::Switch(backend) => assert_eq!(backend.name(), "SAPI"),
+    match repick_backend_gated(
+        &ctx,
+        None,
+        narrator_off,
+        Some((current_id, current.as_ref())),
+    ) {
+        Repick::Switch(_, backend) => assert_eq!(backend.name(), "SAPI"),
         other => panic!("expected a switch to SAPI, got {other:?}"),
     }
     sapi.set_runtime_supported(false);
     assert!(matches!(
-        repick_backend_gated(&ctx, None, narrator_off, Some(current.as_ref())),
+        repick_backend_gated(
+            &ctx,
+            None,
+            narrator_off,
+            Some((current_id, current.as_ref()))
+        ),
         Repick::Gone
     ));
 }
@@ -696,8 +756,14 @@ fn repick_moves_on_when_the_current_backend_dies() {
 fn repick_keeps_when_the_override_names_the_current_backend() {
     let ctx = registry(false);
     let current = ctx.voice("SAPI").unwrap().boxed();
+    let current_id = ctx.id_by_name("SAPI").unwrap();
     ctx.reset_acquires();
-    let repick = repick_backend_gated(&ctx, Some("SAPI"), narrator_off, Some(current.as_ref()));
+    let repick = repick_backend_gated(
+        &ctx,
+        Some("SAPI"),
+        narrator_off,
+        Some((current_id, current.as_ref())),
+    );
     assert!(matches!(repick, Repick::Keep), "got {repick:?}");
     assert_eq!(ctx.acquire_count(), 0);
 }
@@ -709,8 +775,14 @@ fn repick_does_not_keep_uia_when_narrator_is_off() {
     let uia = FakeVoice::new("UIA", 97, SPEAKING);
     let ctx = FakeRegistry::new(vec![FakeVoice::new("OneCore", 98, SPEAKING), uia.clone()]);
     let current = uia.boxed();
-    match repick_backend_gated(&ctx, None, narrator_off, Some(current.as_ref())) {
-        Repick::Switch(backend) => assert_eq!(backend.name(), "OneCore"),
+    let current_id = ctx.id_by_name("UIA").unwrap();
+    match repick_backend_gated(
+        &ctx,
+        None,
+        narrator_off,
+        Some((current_id, current.as_ref())),
+    ) {
+        Repick::Switch(_, backend) => assert_eq!(backend.name(), "OneCore"),
         other => panic!("expected a switch off UIA, got {other:?}"),
     }
 }
@@ -719,7 +791,7 @@ fn repick_does_not_keep_uia_when_narrator_is_off() {
 fn repick_behaves_like_pick_with_no_current_backend() {
     let ctx = registry(false);
     match repick_backend_gated(&ctx, None, narrator_off, None) {
-        Repick::Switch(backend) => assert_eq!(backend.name(), "ONE_CORE"),
+        Repick::Switch(_, backend) => assert_eq!(backend.name(), "ONE_CORE"),
         other => panic!("expected a pick of ONE_CORE, got {other:?}"),
     }
     let silent = FakeRegistry::new(vec![FakeVoice::new("NVDA", 103, runtime(false))]);
