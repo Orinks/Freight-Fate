@@ -73,3 +73,61 @@ def test_ci_does_not_dispatch_the_retired_build_workflow() -> None:
 
     assert "build" not in workflow["jobs"]
     assert "--workflow Build" not in CI_WORKFLOW.read_text(encoding="utf-8")
+
+
+WORKFLOWS = ROOT / ".github" / "workflows"
+RUST_WORKFLOW = WORKFLOWS / "rust.yml"
+CHANGELOG_WORKFLOW = WORKFLOWS / "changelog.yml"
+
+
+def _load(path: Path) -> dict:
+    return yaml.load(path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+
+
+def test_the_build_workflows_skip_pushes_and_prs_that_cannot_affect_them() -> None:
+    """ci.yml tests the Python tooling and rust.yml the game; each used to run
+    its full matrix on every push, so a docs-only merge to dev still rebuilt
+    the Rust workspace on two Windows runners and a Rust-only push still ran
+    pytest on two OSes. Both are path filtered now, on push and PR alike."""
+    for path in (CI_WORKFLOW, RUST_WORKFLOW):
+        triggers = _load(path)["on"]
+        push_paths = triggers["push"]["paths"]
+        assert push_paths, path.name
+        assert triggers["pull_request"]["paths"] == push_paths, path.name
+        assert f".github/workflows/{path.name}" in push_paths or (
+            ".github/workflows/**" in push_paths
+        ), f"{path.name} must rerun when it changes"
+        assert "workflow_dispatch" in triggers, path.name
+
+    python_inputs = _load(CI_WORKFLOW)["on"]["push"]["paths"]
+    for needed in ("tools/**", "tests/**", "pyproject.toml", "uv.lock"):
+        assert needed in python_inputs, needed
+    rust_inputs = _load(RUST_WORKFLOW)["on"]["push"]["paths"]
+    for needed in ("crates/**", "Cargo.lock", "data/**", "assets/**"):
+        assert needed in rust_inputs, needed
+
+
+def test_ci_cancels_superseded_runs() -> None:
+    concurrency = _load(CI_WORKFLOW)["concurrency"]
+    assert "github.ref" in concurrency["group"]
+    assert concurrency["cancel-in-progress"] == "true"
+
+
+def test_one_unfiltered_changelog_gate_covers_every_branch_the_builds_did() -> None:
+    """The gate must see every change, so it cannot sit in a path-filtered
+    workflow. It runs once, from changelog.yml, on every branch either build
+    workflow used to gate."""
+    for path in (CI_WORKFLOW, RUST_WORKFLOW):
+        assert "changelog" not in _load(path)["jobs"], path.name
+
+    workflow = _load(CHANGELOG_WORKFLOW)
+    triggers = workflow["on"]
+    for event in ("push", "pull_request"):
+        assert "paths" not in triggers[event], event
+        assert "paths-ignore" not in triggers[event], event
+        covered = set(triggers[event]["branches"])
+        for path in (CI_WORKFLOW, RUST_WORKFLOW):
+            assert set(_load(path)["on"][event]["branches"]) <= covered, (event, path.name)
+
+    run = "\n".join(step.get("run", "") for step in workflow["jobs"]["changelog"]["steps"])
+    assert "tools/release_notes.py check" in run

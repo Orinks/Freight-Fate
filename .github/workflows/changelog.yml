@@ -1,0 +1,59 @@
+# The changelog gate, in its own workflow so it runs on EVERY change.
+#
+# ci.yml (Python tooling) and rust.yml (the game) are path filtered, so a
+# docs-only push skips the Windows build and a Rust-only push skips pytest.
+# The gate cannot be filtered that way: it is what catches a user-facing
+# change that landed without a CHANGELOG.md bullet, whatever it touched. It
+# used to be a job in both of those workflows; it lives here once instead,
+# on the union of their branches.
+#
+# The gate also runs locally as a pre-push hook, which not every clone has
+# installed. Same tool and skip markers (`tools/release_notes.py check`;
+# `[skip changelog]` / `changelog: none`).
+
+name: Changelog
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main, dev, feat/career-1.9, feat/rust-port]
+  pull_request:
+    branches: [main, dev, feat/career-1.9]
+
+concurrency:
+  group: changelog-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changelog:
+    name: Changelog
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # Full history, because the check walks base..HEAD for commit
+          # messages -- but without the blobs. The pack is 840 MB of world
+          # data churn, and this job needs commits, trees and one changelog
+          # blob per ref (`git show <ref>:CHANGELOG.md`), which a blobless
+          # clone fetches on demand. Three minutes of checkout became thirty
+          # seconds (2026-09-02).
+          fetch-depth: 0
+          filter: blob:none
+          lfs: false
+
+      - name: Require a changelog entry for user-facing changes
+        env:
+          # PRs diff against their target branch; pushes diff against the
+          # ref the branch pointed at before this push.
+          BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] && ! git cat-file -e "$BASE" 2>/dev/null; then
+            # A brand-new branch pushes an all-zeros "before", and a force
+            # push can point at history this clone no longer has.
+            echo "Base commit $BASE unavailable (new branch or force push); skipping."
+            exit 0
+          fi
+          python3 tools/release_notes.py check --base "$BASE" --head HEAD

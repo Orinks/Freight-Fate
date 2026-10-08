@@ -52,8 +52,6 @@ on:
     # Alongside main and dev, the Rust release lines take direct pushes instead
     # of PRs, so each needs its own entry for this CI to run.
     branches: [main, dev, feat/career-1.9, feat/rust-port]
-  pull_request:
-    branches: [main, dev, feat/career-1.9]
     paths:
       - "crates/**"
       - "data/**"
@@ -64,13 +62,41 @@ on:
       - "rust-toolchain.toml"
       - ".cargo/**"
       - ".github/workflows/rust.yml"
+      # Read by the build or the tests from outside crates/: include_str!
+      # fixtures, the JAWS script, the pyproject version the crate must
+      # match, and the BASS fetch tool whose hash keys the BASS cache.
+      - "pyproject.toml"
+      - "tests/pyrandom_fixtures.json"
+      - "tests/python_signed_save.*"
+      - "tools/jaws/**"
+      - "tools/fetch_bass.py"
+  pull_request:
+    branches: [main, dev, feat/career-1.9]
+    # Keep in step with the push list (tests/test_ci_workflow.py checks).
+    paths:
+      - "crates/**"
+      - "data/**"
+      - "assets/**"
+      - "vendor/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "rust-toolchain.toml"
+      - ".cargo/**"
+      - ".github/workflows/rust.yml"
+      - "pyproject.toml"
+      - "tests/pyrandom_fixtures.json"
+      - "tests/python_signed_save.*"
+      - "tools/jaws/**"
+      - "tools/fetch_bass.py"
   # A manual run is the FULL suite: no `--cfg ci_quick`, sweeps included.
   workflow_dispatch:
 
-# The pull-request path filter keeps the Windows build off PRs that only
-# touch Python or docs. A *required* check that is path filtered
-# stays "expected -- waiting for status" forever on a skipped PR, so do not
-# make it required unless the filter is dropped.
+# The path filter keeps the Windows build off pushes and PRs that only touch
+# Python or docs, including the merge push of a PR that already skipped it.
+# A *required* check that is path filtered stays "expected -- waiting for
+# status" forever on a skipped PR, so do not make it required unless the
+# filter is dropped. The changelog gate must see every change, so it is not
+# here: it lives in changelog.yml, unfiltered.
 
 concurrency:
   group: rust-${{ github.ref }}
@@ -316,40 +342,3 @@ jobs:
           name: cargo-timing
           path: target/cargo-timings/cargo-timing.html
           if-no-files-found: ignore
-
-  changelog:
-    # The changelog gate runs locally as a pre-push hook, which not every
-    # clone has installed. ci.yml used to enforce it on this branch; that
-    # workflow no longer runs on feat/career-1.9 (Python pytest stays on
-    # main/dev), so this job is the CI gate for the 1.9 release line. Same
-    # tool and skip markers as the pre-push hook (`tools.release_notes`
-    # check; `[skip changelog]` / `changelog: none`).
-    name: Changelog
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          # Full history, because the check walks base..HEAD for commit
-          # messages -- but without the blobs. The pack is 840 MB of world
-          # data churn, and this job needs commits, trees and one changelog
-          # blob per ref (`git show <ref>:CHANGELOG.md`), which a blobless
-          # clone fetches on demand. Three minutes of checkout became thirty
-          # seconds (2026-09-02).
-          fetch-depth: 0
-          filter: blob:none
-          lfs: false
-
-      - name: Require a changelog entry for user-facing changes
-        env:
-          # PRs diff against their target branch; pushes diff against the
-          # ref the branch pointed at before this push.
-          BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
-        run: |
-          if [ "${{ github.event_name }}" = "push" ] && ! git cat-file -e "$BASE" 2>/dev/null; then
-            # A brand-new branch pushes an all-zeros "before", and a force
-            # push can point at history this clone no longer has.
-            echo "Base commit $BASE unavailable (new branch or force push); skipping."
-            exit 0
-          fi
-          python3 tools/release_notes.py check --base "$BASE" --head HEAD

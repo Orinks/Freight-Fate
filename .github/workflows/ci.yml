@@ -8,9 +8,64 @@ on:
   push:
     # The 1.9 release line has its own Rust CI in rust.yml.
     branches: [main, dev]
+    paths:
+      # What the Python suite reads, measured by auditing every file pytest
+      # opened (2026-10-08): the tools and their tests, the world data and
+      # sound assets they check, the workflows the guards parse, and a few
+      # files outside those trees. A Rust-only push skips this workflow;
+      # rust.yml covers it. The changelog gate is NOT filtered: it lives in
+      # changelog.yml and runs on every change.
+      - "tools/**"
+      - "tests/**"
+      - "sound-test/**"
+      - "data/**"
+      - "assets/**"
+      - "docs/**"
+      - "crates/*/Cargo.toml"
+      - "crates/ff-core/src/music.rs"
+      - "crates/ff-core/src/music/**"
+      - ".cargo/**"
+      - ".github/workflows/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "README.md"
+      - "CHANGELOG.md"
+      - "LICENSE"
+      - "build-release.sh"
+      - "build-release.ps1"
+      - ".gitignore"
+      - ".gitattributes"
   pull_request:
     branches: [main, dev]
+    # Keep in step with the push list (tests/test_ci_workflow.py checks).
+    paths:
+      - "tools/**"
+      - "tests/**"
+      - "sound-test/**"
+      - "data/**"
+      - "assets/**"
+      - "docs/**"
+      - "crates/*/Cargo.toml"
+      - "crates/ff-core/src/music.rs"
+      - "crates/ff-core/src/music/**"
+      - ".cargo/**"
+      - ".github/workflows/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "README.md"
+      - "CHANGELOG.md"
+      - "LICENSE"
+      - "build-release.sh"
+      - "build-release.ps1"
+      - ".gitignore"
+      - ".gitattributes"
   workflow_dispatch:
+
+# A newer push to the same branch or PR supersedes the run in flight, as in
+# rust.yml.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # The Python that still SHIPS: the build, bake, indexing and release tooling
@@ -61,28 +116,3 @@ jobs:
         with:
           name: coverage-${{ matrix.os }}
           path: coverage.xml
-
-  changelog:
-    # The changelog gate runs locally as a pre-push hook, which not every
-    # clone has installed; this enforces it on every PR and also on direct
-    # pushes to dev and main, which would otherwise slip past ungated.
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Require a changelog entry for user-facing changes
-        env:
-          # PRs diff against their target branch; pushes diff against the
-          # ref the branch pointed at before this push.
-          BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
-        run: |
-          if [ "${{ github.event_name }}" = "push" ] && ! git cat-file -e "$BASE" 2>/dev/null; then
-            # A brand-new branch pushes an all-zeros "before", and a force
-            # push can point at history this clone no longer has.
-            echo "Base commit $BASE unavailable (new branch or force push); skipping."
-            exit 0
-          fi
-          python3 tools/release_notes.py check --base "$BASE" --head HEAD
