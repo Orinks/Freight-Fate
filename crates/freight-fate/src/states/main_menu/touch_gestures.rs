@@ -12,6 +12,7 @@ use crate::states::base::{Label, Menu, MenuCore, MenuItem};
 use crate::touch::Gesture;
 
 use super::settings::save_settings;
+use super::TouchPracticeState;
 
 const GESTURES_HELP: &str = "Up and down pick a gesture, Enter chooses the command it runs \
                              while driving, Escape goes back.";
@@ -87,6 +88,12 @@ impl Menu for TouchGesturesState {
                 .help("Enter, then choose the command this gesture runs while driving.")
             })
             .collect();
+        items.push(
+            MenuItem::new("Practice gestures", |_s: &mut Self, ctx| {
+                ctx.push_state(TouchPracticeState::new());
+            })
+            .help("Names each gesture and its current command without controlling the truck."),
+        );
         items.push(
             MenuItem::new(
                 Label::dynamic(|_s: &Self, ctx| {
