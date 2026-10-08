@@ -513,6 +513,14 @@ Everything found before 2026-09-25 moved to
       CDL, from the terminal and from an open bobtail menu, with the date
       the suspension ends. Ported from 2.0's PR #259 for 1.9.4
       (2026-10-08).
+- [ ] Scale reminder state is one key and one age for the whole drive. Two
+      open scales under about a mile apart would let the second reminder
+      overwrite the first, and the first could be charged without its
+      real-seconds grace. No leg has such a pair today (scan, 2026-10-08);
+      keep the age per scale if one is ever added.
+- [ ] A scale crossed during a frame the cab is busy (hazard, microsleep)
+      is never judged at all: the check returns early and its previous
+      position covers one frame. Lenient, not a charge (review, 2026-10-08).
 - [ ] Placed attraction billboards speak in one direction only since
       2026-09-30; the other side hears the random pool. Signs standing at
       their attraction could be marked `both`, and the rest need copy
