@@ -17,8 +17,9 @@ use std::fmt;
 use std::io;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Condvar, Mutex};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
+use chrono::{DateTime, Utc};
 use once_cell::sync::Lazy;
 use serde_json::Value;
 use ureq::tls::{RootCerts, TlsConfig};
@@ -536,6 +537,11 @@ pub fn request(
         }
     };
     let status = response.status().as_u16();
+    if tier == Tier::Orinks {
+        if let Some(date) = response.headers().get("date") {
+            note_server_date(date.to_str().unwrap_or_default());
+        }
+    }
     let body = response
         .body_mut()
         .with_config()
@@ -545,6 +551,37 @@ pub fn request(
         return Err(NetError::Http { code: status, body });
     }
     Ok(RawResponse { status, body })
+}
+
+// -- the server's clock ------------------------------------------------------------------
+
+/// The last `Date` orinks.net sent, and when on this machine's monotonic
+/// clock it arrived. Badges tied to a real-world date read this instead of
+/// the system clock, which the player can set to any day they like.
+static SERVER_CLOCK: Mutex<Option<(DateTime<Utc>, Instant)>> = Mutex::new(None);
+
+/// Record an HTTP `Date` header (RFC 2822 form, "Sun, 28 Sep 2026 14:05:09
+/// GMT"). One that does not parse is ignored.
+pub fn note_server_date(header: &str) {
+    if let Ok(date) = DateTime::parse_from_rfc2822(header) {
+        *SERVER_CLOCK.lock().unwrap_or_else(|p| p.into_inner()) =
+            Some((date.with_timezone(&Utc), Instant::now()));
+    }
+}
+
+/// orinks.net's idea of now: its last `Date`, carried forward on the
+/// monotonic clock. `None` until the game has heard from the server this
+/// session, so an offline game never has one.
+pub fn server_now() -> Option<DateTime<Utc>> {
+    if let Some(at) = testing::server_time_override() {
+        return at;
+    }
+    let reading = *SERVER_CLOCK.lock().unwrap_or_else(|p| p.into_inner());
+    reading.and_then(|(date, heard)| {
+        chrono::Duration::from_std(heard.elapsed())
+            .ok()
+            .map(|since| date + since)
+    })
 }
 
 /// `json.loads(resp.read().decode("utf-8"))`.

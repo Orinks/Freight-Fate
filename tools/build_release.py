@@ -21,9 +21,10 @@ to turn the JSON data tree into ``world.ffdata``, then a ``FreightFate/``
 folder with the executable renamed to ``FreightFate``. On macOS it creates
 ``FreightFate.app`` with the executable under ``Contents/MacOS``, native
 libraries under ``Contents/Frameworks``, and data, packs, build metadata, and
-documents under ``Contents/Resources``; macOS builds are ad-hoc signed, with no
-Apple Developer ID or notarization, so a downloaded app can need the
-documented first-launch Open Anyway step. ``--rust`` is accepted for the
+documents under ``Contents/Resources``. With ``MACOS_SIGN_IDENTITY`` set, the
+app is signed with that Developer ID under the hardened runtime, and with the
+``MACOS_NOTARY_*`` variables also set it is notarized and stapled before it is
+archived; without them it is ad-hoc signed for local use. ``--rust`` is accepted for the
 callers that still pass it; it is the only mode.
 """
 
@@ -80,7 +81,15 @@ ADDON_LIB_DIR = PACKAGE_DIR / SOURCE_ASSETS / "lib"
 # environment at deploy time, so setting it takes a redeploy to have any
 # effect. The sha256 below is what actually gates the download either way.
 DEFAULT_MUSIC_URL = "https://www.orinks.net/downloads/music.pak"
-DEFAULT_MUSIC_SHA256 = "251a9883dc82f39e4b0e51b3d5b3d788f9dce5b931f04c14526cb71087dda77d"
+DEFAULT_MUSIC_SHA256 = "c56401a2a45057faba0bd4bf7d024ce7dd3908f682f4c35526643a1870cb7798"
+# Channel 3000's clips, packed by tools/build_channel3000.py from the
+# channel3000-clips branch. Its own pack rather than more of music.pak, which
+# the game reads whole into memory; the game opens this one only when the
+# radio is first tuned to 87.7. The digest is of that tool's deterministic
+# build of the branch as of 2026-10-06 (96 clips); the owner publishes the
+# file to the site, and a rebuild that changes the clips moves this pin.
+DEFAULT_CHANNEL3000_URL = "https://www.orinks.net/downloads/channel3000.pak"
+DEFAULT_CHANNEL3000_SHA256 = "af58d90b1236b8a6bd454a7466e63905cb260b17f607963619156b62ebeab32e"
 
 
 def platform_native_exts(platform_name: str = sys.platform) -> set[str]:
@@ -122,9 +131,11 @@ def stage_sound_pack(build_dir: Path, root: Path | None = None) -> None:
     root = root or runtime_root(build_dir)
     destination = root / "freight_fate" / "sounds.pak"
     music_destination = root / "freight_fate" / "music.pak"
+    channel3000_destination = root / "freight_fate" / "channel3000.pak"
     destination.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(PACKAGE_DIR / SOURCE_ASSETS / "sounds.pak", destination)
     shutil.copy2(PACKAGE_DIR / SOURCE_ASSETS / "music.pak", music_destination)
+    shutil.copy2(PACKAGE_DIR / SOURCE_ASSETS / "channel3000.pak", channel3000_destination)
     credits = PACKAGE_DIR / "assets" / "sounds" / "CREDITS.md"
     if not credits.exists():
         raise RuntimeError(f"Sound credits were not found: {credits}")
@@ -189,6 +200,10 @@ def verify_sound_packs(root: Path) -> None:
     if not any(name.startswith("music/") for name in music_pack_names):
         raise RuntimeError("Packaged music pack contains no music files")
 
+    channel3000_names = assets_pack.SoundPack(root / "freight_fate" / "channel3000.pak").names()
+    if not any(name.startswith("c3k/") for name in channel3000_names):
+        raise RuntimeError("Packaged Channel 3000 pack contains no clips")
+
 
 def _is_snapshot_label(label: str) -> bool:
     """True for public 1.8 nightlies and Career 1.9 tester prereleases."""
@@ -199,6 +214,29 @@ def _is_snapshot_label(label: str) -> bool:
     return len(suffix) == 8 and suffix.isdigit()
 
 
+def build_commit() -> str:
+    """The checked-out commit, so the updater can tell a same-day rebuild
+    under one snapshot tag from the copy it replaced; "" outside git."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return result.stdout.strip()
+
+
+def label_package_version(label: str) -> str:
+    """The version a build labelled ``label`` is: the label's own for a
+    stable (``v1.9.1`` or ``1.9.1``), else the ``pyproject.toml`` version."""
+    return project_version() if _is_snapshot_label(label) else label.removeprefix("v")
+
+
 def stamp_build_info(build_dir: Path, label: str, root: Path | None = None) -> None:
     """Record what this build is, for the in-game updater.
 
@@ -206,34 +244,156 @@ def stamp_build_info(build_dir: Path, label: str, root: Path | None = None) -> N
     ``1.9-tester-20260828``) or a plain version (``1.6.0``); the release
     tag for the latter is ``v``-prefixed.
 
-    ``package_version`` is the exact ``pyproject.toml`` project version --
-    not ``label``, which for a snapshot is a date-stamped tag, not a package
-    version.
+    ``package_version`` is what the game reports as its own version, and
+    what the updater compares releases against. A snapshot carries the
+    exact ``pyproject.toml`` project version, since its label is a
+    date-stamped tag. A stable build carries the label's version: the
+    ``v1.9.0`` tag push built a game whose pyproject still read
+    ``1.9.0.dev0``, so every 1.9.0 copy called itself a development build
+    and was offered 1.9.0 again on every start.
     """
     snapshot = _is_snapshot_label(label)
     info = {
-        "tag": label if snapshot else f"v{label}",
+        "tag": label if snapshot else f"v{label.removeprefix('v')}",
         "channel": "dev" if snapshot else "stable",
         "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-        "package_version": project_version(),
+        "package_version": label_package_version(label),
+        "commit": build_commit(),
     }
     info_path = (root or runtime_root(build_dir)) / "build_info.json"
     with open(info_path, "w", encoding="utf-8") as f:
         json.dump(info, f, indent=2)
 
 
-def sign_distribution(build_dir: Path) -> None:
-    """Ad-hoc sign the finalized macOS app bundle."""
+MACOS_SIGN_IDENTITY_ENV = "MACOS_SIGN_IDENTITY"
+MACOS_SIGN_KEYCHAIN_ENV = "MACOS_SIGN_KEYCHAIN"
+MACOS_NOTARY_ENV = ("MACOS_NOTARY_KEY_PATH", "MACOS_NOTARY_KEY_ID", "MACOS_NOTARY_ISSUER_ID")
+
+
+def macos_signing_identity(environ: Mapping[str, str] = os.environ) -> str:
+    """The Developer ID to sign with, or empty for an ad-hoc local build."""
+    return environ.get(MACOS_SIGN_IDENTITY_ENV, "").strip()
+
+
+def macos_notary_credentials(
+    environ: Mapping[str, str] = os.environ,
+) -> tuple[str, str, str] | None:
+    """App Store Connect key path, key ID and issuer, or None when unset."""
+    values = tuple(environ.get(name, "").strip() for name in MACOS_NOTARY_ENV)
+    if not any(values):
+        return None
+    if not all(values):
+        missing = [name for name, value in zip(MACOS_NOTARY_ENV, values, strict=True) if not value]
+        raise RuntimeError(f"notarization is half configured; missing {', '.join(missing)}")
+    return values  # type: ignore[return-value]
+
+
+def developer_id_codesign_command(identity: str, target: Path, keychain: str = "") -> list[str]:
+    """codesign for one Mach-O or the bundle: hardened runtime, secure timestamp."""
+    command = ["codesign", "--force", "--options", "runtime", "--timestamp"]
+    if keychain:
+        command += ["--keychain", keychain]
+    return [*command, "--sign", identity, str(target)]
+
+
+def sign_distribution(build_dir: Path, environ: Mapping[str, str] = os.environ) -> None:
+    """Sign the finalized macOS app bundle, Developer ID when configured."""
     if sys.platform != "darwin":
         return
     verify_macos_native_dependencies(build_dir)
-    subprocess.run(
-        ["codesign", "--force", "--deep", "--sign", "-", str(build_dir)],
-        check=True,
-    )
+    identity = macos_signing_identity(environ)
+    if identity:
+        keychain = environ.get(MACOS_SIGN_KEYCHAIN_ENV, "").strip()
+        # Inside out: nested libraries first, then the bundle seals them.
+        # Notarization rejects --deep signing, so each dylib is signed alone.
+        executable = build_dir / "Contents" / "MacOS" / APP_NAME
+        for binary in macos_bundle_binaries(build_dir):
+            if binary != executable:
+                subprocess.run(
+                    developer_id_codesign_command(identity, binary, keychain), check=True
+                )
+        subprocess.run(developer_id_codesign_command(identity, build_dir, keychain), check=True)
+    else:
+        subprocess.run(
+            ["codesign", "--force", "--deep", "--sign", "-", str(build_dir)],
+            check=True,
+        )
     subprocess.run(
         ["codesign", "--verify", "--deep", "--strict", str(build_dir)],
         check=True,
+    )
+
+
+def notarize_distribution(build_dir: Path, environ: Mapping[str, str] = os.environ) -> None:
+    """Notarize and staple a Developer ID signed app, when credentials are set."""
+    if sys.platform != "darwin":
+        return
+    credentials = macos_notary_credentials(environ)
+    if credentials is None:
+        print("Skipped notarization: no App Store Connect key configured.")
+        return
+    if not macos_signing_identity(environ):
+        raise RuntimeError("notarization needs a Developer ID signature; set MACOS_SIGN_IDENTITY")
+    key_path, key_id, issuer = credentials
+    with tempfile.TemporaryDirectory() as scratch:
+        upload = Path(scratch) / f"{build_dir.stem}-notarize.zip"
+        subprocess.run(
+            ["ditto", "-c", "-k", "--keepParent", str(build_dir), str(upload)], check=True
+        )
+        result = subprocess.run(
+            [
+                "xcrun",
+                "notarytool",
+                "submit",
+                str(upload),
+                "--key",
+                key_path,
+                "--key-id",
+                key_id,
+                "--issuer",
+                issuer,
+                "--wait",
+                "--timeout",
+                "45m",
+                "--output-format",
+                "json",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    try:
+        submission = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        submission = {}
+    status = submission.get("status", "")
+    if status != "Accepted":
+        submission_id = submission.get("id", "")
+        if submission_id:
+            subprocess.run(
+                [
+                    "xcrun",
+                    "notarytool",
+                    "log",
+                    submission_id,
+                    "--key",
+                    key_path,
+                    "--key-id",
+                    key_id,
+                    "--issuer",
+                    issuer,
+                ],
+                check=False,
+            )
+        raise RuntimeError(
+            f"Apple notarization returned {status or 'no status'} "
+            f"(exit {result.returncode}): {result.stderr.strip()}"
+        )
+    print(f"Notarization accepted: {submission.get('id', '')}")
+    subprocess.run(["xcrun", "stapler", "staple", str(build_dir)], check=True)
+    subprocess.run(["xcrun", "stapler", "validate", str(build_dir)], check=True)
+    subprocess.run(
+        ["spctl", "--assess", "--type", "execute", "--verbose=2", str(build_dir)], check=True
     )
 
 
@@ -369,6 +529,7 @@ def verify_archive(out: Path) -> None:
         "USER_MANUAL.md",
         "freight_fate/sounds.pak",
         "freight_fate/music.pak",
+        "freight_fate/channel3000.pak",
         RUST_BAKED_FILE_ENTRY,
     )
     missing = [name for name in required if f"{payload_root}/{name}" not in entries]
@@ -398,6 +559,19 @@ def verify_archive(out: Path) -> None:
         )
 
 
+def is_career_19_label(label: str) -> bool:
+    """A Career 1.9 tester snapshot or a stable tag from v1.9.0 on.
+
+    Their Apple Silicon archive is named ``-macos-arm64`` (the workflow
+    uploads only that name, and its stable step adds the ``-macos`` copy
+    the updaters look for); a 1.8 stable tag keeps the plain ``-macos``.
+    """
+    if label.startswith("1.9-tester-"):
+        return True
+    match = re.match(r"v?(\d+)\.(\d+)\.", label)
+    return bool(match) and (int(match[1]), int(match[2])) >= (1, 9)
+
+
 def archive(build_dir: Path, label: str) -> Path:
     if sys.platform == "win32":
         out = DIST / f"{APP_NAME}-{label}-windows-portable.zip"
@@ -405,9 +579,8 @@ def archive(build_dir: Path, label: str) -> Path:
             for path in sorted(build_dir.rglob("*")):
                 z.write(path, Path(APP_NAME) / path.relative_to(build_dir))
     elif sys.platform == "darwin":
-        is_career_19_tester = label.startswith("1.9-tester-")
         is_apple_silicon = platform.machine().lower() in {"arm64", "aarch64"}
-        mac_suffix = "macos-arm64" if is_career_19_tester and is_apple_silicon else "macos"
+        mac_suffix = "macos-arm64" if is_career_19_label(label) and is_apple_silicon else "macos"
         out = DIST / f"{APP_NAME}-{label}-{mac_suffix}.zip"
         subprocess.run(["ditto", "-c", "-k", "--keepParent", str(build_dir), str(out)], check=True)
     else:
@@ -453,6 +626,7 @@ RUST_BAKE_BIN = "ff-bake"
 # so a half-migrated build that ships both is caught rather than shipped.
 RUST_BAKED_SOURCE_FILES = (
     "buffs.json",
+    "channel3000.json",
     "city_services.json",
     "facility_approaches.json",
     "facility_endpoints.json",
@@ -582,15 +756,31 @@ def file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def music_download_config(env: Mapping[str, str] = os.environ) -> tuple[str, str]:
-    """Return the music-pack URL and required lowercase SHA-256 digest."""
-    url = env.get("FREIGHT_FATE_MUSIC_URL", DEFAULT_MUSIC_URL)
-    expected_sha256 = env.get("FREIGHT_FATE_MUSIC_SHA256", DEFAULT_MUSIC_SHA256).lower()
+def _pinned_download_config(
+    env: Mapping[str, str], prefix: str, default_url: str, default_sha256: str
+) -> tuple[str, str]:
+    """``<prefix>_URL`` and ``<prefix>_SHA256`` from ``env``, else the pins."""
+    url = env.get(f"{prefix}_URL", default_url)
+    expected_sha256 = env.get(f"{prefix}_SHA256", default_sha256).lower()
     if len(expected_sha256) != 64 or any(
         character not in "0123456789abcdef" for character in expected_sha256
     ):
-        raise RuntimeError("FREIGHT_FATE_MUSIC_SHA256 must be a 64-character hexadecimal digest")
+        raise RuntimeError(f"{prefix}_SHA256 must be a 64-character hexadecimal digest")
     return url, expected_sha256
+
+
+def music_download_config(env: Mapping[str, str] = os.environ) -> tuple[str, str]:
+    """Return the music-pack URL and required lowercase SHA-256 digest."""
+    return _pinned_download_config(
+        env, "FREIGHT_FATE_MUSIC", DEFAULT_MUSIC_URL, DEFAULT_MUSIC_SHA256
+    )
+
+
+def channel3000_download_config(env: Mapping[str, str] = os.environ) -> tuple[str, str]:
+    """Return the Channel 3000 pack URL and required lowercase SHA-256 digest."""
+    return _pinned_download_config(
+        env, "FREIGHT_FATE_CHANNEL3000", DEFAULT_CHANNEL3000_URL, DEFAULT_CHANNEL3000_SHA256
+    )
 
 
 def download_to_path(request: urllib.request.Request, destination: Path) -> None:
@@ -599,14 +789,19 @@ def download_to_path(request: urllib.request.Request, destination: Path) -> None
         shutil.copyfileobj(response, output, length=1024 * 1024)
 
 
-def ensure_music_pack(path: Path = PACKAGE_DIR / SOURCE_ASSETS / "music.pak") -> None:
-    """Download and verify the public music pack when it is not already present."""
-    url, expected_sha256 = music_download_config()
+def _ensure_pinned_pack(path: Path, url: str, expected_sha256: str, label: str) -> None:
+    """Download ``url`` to ``path`` unless a copy with the pinned digest is there.
+
+    The download lands in a temporary file beside ``path`` and replaces it
+    only once its digest matches, so a failed or tampered download never
+    costs the copy already there. ``label`` names the pack in errors
+    ("Music-pack download failed").
+    """
     if path.is_file() and not is_lfs_pointer(path) and file_sha256(path) == expected_sha256:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
-        dir=path.parent, prefix="music.pak.", suffix=".download", delete=False
+        dir=path.parent, prefix=f"{path.name}.", suffix=".download", delete=False
     ) as temp:
         temporary = Path(temp.name)
     try:
@@ -618,25 +813,39 @@ def ensure_music_pack(path: Path = PACKAGE_DIR / SOURCE_ASSETS / "music.pak") ->
             download_to_path(request, temporary)
         except urllib.error.HTTPError as exc:
             raise RuntimeError(
-                f"Music-pack download failed with HTTP status {exc.code}. "
+                f"{label} download failed with HTTP status {exc.code}. "
                 "Check your connection and retry the build."
             ) from exc
         except (urllib.error.URLError, ConnectionError, TimeoutError) as exc:
             detail = exc.reason if isinstance(exc, urllib.error.URLError) else str(exc)
             raise RuntimeError(
-                f"Music-pack download failed: {detail}. Check your connection and retry the build."
+                f"{label} download failed: {detail}. Check your connection and retry the build."
             ) from exc
         actual_sha256 = file_sha256(temporary)
         if actual_sha256 != expected_sha256:
             raise RuntimeError(
-                "Downloaded music.pak failed SHA-256 verification: "
+                f"Downloaded {path.name} failed SHA-256 verification: "
                 f"expected {expected_sha256}, got {actual_sha256}"
             )
         temporary.replace(path)
-        print(f"Downloaded and verified music.pak ({actual_sha256}).")
+        print(f"Downloaded and verified {path.name} ({actual_sha256}).")
     except Exception:
         temporary.unlink(missing_ok=True)
         raise
+
+
+def ensure_music_pack(path: Path = PACKAGE_DIR / SOURCE_ASSETS / "music.pak") -> None:
+    """Download and verify the public music pack when it is not already present."""
+    url, expected_sha256 = music_download_config()
+    _ensure_pinned_pack(path, url, expected_sha256, "Music-pack")
+
+
+def ensure_channel3000_pack(
+    path: Path = PACKAGE_DIR / SOURCE_ASSETS / "channel3000.pak",
+) -> None:
+    """Download and verify Channel 3000's pack when it is not already present."""
+    url, expected_sha256 = channel3000_download_config()
+    _ensure_pinned_pack(path, url, expected_sha256, "Channel 3000 pack")
 
 
 def rust_data_files(package_dir: Path = PACKAGE_DIR) -> list[Path]:
@@ -800,7 +1009,7 @@ def macos_bundle_version(label: str) -> str:
 
 def write_macos_info_plist(app: Path, label: str) -> None:
     """Write the minimal metadata Finder and assistive technology need."""
-    short_version = project_version().split(".dev", 1)[0]
+    short_version = label_package_version(label).split(".dev", 1)[0]
     info = {
         "CFBundleDevelopmentRegion": "en",
         "CFBundleDisplayName": "Freight Fate",
@@ -812,10 +1021,12 @@ def write_macos_info_plist(app: Path, label: str) -> None:
         "CFBundlePackageType": "APPL",
         "CFBundleShortVersionString": short_version,
         "CFBundleVersion": macos_bundle_version(label),
-        "NSAppleEventsUsageDescription": (
-            "Freight Fate uses VoiceOver to speak menus, driving information, and alerts."
-        ),
     }
+    # No NSAppleEventsUsageDescription, on purpose: without it macOS refuses
+    # Prism's AppleScript route to VoiceOver at once instead of asking. The
+    # question blocked the game's main thread until answered, freezing the
+    # game at launch (issue 266). Speech still reaches VoiceOver through
+    # accessibility announcements, which need no permission.
     info_path = app / "Contents" / "Info.plist"
     info_path.parent.mkdir(parents=True, exist_ok=True)
     with info_path.open("wb") as stream:
@@ -951,6 +1162,7 @@ def prepare_rust_release_dependencies() -> None:
     """Restore native audio and the verified music pack before Cargo runs."""
     subprocess.run(fetch_bass_command(), cwd=ROOT, check=True)
     ensure_music_pack()
+    ensure_channel3000_pack()
 
 
 def stage_rust_build(
@@ -976,6 +1188,7 @@ def stage_rust_build(
                 raise RuntimeError(f"Rust build is missing Linux player library {name}.{hint}")
     require_real_pack(PACKAGE_DIR / SOURCE_ASSETS / "sounds.pak")
     require_real_pack(PACKAGE_DIR / SOURCE_ASSETS / "music.pak")
+    require_real_pack(PACKAGE_DIR / SOURCE_ASSETS / "channel3000.pak")
     plan = plan_rust_layout(
         profile_dir,
         platform_name=platform_name,
@@ -1130,6 +1343,7 @@ def verify_rust_payload(build_dir: Path, platform_name: str = sys.platform) -> N
         root / "SOUND_CREDITS.md",
         root / "freight_fate" / "sounds.pak",
         root / "freight_fate" / "music.pak",
+        root / "freight_fate" / "channel3000.pak",
         root / "freight_fate" / LOOSE_SOUND_TREE / "CREDITS.md",
     ]
     data_dir = root / "freight_fate" / "data"
@@ -1264,6 +1478,7 @@ def build_rust(
     if sys.platform == "darwin":
         # Prove the archive input after every possible smoke-side mutation.
         sign_distribution(build_dir)
+        notarize_distribution(build_dir)
     DIST.mkdir(parents=True, exist_ok=True)
     out = archive(build_dir, label)
     verify_archive(out)

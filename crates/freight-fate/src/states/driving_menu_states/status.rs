@@ -428,12 +428,13 @@ impl DrivingStatusScreenState {
                                 .to_string(),
                         );
                     }
-                    lines.push(
+                    lines.push(format!(
                         "Page Down and Page Up tune stations, or semicolon and apostrophe. With \
                          Control they jump categories. With Shift they change radio volume by \
-                         10 percent. O saves the station as a favorite. M toggles the radio."
-                            .to_string(),
-                    );
+                         10 percent. {} saves the station as a favorite. {} toggles the radio.",
+                        ctx.bindings.spoken(Action::RadioFavorite),
+                        ctx.bindings.spoken(Action::Radio)
+                    ));
                 }
                 if !locked && !d.radio.favorite_ids.is_empty() {
                     lines.push(format!("Favorites saved: {}.", d.radio.favorite_ids.len()));

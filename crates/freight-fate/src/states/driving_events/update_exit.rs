@@ -51,20 +51,7 @@ impl DrivingState {
         // And while the exit lane stands open beside the truck: the seconds
         // between "Exit lane opening" and the steer into it are the driver's
         // to use, past the gore marker included.
-        self.trip.controlled_ramp = self.departure_ramp_mi.is_some()
-            || self.departure_merge_recovery
-            || self.lane.exit_lane_open
-            || self.on_laid_out_ramp()
-            || self.street_control_on_real_time()
-            || (self.ramp_mi.is_some()
-                && (self
-                    .ramp_stop
-                    .as_ref()
-                    .is_some_and(|stop| stop.stop_type == "weigh_station")
-                    || (matches!(
-                        self.ramp_control.as_str(),
-                        "signal" | "stop" | "yield" | "roundabout"
-                    ) && !self.ramp_terminal_done)));
+        self.trip.controlled_ramp = self.controlled_ramp_reason().is_some();
         // The run-in to the dock, which is the destination ramp AND the
         // facility's own streets where it has them. Both are real time.
         //
@@ -124,6 +111,40 @@ impl DrivingState {
             return;
         }
         self.update_armed_exit(ctx);
+    }
+
+    /// Which of the ramp laws above holds the clock at real time this frame,
+    /// by name, or None. `trip.controlled_ramp` is this being Some; the name
+    /// is what the session log gives for the pin (issue 293).
+    pub fn controlled_ramp_reason(&self) -> Option<&'static str> {
+        if self.departure_ramp_mi.is_some() {
+            return Some("departure acceleration lane");
+        }
+        if self.departure_merge_recovery {
+            return Some("departure merge recovery");
+        }
+        if self.lane.exit_lane_open {
+            return Some("exit lane open");
+        }
+        if self.on_laid_out_ramp() {
+            return Some("exit ramp");
+        }
+        if self.street_control_on_real_time() {
+            return Some("street control");
+        }
+        self.ramp_mi?;
+        if self
+            .ramp_stop
+            .as_ref()
+            .is_some_and(|stop| stop.stop_type == "weigh_station")
+        {
+            return Some("weigh station ramp");
+        }
+        let controlled_terminal = matches!(
+            self.ramp_control.as_str(),
+            "signal" | "stop" | "yield" | "roundabout"
+        );
+        (controlled_terminal && !self.ramp_terminal_done).then_some("ramp terminal")
     }
 
     /// The `_ramp_mi is not None` half of `_update_exit`.
@@ -477,6 +498,12 @@ impl DrivingState {
 
     /// The truck makes the gore: onto the ramp.
     fn take_the_ramp(&mut self, ctx: &mut GameContext, stop: &ff_core::sim::trip_models::RoadStop) {
+        // A truck that steered in at the taper is up to 300 feet short of the
+        // gore, and the ramp holds the highway odometer where it stands. The
+        // exit lane leads to the gore, so the highway rejoins there: otherwise
+        // the scale the truck just checked in at was crossed again on the way
+        // out and charged as a bypass.
+        self.trip.position_mi = self.trip.position_mi.max(stop.at_mi);
         self.reset_exit_lane_state();
         self.exit_signal_on = false;
         // Gore to stop bar, then the terminal-to-driveway stretch: the
@@ -776,7 +803,7 @@ impl DrivingState {
             // 2026-08-15 audit).
             self.say_route_confirmation(
                 ctx,
-                &format!(
+                format!(
                     "Facility stopping assistance handling the entrance to {}.",
                     stop.spoken_name()
                 ),

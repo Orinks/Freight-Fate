@@ -51,6 +51,10 @@ Example, and this is the entire entry:
   named; files, functions, constants and data sources are not.
 - Section is one of Added, Changed, Improved, Fixed, Removed, Deprecated,
   Security, Compatibility. Any other heading is dropped from release notes.
+  The one exception is a stable release's curated summary, directly under
+  its `## X.Y.Z - date` heading: Compatibility, Highlights, New features,
+  Fixes, Changes. It is published whole as the stable notes; the detailed
+  bullets stay under `## X.Y.Z complete change list`.
 - No symbols, tables, or jargon: it is read aloud.
 
 ## Common mistakes

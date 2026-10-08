@@ -773,6 +773,16 @@
             "spoken": "Passing Gene Autry"
           },
           {
+            "name": "\u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 46.8,
+            "spoken": "Crossing the \u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River",
+            "lat": 34.23435,
+            "lon": -96.97616,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 154421645 (\u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Mannsville",
             "at_mi": 48.87,
             "off_mi": 5.68,
@@ -789,13 +799,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151324716, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Dickson"
-          },
-          {
-            "name": "\u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 53.35,
-            "spoken": "Crossing the \u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River"
           },
           {
             "name": "Springer",
@@ -1875,13 +1878,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151330009, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lamar"
-          },
-          {
-            "name": "Canadian River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.72,
-            "spoken": "Crossing the Canadian River"
           },
           {
             "name": "Stuart",
@@ -2975,13 +2971,6 @@
             "spoken": "Passing Pickett"
           },
           {
-            "name": "Canadian River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 10.48,
-            "spoken": "Crossing the Canadian River"
-          },
-          {
             "name": "Konawa",
             "at_mi": 11.1,
             "off_mi": 7.91,
@@ -3018,6 +3007,16 @@
             "spoken": "Passing Wanette"
           },
           {
+            "name": "Canadian River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 21.0,
+            "spoken": "Crossing the Canadian River",
+            "lat": 34.96572,
+            "lon": -96.92982,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 140306126 (Canadian River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Asher",
             "at_mi": 22.51,
             "off_mi": 0.39,
@@ -3027,13 +3026,6 @@
             "spoken": "Entering Asher"
           },
           {
-            "name": "Little River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 32.16,
-            "spoken": "Crossing the Little River"
-          },
-          {
             "name": "Maud",
             "at_mi": 32.47,
             "off_mi": 8.83,
@@ -3041,6 +3033,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151374800, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Maud"
+          },
+          {
+            "name": "Little River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 35.3,
+            "spoken": "Crossing the Little River",
+            "lat": 35.1726,
+            "lon": -96.93194,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 141194439 (Little River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Tecumseh",
@@ -3142,13 +3144,6 @@
             "spoken": "Passing Nicoma Park"
           },
           {
-            "name": "Oklahoma River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 72.42,
-            "spoken": "Crossing the Oklahoma River"
-          },
-          {
             "name": "Jones",
             "at_mi": 72.94,
             "off_mi": 9.97,
@@ -3201,6 +3196,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151821609, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Valley Brook"
+          },
+          {
+            "name": "Oklahoma River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 79.5,
+            "spoken": "Crossing the Oklahoma River",
+            "lat": 35.46675,
+            "lon": -97.46377,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 12475643 (Oklahoma River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Nichols Hills",
@@ -4152,13 +4157,6 @@
             "spoken": "Passing Blair"
           },
           {
-            "name": "North Fork Red River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 7.43,
-            "spoken": "Crossing the North Fork Red River"
-          },
-          {
             "name": "Tipton",
             "at_mi": 11.0,
             "off_mi": 9.34,
@@ -4175,6 +4173,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151838342, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Headrick"
+          },
+          {
+            "name": "North Fork Red River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 13.0,
+            "spoken": "Crossing the North Fork Red River",
+            "lat": 34.63788,
+            "lon": -99.1036,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 276910153 (North Fork Red River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Manitou",
@@ -5146,20 +5154,22 @@
         "state_miles": [
           {
             "state": "Oklahoma",
-            "miles": 17.17
+            "miles": 14.5,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 67.83
+            "miles": 70.5,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 17.17,
+            "at_mi": 14.5,
             "from_state": "Oklahoma",
             "state": "Texas",
             "place": "Oklahoma-Texas line on US-283",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "landmarks": [
@@ -5212,8 +5222,11 @@
             "name": "Pease River",
             "category": "river",
             "kind": "point",
-            "at_mi": 31.79,
-            "spoken": "Crossing the Pease River"
+            "at_mi": 32.7,
+            "spoken": "Crossing the Pease River",
+            "lat": 34.17914,
+            "lon": -99.27842,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 190851979 (Pease River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Oklaunion",
@@ -5270,13 +5283,6 @@
             "spoken": "Passing Iowa Park"
           },
           {
-            "name": "Wichita River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 74.29,
-            "spoken": "Crossing the Wichita River"
-          },
-          {
             "name": "Burkburnett",
             "at_mi": 77.01,
             "off_mi": 9.62,
@@ -5295,6 +5301,16 @@
             "spoken": "Passing Pleasant Valley"
           },
           {
+            "name": "The World's Littlest Skyscraper (from Altus)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.0,
+            "spoken": "Billboard: Wichita Falls is home to the World's Littlest Skyscraper, a four-story swindle. A con man sold shares in a tower, built it four stories tall instead of four hundred feet, and pocketed the difference.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Cashion Community",
             "at_mi": 81.26,
             "off_mi": 6.45,
@@ -5302,6 +5318,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151464900, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Cashion Community"
+          },
+          {
+            "name": "Wichita River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 84.0,
+            "spoken": "Crossing the Wichita River",
+            "lat": 33.91392,
+            "lon": -98.50624,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 175126949 (Wichita River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lakeside City",
@@ -6589,6 +6615,36 @@
             "spoken": "Passing Lone Grove"
           },
           {
+            "name": "WinStar World Casino (from Ardmore)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.3,
+            "spoken": "Billboard: WinStar World Casino, ahead at Thackerville, the biggest casino floor in the country, one exit before Texas. Leave the trailer keys in the truck.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Frank Buck Zoo (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.8,
+            "spoken": "Billboard: The Frank Buck Zoo, ahead in Gainesville. Named for the hometown boy famous for bringing wild animals back alive. These ones stayed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Red River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 32.3,
+            "spoken": "Crossing the Red River",
+            "lat": 33.72761,
+            "lon": -97.15921,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 116726187 (Red River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Oak Ridge",
             "at_mi": 36.9,
             "off_mi": 6.59,
@@ -6605,13 +6661,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151562997, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lindsay"
-          },
-          {
-            "name": "Red River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.3,
-            "spoken": "Crossing the Red River"
           },
           {
             "name": "Era",
@@ -6639,6 +6688,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 13918512838, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Road Runner"
+          },
+          {
+            "name": "Frank Buck Zoo (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.6,
+            "spoken": "Billboard: The Frank Buck Zoo, ahead in Gainesville. Named for the hometown boy famous for bringing wild animals back alive. These ones stayed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Sanger",
@@ -6812,6 +6871,16 @@
             "spoken": "Passing Coppell"
           },
           {
+            "name": "Elm Fork Trinity River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 89.5,
+            "spoken": "Crossing the Elm Fork Trinity River",
+            "lat": 32.99375,
+            "lon": -96.94862,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 28759777 (Elm Fork Trinity River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Hebron",
             "at_mi": 91.2,
             "off_mi": 5.23,
@@ -6844,13 +6913,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151841301, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Farmers Branch"
-          },
-          {
-            "name": "Elm Fork Trinity River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 95.7,
-            "spoken": "Crossing the Elm Fork Trinity River"
           },
           {
             "name": "University Park",
@@ -7846,20 +7908,22 @@
         "state_miles": [
           {
             "state": "Oklahoma",
-            "miles": 29.2
+            "miles": 32.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 79.8
+            "miles": 76.7,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 29.2,
+            "at_mi": 32.3,
             "from_state": "Oklahoma",
             "state": "Texas",
             "place": "Oklahoma-Texas line on I-35",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -9294,13 +9358,6 @@
             "spoken": "Passing Alderson"
           },
           {
-            "name": "Canadian River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 50.9,
-            "spoken": "Crossing the Canadian River"
-          },
-          {
             "name": "Indianola",
             "at_mi": 58.3,
             "off_mi": 7.0,
@@ -9308,6 +9365,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151583794, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Indianola"
+          },
+          {
+            "name": "Canadian River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 59.3,
+            "spoken": "Crossing the Canadian River",
+            "lat": 35.14551,
+            "lon": -95.89997,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 141756341 (Canadian River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Hanna",
@@ -9331,8 +9398,11 @@
             "name": "North Canadian River",
             "category": "river",
             "kind": "point",
-            "at_mi": 71.3,
-            "spoken": "Crossing the North Canadian River"
+            "at_mi": 71.7,
+            "spoken": "Crossing the North Canadian River",
+            "lat": 35.31672,
+            "lon": -95.95478,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 138678979 (North Canadian River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Weleetka",
@@ -10933,6 +11003,16 @@
             "spoken": "Passing Ochelata"
           },
           {
+            "name": "Caney River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 1.1,
+            "spoken": "Crossing the Caney River",
+            "lat": 36.75409,
+            "lon": -95.97105,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 28091518 (Caney River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Dewey",
             "at_mi": 4.7,
             "off_mi": 0.0,
@@ -10942,11 +11022,14 @@
             "spoken": "Entering Dewey"
           },
           {
-            "name": "Caney River",
-            "category": "river",
+            "name": "Woolaroc (from Coffeyville)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 4.8,
-            "spoken": "Crossing the Caney River"
+            "at_mi": 9.0,
+            "spoken": "Billboard: Woolaroc, ahead near Bartlesville, an oilman's ranch with bison and longhorns, and the plane that won the nineteen twenty-seven air race to Hawaii.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Copan",
@@ -11001,6 +11084,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151346425, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Tyro"
+          },
+          {
+            "name": "Dalton Defenders Museum (from Bartlesville)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.5,
+            "spoken": "Billboard: The Dalton Defenders Museum, ahead in Coffeyville. The Dalton Gang tried to rob two banks at once here in eighteen ninety-two. The town objected.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Dearing",
@@ -11847,11 +11940,24 @@
         ],
         "landmarks": [
           {
+            "name": "Boise City Bomb Memorial (from Lamar)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.1,
+            "spoken": "Billboard: Boise City, ahead. In nineteen forty-three a lost bomber crew dropped practice bombs on the town square. Nobody was hurt. The crew skipped the reunion.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Cimmaron River",
             "category": "river",
             "kind": "point",
-            "at_mi": 11.8,
-            "spoken": "Crossing the Cimmaron River"
+            "at_mi": 13.3,
+            "spoken": "Crossing the Cimmaron River",
+            "lat": 36.91873,
+            "lon": -102.5199,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 305484690 (Cimmaron River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Comanche National Grassland",
@@ -12097,7 +12203,8 @@
           "name": "level",
           "sections": 298,
           "source": "FHWA Highway Performance Monitoring System (HPMS) Terrain_Type, read from the national ArcGIS Living Atlas layer (Federal User Community hpms_v2_view). The class is HPMS's own; DERIVED here only in that one value stands for a whole leg -- the modal class over the HPMS sections intersecting the leg's bounding box, since HPMS classifies sections and a leg crosses many. Accessed 2026-08-19: https://www.fhwa.dot.gov/policyinformation/hpms.cfm"
-        }
+        },
+        "billboard_bans": []
       },
       "terrain": "flat",
       "divided": false,
@@ -12591,8 +12698,11 @@
             "name": "Blue River",
             "category": "river",
             "kind": "point",
-            "at_mi": 3.3,
-            "spoken": "Crossing the Blue River"
+            "at_mi": 7.8,
+            "spoken": "Crossing the Blue River",
+            "lat": 34.06334,
+            "lon": -96.34856,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 988476537 (Blue River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Bokchito",
@@ -13662,8 +13772,11 @@
             "name": "Cimarron River",
             "category": "river",
             "kind": "point",
-            "at_mi": 34.2,
-            "spoken": "Crossing the Cimarron River"
+            "at_mi": 31.7,
+            "spoken": "Crossing the Cimarron River",
+            "lat": 35.95195,
+            "lon": -97.91469,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 538051939 (Cimarron River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Okarche",
@@ -15081,6 +15194,16 @@
             "spoken": "Passing Billings"
           },
           {
+            "name": "Salt Fork Arkansas River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 50.6,
+            "spoken": "Crossing the Salt Fork Arkansas River",
+            "lat": 36.67645,
+            "lon": -97.34547,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 144885556 (Salt Fork Arkansas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Deer Creek",
             "at_mi": 58.7,
             "off_mi": 9.68,
@@ -15090,20 +15213,6 @@
             "spoken": "Passing Deer Creek"
           },
           {
-            "name": "Salt Fork Arkansas River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 59.5,
-            "spoken": "Crossing the Salt Fork Arkansas River"
-          },
-          {
-            "name": "Chikaskia River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 59.5,
-            "spoken": "Crossing the Chikaskia River"
-          },
-          {
             "name": "Blackwell",
             "at_mi": 59.7,
             "off_mi": 3.15,
@@ -15111,6 +15220,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151506827, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Blackwell"
+          },
+          {
+            "name": "Chikaskia River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 66.7,
+            "spoken": "Crossing the Chikaskia River",
+            "lat": 36.90784,
+            "lon": -97.35281,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 219535105 (Chikaskia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Braman",
@@ -15167,6 +15286,16 @@
             "spoken": "Passing Udall"
           },
           {
+            "name": "Ninnescah River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 99.9,
+            "spoken": "Crossing the Ninnescah River",
+            "lat": 37.38214,
+            "lon": -97.32399,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 51245352 (Ninnescah River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Belle Plaine",
             "at_mi": 100.6,
             "off_mi": 2.44,
@@ -15212,20 +15341,6 @@
             "spoken": "Passing Derby"
           },
           {
-            "name": "Arkansas River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 110.9,
-            "spoken": "Crossing the Arkansas River"
-          },
-          {
-            "name": "Ninnescah River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 110.9,
-            "spoken": "Crossing the Ninnescah River"
-          },
-          {
             "name": "Rose Hill",
             "at_mi": 112.1,
             "off_mi": 10.45,
@@ -15233,6 +15348,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151902642, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rose Hill"
+          },
+          {
+            "name": "Arkansas River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 116.9,
+            "spoken": "Crossing the Arkansas River",
+            "lat": 37.62529,
+            "lon": -97.32663,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 41320421 (Arkansas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Andover",
@@ -16837,6 +16962,16 @@
             "spoken": "Passing Geronimo"
           },
           {
+            "name": "Wichita Mountains Wildlife Refuge (from Lawton)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Wichita Mountains Wildlife Refuge, ahead near Lawton. The bison herd began with fifteen from the Bronx Zoo in nineteen oh-seven. None of them miss New York.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Medicine Park",
             "at_mi": 8.3,
             "off_mi": 5.74,
@@ -16853,6 +16988,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151516477, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Apache"
+          },
+          {
+            "name": "Wichita Mountains Wildlife Refuge (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.3,
+            "spoken": "Billboard: Wichita Mountains Wildlife Refuge, ahead near Lawton. The bison herd began with fifteen from the Bronx Zoo in nineteen oh-seven. None of them miss New York.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Fletcher",
@@ -16927,6 +17072,16 @@
             "spoken": "Passing Alex"
           },
           {
+            "name": "\u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 45.9,
+            "spoken": "Crossing the \u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River",
+            "lat": 35.06115,
+            "lon": -97.90689,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 346393904 (\u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Pocasset",
             "at_mi": 51.4,
             "off_mi": 7.85,
@@ -16943,13 +17098,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151913481, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Amber"
-          },
-          {
-            "name": "\u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 55.2,
-            "spoken": "Crossing the \u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River"
           },
           {
             "name": "Blanchard",
@@ -16997,6 +17145,16 @@
             "spoken": "Passing Goldsby"
           },
           {
+            "name": "Canadian River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 70.8,
+            "spoken": "Crossing the Canadian River",
+            "lat": 35.30317,
+            "lon": -97.59887,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 140307060 (Canadian River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Mustang",
             "at_mi": 74.0,
             "off_mi": 8.17,
@@ -17015,18 +17173,24 @@
             "spoken": "Passing Moore"
           },
           {
-            "name": "Canadian River",
-            "category": "river",
+            "name": "National Cowboy Museum (from Lawton)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 76.6,
-            "spoken": "Crossing the Canadian River"
+            "at_mi": 78.9,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Oklahoma River",
             "category": "river",
             "kind": "point",
-            "at_mi": 76.6,
-            "spoken": "Crossing the Oklahoma River"
+            "at_mi": 81.8,
+            "spoken": "Crossing the Oklahoma River",
+            "lat": 35.45536,
+            "lon": -97.57279,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 164267056 (Oklahoma River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Yukon",
@@ -18376,20 +18540,22 @@
         "state_miles": [
           {
             "state": "Oklahoma",
-            "miles": 38.2
+            "miles": 38.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 15.8
+            "miles": 15.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 38.2,
+            "at_mi": 38.4,
             "from_state": "Oklahoma",
             "state": "Texas",
             "place": "Oklahoma-Texas line on I-44",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -18440,13 +18606,6 @@
             "spoken": "Passing Randlett"
           },
           {
-            "name": "Red River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 34.0,
-            "spoken": "Crossing the Red River"
-          },
-          {
             "name": "Devol",
             "at_mi": 34.1,
             "off_mi": 5.12,
@@ -18463,6 +18622,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151525128, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Grandfield"
+          },
+          {
+            "name": "Red River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 38.2,
+            "spoken": "Crossing the Red River",
+            "lat": 34.10842,
+            "lon": -98.53437,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 116724369 (Red River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "The World's Littlest Skyscraper (from Lawton)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.0,
+            "spoken": "Billboard: Wichita Falls is home to the World's Littlest Skyscraper, a four-story swindle. A con man sold shares in a tower, built it four stories tall instead of four hundred feet, and pocketed the difference.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cashion Community",
@@ -18483,13 +18662,6 @@
             "spoken": "Passing Iowa Park"
           },
           {
-            "name": "Wichita River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 47.4,
-            "spoken": "Crossing the Wichita River"
-          },
-          {
             "name": "Pleasant Valley",
             "at_mi": 49.5,
             "off_mi": 3.95,
@@ -18497,6 +18669,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151336650, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Pleasant Valley"
+          },
+          {
+            "name": "Wichita River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 53.0,
+            "spoken": "Crossing the Wichita River",
+            "lat": 33.91392,
+            "lon": -98.50624,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 175126949 (Wichita River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lakeside City",
@@ -19867,14 +20049,30 @@
             "category": "river",
             "kind": "point",
             "at_mi": 24.4,
-            "spoken": "Crossing the Canadian River"
+            "spoken": "Crossing the Canadian River",
+            "lat": 35.22372,
+            "lon": -95.6048,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 537517602 (Canadian River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "North Canadian River",
             "category": "river",
             "kind": "point",
-            "at_mi": 24.4,
-            "spoken": "Crossing the North Canadian River"
+            "at_mi": 32.3,
+            "spoken": "Crossing the North Canadian River",
+            "lat": 35.33237,
+            "lon": -95.58665,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 141761254 (North Canadian River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Muskogee, Oklahoma (from McAlester)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.0,
+            "spoken": "Billboard: Muskogee, Oklahoma, up the road. Merle Haggard put it on the map. The proudest Okies you'll ever wave at.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Rentiesville",
@@ -20941,6 +21139,16 @@
             "spoken": "Passing Warner"
           },
           {
+            "name": "Muskogee, Oklahoma (from Fort Smith)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.0,
+            "spoken": "Billboard: Muskogee, Oklahoma, up the road. Merle Haggard put it on the map. The proudest Okies you'll ever wave at.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Porum",
             "at_mi": 23.9,
             "off_mi": 10.49,
@@ -20948,20 +21156,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151458182, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Porum"
-          },
-          {
-            "name": "Illinois River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 25.4,
-            "spoken": "Crossing the Illinois River"
-          },
-          {
-            "name": "Arkansas River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 25.4,
-            "spoken": "Crossing the Arkansas River"
           },
           {
             "name": "Webbers Falls",
@@ -20980,6 +21174,16 @@
             "spoken": "Tahlonteeskee Museum ahead"
           },
           {
+            "name": "Arkansas River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 27.8,
+            "spoken": "Crossing the Arkansas River",
+            "lat": 35.48664,
+            "lon": -95.0977,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1384779121 (Arkansas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Gore",
             "at_mi": 28.0,
             "off_mi": 3.14,
@@ -20996,6 +21200,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151926698, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Paradise Hill"
+          },
+          {
+            "name": "Sequoyah's Cabin (from Muskogee)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.8,
+            "spoken": "Billboard: Sequoyah's Cabin, ahead near Sallisaw. Sequoyah lived here from eighteen twenty-nine; he gave the Cherokee their written language. Now a Cherokee Nation museum.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Tamaha",
@@ -21025,6 +21239,26 @@
             "spoken": "Passing Gans"
           },
           {
+            "name": "U.S. Marshals Museum (from Muskogee)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.7,
+            "spoken": "Billboard: The United States Marshals Museum, ahead in Fort Smith. The building is shaped like a marshal's badge. Drive like somebody is watching.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Sequoyah's Cabin (from Fort Smith)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.7,
+            "spoken": "Billboard: Sequoyah's Cabin, ahead near Sallisaw. Sequoyah lived here from eighteen twenty-nine; he gave the Cherokee their written language. Now a Cherokee Nation museum.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Spiro",
             "at_mi": 56.9,
             "off_mi": 10.53,
@@ -21050,13 +21284,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151691413, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fort Coffee"
-          },
-          {
-            "name": "Poteau River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 61.1,
-            "spoken": "Crossing the Poteau River"
           },
           {
             "name": "Bonanza",
@@ -23350,20 +23577,22 @@
         "state_miles": [
           {
             "state": "Oklahoma",
-            "miles": 187.0
+            "miles": 151.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Texas",
-            "miles": 71.0
+            "miles": 107.0,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 187.0,
+            "at_mi": 151.0,
             "from_state": "Oklahoma",
             "state": "Texas",
             "place": "Oklahoma-Texas line on I-40",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -24981,6 +25210,16 @@
             "spoken": "Passing Bethany"
           },
           {
+            "name": "National Cowboy Museum (from Amarillo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mustang",
             "at_mi": 11.4,
             "off_mi": 5.39,
@@ -25044,6 +25283,16 @@
             "spoken": "Passing Bridgeport"
           },
           {
+            "name": "Stafford Air and Space Museum (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.9,
+            "spoken": "Billboard: The Stafford Air and Space Museum, ahead in Weatherford. The town's own astronaut flew four missions, one around the Moon. His Gemini capsule retired here.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Hydro",
             "at_mi": 62.2,
             "off_mi": 0.86,
@@ -25053,11 +25302,24 @@
             "spoken": "Passing Hydro"
           },
           {
-            "name": "Washita River",
-            "category": "river",
+            "name": "Oklahoma Route 66 Museum (from Oklahoma City)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 72.9,
-            "spoken": "Crossing the Washita River"
+            "at_mi": 76.5,
+            "spoken": "Billboard: The Oklahoma Route sixty-six Museum, ahead in Clinton. It covers Chicago to Santa Monica in a single building. Much quicker than driving it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Stafford Air and Space Museum (from Amarillo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 78.8,
+            "spoken": "Billboard: The Stafford Air and Space Museum, ahead in Weatherford. The town's own astronaut flew four missions, one around the Moon. His Gemini capsule retired here.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Arapaho",
@@ -25067,6 +25329,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151542688, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Arapaho"
+          },
+          {
+            "name": "Washita River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 83.4,
+            "spoken": "Crossing the Washita River",
+            "lat": 35.50314,
+            "lon": -98.94208,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 666550999 (Washita River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Clinton",
@@ -25085,6 +25357,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151341515, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bessie"
+          },
+          {
+            "name": "Oklahoma Route 66 Museum (from Amarillo)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 94.5,
+            "spoken": "Billboard: The Oklahoma Route sixty-six Museum, ahead in Clinton. It covers Chicago to Santa Monica in a single building. Much quicker than driving it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Foss",
@@ -25117,8 +25399,11 @@
             "name": "North Fork Red River",
             "category": "river",
             "kind": "point",
-            "at_mi": 128.5,
-            "spoken": "Crossing the North Fork Red River"
+            "at_mi": 128.1,
+            "spoken": "Crossing the North Fork Red River",
+            "lat": 35.28506,
+            "lon": -99.62255,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 970328755 (North Fork Red River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Carter",
@@ -25146,6 +25431,46 @@
             "spoken": "Passing Erick"
           },
           {
+            "name": "The U-Drop Inn (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 162.9,
+            "spoken": "Billboard: The U-Drop Inn, next exit in Shamrock. A nineteen thirty-six art deco gas station that helped inspire the movie Cars. No fuel now, just photographs.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The U-Drop Inn (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 166.7,
+            "spoken": "Billboard: The U-Drop Inn, next exit in Shamrock. A nineteen thirty-six art deco gas station that helped inspire the movie Cars. No fuel now, just photographs.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Devil's Rope Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 183.5,
+            "spoken": "Billboard: The Devil's Rope Museum, next exit in McLean. More than two thousand kinds of barbed wire under one roof. Please do not lean on the exhibits.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Devil's Rope Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 189.2,
+            "spoken": "Billboard: The Devil's Rope Museum, next exit in McLean. More than two thousand kinds of barbed wire under one roof. Please do not lean on the exhibits.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Alanreed",
             "at_mi": 192.7,
             "off_mi": 0.17,
@@ -25153,6 +25478,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151342236, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Alanreed"
+          },
+          {
+            "name": "The Cross at Groom (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 208.5,
+            "spoken": "Billboard: The Cross of Our Lord Jesus Christ, ahead in Groom. Nineteen stories tall. The town's water tower leans on purpose, so your mirrors are fine.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Cross at Groom (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 225.0,
+            "spoken": "Billboard: The Cross of Our Lord Jesus Christ, ahead in Groom. Nineteen stories tall. The town's water tower leans on purpose, so your mirrors are fine.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Claude",
@@ -26910,6 +27255,16 @@
             "spoken": "Passing Spencer"
           },
           {
+            "name": "Oklahoma River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 2.2,
+            "spoken": "Crossing the Oklahoma River",
+            "lat": 35.4589,
+            "lon": -97.49249,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 12475643 (Oklahoma River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Nicoma Park",
             "at_mi": 2.9,
             "off_mi": 9.69,
@@ -26946,18 +27301,14 @@
             "spoken": "Passing Valley Brook"
           },
           {
-            "name": "Oklahoma River",
-            "category": "river",
+            "name": "National Cowboy Museum (from Ardmore)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 12.0,
-            "spoken": "Crossing the Oklahoma River"
-          },
-          {
-            "name": "Canadian River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.0,
-            "spoken": "Crossing the Canadian River"
+            "at_mi": 9.0,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Newcastle",
@@ -26967,6 +27318,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151703815, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Newcastle"
+          },
+          {
+            "name": "Canadian River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 20.8,
+            "spoken": "Crossing the Canadian River",
+            "lat": 35.19455,
+            "lon": -97.48457,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 140306152 (Canadian River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Blanchard",
@@ -27050,6 +27411,16 @@
             "spoken": "Passing Paoli"
           },
           {
+            "name": "\u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 52.8,
+            "spoken": "Crossing the \u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River",
+            "lat": 34.7791,
+            "lon": -97.29301,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1491725935 (\u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Pauls Valley",
             "at_mi": 57.0,
             "off_mi": 2.25,
@@ -27057,13 +27428,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151636290, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Pauls Valley"
-          },
-          {
-            "name": "\u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 62.6,
-            "spoken": "Crossing the \u00c1:g\u00f9nt\u00e0:v\u00e0u; Washita River"
           },
           {
             "name": "Elmore City",
@@ -27091,6 +27455,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151621388, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Katie"
+          },
+          {
+            "name": "Turner Falls Park (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.7,
+            "spoken": "Billboard: Turner Falls Park, ahead near Davis, a seventy-seven-foot waterfall in the Arbuckle Mountains, and a stone castle a professor built for his summers.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Davis",
@@ -27143,6 +27517,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151951992, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gene Autry"
+          },
+          {
+            "name": "Turner Falls Park (from Ardmore)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 89.5,
+            "spoken": "Billboard: Turner Falls Park, ahead near Davis, a seventy-seven-foot waterfall in the Arbuckle Mountains, and a stone castle a professor built for his summers.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lone Grove",
@@ -29773,11 +30157,14 @@
             "spoken": "Passing Spencer"
           },
           {
-            "name": "North Canadian River",
-            "category": "river",
+            "name": "National Cowboy Museum (from Tulsa)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 11.9,
-            "spoken": "Crossing the North Canadian River"
+            "at_mi": 16.0,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Arcadia",
@@ -29843,6 +30230,16 @@
             "spoken": "Passing Carney"
           },
           {
+            "name": "Rock Cafe (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.2,
+            "spoken": "Billboard: The Rock Cafe, ahead in Stroud, built of leftover Route sixty-six sandstone and open since nineteen thirty-nine. Its owner inspired Sally, the Porsche in Cars.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Davenport",
             "at_mi": 50.9,
             "off_mi": 2.41,
@@ -29859,6 +30256,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 5150687917, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Stroud"
+          },
+          {
+            "name": "Rock Cafe (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.3,
+            "spoken": "Billboard: The Rock Cafe, ahead in Stroud, built of leftover Route sixty-six sandstone and open since nineteen thirty-nine. Its owner inspired Sally, the Porsche in Cars.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Depew",
@@ -29888,13 +30295,6 @@
             "spoken": "Passing Mounds"
           },
           {
-            "name": "Arkansas River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 93.0,
-            "spoken": "Crossing the Arkansas River"
-          },
-          {
             "name": "Kiefer",
             "at_mi": 94.0,
             "off_mi": 5.26,
@@ -29911,6 +30311,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151536096, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Glenpool"
+          },
+          {
+            "name": "Golden Driller (from Oklahoma City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 96.9,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Jenks",
@@ -29938,6 +30348,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 4071774070, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lefko Hill"
+          },
+          {
+            "name": "Arkansas River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 104.8,
+            "spoken": "Crossing the Arkansas River",
+            "lat": 36.14325,
+            "lon": -96.00504,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 190148765 (Arkansas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Turley",
@@ -31345,20 +31765,22 @@
         "state_miles": [
           {
             "state": "Oklahoma",
-            "miles": 134.9
+            "miles": 111.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Kansas",
-            "miles": 26.1
+            "miles": 49.9,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 134.9,
+            "at_mi": 111.1,
             "from_state": "Oklahoma",
             "state": "Kansas",
             "place": "Oklahoma-Kansas line on I-35",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -32261,6 +32683,16 @@
             "spoken": "Passing Jones"
           },
           {
+            "name": "National Cowboy Museum (from Wichita)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.0,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Arcadia",
             "at_mi": 18.5,
             "off_mi": 5.14,
@@ -32279,13 +32711,6 @@
             "spoken": "Passing Cedar Valley"
           },
           {
-            "name": "Cimarron River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 38.4,
-            "spoken": "Crossing the Cimarron River"
-          },
-          {
             "name": "Langston",
             "at_mi": 39.7,
             "off_mi": 5.94,
@@ -32302,6 +32727,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151686135, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Coyle"
+          },
+          {
+            "name": "Cimarron River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 40.5,
+            "spoken": "Crossing the Cimarron River",
+            "lat": 35.9858,
+            "lon": -97.35287,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 139560246 (Cimarron River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Mulhall",
@@ -32359,15 +32794,11 @@
             "name": "Salt Fork Arkansas River",
             "category": "river",
             "kind": "point",
-            "at_mi": 93.9,
-            "spoken": "Crossing the Salt Fork Arkansas River"
-          },
-          {
-            "name": "Chikaskia River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 93.9,
-            "spoken": "Crossing the Chikaskia River"
+            "at_mi": 88.7,
+            "spoken": "Crossing the Salt Fork Arkansas River",
+            "lat": 36.67645,
+            "lon": -97.34547,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 144885556 (Salt Fork Arkansas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Blackwell",
@@ -32377,6 +32808,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151506827, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Blackwell"
+          },
+          {
+            "name": "Chikaskia River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 104.7,
+            "spoken": "Crossing the Chikaskia River",
+            "lat": 36.90784,
+            "lon": -97.35281,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 219535105 (Chikaskia River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Braman",
@@ -32395,6 +32836,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151367883, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing South Haven"
+          },
+          {
+            "name": "Ninnescah River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 137.9,
+            "spoken": "Crossing the Ninnescah River",
+            "lat": 37.38214,
+            "lon": -97.32399,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 51245352 (Ninnescah River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Belle Plaine",
@@ -32424,20 +32875,6 @@
             "spoken": "Passing Waco"
           },
           {
-            "name": "Arkansas River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 148.4,
-            "spoken": "Crossing the Arkansas River"
-          },
-          {
-            "name": "Ninnescah River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 148.4,
-            "spoken": "Crossing the Ninnescah River"
-          },
-          {
             "name": "Derby",
             "at_mi": 148.8,
             "off_mi": 3.08,
@@ -32445,6 +32882,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151678831, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Derby"
+          },
+          {
+            "name": "Arkansas River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 154.9,
+            "spoken": "Crossing the Arkansas River",
+            "lat": 37.62529,
+            "lon": -97.32663,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 41320421 (Arkansas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Minneha",
@@ -33546,11 +33993,14 @@
             "spoken": "Passing Jenks"
           },
           {
-            "name": "Arkansas River",
-            "category": "river",
+            "name": "Golden Driller (from Okmulgee)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 33.4,
-            "spoken": "Crossing the Arkansas River"
+            "at_mi": 28.9,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Sand Springs",
@@ -33569,6 +34019,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 4071774070, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lefko Hill"
+          },
+          {
+            "name": "Arkansas River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 36.8,
+            "spoken": "Crossing the Arkansas River",
+            "lat": 36.14325,
+            "lon": -96.00504,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 190148765 (Arkansas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Turley",
@@ -34670,8 +35130,11 @@
             "name": "Arkansas River",
             "category": "river",
             "kind": "point",
-            "at_mi": 8.68,
-            "spoken": "Crossing the Arkansas River"
+            "at_mi": 3.2,
+            "spoken": "Crossing the Arkansas River",
+            "lat": 36.6804,
+            "lon": -97.06486,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1384779124 (Arkansas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Kaw City",
@@ -35547,11 +36010,24 @@
             "spoken": "Passing Kildare"
           },
           {
+            "name": "Marland Mansion (from Stillwater)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The Marland Mansion, ahead in Ponca City. An oilman built fifty-five rooms, lost his company to Wall Street, and moved out. Easy come.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Salt Fork Arkansas River",
             "category": "river",
             "kind": "point",
-            "at_mi": 5.16,
-            "spoken": "Crossing the Salt Fork Arkansas River"
+            "at_mi": 9.8,
+            "spoken": "Crossing the Salt Fork Arkansas River",
+            "lat": 36.57909,
+            "lon": -97.07738,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1384779125 (Salt Fork Arkansas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Marland",
@@ -37483,6 +37959,16 @@
             "spoken": "Passing Mulhall"
           },
           {
+            "name": "Cimarron River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 25.9,
+            "spoken": "Crossing the Cimarron River",
+            "lat": 35.98587,
+            "lon": -97.35324,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 139560246 (Cimarron River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Coyle",
             "at_mi": 26.47,
             "off_mi": 6.88,
@@ -37490,13 +37976,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151686135, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Coyle"
-          },
-          {
-            "name": "Cimarron River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 26.89,
-            "spoken": "Crossing the Cimarron River"
           },
           {
             "name": "Langston",
@@ -37587,6 +38066,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151481673, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Spencer"
+          },
+          {
+            "name": "National Cowboy Museum (from Stillwater)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.8,
+            "spoken": "Billboard: The National Cowboy and Western Heritage Museum, ahead in Oklahoma City, with twenty-eight thousand pieces of the West and a whole cow town indoors.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "The Village",
@@ -38688,20 +39177,6 @@
             "spoken": "Passing Osage"
           },
           {
-            "name": "Arkansas River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 44.42,
-            "spoken": "Crossing the Arkansas River"
-          },
-          {
-            "name": "Cimarron River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 44.42,
-            "spoken": "Crossing the Cimarron River"
-          },
-          {
             "name": "Westport",
             "at_mi": 49.62,
             "off_mi": 0.19,
@@ -38709,6 +39184,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151534978, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Westport"
+          },
+          {
+            "name": "Arkansas River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 54.0,
+            "spoken": "Crossing the Arkansas River",
+            "lat": 36.18222,
+            "lon": -96.26721,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 204082436 (Arkansas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Golden Driller (from Stillwater)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.0,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Sapulpa",
@@ -39676,6 +40171,16 @@
             "spoken": "Passing Owasso"
           },
           {
+            "name": "Golden Driller (from Bartlesville)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.9,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Sperry",
             "at_mi": 11.6,
             "off_mi": 3.75,
@@ -39739,11 +40244,14 @@
             "spoken": "Passing Ochelata"
           },
           {
-            "name": "Caney River",
-            "category": "river",
+            "name": "Woolaroc (from Tulsa)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 41.2,
-            "spoken": "Crossing the Caney River"
+            "at_mi": 37.0,
+            "spoken": "Billboard: Woolaroc, ahead near Bartlesville, an oilman's ranch with bison and longhorns, and the plane that won the nineteen twenty-seven air race to Hawaii.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Copan",
@@ -39762,6 +40270,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151737303, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dewey"
+          },
+          {
+            "name": "Caney River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 44.4,
+            "spoken": "Crossing the Caney River",
+            "lat": 36.75071,
+            "lon": -95.95624,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 28091518 (Caney River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -40784,11 +41302,24 @@
             "spoken": "Passing Sapulpa"
           },
           {
+            "name": "Golden Driller (from Enid)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Arkansas River",
             "category": "river",
             "kind": "point",
-            "at_mi": 15.3,
-            "spoken": "Crossing the Arkansas River"
+            "at_mi": 17.3,
+            "spoken": "Crossing the Arkansas River",
+            "lat": 36.18235,
+            "lon": -96.26705,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 204082436 (Arkansas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Westport",
@@ -42615,11 +43146,14 @@
             "spoken": "Passing Broken Arrow"
           },
           {
-            "name": "Verdigris River",
-            "category": "river",
+            "name": "Golden Driller (from Fayetteville)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 15.8,
-            "spoken": "Crossing the Verdigris River"
+            "at_mi": 13.4,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Verdigris",
@@ -42629,6 +43163,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151687536, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Verdigris"
+          },
+          {
+            "name": "Verdigris River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 21.8,
+            "spoken": "Crossing the Verdigris River",
+            "lat": 36.16447,
+            "lon": -95.61874,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163557213 (Verdigris River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Pryor Creek",
@@ -42728,6 +43272,16 @@
             "spoken": "Passing Gentry"
           },
           {
+            "name": "Illinois River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 94.8,
+            "spoken": "Crossing the Illinois River",
+            "lat": 36.17314,
+            "lon": -94.36597,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 150076055 (Illinois River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Highfill",
             "at_mi": 96.5,
             "off_mi": 5.64,
@@ -42771,13 +43325,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151522359, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lowell"
-          },
-          {
-            "name": "Illinois River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 105.7,
-            "spoken": "Crossing the Illinois River"
           },
           {
             "name": "Johnson",
@@ -43537,58 +44084,63 @@
         "route_points": [
           {
             "at_mi": 0.0,
-            "lat": 36.154,
-            "lon": -95.9928
+            "lat": 36.15402,
+            "lon": -95.99281
           },
           {
-            "at_mi": 27.2,
-            "lat": 36.29292,
-            "lon": -95.60869
+            "at_mi": 27.59,
+            "lat": 36.29326,
+            "lon": -95.60815
           },
           {
-            "at_mi": 54.4,
-            "lat": 36.53961,
-            "lon": -95.23716
+            "at_mi": 56.53,
+            "lat": 36.54624,
+            "lon": -95.2296
           },
           {
-            "at_mi": 81.6,
-            "lat": 36.79196,
-            "lon": -94.88445
+            "at_mi": 90.9,
+            "lat": 36.87856,
+            "lon": -94.84382
           },
           {
-            "at_mi": 108.8,
-            "lat": 37.02198,
-            "lon": -94.53301
+            "at_mi": 115.98,
+            "lat": 37.05513,
+            "lon": -94.73426
           },
           {
-            "at_mi": 136.0,
-            "lat": 37.25555,
-            "lon": -94.30319
+            "at_mi": 141.0,
+            "lat": 37.39169,
+            "lon": -94.71619
           },
           {
-            "at_mi": 163.2,
-            "lat": 37.64752,
-            "lon": -94.30738
+            "at_mi": 168.34,
+            "lat": 37.76485,
+            "lon": -94.70451
           },
           {
-            "at_mi": 190.4,
-            "lat": 38.01749,
-            "lon": -94.36948
+            "at_mi": 195.08,
+            "lat": 38.13431,
+            "lon": -94.71342
           },
           {
-            "at_mi": 217.6,
-            "lat": 38.38953,
-            "lon": -94.34105
+            "at_mi": 220.28,
+            "lat": 38.47074,
+            "lon": -94.68573
           },
           {
-            "at_mi": 244.8,
-            "lat": 38.7381,
-            "lon": -94.4689
+            "at_mi": 246.43,
+            "lat": 38.83106,
+            "lon": -94.67743
+          },
+          {
+            "at_mi": 271.46,
+            "lat": 39.10643,
+            "lon": -94.57912
           },
           {
             "at_mi": 272.0,
             "lat": 39.0997,
-            "lon": -94.57855
+            "lon": -94.57856
           }
         ],
         "elevation_samples": [
@@ -45299,90 +45851,104 @@
             "source": "Real town on US-69 between tulsa_ok_us and kansas_city_mo_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.65 mi off-route at closest approach)."
           },
           {
-            "name": "Loma Linda",
-            "at_mi": 105.3,
-            "type": "place",
-            "state": "Missouri",
-            "highway": "US-69",
-            "lat": 36.9912,
-            "lon": -94.5872,
-            "source": "Real town on US-69 between tulsa_ok_us and kansas_city_mo_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.79 mi off-route at closest approach)."
+            "name": "Baxter Springs",
+            "at_mi": 112.9,
+            "type": "town",
+            "state": "Kansas",
+            "highway": "US-400",
+            "lat": 37.02358,
+            "lon": -94.73524,
+            "source": "OSM place-cache node 151614653; OSM way 1239236955 ref US 400; real place on US-400 between tulsa_ok_us and kansas_city_mo_us; position matched to the nearest point on the archived dense route geometry (1.92 mi off-route at closest approach)."
           },
           {
-            "name": "Carthage",
-            "at_mi": 129.4,
-            "type": "place",
-            "state": "Missouri",
+            "name": "Pittsburg",
+            "at_mi": 142.7,
+            "type": "town",
+            "state": "Kansas",
             "highway": "US-69",
-            "lat": 37.1765,
-            "lon": -94.3102,
-            "source": "Real town on US-69 between tulsa_ok_us and kansas_city_mo_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.27 mi off-route at closest approach)."
+            "lat": 37.41088,
+            "lon": -94.70496,
+            "source": "OSM place-cache node 151520631; OSM way 1204802476 ref US 69;US 160; real place on US-69 between tulsa_ok_us and kansas_city_mo_us; position matched to the nearest point on the archived dense route geometry (0.99 mi off-route at closest approach)."
           },
           {
-            "name": "Lamar",
-            "at_mi": 153.3,
-            "type": "place",
-            "state": "Missouri",
+            "name": "Arma",
+            "at_mi": 152.8,
+            "type": "town",
+            "state": "Kansas",
             "highway": "US-69",
-            "lat": 37.495,
-            "lon": -94.2766,
-            "source": "Real town on US-69 between tulsa_ok_us and kansas_city_mo_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.27 mi off-route at closest approach)."
+            "lat": 37.54416,
+            "lon": -94.69688,
+            "source": "OSM place-cache node 151741431; OSM way 1263119789 ref US 69; real place on US-69 between tulsa_ok_us and kansas_city_mo_us; position matched to the nearest point on the archived dense route geometry (0.78 mi off-route at closest approach)."
           },
           {
-            "name": "Nevada",
-            "at_mi": 178.9,
-            "type": "place",
-            "state": "Missouri",
+            "name": "Fort Scott",
+            "at_mi": 173.8,
+            "type": "town",
+            "state": "Kansas",
             "highway": "US-69",
-            "lat": 37.8392,
-            "lon": -94.3547,
-            "source": "Real town on US-69 between tulsa_ok_us and kansas_city_mo_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.02 mi off-route at closest approach)."
+            "lat": 37.83998,
+            "lon": -94.70829,
+            "source": "OSM place-cache node 151908013; OSM way 50176067 ref US 69;K-7; real place on US-69 between tulsa_ok_us and kansas_city_mo_us; position matched to the nearest point on the archived dense route geometry (0.3 mi off-route at closest approach)."
           },
           {
-            "name": "Butler",
-            "at_mi": 208.4,
-            "type": "place",
-            "state": "Missouri",
+            "name": "Linn Valley",
+            "at_mi": 212.1,
+            "type": "village",
+            "state": "Kansas",
             "highway": "US-69",
-            "lat": 38.2586,
-            "lon": -94.3305,
-            "source": "Real town on US-69 between tulsa_ok_us and kansas_city_mo_us; position matched to the nearest point on the real ORS driving-hgv route geometry (1.49 mi off-route at closest approach)."
+            "lat": 38.37752,
+            "lon": -94.7094,
+            "source": "OSM place-cache node 151348966; OSM way 108012086 ref US 69; real place on US-69 between tulsa_ok_us and kansas_city_mo_us; position matched to the nearest point on the archived dense route geometry (1.9 mi off-route at closest approach)."
           },
           {
-            "name": "Harrisonville",
-            "at_mi": 235.7,
-            "type": "place",
-            "state": "Missouri",
+            "name": "Wea",
+            "at_mi": 236.8,
+            "type": "village",
+            "state": "Kansas",
             "highway": "US-69",
-            "lat": 38.6533,
-            "lon": -94.3488,
-            "source": "Real town on US-69 between tulsa_ok_us and kansas_city_mo_us; position matched to the nearest point on the real ORS driving-hgv route geometry (0.88 mi off-route at closest approach)."
+            "lat": 38.71508,
+            "lon": -94.66755,
+            "source": "OSM place-cache node 151524381; OSM way 108005913 ref US 69; real place on US-69 between tulsa_ok_us and kansas_city_mo_us; position matched to the nearest point on the archived dense route geometry (1.31 mi off-route at closest approach)."
           }
         ],
         "state_miles": [
           {
             "state": "Oklahoma",
-            "miles": 98.0
+            "miles": 106.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
+          },
+          {
+            "state": "Missouri",
+            "miles": 5.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Kansas",
-            "miles": 174.0
+            "miles": 160.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 98.0,
+            "at_mi": 106.6,
             "from_state": "Oklahoma",
-            "state": "Kansas",
-            "place": "Oklahoma-Kansas line on US-69",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "state": "Missouri",
+            "place": "Oklahoma-Missouri line on I-44",
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/.; place's road read from OpenStreetMap way 416761308 ref"
           },
           {
-            "at_mi": 271.9,
+            "at_mi": 107.6,
+            "from_state": "Missouri",
+            "state": "Kansas",
+            "place": "Missouri-Kansas line on US-166",
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/.; place's road read from OpenStreetMap way 138023061 ref"
+          },
+          {
+            "at_mi": 267.8,
             "from_state": "Kansas",
             "state": "Missouri",
             "place": "Kansas-Missouri line on US-69",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -45637,11 +46203,24 @@
         ],
         "landmarks": [
           {
-            "name": "Verdigris River",
-            "category": "river",
+            "name": "Blue Whale of Catoosa (from Tulsa)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 12.7,
-            "spoken": "Crossing the Verdigris River"
+            "at_mi": 8.9,
+            "spoken": "Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Golden Driller (from Kansas City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.4,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Catoosa",
@@ -45653,6 +46232,16 @@
             "spoken": "Passing Catoosa"
           },
           {
+            "name": "Verdigris River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 19.0,
+            "spoken": "Crossing the Verdigris River",
+            "lat": 36.20388,
+            "lon": -95.70714,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 163557213 (Verdigris River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Verdigris",
             "at_mi": 20.9,
             "off_mi": 0.89,
@@ -45660,6 +46249,56 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151687536, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Verdigris"
+          },
+          {
+            "name": "Will Rogers Memorial Museum (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.3,
+            "spoken": "Billboard: The Will Rogers Memorial Museum, ahead in Claremore. He never met a man he didn't like, he said. He never met your dispatcher.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Blue Whale of Catoosa (from Kansas City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.9,
+            "spoken": "Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "World's Largest Totem Pole (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.7,
+            "spoken": "Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Will Rogers Memorial Museum (from Kansas City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.6,
+            "spoken": "Billboard: The Will Rogers Memorial Museum, ahead in Claremore. He never met a man he didn't like, he said. He never met your dispatcher.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "World's Largest Totem Pole (from Kansas City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.7,
+            "spoken": "Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Big Cabin",
@@ -45689,6 +46328,26 @@
             "spoken": "Passing Fairland"
           },
           {
+            "name": "Coleman Theatre (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.9,
+            "spoken": "Billboard: The Coleman Theatre, ahead in Miami, Oklahoma, a nineteen twenty-nine movie palace on Route sixty-six. Its Wurlitzer organ is a year older than the building.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Neosho River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 88.9,
+            "spoken": "Crossing the Neosho River",
+            "lat": 36.85249,
+            "lon": -94.85603,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 136278339 (Neosho River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "North Miami",
             "at_mi": 89.1,
             "off_mi": 3.13,
@@ -45716,18 +46375,14 @@
             "spoken": "Passing Quapaw"
           },
           {
-            "name": "Neosho River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 96.3,
-            "spoken": "Crossing the Neosho River"
-          },
-          {
             "name": "Spring River",
             "category": "river",
             "kind": "point",
-            "at_mi": 96.3,
-            "spoken": "Crossing the Spring River"
+            "at_mi": 97.8,
+            "spoken": "Crossing the Spring River",
+            "lat": 36.92593,
+            "lon": -94.74141,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 136278340 (Spring River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Redings Mill",
@@ -45784,20 +46439,6 @@
             "spoken": "Passing Jasper"
           },
           {
-            "name": "Dry Fork North Fork Spring River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 146.7,
-            "spoken": "Crossing the Dry Fork North Fork Spring River"
-          },
-          {
-            "name": "North Fork Spring River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 146.7,
-            "spoken": "Crossing the North Fork Spring River"
-          },
-          {
             "name": "Lamar Heights",
             "at_mi": 153.1,
             "off_mi": 0.11,
@@ -45819,15 +46460,21 @@
             "name": "Marmaton River",
             "category": "river",
             "kind": "point",
-            "at_mi": 175.3,
-            "spoken": "Crossing the Marmaton River"
+            "at_mi": 174.5,
+            "spoken": "Crossing the Marmaton River",
+            "lat": 37.84889,
+            "lon": -94.70287,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 50177038 (Marmaton River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Little Osage River",
             "category": "river",
             "kind": "point",
-            "at_mi": 175.3,
-            "spoken": "Crossing the Little Osage River"
+            "at_mi": 186.1,
+            "spoken": "Crossing the Little Osage River",
+            "lat": 38.00961,
+            "lon": -94.70359,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 129194985 (Little Osage River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Rich Hill",
@@ -45842,8 +46489,11 @@
             "name": "Marais des Cygnes River",
             "category": "river",
             "kind": "point",
-            "at_mi": 203.2,
-            "spoken": "Crossing the Marais des Cygnes River"
+            "at_mi": 203.9,
+            "spoken": "Crossing the Marais des Cygnes River",
+            "lat": 38.24891,
+            "lon": -94.68626,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 85196049 (Marais des Cygnes River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Passaic",
@@ -46986,6 +47636,16 @@
             "spoken": "Passing Bixby"
           },
           {
+            "name": "Golden Driller (from Muskogee)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.5,
+            "spoken": "Billboard: The Golden Driller, ahead in Tulsa, seventy-six feet tall with one hand on a real oil derrick. His belt buckle once said Tesla, briefly.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Coweta",
             "at_mi": 24.9,
             "off_mi": 2.86,
@@ -47002,6 +47662,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151365193, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Haskell"
+          },
+          {
+            "name": "Muskogee, Oklahoma (from Tulsa)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: Muskogee, Oklahoma, up the road. Merle Haggard put it on the map. The proudest Okies you'll ever wave at.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Redbird",
@@ -47034,8 +47704,11 @@
             "name": "Arkansas River",
             "category": "river",
             "kind": "point",
-            "at_mi": 43.6,
-            "spoken": "Crossing the Arkansas River"
+            "at_mi": 43.4,
+            "spoken": "Crossing the Arkansas River",
+            "lat": 35.80711,
+            "lon": -95.40225,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 190148764 (Arkansas River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Taft",

@@ -89,6 +89,8 @@ def build_country_files(data: dict[str, Any], index: dict[str, Any]) -> dict[Pat
             raise SystemExit(
                 f"Cross-country leg {leg['from']}->{leg['to']} targets unknown country {to_code!r}"
             )
+        # Keep complete leg records intact so optional corridor fields such as
+        # billboard_bans pass through to the indexed shards unchanged.
         by_country[code]["legs"].append(leg)
 
     files: dict[Path, str] = {}

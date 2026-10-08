@@ -75,6 +75,7 @@ fn test_the_table_reads_exactly_as_the_spec_says() {
             (SpeechCategory::Coaching, Disposition::FirstOccurrence),
             (SpeechCategory::Confirmation, Disposition::Full),
             (SpeechCategory::Status, Disposition::Transitions),
+            (SpeechCategory::Traffic, Disposition::Full),
         ]
     );
     assert_eq!(
@@ -84,9 +85,10 @@ fn test_the_table_reads_exactly_as_the_spec_says() {
             (SpeechCategory::Money, Disposition::Terse),
             (SpeechCategory::Navigation, Disposition::Terse),
             (SpeechCategory::NavigationAdvisory, Disposition::Terse),
-            (SpeechCategory::Coaching, Disposition::Earcon),
+            (SpeechCategory::Coaching, Disposition::Silent),
             (SpeechCategory::Confirmation, Disposition::Terse),
             (SpeechCategory::Status, Disposition::Terse),
+            (SpeechCategory::Traffic, Disposition::Silent),
         ]
     );
     assert_eq!(
@@ -95,12 +97,31 @@ fn test_the_table_reads_exactly_as_the_spec_says() {
             (SpeechCategory::Safety, Disposition::Terse),
             (SpeechCategory::Money, Disposition::Silent),
             (SpeechCategory::Navigation, Disposition::Terse),
-            (SpeechCategory::NavigationAdvisory, Disposition::Earcon),
+            (SpeechCategory::NavigationAdvisory, Disposition::Silent),
             (SpeechCategory::Coaching, Disposition::Silent),
-            (SpeechCategory::Confirmation, Disposition::Earcon),
+            (SpeechCategory::Confirmation, Disposition::Silent),
             (SpeechCategory::Status, Disposition::Silent),
+            (SpeechCategory::Traffic, Disposition::Silent),
         ]
     );
+}
+
+/// Quiet is meant to be quiet: the traffic around the truck is words at
+/// standard and nothing at either quieter rung (player report, 2026-10-03,
+/// on a quiet rung still reading out every slow box truck and its speed).
+#[test]
+fn test_traffic_around_the_truck_speaks_only_at_standard() {
+    assert_eq!(
+        disposition_for("standard", Some(SpeechCategory::Traffic)),
+        Disposition::Full
+    );
+    for rung in ["quiet", "urgent_only"] {
+        assert_eq!(
+            disposition_for(rung, Some(SpeechCategory::Traffic)),
+            Disposition::Silent,
+            "{rung}"
+        );
+    }
 }
 
 #[test]
@@ -141,45 +162,19 @@ fn test_the_two_quietest_rungs_are_not_the_same_setting() {
     );
 }
 
-/// Owner playtest, 2026-08-17: "the hazard earcon is being used double
-/// in some places."
-///
-/// CONFIRMATION borrowed the shipped "Hazard clear" chime instead of
-/// having a cue of its own, so at quiet every silenced confirmation
-/// played "you got past the hazard" -- including "Automatic braking.",
-/// which fires while the hazard is still there and the truck is braking
-/// for it. That is the exact failure `ladder_earcons`' own docstring
-/// forbids: one sound teaching a player two things.
-///
-/// Pinned as a rule rather than as one mapping, so the next category
-/// added to the ladder cannot quietly borrow a different loaded sound.
+/// What a rung leaves out is silent (owner, 2026-10-03): no stand-in
+/// sound. Every cell is either spoken in some form or silent.
 #[test]
-fn test_no_ladder_earcon_borrows_a_sound_that_already_means_something() {
-    // Sounds that already carry a meaning of their own on the road.
-    let spoken_for = [
-        "Hazard clear",
-        "Hazard warning",
-        "Collision",
-        "Overspeed",
-        "Low air",
-    ];
-    let borrowed: Vec<_> = LADDER_EARCONS
-        .iter()
-        .filter(|(_, name)| spoken_for.contains(name))
-        .collect();
-    assert!(
-        borrowed.is_empty(),
-        "ladder earcon borrows a loaded sound: {borrowed:?}"
-    );
-
-    // And every ladder earcon is its own sound, not shared between two
-    // categories -- which would be the same bug wearing a different hat.
-    let mut names: Vec<&str> = LADDER_EARCONS.iter().map(|(_, name)| *name).collect();
-    names.sort_unstable();
-    names.dedup();
-    assert_eq!(names.len(), LADDER_EARCONS.len());
-    assert_eq!(ladder_earcon(SpeechCategory::Status), Some("Status note"));
-    assert_eq!(ladder_earcon(SpeechCategory::Safety), None);
+fn test_every_cell_speaks_or_is_silent() {
+    for mode in DRIVING_SPEECH_MODES {
+        for (category, disposition) in disposition_row(mode).unwrap() {
+            assert!(
+                Disposition::ALL.contains(disposition),
+                "{mode} {category:?}"
+            );
+        }
+    }
+    assert_eq!(Disposition::ALL.len(), 5);
 }
 
 /// Quiet and urgent_only must not be able to drop a line as already-said.

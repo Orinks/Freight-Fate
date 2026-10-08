@@ -758,8 +758,11 @@
             "name": "Agua Fria River",
             "category": "river",
             "kind": "point",
-            "at_mi": 24.3,
-            "spoken": "Crossing the Agua Fria River"
+            "at_mi": 23.3,
+            "spoken": "Crossing the Agua Fria River",
+            "lat": 33.45764,
+            "lon": -112.33346,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 102864452 (Agua Fria River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "El Mirage",
@@ -1780,6 +1783,26 @@
             "spoken": "Needles Regional Museum ahead"
           },
           {
+            "name": "Oatman burros (from Bullhead City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.4,
+            "spoken": "Billboard: Oatman, north of Topock on old Route sixty-six. Wild burros run the main street and expect to be fed. They outrank the cars.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Colorado River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 35.0,
+            "spoken": "Crossing the Colorado River",
+            "lat": 34.71729,
+            "lon": -114.48709,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1456602134 (Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Golden Shores",
             "at_mi": 35.69,
             "off_mi": 4.31,
@@ -1789,11 +1812,24 @@
             "spoken": "Passing Golden Shores"
           },
           {
-            "name": "Colorado River",
-            "category": "river",
+            "name": "Oatman burros (from Lake Havasu City)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 42.43,
-            "spoken": "Crossing the Colorado River"
+            "at_mi": 44.7,
+            "spoken": "Billboard: Oatman, north of Topock on old Route sixty-six. Wild burros run the main street and expect to be fed. They outrank the cars.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "London Bridge (from Bullhead City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.2,
+            "spoken": "Billboard: London Bridge, ahead in Lake Havasu City, bought in nineteen sixty-eight and rebuilt in Arizona. The buyer swore it was the bridge he wanted.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Desert Hills",
@@ -2401,13 +2437,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150980291, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lake Montezuma"
-          },
-          {
-            "name": "Verde River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 1.8,
-            "spoken": "Crossing the Verde River"
           },
           {
             "name": "Prescott National Forest",
@@ -3708,8 +3737,11 @@
             "name": "Verde River",
             "category": "river",
             "kind": "point",
-            "at_mi": 7.2,
-            "spoken": "Crossing the Verde River"
+            "at_mi": 3.1,
+            "spoken": "Crossing the Verde River",
+            "lat": 34.58677,
+            "lon": -111.87919,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 502237931 (Verde River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cornville",
@@ -3728,6 +3760,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150980291, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lake Montezuma"
+          },
+          {
+            "name": "Montezuma Castle (from Flagstaff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: Montezuma Castle National Monument, ahead near Camp Verde. A five-story cliff dwelling ninety feet up. Montezuma never lived there, and it is not a castle.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Coconino National Forest",
@@ -3762,6 +3804,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150959063, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Kachina Village"
+          },
+          {
+            "name": "Lowell Observatory (from Camp Verde)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 51.6,
+            "spoken": "Billboard: Lowell Observatory, ahead in Flagstaff. Pluto was found here in nineteen thirty. It has since been demoted, and the observatory took it well.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Bellemont",
@@ -4658,6 +4710,16 @@
             "spoken": "Entering Coconino National Forest"
           },
           {
+            "name": "Tonto Natural Bridge (from Camp Verde)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.9,
+            "spoken": "Billboard: Tonto Natural Bridge State Park, ahead, probably the world's largest travertine bridge, a hundred eighty-three feet high. It is rated for hikers only.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Strawberry",
             "at_mi": 39.2,
             "off_mi": 0.12,
@@ -4686,8 +4748,11 @@
             "name": "East Verde River",
             "category": "river",
             "kind": "point",
-            "at_mi": 49.9,
-            "spoken": "Crossing the East Verde River"
+            "at_mi": 52.0,
+            "spoken": "Crossing the East Verde River",
+            "lat": 34.3013,
+            "lon": -111.35796,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 300593216 (East Verde River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Beaver Valley Estates",
@@ -4697,6 +4762,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150940072, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Beaver Valley Estates"
+          },
+          {
+            "name": "Tonto Natural Bridge (from Payson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.0,
+            "spoken": "Billboard: Tonto Natural Bridge State Park, ahead, probably the world's largest travertine bridge, a hundred eighty-three feet high. It is rated for hikers only.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Mesa Del Caballo",
@@ -5732,6 +5807,26 @@
             "spoken": "Passing Arizona City"
           },
           {
+            "name": "Rooster Cogburn Ostrich Ranch (from Casa Grande)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.1,
+            "spoken": "Billboard: Rooster Cogburn Ostrich Ranch, next exit at Picacho Peak. Feed ostriches, goats, deer and even stingrays. The ostriches do not wait their turn.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Rooster Cogburn Ostrich Ranch (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.5,
+            "spoken": "Billboard: Rooster Cogburn Ostrich Ranch, next exit at Picacho Peak. Feed ostriches, goats, deer and even stingrays. The ostriches do not wait their turn.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Red Rock",
             "at_mi": 35.1,
             "off_mi": 0.94,
@@ -5766,13 +5861,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150961044, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Oro Valley"
-          },
-          {
-            "name": "Santa Cruz River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 59.5,
-            "spoken": "Crossing the Santa Cruz River"
           },
           {
             "name": "Pascua Pueblo",
@@ -6300,8 +6388,11 @@
             "name": "Verde River",
             "category": "river",
             "kind": "point",
-            "at_mi": 2.5,
-            "spoken": "Crossing the Verde River"
+            "at_mi": 0.6,
+            "spoken": "Crossing the Verde River",
+            "lat": 34.73913,
+            "lon": -111.99937,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 502237931 (Verde River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cornville",
@@ -6952,6 +7043,16 @@
             "spoken": "Passing Tombstone"
           },
           {
+            "name": "San Pedro River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 45.1,
+            "spoken": "Crossing the San Pedro River",
+            "lat": 31.55193,
+            "lon": -110.13849,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 428982358 (San Pedro River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Miracle Valley",
             "at_mi": 46.4,
             "off_mi": 11.27,
@@ -6959,13 +7060,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150974045, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Miracle Valley"
-          },
-          {
-            "name": "San Pedro River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 48.2,
-            "spoken": "Crossing the San Pedro River"
           },
           {
             "name": "Huachuca City",
@@ -8343,6 +8437,16 @@
             "spoken": "Passing Tombstone"
           },
           {
+            "name": "San Pedro River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 41.2,
+            "spoken": "Crossing the San Pedro River",
+            "lat": 31.55193,
+            "lon": -110.13849,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 428982358 (San Pedro River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Miracle Valley",
             "at_mi": 42.35,
             "off_mi": 11.27,
@@ -8359,20 +8463,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150937806, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Nicksville"
-          },
-          {
-            "name": "San Pedro River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 47.92,
-            "spoken": "Crossing the San Pedro River"
-          },
-          {
-            "name": "Babacomari River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 47.92,
-            "spoken": "Crossing the Babacomari River"
           },
           {
             "name": "Sierra Vista Estates",
@@ -8393,6 +8483,16 @@
             "spoken": "Entering Huachuca City"
           },
           {
+            "name": "Babacomari River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 57.9,
+            "spoken": "Crossing the Babacomari River",
+            "lat": 31.64519,
+            "lon": -110.34037,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 487472447 (Babacomari River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Whetstone",
             "at_mi": 61.26,
             "off_mi": 0.01,
@@ -8400,6 +8500,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150978173, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Whetstone"
+          },
+          {
+            "name": "Kartchner Caverns (from Douglas)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.6,
+            "spoken": "Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Lone Pine Saddle",
@@ -8425,6 +8535,16 @@
             "spoken": "Passing Benson"
           },
           {
+            "name": "Kartchner Caverns (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.2,
+            "spoken": "Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Corona de Tucson",
             "at_mi": 101.93,
             "off_mi": 5.81,
@@ -8441,6 +8561,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150937823, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Vail"
+          },
+          {
+            "name": "Pima Air and Space Museum (from Douglas)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 105.6,
+            "spoken": "Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pima Air and Space Museum (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 119.0,
+            "spoken": "Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pascua Pueblo",
@@ -10390,6 +10530,16 @@
             "spoken": "Passing Kachina Village"
           },
           {
+            "name": "Lowell Observatory (from Kingman)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Lowell Observatory, ahead in Flagstaff. Pluto was found here in nineteen thirty. It has since been demoted, and the observatory took it well.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Fort Valley",
             "at_mi": 11.7,
             "off_mi": 4.64,
@@ -10424,6 +10574,16 @@
             "spoken": "Entering Parks"
           },
           {
+            "name": "Bearizona (from Flagstaff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.0,
+            "spoken": "Billboard: Bearizona, ahead in Williams. Drive through a pine forest past black bears, wolves and bison. Windows up; the bears have no manners.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Red Lake",
             "at_mi": 34.9,
             "off_mi": 6.95,
@@ -10440,6 +10600,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 1402601531, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Williams"
+          },
+          {
+            "name": "Bearizona (from Kingman)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.0,
+            "spoken": "Billboard: Bearizona, ahead in Williams. Drive through a pine forest past black bears, wolves and bison. Windows up; the bears have no manners.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kaibab Estates West",
@@ -10460,6 +10630,16 @@
             "spoken": "Entering Ash Fork"
           },
           {
+            "name": "Grand Canyon Caverns",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 69.0,
+            "spoken": "Billboard: Grand Canyon Caverns is ahead near Peach Springs. The country's largest dry cavern lies two hundred feet down, with one motel room at the very bottom for the very brave.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Delgadillo's Snow Cap",
             "category": "billboard_sign",
             "kind": "point",
@@ -10467,11 +10647,14 @@
             "spoken": "Billboard: Delgadillo's Snow Cap is ahead in Seligman. It serves burgers, shakes, fake mustard, practical jokes, and a menu delivered by people who consider confusion part of the service."
           },
           {
-            "name": "Grand Canyon Caverns",
+            "name": "Delgadillo's Snow Cap (from Kingman)",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 95.0,
-            "spoken": "Billboard: Grand Canyon Caverns is ahead near Peach Springs. The country's largest dry cavern lies two hundred feet down, with one motel room at the very bottom for the very brave."
+            "at_mi": 87.0,
+            "spoken": "Billboard: Delgadillo's Snow Cap is ahead in Seligman. It serves burgers, shakes, fake mustard, practical jokes, and a menu delivered by people who consider confusion part of the service.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Pine Lake",
@@ -13158,6 +13341,26 @@
             "spoken": "Passing Mountainaire"
           },
           {
+            "name": "Lowell Observatory (from Page)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.1,
+            "spoken": "Billboard: Lowell Observatory, ahead in Flagstaff. Pluto was found here in nineteen thirty. It has since been demoted, and the observatory took it well.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Sunset Crater (from Flagstaff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.1,
+            "spoken": "Billboard: Sunset Crater Volcano National Monument, ahead. It last erupted around the year ten eighty-five and has been quiet since. Keep it that way.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Doney Park",
             "at_mi": 7.4,
             "off_mi": 0.01,
@@ -13192,6 +13395,16 @@
             "spoken": "Entering Timberline-Fernwood"
           },
           {
+            "name": "Sunset Crater (from Page)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.0,
+            "spoken": "Billboard: Sunset Crater Volcano National Monument, ahead. It last erupted around the year ten eighty-five and has been quiet since. Keep it that way.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Coconino National Forest",
             "category": "national_forest",
             "kind": "zone",
@@ -13199,11 +13412,14 @@
             "spoken": "Entering Coconino National Forest"
           },
           {
-            "name": "Little Colorado River",
-            "category": "river",
+            "name": "Cameron Trading Post (from Flagstaff)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 39.5,
-            "spoken": "Crossing the Little Colorado River"
+            "at_mi": 43.5,
+            "spoken": "Billboard: Cameron Trading Post, ahead, trading since nineteen sixteen beside the Little Colorado River gorge. The Navajo taco covers the whole plate.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "old Cameron Trading Post",
@@ -13211,6 +13427,26 @@
             "kind": "point",
             "at_mi": 52.0,
             "spoken": "Museum ahead: old Cameron Trading Post"
+          },
+          {
+            "name": "Little Colorado River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 52.7,
+            "spoken": "Crossing the Little Colorado River",
+            "lat": 35.8774,
+            "lon": -111.41153,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 704397251 (Little Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Cameron Trading Post (from Page)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 61.5,
+            "spoken": "Billboard: Cameron Trading Post, ahead, trading since nineteen sixteen beside the Little Colorado River gorge. The Navajo taco covers the whole plate.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Moenkopi",
@@ -13245,6 +13481,16 @@
             "kind": "point",
             "at_mi": 113.9,
             "spoken": "Approaching Antelope Pass"
+          },
+          {
+            "name": "Horseshoe Bend (from Flagstaff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 120.8,
+            "spoken": "Billboard: Horseshoe Bend, ahead before Page. A short trail ends a thousand feet above a hairpin loop of the Colorado River. Your hairpin turns are smaller.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Greenehaven",
@@ -14724,6 +14970,16 @@
             "spoken": "Passing Timberline-Fernwood"
           },
           {
+            "name": "Walnut Canyon (from Flagstaff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 6.9,
+            "spoken": "Billboard: Walnut Canyon National Monument, next exit. Twenty-five cliff dwelling rooms down a trail that drops a hundred eighty-five feet. The climb back is included.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Mountain View Ranches",
             "at_mi": 10.3,
             "off_mi": 2.45,
@@ -14733,6 +14989,16 @@
             "spoken": "Passing Mountain View Ranches"
           },
           {
+            "name": "Walnut Canyon (from Winslow)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.3,
+            "spoken": "Billboard: Walnut Canyon National Monument, next exit. Twenty-five cliff dwelling rooms down a trail that drops a hundred eighty-five feet. The climb back is included.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Coconino National Forest",
             "category": "national_forest",
             "kind": "zone",
@@ -14740,18 +15006,64 @@
             "spoken": "Entering Coconino National Forest"
           },
           {
+            "name": "Lowell Observatory (from Winslow)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.2,
+            "spoken": "Billboard: Lowell Observatory, ahead in Flagstaff. Pluto was found here in nineteen thirty. It has since been demoted, and the observatory took it well.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Two Guns",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 35.0,
-            "spoken": "Billboard: The ghost town of Two Guns is ahead. It has stone ruins, an old zoo, a canyon, and enough Route sixty-six legends to make every abandoned wall suspicious."
+            "at_mi": 28.0,
+            "spoken": "Billboard: The ghost town of Two Guns is ahead. Its stone ruins, old zoo and canyon are on private land now, posted against visitors, with enough Route sixty-six legends to make every abandoned wall suspicious.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Meteor Crater",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 38.0,
-            "spoken": "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger."
+            "at_mi": 31.5,
+            "spoken": "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Two Guns (from Winslow)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.0,
+            "spoken": "Billboard: The ghost town of Two Guns is ahead. Its stone ruins, old zoo and canyon are on private land now, posted against visitors, with enough Route sixty-six legends to make every abandoned wall suspicious.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Meteor Crater (from Winslow)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.2,
+            "spoken": "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Standin' on the Corner",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.0,
+            "spoken": "Billboard: Winslow, Arizona, is ahead. You know the song.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -15910,8 +16222,11 @@
             "name": "Salt River",
             "category": "river",
             "kind": "point",
-            "at_mi": 32.0,
-            "spoken": "Crossing the Salt River"
+            "at_mi": 39.9,
+            "spoken": "Crossing the Salt River",
+            "lat": 33.79784,
+            "lon": -110.50423,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 337673852 (Salt River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lake of the Woods",
@@ -17510,11 +17825,24 @@
             "spoken": "Passing Joseph City"
           },
           {
-            "name": "Wigwam Motel",
+            "name": "Wigwam Motel (from Gallup)",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 2.0,
-            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?"
+            "at_mi": 9.0,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Petrified Forest National Park (from Holbrook)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 22.3,
+            "spoken": "Billboard: Petrified Forest National Park, next exit, with trees turned to stone two hundred twenty-five million years ago. Thieves keep mailing pieces back.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Petrified Forest National Park",
@@ -17524,11 +17852,14 @@
             "spoken": "Entering Petrified Forest National Park"
           },
           {
-            "name": "Puerco River",
-            "category": "river",
+            "name": "Petrified Forest National Park (from Gallup)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 37.5,
-            "spoken": "Crossing the Puerco River"
+            "at_mi": 26.9,
+            "spoken": "Billboard: Petrified Forest National Park, next exit, with trees turned to stone two hundred twenty-five million years ago. Thieves keep mailing pieces back.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Nahata Dziil",
@@ -17576,6 +17907,16 @@
             "spoken": "Entering Lupton"
           },
           {
+            "name": "Puerco River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 74.0,
+            "spoken": "Crossing the Puerco River",
+            "lat": 35.37364,
+            "lon": -109.03494,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 481681885 (Puerco River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Oak Springs",
             "at_mi": 77.4,
             "off_mi": 8.69,
@@ -17601,6 +17942,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151351290, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hunters Point"
+          },
+          {
+            "name": "El Rancho Hotel (from Holbrook)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 86.0,
+            "spoken": "Billboard: The El Rancho Hotel, ahead in Gallup, built in nineteen thirty-seven for movie crews. Its rooms are named for the stars who stayed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Entering the Navajo Nation",
@@ -19083,11 +19434,14 @@
             "spoken": "Entering Yucca"
           },
           {
-            "name": "Colorado River",
-            "category": "river",
+            "name": "Oatman burros (from Kingman)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 42.6,
-            "spoken": "Crossing the Colorado River"
+            "at_mi": 40.3,
+            "spoken": "Billboard: Oatman, north of Topock on old Route sixty-six. Wild burros run the main street and expect to be fed. They outrank the cars.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Golden Shores",
@@ -19097,6 +19451,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 6186810171, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Golden Shores"
+          },
+          {
+            "name": "Colorado River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 49.7,
+            "spoken": "Crossing the Colorado River",
+            "lat": 34.71736,
+            "lon": -114.48712,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1376658370 (Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Needles Regional Museum",
@@ -19154,13 +19518,6 @@
             "kind": "zone",
             "at_mi": 113.3,
             "spoken": "Entering Mojave National Preserve"
-          },
-          {
-            "name": "Mojave River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 189.8,
-            "spoken": "Crossing the Mojave River"
           },
           {
             "name": "Yermo",
@@ -21214,6 +21571,16 @@
             "spoken": "Passing Golden Shores"
           },
           {
+            "name": "London Bridge (from Kingman)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.2,
+            "spoken": "Billboard: London Bridge, ahead in Lake Havasu City, bought in nineteen sixty-eight and rebuilt in Arizona. The buyer swore it was the bridge he wanted.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Desert Hills",
             "at_mi": 53.7,
             "off_mi": 0.64,
@@ -22382,8 +22749,11 @@
             "name": "Colorado River",
             "category": "river",
             "kind": "point",
-            "at_mi": 70.5,
-            "spoken": "Crossing the Colorado River"
+            "at_mi": 70.4,
+            "spoken": "Crossing the Colorado River",
+            "lat": 36.01251,
+            "lon": -114.74135,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1421140840 (Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Boulder City",
@@ -22407,6 +22777,16 @@
             "kind": "point",
             "at_mi": 86.3,
             "spoken": "Approaching Railroad Pass"
+          },
+          {
+            "name": "The Neon Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 95.2,
+            "spoken": "Billboard: The Neon Museum, ahead in Las Vegas. Old casino signs come here to retire in the boneyard. Some of them still light up.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Whitney",
@@ -23921,11 +24301,14 @@
             "spoken": "Passing Desert Hills"
           },
           {
-            "name": "Colorado River",
-            "category": "river",
+            "name": "London Bridge (from Yuma)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 11.07,
-            "spoken": "Crossing the Colorado River"
+            "at_mi": 8.8,
+            "spoken": "Billboard: London Bridge, ahead in Lake Havasu City, bought in nineteen sixty-eight and rebuilt in Arizona. The buyer swore it was the bridge he wanted.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Parker Strip",
@@ -23973,6 +24356,16 @@
             "spoken": "Entering Parker"
           },
           {
+            "name": "Hi Jolly's tomb (from Lake Havasu City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.2,
+            "spoken": "Billboard: Hi Jolly's tomb, ahead in Quartzsite. A stone pyramid topped with a copper camel, for the Army's camel driver. The Army did try camels.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "La Paz Valley",
             "at_mi": 79.41,
             "off_mi": 1.43,
@@ -23982,6 +24375,16 @@
             "spoken": "Passing La Paz Valley"
           },
           {
+            "name": "Hi Jolly's tomb (from Yuma)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 82.2,
+            "spoken": "Billboard: Hi Jolly's tomb, ahead in Quartzsite. A stone pyramid topped with a copper camel, for the Army's camel driver. The Army did try camels.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Fortuna Foothills",
             "at_mi": 143.62,
             "off_mi": 3.41,
@@ -23989,6 +24392,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150959809, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fortuna Foothills"
+          },
+          {
+            "name": "Yuma Territorial Prison (from Lake Havasu City)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 146.1,
+            "spoken": "Billboard: Yuma Territorial Prison State Historic Park, ahead. More than three thousand inmates from eighteen seventy-six to nineteen oh-nine. Then the high school moved in.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Somerton",
@@ -26062,11 +26475,44 @@
             "spoken": "Entering Taylor"
           },
           {
+            "name": "Wigwam Motel (from Payson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 110.7,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Little Colorado River",
             "category": "river",
             "kind": "point",
-            "at_mi": 113.0,
-            "spoken": "Crossing the Little Colorado River"
+            "at_mi": 119.9,
+            "spoken": "Crossing the Little Colorado River",
+            "lat": 34.89657,
+            "lon": -110.15946,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 76790291 (Little Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Jack Rabbit Trading Post (from Payson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 129.1,
+            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Wigwam Motel (from Winslow)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 129.1,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Joseph City",
@@ -26076,6 +26522,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150935954, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Joseph City"
+          },
+          {
+            "name": "Jack Rabbit Trading Post (from Winslow)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 149.2,
+            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "speed_limits": [
@@ -28237,15 +28693,11 @@
             "name": "New River",
             "category": "river",
             "kind": "point",
-            "at_mi": 35.6,
-            "spoken": "Crossing the New River"
-          },
-          {
-            "name": "Agua Fria River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 35.6,
-            "spoken": "Crossing the Agua Fria River"
+            "at_mi": 34.0,
+            "spoken": "Crossing the New River",
+            "lat": 33.90579,
+            "lon": -112.14588,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 102901200 (New River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Black Canyon City",
@@ -28255,6 +28707,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150932977, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Black Canyon City"
+          },
+          {
+            "name": "Agua Fria River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 45.9,
+            "spoken": "Crossing the Agua Fria River",
+            "lat": 34.07132,
+            "lon": -112.14076,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 191667934 (Agua Fria River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Spring Valley",
@@ -28282,6 +28744,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 9564960302, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Dewey-Humboldt"
+          },
+          {
+            "name": "Montezuma Castle (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.0,
+            "spoken": "Billboard: Montezuma Castle National Monument, ahead near Camp Verde. A five-story cliff dwelling ninety feet up. Montezuma never lived there, and it is not a castle.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Cornville",
@@ -29206,8 +29678,11 @@
             "name": "Salt River",
             "category": "river",
             "kind": "point",
-            "at_mi": 4.9,
-            "spoken": "Crossing the Salt River"
+            "at_mi": 5.0,
+            "spoken": "Crossing the Salt River",
+            "lat": 33.41856,
+            "lon": -112.01812,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 936578425 (Salt River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Paradise Valley",
@@ -29240,8 +29715,11 @@
             "name": "Gila River",
             "category": "river",
             "kind": "point",
-            "at_mi": 29.6,
-            "spoken": "Crossing the Gila River"
+            "at_mi": 27.5,
+            "spoken": "Crossing the Gila River",
+            "lat": 33.14897,
+            "lon": -111.86587,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 73106700 (Gila River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Stotonic",
@@ -30508,6 +30986,16 @@
             "spoken": "Passing Tolleson"
           },
           {
+            "name": "Salt River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 6.4,
+            "spoken": "Crossing the Salt River",
+            "lat": 33.41832,
+            "lon": -112.01857,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 936578425 (Salt River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Paradise Valley",
             "at_mi": 7.7,
             "off_mi": 8.56,
@@ -30524,13 +31012,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150970836, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Guadalupe"
-          },
-          {
-            "name": "Salt River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.1,
-            "spoken": "Crossing the Salt River"
           },
           {
             "name": "Mesa Contemporary Arts Museum",
@@ -31656,11 +32137,11 @@
         ],
         "state_crossings": [
           {
-            "at_mi": 144.6,
+            "at_mi": 145.8,
             "from_state": "Arizona",
             "state": "California",
             "place": "Colorado River near Blythe",
-            "source": "Curated from I-10 corridor state sequence and checked route geometry."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "checkpoints": [
@@ -31706,11 +32187,13 @@
         "state_miles": [
           {
             "state": "Arizona",
-            "miles": 144.6
+            "miles": 145.8,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "California",
-            "miles": 227.4
+            "miles": 226.2,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "interchanges": [
@@ -33798,6 +34281,26 @@
             "spoken": "Passing Brenda"
           },
           {
+            "name": "Hi Jolly's tomb (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 118.1,
+            "spoken": "Billboard: Hi Jolly's tomb, ahead in Quartzsite. A stone pyramid topped with a copper camel, for the Army's camel driver. The Army did try camels.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Hi Jolly's tomb (from Los Angeles)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 136.1,
+            "spoken": "Billboard: Hi Jolly's tomb, ahead in Quartzsite. A stone pyramid topped with a copper camel, for the Army's camel driver. The Army did try camels.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Ehrenberg",
             "at_mi": 145.2,
             "off_mi": 0.36,
@@ -33807,6 +34310,16 @@
             "spoken": "Entering Ehrenberg"
           },
           {
+            "name": "Colorado River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 145.8,
+            "spoken": "Crossing the Colorado River",
+            "lat": 33.60489,
+            "lon": -114.53093,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 11807106 (Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Palo Verde Historical Museum",
             "category": "museum",
             "kind": "point",
@@ -33814,18 +34327,51 @@
             "spoken": "Palo Verde Historical Museum ahead"
           },
           {
-            "name": "Colorado River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 159.6,
-            "spoken": "Crossing the Colorado River"
-          },
-          {
             "name": "Chuckwalla National Monument",
             "category": "protected_area",
             "kind": "zone",
             "at_mi": 202.8,
             "spoken": "Entering Chuckwalla National Monument"
+          },
+          {
+            "name": "General Patton Memorial Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 206.0,
+            "spoken": "Billboard: The General Patton Memorial Museum, ahead at Chiriaco Summit. A million soldiers trained in this desert for the Second World War. The tanks out front are not going anywhere.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Joshua Tree National Park (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 208.8,
+            "spoken": "Billboard: Joshua Tree National Park, ahead at Cottonwood Spring Road. The trees are really yuccas. Nobody has told them, and nobody should.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Joshua Tree National Park (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 220.3,
+            "spoken": "Billboard: Joshua Tree National Park, next exit, seven miles north. The trees are really yuccas. Nobody has told them, and nobody should.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "General Patton Memorial Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 226.0,
+            "spoken": "Billboard: The General Patton Memorial Museum, ahead at Chiriaco Summit. A million soldiers trained in this desert for the Second World War. The tanks out front are not going anywhere.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Bermuda Dunes",
@@ -33855,18 +34401,64 @@
             "spoken": "Passing Thousand Palms"
           },
           {
+            "name": "Palm Springs Aerial Tramway (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 260.1,
+            "spoken": "Billboard: The Palm Springs Aerial Tramway, ahead. Its cars rotate all the way up the cliffs, almost six thousand feet. The view comes around to you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "San Gorgonio Windmills (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 265.1,
+            "spoken": "Billboard: A forest of windmills ahead in the San Gorgonio Pass, turning in the same wind that is currently shoving your trailer around. They will not kill your birds, or your fuzzy dice, but they will spin.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Whitewater River",
             "category": "river",
             "kind": "point",
-            "at_mi": 274.3,
-            "spoken": "Crossing the Whitewater River"
+            "at_mi": 273.6,
+            "spoken": "Crossing the Whitewater River",
+            "lat": 33.92267,
+            "lon": -116.63605,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 229571024 (Whitewater River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
-            "name": "San Gorgonio River",
-            "category": "river",
+            "name": "Hadley's Date Shakes (westbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 274.3,
-            "spoken": "Crossing the San Gorgonio River"
+            "at_mi": 276.6,
+            "spoken": "Billboard: Date shakes ahead at Hadley's. Yes, a milkshake made of dates. Trust the desert. It knows what it is doing.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "San Gorgonio Windmills (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 279.8,
+            "spoken": "Billboard: A forest of windmills ahead in the San Gorgonio Pass, turning in the same wind that is currently shoving your trailer around. They will not kill your birds, or your fuzzy dice, but they will spin.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Cabazon Dinosaurs (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 280.0,
+            "spoken": "Billboard: Dinosaurs, next exit. Concrete, enormous, unbothered by extinction.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "San Gorgonio Pass",
@@ -33876,6 +34468,26 @@
             "spoken": "Approaching San Gorgonio Pass"
           },
           {
+            "name": "Cabazon Dinosaurs (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 284.3,
+            "spoken": "Billboard: Dinosaurs, next exit. Concrete, enormous, unbothered by extinction.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "San Gorgonio River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 285.1,
+            "spoken": "Crossing the San Gorgonio River",
+            "lat": 33.93141,
+            "lon": -116.8286,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 859725886 (San Gorgonio River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Banning",
             "at_mi": 287.8,
             "off_mi": 0.08,
@@ -33883,6 +34495,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150960179, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Banning"
+          },
+          {
+            "name": "Palm Springs Aerial Tramway (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 290.1,
+            "spoken": "Billboard: The Palm Springs Aerial Tramway, ahead. Its cars rotate all the way up the cliffs, almost six thousand feet. The view comes around to you.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Hadley's Date Shakes (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 292.7,
+            "spoken": "Billboard: Date shakes ahead at Hadley's. Yes, a milkshake made of dates. Trust the desert. It knows what it is doing.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Calimesa",
@@ -33930,6 +34562,16 @@
             "spoken": "Passing Loma Linda"
           },
           {
+            "name": "Santa Ana River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 316.4,
+            "spoken": "Crossing the Santa Ana River",
+            "lat": 34.06508,
+            "lon": -117.30206,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 422097184 (Santa Ana River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Little Pigeon Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -33962,13 +34604,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150950291, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Bloomington"
-          },
-          {
-            "name": "Santa Ana River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 329.3,
-            "spoken": "Crossing the Santa Ana River"
           },
           {
             "name": "Upland",
@@ -35590,6 +36225,16 @@
             "spoken": "Passing Fountain Hills"
           },
           {
+            "name": "Verde River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 30.1,
+            "spoken": "Crossing the Verde River",
+            "lat": 33.5808,
+            "lon": -111.67143,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 194870698 (Verde River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Fort McDowell",
             "at_mi": 30.6,
             "off_mi": 3.83,
@@ -35597,13 +36242,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150943188, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Fort McDowell"
-          },
-          {
-            "name": "Verde River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 32.9,
-            "spoken": "Crossing the Verde River"
           },
           {
             "name": "Tonto National Forest",
@@ -37091,8 +37729,11 @@
             "name": "Verde River",
             "category": "river",
             "kind": "point",
-            "at_mi": 37.9,
-            "spoken": "Crossing the Verde River"
+            "at_mi": 42.4,
+            "spoken": "Crossing the Verde River",
+            "lat": 34.58661,
+            "lon": -111.8795,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 502237931 (Verde River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Cornville",
@@ -38687,6 +39328,16 @@
             "spoken": "Passing Cordes Lakes"
           },
           {
+            "name": "Agua Fria River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 54.1,
+            "spoken": "Crossing the Agua Fria River",
+            "lat": 34.07138,
+            "lon": -112.14109,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 191667934 (Agua Fria River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Black Canyon City",
             "at_mi": 54.3,
             "off_mi": 0.54,
@@ -38699,15 +39350,11 @@
             "name": "New River",
             "category": "river",
             "kind": "point",
-            "at_mi": 60.4,
-            "spoken": "Crossing the New River"
-          },
-          {
-            "name": "Agua Fria River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 60.4,
-            "spoken": "Crossing the Agua Fria River"
+            "at_mi": 66.2,
+            "spoken": "Crossing the New River",
+            "lat": 33.90562,
+            "lon": -112.14616,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 102901200 (New River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Anthem",
@@ -39899,11 +40546,24 @@
             "spoken": "Entering Snowflake"
           },
           {
+            "name": "Wigwam Motel (from Show Low)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.0,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Little Colorado River",
             "category": "river",
             "kind": "point",
-            "at_mi": 41.2,
-            "spoken": "Crossing the Little Colorado River"
+            "at_mi": 46.6,
+            "spoken": "Crossing the Little Colorado River",
+            "lat": 34.89657,
+            "lon": -110.15946,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 76790291 (Little Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Joseph City",
@@ -40966,13 +41626,6 @@
             "spoken": "Passing Nicksville"
           },
           {
-            "name": "Babacomari River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 7.14,
-            "spoken": "Crossing the Babacomari River"
-          },
-          {
             "name": "Huachuca City",
             "at_mi": 7.51,
             "off_mi": 0.09,
@@ -40980,6 +41633,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150950608, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Huachuca City"
+          },
+          {
+            "name": "Babacomari River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 9.7,
+            "spoken": "Crossing the Babacomari River",
+            "lat": 31.64516,
+            "lon": -110.34044,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 487472447 (Babacomari River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Whetstone",
@@ -41012,8 +41675,11 @@
             "name": "Santa Cruz River",
             "category": "river",
             "kind": "point",
-            "at_mi": 55.63,
-            "spoken": "Crossing the Santa Cruz River"
+            "at_mi": 58.6,
+            "spoken": "Crossing the Santa Cruz River",
+            "lat": 31.38736,
+            "lon": -110.87447,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 386576624 (Santa Cruz River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -41878,11 +42544,14 @@
         ],
         "landmarks": [
           {
-            "name": "Santa Cruz River",
-            "category": "river",
+            "name": "Mission San Xavier del Bac (from Tucson)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 8.43,
-            "spoken": "Crossing the Santa Cruz River"
+            "at_mi": 5.0,
+            "spoken": "Billboard: Mission San Xavier del Bac, ahead. Built between seventeen eighty-three and seventeen ninety-seven, the White Dove of the Desert still serves its parish.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Pascua Pueblo",
@@ -41894,6 +42563,26 @@
             "spoken": "Passing Pascua Pueblo"
           },
           {
+            "name": "Santa Cruz River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 8.9,
+            "spoken": "Crossing the Santa Cruz River",
+            "lat": 32.10408,
+            "lon": -110.99312,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1004994385 (Santa Cruz River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Mission San Xavier del Bac (from Nogales)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.0,
+            "spoken": "Billboard: Mission San Xavier del Bac, ahead. Built between seventeen eighty-three and seventeen ninety-seven, the White Dove of the Desert still serves its parish.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Sahuarita",
             "at_mi": 19.19,
             "off_mi": 1.88,
@@ -41901,6 +42590,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150963861, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sahuarita"
+          },
+          {
+            "name": "Titan Missile Museum (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.9,
+            "spoken": "Billboard: The Titan Missile Museum, next exit at Sahuarita. An inert Titan Two stands in its silo, with a hole cut in the nose to prove it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Titan Missile Museum (from Nogales)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.9,
+            "spoken": "Billboard: The Titan Missile Museum, next exit at Sahuarita. An inert Titan Two stands in its silo, with a hole cut in the nose to prove it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Green Valley",
@@ -43348,6 +44057,26 @@
             "spoken": "Passing Pascua Pueblo"
           },
           {
+            "name": "Pima Air and Space Museum (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pima Air and Space Museum (from Sierra Vista)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.8,
+            "spoken": "Billboard: The Pima Air and Space Museum, ahead in Tucson. Nearly four hundred aircraft on eighty acres, beside the Air Force boneyard. Even the planes found parking.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Vail",
             "at_mi": 21.06,
             "off_mi": 1.45,
@@ -43364,6 +44093,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150934158, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Corona de Tucson"
+          },
+          {
+            "name": "Kartchner Caverns (from Tucson)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.0,
+            "spoken": "Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Benson",
@@ -43396,6 +44135,16 @@
             "spoken": "Approaching Lone Pine Saddle"
           },
           {
+            "name": "Kartchner Caverns (from Sierra Vista)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.7,
+            "spoken": "Billboard: Kartchner Caverns State Park, ahead near Benson. Two cavers found it in nineteen seventy-four and kept it secret for fourteen years. The secret is out.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Whetstone",
             "at_mi": 62.97,
             "off_mi": 0.01,
@@ -43408,8 +44157,11 @@
             "name": "Babacomari River",
             "category": "river",
             "kind": "point",
-            "at_mi": 66.66,
-            "spoken": "Crossing the Babacomari River"
+            "at_mi": 66.4,
+            "spoken": "Crossing the Babacomari River",
+            "lat": 31.6452,
+            "lon": -110.34036,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 487472447 (Babacomari River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Huachuca City",
@@ -44144,22 +44896,41 @@
             "name": "Little Colorado River",
             "category": "river",
             "kind": "point",
-            "at_mi": 4.1,
-            "spoken": "Crossing the Little Colorado River"
-          },
-          {
-            "name": "Standin' on the Corner",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 5.0,
-            "spoken": "Billboard: Winslow, Arizona, is ahead. Stand on the corner, and a girl in a flatbed Ford may slow down to look. You know the song."
+            "at_mi": 3.1,
+            "spoken": "Crossing the Little Colorado River",
+            "lat": 35.01162,
+            "lon": -110.65217,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 76227022 (Little Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Jack Rabbit Trading Post",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 17.0,
-            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is."
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Jack Rabbit Trading Post (from Holbrook)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.9,
+            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Wigwam Motel",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.0,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -44944,6 +45715,16 @@
             "spoken": "Passing Somerton"
           },
           {
+            "name": "Yuma Territorial Prison (from Phoenix)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.9,
+            "spoken": "Billboard: Yuma Territorial Prison State Historic Park, ahead. More than three thousand inmates from eighteen seventy-six to nineteen oh-nine. Then the high school moved in.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Telegraph Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -44963,8 +45744,11 @@
             "name": "Gila River",
             "category": "river",
             "kind": "point",
-            "at_mi": 123.2,
-            "spoken": "Crossing the Gila River"
+            "at_mi": 145.4,
+            "spoken": "Crossing the Gila River",
+            "lat": 33.33236,
+            "lon": -112.62336,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 52508672 (Gila River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Waddell",
@@ -44983,6 +45767,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150979227, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Litchfield Park"
+          },
+          {
+            "name": "Agua Fria River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 169.1,
+            "spoken": "Crossing the Agua Fria River",
+            "lat": 33.45764,
+            "lon": -112.33346,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 102864452 (Agua Fria River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "El Mirage",
@@ -45010,13 +45804,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150974590, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sun City"
-          },
-          {
-            "name": "Agua Fria River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 172.7,
-            "spoken": "Crossing the Agua Fria River"
           },
           {
             "name": "Tolleson",

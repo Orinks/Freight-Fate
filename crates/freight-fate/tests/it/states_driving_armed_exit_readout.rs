@@ -20,20 +20,21 @@ fn press(harness: &mut PlaytestHarness, key: Key) -> String {
 
 #[test]
 fn test_space_and_u_name_the_signalled_stop_exit_and_its_distance() {
-    // Signal on for a truck stop's exit 1.3 miles ahead, through the X key.
+    // Signal set for a truck stop's exit 1.3 miles ahead, through the X key:
+    // farther out than the blinker runs, so "set", as the X line said.
     let (mut harness, stop) = exit_rig_with(70.0, 0.0, 1.3, 62.0, false, Rig::default());
     harness.app.ctx.settings.imperial_units = true;
 
     let space = press(&mut harness, Key::Space);
     assert!(
-        space.ends_with(" Signal on for exit 42, Prairie Travel Center, 1.3 miles."),
+        space.ends_with(" Signal set for exit 42, Prairie Travel Center, 1.3 miles."),
         "{space}"
     );
 
     let upcoming = press(&mut harness, Key::U);
     assert!(
         upcoming
-            .starts_with("Coming up: signal on for exit 42, Prairie Travel Center, in 1.3 miles"),
+            .starts_with("Coming up: signal set for exit 42, Prairie Travel Center, in 1.3 miles"),
         "{upcoming}"
     );
     // Named once, not again as the next stop.
@@ -50,9 +51,15 @@ fn test_space_and_u_name_the_signalled_stop_exit_and_its_distance() {
     drive_to_the_gore(&mut harness, &stop);
     assert!(harness.read_drive(|d| d.ramp_mi.is_some()));
     let space = press(&mut harness, Key::Space);
-    assert!(!space.contains("Signal on"), "{space}");
+    assert!(
+        !space.contains("Signal on") && !space.contains("Signal set"),
+        "{space}"
+    );
     let upcoming = press(&mut harness, Key::U);
-    assert!(!upcoming.contains("signal on"), "{upcoming}");
+    assert!(
+        !upcoming.contains("signal on") && !upcoming.contains("signal set"),
+        "{upcoming}"
+    );
 }
 
 #[test]
@@ -91,16 +98,29 @@ fn test_space_and_u_name_the_signalled_destination_exit() {
 
     let space = press(&mut harness, Key::Space);
     assert!(
-        space.ends_with(&format!(" Signal on for {name}, 1.3 miles.")),
+        space.ends_with(&format!(" Signal set for {name}, 1.3 miles.")),
         "{space}"
     );
     let upcoming = press(&mut harness, Key::U);
     assert!(
-        upcoming.starts_with(&format!("Coming up: signal on for {name}, in 1.3 miles")),
+        upcoming.starts_with(&format!("Coming up: signal set for {name}, in 1.3 miles")),
         "{upcoming}"
     );
     // The destination clause does not name the same exit a second time.
     assert!(!upcoming.contains("the destination exit, "), "{upcoming}");
+
+    // Inside the blinker's half mile the signal is on, and both keys say so.
+    harness.with_drive(move |d, _| d.trip.position_mi = at_mi - 0.4);
+    let space = press(&mut harness, Key::Space);
+    assert!(
+        space.contains(&format!(" Signal on for {name}, ")),
+        "{space}"
+    );
+    let upcoming = press(&mut harness, Key::U);
+    assert!(
+        upcoming.starts_with(&format!("Coming up: signal on for {name}, in ")),
+        "{upcoming}"
+    );
 }
 
 #[test]
@@ -115,8 +135,14 @@ fn test_nothing_armed_leaves_both_readouts_as_they_were() {
 
     let space = press(&mut harness, Key::Space);
     assert!(!space.is_empty());
-    assert!(!space.contains("Signal on"), "{space}");
+    assert!(
+        !space.contains("Signal on") && !space.contains("Signal set"),
+        "{space}"
+    );
     let upcoming = press(&mut harness, Key::U);
     assert!(!upcoming.is_empty());
-    assert!(!upcoming.contains("signal on"), "{upcoming}");
+    assert!(
+        !upcoming.contains("signal on") && !upcoming.contains("signal set"),
+        "{upcoming}"
+    );
 }

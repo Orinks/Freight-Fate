@@ -39,6 +39,28 @@ fn test_senior_company_driver_chooses_load_but_runs_assigned_route() {
     assert!(policy.assigns_route);
 }
 
+/// Dispatch acts on the band its trust line speaks: a record past the
+/// insurer's floor holds a senior driver to assigned loads and fewer
+/// refusals, not only a low reputation (owner, 2026-09-28).
+#[test]
+fn test_a_record_that_holds_trust_down_takes_load_choice_and_refusals() {
+    use crate::models::enforcement::{standing_band, DrivingRecord, TRUST_POOR};
+    let mut profile = company_profile(SENIOR_LOAD_CHOICE_LEVEL as usize);
+    profile.game_hours = 400.0 * 24.0;
+    let clean = dispatch_policy(&profile);
+    assert!(!clean.assigns_load);
+
+    let mut record = DrivingRecord::default();
+    for _ in 0..6 {
+        record.record_citation_at(200.0, profile.game_hours);
+    }
+    profile.driving_record = Some(record);
+    assert_eq!(standing_band(&profile), TRUST_POOR);
+    let held = dispatch_policy(&profile);
+    assert!(held.assigns_load, "load choice goes with the trust");
+    assert!(held.decline_budget < clean.decline_budget);
+}
+
 #[test]
 fn test_leased_owner_operator_chooses_load_and_route() {
     let mut profile = company_profile(18);

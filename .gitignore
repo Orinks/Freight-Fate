@@ -64,6 +64,8 @@ sound-source/
 # The shipped audio is assets/sounds.pak (tools/pack_sounds.py).
 # music.pak is a private builder-local release asset downloaded when needed.
 assets/music.pak
+# Channel 3000's clips (tools/build_channel3000.py); downloaded like music.pak.
+assets/channel3000.pak
 # The loose assets/sounds tree is builder-local source material and never
 # ships through the repo (owner, 2026-08-08); only the credits ride along
 # so licensing stays reviewable in a clean clone.

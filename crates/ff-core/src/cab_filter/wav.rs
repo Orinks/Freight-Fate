@@ -5,7 +5,7 @@
 //! sub-format, which is what Python 3.12's `wave` accepts.
 //!
 //! Shared by the cab transfer (which re-wraps its render) and the
-//! synthesized cues (`ladder_earcons`, `lane_guide_tone`), whose bytes must
+//! synthesized cues (`lane_guide_tone`), whose bytes must
 //! match the Python build exactly.
 
 /// The parsed contents of a 16-bit PCM WAV.

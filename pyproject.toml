@@ -37,15 +37,16 @@ dev = [
     "ruff>=0.8",
     "soundfile>=0.14.0",
     "pre-commit>=4.6.0",
-    "hypothesis>=6.155.7",
     "openrouteservice>=2.3.3",
     "osmium>=4.3.1",
+    "scipy>=1.13",
 ]
-# Build-time tooling outside the test suite: route enrichment
+# Extra tooling for route enrichment
 # (tools/enrich_routes.py --ors-smoke, ORS-backed corridor generation), and
 # audio work -- av for tools/encode_music_opus.py, scipy for
-# tools/patch_loop_transients.py and the sound-test/ audition scripts. Never a
-# runtime dependency. Run with `uv run --group tooling ...`.
+# tools/patch_loop_transients.py and the sound-test/audition scripts. SciPy
+# is also in dev because the billboard-ban tests import its build tool. Run
+# with `uv run --group tooling ...`.
 tooling = [
     "osmium>=4.0.2",
     "openrouteservice>=2.2.0",

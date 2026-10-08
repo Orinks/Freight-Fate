@@ -126,6 +126,11 @@ impl ArrivalState {
     /// `enter()`, run while the drive is still in hand -- see `drive_ref`.
     /// Nothing here reads the drive; the settlement already captured it.
     pub fn enter_over_drive(&mut self, ctx: &mut GameContext) {
+        // The settlement just moved the driver to a new city: start its
+        // dispatch board's route work now, while the summary is read, so
+        // the board opens without the wait (2026-09-28).
+        let city = profile_of(ctx).current_city.clone();
+        crate::states::city::warm_dispatch_board(ctx.world, &city);
         Menu::enter(self, ctx);
     }
 
@@ -493,7 +498,8 @@ impl ArrivalState {
         // not a second settlement, so they never fold into career earnings.
         //
         // The manual-spec differential: trained out of the automatic-only
-        // restriction, and actually rowing the gears on this run. Added
+        // restriction, and actually rowing the gears on this run -- the
+        // whole run, not just the gate (`drove_automatic`). Added
         // before settled_pay is taken, so the cash and the career's booked
         // earnings agree -- unbooked cash reads as an edited save to cloud
         // upload screening.
@@ -502,6 +508,7 @@ impl ArrivalState {
             .endorsements()
             .contains("manual_transmission")
             && !d.trip.truck.transmission.automatic
+            && !d.drove_automatic
         {
             let manual_bonus = round_py_n(net_pay * MANUAL_SPEC_DIFFERENTIAL, 2).max(0.0);
             if manual_bonus >= 1.0 {

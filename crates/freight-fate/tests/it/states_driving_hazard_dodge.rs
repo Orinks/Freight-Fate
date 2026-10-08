@@ -273,7 +273,7 @@ fn a_lead_vehicle_with_a_lane_open_keeps_both_its_offer_and_its_allowance() {
     let event = lead_vehicle_hazard(3);
     assert_eq!(
         event.text(),
-        "Change lanes or brake! Brake lights right ahead. Left lane open."
+        "Change lanes or brake! Brake lights right ahead. Middle lane open."
     );
     assert_eq!(event.data.dodgeable, Some(true));
     assert_eq!(event.data.in_lane, Some(true));
@@ -348,7 +348,7 @@ fn a_fixed_obstacle_is_dodgeable_where_a_lane_is_open_and_the_call_says_so() {
     let open = drawn_hazard(3, "Debris on the road");
     assert_eq!(
         open.text(),
-        "Change lanes or brake! Debris on the road. Left lane open."
+        "Change lanes or brake! Debris on the road. Middle lane open."
     );
     assert_eq!(open.data.dodgeable, Some(true));
     assert_eq!(open.data.in_lane, Some(true));

@@ -7,7 +7,10 @@ use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc;
 use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
 
 use serde_json::Value;
 
@@ -78,6 +81,76 @@ pub fn clear_refused_secret_keys() {
         .lock()
         .unwrap_or_else(|e| e.into_inner())
         .clear();
+}
+
+/// How long the real game waits on the platform secret store before giving
+/// up and continuing. On macOS a Keychain ACL prompt (common after a new
+/// Developer ID signature) blocks `get_password` / `set_password` until
+/// someone answers; without a limit that freezes launch right after the
+/// "world" boot mark with no further log line (issue 266).
+const SECRET_STORE_TIMEOUT: Duration = Duration::from_secs(3);
+
+/// Set when a secret-store call hit [`SECRET_STORE_TIMEOUT`]. The title
+/// screen speaks once and clears it.
+static KEYCHAIN_TIMED_OUT: AtomicBool = AtomicBool::new(false);
+
+/// Whether a secret-store call timed out since the last check. Clears the flag.
+pub fn take_secret_store_timeout_notice() -> bool {
+    KEYCHAIN_TIMED_OUT.swap(false, Ordering::SeqCst)
+}
+
+/// Run a secret-store call, optionally bounded by `timeout`.
+///
+/// `None` stays on the calling thread (the test shape). `Some` moves the
+/// call onto a worker so a Mac Keychain ACL prompt cannot freeze launch;
+/// a panic from the worker is resumed here so `secret_store_guard` still
+/// sees it on the caller.
+fn call_secret_store<T, F>(
+    op_name: &str,
+    service: &str,
+    user: &str,
+    timeout: Option<Duration>,
+    op: F,
+) -> Result<T, String>
+where
+    T: Send + 'static,
+    F: FnOnce() -> Result<T, String> + Send + 'static,
+{
+    let Some(limit) = timeout else {
+        return op();
+    };
+    let (tx, rx) = mpsc::channel();
+    let handle = thread::Builder::new()
+        .name("secret-store".into())
+        .spawn(move || {
+            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(op));
+            let _ = tx.send(result);
+        })
+        .map_err(|e| format!("could not start the secret-store worker: {e}"))?;
+    match rx.recv_timeout(limit) {
+        Ok(Ok(result)) => {
+            let _ = handle.join();
+            result
+        }
+        Ok(Err(payload)) => {
+            let _ = handle.join();
+            std::panic::resume_unwind(payload);
+        }
+        Err(mpsc::RecvTimeoutError::Timeout) => {
+            KEYCHAIN_TIMED_OUT.store(true, Ordering::SeqCst);
+            log::warn!(
+                "The platform secret store did not answer within {:.0} seconds                  while trying to {op_name} ({service}/{user}). Continuing                  without waiting so launch cannot freeze; a permission dialog                  may still be open on Mac.",
+                limit.as_secs_f32(),
+            );
+            Err(format!(
+                "timed out waiting for the secret store ({op_name})"
+            ))
+        }
+        Err(mpsc::RecvTimeoutError::Disconnected) => {
+            let _ = handle.join();
+            Err(format!("secret-store worker died during {op_name}"))
+        }
+    }
 }
 
 #[cold]
@@ -217,6 +290,8 @@ pub fn secret_store_report() -> (bool, String) {
         Some("Windows")
     } else if cfg!(target_os = "macos") {
         Some("macOS")
+    } else if cfg!(target_os = "ios") {
+        Some("iOS")
     } else if cfg!(target_os = "linux") {
         Some("SecretService")
     } else {
@@ -289,6 +364,11 @@ pub struct IdentityStore {
     token_cache: Mutex<HashMap<String, String>>,
     /// `os.name == "nt"` in Python: Windows refuses the plaintext fallback.
     plaintext_fallback_allowed: bool,
+    /// When set, secret-store calls abort after this long instead of hanging
+    /// on a Mac Keychain prompt. The packaged game always sets it; tests
+    /// that build through [`Self::new`] leave it `None` so their fakes stay
+    /// synchronous.
+    secret_timeout: Option<Duration>,
 }
 
 impl IdentityStore {
@@ -300,12 +380,24 @@ impl IdentityStore {
             secret_store,
             token_cache: Mutex::new(HashMap::new()),
             plaintext_fallback_allowed: !cfg!(windows),
+            secret_timeout: None,
         }
     }
 
-    /// The shipped configuration: the platform keyring over `data_dir`.
+    /// The shipped configuration: the platform keyring over `data_dir`, with
+    /// a wall-clock limit so a Keychain ACL prompt cannot freeze launch.
     pub fn platform(data_dir: &Path) -> Self {
-        Self::new(data_dir, Some(Arc::new(KeyringStore)))
+        let mut store = Self::new(data_dir, Some(Arc::new(KeyringStore)));
+        store.secret_timeout = Some(SECRET_STORE_TIMEOUT);
+        store
+    }
+
+    /// Bound secret-store calls. The packaged game sets this through
+    /// [`Self::platform`]; tests that simulate a hung keychain pass a short
+    /// limit here.
+    pub fn with_secret_timeout(mut self, timeout: Duration) -> Self {
+        self.secret_timeout = Some(timeout);
+        self
     }
 
     /// `OnlineIdentity.path()`: the public half on disk.
@@ -327,7 +419,16 @@ impl IdentityStore {
         let Some(store) = &self.secret_store else {
             return false;
         };
-        match store.set_password(TOKEN_SERVICE, driver_id, token) {
+        let store = Arc::clone(store);
+        let driver_id_owned = driver_id.to_string();
+        let token_owned = token.to_string();
+        match call_secret_store(
+            "store the driver token",
+            TOKEN_SERVICE,
+            driver_id,
+            self.secret_timeout,
+            move || store.set_password(TOKEN_SERVICE, &driver_id_owned, &token_owned),
+        ) {
             Ok(()) => true,
             Err(e) => {
                 log::debug!("no usable secret store for the driver token: {e}");
@@ -338,7 +439,15 @@ impl IdentityStore {
 
     fn read_stored_token(&self, driver_id: &str) -> Option<String> {
         let store = self.secret_store.as_ref()?;
-        match store.get_password(TOKEN_SERVICE, driver_id) {
+        let store = Arc::clone(store);
+        let driver_id_owned = driver_id.to_string();
+        match call_secret_store(
+            "read the driver token",
+            TOKEN_SERVICE,
+            driver_id,
+            self.secret_timeout,
+            move || store.get_password(TOKEN_SERVICE, &driver_id_owned),
+        ) {
             Ok(Some(token)) if !token.is_empty() => Some(token),
             Ok(_) => None,
             Err(e) => {

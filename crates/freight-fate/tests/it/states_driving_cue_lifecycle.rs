@@ -86,7 +86,7 @@ fn test_the_tock_scales_with_the_lane_cue_loudness_setting() {
     tape.clear();
     d.update_steering_lane_cue(&mut app.ctx, 1.0 / 60.0);
     let (key, volume, _) = tape.last();
-    assert_eq!(key, SIGNAL);
+    assert_eq!(key, BLINKER_OFF);
     assert!((volume - 0.45 * 0.6).abs() < 1e-9);
 }
 
@@ -105,7 +105,7 @@ fn test_letting_go_of_the_wheel_cancels_the_signal() {
     d.lane.steering = 0.0; // straightened out: the move is over
     d.update_steering_lane_cue(&mut app.ctx, 1.0 / 60.0);
     // centred, quieter
-    assert_eq!(tape.calls(), vec![(SIGNAL.to_string(), 0.45, 0.0)]);
+    assert_eq!(tape.calls(), vec![(BLINKER_OFF.to_string(), 0.45, 0.0)]);
     assert!(!d.steer_cue_active);
 
     // And it stays over: no second click, no stray tocks.
@@ -153,7 +153,7 @@ fn test_the_lane_change_ends_with_the_click_after_the_line_is_crossed() {
     tape.clear();
     d.lane.steering = 0.0; // straightened up in the new lane
     d.update_steering_lane_cue(&mut app.ctx, 1.0 / 60.0);
-    assert_eq!(tape.keys(), vec![SIGNAL.to_string()]);
+    assert_eq!(tape.keys(), vec![BLINKER_OFF.to_string()]);
 }
 
 #[test]
@@ -171,9 +171,31 @@ fn x_starts_blinker_instead_of_beep_and_guarded_cancel_stops_it() {
     d.take_exit(&mut app.ctx);
     assert!(d.exit_signal_on);
     assert!(app.ctx.audio.cue_held("vehicle/turn_signal"));
+    assert!(!tape.keys().contains(&BLINKER_OFF.to_string()));
     d.take_exit(&mut app.ctx);
     assert!(!d.exit_signal_on);
     assert!(!app.ctx.audio.cue_held("vehicle/turn_signal"));
+    // The blinker clicks off, centred, like the stalk coming back.
+    let (key, _, pan) = tape.last();
+    assert_eq!(key, BLINKER_OFF);
+    assert_eq!(pan, 0.0);
+}
+
+#[test]
+fn canceling_an_exit_before_the_blinker_runs_makes_no_click() {
+    // Signalled miles out, the blinker has not started yet (it waits for
+    // the last half mile), so there is nothing to click off.
+    let mut app = TestApp::new();
+    let mut d = a_steering_drive(&mut app);
+    let tape = CueAudio::install(&mut app);
+    let stop = RoadStop::new("Test Exit", d.trip.position_mi + 3.0, "travel_center");
+    d.trip.stops.push(stop.clone());
+    d.exit_stop = Some(stop);
+    d.take_exit(&mut app.ctx);
+    assert!(d.exit_signal_on && !d.exit_blinker_on());
+    d.take_exit(&mut app.ctx);
+    assert!(!d.exit_signal_on);
+    assert!(!tape.keys().contains(&BLINKER_OFF.to_string()));
 }
 
 #[test]

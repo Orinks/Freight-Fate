@@ -23,6 +23,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
+import leg_geometry as lg  # noqa: E402
 import overpass_corridor as oc  # noqa: E402
 from enrich_routes_landmarks import (  # noqa: E402
     NARRATABLE_OSM_TAGS,
@@ -72,37 +73,41 @@ def _seg_nearest(px, py, ax, ay, bx, by):
 
 def project_on_route(route, cum, lat, lon):
     """Nearest point on the route polyline to (lat,lon); return (at_mi, off_mi)."""
+    at_mi, off_mi, _, _ = project_point_on_route(route, cum, lat, lon)
+    return at_mi, off_mi
+
+
+def project_point_on_route(route, cum, lat, lon):
+    """Return (at_mi, off_mi, projected_lat, projected_lon) on the route."""
     best = (1e9, 0.0)
     for i in range(1, len(route)):
         ay, ax = route[i - 1]
         by, bx = route[i]
-        t, qy, qx = _seg_nearest(lon, lat, ax, ay, bx, by)
-        off = hav(lat, lon, qx, qy)
+        t, projected_lon, projected_lat = _seg_nearest(lon, lat, ax, ay, bx, by)
+        off = hav(lat, lon, projected_lat, projected_lon)
         if off < best[0]:
             seg_mi = cum[i - 1] + t * (cum[i] - cum[i - 1])
-            best = (off, seg_mi)
-    return best[1], best[0]
-
-
-def _ccw(ax, ay, bx, by, cx, cy):
-    return (cy - ay) * (bx - ax) > (by - ay) * (cx - ax)
-
-
-def _segments_cross(a, b, c, d):
-    """True if segment a-b crosses c-d (each pt is (lat,lon))."""
-    (ay, ax), (by, bx), (cy, cx), (dy, dx) = a, b, c, d
-    return (_ccw(ax, ay, cx, cy, dx, dy) != _ccw(bx, by, cx, cy, dx, dy)) and (
-        _ccw(ax, ay, bx, by, cx, cy) != _ccw(ax, ay, bx, by, dx, dy)
-    )
+            best = (off, seg_mi, projected_lat, projected_lon)
+    return best[1], best[0], best[2], best[3]
 
 
 def river_crossing_mi(route, cum, line):
-    """First mile where the route polyline crosses river polyline `line`, or None."""
+    """First (mile, lat, lon) where route crosses river polyline, or None."""
     for i in range(1, len(route)):
         for j in range(1, len(line)):
-            if _segments_cross(route[i - 1], route[i], line[j - 1], line[j]):
-                # approximate crossing at segment i's start-ish midpoint
-                return round((cum[i - 1] + cum[i]) / 2, 1)
+            (ay, ax), (by, bx) = route[i - 1], route[i]
+            (cy, cx), (dy, dx) = line[j - 1], line[j]
+            rx, ry = bx - ax, by - ay
+            sx, sy = dx - cx, dy - cy
+            denominator = rx * sy - ry * sx
+            if abs(denominator) < 1e-12:
+                continue
+            qpx, qpy = cx - ax, cy - ay
+            t = (qpx * sy - qpy * sx) / denominator
+            u = (qpx * ry - qpy * rx) / denominator
+            if 0 <= t <= 1 and 0 <= u <= 1:
+                at_mi = cum[i - 1] + t * (cum[i] - cum[i - 1])
+                return round(at_mi, 1), ay + t * ry, ax + t * rx
     return None
 
 
@@ -122,12 +127,44 @@ def _point_in_ring(lat, lon, ring):
     return inside
 
 
-def zone_entry_mi(route, cum, rings):
-    """Mile where the route first enters any outer ring of a zone, or None."""
+def zone_entry(route, cum, rings):
+    """First (mile, lat, lon) vertex inside any outer ring of a zone, or None."""
     for i, (lat, lon) in enumerate(route):
         if any(_point_in_ring(lat, lon, r) for r in rings):
-            return round(cum[i], 1)
+            return round(cum[i], 1), lat, lon
     return None
+
+
+def zone_entry_mi(route, cum, rings):
+    """Compatibility wrapper returning the mile where a route enters a zone."""
+    entry = zone_entry(route, cum, rings)
+    return entry[0] if entry else None
+
+
+def sample_route(route, cum, step_mi=SAMPLE_STEP_MI):
+    """Interpolate route coordinates at regular mile intervals for bbox queries."""
+    if not route:
+        return []
+    samples = [route[0]]
+    target = step_mi
+    i = 1
+    while target < cum[-1] and i < len(route):
+        while i < len(route) and cum[i] < target:
+            i += 1
+        if i >= len(route):
+            break
+        segment_mi = cum[i] - cum[i - 1]
+        if segment_mi <= 0:
+            i += 1
+            continue
+        fraction = (target - cum[i - 1]) / segment_mi
+        lat = route[i - 1][0] + fraction * (route[i][0] - route[i - 1][0])
+        lon = route[i - 1][1] + fraction * (route[i][1] - route[i - 1][1])
+        samples.append((lat, lon))
+        target += step_mi
+    if samples[-1] != route[-1]:
+        samples.append(route[-1])
+    return samples
 
 
 def _assemble_rings(arcs):
@@ -205,19 +242,23 @@ def _bbox(lat, lon, radius_m):
 
 
 def bake_leg(leg, per_leg):
-    rp = leg.get("corridor", {}).get("route_points", [])
-    if len(rp) < 2:
+    dense_geometry = lg.corridor_geometry(leg)
+    if dense_geometry and len(dense_geometry) >= 2:
+        route = [(lat, lon) for lat, lon, _ in dense_geometry]
+        route_description = "archived dense route geometry"
+    else:
+        rp = leg.get("corridor", {}).get("route_points", [])
+        route = [(p["lat"], p["lon"]) for p in rp]
+        route_description = "route_points fallback geometry"
+    if len(route) < 2:
         return []
-    route = [(p["lat"], p["lon"]) for p in rp]
     raw_cum = route_cum(route)
     scale = float(leg["miles"]) / (raw_cum[-1] or 1.0)
     cum = [c * scale for c in raw_cum]
 
     # sample bboxes along the corridor and union the elements (dedupe by id)
     elements = {}
-    step = max(1, int(len(route) * SAMPLE_STEP_MI / (cum[-1] or SAMPLE_STEP_MI)))
-    for idx in range(0, len(route), step):
-        lat, lon = route[idx]
+    for lat, lon in sample_route(route, cum):
         try:
             payload = overpass(_bbox(lat, lon, BBOX_RADIUS_M))
         except Exception:
@@ -241,26 +282,62 @@ def bake_leg(leg, per_leg):
         if feat["category"] == "river" and not feat["name"].lower().rstrip().endswith("river"):
             continue  # skip creeks/bayous/harbors mistagged waterway=river -- spam control
         at_mi = None
+        position = None
         if feat["kind"] == "point" and feat["category"] != "river":
             lat, lon = el.get("lat"), el.get("lon")
             if lat is None:
                 continue
-            mi, off = project_on_route(route, cum, lat, lon)
+            mi, off, on_lat, on_lon = project_point_on_route(route, cum, lat, lon)
             if off <= POINT_OFF_MI:
                 at_mi = round(mi, 1)
+                position = (on_lat, on_lon)
         elif feat["category"] == "river":
-            at_mi = river_crossing_mi(route, cum, _element_line(el))
+            crossing = river_crossing_mi(route, cum, _element_line(el))
+            if crossing is not None:
+                at_mi, lat, lon = crossing
+                position = (lat, lon)
         else:  # zone
-            at_mi = zone_entry_mi(route, cum, _element_rings(el))
+            entry = zone_entry(route, cum, _element_rings(el))
+            if entry is not None:
+                at_mi, lat, lon = entry
+                position = (lat, lon)
         if at_mi is None:
             continue
+        tags_source = (
+            "derived 2026-10-01: name, category and kind read from OpenStreetMap tags "
+            "via classify_narratable_feature; spoken text derived via spoken_landmark_text; "
+        )
+        if feat["category"] == "river":
+            location_source = (
+                f"crossing of OSM waterway {el.get('type', 'way')} {el['id']} "
+                f"({feat['name']}) with the leg's {route_description}; "
+                "at_mi = cum[i-1] + t * (cum[i] - cum[i-1]), rescaled to leg miles."
+            )
+        elif feat["kind"] == "point":
+            location_source = (
+                f"nearest projection of OSM {el['type']} {el['id']} ({feat['name']}) "
+                f"onto the leg's {route_description}; at_mi = interpolated cumulative "
+                "distance at the projection, rescaled to leg miles."
+            )
+        else:
+            location_source = (
+                f"entry vertex where the leg's {route_description} first enters OSM "
+                f"{el['type']} {el['id']} ({feat['name']}); at_mi = cumulative distance "
+                "at that vertex, rescaled to leg miles."
+            )
         rec = {
             "name": feat["name"],
             "category": feat["category"],
             "kind": feat["kind"],
             "at_mi": at_mi,
+            "lat": round(position[0], 5),
+            "lon": round(position[1], 5),
             "spoken": spoken_landmark_text(feat),
             "rank": feat["rank"],
+            "source": (
+                f"{tags_source}{location_source} "
+                "OpenStreetMap via Overpass: https://www.openstreetmap.org/."
+            ),
         }
         prev = found.get(feat["name"])
         if prev is None or rec["rank"] > prev["rank"]:

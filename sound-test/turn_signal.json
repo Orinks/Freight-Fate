@@ -1,0 +1,37 @@
+{
+  "_about": "Production spec for vehicle/turn_signal and vehicle/turn_signal_off (the 'dash' candidate, chosen by ear 2026-09-29). Render with the genny CLI (github.com/ogomez92/genny): genny render sound-test/turn_signal.json, then encode each WAV to Ogg Vorbis (ffmpeg -c:a libvorbis -q:a 6). The blinker is ONE flasher cycle, tick then tock 0.45 s apart, 0.7 s long: longer than the 0.45 s lane-change cadence and shorter than the 0.9 s blinker beat, so play_if_idle restarts it on every beat and the rhythm never stumbles. The off-click is the stalk snapping back to centre.",
+  "out_dir": "build/sound-test/turn_signal",
+  "sounds": [
+    {
+      "out": "turn_signal.wav",
+      "duration": 0.7,
+      "trim": false,
+      "layers": [
+        {"type": "sfx", "kind": "click", "params": {"tone": 2200}},
+        {"type": "drum", "kind": "woodblock", "gain": 0.35, "params": {"tune": 1500}},
+        {"type": "sfx", "kind": "click", "at": 0.45, "gain": 0.55, "params": {"tone": 1300}},
+        {"type": "drum", "kind": "woodblock", "at": 0.45, "gain": 0.25, "params": {"tune": 1050}}
+      ],
+      "fx": [
+        {"type": "lowpass", "cutoff": 3000, "order": 2},
+        {"type": "eq", "freq": 900, "gain": 4, "q": 1.2},
+        {"type": "mono"}
+      ],
+      "normalize": -3
+    },
+    {
+      "out": "turn_signal_off.wav",
+      "layers": [
+        {"type": "sfx", "kind": "click", "params": {"tone": 1400}},
+        {"type": "sfx", "kind": "click", "at": 0.025, "gain": 0.7, "params": {"tone": 900}},
+        {"type": "drum", "kind": "woodblock", "at": 0.025, "gain": 0.45, "params": {"tune": 650}}
+      ],
+      "fx": [
+        {"type": "lowpass", "cutoff": 3000, "order": 2},
+        {"type": "eq", "freq": 700, "gain": 4, "q": 1.2},
+        {"type": "mono"}
+      ],
+      "normalize": -3
+    }
+  ]
+}

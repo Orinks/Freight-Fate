@@ -51,10 +51,23 @@ fn back_to_back_berth_sleeps_count_toward_the_reset() {
     let before = h.read_drive(|d| d.trip.local_hour());
     h.clear_speech();
     h.select_menu_item("Sleep 4 hours more to finish a 10-hour reset");
+    // The preview forecasts the 4 hours the sleep will spend, not a full 10.
+    let preview = h.app.speech().lines().join(" ");
+    assert!(preview.contains("Preview: sleep 4 hours more"), "{preview}");
+    assert!(
+        preview.contains("The game clock advances 4 hours."),
+        "{preview}"
+    );
     h.clear_speech();
     h.select_menu_item("Sleep 4 hours more to finish a 10-hour reset");
     let woke = h.app.speech().lines().join(" ");
     assert!(woke.contains("You slept 4 hours more"), "{woke}");
+    // The finished reset puts the row back to a whole night.
+    assert!(
+        h.menu_labels().iter().any(|row| row == "Sleep 10 hours"),
+        "{:?}",
+        h.menu_labels()
+    );
     assert!(woke.contains("Hours of service reset"), "{woke}");
     let clock = hos(&h);
     assert_eq!(clock.driving_min, 0.0);

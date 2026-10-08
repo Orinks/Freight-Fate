@@ -3126,13 +3126,6 @@
         ],
         "landmarks": [
           {
-            "name": "East Branch Sebasticook River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.8,
-            "spoken": "Crossing the East Branch Sebasticook River"
-          },
-          {
             "name": "Plymouth",
             "at_mi": 23.3,
             "off_mi": 1.77,
@@ -3140,6 +3133,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158816716, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Plymouth"
+          },
+          {
+            "name": "East Branch Sebasticook River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 27.6,
+            "spoken": "Crossing the East Branch Sebasticook River",
+            "lat": 44.82583,
+            "lon": -69.27434,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 440962499 (East Branch Sebasticook River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Newport",
@@ -3151,6 +3154,16 @@
             "spoken": "Passing Newport"
           },
           {
+            "name": "Sebasticook River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 34.3,
+            "spoken": "Crossing the Sebasticook River",
+            "lat": 44.80182,
+            "lon": -69.39082,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 165264422 (Sebasticook River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Burnham",
             "at_mi": 41.5,
             "off_mi": 1.65,
@@ -3158,20 +3171,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158853429, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Burnham"
-          },
-          {
-            "name": "Sebasticook River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.1,
-            "spoken": "Crossing the Sebasticook River"
-          },
-          {
-            "name": "Kennebec River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.1,
-            "spoken": "Crossing the Kennebec River"
           },
           {
             "name": "Clinton",
@@ -3199,6 +3198,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158904580, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Benton"
+          },
+          {
+            "name": "Kennebec River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 51.8,
+            "spoken": "Crossing the Kennebec River",
+            "lat": 44.60195,
+            "lon": -69.59281,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 348802258 (Kennebec River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Fairfield",
@@ -3285,15 +3294,21 @@
             "name": "Androscoggin River",
             "category": "river",
             "kind": "point",
-            "at_mi": 101.0,
-            "spoken": "Crossing the Androscoggin River"
+            "at_mi": 106.2,
+            "spoken": "Crossing the Androscoggin River",
+            "lat": 44.06448,
+            "lon": -70.20702,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 366649616 (Androscoggin River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Royal River",
             "category": "river",
             "kind": "point",
-            "at_mi": 101.0,
-            "spoken": "Crossing the Royal River"
+            "at_mi": 113.9,
+            "spoken": "Crossing the Royal River",
+            "lat": 43.99023,
+            "lon": -70.30949,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1232708838 (Royal River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Gray",
@@ -3305,25 +3320,14 @@
             "spoken": "Entering Gray"
           },
           {
-            "name": "Stroudwater River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 130.2,
-            "spoken": "Crossing the Stroudwater River"
-          },
-          {
-            "name": "Nonesuch River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 130.2,
-            "spoken": "Crossing the Nonesuch River"
-          },
-          {
             "name": "Presumpscot River",
             "category": "river",
             "kind": "point",
-            "at_mi": 130.2,
-            "spoken": "Crossing the Presumpscot River"
+            "at_mi": 132.9,
+            "spoken": "Crossing the Presumpscot River",
+            "lat": 43.72397,
+            "lon": -70.30465,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 33525209 (Presumpscot River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Westbrook",
@@ -3333,6 +3337,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158859102, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Westbrook"
+          },
+          {
+            "name": "Stroudwater River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 137.9,
+            "spoken": "Crossing the Stroudwater River",
+            "lat": 43.655,
+            "lon": -70.33149,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 453624582 (Stroudwater River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Nonesuch River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 141.1,
+            "spoken": "Crossing the Nonesuch River",
+            "lat": 43.61582,
+            "lon": -70.36134,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 806484243 (Nonesuch River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Saco",
@@ -3423,6 +3447,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 4473066951, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hampton"
+          },
+          {
+            "name": "Strawbery Banke Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 196.1,
+            "spoken": "Billboard: Strawbery Banke Museum, ahead in Portsmouth. Houses on their original sites, spanning over three hundred years. They spell strawberry the old way.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Epping",
@@ -6008,6 +6042,16 @@
             "spoken": "Passing Detroit"
           },
           {
+            "name": "East Branch Sebasticook River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 27.5,
+            "spoken": "Crossing the East Branch Sebasticook River",
+            "lat": 44.82583,
+            "lon": -69.27434,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 440962499 (East Branch Sebasticook River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Newport",
             "at_mi": 27.9,
             "off_mi": 0.57,
@@ -6029,15 +6073,11 @@
             "name": "Sebasticook River",
             "category": "river",
             "kind": "point",
-            "at_mi": 37.2,
-            "spoken": "Crossing the Sebasticook River"
-          },
-          {
-            "name": "East Branch Sebasticook River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.2,
-            "spoken": "Crossing the East Branch Sebasticook River"
+            "at_mi": 34.1,
+            "spoken": "Crossing the Sebasticook River",
+            "lat": 44.80182,
+            "lon": -69.39082,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 165264422 (Sebasticook River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Burnham",
@@ -6076,6 +6116,16 @@
             "spoken": "Passing Benton"
           },
           {
+            "name": "Kennebec River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 51.5,
+            "spoken": "Crossing the Kennebec River",
+            "lat": 44.60195,
+            "lon": -69.59281,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 348802258 (Kennebec River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Fairfield",
             "at_mi": 52.3,
             "off_mi": 0.89,
@@ -6108,13 +6158,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158868270, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Oakland"
-          },
-          {
-            "name": "Kennebec River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 62.7,
-            "spoken": "Crossing the Kennebec River"
           },
           {
             "name": "Vassalboro",
@@ -6207,13 +6250,6 @@
             "spoken": "Passing West Gardiner"
           },
           {
-            "name": "Cathance River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 89.4,
-            "spoken": "Crossing the Cathance River"
-          },
-          {
             "name": "Bowdoin",
             "at_mi": 96.9,
             "off_mi": 2.82,
@@ -6232,6 +6268,16 @@
             "spoken": "Passing Bowdoinham"
           },
           {
+            "name": "Cathance River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 102.5,
+            "spoken": "Crossing the Cathance River",
+            "lat": 43.95313,
+            "lon": -69.96733,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 32926481 (Cathance River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Topsham",
             "at_mi": 103.8,
             "off_mi": 1.36,
@@ -6239,6 +6285,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158868530, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Topsham"
+          },
+          {
+            "name": "Androscoggin River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 104.5,
+            "spoken": "Crossing the Androscoggin River",
+            "lat": 43.93128,
+            "lon": -69.99412,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1231995209 (Androscoggin River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Freeport",
@@ -6253,15 +6309,11 @@
             "name": "Cousins River",
             "category": "river",
             "kind": "point",
-            "at_mi": 116.0,
-            "spoken": "Crossing the Cousins River"
-          },
-          {
-            "name": "Androscoggin River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 116.0,
-            "spoken": "Crossing the Androscoggin River"
+            "at_mi": 116.4,
+            "spoken": "Crossing the Cousins River",
+            "lat": 43.81318,
+            "lon": -70.15365,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 428308906 (Cousins River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Yarmouth",
@@ -7581,6 +7633,16 @@
         ],
         "landmarks": [
           {
+            "name": "Androscoggin River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.5,
+            "spoken": "Crossing the Androscoggin River",
+            "lat": 44.09721,
+            "lon": -70.22298,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1231954648 (Androscoggin River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Minot",
             "at_mi": 3.94,
             "off_mi": 3.71,
@@ -7599,27 +7661,6 @@
             "spoken": "Passing New Gloucester"
           },
           {
-            "name": "Androscoggin River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 15.46,
-            "spoken": "Crossing the Androscoggin River"
-          },
-          {
-            "name": "Presumpscot River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 15.46,
-            "spoken": "Crossing the Presumpscot River"
-          },
-          {
-            "name": "Piscataqua River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 15.46,
-            "spoken": "Crossing the Piscataqua River"
-          },
-          {
             "name": "Gray",
             "at_mi": 17.65,
             "off_mi": 0.34,
@@ -7627,6 +7668,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158811531, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Gray"
+          },
+          {
+            "name": "Piscataqua River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 21.6,
+            "spoken": "Crossing the Piscataqua River",
+            "lat": 43.8319,
+            "lon": -70.32304,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1239002791 (Piscataqua River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "North Yarmouth",
@@ -7656,6 +7707,16 @@
             "spoken": "Passing Falmouth"
           },
           {
+            "name": "Presumpscot River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 29.2,
+            "spoken": "Crossing the Presumpscot River",
+            "lat": 43.72397,
+            "lon": -70.30465,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 33525209 (Presumpscot River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Westbrook",
             "at_mi": 33.26,
             "off_mi": 1.86,
@@ -7663,6 +7724,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158859102, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Westbrook"
+          },
+          {
+            "name": "Stroudwater River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 34.2,
+            "spoken": "Crossing the Stroudwater River",
+            "lat": 43.655,
+            "lon": -70.33149,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 453624582 (Stroudwater River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Nonesuch River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 37.4,
+            "spoken": "Crossing the Nonesuch River",
+            "lat": 43.61582,
+            "lon": -70.36134,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 806484243 (Nonesuch River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Scarborough",
@@ -7683,41 +7764,6 @@
             "spoken": "Passing Saco"
           },
           {
-            "name": "Stroudwater River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 47.27,
-            "spoken": "Crossing the Stroudwater River"
-          },
-          {
-            "name": "Nonesuch River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 47.27,
-            "spoken": "Crossing the Nonesuch River"
-          },
-          {
-            "name": "Kennebunk River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 47.27,
-            "spoken": "Crossing the Kennebunk River"
-          },
-          {
-            "name": "Merriland River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 47.27,
-            "spoken": "Crossing the Merriland River"
-          },
-          {
-            "name": "Mousam River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 47.27,
-            "spoken": "Crossing the Mousam River"
-          },
-          {
             "name": "Biddeford",
             "at_mi": 47.27,
             "off_mi": 1.72,
@@ -7727,6 +7773,26 @@
             "spoken": "Passing Biddeford"
           },
           {
+            "name": "Kennebunk River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 53.3,
+            "spoken": "Crossing the Kennebunk River",
+            "lat": 43.4299,
+            "lon": -70.54766,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 149986903 (Kennebunk River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Mousam River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 55.6,
+            "spoken": "Crossing the Mousam River",
+            "lat": 43.40013,
+            "lon": -70.56535,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1310599427 (Mousam River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Kennebunk",
             "at_mi": 55.87,
             "off_mi": 1.41,
@@ -7734,6 +7800,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158807785, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kennebunk"
+          },
+          {
+            "name": "Merriland River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 59.1,
+            "spoken": "Crossing the Merriland River",
+            "lat": 43.35303,
+            "lon": -70.5916,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 994984855 (Merriland River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Wells",
@@ -7797,6 +7873,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158817140, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rye"
+          },
+          {
+            "name": "Strawbery Banke Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 87.8,
+            "spoken": "Billboard: Strawbery Banke Museum, ahead in Portsmouth. Houses on their original sites, spanning over three hundred years. They spell strawberry the old way.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "North Hampton",
@@ -8668,6 +8754,16 @@
             "spoken": "Passing Turner"
           },
           {
+            "name": "Androscoggin River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.5,
+            "spoken": "Crossing the Androscoggin River",
+            "lat": 44.09721,
+            "lon": -70.22298,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1231954648 (Androscoggin River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Hebron",
             "at_mi": 1.0,
             "off_mi": 11.13,
@@ -8675,6 +8771,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158816749, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hebron"
+          },
+          {
+            "name": "Little Androscoggin River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Crossing the Little Androscoggin River",
+            "lat": 44.05944,
+            "lon": -70.25572,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1464256697 (Little Androscoggin River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Minot",
@@ -8704,20 +8810,6 @@
             "spoken": "Passing Lisbon"
           },
           {
-            "name": "Androscoggin River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 5.24,
-            "spoken": "Crossing the Androscoggin River"
-          },
-          {
-            "name": "Little Androscoggin River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 5.24,
-            "spoken": "Crossing the Little Androscoggin River"
-          },
-          {
             "name": "Durham",
             "at_mi": 5.68,
             "off_mi": 8.21,
@@ -8736,6 +8828,16 @@
             "spoken": "Passing Poland"
           },
           {
+            "name": "Royal River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 10.1,
+            "spoken": "Crossing the Royal River",
+            "lat": 43.99023,
+            "lon": -70.30949,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1232708838 (Royal River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "New Gloucester",
             "at_mi": 10.92,
             "off_mi": 1.93,
@@ -8752,13 +8854,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158817967, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Casco"
-          },
-          {
-            "name": "Royal River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 16.05,
-            "spoken": "Crossing the Royal River"
           },
           {
             "name": "Raymond",
@@ -8836,15 +8931,11 @@
             "name": "Piscataqua River",
             "category": "river",
             "kind": "point",
-            "at_mi": 27.63,
-            "spoken": "Crossing the Piscataqua River"
-          },
-          {
-            "name": "Presumpscot River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 27.63,
-            "spoken": "Crossing the Presumpscot River"
+            "at_mi": 25.5,
+            "spoken": "Crossing the Piscataqua River",
+            "lat": 43.77415,
+            "lon": -70.3131,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 853511540 (Piscataqua River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Falmouth",
@@ -8854,6 +8945,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158838298, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Falmouth"
+          },
+          {
+            "name": "Presumpscot River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 29.0,
+            "spoken": "Crossing the Presumpscot River",
+            "lat": 43.72398,
+            "lon": -70.30449,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 33525209 (Presumpscot River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Westbrook",
@@ -11027,27 +11128,6 @@
             "spoken": "Passing Scarborough"
           },
           {
-            "name": "Merriland River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 15.6,
-            "spoken": "Crossing the Merriland River"
-          },
-          {
-            "name": "Kennebunk River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 15.6,
-            "spoken": "Crossing the Kennebunk River"
-          },
-          {
-            "name": "Mousam River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 15.6,
-            "spoken": "Crossing the Mousam River"
-          },
-          {
             "name": "Saco",
             "at_mi": 16.5,
             "off_mi": 1.65,
@@ -11066,6 +11146,26 @@
             "spoken": "Passing Biddeford"
           },
           {
+            "name": "Kennebunk River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 24.0,
+            "spoken": "Crossing the Kennebunk River",
+            "lat": 43.4299,
+            "lon": -70.54766,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 149986903 (Kennebunk River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Mousam River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 26.2,
+            "spoken": "Crossing the Mousam River",
+            "lat": 43.40013,
+            "lon": -70.56535,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1310599427 (Mousam River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Kennebunk",
             "at_mi": 26.5,
             "off_mi": 1.41,
@@ -11075,6 +11175,16 @@
             "spoken": "Passing Kennebunk"
           },
           {
+            "name": "Merriland River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 29.8,
+            "spoken": "Crossing the Merriland River",
+            "lat": 43.35303,
+            "lon": -70.5916,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 994984855 (Merriland River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Wells",
             "at_mi": 31.6,
             "off_mi": 1.32,
@@ -11082,6 +11192,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158808778, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wells"
+          },
+          {
+            "name": "Webhannet River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 33.4,
+            "spoken": "Crossing the Webhannet River",
+            "lat": 43.30386,
+            "lon": -70.6154,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 994080206 (Webhannet River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Ogunquit River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 36.0,
+            "spoken": "Crossing the Ogunquit River",
+            "lat": 43.26673,
+            "lon": -70.61927,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 421311912 (Ogunquit River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ogunquit",
@@ -11102,34 +11232,6 @@
             "spoken": "Passing Cape Neddick"
           },
           {
-            "name": "Ogunquit River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.6,
-            "spoken": "Crossing the Ogunquit River"
-          },
-          {
-            "name": "Webhannet River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.6,
-            "spoken": "Crossing the Webhannet River"
-          },
-          {
-            "name": "Piscataqua River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.6,
-            "spoken": "Crossing the Piscataqua River"
-          },
-          {
-            "name": "York River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.6,
-            "spoken": "Crossing the York River"
-          },
-          {
             "name": "York",
             "at_mi": 43.9,
             "off_mi": 1.16,
@@ -11137,6 +11239,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 6357513599, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing York"
+          },
+          {
+            "name": "York River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 45.8,
+            "spoken": "Crossing the York River",
+            "lat": 43.14337,
+            "lon": -70.69363,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 377900068 (York River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Piscataqua River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 50.9,
+            "spoken": "Crossing the Piscataqua River",
+            "lat": 43.09287,
+            "lon": -70.76623,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 324714 (Piscataqua River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Newington",
@@ -11166,6 +11288,16 @@
             "spoken": "Passing Rye"
           },
           {
+            "name": "Strawbery Banke Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.5,
+            "spoken": "Billboard: Strawbery Banke Museum, ahead in Portsmouth. Houses on their original sites, spanning over three hundred years. They spell strawberry the old way.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "North Hampton",
             "at_mi": 60.7,
             "off_mi": 0.97,
@@ -11182,6 +11314,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 4473066951, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hampton"
+          },
+          {
+            "name": "Taylor River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 63.3,
+            "spoken": "Crossing the Taylor River",
+            "lat": 42.93379,
+            "lon": -70.86326,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 864490886 (Taylor River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Hampton Falls",
@@ -11209,13 +11351,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 5741482473, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Seabrook"
-          },
-          {
-            "name": "Taylor River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 68.4,
-            "spoken": "Crossing the Taylor River"
           },
           {
             "name": "Salisbury",
@@ -13079,6 +13214,16 @@
             "spoken": "Passing Falmouth"
           },
           {
+            "name": "Fore River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 3.6,
+            "spoken": "Crossing the Fore River",
+            "lat": 43.64524,
+            "lon": -70.29115,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 148328433 (Fore River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Cape Elizabeth",
             "at_mi": 4.1,
             "off_mi": 4.41,
@@ -13097,6 +13242,16 @@
             "spoken": "Passing Westbrook"
           },
           {
+            "name": "Nonesuch River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Crossing the Nonesuch River",
+            "lat": 43.61588,
+            "lon": -70.36143,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 806484243 (Nonesuch River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Scarborough",
             "at_mi": 8.5,
             "off_mi": 2.15,
@@ -13106,32 +13261,14 @@
             "spoken": "Passing Scarborough"
           },
           {
-            "name": "Fore River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.4,
-            "spoken": "Crossing the Fore River"
-          },
-          {
             "name": "Dunstan River",
             "category": "river",
             "kind": "point",
-            "at_mi": 12.4,
-            "spoken": "Crossing the Dunstan River"
-          },
-          {
-            "name": "Nonesuch River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.4,
-            "spoken": "Crossing the Nonesuch River"
-          },
-          {
-            "name": "Saco River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 12.4,
-            "spoken": "Crossing the Saco River"
+            "at_mi": 11.0,
+            "spoken": "Crossing the Dunstan River",
+            "lat": 43.58076,
+            "lon": -70.39668,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1078370440 (Dunstan River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Old Orchard Beach",
@@ -13161,6 +13298,16 @@
             "spoken": "Passing Biddeford"
           },
           {
+            "name": "Saco River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 18.3,
+            "spoken": "Crossing the Saco River",
+            "lat": 43.49877,
+            "lon": -70.48819,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1344403773 (Saco River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Lyman",
             "at_mi": 21.6,
             "off_mi": 4.41,
@@ -13168,6 +13315,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 8464856013, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lyman"
+          },
+          {
+            "name": "Kennebunk River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 24.0,
+            "spoken": "Crossing the Kennebunk River",
+            "lat": 43.4299,
+            "lon": -70.54766,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 149986903 (Kennebunk River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Arundel",
@@ -13179,6 +13336,16 @@
             "spoken": "Passing Arundel"
           },
           {
+            "name": "Mousam River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 26.3,
+            "spoken": "Crossing the Mousam River",
+            "lat": 43.40013,
+            "lon": -70.56535,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1310599427 (Mousam River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Kennebunk",
             "at_mi": 26.6,
             "off_mi": 1.41,
@@ -13186,6 +13353,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158807785, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kennebunk"
+          },
+          {
+            "name": "Merriland River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 29.8,
+            "spoken": "Crossing the Merriland River",
+            "lat": 43.35303,
+            "lon": -70.5916,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 994984855 (Merriland River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Wells",
@@ -13197,6 +13374,16 @@
             "spoken": "Passing Wells"
           },
           {
+            "name": "Webhannet River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 33.4,
+            "spoken": "Crossing the Webhannet River",
+            "lat": 43.30386,
+            "lon": -70.6154,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 994080206 (Webhannet River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Ogunquit",
             "at_mi": 36.9,
             "off_mi": 1.19,
@@ -13204,34 +13391,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158844055, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ogunquit"
-          },
-          {
-            "name": "Kennebunk River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.8,
-            "spoken": "Crossing the Kennebunk River"
-          },
-          {
-            "name": "Webhannet River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.8,
-            "spoken": "Crossing the Webhannet River"
-          },
-          {
-            "name": "Merriland River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.8,
-            "spoken": "Crossing the Merriland River"
-          },
-          {
-            "name": "Mousam River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.8,
-            "spoken": "Crossing the Mousam River"
           },
           {
             "name": "Cape Neddick",
@@ -13313,6 +13472,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 12900635933, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hampton Falls"
+          },
+          {
+            "name": "Strawbery Banke Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 63.1,
+            "spoken": "Billboard: Strawbery Banke Museum, ahead in Portsmouth. Houses on their original sites, spanning over three hundred years. They spell strawberry the old way.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Kensington",
@@ -16244,6 +16413,16 @@
             "spoken": "Passing Long Island"
           },
           {
+            "name": "Presumpscot River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 5.5,
+            "spoken": "Crossing the Presumpscot River",
+            "lat": 43.70335,
+            "lon": -70.32482,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 33525209 (Presumpscot River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Westbrook",
             "at_mi": 6.0,
             "off_mi": 2.79,
@@ -16262,18 +16441,14 @@
             "spoken": "Passing Windham"
           },
           {
-            "name": "Presumpscot River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 16.2,
-            "spoken": "Crossing the Presumpscot River"
-          },
-          {
             "name": "Pleasant River",
             "category": "river",
             "kind": "point",
-            "at_mi": 16.2,
-            "spoken": "Crossing the Pleasant River"
+            "at_mi": 14.0,
+            "spoken": "Crossing the Pleasant River",
+            "lat": 43.80609,
+            "lon": -70.41082,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1543064376 (Pleasant River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Raymond",
@@ -16283,6 +16458,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158814617, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Raymond"
+          },
+          {
+            "name": "Crooked River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 28.3,
+            "spoken": "Crossing the Crooked River",
+            "lat": 43.9585,
+            "lon": -70.56615,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1464256714 (Crooked River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Casco",
@@ -16330,20 +16515,6 @@
             "spoken": "Passing Lovell"
           },
           {
-            "name": "Muddy River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 47.0,
-            "spoken": "Crossing the Muddy River"
-          },
-          {
-            "name": "Crooked River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 47.0,
-            "spoken": "Crossing the Crooked River"
-          },
-          {
             "name": "Fryeburg",
             "at_mi": 53.7,
             "off_mi": 0.01,
@@ -16374,8 +16545,11 @@
             "name": "Saco River",
             "category": "river",
             "kind": "point",
-            "at_mi": 74.4,
-            "spoken": "Crossing the Saco River"
+            "at_mi": 72.4,
+            "spoken": "Crossing the Saco River",
+            "lat": 44.09508,
+            "lon": -71.20313,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 267332924 (Saco River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Bartlett",
@@ -16802,31 +16976,34 @@
         "state_miles": [
           {
             "state": "Maine",
-            "miles": 55.9
+            "miles": 55.3,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "New Hampshire",
-            "miles": 67.0
+            "miles": 66.1,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Vermont",
-            "miles": 48.1
+            "miles": 49.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 55.9,
+            "at_mi": 55.3,
             "from_state": "Maine",
             "state": "New Hampshire",
             "place": "Maine-New Hampshire line on US-302",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
-            "at_mi": 122.9,
+            "at_mi": 121.4,
             "from_state": "New Hampshire",
             "state": "Vermont",
             "place": "New Hampshire-Vermont line on US-302",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],

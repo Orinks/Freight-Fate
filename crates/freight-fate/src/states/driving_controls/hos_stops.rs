@@ -69,10 +69,17 @@ impl DrivingState {
             let key = format!("{prefix}{:.0}", self.absolute_game_hour(ctx, None) * 60.0);
             ctx.reset_event_condition(&key);
             self.hos_plan_hint_pending = Some(key.clone());
+            // A pad has no hours keys; its clock button carries the full
+            // report.
+            let hours_key = if ctx.controller.device() == ff_core::input_hints::CONTROLLER {
+                Action::Clock
+            } else {
+                Action::HosDrive
+            };
             ctx.say_event_with(
                 format!(
                     "{message} Press {} for full hours and route details.",
-                    ctx.control_name(Action::HosDrive)
+                    ctx.control_name(hours_key)
                 ),
                 SayEvent::queued()
                     .key(&key)

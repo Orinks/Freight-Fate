@@ -244,6 +244,37 @@ fn test_cruise_closing_on_a_downgrade_does_not_stack_past_the_cargo_line() {
     );
 }
 
+#[test]
+fn test_a_held_clutch_lets_go_of_cruises_snub_under_the_number() {
+    // A snub rides through a shift, not through a clutch held down or a box
+    // left in neutral: on a manual those last as long as the driver does, and
+    // the snub braked the truck toward a stop with nothing said (review,
+    // 2026-09-28). Level road, so descent control stays out of it.
+    let mut harness = cruising("Clutch Snub", 62.0, 200.0, &[(0.0, BENCH_MILES, 0.0)]);
+    harness.with_drive(|d, _| {
+        d.truck_mut().transmission.automatic = false;
+        d.truck_mut().grade = 0.0;
+        d.cruise_held_mph = Some(62.0);
+        d.cruise_snubbing = true;
+    });
+    // Over the number, the snub holds through the clutch.
+    harness.with_drive(|d, ctx| {
+        d.truck_mut().velocity_mps = 66.0 * MPS_PER_MPH;
+        d.truck_mut().brake = 0.0;
+        d.update_cruise(ctx, DT, false, false, true);
+    });
+    assert!(harness.read_drive(|d| d.cruise_snubbing));
+    assert!(harness.read_drive(|d| d.truck().brake) > 0.0);
+    // Under it, clutch still in, it lets go.
+    harness.with_drive(|d, ctx| {
+        d.truck_mut().velocity_mps = 55.0 * MPS_PER_MPH;
+        d.truck_mut().brake = 0.0;
+        d.update_cruise(ctx, DT, false, false, true);
+    });
+    assert!(!harness.read_drive(|d| d.cruise_snubbing));
+    assert_eq!(harness.read_drive(|d| d.truck().brake), 0.0);
+}
+
 // -- predictive cruise ------------------------------------------------------------
 
 /// `_hill_road(driving, flat_mi=, grade=, climb_mi=)`: flat, then a sustained

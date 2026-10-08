@@ -1,7 +1,9 @@
 //! Opt-in early stop planning, using the same legal-reach route as Alt D.
 
+use ff_core::input_hints::CONTROLLER;
 use ff_core::sim::trip_models::RoadStop;
 use freight_fate::app::testing::TestApp;
+use freight_fate::controller::fakes::FakePad;
 use freight_fate::playtest::menu::menu_rows;
 use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
@@ -122,6 +124,22 @@ fn early_hint_names_a_rebound_hours_readout_key() {
     let said = app.event_lines().join(" ");
     assert!(said.contains("Press F7 for full hours"), "{said}");
     assert!(!said.contains("Press Alt D"), "{said}");
+}
+
+#[test]
+fn early_hint_on_a_controller_names_the_clock_button() {
+    let (mut app, drive) = setup("sleep");
+    app.ctx.settings.hos_planning_hints = true;
+    let c = &mut app.ctx.controller;
+    c.set_enabled(true);
+    c.bind_device(Box::new(FakePad::new(0)), "test pad");
+    c.set_id_pending(false);
+    c.active_device = CONTROLLER;
+    app.ctx.profile.as_mut().unwrap().hos.duty_min = 660.0;
+    drive_and_ctx(&drive, &mut app, |d, ctx| d.maybe_hos_planning_hint(ctx));
+    let said = app.event_lines().join(" ");
+    assert!(said.contains("Press D-pad right for full hours"), "{said}");
+    assert!(!said.contains("Alt D"), "{said}");
 }
 
 #[test]
@@ -586,4 +604,31 @@ fn selected_stop_and_earlier_stop_warning_suppress_late_planning_advice() {
         .warned
         .iter()
         .any(|key| key.contains("plan-hint")));
+}
+
+/// The departure streets are swapped out at the on-ramp merge, so a plan made
+/// there was cancelled a frame later with a false "past your planned stop".
+/// T waits for the highway.
+#[test]
+fn t_on_the_departure_streets_plans_nothing() {
+    let mut app = TestApp::new();
+    let drive = a_drive_between(&mut app, "Rochester", "Buffalo", "Hint Driver");
+    app.ctx.settings.hos_planning_hints = true;
+    drive_and_ctx(&drive, &mut app, |d, ctx| {
+        d.departure_checked = true;
+        d.job.origin_location = "Rochester freight market".into();
+        assert!(
+            d.begin_departure_chain(ctx, false),
+            "no departure chain here"
+        );
+        ctx.profile.as_mut().unwrap().hos.duty_min = 780.0;
+        d.trip.truck.velocity_mps = 10.0;
+    });
+    app.clear_speech();
+    drive_and_ctx(&drive, &mut app, |d, ctx| {
+        d.handle_key_event(ctx, &InputEvent::key(Key::T));
+        assert!(d.trip.planned_stop_key.is_none());
+        assert!(d.selected_stop_key.is_none());
+    });
+    assert!(app.main_lines().is_empty(), "{:?}", app.main_lines());
 }

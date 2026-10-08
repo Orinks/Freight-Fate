@@ -34,8 +34,15 @@ impl SleepChoice {
 
 pub(super) fn sleep_preview(d: &DrivingState, ctx: &GameContext, choice: SleepChoice) -> String {
     let profile = profile_of(ctx);
-    let hours = choice.hours();
-    let minutes = hours as f64 * 60.0;
+    // The reset row sleeps only what is left of a rest already under way, so
+    // the forecast uses the same minutes the sleep will spend.
+    let owed = match choice {
+        SleepChoice::Sleeper(10) => profile.hos.reset_minutes_left(),
+        _ => None,
+    };
+    let minutes = owed.unwrap_or(choice.hours() as f64 * 60.0);
+    let span = hos::duration_text(minutes / 60.0);
+    let more = if owed.is_some() { " more" } else { "" };
     let mut after = profile.hos.clone();
     let completed_split = match choice {
         SleepChoice::Sleeper(10) | SleepChoice::Lot | SleepChoice::Motel => {
@@ -73,7 +80,7 @@ pub(super) fn sleep_preview(d: &DrivingState, ctx: &GameContext, choice: SleepCh
             "This sleep alone does not restore driving time. Your legal driving window keeps counting until the split is paired."
         }
     };
-    let wake_hour = d.trip.local_hour() + hours as f64;
+    let wake_hour = d.trip.local_hour() + minutes / 60.0;
     let legal = match hos::limits(&ctx.settings.hos_mode) {
         Some((drive_limit, duty_limit, _)) => {
             let drive_left = (drive_limit - after.driving_min).max(0.0) / 60.0;
@@ -118,8 +125,8 @@ pub(super) fn sleep_preview(d: &DrivingState, ctx: &GameContext, choice: SleepCh
         String::new()
     };
     format!(
-        "Preview: sleep {hours} hours in {}. {effect} {legal} Fatigue goes from {} to {}. \
-         The game clock advances {hours} hours. {deadline}{pending}{cost} Select this choice again to sleep, or move to another choice.",
+        "Preview: sleep {span}{more} in {}. {effect} {legal} Fatigue goes from {} to {}. \
+         The game clock advances {span}. {deadline}{pending}{cost} Select this choice again to sleep, or move to another choice.",
         choice.name(),
         fmt_f(profile.fatigue, 0),
         fmt_f(fatigue_after, 0)

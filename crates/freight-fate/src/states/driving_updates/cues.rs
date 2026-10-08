@@ -3,7 +3,6 @@
 //! strips, the locator and steering tocks, and the guidance director.
 
 use crate::states::driving_turns::{TURN_COMMIT_TAIL_MI, TURN_GUIDE_LEAD_MI};
-use ff_core::data::corners::{corner_radius_ft, ASSUMED_TURN_DEG};
 use ff_core::data::curves::{min_radius_ft, RouteCurve};
 use ff_core::lane_guide_tone::LANE_GUIDE_TONE_KEY;
 use ff_core::sim::lane::{CROSS_AT, OFF_ROAD};
@@ -294,6 +293,12 @@ impl DrivingState {
         if ctx.settings.lane_is_automated() {
             return false; // the truck holds the lane and takes the exit itself
         }
+        if self.lane.is_following() {
+            // A hold taking a turn keeps the lane, so there is no move across
+            // it to hear -- and the relay at every corner read as a blinker
+            // nobody switched on (owner, 2026-09-30).
+            return false;
+        }
         if self.trip.truck.speed_mph() < STEER_CUE_MIN_MPH {
             return false;
         }
@@ -304,7 +309,7 @@ impl DrivingState {
     ///
     /// The lane locator answers "where am I" on demand. This answers it for
     /// the length of a move being made right now, with no key to remember:
-    /// a panned relay-click recording, keeping time from the moment the wheel goes
+    /// a panned turn-signal relay, keeping time from the moment the wheel goes
     /// over until the move is done.
     ///
     /// An exit signal has a steady beat on the right, independent of steering
@@ -339,8 +344,8 @@ impl DrivingState {
             if ctx.audio.cue_held(STEER_CUE_HOLD) {
                 ctx.audio.release_cue(STEER_CUE_HOLD);
                 let volume = 1.0f64.min(STEER_CUE_CANCEL_VOL * self.cue_loudness(ctx));
-                // centred and quieter: the signal off, not the signal on
-                ctx.audio.play_with("vehicle/signal_tone", volume, 0.0);
+                // centred and quieter: the stalk clicking back, not the signal on
+                ctx.audio.play_with("vehicle/turn_signal_off", volume, 0.0);
             }
             return;
         }
@@ -617,14 +622,6 @@ impl DrivingState {
         if let Some(cue) = corner {
             if let Some(side) = TurnSide::parse(&cue.direction) {
                 let index = self.turn_leg_index(&cue);
-                let measured = self
-                    .trip
-                    .route
-                    .legs
-                    .get(index)
-                    .map(|leg| leg.local_turn_deg)
-                    .filter(|deg| *deg > 0.0);
-                let degrees = measured.unwrap_or(ASSUMED_TURN_DEG);
                 // A street corner has no footprint of its own, so it is
                 // taken as used up across the commit tail past its milepost --
                 // the same stretch `turn_cues_in_play` keeps it alive for.
@@ -634,11 +631,7 @@ impl DrivingState {
                     // A corner is its leg of the street chain, which is what
                     // its cue key already ends in.
                     CORNER_ID_BIT | index as u64,
-                    TurnShape {
-                        side,
-                        deflection_deg: degrees,
-                        radius_ft: corner_radius_ft(degrees),
-                    },
+                    self.corner_shape(&cue, side),
                     through,
                 );
             }
@@ -689,7 +682,14 @@ impl DrivingState {
     /// have.
     pub fn update_lane_guidance_audio(&mut self, ctx: &mut GameContext, dt: f64) {
         let warned = ctx.settings.lane_departure_warning;
-        let curve_steer = if warned {
+        // The lean asks for the wheel only where the wheel is the driver's
+        // (owner, 2026-09-30). With curve assistance or partial lane keeping
+        // steering the road's turns, a lean into them asked for the same
+        // steering a second time, and a driver who followed it changed lanes
+        // into the bend (owner's drive on US-83). There it carries the
+        // driver's own drift and nothing else.
+        let road_steers = ctx.settings.lane_is_manual() && ctx.settings.road_steers_the_bend();
+        let curve_steer = if warned && !road_steers {
             self.curve_steer_demand()
         } else {
             0.0
@@ -716,13 +716,17 @@ impl DrivingState {
         // driver who is holding the lane themselves AND left the
         // lane-departure warning on ("turns yes, drift no", 2026-09-19).
         let hear_drift = warned && ctx.settings.lane_is_manual();
-        let turn_input = self.turn_guide_input(hear_drift);
+        let mut turn_input = self.turn_guide_input(hear_drift);
+        if road_steers {
+            turn_input.shape = None;
+            turn_input.past = true;
+        }
         let turn_pan = self.turn_guide.update(turn_input, dt);
-        // The engine pans whether or not the driver is the one steering
-        // (owner, 2026-09-18): with every assist on, the curve and turn
-        // assists take the turns and the lean still reports the road's shape,
-        // closing as the turn is used up rather than as a wheel answers it.
-        // Only the opt-in tone, which leans instead of the engine, silences it.
+        // On full lane keeping the engine still pans for the road's shape
+        // (owner, 2026-09-18): its keys change lanes and never steer, so the
+        // lean cannot be followed into a bend, and it closes as the turn is
+        // used up rather than as a wheel answers it. Only the opt-in tone,
+        // which leans instead of the engine, silences it.
         //
         // WHO owns the engine is decided by whether a turn is in play, never
         // by whether its lean happens to read zero. The selector used to be

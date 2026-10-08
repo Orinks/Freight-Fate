@@ -17,10 +17,11 @@ use freight_fate::net::testing::{FakeTransport, ManualClock};
 use freight_fate::net::{header, NetError, SharedTransport};
 use freight_fate::online_presence::{
     base_url, client_version, client_version_for, fetch_board, fetch_mastodon_status,
-    request_headers, set_profile_sharing, verify_identity, IdentityStore, MastodonStatus,
-    MemoryStore, OnlineIdentity, OnlinePresence, OnlinePresenceOptions, RefusingStore, SecretStore,
-    HEARTBEAT_INTERVAL_S, IDLE_SIGNOFF_S, MIN_CHANGE_INTERVAL_S, OFF_DUTY_GRACE_S, PACKAGE_VERSION,
-    PAUSED_ACTIVITY, TOKEN_SERVICE,
+    request_headers, set_profile_sharing, take_secret_store_timeout_notice, verify_identity,
+    IdentityStore, MastodonStatus, MemoryStore, OnlineIdentity, OnlinePresence,
+    OnlinePresenceOptions, RefusingStore, SecretStore, HEARTBEAT_INTERVAL_S, IDLE_SIGNOFF_S,
+    MIN_CHANGE_INTERVAL_S, OFF_DUTY_GRACE_S, PACKAGE_VERSION, PAUSED_ACTIVITY, RADIO_CLAUSE,
+    TOKEN_SERVICE,
 };
 use freight_fate::updater::BuildInfo;
 
@@ -215,8 +216,11 @@ fn test_failed_post_is_retried_on_the_heartbeat_schedule() {
     service.update(Some(driving()));
     assert_eq!(transport.request_count(), 1);
 
-    // Not hammered while the site is down...
+    // Not hammered while the site is down, not even on the change throttle:
+    // the snapshot that failed is not a new change...
     clock.advance(1.0);
+    service.pump();
+    clock.advance(MIN_CHANGE_INTERVAL_S);
     service.pump();
     assert_eq!(transport.request_count(), 1);
 
@@ -225,6 +229,54 @@ fn test_failed_post_is_retried_on_the_heartbeat_schedule() {
     clock.advance(HEARTBEAT_INTERVAL_S);
     service.pump();
     assert_eq!(transport.request_count(), 2);
+}
+
+#[test]
+fn test_a_refused_post_waits_for_the_heartbeat_but_a_new_change_does_not() {
+    // A rejected driver (deleted, or a token rotated elsewhere) was retried
+    // every change window forever: four requests a minute from one game.
+    let transport = FakeTransport::failing(NetError::http(404));
+    let clock = ManualClock::new();
+    let service = service(&transport, &clock);
+    service.start();
+    service.update(Some(driving()));
+    for _ in 0..4 {
+        clock.advance(MIN_CHANGE_INTERVAL_S);
+        service.pump();
+    }
+    assert_eq!(transport.request_count(), 1);
+
+    // Something new to say still goes out on the change throttle.
+    service.update(Some(resting()));
+    assert_eq!(transport.request_count(), 2);
+}
+
+#[test]
+fn test_a_failed_sign_off_is_retried_on_the_heartbeat() {
+    let transport = FakeTransport::new();
+    let clock = ManualClock::new();
+    let service = service(&transport, &clock);
+    service.start();
+    service.update(Some(driving()));
+
+    transport.set_error(Some(NetError::http(503)));
+    service.update(None);
+    clock.advance(OFF_DUTY_GRACE_S + 1.0);
+    service.pump();
+    assert_eq!(transport.request_count(), 2);
+
+    // The worker used to wake every twentieth of a second and post again.
+    clock.advance(1.0);
+    service.pump();
+    assert_eq!(transport.request_count(), 2);
+
+    transport.set_error(None);
+    clock.advance(HEARTBEAT_INTERVAL_S);
+    service.pump();
+    assert_eq!(last_activity(&transport), "");
+    clock.advance(HEARTBEAT_INTERVAL_S);
+    service.pump();
+    assert_eq!(transport.request_count(), 3); // off the board, and quiet
 }
 
 // -- going off duty -------------------------------------------------------------
@@ -336,6 +388,60 @@ fn test_snapshot_change_relists_an_idle_driver() {
     assert_eq!(last_activity(&transport), resting().activity);
 }
 
+/// The board snapshot with the cab radio on a live stream, mid-song.
+fn driving_to(song: &str) -> PresenceState {
+    PresenceState::new(
+        "Driving: Chicago to Dallas",
+        &format!("steel coils, 45% there, {RADIO_CLAUSE}KVSC 88.1: {song}"),
+    )
+}
+
+#[test]
+fn test_a_new_song_does_not_keep_a_parked_truck_on_the_board() {
+    // A truck parked with the radio on a live stream: the song title in the
+    // snapshot changes every few minutes on its own. That kept a driver at
+    // 0% on the board, beating, for seven hours (2026-10-03).
+    let transport = FakeTransport::new();
+    let clock = ManualClock::new();
+    let service = service(&transport, &clock);
+    service.start();
+    let mut song = 0;
+    service.update(Some(driving_to("song 0")));
+    let step = 200.0;
+    let mut t = 0.0;
+    while t < IDLE_SIGNOFF_S {
+        clock.advance(step);
+        t += step;
+        song += 1;
+        service.update(Some(driving_to(&format!("song {song}"))));
+        service.pump();
+    }
+    assert_eq!(
+        last_activity(&transport),
+        "",
+        "the idle sign-off never went out"
+    );
+
+    // Signed off, the songs keep changing and nothing more is posted.
+    let sent = transport.posts().len();
+    for _ in 0..6 {
+        clock.advance(step);
+        song += 1;
+        service.update(Some(driving_to(&format!("song {song}"))));
+        service.pump();
+    }
+    assert_eq!(transport.posts().len(), sent);
+
+    // Pulling out is a real change and re-lists the driver.
+    service.update(Some(PresenceState::new(
+        "Driving: Chicago to Dallas",
+        &format!("steel coils, 50% there, {RADIO_CLAUSE}KVSC 88.1: song {song}"),
+    )));
+    clock.advance(MIN_CHANGE_INTERVAL_S);
+    service.pump();
+    assert_eq!(last_activity(&transport), "Driving: Chicago to Dallas");
+}
+
 #[test]
 fn test_pause_posts_once_then_sends_no_heartbeats() {
     // A pause is not the end of a shift, so the driver must not sign off --
@@ -398,6 +504,35 @@ fn test_pause_left_for_the_idle_window_signs_off_once() {
     clock.advance(HEARTBEAT_INTERVAL_S * 2.0);
     service.pump();
     assert_eq!(transport.posts().len(), sent + 1);
+}
+
+#[test]
+fn test_a_failed_idle_sign_off_from_a_pause_waits_for_the_heartbeat() {
+    // Over a paused game the worker woke every twentieth of a second and
+    // posted a failed idle sign-off again each time.
+    let transport = FakeTransport::new();
+    let clock = ManualClock::new();
+    let service = service(&transport, &clock);
+    service.start();
+    service.update(Some(driving()));
+    clock.advance(MIN_CHANGE_INTERVAL_S);
+    service.update(Some(paused()));
+    service.pump();
+    let sent = transport.request_count();
+
+    transport.set_error(Some(NetError::http(503)));
+    clock.advance(IDLE_SIGNOFF_S);
+    service.pump();
+    assert_eq!(transport.request_count(), sent + 1);
+    clock.advance(1.0);
+    service.pump();
+    assert_eq!(transport.request_count(), sent + 1);
+
+    transport.set_error(None);
+    clock.advance(HEARTBEAT_INTERVAL_S);
+    service.pump();
+    assert_eq!(transport.request_count(), sent + 2);
+    assert_eq!(last_activity(&transport), "");
 }
 
 #[test]
@@ -908,5 +1043,61 @@ fn test_default_transport_stamps_the_build_in_the_user_agent() {
     assert_eq!(
         header(&headers, "User-agent"),
         Some(format!("FreightFate/{}", client_version()).as_str())
+    );
+}
+
+/// A secret store that never answers -- the Mac Keychain ACL prompt shape.
+struct HungStore;
+
+impl SecretStore for HungStore {
+    fn set_password(&self, _: &str, _: &str, _: &str) -> Result<(), String> {
+        loop {
+            std::thread::park();
+        }
+    }
+
+    fn get_password(&self, _: &str, _: &str) -> Result<Option<String>, String> {
+        loop {
+            std::thread::park();
+        }
+    }
+
+    fn delete_password(&self, _: &str, _: &str) -> Result<(), String> {
+        loop {
+            std::thread::park();
+        }
+    }
+}
+
+#[test]
+fn test_a_hung_secret_store_times_out_so_launch_can_continue() {
+    let _ = take_secret_store_timeout_notice();
+    let dir = tempfile::tempdir().unwrap();
+    let token = "s".repeat(68);
+    fs::write(
+        dir.path().join("online.json"),
+        json!({"driver_id": "road-star-abcd1234"}).to_string(),
+    )
+    .unwrap();
+    // Plaintext fallback so load can still succeed after the keychain times out.
+    fs::write(dir.path().join("online.token"), &token).unwrap();
+
+    let store = IdentityStore::new(dir.path(), Some(Arc::new(HungStore)))
+        .with_secret_timeout(std::time::Duration::from_millis(80));
+    let started = std::time::Instant::now();
+    let loaded = store.load();
+    let elapsed = started.elapsed();
+
+    assert!(
+        elapsed < std::time::Duration::from_secs(2),
+        "hung keychain waited {elapsed:?}"
+    );
+    assert_eq!(
+        loaded,
+        Some(OnlineIdentity::new("road-star-abcd1234", &token))
+    );
+    assert!(
+        take_secret_store_timeout_notice(),
+        "the title screen needs a spoken notice after a keychain timeout"
     );
 }

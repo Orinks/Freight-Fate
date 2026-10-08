@@ -42,11 +42,12 @@ pub fn staging_sandbox() -> PathBuf {
     game_root().join("saves-agent-staging")
 }
 
-/// The only site an agent session talks to: staging, the owner's own
-/// deployment. Production is for players; a source build that could reach
-/// it with an agent would hand anyone a ready-made way to back up an
+/// The only site an agent session talks to: the orinks-net `dev` branch's
+/// Vercel preview, which reads the staging backend (dev.orinks.net closed
+/// on 2026-10-02). Production is for players; a source build that could
+/// reach it with an agent would hand anyone a ready-made way to back up an
 /// invented career under their own driver.
-pub const STAGING_URL: &str = "https://dev.orinks.net";
+pub const STAGING_URL: &str = "https://orinks-net-git-dev-orinks-projects.vercel.app";
 
 /// The settings a staging session turns on: the master switch and cloud
 /// backup, the one path it exists to exercise. Presence and Mastodon stay

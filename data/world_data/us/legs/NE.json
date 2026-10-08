@@ -151,6 +151,16 @@
         ],
         "landmarks": [
           {
+            "name": "Loup River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 0.9,
+            "spoken": "Crossing the Loup River",
+            "lat": 41.41678,
+            "lon": -97.3682,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 192432338 (Loup River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Bellwood",
             "at_mi": 1.4,
             "off_mi": 8.2,
@@ -167,13 +177,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151363455, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Platte Center"
-          },
-          {
-            "name": "Loup River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 7.91,
-            "spoken": "Crossing the Loup River"
           },
           {
             "name": "Duncan",
@@ -1109,13 +1112,6 @@
             "spoken": "Passing Stanton"
           },
           {
-            "name": "Elkhorn River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 44.0,
-            "spoken": "Crossing the Elkhorn River"
-          },
-          {
             "name": "Battle Creek",
             "at_mi": 46.6,
             "off_mi": 8.81,
@@ -1123,6 +1119,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 6221537800, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Battle Creek"
+          },
+          {
+            "name": "Elkhorn River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 47.0,
+            "spoken": "Crossing the Elkhorn River",
+            "lat": 42.00312,
+            "lon": -97.4265,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 140061987 (Elkhorn River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Hadar",
@@ -1974,6 +1980,16 @@
             "spoken": "Passing Yutan"
           },
           {
+            "name": "Elkhorn River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 68.7,
+            "spoken": "Crossing the Elkhorn River",
+            "lat": 41.2635,
+            "lon": -96.26394,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 132742128 (Elkhorn River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Gretna",
             "at_mi": 69.98,
             "off_mi": 8.0,
@@ -1990,13 +2006,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151948423, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bennington"
-          },
-          {
-            "name": "Elkhorn River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 75.57,
-            "spoken": "Crossing the Elkhorn River"
           },
           {
             "name": "Papillion",
@@ -2633,6 +2642,16 @@
             "spoken": "Passing Doniphan"
           },
           {
+            "name": "North Channel Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 10.2,
+            "spoken": "Crossing the North Channel Platte River",
+            "lat": 40.82283,
+            "lon": -98.39803,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 397989533 (North Channel Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Alda",
             "at_mi": 12.3,
             "off_mi": 4.19,
@@ -2642,13 +2661,6 @@
             "spoken": "Passing Alda"
           },
           {
-            "name": "North Channel Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 18.3,
-            "spoken": "Crossing the North Channel Platte River"
-          },
-          {
             "name": "Wood River",
             "at_mi": 20.5,
             "off_mi": 3.99,
@@ -2656,6 +2668,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151772416, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wood River"
+          },
+          {
+            "name": "Stuhr Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 21.0,
+            "spoken": "Billboard: The Stuhr Museum, ahead in Grand Island. An eighteen-nineties railroad town of sixty buildings, many moved here. Somebody hauled a lot of oversize loads.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Prosser",
@@ -2694,6 +2716,16 @@
             "spoken": "Passing Shelton"
           },
           {
+            "name": "Great Platte River Road Archway (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.5,
+            "spoken": "Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Gibbon",
             "at_mi": 34.6,
             "off_mi": 3.0,
@@ -2717,6 +2749,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151506714, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Heartwell"
+          },
+          {
+            "name": "Pioneer Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.6,
+            "spoken": "Billboard: Harold Warp Pioneer Village, next exit, then twelve miles south in Minden. Fifty thousand old things on twenty acres. Nobody here ever threw anything away.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pioneer Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 43.4,
+            "spoken": "Billboard: Harold Warp Pioneer Village, next exit, then twelve miles south in Minden. Fifty thousand old things on twenty acres. Nobody here ever threw anything away.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Riverdale",
@@ -3542,13 +3594,6 @@
             "spoken": "Passing Alda"
           },
           {
-            "name": "Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 8.2,
-            "spoken": "Crossing the Platte River"
-          },
-          {
             "name": "Wood River",
             "at_mi": 9.0,
             "off_mi": 11.61,
@@ -3567,6 +3612,16 @@
             "spoken": "Passing Doniphan"
           },
           {
+            "name": "Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 11.7,
+            "spoken": "Crossing the Platte River",
+            "lat": 40.82496,
+            "lon": -98.33404,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 491544446 (Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Trumbull",
             "at_mi": 14.9,
             "off_mi": 9.78,
@@ -3583,6 +3638,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151403693, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Phillips"
+          },
+          {
+            "name": "Stuhr Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.5,
+            "spoken": "Billboard: The Stuhr Museum, ahead in Grand Island. An eighteen-nineties railroad town of sixty buildings, many moved here. Somebody hauled a lot of oversize loads.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Giltner",
@@ -3727,6 +3792,16 @@
             "spoken": "Passing Seward"
           },
           {
+            "name": "Big Blue River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 77.8,
+            "spoken": "Crossing the Big Blue River",
+            "lat": 40.82188,
+            "lon": -97.06661,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 262587985 (Big Blue River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Milford",
             "at_mi": 78.9,
             "off_mi": 3.27,
@@ -3743,13 +3818,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151393520, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Garland"
-          },
-          {
-            "name": "Big Blue River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 84.4,
-            "spoken": "Crossing the Big Blue River"
           },
           {
             "name": "Pleasant Dale",
@@ -5571,14 +5639,10 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 3.0,
-            "spoken": "Billboard: Kearney has a museum built as a giant arch over the entire interstate. It tells the story of wagon trains, the Pony Express, and the railroad, all of which followed this river valley west."
-          },
-          {
-            "name": "Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 10.9,
-            "spoken": "Crossing the Platte River"
+            "spoken": "Billboard: Kearney has a museum built as a giant arch over the entire interstate. It tells the story of wagon trains, the Pony Express, and the railroad, all of which followed this river valley west.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Amherst",
@@ -5597,6 +5661,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151433257, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Overton"
+          },
+          {
+            "name": "Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 18.4,
+            "spoken": "Crossing the Platte River",
+            "lat": 40.68278,
+            "lon": -99.37994,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 820342600 (Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Phelps County Historical Museum",
@@ -5687,6 +5761,16 @@
             "spoken": "Passing Republican City"
           },
           {
+            "name": "Republican River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 59.8,
+            "spoken": "Crossing the Republican River",
+            "lat": 40.08732,
+            "lon": -99.37267,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 446732719 (Republican River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Long Island",
             "at_mi": 66.0,
             "off_mi": 9.6,
@@ -5703,13 +5787,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151958536, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Naponee"
-          },
-          {
-            "name": "Republican River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 68.8,
-            "spoken": "Crossing the Republican River"
           },
           {
             "name": "Phillipsburg",
@@ -5739,6 +5816,16 @@
             "spoken": "Entering Glade"
           },
           {
+            "name": "North Fork Solomon River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 90.9,
+            "spoken": "Crossing the North Fork Solomon River",
+            "lat": 39.67356,
+            "lon": -99.30941,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 460386103 (North Fork Solomon River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Kirwin",
             "at_mi": 91.0,
             "off_mi": 9.94,
@@ -5746,20 +5833,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151533415, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kirwin"
-          },
-          {
-            "name": "North Fork Solomon River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 99.6,
-            "spoken": "Crossing the North Fork Solomon River"
-          },
-          {
-            "name": "South Fork Solomon River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 99.6,
-            "spoken": "Crossing the South Fork Solomon River"
           },
           {
             "name": "Woodston",
@@ -5780,6 +5853,16 @@
             "spoken": "Entering Stockton"
           },
           {
+            "name": "South Fork Solomon River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 109.0,
+            "spoken": "Crossing the South Fork Solomon River",
+            "lat": 39.41678,
+            "lon": -99.2756,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 539368571 (South Fork Solomon River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Plainville",
             "at_mi": 121.6,
             "off_mi": 0.01,
@@ -5796,6 +5879,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151748869, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Zurich"
+          },
+          {
+            "name": "Sternberg Museum (from Kearney)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 133.0,
+            "spoken": "Billboard: The Sternberg Museum, ahead in Hays. The famous fossil is a fourteen-foot fish with a six-foot fish inside it. Chew your lunch.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Victoria",
@@ -6467,11 +6560,14 @@
             "spoken": "Passing Riverdale"
           },
           {
-            "name": "Platte River",
-            "category": "river",
+            "name": "Great Platte River Road Archway (eastbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 14.5,
-            "spoken": "Crossing the Platte River"
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Amherst",
@@ -6517,6 +6613,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151328996, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Smithfield"
+          },
+          {
+            "name": "Heartland Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.2,
+            "spoken": "Billboard: The Heartland Museum of Military Vehicles, next exit. About a hundred tanks, jeeps and helicopters, many still running. Every one of them wins a merge.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -7167,6 +7273,16 @@
             "spoken": "Passing Riverdale"
           },
           {
+            "name": "Great Platte River Road Archway (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Amherst",
             "at_mi": 15.3,
             "off_mi": 10.82,
@@ -7212,6 +7328,16 @@
             "spoken": "Passing Smithfield"
           },
           {
+            "name": "Heartland Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.8,
+            "spoken": "Billboard: The Heartland Museum of Military Vehicles, next exit. About a hundred tanks, jeeps and helicopters, many still running. Every one of them wins a merge.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Elwood",
             "at_mi": 39.6,
             "off_mi": 11.92,
@@ -7221,6 +7347,26 @@
             "spoken": "Passing Elwood"
           },
           {
+            "name": "Heartland Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 39.6,
+            "spoken": "Billboard: The Heartland Museum of Military Vehicles, next exit. About a hundred tanks, jeeps and helicopters, many still running. Every one of them wins a merge.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Robert Henri Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.6,
+            "spoken": "Billboard: The Robert Henri Museum, next exit in Cozad. The painter grew up here as Robert Cozad, then left town in a hurry under a new name.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "One Hundredth Meridian Museum",
             "category": "museum",
             "kind": "point",
@@ -7228,11 +7374,44 @@
             "spoken": "One Hundredth Meridian Museum ahead"
           },
           {
+            "name": "Robert Henri Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 54.5,
+            "spoken": "Billboard: The Robert Henri Museum, next exit in Cozad. The painter grew up here as Robert Cozad, then left town in a hurry under a new name.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Pony Express Station (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 56.0,
+            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Platte River",
             "category": "river",
             "kind": "point",
-            "at_mi": 61.6,
-            "spoken": "Crossing the Platte River"
+            "at_mi": 64.1,
+            "spoken": "Crossing the Platte River",
+            "lat": 40.92192,
+            "lon": -100.18062,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 185448033 (Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Pony Express Station (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 72.0,
+            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Brady",
@@ -7244,6 +7423,16 @@
             "spoken": "Passing Brady"
           },
           {
+            "name": "Golden Spike Tower (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.0,
+            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Maxwell",
             "at_mi": 84.8,
             "off_mi": 1.75,
@@ -7253,11 +7442,24 @@
             "spoken": "Passing Maxwell"
           },
           {
+            "name": "Fort Cody Trading Post (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 90.0,
+            "spoken": "Billboard: Fort Cody Trading Post, ahead in North Platte, where Buffalo Bill's Wild West Show runs in twenty thousand hand-carved figures. Tiny horses, no cleanup.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "South Platte River",
             "category": "river",
             "kind": "point",
-            "at_mi": 86.7,
-            "spoken": "Crossing the South Platte River"
+            "at_mi": 98.2,
+            "spoken": "Crossing the South Platte River",
+            "lat": 41.11769,
+            "lon": -100.76364,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 146077684 (South Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "interchanges": [
@@ -8010,11 +8212,54 @@
             "spoken": "Passing Elwood"
           },
           {
+            "name": "Heartland Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.8,
+            "spoken": "Billboard: The Heartland Museum of Military Vehicles, next exit. About a hundred tanks, jeeps and helicopters, many still running. Every one of them wins a merge.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Robert Henri Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.6,
+            "spoken": "Billboard: The Robert Henri Museum, next exit in Cozad. The painter grew up here as Robert Cozad, then left town in a hurry under a new name.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Robert Henri Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.4,
+            "spoken": "Billboard: The Robert Henri Museum, next exit in Cozad. The painter grew up here as Robert Cozad, then left town in a hurry under a new name.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Pony Express Station (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.0,
+            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Platte River",
             "category": "river",
             "kind": "point",
-            "at_mi": 22.6,
-            "spoken": "Crossing the Platte River"
+            "at_mi": 23.7,
+            "spoken": "Crossing the Platte River",
+            "lat": 40.88576,
+            "lon": -100.09089,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 185460159 (Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Sod House Museum",
@@ -8033,6 +8278,26 @@
             "spoken": "Passing Gothenburg"
           },
           {
+            "name": "Pony Express Station (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 37.0,
+            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Golden Spike Tower (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 45.0,
+            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Maxwell",
             "at_mi": 49.8,
             "off_mi": 1.75,
@@ -8042,11 +8307,24 @@
             "spoken": "Passing Maxwell"
           },
           {
+            "name": "Fort Cody Trading Post (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.0,
+            "spoken": "Billboard: Fort Cody Trading Post, ahead in North Platte, where Buffalo Bill's Wild West Show runs in twenty thousand hand-carved figures. Tiny horses, no cleanup.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "South Platte River",
             "category": "river",
             "kind": "point",
-            "at_mi": 55.9,
-            "spoken": "Crossing the South Platte River"
+            "at_mi": 63.2,
+            "spoken": "Crossing the South Platte River",
+            "lat": 41.11769,
+            "lon": -100.76364,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 146077684 (South Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -11631,6 +11909,26 @@
             "spoken": "Passing Ashland"
           },
           {
+            "name": "Strategic Air Command Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.6,
+            "spoken": "Billboard: The Strategic Air Command Museum, next exit. Thirty aircraft indoors, including the Blackbird, the fastest jet ever flown. Parked, it is slower than you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Crossing the Platte River",
+            "lat": 41.02812,
+            "lon": -96.2955,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 906626537 (Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "South Bend",
             "at_mi": 30.1,
             "off_mi": 3.19,
@@ -11640,11 +11938,14 @@
             "spoken": "Passing South Bend"
           },
           {
-            "name": "Platte River",
-            "category": "river",
+            "name": "Strategic Air Command Museum (westbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 38.0,
-            "spoken": "Crossing the Platte River"
+            "at_mi": 30.4,
+            "spoken": "Billboard: The Strategic Air Command Museum, next exit. Thirty aircraft indoors, including the Blackbird, the fastest jet ever flown. Parked, it is slower than you.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Gretna",
@@ -11674,6 +11975,16 @@
             "spoken": "Passing Papillion"
           },
           {
+            "name": "Henry Doorly Zoo (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.0,
+            "spoken": "Billboard: The Henry Doorly Zoo, ahead in Omaha, with an indoor rainforest and a desert under a glass dome. Nebraska weather is optional inside.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Ralston",
             "at_mi": 51.5,
             "off_mi": 1.53,
@@ -11695,8 +12006,11 @@
             "name": "Missouri River",
             "category": "river",
             "kind": "point",
-            "at_mi": 64.0,
-            "spoken": "Crossing the Missouri River"
+            "at_mi": 57.9,
+            "spoken": "Crossing the Missouri River",
+            "lat": 41.2316,
+            "lon": -95.91087,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 133848663 (Missouri River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "McClelland",
@@ -11726,13 +12040,6 @@
             "spoken": "Passing Minden"
           },
           {
-            "name": "East Branche West Nishnabotna River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 90.6,
-            "spoken": "Crossing the East Branche West Nishnabotna River"
-          },
-          {
             "name": "Shelby",
             "at_mi": 92.0,
             "off_mi": 1.2,
@@ -11747,6 +12054,16 @@
             "kind": "point",
             "at_mi": 99.1,
             "spoken": "Walnut Creek Historical Museum ahead"
+          },
+          {
+            "name": "East Branche West Nishnabotna River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 99.2,
+            "spoken": "Crossing the East Branche West Nishnabotna River",
+            "lat": 41.49796,
+            "lon": -95.31266,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1085082346 (East Branche West Nishnabotna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Walnut",
@@ -11767,11 +12084,34 @@
             "spoken": "Passing Marne"
           },
           {
+            "name": "Danish Windmill (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 110.6,
+            "spoken": "Billboard: The Danish Windmill, next exit, north to Elk Horn. Built in Denmark in eighteen forty-eight, shipped over in pieces, and still turning. Some assembly was required.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Danish Windmill (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 113.8,
+            "spoken": "Billboard: The Danish Windmill, next exit, north to Elk Horn. Built in Denmark in eighteen forty-eight, shipped over in pieces, and still turning. Some assembly was required.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "East Nishnabotna River",
             "category": "river",
             "kind": "point",
-            "at_mi": 118.5,
-            "spoken": "Crossing the East Nishnabotna River"
+            "at_mi": 118.7,
+            "spoken": "Crossing the East Nishnabotna River",
+            "lat": 41.49703,
+            "lon": -94.93446,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 691355282 (East Nishnabotna River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Brayton",
@@ -11853,13 +12193,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151670529, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Adel"
-          },
-          {
-            "name": "Raccoon River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 175.2,
-            "spoken": "Crossing the Raccoon River"
           },
           {
             "name": "Waukee",
@@ -14269,6 +14602,16 @@
             "spoken": "Passing Clatonia"
           },
           {
+            "name": "Homestead National Historical Park (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.0,
+            "spoken": "Billboard: Homestead National Historical Park, ahead at Beatrice, on the first homestead claim, filed ten minutes after midnight on New Year's Day. Some people cannot wait.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "De Witt",
             "at_mi": 33.0,
             "off_mi": 9.48,
@@ -14290,8 +14633,21 @@
             "name": "Big Blue River",
             "category": "river",
             "kind": "point",
-            "at_mi": 42.1,
-            "spoken": "Crossing the Big Blue River"
+            "at_mi": 42.5,
+            "spoken": "Crossing the Big Blue River",
+            "lat": 40.25644,
+            "lon": -96.74662,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 261191875 (Big Blue River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Homestead National Historical Park (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 49.0,
+            "spoken": "Billboard: Homestead National Historical Park, ahead at Beatrice, on the first homestead claim, filed ten minutes after midnight on New Year's Day. Some people cannot wait.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Odell",
@@ -14330,11 +14686,24 @@
             "spoken": "Passing Barneston"
           },
           {
+            "name": "Pony Express Barn (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 64.0,
+            "spoken": "Billboard: The Pony Express Barn, ahead in Marysville, the last home station still on its original ground. The mail goes by truck now.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Horseshoe River",
             "category": "river",
             "kind": "point",
-            "at_mi": 69.1,
-            "spoken": "Crossing the Horseshoe River"
+            "at_mi": 71.5,
+            "spoken": "Crossing the Horseshoe River",
+            "lat": 39.89741,
+            "lon": -96.66689,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 594764667 (Horseshoe River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Herkimer",
@@ -14355,6 +14724,16 @@
             "spoken": "Entering Marysville"
           },
           {
+            "name": "Pony Express Barn (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 85.0,
+            "spoken": "Billboard: The Pony Express Barn, ahead in Marysville, the last home station still on its original ground. The mail goes by truck now.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Blue Rapids",
             "at_mi": 88.0,
             "off_mi": 0.08,
@@ -14371,13 +14750,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151333104, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Waterville"
-          },
-          {
-            "name": "Little Blue River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 93.3,
-            "spoken": "Crossing the Little Blue River"
           },
           {
             "name": "Barnes",
@@ -14459,13 +14831,6 @@
             "spoken": "Passing Wakefield"
           },
           {
-            "name": "Republican River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 140.3,
-            "spoken": "Crossing the Republican River"
-          },
-          {
             "name": "Milford",
             "at_mi": 140.7,
             "off_mi": 0.63,
@@ -14473,6 +14838,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151916448, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Milford"
+          },
+          {
+            "name": "Republican River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 147.9,
+            "spoken": "Crossing the Republican River",
+            "lat": 39.07123,
+            "lon": -96.86696,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 73978485 (Republican River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Ogden",
@@ -16101,6 +16476,16 @@
             "spoken": "Passing Ashland"
           },
           {
+            "name": "Strategic Air Command Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 26.5,
+            "spoken": "Billboard: The Strategic Air Command Museum, next exit. Thirty aircraft indoors, including the Blackbird, the fastest jet ever flown. Parked, it is slower than you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Murdock",
             "at_mi": 27.4,
             "off_mi": 5.75,
@@ -16128,6 +16513,16 @@
             "spoken": "Passing South Bend"
           },
           {
+            "name": "Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 29.8,
+            "spoken": "Crossing the Platte River",
+            "lat": 41.0287,
+            "lon": -96.29497,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1346421393 (Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Louisville",
             "at_mi": 30.1,
             "off_mi": 7.17,
@@ -16137,6 +16532,16 @@
             "spoken": "Passing Louisville"
           },
           {
+            "name": "Strategic Air Command Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.3,
+            "spoken": "Billboard: The Strategic Air Command Museum, next exit. Thirty aircraft indoors, including the Blackbird, the fastest jet ever flown. Parked, it is slower than you.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Memphis",
             "at_mi": 32.0,
             "off_mi": 7.54,
@@ -16144,13 +16549,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151599283, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Memphis"
-          },
-          {
-            "name": "Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 37.0,
-            "spoken": "Crossing the Platte River"
           },
           {
             "name": "Gretna",
@@ -16187,6 +16585,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151803955, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Papillion"
+          },
+          {
+            "name": "Henry Doorly Zoo (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.0,
+            "spoken": "Billboard: The Henry Doorly Zoo, ahead in Omaha, with an indoor rainforest and a desert under a glass dome. Nebraska weather is optional inside.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Waterloo",
@@ -17151,6 +17559,16 @@
             "spoken": "Passing Hadar"
           },
           {
+            "name": "Elkhorn River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 2.8,
+            "spoken": "Crossing the Elkhorn River",
+            "lat": 42.00308,
+            "lon": -97.42667,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 140061987 (Elkhorn River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Battle Creek",
             "at_mi": 3.18,
             "off_mi": 8.8,
@@ -17167,13 +17585,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151784006, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Stanton"
-          },
-          {
-            "name": "Elkhorn River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 14.42,
-            "spoken": "Crossing the Elkhorn River"
           },
           {
             "name": "Madison",
@@ -17242,8 +17653,11 @@
             "name": "Loup River",
             "category": "river",
             "kind": "point",
-            "at_mi": 39.36,
-            "spoken": "Crossing the Loup River"
+            "at_mi": 47.1,
+            "spoken": "Crossing the Loup River",
+            "lat": 41.41679,
+            "lon": -97.3682,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 192432338 (Loup River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Bellwood",
@@ -17289,13 +17703,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151743741, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Silver Creek"
-          },
-          {
-            "name": "Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 65.14,
-            "spoken": "Crossing the Platte River"
           },
           {
             "name": "Clarks",
@@ -18521,6 +18928,16 @@
             "spoken": "Passing Hadar"
           },
           {
+            "name": "North Fork Elkhorn River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 2.2,
+            "spoken": "Crossing the North Fork Elkhorn River",
+            "lat": 42.01835,
+            "lon": -97.38767,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 139742597 (North Fork Elkhorn River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Hoskins",
             "at_mi": 6.4,
             "off_mi": 6.49,
@@ -18537,20 +18954,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151784006, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Stanton"
-          },
-          {
-            "name": "North Fork Elkhorn River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 15.0,
-            "spoken": "Crossing the North Fork Elkhorn River"
-          },
-          {
-            "name": "Elkhorn River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 15.0,
-            "spoken": "Crossing the Elkhorn River"
           },
           {
             "name": "Pilger",
@@ -18587,6 +18990,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151773096, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering West Point"
+          },
+          {
+            "name": "Elkhorn River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 50.6,
+            "spoken": "Crossing the Elkhorn River",
+            "lat": 41.71849,
+            "lon": -96.70822,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 62196710 (Elkhorn River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Dodge",
@@ -18756,6 +19169,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151948423, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bennington"
+          },
+          {
+            "name": "Henry Doorly Zoo (from Norfolk)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 103.0,
+            "spoken": "Billboard: The Henry Doorly Zoo, ahead in Omaha, with an indoor rainforest and a desert under a glass dome. Nebraska weather is optional inside.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Papillion",
@@ -20055,20 +20478,22 @@
         "state_miles": [
           {
             "state": "Nebraska",
-            "miles": 79.04
+            "miles": 81.5,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Iowa",
-            "miles": 3.96
+            "miles": 1.5,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 79.04,
+            "at_mi": 81.5,
             "from_state": "Nebraska",
             "state": "Iowa",
             "place": "Nebraska-Iowa line on US-20",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "landmarks": [
@@ -20091,6 +20516,16 @@
             "spoken": "Passing Battle Creek"
           },
           {
+            "name": "North Fork Elkhorn River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 4.4,
+            "spoken": "Crossing the North Fork Elkhorn River",
+            "lat": 42.08461,
+            "lon": -97.42644,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 139742597 (North Fork Elkhorn River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Hadar",
             "at_mi": 5.75,
             "off_mi": 1.28,
@@ -20107,13 +20542,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151384853, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hoskins"
-          },
-          {
-            "name": "North Fork Elkhorn River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 11.36,
-            "spoken": "Crossing the North Fork Elkhorn River"
           },
           {
             "name": "Pierce",
@@ -20267,20 +20695,6 @@
             "spoken": "Entering Jackson"
           },
           {
-            "name": "Missouri River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 73.42,
-            "spoken": "Crossing the Missouri River"
-          },
-          {
-            "name": "Big Sioux River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 73.42,
-            "spoken": "Crossing the Big Sioux River"
-          },
-          {
             "name": "Dakota Dunes",
             "at_mi": 75.72,
             "off_mi": 2.91,
@@ -20315,6 +20729,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151395884, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Sergeant Bluff"
+          },
+          {
+            "name": "Missouri River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 81.5,
+            "spoken": "Crossing the Missouri River",
+            "lat": 42.4875,
+            "lon": -96.41357,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 133850017 (Missouri River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "North Sioux City",
@@ -21684,8 +22108,31 @@
             "name": "South Platte River",
             "category": "river",
             "kind": "point",
-            "at_mi": 15.1,
-            "spoken": "Crossing the South Platte River"
+            "at_mi": 0.6,
+            "spoken": "Crossing the South Platte River",
+            "lat": 41.11773,
+            "lon": -100.76401,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 146077684 (South Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Golden Spike Tower (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.5,
+            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Fort Cody Trading Post (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 11.0,
+            "spoken": "Billboard: Fort Cody Trading Post, ahead in North Platte, where Buffalo Bill's Wild West Show runs in twenty thousand hand-carved figures. Tiny horses, no cleanup.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wellfleet",
@@ -21743,8 +22190,11 @@
             "name": "Republican River",
             "category": "river",
             "kind": "point",
-            "at_mi": 74.5,
-            "spoken": "Crossing the Republican River"
+            "at_mi": 68.6,
+            "spoken": "Crossing the Republican River",
+            "lat": 40.18743,
+            "lon": -100.61907,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 403398421 (Republican River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Danbury",
@@ -21772,6 +22222,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151489659, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Rexford"
+          },
+          {
+            "name": "Prairie Museum (from North Platte)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 135.0,
+            "spoken": "Billboard: The Prairie Museum, ahead in Colby, with the Cooper Barn, the biggest barn in Kansas. The truck stays outside.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -22202,8 +22662,21 @@
             "name": "South Platte River",
             "category": "river",
             "kind": "point",
-            "at_mi": 6.3,
-            "spoken": "Crossing the South Platte River"
+            "at_mi": 0.6,
+            "spoken": "Crossing the South Platte River",
+            "lat": 41.11773,
+            "lon": -100.76398,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 146077684 (South Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Fort Cody Trading Post (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.5,
+            "spoken": "Billboard: Fort Cody Trading Post, ahead in North Platte, where Buffalo Bill's Wild West Show runs in twenty thousand hand-carved figures. Tiny horses, no cleanup.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hershey",
@@ -22215,6 +22688,26 @@
             "spoken": "Passing Hershey"
           },
           {
+            "name": "Golden Spike Tower (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.5,
+            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Ole's Big Game Steakhouse (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.5,
+            "spoken": "Billboard: Ole's Big Game Steakhouse, next exit in Paxton. More than two hundred trophy mounts and a polar bear in the bar. He never buys a round.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Paxton",
             "at_mi": 32.1,
             "off_mi": 0.89,
@@ -22222,6 +22715,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151492099, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Paxton"
+          },
+          {
+            "name": "Ole's Big Game Steakhouse (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.5,
+            "spoken": "Billboard: Ole's Big Game Steakhouse, next exit in Paxton. More than two hundred trophy mounts and a polar bear in the bar. He never buys a round.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Front Street (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.0,
+            "spoken": "Billboard: Front Street, ahead in Ogallala. A rebuilt cattle-trail main street with a cowboy museum and a jail cell. Visit the museum. Skip the cell.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Brule",
@@ -23006,8 +23519,11 @@
             "name": "South Platte River",
             "category": "river",
             "kind": "point",
-            "at_mi": 8.9,
-            "spoken": "Crossing the South Platte River"
+            "at_mi": 0.8,
+            "spoken": "Crossing the South Platte River",
+            "lat": 41.11889,
+            "lon": -101.71431,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM river polygon relation 1990224 (South Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Brule",
@@ -23017,6 +23533,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151351519, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brule"
+          },
+          {
+            "name": "Front Street (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.0,
+            "spoken": "Billboard: Front Street, ahead in Ogallala. A rebuilt cattle-trail main street with a cowboy museum and a jail cell. Visit the museum. Skip the cell.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Julesburg",
@@ -23060,6 +23586,16 @@
             "kind": "point",
             "at_mi": 52.4,
             "spoken": "Lodgepole Depot Museum ahead"
+          },
+          {
+            "name": "The Original Cabela's (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.5,
+            "spoken": "Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -25819,20 +26355,22 @@
         "state_miles": [
           {
             "state": "Nebraska",
-            "miles": 461.7
+            "miles": 454.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Wyoming",
-            "miles": 35.3
+            "miles": 42.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 461.7,
+            "at_mi": 454.6,
             "from_state": "Nebraska",
             "state": "Wyoming",
             "place": "Nebraska-Wyoming line on I-80",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -27571,6 +28109,16 @@
             "spoken": "Passing La Vista"
           },
           {
+            "name": "Henry Doorly Zoo (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.0,
+            "spoken": "Billboard: The Henry Doorly Zoo, ahead in Omaha, with an indoor rainforest and a desert under a glass dome. Nebraska weather is optional inside.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Papillion",
             "at_mi": 12.1,
             "off_mi": 3.94,
@@ -27578,13 +28126,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151803955, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Papillion"
-          },
-          {
-            "name": "Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 13.1,
-            "spoken": "Crossing the Platte River"
           },
           {
             "name": "Gretna",
@@ -27596,6 +28137,26 @@
             "spoken": "Passing Gretna"
           },
           {
+            "name": "Strategic Air Command Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 27.8,
+            "spoken": "Billboard: The Strategic Air Command Museum, next exit. Thirty aircraft indoors, including the Blackbird, the fastest jet ever flown. Parked, it is slower than you.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 28.3,
+            "spoken": "Crossing the Platte River",
+            "lat": 41.02891,
+            "lon": -96.29523,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1346421393 (Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "South Bend",
             "at_mi": 28.3,
             "off_mi": 3.21,
@@ -27603,6 +28164,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151797412, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing South Bend"
+          },
+          {
+            "name": "Strategic Air Command Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 31.6,
+            "spoken": "Billboard: The Strategic Air Command Museum, next exit. Thirty aircraft indoors, including the Blackbird, the fastest jet ever flown. Parked, it is slower than you.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Ashland",
@@ -27686,20 +28257,6 @@
             "spoken": "Passing Aurora"
           },
           {
-            "name": "North Channel Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 129.7,
-            "spoken": "Crossing the North Channel Platte River"
-          },
-          {
-            "name": "South Channel Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 129.7,
-            "spoken": "Crossing the South Channel Platte River"
-          },
-          {
             "name": "Giltner",
             "at_mi": 131.5,
             "off_mi": 3.35,
@@ -27709,6 +28266,16 @@
             "spoken": "Passing Giltner"
           },
           {
+            "name": "Stuhr Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 134.0,
+            "spoken": "Billboard: The Stuhr Museum, ahead in Grand Island. An eighteen-nineties railroad town of sixty buildings, many moved here. Somebody hauled a lot of oversize loads.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Doniphan",
             "at_mi": 143.6,
             "off_mi": 3.34,
@@ -27716,6 +28283,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151696121, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Doniphan"
+          },
+          {
+            "name": "North Channel Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 144.4,
+            "spoken": "Crossing the North Channel Platte River",
+            "lat": 40.82282,
+            "lon": -98.39809,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 397989533 (North Channel Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Stuhr Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 153.0,
+            "spoken": "Billboard: The Stuhr Museum, ahead in Grand Island. An eighteen-nineties railroad town of sixty buildings, many moved here. Somebody hauled a lot of oversize loads.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Denman",
@@ -27739,8 +28326,41 @@
             "name": "Great Platte River Road Archway",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 180.0,
-            "spoken": "Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it."
+            "at_mi": 171.0,
+            "spoken": "Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pioneer Village (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 173.6,
+            "spoken": "Billboard: Harold Warp Pioneer Village, next exit, then twelve miles south in Minden. Fifty thousand old things on twenty acres. Nobody here ever threw anything away.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Pioneer Village (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 177.4,
+            "spoken": "Billboard: Harold Warp Pioneer Village, next exit, then twelve miles south in Minden. Fifty thousand old things on twenty acres. Nobody here ever threw anything away.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Great Platte River Road Archway (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 191.0,
+            "spoken": "Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Elm Creek",
@@ -27761,6 +28381,56 @@
             "spoken": "Passing Overton"
           },
           {
+            "name": "Heartland Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 216.5,
+            "spoken": "Billboard: The Heartland Museum of Military Vehicles, next exit. About a hundred tanks, jeeps and helicopters, many still running. Every one of them wins a merge.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Heartland Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 220.3,
+            "spoken": "Billboard: The Heartland Museum of Military Vehicles, next exit. About a hundred tanks, jeeps and helicopters, many still running. Every one of them wins a merge.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Robert Henri Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 230.8,
+            "spoken": "Billboard: The Robert Henri Museum, next exit in Cozad. The painter grew up here as Robert Cozad, then left town in a hurry under a new name.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Robert Henri Museum (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 234.6,
+            "spoken": "Billboard: The Robert Henri Museum, next exit in Cozad. The painter grew up here as Robert Cozad, then left town in a hurry under a new name.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Pony Express Station",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 236.0,
+            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sod House Museum",
             "category": "museum",
             "kind": "point",
@@ -27777,11 +28447,14 @@
             "spoken": "Passing Gothenburg"
           },
           {
-            "name": "Pony Express Station",
+            "name": "Pony Express Station (eastbound)",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 250.0,
-            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west."
+            "at_mi": 252.0,
+            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Maxwell",
@@ -27793,11 +28466,34 @@
             "spoken": "Passing Maxwell"
           },
           {
+            "name": "Fort Cody Trading Post (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 267.5,
+            "spoken": "Billboard: Fort Cody Trading Post, ahead in North Platte, where Buffalo Bill's Wild West Show runs in twenty thousand hand-carved figures. Tiny horses, no cleanup.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Golden Spike Tower",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 280.0,
-            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch ten thousand rail cars a day being sorted like a giant toy set."
+            "at_mi": 271.0,
+            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Fort Cody Trading Post (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 287.0,
+            "spoken": "Billboard: Fort Cody Trading Post, ahead in North Platte, where Buffalo Bill's Wild West Show runs in twenty thousand hand-carved figures. Tiny horses, no cleanup.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Hershey",
@@ -27809,11 +28505,24 @@
             "spoken": "Passing Hershey"
           },
           {
-            "name": "South Platte River",
-            "category": "river",
+            "name": "Golden Spike Tower (eastbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 307.7,
-            "spoken": "Crossing the South Platte River"
+            "at_mi": 293.5,
+            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch about fourteen thousand rail cars a day being sorted like a giant toy set.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Ole's Big Game Steakhouse (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 305.0,
+            "spoken": "Billboard: Ole's Big Game Steakhouse, next exit in Paxton. More than two hundred trophy mounts and a polar bear in the bar. He never buys a round.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Paxton",
@@ -27825,6 +28534,26 @@
             "spoken": "Passing Paxton"
           },
           {
+            "name": "Ole's Big Game Steakhouse (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 312.0,
+            "spoken": "Billboard: Ole's Big Game Steakhouse, next exit in Paxton. More than two hundred trophy mounts and a polar bear in the bar. He never buys a round.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Front Street (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 319.0,
+            "spoken": "Billboard: Front Street, ahead in Ogallala. A rebuilt cattle-trail main street with a cowboy museum and a jail cell. Visit the museum. Skip the cell.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Brule",
             "at_mi": 337.5,
             "off_mi": 0.97,
@@ -27832,6 +28561,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151351519, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brule"
+          },
+          {
+            "name": "Front Street (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 340.5,
+            "spoken": "Billboard: Front Street, ahead in Ogallala. A rebuilt cattle-trail main street with a cowboy museum and a jail cell. Visit the museum. Skip the cell.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "South Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 352.8,
+            "spoken": "Crossing the South Platte River",
+            "lat": 41.0287,
+            "lon": -102.16593,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 146077684 (South Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Julesburg",
@@ -27852,18 +28601,24 @@
             "spoken": "Passing Lodgepole"
           },
           {
-            "name": "Carhenge",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 390.0,
-            "spoken": "Billboard: Carhenge is ahead in western Nebraska. Vintage cars are arranged like Stonehenge and painted gray, yet the result is still easier to understand than most modern roundabouts."
-          },
-          {
             "name": "The Original Cabela's",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 410.0,
-            "spoken": "Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop."
+            "at_mi": 387.0,
+            "spoken": "Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Original Cabela's (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 404.0,
+            "spoken": "Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Dix",
@@ -27891,6 +28646,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151328691, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Burns"
+          },
+          {
+            "name": "Old West Museum (from Omaha)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 488.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "restrictions": [],
@@ -29854,6 +30619,16 @@
             "spoken": "Approaching Coyote Pass"
           },
           {
+            "name": "North Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 3.9,
+            "spoken": "Crossing the North Platte River",
+            "lat": 41.83904,
+            "lon": -103.63554,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 246282423 (North Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Minatare",
             "at_mi": 5.0,
             "off_mi": 6.53,
@@ -29870,13 +30645,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151502815, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Melbeta"
-          },
-          {
-            "name": "North Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 14.5,
-            "spoken": "Crossing the North Platte River"
           },
           {
             "name": "Dix",
@@ -29904,6 +30672,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151328691, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Burns"
+          },
+          {
+            "name": "Old West Museum (from Scottsbluff)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 106.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Ranchettes",
@@ -30853,6 +31631,16 @@
             "spoken": "Approaching Coyote Pass"
           },
           {
+            "name": "North Platte River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 3.9,
+            "spoken": "Crossing the North Platte River",
+            "lat": 41.83904,
+            "lon": -103.63554,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 246282423 (North Platte River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Minatare",
             "at_mi": 5.0,
             "off_mi": 6.53,
@@ -30869,13 +31657,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151502815, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Melbeta"
-          },
-          {
-            "name": "North Platte River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 10.3,
-            "spoken": "Crossing the North Platte River"
           },
           {
             "name": "Plains Historical Museum",
@@ -31743,6 +32524,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "The Original Cabela's (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 13.0,
+            "spoken": "Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Dix",
             "at_mi": 29.8,
             "off_mi": 0.98,
@@ -31768,6 +32559,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151328691, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Burns"
+          },
+          {
+            "name": "Old West Museum (from Sidney)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 93.0,
+            "spoken": "Billboard: The Old West Museum, ahead in Cheyenne. The country's largest collection of horse-drawn carriages, a hundred sixty strong. None of them has a turn signal.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Ranchettes",

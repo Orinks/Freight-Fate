@@ -352,7 +352,7 @@ impl DrivingState {
         self.roll_over(ctx);
     }
 
-    /// The truck goes over: the freight is scrap, the truck may not be
+    /// The truck goes over: any freight aboard is scrap, the truck may not be
     /// driven, and the run carries on the way it does after any other
     /// out-of-service event.
     pub fn roll_over(&mut self, ctx: &mut GameContext) {
@@ -372,6 +372,8 @@ impl DrivingState {
         // This line names what happened to the load, so the condition cue
         // must not say it again a frame later.
         self.cargo_cue_at = self.cargo_cue_at.max(CARGO_REJECT_PCT);
+        // A deadhead or a bobtail has no load and no receiver to name.
+        let loaded = self.trip.truck.trailer_attached && self.trip.truck.cargo_kg > 0.0;
         let liquid = self.trip.truck.liquid.is_some();
         let words = cargo_condition_text(self.trip.truck.cargo_damage_pct, liquid);
         let place = if on_ramp { "ramp curve" } else { "bend" };
@@ -382,17 +384,25 @@ impl DrivingState {
             } else {
                 ""
             };
-            format!("Rolled over in the {place}. Load {words}.{record}")
+            if loaded {
+                format!("Rolled over in the {place}. Load {words}.{record}")
+            } else {
+                format!("Rolled over in the {place}.{record}")
+            }
         } else {
             let record = if recorded {
                 " It goes on your driving record as a crash."
             } else {
                 ""
             };
-            format!(
-                "The truck rolled over in the {place}. The load is {words}, and the receiver \
-                 will refuse it.{record}"
-            )
+            if loaded {
+                format!(
+                    "The truck rolled over in the {place}. The load is {words}, and the \
+                     receiver will refuse it.{record}"
+                )
+            } else {
+                format!("The truck rolled over in the {place}.{record}")
+            }
         };
         ctx.say_event_with(message, SayEvent::new().category(SpeechCategory::Safety));
         // The wall is reached here, not by the band watcher: settlement

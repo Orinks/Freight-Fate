@@ -3,12 +3,16 @@
 //! approach are one pickup drive, the offer says the deadhead comes first,
 //! and a save on the way rebuilds the same road.
 
-use ff_core::models::jobs::Job;
+use ff_core::models::jobs::{route_drive_hours, Job};
+use ff_core::sim::timezones::{appointment_text, city_zone, EASTERN};
 
 use freight_fate::app::testing::TestApp;
+use freight_fate::states::base::Key;
 use freight_fate::states::city::{
-    describe_job, dispatch_cache_key, relay_load_for_board, JobBoardState, DRIVE_PHASE_PICKUP,
+    describe_job, dispatch_cache_key, relay_load_for_board, JobBoardState, JobDetailState,
+    DRIVE_PHASE_PICKUP,
 };
+use freight_fate::states::city_pickup::{PICKUP_CHECK_IN_MIN, PICKUP_LOADING_MIN};
 use freight_fate::states::driving::DrivingState;
 
 use crate::states_city_support::*;
@@ -85,4 +89,50 @@ fn test_accepting_a_relayed_load_drives_the_deadhead_and_the_approach_as_one_pic
     let resumed = DrivingState::from_snapshot(&mut app.ctx, &snapshot).expect("resumes");
     assert_eq!(resumed.trip.route.cities, cities);
     assert_eq!(resumed.phase.to_string(), DRIVE_PHASE_PICKUP);
+}
+
+/// The delivery clock starts at the shipper, so the detail screen's "deliver
+/// by" time counts the deadhead, check-in and loading ahead of the deadline.
+/// Counted from the board, a long deadhead put it before the truck could
+/// even arrive.
+#[test]
+fn test_a_relayed_loads_appointment_counts_from_the_loaded_departure() {
+    let mut app = TestApp::new();
+    let job = ["Sherman", "Topeka", "Cheyenne", "Amarillo", "Bismarck"]
+        .into_iter()
+        .find_map(|city| relayed_load(&mut app, city))
+        .expect("one of the small towns relays a load off an empty board");
+    let world = app.ctx.world;
+    let here = world.resolve_city_key(&profile(&app).current_city);
+    let origin = world.resolve_city_key(&job.origin);
+    let corridor = world
+        .supported_route(&here, &origin, None)
+        .unwrap()
+        .unwrap();
+    let approach_h = world
+        .facility_approach_route(&job.origin, &job.origin_location)
+        .map(|approach| route_drive_hours(Some(&approach), 0.0, Some(world)))
+        .unwrap_or(0.0);
+    let departure_h = route_drive_hours(Some(&corridor), 0.0, Some(world))
+        + approach_h
+        + (PICKUP_CHECK_IN_MIN + PICKUP_LOADING_MIN) / 60.0;
+    let zone = world
+        .city(&job.destination)
+        .map(|city| city_zone(city))
+        .unwrap_or(EASTERN);
+    let now = profile(&app).game_hours;
+
+    let board = JobBoardState::new(&app.ctx, vec![job.clone()]);
+    app.push_state(board);
+    key(&mut app, Key::F1);
+    let deadline = labels::<JobDetailState>(&app)
+        .into_iter()
+        .find(|line| line.starts_with("Deadline:"))
+        .expect("a deadline line");
+    let due = appointment_text(now, departure_h + job.deadline_game_h, zone);
+    assert!(
+        deadline.ends_with(&format!("deliver by about {due}.")),
+        "{deadline}"
+    );
+    assert_ne!(due, appointment_text(now, job.deadline_game_h, zone));
 }

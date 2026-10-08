@@ -17,7 +17,7 @@ use crate::discord_presence::PresenceState;
 use crate::impl_state_for_menu;
 use crate::states::base::{Menu, MenuCore, MenuItem};
 use crate::states::city::PayDebtState;
-use crate::states::driving::DrivingState;
+use crate::states::driving::{DrivingState, StopVisit};
 use crate::states::driving_core::{
     advance_rest_clock, clock_text, deadline_text, hos_mut_of, hos_of, pay_advance_grant,
     pay_advance_unavailable_reason, player_pays_operating_costs, poi_ambient_key, profile_mut_of,
@@ -27,6 +27,7 @@ use crate::states::driving_core::{
     ROAD_TIRE_SPECIALIST_COST_PER_PCT, ROAD_TIRE_SPECIALIST_MIN, WALK_AROUND_MIN, WAVE_THROUGH_MIN,
 };
 use crate::states::driving_menu_states::{keep_rows, DriveRef};
+use crate::states::driving_rest_states::back_on_the_road_line;
 use crate::states::driving_rest_states::fuel_pump::FuelPump;
 use crate::states::driving_rest_states::loyalty::LoyaltyRewardsState;
 use crate::states::driving_rest_states::rest_preview::{sleep_preview, SleepChoice};
@@ -56,11 +57,10 @@ pub struct RestStopState {
     driving: DriveRef,
     pub stop: RoadStop,
     preferred_rest: RestFocus,
-    fueled_here: bool,
-    inspection_complete: bool,
     pending_sleep: Option<SleepChoice>,
-    /// Game hour of this visit's full-price CAT Scale ticket (reweigh price).
-    full_weigh_h: Option<f64>,
+    /// The drive's [`StopVisit`] as of the last row build; written through
+    /// the drive, so reopening the menu keeps it.
+    visit: StopVisit,
 }
 
 impl RestStopState {
@@ -70,10 +70,8 @@ impl RestStopState {
             driving: DriveRef::active(ctx),
             stop,
             preferred_rest,
-            fueled_here: false,
-            inspection_complete: false,
             pending_sleep: None,
-            full_weigh_h: None,
+            visit: StopVisit::default(),
         }
     }
 
@@ -88,10 +86,8 @@ impl RestStopState {
             } else {
                 RestFocus::Default
             },
-            fueled_here: false,
-            inspection_complete: false,
             pending_sleep: None,
-            full_weigh_h: None,
+            visit: StopVisit::default(),
         }
     }
 
@@ -170,9 +166,17 @@ impl RestStopState {
             // scale its truck-stop script -- "no truck parking... Loyalty
             // program: Loyalty points: 0" -- at an open scale (owner
             // playtest, 2026-08-20).
+            //
+            // A closed scale's first row is its own name ("I-40 Weigh
+            // Station is closed"), so leading with the name as well read it
+            // twice in one breath (QA, 2026-10-07). The row says it once.
+            let row = self.current_text(ctx);
+            if row.starts_with(&self.stop.spoken_name()) {
+                parts.clear();
+            }
             parts.push("Inspection station.".to_string());
             parts.push(format!("It is {}.", clock_text(d.trip.local_hour())));
-            parts.push(self.current_text(ctx));
+            parts.push(row);
             ctx.say(&parts.join(" "));
             return;
         }
@@ -196,6 +200,7 @@ impl RestStopState {
     }
 
     fn rows(&mut self, ctx: &mut GameContext, d: &mut DrivingState) -> Vec<MenuItem<Self>> {
+        self.visit = d.stop_visit(&self.stop).clone();
         let actions: Vec<String> = self.stop.actions.clone();
         let has = |name: &str| actions.iter().any(|a| a == name);
         let mut items: Vec<MenuItem<Self>> = Vec::new();
@@ -396,13 +401,25 @@ impl RestStopState {
                 .help("Roadside help from the listed towing service."),
             );
         }
-        if has("inspect") && !self.inspection_complete {
-            items.push(
+        if has("inspect") && !self.visit.inspected {
+            // Only an open scale has anyone to check in with. A closed one
+            // used to offer the check-in all the same and answer it as an
+            // open one did, waving a tester "straight back onto the highway"
+            // six miles short of the open scale he had been warned about
+            // (log, 2026-10-07). The closed row says so instead.
+            let item = if d.scale_is_open(&self.stop) {
                 MenuItem::new("Check in at inspection station", |s: &mut Self, ctx| {
                     s.inspect(ctx)
                 })
-                .help("Records the inspection check-in."),
-            );
+                .help("Records the inspection check-in.")
+            } else {
+                MenuItem::new(
+                    format!("{} is closed", self.stop.spoken_name()),
+                    |s: &mut Self, ctx| s.inspect(ctx),
+                )
+                .help("Nobody is at the scale house. There is nothing to check in at.")
+            };
+            items.push(item);
         }
         if d.trip.truck.doubles_hooked() {
             // A set of doubles is two trailers and a dolly to walk: the row
@@ -530,14 +547,16 @@ impl RestStopState {
         }) else {
             return;
         };
+        // Twenty-five proper breaks. The 30-minute one is the break that
+        // counts -- the 15-minute food and coffee stop eases fatigue but
+        // resets nothing, so it is not one of these. Counted before the
+        // save, so a quit afterwards cannot lose it.
+        let breaks = increment_stat(profile_mut_of(ctx), "breaks_taken");
         self.save_here(ctx, true);
         ctx.audio.play("ui/notify");
         ctx.say(&text);
         ctx.award_achievement("break_taken");
-        // Twenty-five proper breaks. The 30-minute one is the break that
-        // counts -- the 15-minute food and coffee stop eases fatigue but
-        // resets nothing, so it is not one of these.
-        if increment_stat(profile_mut_of(ctx), "breaks_taken") >= 25 {
+        if breaks >= 25 {
             ctx.award_achievement("coffee_regular");
         }
         // The break counts toward a 10-hour reset; the reset row says so.
@@ -698,6 +717,7 @@ impl RestStopState {
         if before_fatigue < hos::FATIGUE_SEVERE {
             ctx.award_achievement("sleep_before_exhaustion");
         }
+        self.refresh(ctx, true);
     }
 
     /// A paid bed where the parking is rough: a legal reset with real rest.
@@ -733,7 +753,7 @@ impl RestStopState {
                 "{engine_off}You took a motel room for {} dollars and slept a full ten hours. It \
                  is {}. Hours of service reset and you wake fresh. You have {} dollars. {}{}",
                 fmt_grouped(MOTEL_COST, 0),
-                clock_text(d.trip.current_hour()),
+                clock_text(d.trip.local_hour()),
                 fmt_grouped(money, 0),
                 deadline_text(d, ctx),
                 wake_air_instruction(d, ctx, true)
@@ -828,7 +848,7 @@ impl RestStopState {
                 format!(
                     "Shop repaired {} percent damage on the carrier account. It is {}. {}",
                     fmt_f(damage, 0),
-                    clock_text(d.trip.current_hour()),
+                    clock_text(d.trip.local_hour()),
                     deadline_text(d, ctx)
                 )
             }) else {
@@ -853,9 +873,29 @@ impl RestStopState {
             ctx.say("The truck does not need roadside assistance.");
             return;
         }
+        // A field patch only brings damage down to its own floor; under it,
+        // the call-out bought nothing and the line claimed a repair.
+        if damage <= FIELD_REPAIR_DAMAGE_PCT {
+            ctx.say(&format!(
+                "A roadside patch cannot bring the truck under {} percent damage. A repair \
+                 shop can.",
+                fmt_f(FIELD_REPAIR_DAMAGE_PCT, 0)
+            ));
+            return;
+        }
         let cost = road_repair_cost(damage, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE);
         let carrier_paid = !player_pays_operating_costs(&profile_of(ctx).business_status);
         if !carrier_paid {
+            let money = profile_of(ctx).money();
+            if money < cost {
+                ctx.audio.play("ui/error");
+                ctx.say(&format!(
+                    "Roadside assistance costs {} dollars and you have {} dollars.",
+                    fmt_grouped(cost, 0),
+                    fmt_grouped(money, 0)
+                ));
+                return;
+            }
             profile_mut_of(ctx).spend(cost);
         }
         let Some(text) = self.driving.clone().with(ctx, |d, ctx| {
@@ -1031,7 +1071,7 @@ impl RestStopState {
     }
 
     fn buff_price(&self, buff: &Buff) -> f64 {
-        if buff.free_with_fuel && self.fueled_here {
+        if buff.free_with_fuel && (self.visit.fueled || self.visit.free_shower) {
             return 0.0;
         }
         buff.price
@@ -1058,8 +1098,11 @@ impl RestStopState {
     fn buff_label(&self, buff: &Buff) -> String {
         let price = self.buff_price(buff);
         if price <= 0.0 {
-            if buff.free_with_fuel {
+            if buff.free_with_fuel && self.visit.fueled {
                 return format!("{}: free with your fuel purchase", buff.label);
+            }
+            if buff.free_with_fuel {
+                return format!("{}: free with your loyalty reward", buff.label);
             }
             return format!("{}: free", buff.label);
         }
@@ -1139,10 +1182,17 @@ impl RestStopState {
                 );
                 hos_mut_of(ctx).take_break(buff.stop_minutes);
             }
+            let from_reward = buff.free_with_fuel && price <= 0.0 && !self.visit.fueled;
+            if from_reward {
+                // A redeemed shower is one shower.
+                d.stop_visit(&self.stop).free_shower = false;
+            }
             let billing = if carrier_pays {
                 "Billed to the carrier.".to_string()
             } else if price <= 0.0 {
-                if buff.free_with_fuel {
+                if from_reward {
+                    "Free with your loyalty reward.".to_string()
+                } else if buff.free_with_fuel {
                     "Free with your fuel purchase.".to_string()
                 } else {
                     "Free.".to_string()
@@ -1170,8 +1220,51 @@ impl RestStopState {
     }
 
     fn inspect(&mut self, ctx: &mut GameContext) {
+        // Nobody is in a closed scale house: the row says so and nothing
+        // else happens. It used to run the check-in all the same -- marking
+        // the stop inspected, playing the notify tone and saving -- for a
+        // scale that settles nothing (QA, 2026-10-07). No time, no record.
+        let open = self
+            .driving
+            .read(|d| d.scale_is_open(&self.stop))
+            .unwrap_or(false);
+        if !open {
+            ctx.say(&format!(
+                "{} is closed. Pull back onto the highway.",
+                self.stop.spoken_name()
+            ));
+            return;
+        }
+        let Some((text, waved)) = self.check_in(ctx) else {
+            return;
+        };
+        self.refresh(ctx, true);
+        ctx.say(&text);
+        ctx.say_with(self.current_text(ctx), Say::queued().review(false));
+        if waved {
+            record_inspection(ctx);
+        }
+    }
+
+    /// Whether this is an open scale the driver has not checked in at yet.
+    fn check_in_pending(&self) -> bool {
+        self.stop.actions.iter().any(|a| a == "inspect")
+            && !self.visit.inspected
+            && self
+                .driving
+                .read(|d| d.scale_is_open(&self.stop))
+                .unwrap_or(false)
+    }
+
+    /// The scale check-in itself, settled and saved: the spoken result, and
+    /// whether the lane waved the truck through.
+    ///
+    /// Open scales only: `inspect` answers a closed one before this runs,
+    /// and Back runs it only while `check_in_pending`, which is open-only.
+    fn check_in(&mut self, ctx: &mut GameContext) -> Option<(String, bool)> {
         let stop = self.stop.clone();
-        let Some((text, waved)) = self.driving.clone().with(ctx, |d, ctx| {
+        let result = self.driving.clone().with(ctx, |d, ctx| {
+            d.stop_visit(&stop).inspected = true;
             ctx.audio.play("ui/notify");
             // A valid decal is waved through on sight (CVSA Operational
             // Policy 5), unless the record is targeted.
@@ -1223,16 +1316,11 @@ impl RestStopState {
                 ),
                 false,
             )
-        }) else {
-            return;
-        };
-        self.inspection_complete = true;
-        self.refresh(ctx, true);
-        ctx.say(&text);
-        ctx.say_with(self.current_text(ctx), Say::queued().review(false));
-        if waved {
-            record_inspection(ctx);
-        }
+        })?;
+        // The fine, the citation and the done check-in are on disk before a
+        // quit could take them back.
+        self.save_here(ctx, true);
+        Some(result)
     }
 
     /// The driver's own pre-trip: what an inspector would find on the
@@ -1381,14 +1469,6 @@ impl FuelPump for RestStopState {
     fn stop(&self) -> &RoadStop {
         &self.stop
     }
-
-    fn fueled_here(&self) -> bool {
-        self.fueled_here
-    }
-
-    fn set_fueled_here(&mut self, fueled: bool) {
-        self.fueled_here = fueled;
-    }
 }
 
 impl Menu for RestStopState {
@@ -1484,17 +1564,38 @@ impl Menu for RestStopState {
     }
 
     fn go_back(&mut self, ctx: &mut GameContext) {
+        // Leaving an open scale runs the check-in first (owner ruling,
+        // 2026-09-28): Back used to skip the inspection a flagged record is
+        // pulled in for.
+        let checked = if self.check_in_pending() {
+            self.check_in(ctx)
+        } else {
+            None
+        };
+        // Leaving one scale with another open one still ahead: say which
+        // was which once the truck is back on the road (tester log,
+        // 2026-10-07: a closed scale six miles short of the announced one).
+        let here = (self.stop.stop_type == "weigh_station").then(|| self.stop.spoken_name());
+        let engine_on = self
+            .driving
+            .read(|d| {
+                d.note_scale_reannounce(here.as_deref());
+                d.trip.truck.engine_on
+            })
+            .unwrap_or(false);
         ctx.audio.play("ui/menu_back");
         ctx.pop_state();
-        let engine = ctx.control_hint("engine");
-        let brake = ctx.control_hint("parking_brake");
-        ctx.say_with(
-            format!(
-                "Back on the road. Parking brake set. {engine} starts the engine, {brake} \
-                 releases the brake."
-            ),
-            Say::new(),
-        );
+        let back = back_on_the_road_line(ctx, engine_on);
+        match checked {
+            Some((text, waved)) => {
+                ctx.say(&text);
+                ctx.say_with(back, Say::queued());
+                if waved {
+                    record_inspection(ctx);
+                }
+            }
+            None => ctx.say_with(back, Say::new()),
+        }
     }
 }
 

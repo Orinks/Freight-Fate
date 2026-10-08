@@ -22,9 +22,14 @@ fn sample(at_mi: f64, aadt: f64, lanes: i64) -> TrafficVolumeSample {
     }
 }
 
+/// Chicago is an hour behind the trip's Eastern clock, and congestion reads
+/// the local one: a test's "5 PM" in Chicago is 18.0 on the trip clock.
+const CHICAGO_BEHIND_H: f64 = 1.0;
+
 /// A trip whose first leg carries a known HPMS profile: a genuinely
 /// overloaded metro stretch for the first dozen miles, light rural volume
 /// beyond. Independent of whatever the checked-in bake contains.
+/// `opts.start_hour` is Chicago's wall clock.
 fn synthetic_trip(opts: TripOptions) -> Trip {
     let cached = first_route_option(world(), "Chicago", "Indianapolis");
     let leg = with_corridor(&cached.legs[0], |d| {
@@ -40,6 +45,7 @@ fn synthetic_trip(opts: TripOptions) -> Trip {
         TripOptions {
             seed: Some(2),
             world: Some(world()),
+            start_hour: opts.start_hour + CHICAGO_BEHIND_H,
             ..opts
         },
     )
@@ -693,7 +699,7 @@ fn test_congestion_preserves_local_volume_and_lane_capacity() {
         weather("great_lakes", 1),
         TripOptions {
             seed: Some(2),
-            start_hour: 17.0,
+            start_hour: 17.0 + CHICAGO_BEHIND_H,
             world: Some(world()),
             ..Default::default()
         },

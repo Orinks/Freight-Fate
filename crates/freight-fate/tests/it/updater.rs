@@ -236,6 +236,30 @@ fn test_stable_channel_ignores_newer_19_tester_prerelease() {
     assert_eq!(info.tag, "v1.8.8.1");
 }
 
+#[test]
+fn test_stable_build_is_not_offered_its_own_release() {
+    // The 1.9.0 stable shipped stamped `1.9.0.dev0` and tagged `vv1.9.0`, so
+    // the version text said it was older than v1.9.0 and the updater offered
+    // the same release again on every start.
+    let api = |path: &str| -> Result<Value, NetError> {
+        assert_eq!(path, "/releases/latest");
+        Ok(release("v1.9.0"))
+    };
+    let env = env_on(Platform::Windows);
+    for tag in ["v1.9.0", "vv1.9.0"] {
+        let build = BuildInfo::new(tag, "stable", "2026-10-04");
+        let found = check_for_update_with("stable", "1.9.0.dev0", Some(&build), &env, &api);
+        assert_eq!(found.unwrap(), None, "{tag}");
+    }
+
+    // An older stable copy is still offered the release.
+    let build = BuildInfo::new("v1.8.8.1", "stable", "2026-08-08");
+    let info = check_for_update_with("stable", "1.8.8.1", Some(&build), &env, &api)
+        .unwrap()
+        .expect("a stable update");
+    assert_eq!(info.tag, "v1.9.0");
+}
+
 // -- dev channel --------------------------------------------------------------
 
 #[test]
@@ -522,6 +546,37 @@ fn test_19_snapshot_offers_the_arm64_linux_tarball_to_an_arm64_process() {
         .expect("an update");
     assert_eq!(info.tag, "1.9-tester-20260825");
     assert!(info.asset_name.ends_with("-linux-arm64.tar.gz"));
+}
+
+#[test]
+fn test_19_snapshot_rebuilt_under_the_same_tag_is_offered_by_commit() {
+    // 2026-10-03: the release candidate re-cut 1.9-tester-20261003 in the
+    // afternoon; the copy from that morning's run carried the same tag and
+    // was told it was up to date. The stamped commit tells them apart.
+    const MORNING: &str = "be5c41eae0a4d45b9193c705e48185479756ea44";
+    const AFTERNOON: &str = "47df2cd3e0f2d61e8e06188e8267910cbb7b7db1";
+    let mut rebuilt = tester("1.9-tester-20261003");
+    rebuilt["target_commitish"] = json!(AFTERNOON);
+    let releases = vec![tester("1.9-tester-20261002"), rebuilt];
+    let mut build = BuildInfo::new("1.9-tester-20261003", "dev", "2026-10-03");
+
+    build.commit = MORNING.to_string();
+    let info = snapshot_update_from(&releases, Some(&build), "1.9.0", None, &env())
+        .expect("the rebuild is offered");
+    assert_eq!(info.tag, "1.9-tester-20261003");
+
+    build.commit = AFTERNOON.to_string();
+    assert!(snapshot_update_from(&releases, Some(&build), "1.9.0", None, &env()).is_none());
+
+    // A copy stamped before commits were recorded stays where it was.
+    build.commit = String::new();
+    assert!(snapshot_update_from(&releases, Some(&build), "1.9.0", None, &env()).is_none());
+
+    let stamped = build_info_from_dict(
+        &json!({"tag": "1.9-tester-20261003", "commit": AFTERNOON}),
+        "1.9.0",
+    );
+    assert_eq!(stamped.commit, AFTERNOON);
 }
 
 #[test]
@@ -1008,6 +1063,7 @@ fn test_startup_update_prompt_respects_skipped_version() {
         asset_name: "FreightFate-1.6.1-windows-portable.zip".to_string(),
         asset_url: "https://example.test/FreightFate.zip".to_string(),
         asset_size: 1,
+        asset_sha256: String::new(),
     };
     let mut app = TestApp::new();
     app.ctx.settings.skipped_update = "v1.6.1".to_string();
@@ -1060,6 +1116,7 @@ fn test_remind_later_help_describes_terminal_exit_check() {
         asset_name: "FreightFate-1.6.1-windows-portable.zip".to_string(),
         asset_url: "https://example.test/FreightFate.zip".to_string(),
         asset_size: 1,
+        asset_sha256: String::new(),
     };
     let mut state = UpdatePromptState::new(info);
     let items = state.build_items(&mut app.ctx);
@@ -1452,6 +1509,7 @@ fn test_download_state_parks_update_when_not_auto_appliable() {
         asset_name: "FreightFate-9.9.9-linux-x86_64.AppImage".to_string(),
         asset_url: "https://example.test/a".to_string(),
         asset_size: 1,
+        asset_sha256: String::new(),
     };
     let new_root = tmp.path().join(&info.asset_name);
     fs::write(&new_root, b"new").unwrap();
@@ -1496,6 +1554,7 @@ fn test_update_info_is_plain_data() {
         asset_name: "FreightFate-9.9.9-linux-x86_64.AppImage".to_string(),
         asset_url: "https://example.test/a".to_string(),
         asset_size: 1,
+        asset_sha256: String::new(),
     };
     assert_eq!(info.clone(), info);
 }

@@ -8,10 +8,14 @@ use ff_core::sim::timezones::{appointment_text, city_zone};
 use crate::app::{GameContext, SharedState};
 use crate::impl_state_for_menu;
 use crate::states::base::{Menu, MenuCore, MenuItem};
-use crate::states::city::{base_menu_current_help, profile};
+use crate::states::city::{
+    base_menu_current_help, profile, PICKUP_CHECK_IN_MIN, PICKUP_LOADING_MIN,
+};
 
 use super::weight::load_weight_margin;
-use super::{locked_reason, market_preview, settlement_for, trailer_note, JobBoardState};
+use super::{
+    locked_reason, market_preview, pickup_drive_hours, settlement_for, trailer_note, JobBoardState,
+};
 
 /// Board line for a carrier-assigned reposition.
 fn describe_reposition(ctx: &GameContext, total: usize, job: &Job, index: Option<usize>) -> String {
@@ -129,6 +133,11 @@ impl JobDetailState {
             .city(&job.destination)
             .map(|city| city_zone(city))
             .unwrap_or(ff_core::sim::timezones::EASTERN);
+        // The delivery clock starts when the loaded truck leaves the shipper,
+        // after the drive there and the check-in and loading: a relayed
+        // load's deadhead can run longer than the deadline's slack.
+        let loaded_departure_h =
+            pickup_drive_hours(ctx, job) + (PICKUP_CHECK_IN_MIN + PICKUP_LOADING_MIN) / 60.0;
         let mut lines = vec![
             format!("Cargo: {}.", job.spoken_cargo_label()),
             format!("Origin: {}.", job.origin_facility_text()),
@@ -146,9 +155,9 @@ impl JobDetailState {
                 fmt_f(s.per_distance(dollars_per_mile), 2)
             ),
             format!(
-                "Deadline: {} hours, deliver by about {}.",
+                "Deadline: {} hours once loaded, deliver by about {}.",
                 fmt_f(job.deadline_game_h, 0),
-                appointment_text(p.game_hours, job.deadline_game_h, zone)
+                appointment_text(p.game_hours, loaded_departure_h + job.deadline_game_h, zone)
             ),
             format!("Equipment: {}.", job.equipment_text()),
             format!("Trailer: {}", trailer_note(p, job)),

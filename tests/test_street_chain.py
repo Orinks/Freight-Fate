@@ -536,6 +536,20 @@ def test_a_rural_numbered_highway_and_a_county_road_differ_where_the_code_says()
     assert (highway["limit_mph"], county["limit_mph"]) == (65.0, 55.0)
 
 
+def test_a_rural_road_takes_the_truck_figure_where_the_code_has_one():
+    """Va. Code 46.2-870 holds a truck to 45 off the primaries (55 for a car),
+    and Mont. Code 61-8-312 to 65 off the interstate (70 by day for a car).
+    Both baked the car figure; the game drives a truck."""
+    primary = _one_street("Virginia", town=False, major=frozenset({(0, 1), (1, 2)}))
+    secondary = _one_street("Virginia", town=False)
+    montana = _one_street("Montana", town=False, major=frozenset({(0, 1), (1, 2)}))
+    assert (primary["limit_mph"], secondary["limit_mph"], montana["limit_mph"]) == (
+        55.0,
+        45.0,
+        65.0,
+    )
+
+
 def test_a_state_without_a_rural_default_takes_the_labelled_median():
     street = _one_street("Nevada", town=False)
     if street["limit_source"] == "assumed":

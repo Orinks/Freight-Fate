@@ -912,8 +912,8 @@ fn faults(preset: Preset, kind: Kind, run: &Run) -> Vec<String> {
     }
     let automated = settings.lane_is_automated();
     for (phrase, wrong) in [
-        ("Tap Right", !automated),
-        ("Hold Right", automated),
+        ("Tap the Right arrow", !automated),
+        ("Hold the Right arrow", automated),
         ("Steer right", automated),
     ] {
         if wrong && heard.contains(phrase) {

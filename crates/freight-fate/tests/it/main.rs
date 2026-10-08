@@ -5,7 +5,9 @@
 //! Files live in `tests/it/`, which cargo does not auto-discover, so this
 //! file is the only target and the `mod` lines below are what includes
 //! them. A new test file needs a line here. The exceptions:
-//! `tests/classic_startup.rs` needs a process nothing has touched yet, and
+//! `tests/classic_startup.rs` needs a process nothing has touched yet,
+//! `tests/frame_time/` times frames and must not share the CPU with
+//! sibling tests, and
 //! `tests/agent_server.rs` tests agent tooling rather than the game, so it
 //! is its own binary that a plain `cargo test` leaves out (see Cargo.toml).
 
@@ -41,6 +43,7 @@ mod app_smoke;
 mod app_speech_audio;
 mod app_speech_ducking;
 mod app_state_stack;
+mod app_touch_gestures;
 mod audio_backends;
 mod audio_loops;
 mod audio_radio_now_playing;
@@ -59,7 +62,6 @@ mod cloud_backup_review;
 mod cloud_saves;
 mod discord_presence;
 mod duty_watch;
-mod frame_time;
 mod net;
 mod network_guard;
 mod online_activation;
@@ -79,6 +81,7 @@ mod secret_store_guard;
 mod single_instance;
 mod speech;
 mod speech_live;
+mod states_assist_picker;
 mod states_career_close_out;
 mod states_city;
 mod states_city_hos;
@@ -94,11 +97,14 @@ mod states_driving_approach_sweep;
 mod states_driving_armed_exit_readout;
 mod states_driving_arrival_gate;
 mod states_driving_bend_rollover_sweep;
+mod states_driving_billboard_moment;
 mod states_driving_border;
 mod states_driving_buffs;
 mod states_driving_cab_systems;
 mod states_driving_cat_scale;
 mod states_driving_chain_law;
+mod states_driving_channel3000;
+mod states_driving_commands;
 mod states_driving_controls;
 mod states_driving_core;
 mod states_driving_damage;
@@ -123,6 +129,7 @@ mod states_driving_exit_windows;
 mod states_driving_exits;
 mod states_driving_facility;
 mod states_driving_facility_approaches;
+mod states_driving_fuel_warning;
 mod states_driving_grades;
 mod states_driving_hazard_dodge;
 mod states_driving_hazards;
@@ -138,11 +145,15 @@ mod states_driving_menus_rest;
 mod states_driving_menus_roadside;
 mod states_driving_menus_tablet;
 mod states_driving_multilane_speech;
+mod states_driving_pace;
+mod states_driving_passing;
 mod states_driving_ramps;
 mod states_driving_rest_choice_scenarios;
 mod states_driving_retarder;
 mod states_driving_road;
 mod states_driving_rollover;
+mod states_driving_scale_pairs;
+mod states_driving_scale_reminder;
 mod states_driving_speech_ladder;
 mod states_driving_speed_keeper_sweep;
 mod states_driving_status_screens;
@@ -189,6 +200,7 @@ mod transcript_tutorial_verbosity;
 mod transcript_wrong_way;
 mod twin_parcel_doubles;
 mod updater;
+mod updater_watchdog;
 mod windows_subsystem;
 
 mod states_ramp_assist_control;
@@ -196,3 +208,4 @@ mod states_ramp_signal_timing;
 
 mod states_driving_hos_planning;
 mod states_driving_hos_rest_stretch;
+mod states_driving_speech_modes;

@@ -23,6 +23,25 @@ pub fn active_log_path() -> Option<PathBuf> {
     LOG_FILE.lock().unwrap_or_else(|e| e.into_inner()).clone()
 }
 
+/// The folder holding `game.log`, in words for the bug-report prompt.
+///
+/// The folder this session actually writes, when there is one. Otherwise the
+/// packaged layout: beside the game, except on macOS, where the log lives
+/// with the player's data. Saying "next to the game" on a Mac sent testers to
+/// the folder the 1.8 build wrote, so they attached weeks-old logs from a
+/// different version (issue 266).
+pub fn log_folder_words() -> String {
+    if let Some(dir) = active_log_path().as_deref().and_then(Path::parent) {
+        return dir.display().to_string();
+    }
+    if cfg!(target_os = "macos") {
+        "the logs folder inside Library, Application Support, FreightFate, in your home folder"
+            .to_string()
+    } else {
+        "the logs folder next to the game".to_string()
+    }
+}
+
 /// `FREIGHT_FATE_LOG` level names (Python logging names) to a filter.
 pub fn parse_level(name: &str) -> LevelFilter {
     match name.trim().to_ascii_uppercase().as_str() {
@@ -68,7 +87,7 @@ pub fn configure_logging() {
     let log_path: Option<PathBuf> = match explicit {
         Some(path) => Some(PathBuf::from(path)),
         None if packaged => Some(packaged_log_path(
-            cfg!(target_os = "macos"),
+            cfg!(any(target_os = "macos", target_os = "ios")),
             &ff_core::settings::game_root(),
             &ff_core::models::profile::data_dir(),
         )),

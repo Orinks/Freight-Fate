@@ -96,6 +96,7 @@ pub fn parse_wzdx_events(data: &Value, _state: &str) -> Vec<TrafficEvent> {
             location_text,
             closure: closure.into(),
             work_type: "construction".into(),
+            direction: String::new(),
         });
     }
     events
@@ -179,6 +180,7 @@ pub fn build_wzdx_v4_event(
         } else {
             String::new()
         },
+        direction: String::new(),
     })
 }
 

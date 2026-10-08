@@ -195,21 +195,42 @@ impl DrivingRecord {
         self.serious_within(game_hours, REVIEW_WINDOW_DAYS)
     }
 
-    /// The career hour at which the oldest citation or serious violation
-    /// still in the window leaves it, or `None` when the window is empty.
-    /// This is the date a record-based hold can honestly promise.
-    pub fn window_ages_out_at(&self, game_hours: f64) -> Option<f64> {
+    /// The career hour at which the window stops meeting `holds(citations,
+    /// serious)`, with nothing new added, or `None` when it already does not.
+    /// Each event leaves the window a year after it, so walk the expiries in
+    /// order. This is the date a record-based hold can honestly promise: the
+    /// oldest event leaving is not it when the rest still meet the floor.
+    pub fn window_clears_at(
+        &self,
+        game_hours: f64,
+        holds: impl Fn(i64, i64) -> bool,
+    ) -> Option<f64> {
         let window = REVIEW_WINDOW_DAYS as f64 * HOURS_PER_DAY;
         let cutoff = self.review_cutoff(game_hours);
-        self.citation_times
+        let mut events: Vec<(f64, bool)> = self
+            .citation_times
             .iter()
-            .chain(self.serious_violations.iter())
-            .filter(|&&at| at >= cutoff)
-            .copied()
-            .fold(None, |oldest: Option<f64>, at| {
-                Some(oldest.map_or(at, |o| o.min(at)))
-            })
-            .map(|oldest| oldest + window)
+            .map(|&at| (at, false))
+            .chain(self.serious_violations.iter().map(|&at| (at, true)))
+            .filter(|&(at, _)| at >= cutoff)
+            .collect();
+        events.sort_by(|a, b| a.0.total_cmp(&b.0));
+        let mut citations = events.iter().filter(|e| !e.1).count() as i64;
+        let mut serious = events.len() as i64 - citations;
+        if !holds(citations, serious) {
+            return None;
+        }
+        for (at, is_serious) in events {
+            if is_serious {
+                serious -= 1;
+            } else {
+                citations -= 1;
+            }
+            if !holds(citations, serious) {
+                return Some(at + window);
+            }
+        }
+        None
     }
 
     pub fn suspended(&self, game_hours: f64) -> bool {

@@ -974,10 +974,13 @@ pub struct BenchRun {
 
 /// Drive into a lead doing `lead_mph` on a road of `lanes_your_side` lanes,
 /// hands off from the moment the warning lands, and measure the response.
+/// Lane keeping on partial: on full the truck passes instead of braking
+/// (`states_driving_passing`), and hands off is the driver's case.
 pub fn bench_lead(lanes_your_side: i64, lead_mph: f64) -> BenchRun {
     use ff_core::sim::traffic_manager::TrafficVehicle;
 
     let mut harness = PlaytestHarness::new();
+    harness.app.ctx.settings.lane_keeping = "partial".to_string();
     harness.app.ctx.settings.speed_keeper = false;
     harness.app.ctx.settings.automatic_emergency_braking = true;
     harness.app.ctx.settings.time_scale = 1.0;
@@ -1404,10 +1407,12 @@ pub fn lane_bench(drive: &mut DrivingState, limit_mph: f64, lanes_your_side: i64
 
 /// Drive into a lead doing `lead_mph` on a road of `lanes_your_side` lanes,
 /// hands off, and report every line heard and the slowest the truck got.
+/// Lane keeping on partial, for the reason [`bench_lead`] gives.
 fn met_a_slow_lead(name: &str, lanes_your_side: i64, lead_mph: f64) -> (Vec<String>, f64) {
     use ff_core::sim::traffic_manager::TrafficVehicle;
 
     let mut harness = PlaytestHarness::new();
+    harness.app.ctx.settings.lane_keeping = "partial".to_string();
     harness.app.ctx.settings.speed_keeper = false;
     harness.app.ctx.settings.automatic_emergency_braking = true;
     harness.app.ctx.settings.time_scale = 1.0;

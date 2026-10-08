@@ -40,6 +40,13 @@ pub type Candidate = (String, f64, usize);
 type CandidateCache = HashMap<usize, HashMap<String, Vec<Candidate>>>;
 static CANDIDATES_CACHE: Lazy<Mutex<CandidateCache>> = Lazy::new(|| Mutex::new(HashMap::new()));
 
+/// Every other city reachable from `city`, from the same cache the boards
+/// fill: one supported route per city on the map, so the first ask in a city
+/// is the expensive part of opening its board.
+pub fn reachable_cities(world: &World, city: &str) -> Vec<Candidate> {
+    JobBoard::new(world, Some(0), None).candidates(&world.resolve_city_key(city))
+}
+
 /// The keyword arguments of `JobBoard.offers` / `offer_to`, each with its
 /// Python default.
 #[derive(Debug, Clone, Copy, Default)]

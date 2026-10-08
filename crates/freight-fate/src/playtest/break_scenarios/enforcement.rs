@@ -12,6 +12,7 @@
 use crate::playtest::breaker::{outcome, Outcome, Rig, RigOptions, DT};
 use crate::states::base::Key;
 use crate::states::driving_border::BorderClearanceState;
+use crate::states::driving_enforcement::SCALE_REMINDER_REAL_LEAD_S;
 use crate::states::driving_rest_states::EnforcementStopState;
 
 use ff_core::sim::enforcement_posts::{
@@ -277,11 +278,18 @@ pub fn run_the_border() -> Outcome {
 pub fn scale_pull_over_stands_down_exit() -> Outcome {
     let mut rig = Rig::new(RigOptions::default());
     let mut findings: Vec<String> = Vec::new();
-    let (_scale, truckstop) = inject_open_scale(&mut rig.drive.trip);
+    let (scale, truckstop) = inject_open_scale(&mut rig.drive.trip);
     rig.prepare(54.0, None);
     // Recreate the pre-fix wreckage by force: exit armed for the truck stop
     // (not the scale), then blow the scale at speed.
     rig.drive.trip.position_mi = SCALE_MI - 0.1;
+    // A truck that drove the approach heard the notice and, half a mile
+    // out, the reminder more than its real seconds ago: the crossing is
+    // the driver's to answer for.
+    let key = rig.drive.weigh_station_key(&scale);
+    rig.drive.weigh_station_noticed.insert(key.clone());
+    rig.drive.weigh_station_reminder_key = key;
+    rig.drive.weigh_station_reminder_age_s = SCALE_REMINDER_REAL_LEAD_S;
     rig.drive.enforcement_prev_mi = rig.drive.trip.position_mi;
     rig.drive.exit_stop = Some(truckstop);
     rig.drive.exit_signal_on = true;

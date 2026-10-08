@@ -1723,6 +1723,7 @@ fn a_village(name: &str, at_mi: f64, off_mi: f64) -> Landmark {
         kind: "point".to_string(),
         spoken: format!("Passing {name}"),
         off_mi,
+        directions: vec!["both".to_string()],
     }
 }
 

@@ -3,12 +3,13 @@
 //! tolls it paid. Each lands on the settlement (or, for a toll, the plaza)
 //! of the run that meets it, and not on the near miss before it.
 
+use chrono::{DateTime, TimeZone, Utc};
 use ff_core::data::world_models::Route;
 use ff_core::models::jobs::{Job, CARGO_CATALOG};
-use ff_core::sim::season::{date_text, is_friday_the_thirteenth};
 use ff_core::sim::trip_models::TripEventKind;
 use ff_core::sim::weather::WeatherKind;
 use freight_fate::app::testing::TestApp;
+use freight_fate::net::testing::set_server_time;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::DRIVE_PHASE_DELIVERY;
 use serde_json::json;
@@ -263,9 +264,41 @@ fn april_first_is_april_first_on_the_career_calendar() {
     date_earns("april_first", "March 31", "April 1");
 }
 
+/// orinks.net's clock at noon Eastern on a real date.
+fn server_on(y: i32, m: u32, d: u32) -> Option<DateTime<Utc>> {
+    Some(Utc.with_ymd_and_hms(y, m, d, 16, 0, 0).unwrap())
+}
+
 #[test]
-fn ten_four_day_is_the_fourth_of_october() {
-    date_earns("ten_four_day", "October 3", "October 4");
+fn ten_four_day_is_the_real_fourth_of_october() {
+    run_earns(
+        "ten_four_day",
+        |app, d| {
+            // The career calendar alone never earns it, with or without
+            // word from the server.
+            arrive_on(app, d, "October 4", 12.0);
+            set_server_time(None);
+        },
+        |_, _| set_server_time(server_on(2026, 10, 4)),
+    );
+    let mut app = career_in(CHICAGO);
+    set_server_time(server_on(2026, 10, 3));
+    let mut drive = run_on(&mut app, chicago_run());
+    arrive_on(&mut app, &drive, "October 4", 12.0);
+    settle(&mut app, &mut drive);
+    assert!(
+        !earned(&app, "ten_four_day"),
+        "earned off the career calendar"
+    );
+}
+
+#[test]
+fn appreciation_week_is_the_real_week_in_september() {
+    run_earns(
+        "appreciation_week",
+        |_, _| set_server_time(server_on(2026, 9, 12)),
+        |_, _| set_server_time(server_on(2026, 9, 13)),
+    );
 }
 
 #[test]
@@ -287,21 +320,23 @@ fn new_year_run_is_the_small_hours_of_january_first() {
 }
 
 #[test]
-fn friday_thirteenth_is_a_clean_run_on_the_day() {
-    let hours = (0..365)
-        .map(|day| f64::from(day) * 24.0 + 12.0)
-        .find(|h| date_text(*h) == "April 13")
-        .expect("on the calendar");
-    assert!(is_friday_the_thirteenth(hours));
+fn friday_thirteenth_is_a_clean_run_on_the_real_day() {
     run_earns(
         "friday_thirteenth",
-        |app, d| {
+        |_, d| {
             // The right day, but the truck came in dented.
-            arrive_on(app, d, "April 13", 12.0);
+            set_server_time(server_on(2026, 11, 13));
             d.trip.truck.damage_pct = d.start_damage + 5.0;
         },
-        |app, d| arrive_on(app, d, "April 13", 12.0),
+        |_, _| set_server_time(server_on(2026, 11, 13)),
     );
+    // April 13 is a Friday on the career calendar, and that no longer counts.
+    let mut app = career_in(CHICAGO);
+    set_server_time(server_on(2026, 11, 12));
+    let mut drive = run_on(&mut app, chicago_run());
+    arrive_on(&mut app, &drive, "April 13", 12.0);
+    settle(&mut app, &mut drive);
+    assert!(!earned(&app, "friday_thirteenth"));
 }
 
 #[test]

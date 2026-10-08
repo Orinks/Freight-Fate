@@ -12,7 +12,10 @@
 //!
 //! Port of `freight_fate/sim/weather.py`.
 
-use super::season::{adjust_for_calendar, date_text, real_clock_game_hours, season, temperature_c};
+use super::season::{
+    adjust_for_calendar, adjust_for_temperature, date_text, real_clock_game_hours, season,
+    temperature_c,
+};
 use crate::pyfmt::fmt_f;
 use crate::pyrandom::PyRandom;
 
@@ -301,7 +304,24 @@ impl WeatherSystem {
         let Some(temp) = temp else {
             return kind;
         };
+        if self.provider.is_some() && self.live_weather_controls_calendar {
+            // The real sky on the real date: the season guard is for an
+            // independent career calendar, and a real October snow at a
+            // Denver station is snow, not rain (seasonal audit, 2026-10-01).
+            return adjust_for_temperature(kind, Some(temp));
+        }
         adjust_for_calendar(kind, Some(temp), self.season_clock())
+    }
+
+    /// Whether a winter warning belongs in this drive: always on the live
+    /// calendar, and only in the career's winter on its own calendar, where
+    /// the sky is already kept out of season snow.
+    pub fn winter_fits_calendar(&self) -> bool {
+        if self.provider.is_some() && self.live_weather_controls_calendar {
+            return true;
+        }
+        self.season_clock()
+            .is_none_or(|clock| season(clock) == "winter")
     }
 
     /// Track the city whose real weather should apply (provider mode).

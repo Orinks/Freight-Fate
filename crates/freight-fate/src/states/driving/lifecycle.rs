@@ -158,21 +158,21 @@ impl DrivingState {
         );
         match kind {
             WeatherKind::Rain | WeatherKind::HeavyRain => {
-                ctx.award_achievement("rain_driver");
+                ctx.award_driving_achievement("rain_driver");
             }
             WeatherKind::Snow | WeatherKind::Ice | WeatherKind::Wind => {
-                ctx.award_achievement("winter_or_wind");
+                ctx.award_driving_achievement("winter_or_wind");
             }
             WeatherKind::Fog | WeatherKind::Thunderstorm => {
-                ctx.award_achievement("low_visibility");
+                ctx.award_driving_achievement("low_visibility");
             }
             _ => {}
         }
         if kind == WeatherKind::Thunderstorm {
-            ctx.award_achievement("storm_driving");
+            ctx.award_driving_achievement("storm_driving");
         }
         if seen >= WeatherKind::ALL.len() {
-            ctx.award_achievement("weather_collector");
+            ctx.award_driving_achievement("weather_collector");
         }
     }
 
@@ -187,6 +187,7 @@ impl DrivingState {
         }
         self.entered_once = true;
         self.log_assist_configuration(ctx);
+        self.log_pace_configuration(ctx);
         self.refresh_exit_hint(ctx);
         ctx.clear_music_rotation();
         ctx.audio.stop_music_with(800);
@@ -274,7 +275,7 @@ impl DrivingState {
         if self.phase == DRIVE_PHASE_DELIVERY {
             self.record_weather_achievement(ctx);
             if !self.trip.truck.transmission.automatic {
-                ctx.award_achievement_with("manual_driver", false, true);
+                ctx.award_driving_achievement("manual_driver");
             }
         }
     }
@@ -304,8 +305,24 @@ impl DrivingState {
         self.engine_guide_pan_applied = None;
         self.road_pan_applied = None;
         ctx.audio.stop_world();
+        self.forget_stopped_loops();
         ctx.audio.stop_music_with(600);
         ctx.apply_volumes();
+    }
+
+    /// Clear the latches of every cue loop `stop_world` just silenced.
+    ///
+    /// Each of these loops starts once on its latch rather than every frame,
+    /// so a latch left set kept its sound off after the world came back: the
+    /// lane guide tone stayed silent through the next drift after a pause,
+    /// which is the tone saying "centred" to a driver who was not. Every
+    /// place that stops the world under a live drive calls this after it.
+    pub fn forget_stopped_loops(&mut self) {
+        self.reverse_cue_active = false;
+        self.air_cue_active = false;
+        self.jake_cue_key = None;
+        self.lane_guide_tone_on = false;
+        self.lane_guide_pan_applied = 0.0;
     }
 
     /// `is_night(self.trip.local_hour)`: the drive's own day/night flag, for

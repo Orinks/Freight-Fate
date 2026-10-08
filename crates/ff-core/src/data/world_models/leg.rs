@@ -16,6 +16,14 @@ use crate::data::world::World;
 use crate::data::world_corridor::build_leg_corridor;
 use crate::pyfmt::fmt_f;
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct BillboardBan {
+    pub from_mi: f64,
+    pub to_mi: f64,
+    pub name: String,
+    pub source: String,
+}
+
 /// The heavy per-mile corridor fields a leg parses on first touch.
 /// Everything else on a `Leg` (endpoints, miles, highway, terrain, stops,
 /// lanes, the local cue, divided, meta_complete) stays eager because the
@@ -36,6 +44,7 @@ pub struct CorridorDetail {
     pub landmarks: Vec<Landmark>,
     pub restrictions: Vec<RouteRestriction>,
     pub lane_segments: Vec<LaneSegment>,
+    pub billboard_bans: Vec<BillboardBan>,
 }
 
 /// The raw corridor JSON plus its parse context, held by a lazy leg until the
@@ -380,6 +389,10 @@ impl Leg {
         &self.corridor().landmarks
     }
 
+    pub fn billboard_bans(&self) -> &[BillboardBan] {
+        &self.corridor().billboard_bans
+    }
+
     pub fn restrictions(&self) -> &[RouteRestriction] {
         &self.corridor().restrictions
     }
@@ -525,15 +538,38 @@ impl Route {
             .collect()
     }
 
-    pub fn stop_details(&self) -> Vec<&Stop> {
-        self.legs
-            .iter()
-            .flat_map(|leg| leg.stops.iter().filter(|s| s.curated()))
-            .collect()
+    fn stops_with_route_miles(&self, include_uncurated: bool) -> Vec<Stop> {
+        let mut at_mi = 0.0;
+        let mut stops = Vec::new();
+        for (index, leg) in self.legs.iter().enumerate() {
+            let forward = self.cities.get(index).is_none_or(|city| city == &leg.a);
+            for stop in &leg.stops {
+                if !include_uncurated && !stop.curated() {
+                    continue;
+                }
+                let mut route_stop = stop.clone();
+                let local_mi = if forward {
+                    stop.at_mi
+                } else {
+                    leg.miles - stop.at_mi
+                };
+                route_stop.at_mi = at_mi + local_mi;
+                stops.push(route_stop);
+            }
+            at_mi += leg.miles;
+        }
+        stops.sort_by(|left, right| left.at_mi.total_cmp(&right.at_mi));
+        stops
     }
 
-    pub fn raw_stop_details(&self) -> Vec<&Stop> {
-        self.legs.iter().flat_map(|leg| leg.stops.iter()).collect()
+    /// Curated stops with mileposts measured from the route's start.
+    pub fn stop_details(&self) -> Vec<Stop> {
+        self.stops_with_route_miles(false)
+    }
+
+    /// All stop records with mileposts measured from the route's start.
+    pub fn raw_stop_details(&self) -> Vec<Stop> {
+        self.stops_with_route_miles(true)
     }
 
     /// Curated stops the rig can physically use, for pre-trip planning.
@@ -542,7 +578,7 @@ impl Route {
     /// decides whether a run is survivable, so a stop that would turn a rig
     /// away must not pad them. Pass `false` for the trailer case, the cautious
     /// read and the one nearly every job is.
-    pub fn accessible_stop_details(&self, bobtail: bool) -> Vec<&Stop> {
+    pub fn accessible_stop_details(&self, bobtail: bool) -> Vec<Stop> {
         self.stop_details()
             .into_iter()
             .filter(|s| s.accessible_to(bobtail))

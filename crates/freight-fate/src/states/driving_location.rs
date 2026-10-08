@@ -537,7 +537,8 @@ impl DrivingState {
         // gate"), so it starts like one; "half a mile" after the full stop
         // read as a run-on (agent playtest, 2026-09-02).
         let parts = [
-            format!("{}.", crate::states::city::py_capitalize(&where_text)),
+            // Only the opening letter: the rest names streets and cities.
+            format!("{}.", crate::states::city::upper_first(&where_text)),
             format!(
                 "{} to {target}.",
                 crate::states::city::py_capitalize(&self.closing_text(distance.max(0.0)))

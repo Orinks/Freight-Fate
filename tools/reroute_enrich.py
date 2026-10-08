@@ -64,6 +64,7 @@ Usage
 from __future__ import annotations
 
 import argparse
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -233,7 +234,11 @@ def route_tolls(world: dict[str, Any], leg: dict[str, Any]) -> bool | None:
     profile, between the same two city nodes.
     """
     cities = world["cities"]
-    fetched = rr.fetch_route(cities[leg["from"]], cities[leg["to"]])
+    fetched = rr.fetch_route(
+        cities[leg["from"]],
+        cities[leg["to"]],
+        via=rr.route_via_points(leg),
+    )
     if fetched is None:
         return None
     _shape, _miles, has_toll = fetched
@@ -363,10 +368,11 @@ def delegated_steps(
 
 # --- the pass ---------------------------------------------------------------
 def pending_legs(world: dict[str, Any]) -> list[dict[str, Any]]:
+    """Rerouted legs still missing the grade profile dropped with the old route."""
     return [
         leg
         for leg in world["legs"]
-        if leg.get("rerouted") and not (leg.get("corridor") or {}).get("interchanges")
+        if leg.get("rerouted") and not (leg.get("corridor") or {}).get("grade_segments")
     ]
 
 
@@ -390,6 +396,18 @@ def grade_coverage_gaps(leg: dict[str, Any]) -> list[str]:
     return gaps
 
 
+def expected_layers_for_leg(leg: dict[str, Any], expect_interchanges: bool) -> list[str]:
+    expected = [layer for layer in REBUILT_LAYERS if expect_interchanges or layer not in NEEDS_PBF]
+    highway = str(leg.get("highway") or "").replace(",", "/").split("/")[0].strip()
+    if (
+        expect_interchanges
+        and not re.fullmatch(r"I-\d+", highway)
+        and not (leg.get("corridor") or {}).get("interchanges")
+    ):
+        expected = [layer for layer in expected if layer not in NEEDS_PBF]
+    return expected
+
+
 def report_completeness(
     before: dict[str, dict[str, int]], world: dict[str, Any], expect_interchanges: bool
 ) -> int:
@@ -408,9 +426,7 @@ def report_completeness(
         if leg is None:
             continue
         new = layer_sizes(leg)
-        expected = [
-            layer for layer in REBUILT_LAYERS if expect_interchanges or layer not in NEEDS_PBF
-        ]
+        expected = expected_layers_for_leg(leg, expect_interchanges)
         print(f"\n{wanted}  ({leg.get('highway')}, {leg['miles']} mi)")
         for layer in sorted(set(old) | set(new) | set(expected)):
             was, now = old.get(layer, 0), new.get(layer, 0)
@@ -440,7 +456,7 @@ def main() -> int:
     ap.add_argument(
         "--all-pending",
         action="store_true",
-        help="every leg reroute_leg.py left incomplete",
+        help="every rerouted leg missing grade_segments",
     )
     ap.add_argument("--check", action="store_true", help="list incomplete legs and stop")
     ap.add_argument("--pbf", type=Path, help="local OSM extract for the interchange family")

@@ -52,6 +52,12 @@ pub struct SdlShell {
     pump: EventPump,
     #[cfg(target_os = "windows")]
     window_handle: Option<isize>,
+    #[cfg(target_os = "ios")]
+    touch: crate::touch::TouchInput,
+    #[cfg(target_os = "ios")]
+    keyboard_shown: bool,
+    #[cfg(target_os = "ios")]
+    text_field_open: bool,
 }
 
 #[cfg(target_os = "windows")]
@@ -114,6 +120,18 @@ fn release_at_process_exit<T>(resource: T) {
 impl SdlShell {
     /// `pygame.init()` + `set_caption` + `set_mode(WINDOW_SIZE)`.
     pub fn new(title: &str) -> Result<Self, String> {
+        // SDL on iOS offers the accelerometer as a joystick by default; the
+        // game has no use for a tilt stick among its controllers.
+        #[cfg(target_os = "ios")]
+        sdl2::hint::set("SDL_ACCELEROMETER_AS_JOYSTICK", "0");
+        // SDL locks a window wider than tall to landscape; the screen is one
+        // touch surface, so follow however the player holds the device and
+        // keep swipe directions matching their hand.
+        #[cfg(target_os = "ios")]
+        sdl2::hint::set(
+            "SDL_IOS_ORIENTATIONS",
+            "Portrait PortraitUpsideDown LandscapeLeft LandscapeRight",
+        );
         let sdl = sdl2::init()?;
         let video = sdl.video()?;
         let window = video
@@ -150,8 +168,13 @@ impl SdlShell {
         }
         let pump = sdl.event_pump()?;
         // pygame delivered event.unicode for every key; SDL needs text
-        // input running for TextInput events.
+        // input running for TextInput events. On iOS starting text input
+        // raises the on-screen keyboard, so there it waits for the player's
+        // three-finger double tap; a hardware keyboard types regardless.
+        #[cfg(not(target_os = "ios"))]
         video.text_input().start();
+        #[cfg(target_os = "ios")]
+        install_touch_surface(canvas.window());
         Ok(Self {
             sdl,
             video,
@@ -159,6 +182,12 @@ impl SdlShell {
             pump,
             #[cfg(target_os = "windows")]
             window_handle,
+            #[cfg(target_os = "ios")]
+            touch: crate::touch::TouchInput::new(),
+            #[cfg(target_os = "ios")]
+            keyboard_shown: false,
+            #[cfg(target_os = "ios")]
+            text_field_open: false,
         })
     }
 
@@ -244,7 +273,67 @@ impl SdlShell {
             pump.poll_iter().collect::<Vec<Event>>()
         }))
         .ok()?;
-        Some(translate_events(raw))
+        #[cfg(not(target_os = "ios"))]
+        let events = translate_events(raw);
+        #[cfg(target_os = "ios")]
+        let events = self.with_touch(translate_events(raw));
+        Some(events)
+    }
+
+    /// Follow the active screen: raise the on-screen keyboard when a text
+    /// field opens and lower it when the field goes away. In between, the
+    /// three-finger double tap still hides or shows it.
+    #[cfg(target_os = "ios")]
+    pub fn set_text_field(&mut self, open: bool) {
+        if open == self.text_field_open {
+            return;
+        }
+        self.text_field_open = open;
+        if open != self.keyboard_shown {
+            self.keyboard_shown = open;
+            if open {
+                self.video.text_input().start();
+            } else {
+                self.video.text_input().stop();
+            }
+        }
+    }
+
+    /// Text input always runs off iOS; there is no keyboard to raise.
+    #[cfg(not(target_os = "ios"))]
+    pub fn set_text_field(&mut self, _open: bool) {}
+
+    /// Append this frame's gestures to the SDL events. A
+    /// lost focus (the app leaving the foreground) lets go of a held pedal.
+    #[cfg(target_os = "ios")]
+    fn with_touch(&mut self, mut events: Vec<InputEvent>) -> Vec<InputEvent> {
+        if events
+            .iter()
+            .any(|event| matches!(event, InputEvent::WindowFocusLost))
+        {
+            self.touch.release_into(&mut events);
+        }
+        while let Some(gesture) = next_gesture() {
+            let out = self.touch.handle(gesture);
+            events.extend(out.events);
+            if out.toggle_keyboard {
+                self.keyboard_shown = !self.keyboard_shown;
+                if self.keyboard_shown {
+                    self.video.text_input().start();
+                } else {
+                    self.video.text_input().stop();
+                }
+            }
+        }
+        events
+    }
+
+    /// Pump the event queue once and discard what arrives. Quit calls this
+    /// while services shut down so macOS keeps reading the still-open
+    /// window as responsive (issue 266); events during quit are ignored on
+    /// purpose -- the game is leaving.
+    pub fn pump_during_quit(&mut self) {
+        let _ = self.poll();
     }
 
     /// `screen.fill(BG_COLOR)` ... `display.flip()`. The text lines are not
@@ -258,9 +347,61 @@ impl SdlShell {
     }
 }
 
+#[cfg(target_os = "ios")]
+extern "C" {
+    fn ff_touch_install(window: *mut std::ffi::c_void) -> i32;
+    fn ff_touch_next() -> i32;
+}
+
+/// Lay the gesture surface (`ios/ff_touch.m`) over SDL's view.
+#[cfg(target_os = "ios")]
+fn install_touch_surface(window: &sdl2::video::Window) {
+    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+
+    let ui_window = match window.window_handle().map(|handle| handle.as_raw()) {
+        // sdl2 reports the UIWindow in the `ui_view` slot.
+        Ok(RawWindowHandle::UiKit(handle)) => handle.ui_view.as_ptr(),
+        _ => {
+            log::warn!("touch: SDL gave no UIKit window; gestures are off");
+            return;
+        }
+    };
+    // SAFETY: the pointer is SDL's live UIWindow, and this runs on the main
+    // thread, where SDL created it.
+    if unsafe { ff_touch_install(ui_window) } == 0 {
+        log::warn!("touch: the gesture surface could not be installed");
+    }
+}
+
+#[cfg(target_os = "ios")]
+fn next_gesture() -> Option<crate::touch::Gesture> {
+    loop {
+        // SAFETY: a plain queue pop, no arguments.
+        let code = unsafe { ff_touch_next() };
+        if code < 0 {
+            return None;
+        }
+        if let Some(gesture) = crate::touch::Gesture::from_code(code) {
+            return Some(gesture);
+        }
+    }
+}
+
 /// SDL events to game events, pairing each `KeyDown` with the `TextInput`
 /// that follows it.
 pub fn translate_events(raw: Vec<Event>) -> Vec<InputEvent> {
+    translate_events_with(raw, cfg!(target_os = "ios"))
+}
+
+/// [`translate_events`], with the iOS on-screen keyboard's order allowed.
+///
+/// UIKit's keyboard reaches SDL as a finished edit: each character's key
+/// press and release first, then one `TextInput` for the lot -- or, while
+/// SDL believes a hardware keyboard is attached (the Simulator, always),
+/// the `TextInput` alone. With `soft_keyboard` set, each character finds the
+/// unpaired press of its own key earlier in the batch, and a character with
+/// none becomes a press of its own, so typed names are not lost.
+pub fn translate_events_with(raw: Vec<Event>, soft_keyboard: bool) -> Vec<InputEvent> {
     let mut out = Vec::with_capacity(raw.len());
     let mut pending_text: Option<usize> = None; // index in `out` of the last KeyDown
     for event in raw {
@@ -286,6 +427,8 @@ pub fn translate_events(raw: Vec<Event>) -> Vec<InputEvent> {
                     if let Some(InputEvent::KeyDown { text: slot, .. }) = out.get_mut(index) {
                         *slot = text.chars().next();
                     }
+                } else if soft_keyboard {
+                    pair_typed_text(&mut out, &text);
                 }
                 continue;
             }
@@ -341,6 +484,40 @@ pub fn translate_events(raw: Vec<Event>) -> Vec<InputEvent> {
         pending_text = None;
     }
     out
+}
+
+/// Give each typed character to the unpaired press of its key, or a press
+/// of its own when the batch has none.
+fn pair_typed_text(out: &mut Vec<InputEvent>, text: &str) {
+    let mut searched_to = 0;
+    for ch in text.chars() {
+        let key = Key::from_char(ch);
+        let found = out[searched_to..].iter().position(
+            |event| matches!(event, InputEvent::KeyDown { key: k, text: None, .. } if *k == key),
+        );
+        match found {
+            Some(offset) => {
+                let index = searched_to + offset;
+                if let InputEvent::KeyDown { text: slot, .. } = &mut out[index] {
+                    *slot = Some(ch);
+                }
+                searched_to = index + 1;
+            }
+            None => {
+                out.push(InputEvent::KeyDown {
+                    key,
+                    mods: Mods::NONE,
+                    text: Some(ch),
+                    repeat: false,
+                });
+                out.push(InputEvent::KeyUp {
+                    key,
+                    mods: Mods::NONE,
+                });
+                searched_to = out.len();
+            }
+        }
+    }
 }
 
 /// `event.mod & KMOD_*`.
@@ -495,6 +672,90 @@ mod tests {
                 InputEvent::key(Key::Left),
             ]
         );
+    }
+
+    fn down(keycode: Keycode) -> Event {
+        Event::KeyDown {
+            timestamp: 0,
+            window_id: 0,
+            keycode: Some(keycode),
+            scancode: None,
+            keymod: Mod::NOMOD,
+            repeat: false,
+        }
+    }
+
+    fn up(keycode: Keycode) -> Event {
+        Event::KeyUp {
+            timestamp: 0,
+            window_id: 0,
+            keycode: Some(keycode),
+            scancode: None,
+            keymod: Mod::NOMOD,
+            repeat: false,
+        }
+    }
+
+    fn text(text: &str) -> Event {
+        Event::TextInput {
+            timestamp: 0,
+            window_id: 0,
+            text: text.to_string(),
+        }
+    }
+
+    fn typed(events: &[InputEvent]) -> String {
+        events
+            .iter()
+            .filter_map(|event| match event {
+                InputEvent::KeyDown { text, .. } => *text,
+                _ => None,
+            })
+            .collect()
+    }
+
+    #[test]
+    fn soft_keyboard_text_after_the_release_reaches_its_press() {
+        let raw = vec![down(Keycode::I), up(Keycode::I), text("i")];
+        let events = translate_events_with(raw, true);
+        assert_eq!(typed(&events), "i");
+        assert_eq!(events.len(), 2, "{events:?}");
+    }
+
+    #[test]
+    fn soft_keyboard_text_with_no_press_types_on_its_own() {
+        let events = translate_events_with(vec![text("Jo")], true);
+        assert_eq!(typed(&events), "Jo");
+        assert!(matches!(
+            events.first(),
+            Some(InputEvent::KeyDown { key: Key::J, .. })
+        ));
+    }
+
+    #[test]
+    fn soft_keyboard_text_skips_a_backspace_before_it() {
+        let raw = vec![
+            down(Keycode::BACKSPACE),
+            up(Keycode::BACKSPACE),
+            down(Keycode::A),
+            up(Keycode::A),
+            text("a"),
+        ];
+        let events = translate_events_with(raw, true);
+        assert!(matches!(
+            events.first(),
+            Some(InputEvent::KeyDown {
+                key: Key::Backspace,
+                text: None,
+                ..
+            })
+        ));
+        assert_eq!(typed(&events), "a");
+    }
+
+    #[test]
+    fn desktop_drops_text_that_no_press_is_waiting_for() {
+        assert!(translate_events_with(vec![text("x")], false).is_empty());
     }
 
     #[test]

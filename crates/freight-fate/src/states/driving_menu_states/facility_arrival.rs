@@ -18,6 +18,7 @@ use crate::audio::facility_ambient_key;
 use crate::discord_presence::PresenceState;
 use crate::impl_state_for_menu;
 use crate::states::base::{Menu, MenuCore, MenuItem, TimedMessageState};
+use crate::states::city_pickup::sync_facility_engine_audio;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::{
     advance_rest_clock, carrier_accessorial_charges, charge_summary, charge_total,
@@ -60,6 +61,7 @@ impl FacilityArrivalState {
             select_menu_music_sequence(ctx.profile.as_ref().map(|p| p as &dyn MenuMusicProfile));
         let refs: Vec<&str> = sequence.iter().map(String::as_str).collect();
         ctx.play_music_sequence("menu", &refs);
+        sync_facility_engine_audio(ctx, &driving.trip.truck);
         let items = self.rows(ctx, driving);
         self.menu.items = items;
         self.menu.index = self.menu.index.min(self.menu.items.len().saturating_sub(1));
@@ -209,11 +211,11 @@ impl FacilityArrivalState {
         let defect = self.hooked_defect(ctx);
         let complete = move |ctx: &mut GameContext| {
             drive.with(ctx, |d, ctx| {
+                // The rest clock burns the dock wait's idle fuel. The
+                // settlement already reports the tank, so this one is felt
+                // rather than announced.
                 advance_rest_clock(d, ctx, minutes, None, "");
                 hos_mut_of(ctx).on_duty(minutes);
-                // A dock wait is engine time too. The settlement already
-                // reports the tank, so this one is felt rather than announced.
-                d.trip.truck.burn_idle_fuel_over_game_time(minutes * 60.0);
                 d.set_status(if drop_hook {
                     "Trailer dropped. Hooked to an empty, paperwork signed."
                 } else {
@@ -441,6 +443,8 @@ impl Menu for FacilityArrivalState {
             select_menu_music_sequence(ctx.profile.as_ref().map(|p| p as &dyn MenuMusicProfile));
         let refs: Vec<&str> = sequence.iter().map(String::as_str).collect();
         ctx.play_music_sequence("menu", &refs);
+        self.driving
+            .read(|d| sync_facility_engine_audio(ctx, &d.trip.truck));
         let items = self.build_items(ctx);
         self.menu.items = items;
         self.menu.index = self.menu.index.min(self.menu.items.len().saturating_sub(1));

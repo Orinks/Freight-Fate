@@ -33,6 +33,10 @@ use ff_core::sim::weather::WeatherProvider;
 use crate::app::GameContext;
 use crate::net::UreqTransport;
 use crate::states::driving_core::*;
+use crate::states::driving_events::billboard_moment::BillboardWatch;
+use crate::states::driving_updates::radio_channel3000::{
+    channel3000_for_drive, channel3000_playable,
+};
 
 use super::DrivingState;
 
@@ -249,6 +253,14 @@ impl DrivingState {
         let music_night = is_night(trip.local_start_hour());
 
         let mut catalog: Vec<RadioStation> = default_radio_catalog().to_vec();
+        let channel3000 = channel3000_for_drive(
+            trip_seed,
+            trip.local_start_hour(),
+            initial_airtime_s(trip_seed),
+        );
+        if !channel3000_playable(channel3000.as_ref()) {
+            catalog.retain(|station| !DrivingState::is_channel3000(station));
+        }
         catalog.extend(load_personal_playlists(&personal_playlists_dir()));
         let radio = RadioState::from_settings(
             catalog,
@@ -293,6 +305,8 @@ impl DrivingState {
             start_brake_wear,
             start_engine_wear,
             rig_buffs: RigBuffs::new(),
+            stop_visit: Default::default(),
+            drove_automatic: false,
             weather_source_real: ctx.settings.real_weather,
             alerts_next_poll_mi: 0.0,
             alerts_pending: None,
@@ -307,6 +321,7 @@ impl DrivingState {
             radio,
             radio_station_id: String::new(),
             radio_playlist: Vec::new(),
+            radio_playing_key: String::new(),
             radio_track_index: 0,
             radio_elapsed_s: 0.0,
             radio_break_queue: Vec::new(),
@@ -317,6 +332,8 @@ impl DrivingState {
             radio_track_len: None,
             // The stations were already on the air before this drive began.
             radio_airtime_s: initial_airtime_s(trip_seed),
+            channel3000,
+            channel3000_serial: 0,
             playlist_positions: HashMap::new(),
             playlist_shuffle: HashMap::new(),
             playlist_wait_s: 0.0,
@@ -375,6 +392,8 @@ impl DrivingState {
             overspeed_chime_timer: 0.0,
             construction_seen: false,
             traffic_seen: false,
+            billboard_watch: BillboardWatch::now(ctx, start_damage),
+            pool_billboards_heard: 0,
             brake_squeal_cooldown_s: 0.0,
             hydro_active: false,
             jake_slip_active: false,
@@ -411,8 +430,12 @@ impl DrivingState {
             pull_over_run_s: 0.0,
             record_events: Vec::new(),
             fatigue_events: 0,
-            weigh_station_notice_key: String::new(),
+            weigh_station_noticed: HashSet::new(),
             weigh_station_reminder_key: String::new(),
+            weigh_station_reminder_age_s: 0.0,
+            scale_reminder_held_by_game: HashSet::new(),
+            scale_reminder_late_by_driver: HashSet::new(),
+            scale_reannounce: None,
             weigh_station_pending: None,
             weigh_station_transponder_verdict: HashMap::new(),
             traced_jake_stage: -1,
@@ -635,6 +658,9 @@ impl DrivingState {
             turn_grace_s: 0.0,
             air_ready_said: air_ready,
             low_air_said: air_low_warning,
+            // New drives start clear so a tank already under the line still
+            // earns one cue; resumed drives re-derive the latch below.
+            low_fuel_said: false,
             spring_brake_said: spring_brakes_active,
             brake_lockout_cue_timer: 0.0,
             brake_air_hissed: false,
@@ -645,11 +671,14 @@ impl DrivingState {
             lane_change_target: None,
             lane_change_timer: 0.0,
             lane_signal_timer: 0.0,
+            passing: None,
+            pass_returning: false,
             merge_deadline: None,
             departure_ramp_mi: None,
             departure_merge_road_mph: 0.0,
             departure_cruise_handoff_mph: None,
             departure_merge_recovery: false,
+            clock_pacing: Default::default(),
             lane_count_seen: None,
             lane_before_narrow: None,
             merge_taper_warned: None,

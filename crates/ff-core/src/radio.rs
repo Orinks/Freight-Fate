@@ -151,7 +151,29 @@ impl RadioStation {
         if self.name.is_empty() || self.name.to_uppercase() == self.call_sign.to_uppercase() {
             return self.call_sign.clone();
         }
+        // A name that already says the call sign ("KXLU 88.9", "Classical
+        // KING FM 98.1", "AFN Tokyo") is the station's own branding: leading
+        // with the letters again made every seek say them twice.
+        if self.name_says_call_sign() {
+            return self.name.clone();
+        }
         format!("{}, {}", self.call_sign, self.name)
+    }
+
+    /// Whether the name carries the call sign, suffix aside (KING for
+    /// KING-FM or "KING FM"), as a word of its own: SAT is not in "Satellite".
+    fn name_says_call_sign(&self) -> bool {
+        let base = self
+            .call_sign
+            .split(|c: char| !c.is_alphanumeric())
+            .next()
+            .unwrap_or_default()
+            .to_uppercase();
+        !base.is_empty()
+            && self
+                .name
+                .split(|c: char| !c.is_alphanumeric())
+                .any(|word| word.to_uppercase() == base)
     }
 
     pub fn satellite(&self) -> bool {
@@ -433,7 +455,11 @@ const LIVE365_CANONICAL_HOST: &str = "streaming.live365.com";
 /// different one. Live365 mounts fold further, onto the station id in the
 /// mount name: the directory carries the same station under several CDN
 /// edge hosts and bitrates, which put Radiostorm's At Work, Oldies and
-/// Comedy channels on the web band twice each. Never stored or spoken --
+/// Comedy channels on the web band twice each. A trailing `;` goes with the
+/// slash: `host/;` is the Shoutcast mount of the stream `host/` serves to a
+/// player, and repairing one directory listing to it while its twin kept
+/// the bare root put fifteen stations on the dial twice (sweep, 2026-10-03).
+/// Never stored or spoken --
 /// comparison only. Shared with tools/import_radio_catalog.py's build-time
 /// collision check, so both layers agree on what counts as "the same
 /// stream".
@@ -442,7 +468,7 @@ pub fn normalize_stream_url(url: &str) -> String {
     if let Some(m) = URL_SCHEME_RE.find(url) {
         url = &url[m.end()..];
     }
-    let url = url.trim_end_matches('/');
+    let url = url.trim_end_matches(['/', ';']);
     let (host, rest) = url.split_once('/').unwrap_or((url, ""));
     let host = host.to_lowercase();
     if LIVE365_HOST_RE.is_match(&host) {

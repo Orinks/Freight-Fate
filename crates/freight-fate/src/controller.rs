@@ -34,7 +34,15 @@ use std::cell::RefCell;
 use std::collections::HashSet;
 use std::rc::Rc;
 
-use ff_core::input_hints::{control_hint, CONTROLLER, KEYBOARD};
+use ff_core::input_hints::{control_hint, CONTROLLER, KEYBOARD, TOUCH};
+
+/// The device hints name before the player touches anything: the screen on
+/// iPhone and iPad, the keyboard everywhere else.
+const DEFAULT_DEVICE: &str = if cfg!(target_os = "ios") {
+    TOUCH
+} else {
+    KEYBOARD
+};
 use ff_core::rumble::{RumbleEngine, RumbleSink};
 
 use crate::states::base::InputEvent;
@@ -318,6 +326,9 @@ pub struct ControllerManager {
     slot: Rc<RefCell<PadSlot>>,
     /// Which device the player last used (`active_device`).
     pub active_device: &'static str,
+    /// Set while a gesture is played as key presses, so those presses do
+    /// not count as the keyboard being used.
+    pub touch_keys: bool,
     instance_id: Option<u32>,
     name: String,
     disconnected: bool, // latched until the app consumes it
@@ -366,7 +377,8 @@ impl ControllerManager {
         }));
         let mut manager = Self {
             slot: Rc::clone(&slot),
-            active_device: KEYBOARD,
+            active_device: DEFAULT_DEVICE,
+            touch_keys: false,
             instance_id: None,
             name: String::new(),
             disconnected: false,
@@ -476,7 +488,7 @@ impl ControllerManager {
         } else {
             self.teardown_subsystem(); // close handles + uninit while off
             self.reset_analog();
-            self.active_device = KEYBOARD;
+            self.active_device = DEFAULT_DEVICE;
         }
     }
 
@@ -621,14 +633,23 @@ impl ControllerManager {
 
     /// Record that the keyboard was just used, so hints name keys.
     pub fn note_keyboard(&mut self) {
-        self.active_device = KEYBOARD;
+        if !self.touch_keys {
+            self.active_device = KEYBOARD;
+        }
     }
 
-    /// `"controller"` when a pad is active and was used last, else
-    /// `"keyboard"`.
+    /// Record that the touch screen was just used, so hints name gestures.
+    pub fn note_touch(&mut self) {
+        self.active_device = TOUCH;
+    }
+
+    /// `"controller"` when a pad is active and was used last, `"touch"`
+    /// when the screen was, else `"keyboard"`.
     pub fn device(&self) -> &'static str {
         if self.active() && self.active_device == CONTROLLER {
             CONTROLLER
+        } else if self.active_device == TOUCH {
+            TOUCH
         } else {
             KEYBOARD
         }

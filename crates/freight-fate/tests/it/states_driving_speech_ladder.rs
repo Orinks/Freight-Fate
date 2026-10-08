@@ -29,8 +29,7 @@ use ff_core::models::profile::Profile;
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::trip_models::{TrafficPressure, TripEvent, TripEventData, TripEventKind};
 use ff_core::sim::weather::{WeatherKind, WeatherSystem};
-use ff_core::sound_catalog::CATALOG;
-use ff_core::speech_pacing::{disposition_for, Disposition, SpeechCategory, DRIVING_SPEECH_MODES};
+use ff_core::speech_pacing::{disposition_for, Disposition, SpeechCategory};
 use ff_core::speech_text::{stop_callout, SpokenMessage, StopCalloutParts};
 
 use ff_core::data::world_models::{Leg, Route};
@@ -38,7 +37,7 @@ use freight_fate::app::testing::TestApp;
 use freight_fate::app::SayEvent;
 use freight_fate::playtest::breaker::{self, tweak_rigs, Verdict};
 use freight_fate::playtest::harness::{PlaytestHarness, StartDelivery};
-use freight_fate::states::base::State;
+use freight_fate::states::base::{InputEvent, Key, Mods, State};
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_core::*;
 use freight_fate::states::driving_events::{event_category_for_kind, FLAVOR_EVENT_KINDS};
@@ -205,7 +204,7 @@ fn test_the_lead_announcement_yields_before_the_turn_itself() {
     );
     assert_eq!(
         disposition_for("urgent_only", Some(SpeechCategory::NavigationAdvisory)),
-        Disposition::Earcon
+        Disposition::Silent
     );
     for rung in ["quiet", "urgent_only"] {
         assert_eq!(
@@ -323,31 +322,6 @@ fn test_every_trip_event_kind_is_classified() {
         both.is_empty(),
         "trip event kinds claimed by both lists: {both:?}"
     );
-}
-
-#[test]
-fn test_every_earcon_category_is_learnable() {
-    // R14's standing rule, binding S4's substitutions: no earcon may carry
-    // meaning that the Learn game sounds screen cannot teach. This is what
-    // makes "the rung replaces words with sounds" legitimate rather than
-    // exclusionary.
-    let learnable: Vec<&str> = CATALOG
-        .iter()
-        .flat_map(|category| category.entries.iter().map(|entry| entry.name))
-        .collect();
-    for rung in DRIVING_SPEECH_MODES {
-        for category in SpeechCategory::ALL {
-            if disposition_for(rung, Some(category)) == Disposition::Earcon {
-                let cue = ff_core::speech_pacing::ladder_earcon(category).unwrap_or_else(|| {
-                    panic!("{category:?} becomes an earcon at {rung} with no cue at all")
-                });
-                assert!(
-                    learnable.contains(&cue),
-                    "{category:?} becomes an earcon at {rung} with nothing to learn it by"
-                );
-            }
-        }
-    }
 }
 
 // -- the gate, with a literal line ---------------------------------------------------
@@ -732,6 +706,71 @@ fn test_an_engine_stall_speaks_at_urgent_only_as_safety() {
             .any(|line| line.to_lowercase().contains("engine stalled")),
         "{lines:?}"
     );
+    app.shutdown();
+}
+
+#[test]
+fn test_the_manual_stall_line_leads_to_first_gear_not_a_second_stall() {
+    // A manual only stalls in fourth or taller, where shifting up goes taller
+    // still: "restart, then select W" put a truck stalled in fifth into sixth,
+    // and letting the clutch out stalled it again. The keys the line names,
+    // pressed in its order, must leave the truck running in first.
+    let mut app = an_app();
+    let mut drive = a_drive(&mut app);
+    app.ctx.settings.automatic_transmission = false;
+    let t = &mut drive.trip.truck;
+    t.start_engine();
+    t.set_air_ready(false);
+    t.transmission.automatic = false;
+    t.transmission.clutch = 1.0;
+    assert!(t.transmission.request_gear(5).ok);
+    t.transmission.clutch = 0.0;
+    app.clear_speech();
+    for _ in 0..(60 * 5) {
+        drive.update(&mut app.ctx, DT);
+        if drive.trip.truck.stalled {
+            break;
+        }
+    }
+    assert!(
+        drive.trip.truck.stalled,
+        "fifth at a standstill no longer stalls"
+    );
+    let lines = app.event_lines();
+    let line = lines
+        .iter()
+        .find(|line| line.contains("Engine stalled"))
+        .unwrap_or_else(|| panic!("no stall line in {lines:?}"));
+    assert!(
+        line.contains("Press N for neutral and E to restart")
+            && line.contains("hold Left Shift and press W for first gear"),
+        "{line}"
+    );
+
+    let press = |drive: &mut DrivingState, app: &mut TestApp, key: Key, mods: Mods| {
+        let event = InputEvent::KeyDown {
+            key,
+            mods,
+            text: None,
+            repeat: false,
+        };
+        drive.handle_key_event(&mut app.ctx, &event);
+    };
+    press(&mut drive, &mut app, Key::N, Mods::NONE);
+    press(&mut drive, &mut app, Key::E, Mods::NONE);
+    app.ctx.input.press(Key::LShift, Mods::NONE);
+    drive.update(&mut app.ctx, DT);
+    press(&mut drive, &mut app, Key::W, Mods::SHIFT);
+    for _ in 0..30 {
+        drive.update(&mut app.ctx, DT);
+    }
+    app.ctx.input.release(Key::LShift, Mods::NONE);
+    for _ in 0..(60 * 2) {
+        drive.update(&mut app.ctx, DT);
+    }
+    let t = &drive.trip.truck;
+    assert_eq!(t.transmission.gear, 1);
+    assert!(t.engine_on && !t.stalled, "stalled again after the restart");
     app.shutdown();
 }
 
@@ -1146,8 +1185,8 @@ fn call_is_tagged(call: &SayEventCall) -> bool {
         return true;
     }
     // The options are the last argument. When it is a plain binding --
-    // `opts`, or `opts()` for the closure form -- follow it back to where it
-    // was built or assigned inside this function.
+    // `opts`, or `opts()` / `opts(reason)` for the closure form -- follow it
+    // back to where it was built or assigned inside this function.
     // A multi-line call ends with a trailing comma, so the last split piece is
     // whitespace: take the last one that is not.
     let Some(last) = call
@@ -1158,7 +1197,7 @@ fn call_is_tagged(call: &SayEventCall) -> bool {
     else {
         return false;
     };
-    let name = last.trim_end_matches("()").trim();
+    let name = last.split('(').next().unwrap_or(last).trim();
     if name.is_empty() || !name.chars().all(|c| c.is_alphanumeric() || c == '_') {
         return false;
     }

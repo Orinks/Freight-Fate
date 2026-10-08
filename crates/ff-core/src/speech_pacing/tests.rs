@@ -712,6 +712,47 @@ fn test_a_backlog_older_than_the_pause_still_flushes() {
     ));
 }
 
+/// A flush that hands a line back speaks it FIRST, so the line that flushed
+/// has not started while the hand-back plays. It used to be dated as
+/// speaking from the flush, so the next route line or warning dropped it as
+/// heard before the player got a word of it.
+#[test]
+fn test_the_line_behind_a_hand_back_is_rescued_while_the_hand_back_plays() {
+    let stop = "Next stop in 5 miles: service plaza.";
+    let zone = "Zone ahead; speed limit 45.";
+    let first_flush = || {
+        let clock = FakeClock::at(0.0);
+        let mut pacer = EventSpeechPacer::with_clock(clock.clock());
+        pacer.note_queued(CHATTER, EventPriority::Ambient, None, None);
+        pacer.note_queued(stop, EventPriority::Route, None, None);
+        clock.advance(EventSpeechPacer::BASE_UTTERANCE_S + 0.1);
+        assert!(flush_at(&mut pacer, zone, EventPriority::Route));
+        // The stop line had not started, so it comes back and is said first.
+        assert_eq!(pacer.take_flush_cut(), cut(stop, EventPriority::Route));
+        pacer.note_ahead(stop);
+        (pacer, clock)
+    };
+
+    // A second route line while the stop line is still playing.
+    let (mut pacer, clock) = first_flush();
+    clock.advance(1.0);
+    assert!(flush_at(
+        &mut pacer,
+        "Speed limit 45.",
+        EventPriority::Route
+    ));
+    assert_eq!(pacer.take_flush_cut(), cut(zone, EventPriority::Route));
+
+    // A warning past half the zone line's length, still inside the stop line.
+    let (mut pacer, clock) = first_flush();
+    heard(&clock, zone, 0.6);
+    assert_eq!(
+        interrupt(&mut pacer, HAZARD),
+        cut(zone, EventPriority::Route)
+    );
+    assert_eq!(pacer.take_mostly_heard(), None);
+}
+
 /// Darren and Jerry, 2026-08-21: the repeat the build note describes at
 /// a scale happens in a work zone too.
 ///

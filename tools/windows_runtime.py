@@ -138,8 +138,7 @@ def pe_imports(path: Path, *, delayed: bool = True) -> set[str]:
     ``delayed`` off returns only the NORMAL import table -- what the loader
     must resolve before the process starts. A delay import is resolved on
     first call, so a missing one is a feature that does not run rather than a
-    game that does not launch: Prism's bridges to the PC-Talker, ZDSR and
-    BoYing screen readers are delay imports for exactly that reason.
+    game that does not launch.
 
     This is a static runtime audit, not a general Windows loader emulator.
     All reads must map to bytes in the file, never a section's zero-filled tail.

@@ -7,7 +7,7 @@ use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use super::{
     install_target_in, running_appimage_path, Platform, UpdateInfo, UpdaterEnv, APP_NAME,
@@ -20,6 +20,10 @@ use crate::net::{self, NetError};
 pub enum DownloadError {
     /// `UpdateCancelled`: the player backed out.
     Cancelled,
+    /// Nothing arrived for this long: the transfer went quiet (issue 266).
+    Stalled(Duration),
+    /// The file arrived whole but is not the one the release published.
+    Corrupt,
     Net(NetError),
     Io(io::Error),
 }
@@ -28,6 +32,10 @@ impl std::fmt::Display for DownloadError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             DownloadError::Cancelled => f.write_str("update cancelled"),
+            DownloadError::Stalled(idle) => {
+                write!(f, "no data arrived for {} seconds", idle.as_secs())
+            }
+            DownloadError::Corrupt => f.write_str("the download does not match the release"),
             DownloadError::Net(e) => write!(f, "{e}"),
             DownloadError::Io(e) => write!(f, "{e}"),
         }
@@ -48,14 +56,31 @@ impl From<io::Error> for DownloadError {
     }
 }
 
+/// How long a download may go without a single byte before it fails.
+///
+/// An idle bound, never a total one: the download client deliberately has
+/// no overall or response deadline, because a 420 MB snapshot cannot fit
+/// one on a real line and the total deadline made every big update die
+/// mid-transfer and be re-offered forever (issue 181). What it lost with
+/// them was any bound on a connection that simply goes quiet, so a stalled
+/// transfer blocked the worker for good (issue 266). Sixty seconds of
+/// nothing is a dead transfer on any line that could finish one.
+pub const DOWNLOAD_IDLE_TIMEOUT: Duration = Duration::from_secs(60);
+
+/// How often the copy loop wakes to check for a cancel while it waits.
+const CANCEL_POLL: Duration = Duration::from_millis(100);
+
 /// Fetch the release archive into `dest_dir`.
 ///
-/// `progress(done_bytes, total_bytes)` is called as data arrives;
-/// `cancelled` is checked between chunks.
+/// `progress(done_bytes, total_bytes)` is called as data arrives. The
+/// transfer fails with [`DownloadError::Stalled`] after
+/// [`DOWNLOAD_IDLE_TIMEOUT`] without a byte, returns within a moment of
+/// `cancelled` being set, and is checked against the release's published
+/// SHA-256 when it has one.
 pub fn download(
     info: &UpdateInfo,
     dest_dir: &Path,
-    mut progress: Option<&mut dyn FnMut(u64, u64)>,
+    progress: Option<&mut dyn FnMut(u64, u64)>,
     cancelled: Option<&AtomicBool>,
 ) -> Result<PathBuf, DownloadError> {
     let dest = dest_dir.join(&info.asset_name);
@@ -66,7 +91,7 @@ pub fn download(
     // The download client, not the GitHub tier: a 294 MB snapshot can never
     // finish inside a total deadline, and failing here re-offers the same
     // update forever.
-    let mut response = net::download_agent()
+    let response = net::download_agent()
         .get(&info.asset_url)
         .header("User-Agent", USER_AGENT)
         .call()
@@ -82,30 +107,169 @@ pub fn download(
         .and_then(|v| v.trim().parse::<u64>().ok())
         .filter(|n| *n > 0)
         .unwrap_or(info.asset_size.max(0) as u64);
-    let mut file = fs::File::create(&dest)?;
-    let mut reader = response.body_mut().as_reader();
-    let mut buf = vec![0u8; 65536];
+    let reader = response.into_body().into_reader();
+    let file = fs::File::create(&dest)?;
+    let digest = stream_to_file(
+        reader,
+        file,
+        total,
+        progress,
+        cancelled,
+        DOWNLOAD_IDLE_TIMEOUT,
+    )?;
+    if !info.asset_sha256.is_empty() && !digest.eq_ignore_ascii_case(&info.asset_sha256) {
+        log::warn!(
+            "Update download {} has SHA-256 {digest}, release says {}",
+            info.asset_name,
+            info.asset_sha256
+        );
+        let _ = fs::remove_file(&dest);
+        return Err(DownloadError::Corrupt);
+    }
+    Ok(dest)
+}
+
+/// Copy `reader` into `file`, bounded by an idle timeout and a cancel flag;
+/// returns the lowercase hex SHA-256 of what was written.
+///
+/// The blocking reads run on their own thread and hand chunks over a small
+/// channel, so this loop can always give up: a socket read cannot be
+/// interrupted, but it no longer has to be waited for. A reader left
+/// blocked on a dead connection ends when that read returns (its next send
+/// finds nobody listening) or with the process.
+pub fn stream_to_file<R: Read + Send + 'static>(
+    mut reader: R,
+    mut file: fs::File,
+    total: u64,
+    mut progress: Option<&mut dyn FnMut(u64, u64)>,
+    cancelled: Option<&AtomicBool>,
+    idle_timeout: Duration,
+) -> Result<String, DownloadError> {
+    use sha2::{Digest, Sha256};
+    use std::sync::mpsc::{sync_channel, RecvTimeoutError};
+
+    let (tx, rx) = sync_channel::<io::Result<Vec<u8>>>(8);
+    std::thread::Builder::new()
+        .name("update-download-read".into())
+        .spawn(move || loop {
+            let mut buf = vec![0u8; 65536];
+            match reader.read(&mut buf) {
+                Ok(0) => break,
+                Ok(n) => {
+                    buf.truncate(n);
+                    if tx.send(Ok(buf)).is_err() {
+                        break;
+                    }
+                }
+                Err(e) if e.kind() == io::ErrorKind::Interrupted => continue,
+                Err(e) => {
+                    let _ = tx.send(Err(e));
+                    break;
+                }
+            }
+        })?;
+
+    let mut hasher = Sha256::new();
     let mut done: u64 = 0;
+    let mut last_data = Instant::now();
     loop {
         if cancelled.is_some_and(|flag| flag.load(Ordering::SeqCst)) {
             return Err(DownloadError::Cancelled);
         }
-        let n = reader.read(&mut buf)?;
-        if n == 0 {
-            break;
-        }
-        file.write_all(&buf[..n])?;
-        done += n as u64;
-        if let Some(progress) = progress.as_deref_mut() {
-            progress(done, total);
+        match rx.recv_timeout(CANCEL_POLL) {
+            Ok(Ok(chunk)) => {
+                file.write_all(&chunk)?;
+                hasher.update(&chunk);
+                done += chunk.len() as u64;
+                last_data = Instant::now();
+                if let Some(progress) = progress.as_deref_mut() {
+                    progress(done, total);
+                }
+            }
+            Ok(Err(e)) => return Err(e.into()),
+            Err(RecvTimeoutError::Disconnected) => break,
+            Err(RecvTimeoutError::Timeout) => {
+                if last_data.elapsed() >= idle_timeout {
+                    log::warn!(
+                        "Update download stalled: nothing for {} s after {done} bytes",
+                        idle_timeout.as_secs()
+                    );
+                    return Err(DownloadError::Stalled(idle_timeout));
+                }
+            }
         }
     }
     file.flush()?;
-    Ok(dest)
+    Ok(hasher
+        .finalize()
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect())
+}
+
+/// The longest an unpack may run. A 420 MB snapshot unpacks in well under
+/// a minute on any Mac that can run the game; past this the unpacker is
+/// wedged, and the player must be told rather than left on a silent screen.
+pub const UNPACK_TIMEOUT: Duration = Duration::from_secs(600);
+
+/// Run an external unpacker to completion, bounded: killed when `cancelled`
+/// is set (`ErrorKind::Interrupted`) or when it outlives `timeout`
+/// (`ErrorKind::TimedOut`). Its output is discarded; it has no terminal.
+pub fn run_bounded(
+    command: &mut Command,
+    timeout: Duration,
+    cancelled: Option<&AtomicBool>,
+) -> io::Result<()> {
+    let mut child = command
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()?;
+    let deadline = Instant::now() + timeout;
+    loop {
+        if let Some(status) = child.try_wait()? {
+            if status.success() {
+                return Ok(());
+            }
+            return Err(io::Error::other(format!("unpacker failed: {status}")));
+        }
+        let stop = if cancelled.is_some_and(|flag| flag.load(Ordering::SeqCst)) {
+            Some(io::Error::new(
+                io::ErrorKind::Interrupted,
+                "update cancelled",
+            ))
+        } else if Instant::now() >= deadline {
+            Some(io::Error::new(
+                io::ErrorKind::TimedOut,
+                format!("unpacking took longer than {} seconds", timeout.as_secs()),
+            ))
+        } else {
+            None
+        };
+        if let Some(err) = stop {
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err(err);
+        }
+        std::thread::sleep(Duration::from_millis(50));
+    }
 }
 
 /// Unpack the release archive; returns the new app folder inside it.
 pub fn extract(archive: &Path, staging: &Path, env: &UpdaterEnv) -> io::Result<PathBuf> {
+    extract_with(archive, staging, env, None, UNPACK_TIMEOUT)
+}
+
+/// [`extract`], cancellable and bounded. The macOS unpacker is an external
+/// `ditto`, so it is the one step that can be killed mid-way; the in-process
+/// zip and tar readers check `cancelled` once they return.
+pub fn extract_with(
+    archive: &Path,
+    staging: &Path,
+    env: &UpdaterEnv,
+    cancelled: Option<&AtomicBool>,
+    timeout: Duration,
+) -> io::Result<PathBuf> {
     fs::create_dir_all(staging)?;
     let name = archive
         .file_name()
@@ -119,21 +283,24 @@ pub fn extract(archive: &Path, staging: &Path, env: &UpdaterEnv) -> io::Result<P
         tar.unpack(staging)?;
     } else if env.platform == Platform::MacOs {
         // ditto preserves the executable bits and bundle symlinks that a
-        // plain unzip would drop
-        let status = Command::new("ditto")
-            .args(["-x", "-k"])
-            .arg(archive)
-            .arg(staging)
-            .status()?;
-        if !status.success() {
-            return Err(io::Error::other(format!("ditto failed: {status}")));
-        }
+        // plain unzip would drop. Bounded and killable: an unbounded
+        // `status()` here could hold the download screen silent for as
+        // long as ditto ran, with no way to leave it (issue 266).
+        let mut ditto = Command::new("ditto");
+        ditto.args(["-x", "-k"]).arg(archive).arg(staging);
+        run_bounded(&mut ditto, timeout, cancelled)?;
     } else {
         let file = fs::File::open(archive)?;
         let mut zip = zip::ZipArchive::new(file)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
         zip.extract(staging)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+    }
+    if cancelled.is_some_and(|flag| flag.load(Ordering::SeqCst)) {
+        return Err(io::Error::new(
+            io::ErrorKind::Interrupted,
+            "update cancelled",
+        ));
     }
     extracted_root(staging, &name, env)
 }
@@ -192,10 +359,21 @@ pub fn make_staging_dir() -> io::Result<PathBuf> {
 /// An .AppImage download IS the update -- one file, nothing to unpack.
 /// Archives unpack into the staging dir and yield the new app folder.
 pub fn stage_update(archive: &Path, staging: &Path, env: &UpdaterEnv) -> io::Result<PathBuf> {
+    stage_update_with(archive, staging, env, None, UNPACK_TIMEOUT)
+}
+
+/// [`stage_update`], cancellable and bounded (see [`extract_with`]).
+pub fn stage_update_with(
+    archive: &Path,
+    staging: &Path,
+    env: &UpdaterEnv,
+    cancelled: Option<&AtomicBool>,
+    timeout: Duration,
+) -> io::Result<PathBuf> {
     if path_name(archive).ends_with(".AppImage") {
         return Ok(archive.to_path_buf());
     }
-    let new_root = extract(archive, &staging.join("unpacked"), env)?;
+    let new_root = extract_with(archive, &staging.join("unpacked"), env, cancelled, timeout)?;
     match fs::remove_file(archive) {
         Ok(()) => {}
         Err(e) if e.kind() == io::ErrorKind::NotFound => {}
@@ -224,6 +402,12 @@ fn dir_writable(path: &Path) -> bool {
 /// swap needs the .AppImage's own folder to be writable, and a folder
 /// update can never be applied to an AppImage run -- the mounted payload
 /// is read-only and disposable; the .AppImage file is the install.
+///
+/// On macOS the swap renames the app bundle inside its folder, so that
+/// folder must be writable, and the bundle must not be running from App
+/// Translocation: an app opened straight out of a quarantined download runs
+/// from a read-only copy under `AppTranslocation`, which no swap can touch,
+/// and which is gone once the game quits -- the restart then opens nothing.
 pub fn can_auto_apply(new_root: &Path, env: &UpdaterEnv) -> bool {
     let appimage = running_appimage_path(env.appimage.as_deref());
     if path_name(new_root).ends_with(".AppImage") && new_root.is_file() {
@@ -232,7 +416,24 @@ pub fn can_auto_apply(new_root: &Path, env: &UpdaterEnv) -> bool {
             .and_then(Path::parent)
             .is_some_and(dir_writable);
     }
+    if env.platform == Platform::MacOs {
+        return macos_bundle_swappable(&install_target_in(env));
+    }
     appimage.is_none()
+}
+
+/// Whether the macOS apply script can swap the bundle at `install`.
+pub fn macos_bundle_swappable(install: &Path) -> bool {
+    if is_translocated(install) {
+        return false;
+    }
+    install.parent().is_some_and(dir_writable)
+}
+
+/// True for a bundle macOS is running from an App Translocation mount.
+pub fn is_translocated(path: &Path) -> bool {
+    path.components()
+        .any(|c| c.as_os_str() == std::ffi::OsStr::new("AppTranslocation"))
 }
 
 /// Park an update that needs a manual install somewhere describable.
@@ -241,8 +442,13 @@ pub fn can_auto_apply(new_root: &Path, env: &UpdaterEnv) -> bool {
 /// update moves to the home folder instead, so the spoken location is
 /// one the player can find again (and that survives a reboot). Folder
 /// updates stay where they were unpacked.
+///
+/// A macOS `.app` bundle is a folder but is also the whole update, so it
+/// moves to the home folder too; a bundle left under the system temp folder
+/// is one the player could never find to drag into Applications.
 pub fn stash_for_manual_install(new_root: &Path, home: Option<&Path>) -> PathBuf {
-    if !new_root.is_file() {
+    let bundle = new_root.is_dir() && path_name(new_root).ends_with(".app");
+    if !new_root.is_file() && !bundle {
         return new_root.to_path_buf();
     }
     let Some(home) = home else {
@@ -250,6 +456,14 @@ pub fn stash_for_manual_install(new_root: &Path, home: Option<&Path>) -> PathBuf
     };
     let dest = home.join(path_name(new_root));
     let moved = (|| -> io::Result<()> {
+        if bundle {
+            // Never delete a bundle already at the destination: it may be
+            // the player's own copy. A rename either lands or fails whole.
+            if dest.exists() {
+                return Err(io::Error::from(io::ErrorKind::AlreadyExists));
+            }
+            return fs::rename(new_root, &dest);
+        }
         if dest.exists() {
             fs::remove_file(&dest)?;
         }

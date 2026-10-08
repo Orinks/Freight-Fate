@@ -469,6 +469,7 @@ pub struct PendingAmbient {
     pub category: Option<SpeechCategory>,
     pub waited_s: f64,
     pub key: Option<String>,
+    pub priority: Option<EventPriority>,
     /// A line that counts down toward something can re-render at delivery, so
     /// a wait never makes it lie: the 12-second age cap is REAL seconds, and
     /// under time compression that is miles -- a travel plaza queued at "in 5
@@ -510,6 +511,7 @@ impl PendingAmbient {
             category: None,
             waited_s: 0.0,
             key: None,
+            priority: None,
             render: None,
         }
     }
@@ -773,6 +775,8 @@ impl RadioPlaybackBackend for DrivingRadioBackend<'_> {
         if station.fallback {
             self.driving.radio_station_id = station.id.clone();
             self.ctx.audio.stop_music_with(600);
+        } else if DrivingState::is_channel3000(station) {
+            self.driving.start_channel3000(self.ctx, 900);
         } else {
             self.driving.start_station_rotation(self.ctx, station, 900);
         }

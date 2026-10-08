@@ -10,9 +10,9 @@
 //! the spoken hints read.
 //!
 //! What stays fixed, on purpose: Escape for the pause menu, Enter to confirm,
-//! F1 for help, the Control keys that stop the event voice, the clutch on
-//! Shift and the left bumper, plus and minus for the cruise target, the radio
-//! dial keys, the message-review keys, and every menu key. Those are either
+//! F1 for help, F2 for the command list, the Control keys that stop the event
+//! voice, the clutch on Shift and the left bumper, plus and minus for the
+//! cruise target, the radio dial keys, the message-review keys, and every menu key. Those are either
 //! the screen reader's own vocabulary or a control with several physical
 //! keys already, and moving them would cost more than it gives. On the pad,
 //! Start (pause), Back (stop the voice, then help), the two bumpers and the
@@ -31,10 +31,13 @@ use ff_core::settings::Settings;
 use crate::app::held_keys::HeldKeys;
 use crate::controller::ControllerButton;
 use crate::states::base::{Key, Mods};
+use crate::touch::Gesture;
 
 mod names;
+mod touch;
 
 pub use names::{key_saved_name, key_spoken_name, pad_button_short_name, parse_key_name};
+pub use touch::{touch_gesture_name, touch_gesture_noun, touch_slots, TouchCommand};
 
 /// One discrete driving control a player can move to another key or button.
 ///
@@ -665,6 +668,21 @@ impl Action {
     pub fn on_pad(self) -> bool {
         !self.default_pad_chords().is_empty()
     }
+
+    /// The controls that act only while held: the pedals, steering, the
+    /// emergency brake and the horn. A menu row or a tap cannot run them.
+    pub fn held(self) -> bool {
+        matches!(
+            self,
+            Action::Accelerate
+                | Action::Brake
+                | Action::EmergencyBrake
+                | Action::SteerLeft
+                | Action::SteerRight
+                | Action::Straighten
+                | Action::Horn
+        )
+    }
 }
 
 /// Why a key cannot be chosen, as the screen says it.
@@ -674,6 +692,7 @@ pub fn reserved_key_reason(chord: &Chord) -> Option<&'static str> {
         Key::Escape => Some("Escape is the pause menu"),
         Key::Return | Key::KpEnter => Some("Enter confirms"),
         Key::F1 => Some("F1 is help"),
+        Key::F2 => Some("F2 lists the driving commands"),
         Key::LCtrl | Key::RCtrl | Key::LShift | Key::RShift | Key::LAlt | Key::RAlt => {
             Some("a modifier key on its own cannot be a shortcut")
         }
@@ -690,13 +709,14 @@ pub fn reserved_key_reason(chord: &Chord) -> Option<&'static str> {
         _ => None,
     };
     if let Some(reason) = fixed {
-        // Escape, F1 and the modifier keys are fixed however they are
-        // pressed (the first two are answered before the table is asked);
+        // Escape, F1, F2 and the modifier keys are fixed however they are
+        // pressed (the first three are answered before the table is asked);
         // the rest are only claimed bare, so Alt with a review key is free.
         let always = matches!(
             chord.key,
             Key::Escape
                 | Key::F1
+                | Key::F2
                 | Key::LCtrl
                 | Key::RCtrl
                 | Key::LShift
@@ -745,6 +765,7 @@ pub enum Rebind {
 pub struct KeyBindings {
     keys: HashMap<Action, Chord>,
     pad: HashMap<Action, PadChord>,
+    touch: HashMap<Gesture, TouchCommand>,
 }
 
 impl KeyBindings {
@@ -766,6 +787,7 @@ impl KeyBindings {
                 }
             }
         }
+        out.touch = touch::parse_touch(&settings.touch_bindings);
         out
     }
 
@@ -783,16 +805,18 @@ impl KeyBindings {
         }
         settings.key_bindings = keys.join(";");
         settings.pad_bindings = pad.join(";");
+        settings.touch_bindings = touch::saved_touch(&self.touch);
     }
 
     /// True when nothing has been moved from its default.
     pub fn is_default(&self) -> bool {
-        self.keys.is_empty() && self.pad.is_empty()
+        self.keys.is_empty() && self.pad.is_empty() && self.touch.is_empty()
     }
 
     pub fn reset(&mut self) {
         self.keys.clear();
         self.pad.clear();
+        self.touch.clear();
     }
 
     pub fn reset_keys(&mut self) {
@@ -806,10 +830,19 @@ impl KeyBindings {
     // -- keyboard ----------------------------------------------------------------
 
     /// The chords that trigger `action` today.
+    ///
+    /// A default the player already moved another control onto stays with
+    /// that control: a default added in an update (Straighten on slash) must
+    /// never take over a key the player bound before it existed.
     pub fn chords(&self, action: Action) -> Vec<Chord> {
         match self.keys.get(&action) {
             Some(chord) => vec![*chord],
-            None => action.default_chords().to_vec(),
+            None => action
+                .default_chords()
+                .iter()
+                .copied()
+                .filter(|chord| !self.keys.values().any(|moved| moved == chord))
+                .collect(),
         }
     }
 
@@ -869,10 +902,16 @@ impl KeyBindings {
 
     // -- pad ---------------------------------------------------------------------
 
+    /// Same rule as [`Self::chords`]: a player's binding outranks a default.
     pub fn pad_chords(&self, action: Action) -> Vec<PadChord> {
         match self.pad.get(&action) {
             Some(chord) => vec![*chord],
-            None => action.default_pad_chords().to_vec(),
+            None => action
+                .default_pad_chords()
+                .iter()
+                .copied()
+                .filter(|chord| !self.pad.values().any(|moved| moved == chord))
+                .collect(),
         }
     }
 
@@ -1028,6 +1067,19 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn a_saved_binding_keeps_its_key_when_an_update_adds_that_default() {
+        // Horn moved to slash on a build before Straighten took slash by
+        // default: the horn keeps it, and straighten waits for a key.
+        let settings = Settings {
+            key_bindings: "horn=slash".into(),
+            ..Settings::default()
+        };
+        let b = KeyBindings::from_settings(&settings);
+        assert_eq!(b.action_for(Key::Slash, Mods::NONE), Some(Action::Horn));
+        assert!(b.chords(Action::Straighten).is_empty());
     }
 
     #[test]
