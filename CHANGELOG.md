@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- **Menus accept Enter, Space, and letters from braille notetakers and automation tools.**
+
 - **Sitting through a training course now tires you, about half as fast as driving.** A multi-day course counts only its last daytime class day.
 
 - **A course that leaves you drowsy now tells you to sleep before driving.** Night classes are judged by the city's local clock.

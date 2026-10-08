@@ -44,6 +44,8 @@ pub mod sdl_shell;
 pub mod speech_delivery;
 pub mod synth_music;
 pub mod testing;
+#[cfg(any(windows, test))]
+mod win_keys;
 
 pub use context::{
     share, Clipboard, ContextParts, GameContext, MemoryClipboard, Services, SharedState,
