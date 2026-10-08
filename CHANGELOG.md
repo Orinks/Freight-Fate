@@ -8,6 +8,8 @@
 
 - **Touch haptics now have a switch in Touch gestures settings.**
 
+- **Practice gestures now names every touch command without driving.**
+
 ### Changed
 
 - **Touch pedals work anywhere on the screen.** Hold for gas, tap then hold to brake.

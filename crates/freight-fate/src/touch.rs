@@ -223,15 +223,24 @@ impl TouchInput {
             // press-and-hold work exactly as they do on a keyboard.
             // The hold goes out as its gesture, and the app presses the
             // key, so the press is known to be the screen's.
-            Gesture::HoldUpperBegan
-            | Gesture::HoldLowerBegan
-            | Gesture::EmergencyBrakeHoldBegan
-            | Gesture::HornHoldBegan => {
+            Gesture::HoldUpperBegan | Gesture::HoldLowerBegan => {
                 self.release_into(&mut out.events);
                 out.events.push(InputEvent::Gesture(gesture));
                 self.held = gesture.held_key();
             }
-            Gesture::HoldEnded => self.release_into(&mut out.events),
+            // These holds use the player's current keyboard binding.  The
+            // application resolves and holds that chord, because this small
+            // platform-neutral translator deliberately does not own bindings.
+            Gesture::EmergencyBrakeHoldBegan | Gesture::HornHoldBegan => {
+                out.events.push(InputEvent::Gesture(gesture));
+            }
+            Gesture::HoldEnded => {
+                if self.held.is_some() {
+                    self.release_into(&mut out.events);
+                } else {
+                    out.events.push(InputEvent::Gesture(gesture));
+                }
+            }
             other => out.events.push(InputEvent::Gesture(other)),
         }
         out
@@ -397,20 +406,17 @@ mod tests {
     }
 
     #[test]
-    fn emergency_brake_and_horn_holds_release_their_keys() {
-        for (gesture, key) in [
-            (Gesture::EmergencyBrakeHoldBegan, Key::B),
-            (Gesture::HornHoldBegan, Key::H),
-        ] {
+    fn emergency_brake_and_horn_holds_are_left_for_live_bindings() {
+        for gesture in [Gesture::EmergencyBrakeHoldBegan, Gesture::HornHoldBegan] {
             let mut touch = TouchInput::new();
-            touch.handle(gesture);
-            assert_eq!(touch.held(), Some(key));
+            assert_eq!(
+                touch.handle(gesture).events,
+                vec![InputEvent::Gesture(gesture)]
+            );
+            assert_eq!(touch.held(), None);
             assert_eq!(
                 touch.handle(Gesture::HoldEnded).events,
-                vec![InputEvent::KeyUp {
-                    key,
-                    mods: Mods::NONE
-                }]
+                vec![InputEvent::Gesture(Gesture::HoldEnded)]
             );
         }
     }

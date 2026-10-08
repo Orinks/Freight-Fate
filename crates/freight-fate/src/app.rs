@@ -149,6 +149,9 @@ pub struct App {
     world_held: bool,
     /// The key probe, while one is running (see `app::key_probe`).
     key_probe: Option<KeyProbe>,
+    /// A two- or three-finger touch hold resolved through the live keyboard
+    /// bindings. Pedal holds live in `TouchInput`; these actions can be rebound.
+    touch_bound_hold: Option<crate::bindings::Chord>,
 }
 
 /// Read-only driving facts available to a normal-input policy.
@@ -558,6 +561,7 @@ impl App {
             operator_keys_ignored: false,
             world_held: false,
             key_probe: None,
+            touch_bound_hold: None,
         }
     }
 
@@ -783,6 +787,37 @@ impl App {
     /// a controller button is pressed.
     pub fn dispatch_gesture(&mut self, gesture: Gesture) {
         self.ctx.controller.note_touch();
+        if let Some(action) = match gesture {
+            Gesture::EmergencyBrakeHoldBegan => Some(crate::bindings::Action::EmergencyBrake),
+            Gesture::HornHoldBegan => Some(crate::bindings::Action::Horn),
+            _ => None,
+        } {
+            if let Some(previous) = self.touch_bound_hold.take() {
+                self.handle_event(&InputEvent::KeyUp {
+                    key: previous.key,
+                    mods: previous.mods,
+                });
+            }
+            if let Some(chord) = self.ctx.bindings.chords(action).into_iter().next() {
+                self.touch_bound_hold = Some(chord);
+                self.handle_event(&InputEvent::KeyDown {
+                    key: chord.key,
+                    mods: chord.mods,
+                    text: None,
+                    repeat: false,
+                });
+            }
+            return;
+        }
+        if gesture == Gesture::HoldEnded {
+            if let Some(chord) = self.touch_bound_hold.take() {
+                self.handle_event(&InputEvent::KeyUp {
+                    key: chord.key,
+                    mods: chord.mods,
+                });
+                return;
+            }
+        }
         let events = if gesture.held_key().is_some() {
             gesture.hold_events()
         } else {

@@ -5,7 +5,7 @@
 
 use ff_core::sim::weather::WeatherKind;
 
-use freight_fate::bindings::{Action, TouchCommand};
+use freight_fate::bindings::{Action, Chord, TouchCommand};
 use freight_fate::playtest::harness::{PlaytestHarness, StartDelivery};
 use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
@@ -182,6 +182,28 @@ fn magic_tap_pauses_the_drive() {
     let mut input = TouchInput::new();
     touch(&mut harness, &mut input, Gesture::MagicTap);
     assert!(harness.state_is::<PauseMenuState>());
+}
+
+#[test]
+fn emergency_and_horn_holds_follow_rebound_keys() {
+    let mut harness = a_drive("Touch held bindings");
+    assert!(matches!(
+        harness
+            .app
+            .ctx
+            .bindings
+            .set_chord(Action::EmergencyBrake, Chord::plain(Key::Z)),
+        freight_fate::bindings::Rebind::Done
+    ));
+    let mut input = TouchInput::new();
+    touch(&mut harness, &mut input, Gesture::EmergencyBrakeHoldBegan);
+    assert!(harness.app.ctx.input.physically_down(Key::Z));
+    touch(&mut harness, &mut input, Gesture::HoldEnded);
+    assert!(!harness.app.ctx.input.physically_down(Key::Z));
+    touch(&mut harness, &mut input, Gesture::HornHoldBegan);
+    assert!(harness.app.ctx.input.physically_down(Key::H));
+    touch(&mut harness, &mut input, Gesture::HoldEnded);
+    assert!(!harness.app.ctx.input.physically_down(Key::H));
 }
 
 #[test]

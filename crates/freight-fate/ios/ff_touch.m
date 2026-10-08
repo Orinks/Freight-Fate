@@ -18,6 +18,7 @@
 #import <UIKit/UIGestureRecognizerSubclass.h>
 #include <os/lock.h>
 #include <stdint.h>
+#include <math.h>
 
 // Keep in step with `touch::Gesture::from_code`.
 enum {
@@ -200,7 +201,7 @@ static const CGFloat FF_SWIPE_DISTANCE = 36.0;
     }
     if ([touches containsObject:_pedal]) {
         if (self.state == UIGestureRecognizerStatePossible) {
-            _brakeArmedAt = ((UITouch *)[touches anyObject]).timestamp;
+            _brakeArmedAt = _pedal.timestamp;
         }
         [self pedalLifted:UIGestureRecognizerStateEnded];
     }
@@ -380,7 +381,10 @@ static const CGFloat FF_SWIPE_DISTANCE = 36.0;
         ff_touch_haptic([[hold valueForKey:@"ffCode"] intValue] == FF_EMERGENCY_BRAKE_HOLD_BEGAN ? 2 : 0);
     } else if (hold.state == UIGestureRecognizerStateEnded || hold.state == UIGestureRecognizerStateCancelled) {
         ff_push(FF_HOLD_ENDED);
-        ff_touch_haptic(0);
+        int32_t code = [[hold valueForKey:@"ffCode"] intValue];
+        if (code != FF_EMERGENCY_BRAKE_HOLD_BEGAN && code != FF_HORN_HOLD_BEGAN) {
+            ff_touch_haptic(0);
+        }
     }
 }
 
