@@ -340,10 +340,30 @@ pub struct DrivingState {
     // on a road the player has already left.
     pub record_events: Vec<String>,
     pub fatigue_events: i64, // run-off-road microsleeps this trip
-    pub weigh_station_notice_key: String,
+    // Every open scale whose notice has been spoken this trip, by key.
+    pub weigh_station_noticed: HashSet<String>,
     // The half-mile "slow for the scale" nudge, latched separately so it
     // speaks once per announced scale and never re-fires on a re-approach.
     pub weigh_station_reminder_key: String,
+    // Real driving seconds since that reminder was spoken, counting only
+    // frames the cab was free (no hazard, pull-over, ramp or menu). A
+    // crossing before SCALE_REMINDER_REAL_LEAD_S of them is not judged a
+    // bypass, but only when the game itself held that reminder back.
+    pub weigh_station_reminder_age_s: f64,
+    // Open scales whose last reminder the game held back: the notice only
+    // latched inside the reminder window, or the cab was taken (a stop, a
+    // ramp, a hazard, a departure lane) while the truck was inside it,
+    // before or after the reminder spoke. A reminder made late by the
+    // driver's own crawl or signal is not here.
+    pub scale_reminder_held_by_game: HashSet<String>,
+    // Open scales whose reminder the driver held quiet inside its window,
+    // under the bypass speed or signalled for the ramp. A cab taken after
+    // such a reminder finally speaks does not excuse the crossing.
+    pub scale_reminder_late_by_driver: HashSet<String>,
+    // A stop or a pause just ended: re-announce the open scale still ahead
+    // once the cab is free. Holds the name of a scale just checked in at,
+    // or an empty string when there is none.
+    pub scale_reannounce: Option<String>,
     // A scale crossed with its own exit armed: judged after the exit watch
     // runs, later in the same frame, never on ramp speed alone.
     pub weigh_station_pending: Option<RoadStop>,
@@ -846,6 +866,9 @@ pub struct DrivingState {
     // than the traffic it joined. Keep the low-speed merge handoff on the
     // real-time clock until it can safely become ordinary highway driving.
     pub departure_merge_recovery: bool,
+    /// A waiting pace change, the merge handoff's bound and the clock
+    /// trace (`driving_updates::pacing`).
+    pub clock_pacing: crate::states::driving_updates::pacing::ClockPacing,
     // Lanes on our side last tick, so a road that narrows under the truck
     // can be told apart from a driver who steered into the cones.
     pub lane_count_seen: Option<i64>,

@@ -1236,6 +1236,112 @@ fn test_fatigue_grows_faster_at_night() {
 }
 
 #[test]
+fn awake_fatigue_gain_uses_day_and_night_rates() {
+    // Eight daytime hours at the day rate.
+    let day_8h = awake_fatigue_gain(8.0, 8.0 * 60.0);
+    assert!(approx(day_8h, fatigue_rate_per_min(false) * 8.0 * 60.0));
+    // A full day crosses night, so it outpaces pure day rate and stays finite.
+    let day_24h = awake_fatigue_gain(8.0, 24.0 * 60.0);
+    assert!(day_24h > fatigue_rate_per_min(false) * 24.0 * 60.0);
+    assert!(day_24h.is_finite());
+}
+
+#[test]
+fn course_fatigue_is_half_the_driving_rate_day_and_night() {
+    // An 8 h day class from 10: 0.0575/min x 480 = 27.6, landing at 37.6.
+    let day = course_fatigue(10.0, 8.0, 8.0 * 60.0, |_| 1.0);
+    assert!(approx(day, 37.6), "8 h day class: {day}");
+    assert!(approx(
+        day - 10.0,
+        CLASSROOM_FATIGUE_FACTOR * awake_fatigue_gain(8.0, 8.0 * 60.0)
+    ));
+    // 9 PM to 5 AM is all night: 0.085/min x 480 = 40.8, landing at 50.8.
+    let night = course_fatigue(10.0, 21.0, 8.0 * 60.0, |_| 1.0);
+    assert!(approx(night, 50.8), "8 h night class: {night}");
+}
+
+#[test]
+fn course_fatigue_scale_multiplies_each_minute() {
+    // A buff at rate 0.5 for the first four hours only.
+    let buffed = course_fatigue(0.0, 8.0, 8.0 * 60.0, |h| if h < 4.0 { 0.5 } else { 1.0 });
+    let plain_half = 0.0575 * 240.0;
+    assert!(approx(buffed, plain_half * 0.5 + plain_half), "{buffed}");
+}
+
+#[test]
+fn multi_day_course_counts_only_the_last_class_day() {
+    // 24 h from 7 AM: the last class day is 8 AM to 4 PM, all day rate:
+    // 0.0575 x 480 = 27.6, whatever the driver walked in with.
+    let fresh = course_fatigue(0.0, 7.0, 24.0 * 60.0, |_| 1.0);
+    let tired = course_fatigue(95.0, 7.0, 24.0 * 60.0, |_| 1.0);
+    assert!(approx(fresh, 27.6), "24 h course: {fresh}");
+    assert!(
+        approx(fresh, tired),
+        "arrival fatigue is replaced, not added"
+    );
+    assert!(approx(
+        fresh,
+        CLASSROOM_FATIGUE_FACTOR * awake_fatigue_gain(8.0, 8.0 * 60.0)
+    ));
+    // The 10 h threshold: a 10 h course is two days, a 9.9 h course is one.
+    let ten = course_fatigue(50.0, 8.0, 10.0 * 60.0, |_| 1.0);
+    assert!(approx(ten, 27.6), "10 h course: {ten}");
+    let under = course_fatigue(50.0, 8.0, 9.9 * 60.0, |_| 1.0);
+    assert!(under > 50.0);
+    // The cliff the cutoff comment describes: 599 min from 8 AM at 50.
+    let cliff = course_fatigue(50.0, 8.0, 599.0, |_| 1.0);
+    assert!(approx(cliff, 50.0 + 0.0575 * 599.0), "599 min: {cliff}");
+}
+
+#[test]
+fn multi_day_course_class_day_is_daytime_from_any_start_hour() {
+    // Schools teach 8 AM to 4 PM: a course starting at 3 to 7 AM must not
+    // run its last class day overnight.
+    for start in [3.0, 5.0, 7.0, 12.0, 21.0, 23.5, 0.0] {
+        for arrival in [0.0, 40.0, 95.0] {
+            let after = course_fatigue(arrival, start, 24.0 * 60.0, |_| 1.0);
+            assert!(
+                approx(after, 27.6),
+                "start {start}, arrival {arrival}: {after}"
+            );
+        }
+    }
+    // Days past the first and a long-running game clock change nothing.
+    assert!(approx(
+        course_fatigue(0.0, 1000.0 + 5.0, 24.0 * 60.0, |_| 1.0),
+        27.6
+    ));
+    assert!(approx(
+        course_fatigue(0.0, 21.0, 10.0 * 60.0, |_| 1.0),
+        27.6
+    ));
+}
+
+#[test]
+fn multi_day_course_buffs_follow_the_class_day_hours() {
+    // From 3 AM the class day runs 5 to 13 hours into the course. A half
+    // rate buff for the first 9 hours covers its first four class hours.
+    let buffed = course_fatigue(0.0, 3.0, 24.0 * 60.0, |h| if h < 9.0 { 0.5 } else { 1.0 });
+    let half = 0.0575 * 240.0;
+    assert!(approx(buffed, half * 0.5 + half), "from 3 AM: {buffed}");
+    // From 9 PM the class day is 8 AM to 4 PM next day, 11 to 19 hours in.
+    let buffed = course_fatigue(0.0, 21.0, 24.0 * 60.0, |h| if h < 15.0 { 0.5 } else { 1.0 });
+    assert!(approx(buffed, half * 0.5 + half), "from 9 PM: {buffed}");
+    // A flat mode multiplier scales the whole day.
+    assert!(approx(
+        course_fatigue(0.0, 5.0, 24.0 * 60.0, |_| 0.8),
+        0.8 * 27.6
+    ));
+}
+
+#[test]
+fn course_fatigue_clamps_and_ignores_bad_minutes() {
+    assert_eq!(course_fatigue(95.0, 21.0, 8.0 * 60.0, |_| 1.0), 100.0);
+    assert_eq!(course_fatigue(12.0, 8.0, f64::NAN, |_| 1.0), 12.0);
+    assert_eq!(course_fatigue(12.0, 8.0, -60.0, |_| 1.0), 12.0);
+}
+
+#[test]
 fn test_fatigue_shortens_the_reaction_window() {
     assert_eq!(reaction_window_mult(0.0), 1.0);
     assert_eq!(reaction_window_mult(FATIGUE_DROWSY), 1.0);

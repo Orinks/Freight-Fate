@@ -33,7 +33,9 @@ BASE = "https://here.now"
 CRED = Path.home() / ".herenow" / "credentials"
 
 
-def _call(method: str, url: str, body: dict | None = None, key: str | None = None) -> dict:
+def _call(
+    method: str, url: str, body: dict | None = None, key: str | None = None, timeout: float = 120
+) -> dict:
     data = json.dumps(body).encode() if body is not None else None
     headers = {"Accept": "application/json"}
     if data is not None:
@@ -42,7 +44,7 @@ def _call(method: str, url: str, body: dict | None = None, key: str | None = Non
         headers["Authorization"] = f"Bearer {key}"
     req = urllib.request.Request(url, data=data, method=method, headers=headers)
     try:
-        with urllib.request.urlopen(req, timeout=120) as resp:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
             raw = resp.read()
             return json.loads(raw) if raw else {}
     except urllib.error.HTTPError as exc:
@@ -157,7 +159,8 @@ def publish(slug: str, pack: Path, dry_run: bool) -> None:
         with urllib.request.urlopen(req, timeout=3600) as resp:
             print("  upload status", resp.status)
     version_id = upload.get("versionId")
-    fin = _call("POST", upload["finalizeUrl"], {"versionId": version_id}, key=key)
+    # Finalize checks the uploaded bytes server side; a 1.4 GB file took over two minutes.
+    fin = _call("POST", upload["finalizeUrl"], {"versionId": version_id}, key=key, timeout=900)
     print("finalized:", json.dumps({k: fin.get(k) for k in ("currentVersionId", "code", "error")}))
     print("live at:", out.get("siteUrl") or site.get("siteUrl"))
 

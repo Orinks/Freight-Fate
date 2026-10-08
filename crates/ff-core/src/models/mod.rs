@@ -12,6 +12,7 @@ pub mod credentials;
 pub mod dispatch_policy;
 pub mod economy;
 pub mod enforcement;
+pub mod exchange;
 pub mod jobs;
 pub mod loyalty;
 pub mod market;
