@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- **Manassas, Virginia is now a freight city.** I-66 connects its real FedEx Freight and US Foods facilities to Washington and Winchester.
+
 ### Fixed
 
 - **Sitting through a training course now tires you, about half as fast as driving.** A multi-day course counts only its last daytime class day.

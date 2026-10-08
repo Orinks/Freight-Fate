@@ -240,6 +240,7 @@ pub const TEMPLATE_INTERMODAL_RAMP_DENYLIST_CITY_KEYS: &[&str] = &[
     "lusk_wy_us",
     "mammoth_lakes_ca_us",
     "mankato_mn_us",
+    "manassas_va_us",
     "mansfield_oh_us",
     "marion_oh_us",
     "marquette_mi_us",
