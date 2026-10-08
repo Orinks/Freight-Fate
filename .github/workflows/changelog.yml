@@ -28,7 +28,9 @@ concurrency:
 
 jobs:
   changelog:
-    name: Changelog
+    # Branch protection requires the check context "changelog" (ci.yml's old
+    # job id), so the job name must stay exactly that.
+    name: changelog
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
