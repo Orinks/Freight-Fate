@@ -2,22 +2,6 @@
 
 ## Unreleased
 
-### Added
-
-- **Hold two fingers anywhere for the emergency brake, or three fingers for the horn.**
-
-- **Touch gestures settings have a haptics switch.** Light taps confirm pedals and commands; the emergency brake buzzes.
-
-- **Practice gestures names each touch gesture without moving the truck.** It is offered once before your first touch drive.
-
-### Changed
-
-- **Touch pedals work anywhere on the screen.** Hold one finger for gas; tap, then hold to brake.
-
-- **While holding gas, swipe left or right with a second finger to change lanes.**
-
-- **With VoiceOver on iOS 17 or later, touching the game screen no longer makes VoiceOver talk over the game.**
-
 ### Fixed
 
 - **Sitting through a training course now tires you, about half as fast as driving.** A multi-day course counts only its last daytime class day.
