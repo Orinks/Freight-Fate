@@ -161,6 +161,25 @@ fn fixed_binding(ctx: &GameContext, gesture: Gesture) -> String {
         Gesture::EmergencyBrakeHoldBegan => ctx.control_name(Action::EmergencyBrake),
         Gesture::HornHoldBegan => ctx.control_name(Action::Horn),
         Gesture::MagicTap => "pause".to_string(),
-        _ => "fixed command".to_string(),
+        other => fixed_command(other).to_string(),
+    }
+}
+
+/// What a gesture that cannot be moved does, in the touch help's words.
+fn fixed_command(gesture: Gesture) -> &'static str {
+    match gesture {
+        Gesture::DoubleTap | Gesture::Activate => "Enter",
+        Gesture::SwipeLeft => "Steer left",
+        Gesture::SwipeRight => "Steer right",
+        Gesture::Increment => "Up",
+        Gesture::Decrement => "Down",
+        Gesture::TwoFingerSwipeUp => "Help",
+        Gesture::TwoFingerSwipeLeft => "Previous message",
+        Gesture::TwoFingerSwipeRight => "Next message",
+        Gesture::ThreeFingerSwipeLeft => "Previous radio station",
+        Gesture::ThreeFingerSwipeRight => "Next radio station",
+        Gesture::ThreeFingerTap => "Driving command list",
+        Gesture::ThreeFingerDoubleTap => "Show or hide the keyboard",
+        _ => "No command",
     }
 }

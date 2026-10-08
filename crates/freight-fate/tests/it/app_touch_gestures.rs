@@ -246,6 +246,32 @@ fn touch_practice_takes_pedal_and_bound_holds_before_they_press_keys() {
 }
 
 #[test]
+fn touch_practice_names_every_fixed_gesture_command() {
+    let mut harness = a_drive("Touch Practice Fixed");
+    harness.app.push_state(TouchPracticeState::new());
+
+    harness.clear_speech();
+    harness.app.dispatch_gesture(Gesture::SwipeRight);
+    assert_eq!(harness.transcript(), vec!["Swipe right: Steer right."]);
+
+    for gesture in (0..=38).filter_map(Gesture::from_code) {
+        if matches!(
+            gesture,
+            Gesture::Escape | Gesture::TwoFingerSwipeDown | Gesture::HoldEnded
+        ) {
+            continue;
+        }
+        harness.clear_speech();
+        harness.app.dispatch_gesture(gesture);
+        let spoken = harness.transcript();
+        assert!(
+            !spoken.is_empty() && spoken.iter().all(|line| !line.contains("No command")),
+            "{gesture:?}: {spoken:?}"
+        );
+    }
+}
+
+#[test]
 fn gas_hold_swipe_left_changes_lanes_with_full_lane_keeping() {
     let mut harness = a_drive("Touch Lane Change");
     rolling(&mut harness, 55.0);
