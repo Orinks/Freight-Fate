@@ -4,7 +4,7 @@
 
 ### Fixed
 
-- **Menus accept Enter, Space, and letters from braille notetakers and automation tools.**
+- **Menus accept Enter, Space, and letters from braille notetakers and automation tools.** Like the BrailleNote Evolve, they could arrow but not select.
 
 - **Sitting through a training course now tires you, about half as fast as driving.** A multi-day course counts only its last daytime class day.
 
