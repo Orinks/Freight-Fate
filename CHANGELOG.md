@@ -6,9 +6,7 @@
 
 - **Menus accept Enter, Space, and letters from braille notetakers and automation tools.** Like the BrailleNote Evolve, they could arrow but not select.
 
-- **Sitting through a training course now tires you, about half as fast as driving.** A multi-day course counts only its last daytime class day.
-
-- **A course that leaves you drowsy now tells you to sleep before driving.** Night classes are judged by the city's local clock.
+- **Training classes now leave you tired, about half as fast as driving does.** If a class leaves you drowsy, you are told to sleep before you drive.
 
 - **The last weigh station warning names its scale and leaves time to take the exit in every driving mode.** Closed scales say so.
 
@@ -29,6 +27,10 @@
 - **Two real Arkansas weigh stations near West Memphis are on the map.** Marion screens southbound I-55, Lehi eastbound I-40.
 
 - **A hazard after the last weigh station warning no longer costs you the bypass charge.** Time spent on the hazard does not count against you.
+
+- **The update check skips a preview snapshot that changes nothing you would notice.** A snapshot that only repeats your version is no longer offered.
+
+- **What's new for an update from an older preview snapshot lists what you are really getting.** It reads the notes of each release since your copy.
 
 ## 1.9.3 - 2026-10-06
 
