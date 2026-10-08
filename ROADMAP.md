@@ -455,6 +455,17 @@ Everything found before 2026-09-25 moved to
       updater offers a same-tag rebuild on a different one (2026-10-03).
       Copies built before this have no commit and still wait for the
       next day's snapshot.
+- [x] The nightly publishes a tester snapshot even when the day's commits
+      changed nothing a player notices (1.9-tester-20261007, four hours
+      after v1.9.3), and a 1.9.3 copy on the snapshot channel was offered
+      it. The updater now skips a snapshot unless a stable release or a
+      snapshot with real notes came out after the running copy, and the
+      orinks.net downloads page hides such a snapshot (2026-10-07).
+- [x] When the updater offers a tester on an older snapshot a quiet one
+      because a stable release came out in between, What's new read "No
+      user-facing changes", which is untrue for that player: they get the
+      stable release's fixes. It now reads the notes of every release since
+      that copy, newest first, each under its name (2026-10-07).
 - [ ] Updater, issue 266: a stalled download now fails after sixty idle
       seconds, but its blocked read thread and socket linger until that read
       returns or the game quits. A per-read socket timeout would end both.
