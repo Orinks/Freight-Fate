@@ -3,8 +3,16 @@ name: CI
 permissions:
   contents: read
   actions: write
+  # dorny/paths-filter lists a PR's changed files through the API.
+  pull-requests: read
 
 on:
+  # Unfiltered on purpose: the two `test` matrix checks are REQUIRED, and a
+  # required check that a path filter skips stays "expected -- waiting for
+  # status" forever. Instead the `changes` job below decides whether the
+  # Python inputs changed, and on a push or PR that leaves them alone the
+  # test jobs still run and report success, but skip every step after the
+  # gate (seconds, not the full matrix).
   push:
     # The 1.9 release line has its own Rust CI in rust.yml.
     branches: [main, dev]
@@ -12,12 +20,76 @@ on:
     branches: [main, dev]
   workflow_dispatch:
 
+# A newer push to the same branch or PR supersedes the run in flight, as in
+# rust.yml.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  changes:
+    # Which inputs changed. `python` is what the Python suite reads, measured
+    # by auditing every file pytest opened (2026-10-08): the tools and their
+    # tests, the world data and sound assets they check, the workflows the
+    # guards parse, and a few files outside those trees. A Rust-only change
+    # leaves it false; rust.yml covers that. The changelog gate is NOT gated
+    # here: it lives in changelog.yml and runs on every change.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      # A manual run, or a filter that could not decide (a force push whose
+      # old head this clone no longer has), runs everything.
+      python: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outcome != 'success' || steps.filter.outputs.python == 'true' }}
+    steps:
+      - uses: actions/checkout@v6
+        # A PR's changed files come from the API; a push diffs against the
+        # commit the branch pointed at before it, which needs the history
+        # (commits and trees only, as in changelog.yml).
+        if: github.event_name == 'push'
+        with:
+          fetch-depth: 0
+          filter: blob:none
+          lfs: false
+
+      - uses: dorny/paths-filter@v4
+        id: filter
+        if: github.event_name != 'workflow_dispatch'
+        continue-on-error: true
+        with:
+          base: ${{ github.event_name == 'push' && github.event.before || '' }}
+          filters: |
+            python:
+              - "tools/**"
+              - "tests/**"
+              - "sound-test/**"
+              - "data/**"
+              - "assets/**"
+              - "docs/**"
+              - "crates/*/Cargo.toml"
+              - "crates/ff-core/src/music.rs"
+              - "crates/ff-core/src/music/**"
+              - ".cargo/**"
+              - ".github/workflows/**"
+              - "pyproject.toml"
+              - "uv.lock"
+              - "README.md"
+              - "CHANGELOG.md"
+              - "LICENSE"
+              - "build-release.sh"
+              - "build-release.ps1"
+              - ".gitignore"
+              - ".gitattributes"
+
   # The Python that still SHIPS: the build, bake, indexing and release tooling
   # under tools/, plus the workflow and sound-pack guards. The game is Rust and
   # rust.yml proves it; the Python game itself was deleted in the 2026-09-21
   # sunset.
   test:
+    needs: changes
+    # Runs even if `changes` failed: its output is then empty, which the
+    # step gates below read as "changed", so a broken filter costs a full
+    # run rather than a silent pass of the required checks.
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix:
@@ -32,6 +104,10 @@ jobs:
       # tracer on the CPU-bound bake and sweep tools this job still runs.
       COVERAGE_CORE: sysmon
     steps:
+      - name: Python inputs unchanged; skipping
+        if: needs.changes.outputs.python == 'false'
+        run: echo "Nothing the Python suite reads changed; rust.yml covers the rest."
+
       # sounds.pak is an ordinary 7.8 MB blob in git now, not a Git LFS object
       # (see .gitattributes), so a plain checkout carries the real pack and
       # the audio tests run here on every push. They used to depend on an LFS
@@ -41,48 +117,29 @@ jobs:
       # the 250 MB music.pak stays outside the repository, and the tests that
       # read it skip here by design.
       - uses: actions/checkout@v6
+        if: needs.changes.outputs.python != 'false'
 
       - name: Install uv
+        if: needs.changes.outputs.python != 'false'
         uses: astral-sh/setup-uv@v8.2.0
         with:
           python-version: "3.12"
 
       - name: Install dependencies
+        if: needs.changes.outputs.python != 'false'
         run: uv sync --dev
 
       - name: Lint
+        if: needs.changes.outputs.python != 'false'
         run: uv run ruff check tests tools sound-test
 
       - name: Run tests
+        if: needs.changes.outputs.python != 'false'
         run: uv run pytest tests/ -n auto --durations=15 --cov=tools --cov-report=xml
 
       - name: Upload coverage report
+        if: needs.changes.outputs.python != 'false'
         uses: actions/upload-artifact@v7
         with:
           name: coverage-${{ matrix.os }}
           path: coverage.xml
-
-  changelog:
-    # The changelog gate runs locally as a pre-push hook, which not every
-    # clone has installed; this enforces it on every PR and also on direct
-    # pushes to dev and main, which would otherwise slip past ungated.
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Require a changelog entry for user-facing changes
-        env:
-          # PRs diff against their target branch; pushes diff against the
-          # ref the branch pointed at before this push.
-          BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
-        run: |
-          if [ "${{ github.event_name }}" = "push" ] && ! git cat-file -e "$BASE" 2>/dev/null; then
-            # A brand-new branch pushes an all-zeros "before", and a force
-            # push can point at history this clone no longer has.
-            echo "Base commit $BASE unavailable (new branch or force push); skipping."
-            exit 0
-          fi
-          python3 tools/release_notes.py check --base "$BASE" --head HEAD
