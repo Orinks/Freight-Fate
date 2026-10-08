@@ -232,6 +232,15 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
     ]
 }
 
+/// The refusal for any drive started from the terminal while the CDL is
+/// suspended or disqualified, or `None` when the driver may drive.
+pub(crate) fn cdl_drive_refusal(ctx: &GameContext) -> Option<String> {
+    let p = ctx.profile.as_ref()?;
+    let record = &p.driving_record;
+    (record.lifetime_disqualified || record.suspended(p.game_hours))
+        .then(|| ff_core::models::enforcement::suspension_drive_refusal_line(p))
+}
+
 /// What the terminal says about the first-day / career objective on entry
 /// (the `first_day` clause of `CityMenuState.announce_entry`).
 pub(crate) fn terminal_objective_clause(p: &Profile) -> String {

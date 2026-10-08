@@ -155,7 +155,7 @@ time is a view, via `Trip.local_hour`.
 | Achievement | `Achievement`, `AchievementAward` | `achievements.py` |
 | Achievement category | `AchievementCategory` | `achievements.py` |
 | Message | `Message`, `MessageCategory`, `MessageLog` | `message_log.py` |
-| Engine voice | `EngineVoice`, `EngineReading` | `engine_audio.py` |
+| Engine sound | `EngineVoice`, `EngineReading` | `engine_audio.py` |
 | Settings | -- | `settings.py` |
 | Speech | -- | `speech.py` |
 | States | `State` and subclasses | `states/` |
