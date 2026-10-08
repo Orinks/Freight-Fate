@@ -501,10 +501,10 @@ Everything found before 2026-09-25 moved to
       roadside stop does; Escape on a stop that pulled the CDL no longer
       drives on; a saved run on a pulled CDL closes out instead of resuming.
       Ported from 2.0's PR #261 (2026-09-30).
-- [ ] An owner-operator can still start "Bobtail to a nearby city" on a
-      suspended or disqualified CDL; 2.0 refuses it (PR #259). On 1.9 a
-      bobtail on a pulled CDL ends at the next run-off, barrel strike,
-      roadside stop or reload (2026-09-30).
+- [x] "Bobtail to a nearby city" is refused on a suspended or disqualified
+      CDL, from the terminal and from an open bobtail menu, with the date
+      the suspension ends. Ported from 2.0's PR #259 for 1.9.4
+      (2026-10-08).
 - [ ] Placed attraction billboards speak in one direction only since
       2026-09-30; the other side hears the random pool. Signs standing at
       their attraction could be marked `both`, and the rest need copy
