@@ -84,27 +84,42 @@ def _load(path: Path) -> dict:
     return yaml.load(path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
 
 
-def test_the_build_workflows_skip_pushes_and_prs_that_cannot_affect_them() -> None:
-    """ci.yml tests the Python tooling and rust.yml the game; each used to run
-    its full matrix on every push, so a docs-only merge to dev still rebuilt
-    the Rust workspace on two Windows runners and a Rust-only push still ran
-    pytest on two OSes. Both are path filtered now, on push and PR alike."""
-    for path in (CI_WORKFLOW, RUST_WORKFLOW):
-        triggers = _load(path)["on"]
-        push_paths = triggers["push"]["paths"]
-        assert push_paths, path.name
-        assert triggers["pull_request"]["paths"] == push_paths, path.name
-        assert f".github/workflows/{path.name}" in push_paths or (
-            ".github/workflows/**" in push_paths
-        ), f"{path.name} must rerun when it changes"
-        assert "workflow_dispatch" in triggers, path.name
+def test_rust_ci_skips_pushes_and_prs_that_cannot_affect_it() -> None:
+    """A docs-only merge to dev used to rebuild the Rust workspace on two
+    Windows runners: only the PR trigger was path filtered. Push and PR now
+    share one list."""
+    triggers = _load(RUST_WORKFLOW)["on"]
+    push_paths = triggers["push"]["paths"]
+    assert triggers["pull_request"]["paths"] == push_paths
+    for needed in ("crates/**", "Cargo.lock", "data/**", "assets/**", ".github/workflows/rust.yml"):
+        assert needed in push_paths, needed
+    assert "workflow_dispatch" in triggers, "the manual full-suite run must stay"
 
-    python_inputs = _load(CI_WORKFLOW)["on"]["push"]["paths"]
-    for needed in ("tools/**", "tests/**", "pyproject.toml", "uv.lock"):
+
+def test_python_ci_skips_its_work_without_skipping_its_required_checks() -> None:
+    """The two `test` matrix checks are required, and a required check that a
+    trigger path filter skips never reports, which would block every
+    Rust-only PR. So ci.yml triggers on everything, and a `changes` job
+    gates the test steps instead."""
+    workflow = _load(CI_WORKFLOW)
+    for event in ("push", "pull_request"):
+        trigger = workflow["on"][event]
+        assert "paths" not in trigger and "paths-ignore" not in trigger, event
+
+    changes = workflow["jobs"]["changes"]
+    filter_step = next(
+        step for step in changes["steps"] if step.get("uses", "").startswith("dorny/paths-filter@")
+    )
+    python_inputs = yaml.safe_load(filter_step["with"]["filters"])["python"]
+    for needed in ("tools/**", "tests/**", "pyproject.toml", "uv.lock", ".github/workflows/**"):
         assert needed in python_inputs, needed
-    rust_inputs = _load(RUST_WORKFLOW)["on"]["push"]["paths"]
-    for needed in ("crates/**", "Cargo.lock", "data/**", "assets/**"):
-        assert needed in rust_inputs, needed
+
+    test_job = workflow["jobs"]["test"]
+    assert test_job["needs"] == "changes"
+    gated = [step for step in test_job["steps"] if "skipping" not in step.get("name", "")]
+    assert gated
+    for step in gated:
+        assert step.get("if") == "needs.changes.outputs.python != 'false'", step
 
 
 def test_ci_cancels_superseded_runs() -> None:
