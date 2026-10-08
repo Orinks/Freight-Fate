@@ -1296,6 +1296,14 @@ fn test_radio_persists_enabled_station_and_volume() {
 
 // -- App()-bound --------------------------------------------------------------------
 
+#[test]
+fn missing_touch_gesture_fields_use_additive_defaults() {
+    let settings: Settings = serde_json::from_str("{}")
+        .expect("a settings file written before touch gestures remains readable");
+    assert!(settings.touch_haptics);
+    assert!(!settings.touch_practice_offered);
+}
+
 // `test_settings_menu_saves_each_change` is live in `crates/freight-fate/tests/states_main_menu_settings.rs`.
 
 // `test_gameplay_reorg_notice_fires_once_for_a_pre_reorg_settings_file` is live in `crates/freight-fate/tests/states_main_menu_settings.rs`.

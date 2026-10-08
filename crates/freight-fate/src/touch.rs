@@ -34,9 +34,9 @@ pub enum Gesture {
     ThreeFingerDoubleTap,
     /// Opens the driving command list, and reads a name field back.
     ThreeFingerTap,
-    /// One finger held still on the top half of the screen.
+    /// One finger held still anywhere on the screen (gas).
     HoldUpperBegan,
-    /// One finger held still on the bottom half of the screen.
+    /// A tap followed by a hold anywhere on the screen (brake).
     HoldLowerBegan,
     HoldEnded,
     /// VoiceOver's two-finger scrub.
@@ -49,20 +49,24 @@ pub enum Gesture {
     Increment,
     /// VoiceOver's swipe down on the adjustable element.
     Decrement,
-    /// A second finger's tap while the top-half hold is down.
+    /// A second finger's tap while gas is held.
     UpperHoldTap,
     UpperHoldDoubleTap,
     UpperHoldSwipeUp,
     UpperHoldSwipeDown,
     UpperHoldSwipeLeft,
     UpperHoldSwipeRight,
-    /// A second finger's tap while the bottom-half hold is down.
+    /// A second finger's tap while brake is held.
     LowerHoldTap,
     LowerHoldDoubleTap,
     LowerHoldSwipeUp,
     LowerHoldSwipeDown,
     LowerHoldSwipeLeft,
     LowerHoldSwipeRight,
+    /// Two fingers held anywhere (emergency brake).
+    EmergencyBrakeHoldBegan,
+    /// Three fingers held anywhere (horn).
+    HornHoldBegan,
 }
 
 impl Gesture {
@@ -106,6 +110,8 @@ impl Gesture {
             34 => Gesture::LowerHoldSwipeDown,
             35 => Gesture::LowerHoldSwipeLeft,
             36 => Gesture::LowerHoldSwipeRight,
+            37 => Gesture::EmergencyBrakeHoldBegan,
+            38 => Gesture::HornHoldBegan,
             _ => return None,
         })
     }
@@ -135,6 +141,8 @@ impl Gesture {
             | Gesture::HoldUpperBegan
             | Gesture::HoldLowerBegan
             | Gesture::HoldEnded
+            | Gesture::EmergencyBrakeHoldBegan
+            | Gesture::HornHoldBegan
             | Gesture::UpperHoldTap
             | Gesture::UpperHoldDoubleTap
             | Gesture::UpperHoldSwipeUp
@@ -150,12 +158,13 @@ impl Gesture {
         })
     }
 
-    /// The pedal key a hold keeps down: Up for the top half, Down for the
-    /// bottom.
+    /// The key a hold keeps down.
     pub fn held_key(self) -> Option<Key> {
         match self {
             Gesture::HoldUpperBegan => Some(Key::Up),
             Gesture::HoldLowerBegan => Some(Key::Down),
+            Gesture::EmergencyBrakeHoldBegan => Some(Key::B),
+            Gesture::HornHoldBegan => Some(Key::H),
             _ => None,
         }
     }
@@ -209,12 +218,15 @@ impl TouchInput {
         let mut out = TouchOutput::default();
         match gesture {
             Gesture::ThreeFingerDoubleTap => out.toggle_keyboard = true,
-            // Top half is the accelerator, bottom half the brake: the Up and
-            // Down arrows held, so the latching brake and the reverse
+            // Gas, brake, emergency brake and horn are held keys, so the
+            // latching brake and the reverse
             // press-and-hold work exactly as they do on a keyboard.
             // The hold goes out as its gesture, and the app presses the
             // key, so the press is known to be the screen's.
-            Gesture::HoldUpperBegan | Gesture::HoldLowerBegan => {
+            Gesture::HoldUpperBegan
+            | Gesture::HoldLowerBegan
+            | Gesture::EmergencyBrakeHoldBegan
+            | Gesture::HornHoldBegan => {
                 self.release_into(&mut out.events);
                 out.events.push(InputEvent::Gesture(gesture));
                 self.held = gesture.held_key();
@@ -276,10 +288,10 @@ mod tests {
 
     #[test]
     fn every_native_code_round_trips_and_unknown_codes_are_ignored() {
-        for code in 0..37 {
+        for code in 0..39 {
             assert!(Gesture::from_code(code).is_some(), "code {code}");
         }
-        assert_eq!(Gesture::from_code(37), None);
+        assert_eq!(Gesture::from_code(39), None);
         assert_eq!(Gesture::from_code(-1), None);
     }
 
@@ -382,6 +394,25 @@ mod tests {
             }]
         );
         assert_eq!(touch.held(), None);
+    }
+
+    #[test]
+    fn emergency_brake_and_horn_holds_release_their_keys() {
+        for (gesture, key) in [
+            (Gesture::EmergencyBrakeHoldBegan, Key::B),
+            (Gesture::HornHoldBegan, Key::H),
+        ] {
+            let mut touch = TouchInput::new();
+            touch.handle(gesture);
+            assert_eq!(touch.held(), Some(key));
+            assert_eq!(
+                touch.handle(Gesture::HoldEnded).events,
+                vec![InputEvent::KeyUp {
+                    key,
+                    mods: Mods::NONE
+                }]
+            );
+        }
     }
 
     #[test]

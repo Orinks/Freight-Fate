@@ -24,9 +24,10 @@ pub const TOUCH: &str = "touch";
 /// phrase comes from the player's touch bindings or the driving command
 /// list, in `freight-fate`'s bindings.
 pub const TOUCH_HINTS: &[(&str, &str)] = &[
-    ("accelerate", "the top half of the screen"),
-    ("brake", "a hold on the bottom half of the screen"),
-    ("emergency_brake", "a hold on the bottom half of the screen"),
+    ("accelerate", "a hold anywhere on the screen"),
+    ("brake", "tap, then hold anywhere on the screen"),
+    ("emergency_brake", "a two-finger hold"),
+    ("horn", "a three-finger hold"),
     ("confirm", "a double tap"),
     ("pause", "a two-finger swipe down"),
     ("help", "a two-finger swipe up"),
@@ -122,7 +123,7 @@ mod tests {
         assert_eq!(control_hint("teleport", KEYBOARD), "teleport");
         assert_eq!(
             control_hint("accelerate", TOUCH),
-            "the top half of the screen"
+            "a hold anywhere on the screen"
         );
         assert_eq!(control_hint("take_exit", TOUCH), "X");
         assert_eq!(control_hint("teleport", CONTROLLER), "teleport");

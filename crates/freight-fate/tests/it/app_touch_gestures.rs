@@ -76,7 +76,7 @@ fn by_key<R>(
 }
 
 #[test]
-fn hold_the_top_half_then_tap_a_second_finger_sets_cruise_with_the_pedal_down() {
+fn hold_gas_then_tap_a_second_finger_sets_cruise_with_the_pedal_down() {
     let (expected, _) = by_key(
         "Touch Cruise Key",
         |h| rolling(h, 24.0),
@@ -147,7 +147,7 @@ fn a_second_finger_on_the_brake_runs_the_parking_brake_and_the_engine() {
         .map(|line| {
             line.replace(
                 "P releases",
-                "a second-finger tap while you hold the bottom half releases",
+                "a second-finger tap while holding brake releases",
             )
         })
         .collect();
@@ -275,8 +275,8 @@ fn the_touch_gestures_screen_moves_a_gesture_and_saves_it() {
     let labels = harness.menu_labels();
     for wanted in [
         "Tap: Speed",
-        "Hold the top half, tap with a second finger: Automatic speed control",
-        "Hold the bottom half, double tap with a second finger: Engine on or off",
+        "Gas hold, tap with a second finger: Automatic speed control",
+        "Brake hold, double tap with a second finger: Engine on or off",
         "Two-finger double tap: Pause",
         "Reset every touch gesture to its default",
     ] {

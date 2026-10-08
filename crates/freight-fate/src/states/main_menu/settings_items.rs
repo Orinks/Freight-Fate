@@ -97,7 +97,7 @@ fn touch_gestures_row() -> Row {
     )
     .help(
         "Choose which driving command each touch gesture runs, including a second \
-         finger while you hold the top or bottom half.",
+         finger while holding gas or brake.",
     )
 }
 

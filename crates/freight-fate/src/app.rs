@@ -436,6 +436,7 @@ impl App {
         // Every GameContext is built here, so this one call covers drives too.
         crate::audio::classic_music::register();
         let settings = Settings::load();
+        sdl_shell::set_touch_haptics(settings.touch_haptics);
         boot_timing::mark("settings");
         let message_log = MessageLog::new();
         let world = get_world();

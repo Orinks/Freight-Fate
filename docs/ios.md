@@ -31,8 +31,10 @@ Outside the drive, and for the gestures the drive leaves fixed:
 | Three-finger swipe left / right | Page Up / Page Down |
 | Three-finger tap | F2: while driving, the list of every driving command; in a name field, read the name back |
 | Three-finger double tap | Show or hide the on-screen keyboard, for letter commands |
-| Touch and hold the top half | Hold Up (throttle) until you lift |
-| Touch and hold the bottom half | Hold Down (brake) until you lift |
+| Hold one finger anywhere | Hold Up (gas) until you lift |
+| Tap, lift, then hold one finger anywhere within 0.28 seconds | Hold Down (brake) until you lift |
+| Hold two fingers anywhere | Emergency brake until you lift |
+| Hold three fingers anywhere | Horn until you lift |
 
 Because the game screen takes touches directly, VoiceOver's scrub (two-finger
 Z) reads there as a two-finger swipe; use a two-finger swipe down to go back.
@@ -45,10 +47,11 @@ Controls, Touch gestures, the way keyboard keys and controller buttons can.
 
 | Gesture | Default command |
 |---|---|
-| Hold the top half, tap with a second finger | Automatic speed control: adaptive cruise, or the speed keeper in low-speed zones |
-| Hold the top half, swipe up / down with a second finger | Shift up / down |
-| Hold the bottom half, tap with a second finger | Parking brake |
-| Hold the bottom half, double tap with a second finger | Engine on or off |
+| While holding gas, tap with a second finger | Automatic speed control: adaptive cruise, or the speed keeper in low-speed zones |
+| While holding gas, swipe up / down with a second finger | Shift up / down |
+| While holding gas, swipe left / right with a second finger | Steer or change lanes left / right |
+| While holding brake, tap with a second finger | Parking brake |
+| While holding brake, double tap with a second finger | Engine on or off |
 | Tap | Speed |
 | Swipe up / down | Raise / lower the cruise target |
 | Two-finger tap | Status menu |
@@ -56,10 +59,9 @@ Controls, Touch gestures, the way keyboard keys and controller buttons can.
 | Three-finger swipe up | Route and location |
 | Three-finger swipe down | Road ahead |
 
-So to set cruise: hold the top half until you reach 20 miles per hour, tap
-with a second finger, and lift. The other second-finger gestures (double tap
-on the top half, and left, right, up and down swipes on the bottom half) start
-out doing nothing, ready for any command you choose.
+So to set cruise: hold anywhere until you reach 20 miles per hour, tap with a
+second finger, and lift. The other second-finger gestures are ready for any
+command you choose.
 
 These stay fixed: the holds are the pedals, swipes left and right steer (or
 change lanes with lane keeping on full), double tap is Enter, two-finger
@@ -116,8 +118,16 @@ frameworks it and SDL2 need, plus clang's iOS runtime for `@available` checks.
   sandbox, out of reach) and the braille-only Output row (it needs NVDA or
   JAWS).
 - Spoken prompts name the gesture for a control ("press a second-finger
-  double tap while you hold the bottom half to start the engine"), or its row
+  double tap while holding brake to start the engine"), or its row
   on the three-finger tap command list when no gesture runs it. Pressing a
   key on a hardware keyboard, or a controller button, switches them back to
   key or button names until the screen is touched again.
 - The Simulator has no BASS audio device, so only speech is heard there.
+
+## Manual VoiceOver test checklist
+
+- Test with VoiceOver on and off; on iOS 17 or later confirm direct touch is silent on touch.
+- Hold gas in the centre, corners, and edges; tap then hold for brake without firing single tap.
+- Test every second-finger command, gas-hold lane changes, two-finger emergency brake, and three-finger horn.
+- Verify magic tap, escape scrub, the haptics switch, and release feedback.
+- Enter Practice gestures, verify double escape exits, and verify the first-drive practice offer appears once.

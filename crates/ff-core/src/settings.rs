@@ -663,6 +663,10 @@ settings_fields! {
     /// The same for the iPhone and iPad driving gestures
     /// (`tap=fuel;magic_tap=none`).
     touch_bindings: String = "" => str_plain,
+    /// Touch feedback on iPhone and iPad gesture recognition.
+    touch_haptics: bool = true => bool_strict,
+    /// Whether the one-time iOS gesture-practice offer was made.
+    touch_practice_offered: bool = false => bool_strict,
     /// Steer AWAY from the engine's lean instead of toward it, for
     /// drivers who learned that habit in audio racing games.
     steering_guide_inverted: bool = false => bool_strict,

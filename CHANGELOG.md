@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Added
+
+- **Hold two fingers to apply the emergency brake, three fingers for the horn.**
+
+- **Touch haptics now have a switch in Touch gestures settings.**
+
+### Changed
+
+- **Touch pedals work anywhere on the screen.** Hold for gas, tap then hold to brake.
+
+- **While holding gas, a second-finger swipe left or right changes lanes.**
+
+- **With VoiceOver on, the driving screen takes touches directly and stays silent while you play.**
+
 ### Fixed
 
 - **Sitting through a training course now tires you, about half as fast as driving.** A multi-day course counts only its last daytime class day.
