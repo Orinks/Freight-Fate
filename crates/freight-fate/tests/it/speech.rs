@@ -9,8 +9,9 @@
 use ff_core::speech_text::SpokenMessage;
 use freight_fate::speech::fakes::{FakeRegistry, FakeVoice};
 use freight_fate::speech::{
-    apply_speech_settings, pick_backend_gated, pick_event_backend, CaptureSpeech, NullSpeech,
-    Speech, SpeechChannel, SpeechSink, VoiceFeatures, EVENT_BACKEND, REFRESH_INTERVAL_S,
+    apply_speech_settings, pick_backend_gated, pick_event_backend, repick_backend_gated,
+    CaptureSpeech, NullSpeech, Repick, Speech, SpeechChannel, SpeechSink, VoiceFeatures,
+    EVENT_BACKEND, REFRESH_INTERVAL_S,
 };
 
 const SPEAKING: VoiceFeatures = VoiceFeatures::SPEAKING;
@@ -643,6 +644,109 @@ fn with_registry_runs_the_startup_selection() {
     let forced = Speech::with_registry(Box::new(ctx), Some("OneCore".to_string()));
     assert_eq!(forced.backend_name(), "OneCore");
     assert_eq!(forced.event_backend_name(), "SAPI");
+}
+
+// -- repick_backend_gated: the health check keeps the live backend -------------
+
+#[test]
+fn repick_keeps_the_current_backend_without_reacquiring_it() {
+    // The every-3-s health check used to acquire a fresh copy of the voice
+    // it already held: a rebuilt synthesizer (or, on iOS VoiceOver, a
+    // screen-changed notification) each time. Keep must cost no acquire.
+    let ctx = registry(true); // NVDA running and top-ranked
+    let current = ctx.voice("NVDA").unwrap().boxed();
+    ctx.reset_acquires();
+    let repick = repick_backend_gated(&ctx, None, narrator_off, Some(current.as_ref()));
+    assert!(matches!(repick, Repick::Keep), "got {repick:?}");
+    assert_eq!(ctx.acquire_count(), 0);
+}
+
+#[test]
+fn repick_switches_to_a_higher_priority_backend_that_started() {
+    // The game holds ONE_CORE because NVDA was not running; NVDA starts
+    // mid-session and the next check must hand speech to it.
+    let ctx = registry(false);
+    let current = ctx.voice("ONE_CORE").unwrap().boxed();
+    ctx.voice("NVDA").unwrap().set_runtime_supported(true);
+    match repick_backend_gated(&ctx, None, narrator_off, Some(current.as_ref())) {
+        Repick::Switch(backend) => assert_eq!(backend.name(), "NVDA"),
+        other => panic!("expected a switch to NVDA, got {other:?}"),
+    }
+}
+
+#[test]
+fn repick_moves_on_when_the_current_backend_dies() {
+    let nvda = FakeVoice::new("NVDA", 103, runtime(true));
+    let sapi = FakeVoice::new("SAPI", 97, SPEAKING);
+    let ctx = FakeRegistry::new(vec![nvda.clone(), sapi.clone()]);
+    let current = nvda.boxed();
+    nvda.set_runtime_supported(false);
+    match repick_backend_gated(&ctx, None, narrator_off, Some(current.as_ref())) {
+        Repick::Switch(backend) => assert_eq!(backend.name(), "SAPI"),
+        other => panic!("expected a switch to SAPI, got {other:?}"),
+    }
+    sapi.set_runtime_supported(false);
+    assert!(matches!(
+        repick_backend_gated(&ctx, None, narrator_off, Some(current.as_ref())),
+        Repick::Gone
+    ));
+}
+
+#[test]
+fn repick_keeps_when_the_override_names_the_current_backend() {
+    let ctx = registry(false);
+    let current = ctx.voice("SAPI").unwrap().boxed();
+    ctx.reset_acquires();
+    let repick = repick_backend_gated(&ctx, Some("SAPI"), narrator_off, Some(current.as_ref()));
+    assert!(matches!(repick, Repick::Keep), "got {repick:?}");
+    assert_eq!(ctx.acquire_count(), 0);
+}
+
+#[test]
+fn repick_does_not_keep_uia_when_narrator_is_off() {
+    // UIA's live check cannot tell Narrator apart from Windows itself, so a
+    // UIA keep would go on talking into notifications nobody reads aloud.
+    let uia = FakeVoice::new("UIA", 97, SPEAKING);
+    let ctx = FakeRegistry::new(vec![FakeVoice::new("OneCore", 98, SPEAKING), uia.clone()]);
+    let current = uia.boxed();
+    match repick_backend_gated(&ctx, None, narrator_off, Some(current.as_ref())) {
+        Repick::Switch(backend) => assert_eq!(backend.name(), "OneCore"),
+        other => panic!("expected a switch off UIA, got {other:?}"),
+    }
+}
+
+#[test]
+fn repick_behaves_like_pick_with_no_current_backend() {
+    let ctx = registry(false);
+    match repick_backend_gated(&ctx, None, narrator_off, None) {
+        Repick::Switch(backend) => assert_eq!(backend.name(), "ONE_CORE"),
+        other => panic!("expected a pick of ONE_CORE, got {other:?}"),
+    }
+    let silent = FakeRegistry::new(vec![FakeVoice::new("NVDA", 103, runtime(false))]);
+    assert!(matches!(
+        repick_backend_gated(&silent, None, narrator_off, None),
+        Repick::Gone
+    ));
+}
+
+#[test]
+fn refresh_does_not_retry_an_event_voice_the_registry_lacks() {
+    // An iOS-shaped registry: AVSpeech is the main voice, SAPI does not
+    // exist. The old refresh re-logged "Event speech backend SAPI not
+    // available" every 3 s forever; now the unresolvable preference is not
+    // retried. (Resolving the preference still walks the option list, which
+    // acquires the one backend; on Prism that is a registry-cached instance,
+    // so the refresh costs no rebuild.)
+    let av = FakeVoice::new("AVSpeech", 103, ADJUSTABLE);
+    let ctx = FakeRegistry::new(vec![av.clone()]);
+    let mut s = speech_on(&ctx, "AVSpeech");
+    s.select_event_backend(Some("SAPI")); // a Windows save's preference
+    assert_eq!(s.event_backend_name(), "none");
+    for _ in 0..3 {
+        s.poll(REFRESH_INTERVAL_S);
+    }
+    assert_eq!(s.backend_name(), "AVSpeech");
+    assert_eq!(s.event_backend_name(), "none");
 }
 
 // -- apply_speech_settings (GameContext.apply_speech) ---------------------------

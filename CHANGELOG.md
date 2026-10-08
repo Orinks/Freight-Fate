@@ -20,6 +20,8 @@
 
 ### Fixed
 
+- **Less memory and smoother speech**: music now streams from disk instead of taking about 380 MB of memory, and speech no longer rebuilds its voice every three seconds.
+
 - **Bobtail to a nearby city is refused while your CDL is suspended or disqualified.** You hear when the suspension ends instead.
 
 - **Training classes now leave you tired, about half as fast as driving does.** If a class leaves you drowsy, you are told to sleep before you drive.

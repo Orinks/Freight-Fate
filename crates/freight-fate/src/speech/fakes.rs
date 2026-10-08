@@ -196,6 +196,8 @@ impl VoiceBackend for FakeVoice {
 #[derive(Clone, Debug, Default)]
 pub struct FakeRegistry {
     order: Vec<FakeVoice>,
+    /// Every `acquire` served, shared across clones (the game holds one).
+    acquires: Rc<RefCell<Vec<BackendId>>>,
 }
 
 impl FakeRegistry {
@@ -204,12 +206,25 @@ impl FakeRegistry {
     pub fn new(voices: Vec<FakeVoice>) -> Self {
         let mut order = voices;
         order.sort_by_key(|voice| std::cmp::Reverse(voice.priority()));
-        Self { order }
+        Self {
+            order,
+            acquires: Rc::new(RefCell::new(Vec::new())),
+        }
     }
 
     /// The registered voice named `name`, to inspect or mutate it.
     pub fn voice(&self, name: &str) -> Option<&FakeVoice> {
         self.order.iter().find(|voice| voice.name() == name)
+    }
+
+    /// How many `acquire` calls this registry has served.
+    pub fn acquire_count(&self) -> usize {
+        self.acquires.borrow().len()
+    }
+
+    /// Forget the acquire count, for a measurement from here on.
+    pub fn reset_acquires(&self) {
+        self.acquires.borrow_mut().clear();
     }
 
     fn index_of(&self, id: BackendId) -> Option<usize> {
@@ -245,6 +260,7 @@ impl VoiceRegistry for FakeRegistry {
     }
 
     fn acquire(&self, id: BackendId) -> Result<Box<dyn VoiceBackend>, prismer::Error> {
+        self.acquires.borrow_mut().push(id);
         self.index_of(id)
             .map(|index| self.order[index].boxed())
             .ok_or(prismer::Error::BackendNotAvailable)

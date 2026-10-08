@@ -490,37 +490,39 @@ pub fn pick_backend(
     pick_backend_gated(ctx, override_name, narrator_running)
 }
 
-/// [`pick_backend`] with the Narrator probe supplied, so the policy can be
-/// tested against a fake registry with and without Narrator "running".
-pub fn pick_backend_gated(
-    ctx: &dyn VoiceRegistry,
-    override_name: Option<&str>,
-    narrator_probe: fn() -> bool,
-) -> Option<Box<dyn VoiceBackend>> {
-    if let Some(name) = override_name.filter(|name| !name.is_empty()) {
-        match ctx.id_by_name(name).map(|id| ctx.acquire(id)) {
-            Some(Ok(backend)) => {
-                if usable(backend.as_ref()) {
-                    return Some(backend);
-                }
-                log::warn!(
-                    "Requested speech backend {name} is not usable; falling back to automatic choice"
-                );
+/// The override's backend, usable, or None -- with the same fallback logs
+/// the selection has always emitted when the request cannot be honored.
+fn requested_backend(ctx: &dyn VoiceRegistry, name: &str) -> Option<Box<dyn VoiceBackend>> {
+    match ctx.id_by_name(name).map(|id| ctx.acquire(id)) {
+        Some(Ok(backend)) => {
+            if usable(backend.as_ref()) {
+                return Some(backend);
             }
-            Some(Err(err)) => {
-                log::warn!(
-                    "Requested speech backend {name} not found; falling back to automatic choice: {err}"
-                );
-            }
-            None => {
-                log::warn!(
-                    "Requested speech backend {name} not found; falling back to automatic choice"
-                );
-            }
+            log::warn!(
+                "Requested speech backend {name} is not usable; falling back to automatic choice"
+            );
+        }
+        Some(Err(err)) => {
+            log::warn!(
+                "Requested speech backend {name} not found; falling back to automatic choice: {err}"
+            );
+        }
+        None => {
+            log::warn!(
+                "Requested speech backend {name} not found; falling back to automatic choice"
+            );
         }
     }
-    // The probe runs once per pick, not per candidate: one process scan per
-    // 3 s health check is free, one per backend is not.
+    None
+}
+
+/// The candidate ids in selection order: priority descending, registry
+/// order on ties, the UIA Narrator route last and only while the probe says
+/// Narrator is running (so a UIA entry in this list already implies it).
+///
+/// The probe runs once per pick, not per candidate: one process scan per
+/// 3 s health check is free, one per backend is not.
+fn gated_candidates(ctx: &dyn VoiceRegistry, narrator_probe: fn() -> bool) -> Vec<BackendId> {
     let narrator = narrator_probe();
     let mut candidates: Vec<(i32, BackendId)> = Vec::new();
     for index in 0..ctx.backend_count() {
@@ -541,7 +543,25 @@ pub fn pick_backend_gated(
     // Python's `list.sort(reverse=True)` is stable: equal priorities keep
     // registry order, so the first-registered of a tie still wins here.
     candidates.sort_by_key(|(priority, _)| std::cmp::Reverse(*priority));
-    for (_, backend_id) in candidates {
+    candidates
+        .into_iter()
+        .map(|(_, backend_id)| backend_id)
+        .collect()
+}
+
+/// [`pick_backend`] with the Narrator probe supplied, so the policy can be
+/// tested against a fake registry with and without Narrator "running".
+pub fn pick_backend_gated(
+    ctx: &dyn VoiceRegistry,
+    override_name: Option<&str>,
+    narrator_probe: fn() -> bool,
+) -> Option<Box<dyn VoiceBackend>> {
+    if let Some(name) = override_name.filter(|name| !name.is_empty()) {
+        if let Some(backend) = requested_backend(ctx, name) {
+            return Some(backend);
+        }
+    }
+    for backend_id in gated_candidates(ctx, narrator_probe) {
         let Ok(backend) = ctx.acquire(backend_id) else {
             continue;
         };
@@ -550,6 +570,80 @@ pub fn pick_backend_gated(
         }
     }
     None
+}
+
+/// The outcome of a health-check re-pick against the voice already held.
+pub enum Repick {
+    /// The current backend is still the choice: keep it without
+    /// re-acquiring. Re-acquiring rebuilds the voice -- a new
+    /// AVSpeechSynthesizer, authorization prompt and probe utterance on
+    /// macOS, a screen-changed notification on iOS VoiceOver -- and doing
+    /// that every refresh interval is the cost this variant exists to skip.
+    Keep,
+    /// A different backend now wins (a screen reader started, the current
+    /// one died): the newly acquired backend to switch to.
+    Switch(Box<dyn VoiceBackend>),
+    /// Nothing in the registry can speak right now.
+    Gone,
+}
+
+impl fmt::Debug for Repick {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Keep => f.write_str("Keep"),
+            Self::Switch(backend) => f.debug_tuple("Switch").field(backend).finish(),
+            Self::Gone => f.write_str("Gone"),
+        }
+    }
+}
+
+/// [`pick_backend_gated`] for the periodic health check: the same candidate
+/// ordering, but when the walk reaches the backend already held it is kept
+/// without being re-acquired. Candidates ranked above it are still
+/// acquired, so a screen reader that starts mid-session is still picked up;
+/// a current backend whose live check fails is skipped and the walk
+/// continues. `current == None` behaves exactly like [`pick_backend_gated`],
+/// and an override naming the current backend keeps it while it is usable.
+pub fn repick_backend_gated(
+    ctx: &dyn VoiceRegistry,
+    override_name: Option<&str>,
+    narrator_probe: fn() -> bool,
+    current: Option<&dyn VoiceBackend>,
+) -> Repick {
+    let Some(current) = current else {
+        return match pick_backend_gated(ctx, override_name, narrator_probe) {
+            Some(backend) => Repick::Switch(backend),
+            None => Repick::Gone,
+        };
+    };
+    let current_name = current.name();
+    if let Some(name) = override_name.filter(|name| !name.is_empty()) {
+        if name == current_name && usable(current) {
+            return Repick::Keep;
+        }
+        if let Some(backend) = requested_backend(ctx, name) {
+            return Repick::Switch(backend);
+        }
+    }
+    for backend_id in gated_candidates(ctx, narrator_probe) {
+        if name_of(ctx, backend_id) == current_name {
+            // The voice already held: keep it while its live check passes.
+            // (A UIA keep also needs Narrator running, but UIA only reaches
+            // this list when the probe already said yes.) When the check
+            // fails the current backend died: skip it and keep walking.
+            if usable(current) {
+                return Repick::Keep;
+            }
+            continue;
+        }
+        let Ok(backend) = ctx.acquire(backend_id) else {
+            continue;
+        };
+        if usable(backend.as_ref()) {
+            return Repick::Switch(backend);
+        }
+    }
+    Repick::Gone
 }
 
 /// A second, independent voice for driving events.
