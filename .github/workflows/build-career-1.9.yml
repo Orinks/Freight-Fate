@@ -148,6 +148,26 @@ jobs:
             --exclude-stable-notes latest-stable-notes.md \
             >> "$GITHUB_OUTPUT"
 
+  format:
+    # Formatting is the same on every platform, so it is checked once, on
+    # the cheap Linux runner, instead of on each packaging runner. Release
+    # still needs it.
+    name: Format
+    needs: prepare
+    if: needs.prepare.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.commit_sha }}
+
+      - name: Install the pinned Rust toolchain
+        run: rustup show
+
+      - name: Check Rust formatting
+        run: cargo fmt --all --check
+
   build_windows:
     name: Build (Windows)
     needs: prepare
@@ -182,9 +202,6 @@ jobs:
         with:
           shared-key: career-19-snapshot-windows
 
-      - name: Check Rust formatting
-        run: cargo fmt --all --check
-
       - name: Fetch BASS
         # Audio tests skip when the proprietary BASS runtime is absent. Fetch
         # and verify it before Clippy or Cargo tests so a clean runner cannot
@@ -194,11 +211,16 @@ jobs:
           uv run python tools/fetch_bass.py --check
 
       - name: Lint Rust targets
+        # A scheduled run builds the dev tip, and every push to dev already
+        # ran rust.yml's Clippy (Windows) on that commit. Tag pushes and
+        # manual runs (which may name another branch) still lint here.
+        if: github.event_name != 'schedule'
         run: cargo clippy --all-targets --locked -- -D warnings
 
       - name: Test Rust workspace
         # The FULL suite: no `--cfg ci_quick`, so the whole-map sweeps the
-        # per-push workflow (rust.yml) leaves out run here every night.
+        # per-push workflow (rust.yml) leaves out run here, and only here.
+        # They are headless driving logic, so the other runners skip them.
         run: cargo test -p ff-core -p freight-fate
 
       - name: Build the portable release
@@ -267,18 +289,23 @@ jobs:
       # the runner's preinstalled cmake; the staging step fails the build
       # if the executable links any SDL dynamically.
 
-      - name: Check Rust formatting
-        run: cargo fmt --all --check
-
       - name: Fetch BASS
         run: |
           uv run python tools/fetch_bass.py
           uv run python tools/fetch_bass.py --check
 
       - name: Lint Rust targets
+        # Kept for the `cfg(target_os)` code only this runner compiles. Same
+        # RUSTFLAGS as the tests below, so both share one debug build of the
+        # native dependencies (SDL2, Prism) instead of compiling them twice.
+        env:
+          RUSTFLAGS: --cfg ci_quick
         run: cargo clippy --all-targets --locked -- -D warnings
 
       - name: Test Rust workspace
+        # The quick set: the whole-map sweeps run once, on the Windows job.
+        env:
+          RUSTFLAGS: --cfg ci_quick
         run: cargo test -p ff-core -p freight-fate
 
       - name: Import the Developer ID signing credentials
@@ -472,18 +499,21 @@ jobs:
           echo "CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=gcc-13" >> "$GITHUB_ENV"
           echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=gcc-13" >> "$GITHUB_ENV"
 
-      - name: Check Rust formatting
-        run: cargo fmt --all --check
-
       - name: Fetch BASS
         run: |
           uv run python tools/fetch_bass.py
           uv run python tools/fetch_bass.py --check
 
       - name: Lint Rust targets
+        # See the Mac job: platform lints, RUSTFLAGS shared with the tests.
+        env:
+          RUSTFLAGS: --cfg ci_quick
         run: cargo clippy --all-targets --locked -- -D warnings
 
       - name: Test Rust workspace
+        # The quick set: the whole-map sweeps run once, on the Windows job.
+        env:
+          RUSTFLAGS: --cfg ci_quick
         run: cargo test -p ff-core -p freight-fate
 
       - name: Build the Linux release
@@ -563,8 +593,8 @@ jobs:
 
   release:
     name: Release
-    needs: [prepare, build_windows, build_macos, build_linux, smoke_linux]
-    if: always() && needs.prepare.outputs.should_build == 'true' && needs.build_windows.result == 'success' && needs.build_macos.result == 'success' && needs.build_linux.result == 'success' && needs.smoke_linux.result == 'success'
+    needs: [prepare, format, build_windows, build_macos, build_linux, smoke_linux]
+    if: always() && needs.prepare.outputs.should_build == 'true' && needs.format.result == 'success' && needs.build_windows.result == 'success' && needs.build_macos.result == 'success' && needs.build_linux.result == 'success' && needs.smoke_linux.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
