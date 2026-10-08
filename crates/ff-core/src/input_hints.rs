@@ -25,7 +25,8 @@ pub const TOUCH: &str = "touch";
 /// phrase comes from the player's touch bindings or the driving command
 /// list, in `freight-fate`'s bindings.
 pub const TOUCH_HINTS: &[(&str, &str)] = &[
-    ("accelerate", "a swipe up and hold"),
+    // Every gas line reads "hold {}", so the phrase leaves the hold out.
+    ("accelerate", "a swipe up"),
     ("brake", "a swipe down and hold"),
     ("emergency_brake", "a deep swipe down"),
     ("horn", "a two-finger hold"),
@@ -123,7 +124,7 @@ mod tests {
     #[test]
     fn test_unknown_action_is_audible_not_fatal() {
         assert_eq!(control_hint("teleport", KEYBOARD), "teleport");
-        assert_eq!(control_hint("accelerate", TOUCH), "a swipe up and hold");
+        assert_eq!(control_hint("accelerate", TOUCH), "a swipe up");
         assert_eq!(control_hint("take_exit", TOUCH), "X");
         assert_eq!(control_hint("teleport", CONTROLLER), "teleport");
     }
