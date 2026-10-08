@@ -2,11 +2,27 @@
 
 ## Unreleased
 
+### Added
+
+- **Interstates now have the sound of distant traffic, louder on busier stretches.**
+
+- **The radio status screen says where your own playlist files go until you have one on the dial.**
+
+- **A fuel range warning speaks when your fuel will not reach the next fuel stop.** It names your range and how far the stop is.
+
+### Changed
+
+- **Tire noise on the road is louder at highway speed.**
+
+- **The fuel range now comes from your truck's own mileage on this drive, load and hills included.**
+
+- **The Engine voice and Engine brake voice settings are now called Engine sound and Engine brake sound.**
+
 ### Fixed
 
-- **Sitting through a training course now tires you, about half as fast as driving.** A multi-day course counts only its last daytime class day.
+- **Bobtail to a nearby city is refused while your CDL is suspended or disqualified.** You hear when the suspension ends instead.
 
-- **A course that leaves you drowsy now tells you to sleep before driving.** Night classes are judged by the city's local clock.
+- **Training classes now leave you tired, about half as fast as driving does.** If a class leaves you drowsy, you are told to sleep before you drive.
 
 - **The last weigh station warning names its scale and leaves time to take the exit in every driving mode.** Closed scales say so.
 
@@ -27,6 +43,14 @@
 - **Two real Arkansas weigh stations near West Memphis are on the map.** Marion screens southbound I-55, Lehi eastbound I-40.
 
 - **A hazard after the last weigh station warning no longer costs you the bypass charge.** Time spent on the hazard does not count against you.
+
+- **Passing traffic now sounds where the vehicle really is.** You hear it come up beside you, then fade as it pulls ahead.
+
+- **Traffic sounds on exit ramps now match the cars.** The freeway fades off to your left, and cross traffic at the ramp end sweeps across in front of you.
+
+- **The update check skips a preview snapshot that changes nothing you would notice.** A snapshot that only repeats your version is no longer offered.
+
+- **What's new for an update from an older preview snapshot lists what you are really getting.** It reads the notes of each release since your copy.
 
 ## 1.9.3 - 2026-10-06
 

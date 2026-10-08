@@ -26,14 +26,18 @@ use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::{Key, Menu, SimpleMenuState};
 use freight_fate::states::career_setback::CareerSetbackNoticeState;
 use freight_fate::states::city::{
-    dispatch_cache_key, open_freight_market, relay_load_for_board, CityMenuState, JobBoardState,
-    JobDetailState, PayDebtState, RouteSelectState, TruckStatusState, JOB_BOARD_INTRO_HELP,
+    dispatch_cache_key, open_freight_market, relay_load_for_board, BobtailDestState, CityMenuState,
+    JobBoardState, JobDetailState, PayDebtState, RouteSelectState, TruckStatusState,
+    JOB_BOARD_INTRO_HELP,
 };
+use freight_fate::states::city_pickup::PickupFacilityState;
 use freight_fate::states::driving::DrivingState;
 use freight_fate::states::driving_pause_states::{
     AbandonJobConfirmationState, PauseMenuState, ASSIGNED_REPOSITION_ABANDON_REPUTATION_PENALTY,
 };
-use freight_fate::states::main_menu::{ConfirmQuitState, MainMenuState};
+use freight_fate::states::main_menu::{
+    ConfirmQuitState, MainMenuState, TouchPracticeOfferState, TouchPracticeState,
+};
 use serde_json::{json, Map, Value};
 
 fn job(miles: f64) -> Job {
@@ -252,6 +256,66 @@ fn test_company_departure_runs_dispatch_assigned_route() {
         .main_lines()
         .iter()
         .any(|line| line.contains("Route planning to")));
+}
+
+#[test]
+fn touch_departure_offers_practice_once_and_marks_the_offer_seen() {
+    let mut app = TestApp::new();
+    new_hire(&mut app, "Touch Offer");
+    let pickup = loaded_pickup(&app, job(92.0));
+    app.ctx.controller.note_touch();
+    app.push_state(pickup);
+
+    app.dispatch_gesture(freight_fate::touch::Gesture::DoubleTap);
+
+    assert!(is::<TouchPracticeOfferState>(&app));
+    assert!(app.ctx.settings.touch_practice_offered);
+
+    app.pop_state();
+    assert!(is::<DrivingState>(&app));
+    app.pop_state();
+    assert!(is::<PickupFacilityState>(&app));
+    app.dispatch_gesture(freight_fate::touch::Gesture::DoubleTap);
+
+    assert!(is::<DrivingState>(&app));
+    assert!(!stack_has::<TouchPracticeOfferState>(&app));
+}
+
+#[test]
+fn touch_practice_offer_practice_and_skip_leave_the_driver_in_the_right_state() {
+    let mut app = TestApp::new();
+    new_hire(&mut app, "Touch Offer Choices");
+    let pickup = loaded_pickup(&app, job(92.0));
+    app.ctx.controller.note_touch();
+    app.push_state(pickup);
+    app.dispatch_gesture(freight_fate::touch::Gesture::DoubleTap);
+    assert!(is::<TouchPracticeOfferState>(&app));
+
+    app.dispatch_gesture(freight_fate::touch::Gesture::DoubleTap);
+    assert!(is::<TouchPracticeState>(&app));
+
+    app.pop_state();
+    assert!(is::<DrivingState>(&app));
+    app.push_state(TouchPracticeOfferState::new());
+
+    app.dispatch_gesture(freight_fate::touch::Gesture::SwipeDown);
+    app.dispatch_gesture(freight_fate::touch::Gesture::DoubleTap);
+    assert!(is::<DrivingState>(&app));
+}
+
+#[test]
+fn keyboard_departure_does_not_offer_touch_practice() {
+    let mut app = TestApp::new();
+    new_hire(&mut app, "Keyboard Offer");
+    let pickup = loaded_pickup(&app, job(92.0));
+    app.ctx.controller.note_touch();
+    app.ctx.controller.note_keyboard();
+    app.push_state(pickup);
+
+    key(&mut app, Key::Return);
+
+    assert!(is::<DrivingState>(&app));
+    assert!(!app.ctx.settings.touch_practice_offered);
 }
 
 #[test]
@@ -1231,6 +1295,59 @@ fn test_waiting_out_the_suspension_gives_the_licence_back() {
         .main_lines()
         .iter()
         .any(|line| line.contains("Your CDL is clear and the dispatch board is open again")));
+}
+
+#[test]
+fn test_a_disqualified_owner_operator_cannot_bobtail() {
+    let mut app = TestApp::new();
+    career(&mut app, "Empty", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        p.business_status = LEASED_OWNER_OPERATOR.to_string();
+        let now = p.game_hours;
+        p.driving_record.record_major_offense(now);
+    }
+    let city = CityMenuState::new(&app.ctx, false);
+    app.push_state(city);
+    app.clear_speech();
+    select::<CityMenuState>(&mut app, "Bobtail to a nearby city");
+    assert!(is::<CityMenuState>(&app), "the bobtail menu opened");
+    let expected = enforcement::suspension_drive_refusal_line(profile(&app));
+    let ends = enforcement::clears_text(profile(&app));
+    assert_eq!(
+        expected,
+        format!(
+            "You cannot drive, not even bobtail, while your CDL is disqualified. The \
+             disqualification ends {ends}. Wait out the CDL suspension is on the terminal \
+             menu."
+        )
+    );
+    assert!(
+        app.main_lines().iter().any(|l| l == &expected),
+        "{:?}",
+        app.main_lines()
+    );
+
+    // A bobtail menu already open refuses too.
+    app.push_state(BobtailDestState::new(vec!["Milwaukee".to_string()]));
+    key(&mut app, Key::Return);
+    assert!(!is::<DrivingState>(&app));
+    assert!(profile(&app).active_trip.is_none());
+}
+
+#[test]
+fn test_a_lifetime_disqualification_refuses_bobtail_without_an_end_date() {
+    let mut app = TestApp::new();
+    career(&mut app, "Empty", "Chicago");
+    {
+        let p = profile_mut(&mut app);
+        p.business_status = LEASED_OWNER_OPERATOR.to_string();
+        p.driving_record.lifetime_disqualified = true;
+    }
+    assert_eq!(
+        enforcement::suspension_drive_refusal_line(profile(&app)),
+        "You cannot drive with a lifetime CDL disqualification, not even bobtail."
+    );
 }
 
 #[test]

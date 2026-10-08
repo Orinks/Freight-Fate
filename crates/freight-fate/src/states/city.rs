@@ -25,6 +25,7 @@ use serde_json::{Map, Value};
 
 use ff_core::data::world::World;
 use ff_core::data::world_models::{HomeTerminal, Route};
+use ff_core::input_hints::TOUCH;
 use ff_core::models::business::{is_owner_operator, COMPANY_DRIVER, INDEPENDENT_AUTHORITY};
 use ff_core::models::career_objectives::career_objective;
 use ff_core::models::career_training::{
@@ -47,6 +48,7 @@ use crate::app::{GameContext, Say};
 use crate::bindings::Action;
 use crate::states::base::{InputEvent, Key, Menu, MenuItem, SimpleMenuState};
 use crate::states::driving::DrivingState;
+use crate::states::main_menu::TouchPracticeOfferState;
 
 mod board;
 mod close_out;
@@ -230,6 +232,15 @@ pub fn first_day_orientation_lines(ctx: &GameContext, prefix: &str) -> Vec<Strin
          it cleanly."
             .to_string(),
     ]
+}
+
+/// The refusal for any drive started from the terminal while the CDL is
+/// suspended or disqualified, or `None` when the driver may drive.
+pub(crate) fn cdl_drive_refusal(ctx: &GameContext) -> Option<String> {
+    let p = ctx.profile.as_ref()?;
+    let record = &p.driving_record;
+    (record.lifetime_disqualified || record.suspended(p.game_hours))
+        .then(|| ff_core::models::enforcement::suspension_drive_refusal_line(p))
 }
 
 /// What the terminal says about the first-day / career objective on entry
@@ -801,6 +812,13 @@ pub fn launch_driving(ctx: &mut GameContext, launch: DrivingLaunch) {
     };
     ctx.say(&format!("{line}{deadline_note}"));
     ctx.push_state(driving);
+    if ctx.controller.device() == TOUCH && !ctx.settings.touch_practice_offered {
+        ctx.settings.touch_practice_offered = true;
+        if let Err(e) = ctx.settings.save() {
+            log::warn!("could not save touch practice offer setting: {e}");
+        }
+        ctx.push_state(TouchPracticeOfferState::new());
+    }
 }
 
 // -- menu plumbing --------------------------------------------------------------------

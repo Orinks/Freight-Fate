@@ -409,8 +409,8 @@ impl DrivingState {
     /// The touch-screen layout, from the player's own touch bindings.
     pub fn speak_touch_help(&mut self, ctx: &mut GameContext) {
         let mut text = String::from(
-            "Touch and hold the top half of the screen for the gas, the bottom half for \
-             the brake. Swipe left or right to steer, unless lane keeping is on full. ",
+            "Hold anywhere on the screen for gas. Tap, then hold anywhere for brake. \
+             Hold two fingers for emergency brake and three fingers for horn. Swipe left or right to steer, unless lane keeping is on full. ",
         );
         for gesture in crate::bindings::touch_slots() {
             let (Some(name), Some(command)) = (

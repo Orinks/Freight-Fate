@@ -3,7 +3,7 @@
 use std::collections::HashSet;
 
 use crate::sim_support::*;
-use ff_core::data::world_models::Route;
+use ff_core::data::world_models::{Leg, Route};
 use ff_core::pyrandom::PyRandom;
 use ff_core::sim::traffic_manager::{
     climb_speed_mph, governed_band, BrakingZone, TrafficManager, TrafficVehicle,
@@ -1076,4 +1076,35 @@ fn test_npc_trucks_actually_slow_down_on_a_real_climb() {
         climb_speed_mph("semi", steepest) < GOVERNED_TRUCK_BAND_MPH.0,
         "a truck on the steepest part of this route must be held below its limiter"
     );
+}
+
+#[test]
+fn test_only_a_freeway_has_distant_traffic_to_hear() {
+    // The cab's traffic bed reads this: an interstate carries its real
+    // presence, an undivided two-lane road and a city street carry none.
+    let w = world();
+    let presence_on = |leg: &std::sync::Arc<Leg>| {
+        let route = Route::new(vec![leg.a.clone(), leg.b.clone()], vec![leg.clone()]);
+        let manager = TrafficManager::bare(&route, &[0.0]);
+        manager.freeway_presence_at(leg.miles / 2.0)
+    };
+    let interstate = w
+        .legs
+        .iter()
+        .find(|leg| leg.highway.starts_with("I-") && leg.miles > 50.0 && leg.local_cue.is_empty())
+        .expect("an interstate leg");
+    let busy = presence_on(interstate);
+    assert!(busy > 0.0 && busy <= 1.0, "{busy}");
+    let two_lane = w
+        .legs
+        .iter()
+        .find(|leg| {
+            !leg.highway.starts_with("I-") && leg.divided == Some(false) && leg.local_cue.is_empty()
+        })
+        .expect("an undivided highway leg");
+    assert_eq!(presence_on(two_lane), 0.0);
+    // The same interstate, but as the city street a facility chain bakes.
+    let mut street = (**interstate).clone();
+    street.local_cue = "Turn right onto Main Street".to_string();
+    assert_eq!(presence_on(&std::sync::Arc::new(street)), 0.0);
 }

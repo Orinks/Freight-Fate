@@ -89,6 +89,16 @@ pub const FUEL_STOP_MIN: f64 = 20.0; // fueling is on-duty-not-driving work
 /// Fraction of tank remaining that fires the once-per-threshold low-fuel cue.
 /// Re-arms only after a refill climbs back above this line.
 pub const LOW_FUEL_WARN_FRACTION: f64 = 0.15;
+/// Miles per gallon the fuel range assumes before this run has burned
+/// enough to measure its own. ASSUMED: the burn model is calibrated for
+/// about 6.5 to 7 at a 60 mph cruise, and a loaded climb burns more.
+pub const ASSUMED_RANGE_MPG: f64 = 6.0;
+/// What a run must have driven and burned before its own average stands in
+/// for [`ASSUMED_RANGE_MPG`], and the band that average is held to.
+pub const RANGE_MEASURE_MIN_MI: f64 = 15.0;
+pub const RANGE_MEASURE_MIN_GAL: f64 = 2.0;
+pub const RANGE_MPG_FLOOR: f64 = 3.0;
+pub const RANGE_MPG_CEILING: f64 = 10.0;
 pub const INSPECTION_MIN: f64 = 15.0; // inspection lane: they take you in
 /// The driver's own pre-trip walk-around, on duty. ASSUMED: 49 CFR 396.13
 /// sets no time; carriers budget about fifteen minutes.

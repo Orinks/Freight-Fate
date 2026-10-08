@@ -41,6 +41,25 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Traffic sounds (owner, 2026-10-08: "the sounds aren't synced with the
+      NPC traffic"): the three nearest NPC vehicles each run a steady class
+      loop whose level, pan and pitch are set every frame from where the
+      vehicle is, mainline and ramp-end cross traffic alike, replacing the
+      bumper-crossing whooshes and the timed crossing one-shots (whose
+      recordings peaked anywhere from 0.1 s to 1.7 s in, and whose cooldown
+      dropped most passes). On an exit ramp the mainline sits to the left and
+      fades down the ramp instead of passing through the cab. Interstates and
+      divided multi-lane highways carry a distant-traffic bed at the road's
+      real presence, and the road bed is 6 dB louder. Loops rendered with
+      genny (`sound-test/traffic_sounds.json`); levels in `docs/audio-levels.md`.
+- [ ] (Found along the way) Owner listening pass on the traffic sounds and
+      the freeway bed: `TRAFFIC_SOUND_PEAK`, `TRAFFIC_BED_PEAK` and the
+      per-class loudness are first guesses, set without ears.
+- [x] The radio status screen names the Playlists folder's full location
+      while no personal playlist is on the dial and streamer-safe mode is
+      off (issue #289: a player saw the shuffle setting and could not find
+      how to add music at all).
+
 - [x] Channel 3000 on 87.7 (owner, 2026-10-06): the owner's TV programming on
       a daypart schedule by the truck's local hour, from its own
       `channel3000.pak`, opened on first tune-in; off the dial without the
@@ -408,10 +427,14 @@ Everything found before 2026-09-25 moved to
       alone on x86_64 and in its module; the source of the nondeterminism is
       not found yet.
 
-- [ ] Low fuel warning could also fire when remaining range is shorter than
+- [x] Low fuel warning could also fire when remaining range is shorter than
       the distance to the next fuel-capable stop (issue #272 shipped the
-      once-per-threshold 15 percent cue first; honest loaded range for the
-      range-based alternate is still open).
+      once-per-threshold 15 percent cue first). Shipped for 1.9.4
+      (2026-10-08): the range is the run's own miles per gallon (DERIVED:
+      miles driven over gallons burned, once 15 miles and 2 gallons are in,
+      held to 3 to 10; ASSUMED 6 before that), F speaks it, and a fuel range
+      warning speaks once when it falls short of the next fuel stop this rig
+      can use, or of the destination when none comes first.
 
 - [x] More music on the Terrestrial dial (owner, 2026-10-03, from player
       feedback): 156 commercial music stations in 35 states, each heard
@@ -455,6 +478,17 @@ Everything found before 2026-09-25 moved to
       updater offers a same-tag rebuild on a different one (2026-10-03).
       Copies built before this have no commit and still wait for the
       next day's snapshot.
+- [x] The nightly publishes a tester snapshot even when the day's commits
+      changed nothing a player notices (1.9-tester-20261007, four hours
+      after v1.9.3), and a 1.9.3 copy on the snapshot channel was offered
+      it. The updater now skips a snapshot unless a stable release or a
+      snapshot with real notes came out after the running copy, and the
+      orinks.net downloads page hides such a snapshot (2026-10-07).
+- [x] When the updater offers a tester on an older snapshot a quiet one
+      because a stable release came out in between, What's new read "No
+      user-facing changes", which is untrue for that player: they get the
+      stable release's fixes. It now reads the notes of every release since
+      that copy, newest first, each under its name (2026-10-07).
 - [ ] Updater, issue 266: a stalled download now fails after sixty idle
       seconds, but its blocked read thread and socket linger until that read
       returns or the game quits. A per-read socket timeout would end both.
@@ -475,10 +509,18 @@ Everything found before 2026-09-25 moved to
       roadside stop does; Escape on a stop that pulled the CDL no longer
       drives on; a saved run on a pulled CDL closes out instead of resuming.
       Ported from 2.0's PR #261 (2026-09-30).
-- [ ] An owner-operator can still start "Bobtail to a nearby city" on a
-      suspended or disqualified CDL; 2.0 refuses it (PR #259). On 1.9 a
-      bobtail on a pulled CDL ends at the next run-off, barrel strike,
-      roadside stop or reload (2026-09-30).
+- [x] "Bobtail to a nearby city" is refused on a suspended or disqualified
+      CDL, from the terminal and from an open bobtail menu, with the date
+      the suspension ends. Ported from 2.0's PR #259 for 1.9.4
+      (2026-10-08).
+- [ ] Scale reminder state is one key and one age for the whole drive. Two
+      open scales under about a mile apart would let the second reminder
+      overwrite the first, and the first could be charged without its
+      real-seconds grace. No leg has such a pair today (scan, 2026-10-08);
+      keep the age per scale if one is ever added.
+- [ ] A scale crossed during a frame the cab is busy (hazard, microsleep)
+      is never judged at all: the check returns early and its previous
+      position covers one frame. Lenient, not a charge (review, 2026-10-08).
 - [ ] Placed attraction billboards speak in one direction only since
       2026-09-30; the other side hears the random pool. Signs standing at
       their attraction could be marked `both`, and the rest need copy
@@ -2623,6 +2665,12 @@ terminal becomes the anchor of that week instead of a spawn point.
       the home terminal: short home-region runs, home every night, no
       cycle pressure, lower pay -- weighted toward new hires in the
       assigned-dispatch levels.
+
+- [ ] genny's instruments in Synthesized music (owner, 2026-10-08): the game
+      already composes endless seeded pieces in Rust (`ff_core::music_synth`);
+      porting genny's voiced instruments, drums and styles into that renderer
+      would give the synth mode a real band. genny is Python, so it is a port,
+      not an embed.
 
 ### Personal conveyance and duty-purpose correction
 

@@ -502,6 +502,17 @@ pub struct AudioCalls {
     /// holds: a stop that settles the truck to idle without telling the audio
     /// leaves the loop roaring at highway revs.
     pub engine_rpm: Vec<(f64, f64)>,
+    /// The loops sounding now, by channel: what a listener would hear.
+    pub loops: std::collections::HashMap<u32, RecordedLoop>,
+}
+
+/// One running loop as [`RecordingAudio`] last left it.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RecordedLoop {
+    pub key: String,
+    pub volume: f64,
+    pub pan: f64,
+    pub rate: f64,
 }
 
 pub type AudioLog = Rc<RefCell<AudioCalls>>;
@@ -575,10 +586,42 @@ impl Audio for RecordingAudio {
     fn has_asset(&mut self, _key: &str) -> bool {
         true
     }
-    fn start_loop_with(&mut self, _channel: u32, _key: &str, _volume: f64, _fade_ms: u32) {}
-    fn set_loop_volume(&mut self, _channel: u32, _volume: f64) {}
-    fn set_loop_pan(&mut self, _channel: u32, _pan: f64) {}
-    fn stop_loop_with(&mut self, _channel: u32, _fade_ms: u32) {}
+    fn start_loop_with(&mut self, channel: u32, key: &str, volume: f64, _fade_ms: u32) {
+        let mut log = self.log.borrow_mut();
+        let entry = log.loops.entry(channel).or_insert_with(|| RecordedLoop {
+            key: key.to_string(),
+            volume,
+            pan: 0.0,
+            rate: 1.0,
+        });
+        if entry.key != key {
+            *entry = RecordedLoop {
+                key: key.to_string(),
+                volume,
+                pan: 0.0,
+                rate: 1.0,
+            };
+        }
+        entry.volume = volume;
+    }
+    fn set_loop_volume(&mut self, channel: u32, volume: f64) {
+        if let Some(entry) = self.log.borrow_mut().loops.get_mut(&channel) {
+            entry.volume = volume;
+        }
+    }
+    fn set_loop_pan(&mut self, channel: u32, pan: f64) {
+        if let Some(entry) = self.log.borrow_mut().loops.get_mut(&channel) {
+            entry.pan = pan;
+        }
+    }
+    fn set_loop_rate(&mut self, channel: u32, rate: f64) {
+        if let Some(entry) = self.log.borrow_mut().loops.get_mut(&channel) {
+            entry.rate = rate;
+        }
+    }
+    fn stop_loop_with(&mut self, channel: u32, _fade_ms: u32) {
+        self.log.borrow_mut().loops.remove(&channel);
+    }
     fn start_sustain_loop_with(
         &mut self,
         _channel: u32,

@@ -97,7 +97,7 @@ fn touch_gestures_row() -> Row {
     )
     .help(
         "Choose which driving command each touch gesture runs, including a second \
-         finger while you hold the top or bottom half.",
+         finger while holding gas or brake.",
     )
 }
 
@@ -861,7 +861,7 @@ impl SettingsCategoryState {
                 "Engine start, shutdown, and running engine sounds.",
             ),
             row(
-                dyn_label(|s| format!("Engine voice: {}", s.engine_voice)),
+                dyn_label(|s| format!("Engine sound: {}", s.engine_voice)),
                 adjust(|s, ctx, d| s.toggle_engine_voice(ctx, d)),
                 "Real is the engine recorded from a working truck cab, \
                  following the rpm. Classic is the original engine sound. \
@@ -870,7 +870,7 @@ impl SettingsCategoryState {
             row(
                 dyn_label(|s| {
                     format!(
-                        "Engine brake voice: {}",
+                        "Engine brake sound: {}",
                         if s.jake_voice == "real" { "recorded" } else { "classic" }
                     )
                 }),

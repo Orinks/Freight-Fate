@@ -800,6 +800,27 @@ impl TrafficManager {
         }
     }
 
+    /// How busy the freeway under `mile` is, 0 to 1, for the distant
+    /// traffic the cab hears; 0 off a freeway. A freeway here is an
+    /// interstate, or a divided highway with two or more lanes each way;
+    /// city streets and yards are never one. The number is
+    /// [`TrafficManager::leg_density`], the same presence the bubble spawns
+    /// from, so the road sounds as busy as it is.
+    pub fn freeway_presence_at(&self, mile: f64) -> f64 {
+        let Some(leg) = self.leg_at(mile) else {
+            return 0.0;
+        };
+        if !leg.local_cue.is_empty() || leg.local_yard {
+            return 0.0;
+        }
+        let interstate = leg.highway.trim().to_uppercase().starts_with("I-");
+        let divided = leg.divided == Some(true) && self.lane_count_at(mile) >= 2;
+        if !(interstate || divided) {
+            return 0.0;
+        }
+        self.leg_density(leg, is_night(self.hour), Some(mile))
+    }
+
     /// [`TrafficManager::lane_count_at`] for an already resolved leg.
     fn lane_count_on(leg: &Leg, offset: f64, forward: bool) -> i64 {
         for seg in leg.lane_segments() {

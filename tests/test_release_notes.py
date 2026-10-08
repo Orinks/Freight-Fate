@@ -729,8 +729,9 @@ def test_career_19_snapshot_workflow_contract():
     assert "tag=1.9-tester-$(date -u +%Y%m%d)" in workflow
     assert "commit_sha: ${{ steps.check.outputs.commit_sha }}" in workflow
     assert 'echo "commit_sha=$(git rev-parse HEAD)"' in workflow
-    # Windows, macOS, Linux build, the Linux distro smoke, and the release.
-    assert workflow.count("ref: ${{ needs.prepare.outputs.commit_sha }}") == 5
+    # Format, Windows, macOS, Linux build, the Linux distro smoke, and the
+    # release.
+    assert workflow.count("ref: ${{ needs.prepare.outputs.commit_sha }}") == 6
     assert 'git tag --list "1.9-tester-*"' in workflow
     assert "tools/release_notes.py should-build-nightly" in workflow
     assert "tools/release_notes.py nightly" in workflow
@@ -843,7 +844,6 @@ def test_career_19_snapshot_builds_an_apple_silicon_macos_release():
     )
     assert "uv run python tools/fetch_bass.py\n" in named_steps["Fetch BASS"][1]["run"]
     assert "uv run python tools/fetch_bass.py --check" in named_steps["Fetch BASS"][1]["run"]
-    assert named_steps["Check Rust formatting"][1]["run"] == "cargo fmt --all --check"
     assert (
         named_steps["Lint Rust targets"][1]["run"]
         == "cargo clippy --all-targets --locked -- -D warnings"
@@ -873,11 +873,13 @@ def test_career_19_release_requires_and_verifies_every_platform_archive():
 
     assert release["needs"] == [
         "prepare",
+        "format",
         "build_windows",
         "build_macos",
         "build_linux",
         "smoke_linux",
     ]
+    assert "needs.format.result == 'success'" in release["if"]
     assert "needs.build_windows.result == 'success'" in release["if"]
     assert "needs.build_macos.result == 'success'" in release["if"]
     assert "needs.build_linux.result == 'success'" in release["if"]
@@ -974,6 +976,41 @@ def test_career_19_snapshot_prepares_bass_before_rust_validation():
         assert bass_index < named_steps["Lint Rust targets"][0]
         assert bass_index < named_steps["Test Rust workspace"][0]
         assert named_steps["Test Rust workspace"][0] < named_steps[build_step_name][0]
+
+
+def test_career_19_snapshot_runs_each_platform_independent_check_once():
+    """Formatting and the whole-map sweeps do not depend on the platform, so
+    each runs on one runner; every check still gates the release."""
+    workflow_path = (
+        Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build-career-1.9.yml"
+    )
+    jobs = yaml.load(workflow_path.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)["jobs"]
+
+    def step(job, name):
+        return next(s for s in jobs[job]["steps"] if s.get("name") == name)
+
+    fmt_jobs = [
+        name
+        for name, job in jobs.items()
+        if any("cargo fmt" in s.get("run", "") for s in job.get("steps", []))
+    ]
+    assert fmt_jobs == ["format"]
+    assert jobs["format"]["runs-on"] == "ubuntu-latest"
+    assert step("format", "Check Rust formatting")["run"] == "cargo fmt --all --check"
+
+    # The sweeps run once, on Windows; the other runners take the quick set,
+    # with clippy on the same RUSTFLAGS so the debug native builds are shared.
+    assert "RUSTFLAGS" not in step("build_windows", "Test Rust workspace").get("env", {})
+    for job in ("build_macos", "build_linux"):
+        for name in ("Lint Rust targets", "Test Rust workspace"):
+            assert step(job, name)["env"]["RUSTFLAGS"] == "--cfg ci_quick", (job, name)
+        assert "RUSTFLAGS" not in jobs[job].get("env", {})
+
+    # Windows clippy is skipped only on the schedule, whose dev tip rust.yml
+    # already linted; tag pushes and manual runs still lint.
+    assert step("build_windows", "Lint Rust targets")["if"] == "github.event_name != 'schedule'"
+    for job in ("build_macos", "build_linux"):
+        assert "if" not in step(job, "Lint Rust targets")
 
 
 def test_career_19_retry_is_bounded_to_one_delayed_attempt():
