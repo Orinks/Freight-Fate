@@ -3391,9 +3391,8 @@ here 2026-09-25. Details stay in the linked dated sections.
 - [x] **Offline call dispatch groundwork.** A stopped driver can send a
       structured delay, hours, road, truck or load request and receive an
       immediate trip-specific local answer.
-- [ ] **Route calls to a remote dispatcher when one is available.** Deliver
-      the same structured request asynchronously, with a short wait and the
-      local dispatcher as the automatic fallback.
+- [x] **Route Call Dispatch to an opted-in remote dispatcher.** If nobody
+      picks up, the office answers instead.
 - [ ] **Partial: reopen and finish driving school.** The sandboxed
       practice-road foundation and one Rolling Basics lesson exist, with
       profile restoration, stage progression, and manual-start tests in
