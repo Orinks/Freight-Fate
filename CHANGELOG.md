@@ -76,7 +76,7 @@
 
 - Phase A ALCAN: BC↔YT `state_crossings` on Fort Nelson–Watson Lake Alaska Highway legs (corridor metadata completeness).
 
-- **Sitting through a training course now tires you, about half as fast as driving.** A multi-day course counts only its last class day.
+- **Sitting through a training course now tires you, about half as fast as driving.** A multi-day course counts only its last daytime class day.
 
 - **A course that leaves you drowsy now tells you to sleep before driving.** Night classes are judged by the city's local clock.
 
@@ -85,6 +85,8 @@
 - **Driving into Memphis from St. Louis no longer passes a weigh station that is not there.** The West Memphis scale is westbound I-40 only.
 
 - **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now says it waits until you stop.
+
+- **West Memphis stops sit where they really are.** The Riverside scale is past the bridge, and the Petro and Love's are at exit 280.
 
 - **Creeping up to an open scale, then speeding past, no longer dodges the bypass charge.** Only a warning the game delayed excuses you.
 
@@ -95,6 +97,8 @@
 - **The state line on the St. Louis to Memphis drive now says I-40, over the Hernando de Soto Bridge.**
 
 - **Two real Arkansas weigh stations near West Memphis are on the map.** Marion screens southbound I-55, Lehi eastbound I-40.
+
+- **A hazard after the last weigh station warning no longer costs you the bypass charge.** Time spent on the hazard does not count against you.
 
 ## 1.9.3 - 2026-10-06
 

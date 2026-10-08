@@ -434,6 +434,7 @@ impl DrivingState {
             weigh_station_reminder_key: String::new(),
             weigh_station_reminder_age_s: 0.0,
             scale_reminder_held_by_game: HashSet::new(),
+            scale_reminder_late_by_driver: HashSet::new(),
             scale_reannounce: None,
             weigh_station_pending: None,
             weigh_station_transponder_verdict: HashMap::new(),

@@ -1041,18 +1041,14 @@ fn course_fatigue_runs_at_the_classroom_rate_day_and_night() {
     assert!(!line.contains("drowsy"), "{line}");
 }
 
-#[test]
-fn multi_day_course_counts_only_the_last_class_day() {
-    // LCV is the 24 h course: class days with sleep between, so the driver
-    // leaves with the last class day's fatigue, whatever they walked in
-    // with. HOS still books it off duty.
+fn take_lcv_course(game_hours: f64, fatigue: f64) -> f64 {
     let mut app = TestApp::new();
     career(&mut app, "Course Fatigue", "Chicago");
     app.ctx.settings.time_scale = 20.0;
     {
         let p = profile_mut(&mut app);
-        p.fatigue = 95.0;
-        p.game_hours = 8.0; // 7 AM Central; the last class day is 11 PM to 7 AM
+        p.fatigue = fatigue;
+        p.game_hours = game_hours;
         p.career.xp = LEVEL_XP[19]; // level 20
         p.career
             .purchased_endorsements
@@ -1061,14 +1057,38 @@ fn multi_day_course_counts_only_the_last_class_day() {
     }
     app.push_state(EndorsementCourseState::new());
     select::<EndorsementCourseState>(&mut app, "Lcv certificate course:");
-    let after_24 = profile(&app).fatigue;
-    // Six night hours (0.085 x 360 = 30.6) and two dawn hours (0.0575 x 120 = 6.9).
-    approx(after_24, 37.5);
+    profile(&app).fatigue
+}
+
+#[test]
+fn multi_day_course_counts_only_the_last_class_day() {
+    // LCV is the 24 h course: class days with sleep between, so the driver
+    // leaves with the last class day's fatigue, whatever they walked in
+    // with. HOS still books it off duty.
+    let after_24 = take_lcv_course(8.0, 95.0); // 7 AM Central
+                                               // The last class day is 8 AM to 4 PM local, all day rate: 0.0575 x 480.
+    approx(after_24, 27.6);
     approx(
         after_24,
         hos::course_fatigue(0.0, 7.0, 24.0 * 60.0, |_| 1.0),
     );
     assert_ne!(after_24, 0.0, "a course must not wipe fatigue to zero");
+}
+
+#[test]
+fn multi_day_course_scores_a_daytime_class_day_from_any_start_hour() {
+    // Schools teach in the daytime: an LCV course started at 3 to 7 AM
+    // used to run its last class day overnight (37.5 to 40.8). Chicago is
+    // Central, an hour behind the Eastern game clock.
+    for local in [3.0, 5.0, 7.0, 12.0, 21.0] {
+        for arrival in [0.0, 95.0] {
+            let after = take_lcv_course(local + 1.0, arrival);
+            assert!(
+                (after - 27.6).abs() < 0.01,
+                "{local} local, arrival {arrival}: {after}"
+            );
+        }
+    }
 }
 
 #[test]

@@ -126,8 +126,18 @@ impl DrivingState {
     /// Runs on the frames the scale check is held off (a pull-over, a ramp,
     /// a hazard or microsleep window, the arrival menu) and on a departure
     /// lane, where a truck pulling out of a facility is slow because it is
-    /// supposed to be. Only announced, open, not-yet-reminded scales; a
-    /// green transponder light needs no reminder at all.
+    /// supposed to be. Only announced, open scales; a green transponder
+    /// light needs no reminder at all.
+    ///
+    /// A reminder already spoken counts too. QA (2026-10-07): the reminder
+    /// spoke half a mile out, a hazard held the cab from 0.48 to 0.15 of a
+    /// mile, and the crossing was charged -- the hazard had eaten most of
+    /// the real seconds the reminder promised, and those seconds were never
+    /// the driver's to use. The reminder's age only counts seconds the cab
+    /// was free, so the excuse lasts exactly as long as the driver is owed.
+    /// One the driver's own crawl or signal made late
+    /// (`scale_reminder_late_by_driver`) stays theirs: a hazard after it
+    /// does not reopen the crawl-then-speed dodge.
     pub fn note_scale_reminders_held_by_game(&mut self) {
         let window = self.scale_reminder_mi();
         let held: Vec<String> = self
@@ -142,7 +152,8 @@ impl DrivingState {
             .map(|stop| self.weigh_station_key(stop))
             .filter(|key| {
                 self.weigh_station_noticed.contains(key)
-                    && *key != self.weigh_station_reminder_key
+                    && (*key != self.weigh_station_reminder_key
+                        || !self.scale_reminder_late_by_driver.contains(key))
                     && self
                         .weigh_station_transponder_verdict
                         .get(key)
@@ -177,10 +188,11 @@ impl DrivingState {
         if !self.weigh_station_noticed.contains(key) || key == self.weigh_station_reminder_key {
             return;
         }
-        if self.trip.truck.speed_mph() <= WEIGH_STATION_BYPASS_MPH {
-            return;
-        }
-        if self.exit_is_armed_for(stop) {
+        if self.trip.truck.speed_mph() <= WEIGH_STATION_BYPASS_MPH || self.exit_is_armed_for(stop) {
+            // Inside the window and held quiet by the driver's own pace or
+            // signal: whatever this reminder's lateness costs is theirs, even
+            // if the cab is taken after it finally speaks.
+            self.scale_reminder_late_by_driver.insert(key.to_string());
             return;
         }
         if self

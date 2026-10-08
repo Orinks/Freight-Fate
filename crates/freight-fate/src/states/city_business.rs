@@ -1160,8 +1160,10 @@ impl EndorsementCourseState {
             // Off duty on the hours clock: a stretch of 10+ hours still resets
             // HOS the way consecutive off duty does. Fatigue accrues at the
             // classroom rate -- sitting in class is not sleep (GitHub #314) --
-            // and a multi-day course counts only its last class day. Training
-            // a carrier requires is on duty (49 CFR 395.2): ROADMAP debt.
+            // and a multi-day course counts only its last class day, scored
+            // 8 AM to 4 PM local. Training a carrier requires is on duty (49
+            // CFR 395.2), and the clock still advances a flat course_hours:
+            // both ROADMAP debt.
             p.hos.off_duty(cred.course_hours * 60.0);
             let fatigue = {
                 let p = &*p;
@@ -1227,8 +1229,9 @@ impl EndorsementCourseState {
 }
 
 /// The warning a course ends with when it leaves the driver drowsy or worse,
-/// on the same thresholds the road's yawn and rumble-strip cues use. It is a
-/// safety line, so every speech rung hears it whole.
+/// on the same thresholds the road's yawn and rumble-strip cues use. It has
+/// no speech category of its own: it is appended to the course completion
+/// line, so it is heard wherever that line is.
 pub fn course_fatigue_cue(fatigue: f64) -> Option<&'static str> {
     if fatigue >= hos::FATIGUE_SEVERE {
         Some("You're dangerously drowsy after the course. Sleep before you drive.")
