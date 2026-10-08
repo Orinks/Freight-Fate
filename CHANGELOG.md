@@ -4,6 +4,8 @@
 
 ### Added
 
+- **A remote dispatcher can now answer Call Dispatch calls.** The office answers if nobody picks up.
+
 - **Drivers can call dispatch while stopped for trip-specific help.** Report delays, hours, road conditions, truck trouble or load trouble.
 
 - **Trucks now stop for customs at the border on the Alaska Highway and southbound at Blaine.** Driving past the booth brings a penalty.
