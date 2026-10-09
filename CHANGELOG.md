@@ -36,6 +36,12 @@
 
 ### Fixed
 
+- **Been Everywhere, For Real now needs all sixteen regions on the map, not fourteen.**
+
+- **Grossed Out at the Scale House can now be earned.** It needs a load within a ton of the legal limit; dispatch never offered the old 24 tons.
+
+- **The Route 66 and redwood badges count the newer towns on the map,** like Joplin, Gallup and Kingman on the Mother Road, and Eureka in the redwoods.
+
 - **Menus accept Enter, Space, and letters from braille notetakers and automation tools.** Like the BrailleNote Evolve, they could arrow but not select.
 
 - **Traffic is now loud enough to hear over the engine, from about a quarter mile away.**
