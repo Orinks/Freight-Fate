@@ -149,7 +149,7 @@ impl Question {
         match self {
             Question::Name => "",
             Question::StreamUrl => {
-                "The direct link to the audio stream, not the station's web page. Control V pastes."
+                "The direct link to the audio stream, not the station's web page. streamurl.link finds one. Control V pastes."
             }
             Question::CallSign => "Like W X Y Z, or K A B C dash F M.",
             Question::State => "The state it broadcasts from.",

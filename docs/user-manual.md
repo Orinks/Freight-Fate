@@ -2006,7 +2006,8 @@ back safely instead of blocking the drive.
 
 Missing a station? Choose Suggest a station in the Radio app, on the driver
 tablet. Say whether it broadcasts on AM or FM or only online, then give its
-name and stream address; Control V pastes the address. An AM or FM station
+name and stream address; Control V pastes the address, and streamurl.link
+finds a station's stream address if you do not have it. An AM or FM station
 also needs its call sign and state, and can have its city and frequency.
 orinks.net plays the first seconds of the stream and tells you straight
 away if it will not play or is already on the dial; otherwise it waits for
