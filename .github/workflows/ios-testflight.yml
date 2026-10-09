@@ -1,0 +1,219 @@
+# Build, sign and upload Freight Fate to TestFlight (internal testers).
+#
+# Manual only: run it with
+#
+#     gh workflow run ios-testflight.yml -R orinks-games/Freight-Fate
+#
+# It never runs from a push, a tag or a pull request, and it makes no tag and
+# no release. One-time setup and failure messages: docs/ios-testflight.md.
+#
+# No certificate or profile is stored. Each run uses the App Store Connect key
+# (ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8_BASE64) to make a short-lived Apple
+# distribution certificate and App Store profile (tools/ios_signing.py), signs
+# with them in a throwaway keychain, and deletes the keychain, the key files,
+# the profile and the certificate when it ends, so runs never use up Apple's
+# certificate cap.
+#
+# Build number: github.run_number, which rises with every dispatch. A re-run
+# of the same run keeps its number and Apple refuses a repeat, so start a new
+# dispatch instead of using "Re-run jobs". The optional build_number input
+# overrides it.
+#
+# Standard macos-26 runner only: this repo is public, so it costs nothing,
+# and a larger runner would be billed.
+
+name: iOS TestFlight
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: "Build number (default: the run number); must be higher than every earlier upload"
+        required: false
+        type: string
+
+concurrency:
+  group: ios-testflight
+  cancel-in-progress: false
+
+env:
+  PYTHON_VERSION: "3.12"
+  BUNDLE_ID: net.orinks.freightfate
+
+jobs:
+  testflight:
+    name: Build and upload to TestFlight
+    runs-on: macos-26
+    timeout-minutes: 90
+    env:
+      CARGO_TERM_COLOR: always
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      # tools/build_ios.py's MINIMUM_IOS.
+      IPHONEOS_DEPLOYMENT_TARGET: "14.0"
+      # The bundled SDL2 source declares a cmake_minimum_required older than
+      # CMake 4 accepts.
+      CMAKE_POLICY_VERSION_MINIMUM: "3.5"
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install the pinned Rust toolchain and the iOS target
+        run: |
+          rustup show
+          rustup target add aarch64-apple-ios
+
+      - name: Cache cargo registry and target directory
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ios-testflight
+          cache-on-failure: true
+
+      - name: Write the App Store Connect key
+        shell: bash
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          for name in ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8_BASE64 APPLE_TEAM_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::The repository secret $name is empty or missing. See docs/ios-testflight.md."
+              exit 1
+            fi
+          done
+          SIGNING_DIR="$RUNNER_TEMP/ios-signing"
+          echo "SIGNING_DIR=$SIGNING_DIR" >> "$GITHUB_ENV"
+          mkdir -p "$SIGNING_DIR"
+          key_path="$SIGNING_DIR/AuthKey_$ASC_KEY_ID.p8"
+          echo "$ASC_KEY_P8_BASE64" | base64 --decode > "$key_path"
+          chmod 600 "$key_path"
+          # The upload step takes the key text as an input; hide every line
+          # of it from the logs before it goes anywhere.
+          while IFS= read -r line; do
+            case "$line" in
+              ""|-----*) ;;
+              *) echo "::add-mask::$line" ;;
+            esac
+          done < "$key_path"
+          delimiter="EOF_$(uuidgen)"
+          {
+            echo "ASC_KEY_PATH=$key_path"
+            echo "ASC_KEY_P8<<$delimiter"
+            cat "$key_path"
+            echo "$delimiter"
+          } >> "$GITHUB_ENV"
+
+      - name: Create the signing certificate and App Store profile
+        # Checks the key, registers the bundle id if it is new, then makes a
+        # temporary certificate and a profile for it. Clear errors name the
+        # one thing to fix.
+        shell: bash
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          python3 tools/ios_signing.py prepare --out "$SIGNING_DIR" \
+            --bundle-id "$BUNDLE_ID" --label "run-${{ github.run_id }}"
+
+      - name: Import the certificate into a throwaway keychain
+        shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          keychain="$RUNNER_TEMP/freight-fate-ios.keychain-db"
+          keychain_password="$(uuidgen)"
+          p12_password="$(uuidgen)"
+          echo "::add-mask::$keychain_password"
+          echo "::add-mask::$p12_password"
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          echo "SIGN_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
+          openssl pkcs12 -export -inkey "$SIGNING_DIR/distribution.key.pem" \
+            -in "$SIGNING_DIR/distribution.cert.pem" \
+            -out "$SIGNING_DIR/distribution.p12" -passout "pass:$p12_password"
+          security import "$SIGNING_DIR/distribution.p12" -k "$keychain" \
+            -P "$p12_password" -T /usr/bin/codesign
+          rm -f "$SIGNING_DIR/distribution.p12"
+          # Apple's intermediates, in case the runner image lacks them.
+          for ca in AppleWWDRCAG3 AppleWWDRCAG6; do
+            if curl -fsSL "https://www.apple.com/certificateauthority/$ca.cer" -o "$RUNNER_TEMP/$ca.cer"; then
+              security import "$RUNNER_TEMP/$ca.cer" -k "$keychain" || true
+            fi
+          done
+          security set-key-partition-list -S apple-tool:,apple: -s \
+            -k "$keychain_password" "$keychain" >/dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          security find-identity -v -p codesigning "$keychain"
+          identity="$(security find-identity -v -p codesigning "$keychain" | awk '/[0-9A-F]{40}/ {print $2; exit}')"
+          if [ -z "$identity" ]; then
+            echo "::error::No valid signing identity after the import. The list above shows what the keychain holds."
+            exit 1
+          fi
+          echo "SIGN_IDENTITY=$identity" >> "$GITHUB_ENV"
+          # Install the profile where Xcode tools look for it.
+          profile_uuid="$(security cms -D -i "$SIGNING_DIR/profile.mobileprovision" | plutil -extract UUID raw -o - -)"
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$SIGNING_DIR/profile.mobileprovision" \
+            "$HOME/Library/MobileDevice/Provisioning Profiles/$profile_uuid.mobileprovision"
+
+      - name: Check the App Store Connect app record exists
+        shell: bash
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: python3 tools/ios_signing.py check-app --bundle-id "$BUNDLE_ID"
+
+      - name: Build, sign and package the iOS app
+        shell: bash
+        env:
+          BUILD_NUMBER_INPUT: ${{ inputs.build_number }}
+        run: |
+          set -euo pipefail
+          build_number="${BUILD_NUMBER_INPUT:-${{ github.run_number }}}"
+          echo "BUILD_NUMBER=$build_number" >> "$GITHUB_ENV"
+          uv run python tools/build_ios.py --device --ipa \
+            --build-number "$build_number" \
+            --sign-identity "$SIGN_IDENTITY" \
+            --provisioning-profile "$SIGNING_DIR/profile.mobileprovision"
+          test -f build/ios/FreightFate.ipa
+
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-testflight-build@155ea93be9ee6d5186c71f660a612f5eddb14510 # v5
+        with:
+          app-path: build/ios/FreightFate.ipa
+          app-type: ios
+          issuer-id: ${{ secrets.ASC_ISSUER_ID }}
+          api-key-id: ${{ secrets.ASC_KEY_ID }}
+          api-private-key: ${{ env.ASC_KEY_P8 }}
+          # Matches ITSAppUsesNonExemptEncryption in the app's Info.plist.
+          uses-non-exempt-encryption: "false"
+          wait-for-processing: "true"
+
+      - name: Remove the signing material
+        # Runs even after a failure: revoke the temporary certificate and
+        # profile, then delete the keychain and every key file.
+        if: always()
+        shell: bash
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          SIGNING_DIR="${SIGNING_DIR:-$RUNNER_TEMP/ios-signing}"
+          python3 tools/ios_signing.py cleanup --out "$SIGNING_DIR" || true
+          if [ -n "${SIGN_KEYCHAIN:-}" ]; then
+            security delete-keychain "$SIGN_KEYCHAIN" || true
+          fi
+          rm -f "${ASC_KEY_PATH:-/nonexistent}"
+          rm -rf "$SIGNING_DIR" \
+            "$HOME/Library/MobileDevice/Provisioning Profiles"/*.mobileprovision
