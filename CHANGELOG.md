@@ -18,7 +18,13 @@
 
 - **The Engine voice and Engine brake voice settings are now called Engine sound and Engine brake sound.**
 
+- **The distant interstate traffic is a steady roar now, not a swell like waves.**
+
+- **A slower vehicle ahead now plays the slowing-traffic sound.** It no longer plays a passing sound before anything has passed.
+
 ### Fixed
+
+- **Nearby traffic is now loud enough to hear over the engine, from a few hundred feet away.**
 
 - **Bobtail to a nearby city is refused while your CDL is suspended or disqualified.** You hear when the suspension ends instead.
 

@@ -240,20 +240,21 @@ pub fn route_event_sound(event: &TripEvent) -> Option<&'static str> {
     }
 }
 
-/// `_traffic_vehicle_sound`: the pass whoosh for the NPC vehicle on the event.
+/// The earcon for a slower vehicle ahead: the slowing-traffic cue, or the
+/// trooper's own pass when it is a trooper. The vehicle's own sound is its
+/// traffic loop once it is near; a pass whoosh here, with the vehicle still a
+/// quarter mile up the road, sounded like something going by that never did
+/// (owner drive, 2026-10-09).
 pub fn traffic_vehicle_sound(event: &TripEvent) -> &'static str {
-    let vehicle_class = event
+    let trooper = event
         .data
         .npc_vehicle
         .as_ref()
-        .map(|v| v.vehicle_class.trim().to_lowercase())
-        .unwrap_or_default();
-    match vehicle_class.as_str() {
-        "state trooper" => "traffic/trooper_pass",
-        "semi" => "traffic/semi_pass",
-        "box truck" => "traffic/box_truck_pass",
-        "car" => "traffic/car_pass",
-        _ => "events/traffic_slowing",
+        .is_some_and(|v| v.vehicle_class.trim().eq_ignore_ascii_case("state trooper"));
+    if trooper {
+        "traffic/trooper_pass"
+    } else {
+        "events/traffic_slowing"
     }
 }
 

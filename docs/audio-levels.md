@@ -67,3 +67,10 @@ distance) and the bed by the road's traffic presence (`TRAFFIC_BED_PEAK` at
 the busiest road), so those two constants are where a listening pass tunes
 them.
 
+2026-10-09, the owner's first listening drive: no single vehicle could be
+heard over the engine. `TRAFFIC_SOUND_PEAK` went from 0.45 at 12 feet to 0.8
+at 60 feet, still halving with each doubling of distance past that, and the
+hearing edge from 450 to 900 feet, since the bubble keeps vehicles a tenth of
+a mile apart or more. The bed was re-made steady (`sound-test/highway_bed.py`)
+and stays at -22 LUFS.
+

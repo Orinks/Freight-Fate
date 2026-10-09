@@ -36,13 +36,17 @@ use crate::app::GameContext;
 use crate::audio::{CH_TRAFFIC_BED, CH_TRAFFIC_SOUNDS};
 use crate::states::driving::DrivingState;
 
-/// Beyond this a vehicle is part of the bed, not a sound of its own.
-pub const TRAFFIC_SOUND_HEAR_FT: f64 = 450.0;
-/// Closest a sound is treated as: one lane over, alongside.
-pub const TRAFFIC_SOUND_REF_FT: f64 = 12.0;
-/// A sound's level at [`TRAFFIC_SOUND_REF_FT`]. It falls with distance, so a
-/// car a hundred feet back is about a tenth of this.
-pub const TRAFFIC_SOUND_PEAK: f64 = 0.45;
+/// Beyond this a vehicle is part of the bed, not a sound of its own. The
+/// bubble keeps vehicles a tenth of a mile apart or more, so a 450-foot edge
+/// left most of a busy interstate silent (owner drive, 2026-10-09).
+pub const TRAFFIC_SOUND_HEAR_FT: f64 = 900.0;
+/// Inside this a sound is at full level: alongside, or a few car lengths off.
+pub const TRAFFIC_SOUND_REF_FT: f64 = 60.0;
+/// A sound's level at [`TRAFFIC_SOUND_REF_FT`]. It halves with each doubling
+/// of distance past that, so a car 240 feet back is a quarter of this. The
+/// first cut peaked at 0.45 from 12 feet, which put a car a hundred feet off
+/// at 0.05: under the engine, inaudible.
+pub const TRAFFIC_SOUND_PEAK: f64 = 0.8;
 /// Lane width, for how far over the next lane is.
 pub const LANE_WIDTH_FT: f64 = 12.0;
 /// Where an exit ramp leaves the mainline: the gore, a lane's width past the
