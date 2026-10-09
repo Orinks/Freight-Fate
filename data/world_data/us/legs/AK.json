@@ -5524,7 +5524,7 @@
             "miles": 3.0
           }
         ],
-        "source": "Anton Anderson Memorial Tunnel is 2.5 miles; paid miles 3 (rounded path length). Sources: https://www.alaskarailroad.com/sites/default/files/Communications/1.2025.08.29_WTMP_Final_Master_Plan.pdf and https://dot.alaska.gov/creg/whittiertunnel/faq.shtml, accessed 2026-10-09.",
+        "source": "ROUTER CHECK EXEMPT: the public Valhalla truck route from the Bear Valley staging point to Whittier is 3.71 mi because it includes approach roads at both ends, so this leg is exempt from the 6% router agreement check; the length comes from the Alaska Railroad master plan. Anton Anderson Memorial Tunnel is 2.5 miles; paid miles 3 (rounded path length). Sources: https://www.alaskarailroad.com/sites/default/files/Communications/1.2025.08.29_WTMP_Final_Master_Plan.pdf and https://dot.alaska.gov/creg/whittiertunnel/faq.shtml, accessed 2026-10-09.",
         "speed_limits": [
           {
             "at_mi": 0.0,
@@ -5604,7 +5604,7 @@
             "access_date": "2026-10-09",
             "length_text": "The tunnel limit is 75 feet. Your rig is {n} feet.",
             "width_text": "Over 10 feet wide needs a permit.",
-            "height_text": "The tunnel limit is 15 feet high.",
+            "height_text": "Over 14 feet high needs a permit.",
             "placarded_text": "Placarded hazardous materials cannot go through the tunnel. They move by Alaska Railroad.",
             "non_placarded_text": "Non-placarded hazardous materials are limited to 400 pounds."
           },

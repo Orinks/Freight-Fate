@@ -88,6 +88,22 @@ fn whittier_tunnel_gate_runs_in_the_trip_and_toll_is_one_way() {
     return_trip.position_mi = return_trip.total_miles();
     return_trip.check_tolls();
     assert!(return_trip.toll_charges.is_empty(), "return is toll-free");
+    let spoken_tolls = |trip: &Trip| {
+        trip.build_navigation_cues()
+            .iter()
+            .filter(|cue| cue.kind == "toll")
+            .count()
+    };
+    assert_eq!(
+        spoken_tolls(&return_trip),
+        0,
+        "no toll cue where none is charged"
+    );
+    assert_eq!(
+        spoken_tolls(&trip),
+        1,
+        "the toll cue is spoken toward Whittier"
+    );
 }
 
 #[test]

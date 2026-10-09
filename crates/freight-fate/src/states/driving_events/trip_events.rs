@@ -41,9 +41,15 @@ impl DrivingState {
         // A scheduled tunnel hold is work time, not rest.  The trip model
         // advances the shared game clock at the physical gate; this is where
         // the career-owned hours-of-service ledger receives the same minutes.
-        if event.data.context.as_deref() == Some("tunnel_wait") {
+        // A closure for the night is logged as sleeper time instead.
+        let tunnel_closed = event.data.context.as_deref() == Some("tunnel_closed");
+        if tunnel_closed || event.data.context.as_deref() == Some("tunnel_wait") {
             if let Some(minutes) = event.data.amount {
-                hos_mut_of(ctx).on_duty(minutes);
+                ff_core::sim::tunnel::log_wait_to_hos(
+                    hos_mut_of(ctx),
+                    minutes.round() as i64,
+                    tunnel_closed,
+                );
             }
         }
         if self.should_ignore_destination_exit_gps_cue(ctx, event) {

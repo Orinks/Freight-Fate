@@ -2881,7 +2881,17 @@ branch. The older Phase A/B plan checklists are not a live completion list.
 - [ ] **Whittier–Valdez ferry.** No service or verified freight slice is modeled.
 - [ ] **Whittier tunnel special movements.** Permits for 10–11 foot loads and
       special Class E openings remain open.
-- [ ] **Whittier overnight parking.** Needs a real, verified facility.
+- [ ] **Whittier overnight parking.** Needs a real, verified facility. Until
+      then a truck that arrives after the tunnel closes is logged as
+      sleeper-berth time (a wait of ten hours or more as a full reset), even
+      though overnight staging parking is unverified.
+- [ ] **Tunnel gate cues.** After a refusal the truck still hears the toll cue
+      and "Merge onto the tunnel" while it sits at the gate, and no cue is
+      spoken when the gate opens after a wait. The HOS logging for waits has
+      unit tests in the tunnel module but no driving-state test yet.
+- [ ] **Tunnel combination length.** The 73.5 ft combination convention should
+      be revisited if tractor lengths vary: a long-sleeper tractor with a
+      53 ft trailer can exceed the 75 ft tunnel limit.
 - [ ] **Alaska Railroad alternative for placarded hazardous materials.**
       Placarded loads are refused at the tunnel; train carriage is not modeled.
 - [ ] **Whittier freight facilities.** Await a verified freight address and coordinates.
