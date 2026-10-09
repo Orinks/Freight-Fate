@@ -30,6 +30,8 @@
 
 ### Fixed
 
+- **Channel 3000's shows are now as loud as the other stations, and their theme music no longer jumps out over the talk.**
+
 - **Traffic is now loud enough to hear over the engine, from about a quarter mile away.**
 
 - **Passing traffic now sounds where the vehicle really is.** It comes up on its own side, then fades as it pulls ahead.
