@@ -40,27 +40,19 @@
 
 - **The last weigh station warning names its scale and leaves time to take the exit in every driving mode.** Closed scales say so.
 
-- **Driving into Memphis from St. Louis no longer passes a weigh station that is not there.** The West Memphis scale is westbound I-40 only.
+- **Weigh stations and truck stops around West Memphis are now where they really are.** The scale that was never there is gone, and the Marion and Lehi scales are added.
 
 - **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now waits until you stop, and says so.
 
-- **West Memphis stops sit where they really are.** The Riverside scale is past the bridge, and the Petro and Love's are at exit 280.
+- **The weigh station bypass charge now applies only when you really skip an open scale.** A hazard near the scale no longer costs you; slowing, then speeding past, still does.
 
-- **Creeping up to an open scale, then speeding past, no longer dodges the bypass charge.**
-
-- **A closed weigh station's check-in just says it is closed.** It no longer chimes, saves, or counts as an inspection.
-
-- **Arriving at a closed weigh station says its name once.**
+- **A closed weigh station says it is closed, once, and nothing more.** It no longer chimes, saves, or counts as an inspection.
 
 - **The state line on the St. Louis to Memphis drive now says I-40, over the Hernando de Soto Bridge.**
 
-- **Two real Arkansas weigh stations near West Memphis are on the map.** Marion screens southbound I-55, Lehi eastbound I-40.
+- **The update check no longer offers a preview snapshot that is the same as your copy.**
 
-- **A hazard after the last weigh station warning no longer costs you the bypass charge.**
-
-- **The update check no longer offers a preview snapshot that only repeats your version.**
-
-- **Updating from an older preview snapshot now lists every change since your copy.**
+- **What's new, when updating from an older preview snapshot, now lists every change since your copy.**
 
 ## 1.9.3 - 2026-10-06
 
