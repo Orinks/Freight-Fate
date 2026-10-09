@@ -8300,6 +8300,28 @@
         }
       ]
     },
+    "bear_valley_ak_us": {
+      "spoken_city": "Bear Valley",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 60.7902,
+      "lon": -148.8153,
+      "no_freight": true,
+      "locations": [],
+      "source_note": "Bear Valley is the Anton Anderson Memorial Tunnel staging end, not a freight market. Coordinates are the Bear Valley staging and tunnel-control way 232967259, OpenStreetMap via Nominatim, accessed 2026-10-09. No freight facility is asserted."
+    },
+    "whittier_ak_us": {
+      "spoken_city": "Whittier",
+      "state": "AK",
+      "country": "US",
+      "region": "pacific_northwest",
+      "lat": 60.78308,
+      "lon": -148.7331,
+      "no_freight": true,
+      "locations": [],
+      "source_note": "Whittier is a real road endpoint reached through the Anton Anderson Memorial Tunnel. No freight facility has a verified street address and coordinates, so this city deliberately has no facilities or generated jobs. Sources: https://www.alaskarailroad.com/sites/default/files/Communications/1.2025.08.29_WTMP_Final_Master_Plan.pdf and verified research accessed 2026-10-09."
+    },
     "nenana_ak_us": {
       "spoken_city": "Nenana",
       "state": "AK",

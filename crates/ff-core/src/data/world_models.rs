@@ -9,6 +9,9 @@
 
 use std::fmt;
 
+use chrono::{NaiveDate, NaiveTime};
+use serde::{Deserialize, Serialize};
+
 use super::world_constants::{
     lookup, screened_vehicle_access, vehicle_access_allows, DEFAULT_VEHICLE_ACCESS,
     LOCATION_TYPE_LABELS, PARKING_CERTAINTY_LABELS, STOP_TYPE_LABELS, TOLL_METHOD_LABELS,
@@ -68,6 +71,124 @@ impl From<serde_json::Error> for DataError {
 
 fn strings(items: &[&str]) -> Vec<String> {
     items.iter().map(|s| s.to_string()).collect()
+}
+
+/// Published operating rules for a controlled one-lane tunnel.  Unlike an
+/// ordinary road record this is deliberately data-led: dates, words and the
+/// cited source travel with the rule rather than being hidden in gameplay.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TunnelData {
+    pub source_url: String,
+    pub access_date: String,
+    pub planning_text: String,
+    pub toll_text: String,
+    pub closed_text: String,
+    pub hours_not_published_text: String,
+    pub hours: Vec<TunnelHours>,
+    pub schedule: TunnelSchedule,
+    pub limits: TunnelLimits,
+    pub speed_mph: f64,
+    pub length_mi: f64,
+    pub speed_source_url: String,
+    pub speed_access_date: String,
+    pub length_source_url: String,
+    pub length_access_date: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TunnelHours {
+    pub valid_from: String,
+    pub valid_to: String,
+    pub opens: String,
+    pub closes: String,
+    pub source_url: String,
+    pub access_date: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TunnelSchedule {
+    pub opening_minutes: u32,
+    pub interval_minutes: u32,
+    #[serde(default)]
+    pub summer_bear_valley_to_whittier: String,
+    #[serde(default)]
+    pub summer_whittier_to_bear_valley: String,
+    #[serde(default)]
+    pub winter_bear_valley_to_whittier: String,
+    #[serde(default)]
+    pub winter_whittier_to_bear_valley: String,
+    pub source_url: String,
+    pub access_date: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TunnelLimits {
+    pub length_ft: f64,
+    pub width_ft: f64,
+    pub normal_width_ft: f64,
+    pub height_ft: f64,
+    pub normal_height_ft: f64,
+    pub placarded_hazmat_banned: bool,
+    pub non_placarded_hazmat_lb: u32,
+    pub source_url: String,
+    pub access_date: String,
+    pub length_text: String,
+    pub width_text: String,
+    pub height_text: String,
+    pub placarded_text: String,
+    pub non_placarded_text: String,
+}
+
+impl TunnelData {
+    /// Validate source provenance and the published date/time windows at load,
+    /// not the first time a player reaches the tunnel.
+    pub fn validate(&self, context: &str) -> Result<(), DataError> {
+        fn source(url: &str, date: &str, context: &str) -> Result<(), DataError> {
+            if url.trim().is_empty() || date.trim().is_empty() {
+                return Err(DataError::value(format!(
+                    "{context} has no source URL or access date"
+                )));
+            }
+            NaiveDate::parse_from_str(date, "%Y-%m-%d")
+                .map_err(|_| DataError::value(format!("{context} has invalid access date")))?;
+            Ok(())
+        }
+        source(&self.source_url, &self.access_date, context)?;
+        if self.hours.is_empty() {
+            return Err(DataError::value(format!("{context} has no hours")));
+        }
+        for hours in &self.hours {
+            source(&hours.source_url, &hours.access_date, context)?;
+            let from = NaiveDate::parse_from_str(&hours.valid_from, "%Y-%m-%d")
+                .map_err(|_| DataError::value(format!("{context} has invalid hours dates")))?;
+            let to = NaiveDate::parse_from_str(&hours.valid_to, "%Y-%m-%d")
+                .map_err(|_| DataError::value(format!("{context} has invalid hours dates")))?;
+            if from > to
+                || NaiveTime::parse_from_str(&hours.opens, "%H:%M").is_err()
+                || NaiveTime::parse_from_str(&hours.closes, "%H:%M").is_err()
+            {
+                return Err(DataError::value(format!("{context} has invalid hours")));
+            }
+        }
+        source(
+            &self.schedule.source_url,
+            &self.schedule.access_date,
+            context,
+        )?;
+        source(&self.limits.source_url, &self.limits.access_date, context)?;
+        source(&self.speed_source_url, &self.speed_access_date, context)?;
+        source(&self.length_source_url, &self.length_access_date, context)?;
+        if self.schedule.opening_minutes == 0
+            || self.schedule.interval_minutes == 0
+            || self.speed_mph <= 0.0
+            || self.length_mi <= 0.0
+        {
+            return Err(DataError::value(format!(
+                "{context} has invalid tunnel operating data"
+            )));
+        }
+        Ok(())
+    }
 }
 
 /// A freight facility in a city: shipper, receiver, or both.
@@ -870,6 +991,8 @@ pub struct City {
     pub state: String,
     pub region: String,
     pub locations: Vec<Location>,
+    /// Real endpoint with no verified freight facility.  It is not a market.
+    pub no_freight: bool,
     pub lat: f64,
     pub lon: f64,
     pub market_tags: Vec<String>,

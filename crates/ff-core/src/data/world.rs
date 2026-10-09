@@ -24,7 +24,7 @@ use super::stop_twins::screen_twin_stops;
 use super::world_constants::{
     ALTERNATE_ROUTE_EXTRA_RATIO, ALTERNATE_ROUTE_MAX_EXTRA_MILES, ALTERNATE_ROUTE_MIN_EXTRA_MILES,
 };
-use super::world_corridor::raw_metadata_complete;
+use super::world_corridor::{raw_metadata_complete, validate_tunnel_raw};
 use super::world_loader::{load_world_data, WorldData};
 use super::world_local_data::{
     load_city_service_data, load_facility_approaches, load_facility_endpoints,
@@ -124,15 +124,17 @@ impl World {
                 .map(|loc| parse_location(loc, key, &identity.spoken_city, lat, lon))
                 .collect::<Result<Vec<_>, _>>()?;
             let tags = market_tags_for_city(key, &identity.state_code, c, &explicit_locs);
-            let locs = expand_market_locations(
-                key,
+            let locs = if c.no_freight {
+                explicit_locs
+            } else {
+                expand_market_locations(key, &identity.spoken_city, lat, lon, &explicit_locs, &tags)
+            };
+            validate_city_locations(
                 &identity.spoken_city,
-                lat,
-                lon,
-                &explicit_locs,
-                &tags,
-            );
-            validate_city_locations(&identity.spoken_city, &locs, &mut facilities_by_id)?;
+                &locs,
+                c.no_freight,
+                &mut facilities_by_id,
+            )?;
             cities.insert(
                 key.clone(),
                 City {
@@ -140,6 +142,7 @@ impl World {
                     state: identity.state_name,
                     region: c.region.clone(),
                     locations: locs,
+                    no_freight: c.no_freight,
                     lat,
                     lon,
                     market_tags: tags,
@@ -198,6 +201,7 @@ impl World {
             // which twin it keeps is decided on the recorded types.
             let stops = screen_branded_plazas(stops);
             let corridor = leg.corridor;
+            validate_tunnel_raw(&corridor, &leg_from, &leg_to)?;
             let from_state = cities
                 .get(&leg_from)
                 .ok_or_else(|| DataError::key(format!("Unknown city: {leg_from}")))?
@@ -330,7 +334,12 @@ impl World {
         let mut facilities_by_id: HashMap<String, Location> = HashMap::new();
         for baked in baked_cities {
             let city = City::from(baked);
-            validate_city_locations(&city.name, &city.locations, &mut facilities_by_id)?;
+            validate_city_locations(
+                &city.name,
+                &city.locations,
+                city.no_freight,
+                &mut facilities_by_id,
+            )?;
             cities.insert(city.key.clone(), city);
         }
         let (city_aliases, ambiguous_spoken) = build_city_aliases(&cities);

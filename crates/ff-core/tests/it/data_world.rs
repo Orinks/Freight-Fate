@@ -229,6 +229,14 @@ fn test_every_city_has_locations_with_known_cargo() {
     // other assertion of the Python test is live here.
     let world = world();
     for city in world.cities.values() {
+        if city.no_freight {
+            assert!(
+                city.locations.is_empty(),
+                "{} must not invent freight locations",
+                city.name
+            );
+            continue;
+        }
         assert!(
             !city.locations.is_empty(),
             "{} has no freight locations",
@@ -377,6 +385,14 @@ fn test_freight_location_categories_are_live() {
 fn test_each_metro_expands_to_representative_facilities() {
     let world = world();
     for city in world.cities.values() {
+        if city.no_freight {
+            assert!(
+                city.locations.is_empty(),
+                "{} must not invent freight locations",
+                city.name
+            );
+            continue;
+        }
         // Floor is 5, not 6: the geography gate can strip both the template
         // port terminal and the intermodal ramp from a remote town (rural
         // Nevada keeps five). Inventing a different filler facility to hold
@@ -1071,6 +1087,14 @@ fn test_every_city_has_coordinates_and_a_known_region() {
             city.name,
             city.lon
         );
+        if city.no_freight {
+            assert!(
+                city.locations.is_empty(),
+                "{} must not invent freight locations",
+                city.name
+            );
+            continue;
+        }
         let floor = if is_stand_in_market(&city.key) { 1 } else { 2 };
         assert!(
             city.locations.len() >= floor,
@@ -2466,7 +2490,7 @@ fn test_legs_are_sane_and_unique() {
         // Virginia Beach ~18, New Haven-Bridgeport ~21) are legitimate short
         // freight lanes; only ban truly trivial or cross-country single legs.
         assert!(
-            (10.0..=800.0).contains(&leg.miles),
+            leg.highway == "Anton Anderson Memorial Tunnel" || (10.0..=800.0).contains(&leg.miles),
             "absurd mileage: {leg:?}"
         );
         // Directed uniqueness: the graph may author both A→B and B→A (ALCAN

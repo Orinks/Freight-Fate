@@ -2,6 +2,74 @@
   "legs": [
     {
       "from": "anchorage_ak_us",
+      "to": "bear_valley_ak_us",
+      "miles": 56,
+      "highway": "Seward Highway and Portage Glacier Highway",
+      "terrain": "mountain",
+      "divided": false,
+      "lanes": 2,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": false,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 61.2181,
+            "lon": -149.9003
+          },
+          {
+            "at_mi": 56.0,
+            "lat": 60.7902,
+            "lon": -148.8153
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 111.5,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-10-09."
+          },
+          {
+            "at_mi": 56.0,
+            "elevation_ft": 90.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-10-09."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 56.0,
+            "avg_grade_pct": -0.01,
+            "terrain": "mountain",
+            "source": "Coarse grade from endpoint elevations along public Valhalla truck-costing route geometry (https://valhalla1.openstreetmap.de), sampled 2026-10-09."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 56.0
+          }
+        ],
+        "source": "Public Valhalla truck costing over OpenStreetMap (https://valhalla1.openstreetmap.de, loaded-semi options), sampled 2026-10-09. Router path length 55.9443 mi; paid miles 56 (rounded path length). Seward Highway and Portage Glacier Highway to Bear Valley staging.",
+        "landmarks": [],
+        "speed_limits": [
+          {
+            "at_mi": 1.0,
+            "mph": 55,
+            "hgv": false,
+            "source": "Alaska default maximum speed, 13 AAC 02.275; posted limits control where signed. Accessed 2026-10-09."
+          }
+        ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "anchorage_ak_us",
       "to": "palmer_ak_us",
       "miles": 42,
       "highway": "Glenn Highway",
@@ -5397,6 +5465,157 @@
             "source": "Coarse rural Alaska NHS placeholder: unposted default 55 mph under 13 AAC 02.275 (all vehicles); altered limits apply when posted per 13 AAC 02.280. Not a harvested maxspeed tag; not labeled CMV-only."
           }
         ],
+        "interchanges": [],
+        "restrictions": [],
+        "lane_segments": [],
+        "traffic_aadt": [],
+        "state_crossings": []
+      }
+    },
+    {
+      "from": "bear_valley_ak_us",
+      "to": "whittier_ak_us",
+      "miles": 3,
+      "highway": "Anton Anderson Memorial Tunnel",
+      "kind": "tunnel",
+      "terrain": "mountain",
+      "divided": false,
+      "lanes": 1,
+      "stops": [],
+      "corridor": {
+        "tollway_detected": true,
+        "route_points": [
+          {
+            "at_mi": 0.0,
+            "lat": 60.7902,
+            "lon": -148.8036
+          },
+          {
+            "at_mi": 3.0,
+            "lat": 60.78308,
+            "lon": -148.7331
+          }
+        ],
+        "elevation_samples": [
+          {
+            "at_mi": 0.0,
+            "elevation_ft": 80.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-10-09."
+          },
+          {
+            "at_mi": 3.0,
+            "elevation_ft": 20.0,
+            "source": "Open-Meteo elevation API over public DEM at development time (https://api.open-meteo.com), sampled 2026-10-09."
+          }
+        ],
+        "grade_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 3.0,
+            "avg_grade_pct": -0.38,
+            "terrain": "mountain",
+            "source": "Tunnel endpoints and length from Alaska Railroad Whittier Terminal Master Plan, accessed 2026-10-09."
+          }
+        ],
+        "checkpoints": [],
+        "state_miles": [
+          {
+            "state": "Alaska",
+            "miles": 3.0
+          }
+        ],
+        "source": "Anton Anderson Memorial Tunnel is 2.5 miles; paid miles 3 (rounded path length). Sources: https://www.alaskarailroad.com/sites/default/files/Communications/1.2025.08.29_WTMP_Final_Master_Plan.pdf and https://dot.alaska.gov/creg/whittiertunnel/faq.shtml, accessed 2026-10-09.",
+        "speed_limits": [
+          {
+            "at_mi": 0.0,
+            "mph": 25,
+            "hgv": false,
+            "source": "https://dot.alaska.gov/creg/whittiertunnel/mcinfo.shtml, accessed 2026-10-09."
+          }
+        ],
+        "toll_events": [
+          {
+            "name": "Tunnel toll",
+            "at_mi": 0.01,
+            "road": "Anton Anderson Memorial Tunnel",
+            "authority": "Alaska Department of Transportation and Public Facilities",
+            "method": "cash_card",
+            "amount": 137.0,
+            "amount_plate": 137.0,
+            "estimated": false,
+            "directions": [
+              "forward"
+            ],
+            "source": "https://dot.alaska.gov/creg/whittiertunnel/tolls.shtml and https://dot.alaska.gov/creg/whittiertunnel/tunnelregs.shtml, accessed 2026-10-09."
+          }
+        ],
+        "tunnel": {
+          "source_url": "https://dot.alaska.gov/creg/whittiertunnel/schedule.shtml",
+          "access_date": "2026-10-09",
+          "planning_text": "Anton Anderson Memorial Tunnel. One lane shared with the railroad. Gates run on a published schedule.",
+          "toll_text": "Tunnel toll, $137.",
+          "closed_text": "The tunnel is closed for the night. The next opening is at 7:00 AM.",
+          "hours_not_published_text": "Hours not published",
+          "hours": [
+            {
+              "valid_from": "2026-01-01",
+              "valid_to": "2026-04-30",
+              "opens": "07:00",
+              "closes": "22:45",
+              "source_url": "https://dot.alaska.gov/creg/whittiertunnel/schedule.shtml",
+              "access_date": "2026-10-09"
+            },
+            {
+              "valid_from": "2026-05-01",
+              "valid_to": "2026-09-30",
+              "opens": "05:30",
+              "closes": "23:15",
+              "source_url": "https://dot.alaska.gov/creg/whittiertunnel/schedule.shtml",
+              "access_date": "2026-10-09"
+            },
+            {
+              "valid_from": "2026-10-01",
+              "valid_to": "2027-04-30",
+              "opens": "07:00",
+              "closes": "22:45",
+              "source_url": "https://dot.alaska.gov/creg/whittiertunnel/schedule.shtml",
+              "access_date": "2026-10-09"
+            }
+          ],
+          "schedule": {
+            "opening_minutes": 15,
+            "interval_minutes": 30,
+            "summer_bear_valley_to_whittier": ":30",
+            "summer_whittier_to_bear_valley": ":00",
+            "winter_bear_valley_to_whittier": ":30",
+            "winter_whittier_to_bear_valley": ":00",
+            "source_url": "https://dot.alaska.gov/creg/whittiertunnel/schedule.shtml",
+            "access_date": "2026-10-09"
+          },
+          "limits": {
+            "length_ft": 75.0,
+            "width_ft": 11.0,
+            "normal_width_ft": 10.0,
+            "height_ft": 15.0,
+            "normal_height_ft": 14.0,
+            "placarded_hazmat_banned": true,
+            "non_placarded_hazmat_lb": 400,
+            "source_url": "https://dot.alaska.gov/creg/whittiertunnel/vehiclesize.shtml",
+            "access_date": "2026-10-09",
+            "length_text": "The tunnel limit is 75 feet. Your rig is {n} feet.",
+            "width_text": "Over 10 feet wide needs a permit.",
+            "height_text": "The tunnel limit is 15 feet high.",
+            "placarded_text": "Placarded hazardous materials cannot go through the tunnel. They move by Alaska Railroad.",
+            "non_placarded_text": "Non-placarded hazardous materials are limited to 400 pounds."
+          },
+          "speed_mph": 25,
+          "length_mi": 2.5,
+          "speed_source_url": "https://dot.alaska.gov/creg/whittiertunnel/mcinfo.shtml",
+          "speed_access_date": "2026-10-09",
+          "length_source_url": "https://www.alaskarailroad.com/sites/default/files/Communications/1.2025.08.29_WTMP_Final_Master_Plan.pdf",
+          "length_access_date": "2026-10-09"
+        },
+        "landmarks": [],
         "interchanges": [],
         "restrictions": [],
         "lane_segments": [],

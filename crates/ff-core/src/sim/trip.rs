@@ -356,6 +356,10 @@ pub struct Trip {
     pub announced_cities: HashSet<usize>,
     pub announced_navigation: HashSet<String>,
     pub charged_tolls: HashSet<String>,
+    /// Tunnel gates already reached in this run.  A refused gate remains
+    /// closed rather than replaying its refusal every frame.
+    pub processed_tunnel_gates: HashSet<usize>,
+    pub refused_tunnel_gates: HashSet<usize>,
     /// The zone the truck was last known to be inside (Python
     /// `_active_zone`); compared by `zone_key`, the Rust stand-in for
     /// Python's object identity.
@@ -513,6 +517,8 @@ impl Trip {
             announced_cities: HashSet::new(),
             announced_navigation: HashSet::new(),
             charged_tolls: HashSet::new(),
+            processed_tunnel_gates: HashSet::new(),
+            refused_tunnel_gates: HashSet::new(),
             entered_zone: None,
             zone_entry_spoken: true,
             announced_speed_limit: None,

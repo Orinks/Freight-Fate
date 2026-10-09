@@ -82,6 +82,13 @@ impl DrivingState {
         } else {
             0.0
         };
+        truck.cargo_key = if phase == DRIVE_PHASE_DELIVERY {
+            job.cargo.key.to_string()
+        } else {
+            String::new()
+        };
+        truck.placarded_hazmat =
+            phase == DRIVE_PHASE_DELIVERY && matches!(job.cargo.key, "hazardous" | "fuel_bulk");
         // A reposition run is the tractor alone -- nothing on the fifth
         // wheel. Pickup deadheads haul their empty box.
         truck.trailer_attached = !job.bobtail;

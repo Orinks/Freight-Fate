@@ -10,7 +10,7 @@ use parking_lot::Mutex;
 use super::{
     lane_word, DataError, ElevationSample, GradeSegment, HpmsTerrain, Interchange, Landmark,
     LaneSegment, RouteCheckpoint, RoutePoint, RouteRestriction, SpeedLimitSample, StateCrossing,
-    StateMileage, Stop, StreetControl, StreetLimit, TollEvent, TrafficVolumeSample,
+    StateMileage, Stop, StreetControl, StreetLimit, TollEvent, TrafficVolumeSample, TunnelData,
 };
 use crate::data::world::World;
 use crate::data::world_corridor::build_leg_corridor;
@@ -36,6 +36,7 @@ pub struct CorridorDetail {
     pub landmarks: Vec<Landmark>,
     pub restrictions: Vec<RouteRestriction>,
     pub lane_segments: Vec<LaneSegment>,
+    pub tunnel: Option<TunnelData>,
 }
 
 /// The raw corridor JSON plus its parse context, held by a lazy leg until the

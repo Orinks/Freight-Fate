@@ -22,7 +22,7 @@ use crate::data::world_models::{
     GradeSegment, HpmsTerrain, Interchange, Landmark, LaneSegment, LocalApproach, LocalGeometry,
     LocalGeometrySegment, Location, RouteCheckpoint, RoutePoint, RouteRestriction,
     SpeedLimitSample, StateCrossing, StateMileage, Stop, StreetControl, StreetLimit, TollEvent,
-    TrafficVolumeSample,
+    TrafficVolumeSample, TunnelData,
 };
 
 /// A mirror struct with the same field names and types as its model, and the
@@ -142,6 +142,7 @@ pub struct BakedCorridor {
     pub landmarks: Vec<BakedLandmark>,
     pub restrictions: Vec<BakedRouteRestriction>,
     pub lane_segments: Vec<BakedLaneSegment>,
+    pub tunnel: Option<TunnelData>,
 }
 
 impl From<&CorridorDetail> for BakedCorridor {
@@ -161,6 +162,7 @@ impl From<&CorridorDetail> for BakedCorridor {
             landmarks: to_mirror(&detail.landmarks),
             restrictions: to_mirror(&detail.restrictions),
             lane_segments: to_mirror(&detail.lane_segments),
+            tunnel: detail.tunnel.clone(),
         }
     }
 }
@@ -182,6 +184,7 @@ impl From<BakedCorridor> for CorridorDetail {
             landmarks: from_mirror(baked.landmarks),
             restrictions: from_mirror(baked.restrictions),
             lane_segments: from_mirror(baked.lane_segments),
+            tunnel: baked.tunnel,
         }
     }
 }
@@ -264,6 +267,7 @@ pub struct BakedCity {
     pub state: String,
     pub region: String,
     pub locations: Vec<BakedLocation>,
+    pub no_freight: bool,
     pub lat: f64,
     pub lon: f64,
     pub market_tags: Vec<String>,
@@ -280,6 +284,7 @@ impl From<&City> for BakedCity {
             state: city.state.clone(),
             region: city.region.clone(),
             locations: to_mirror(&city.locations),
+            no_freight: city.no_freight,
             lat: city.lat,
             lon: city.lon,
             market_tags: city.market_tags.clone(),
@@ -298,6 +303,7 @@ impl From<BakedCity> for City {
             state: baked.state,
             region: baked.region,
             locations: from_mirror(baked.locations),
+            no_freight: baked.no_freight,
             lat: baked.lat,
             lon: baked.lon,
             market_tags: baked.market_tags,
