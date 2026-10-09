@@ -90,9 +90,13 @@ pub(super) fn city_identity(
 pub(super) fn validate_city_locations(
     city: &str,
     locations: &[Location],
+    no_freight: bool,
     facilities_by_id: &mut HashMap<String, Location>,
 ) -> Result<(), DataError> {
     if locations.is_empty() {
+        if no_freight {
+            return Ok(());
+        }
         return Err(DataError::value(format!(
             "{city} has no freight facilities"
         )));

@@ -305,6 +305,10 @@ impl Trip {
                 ));
             }
             for toll in leg.toll_events() {
+                // A directional toll is announced only where it is charged.
+                if !toll.applies_to_direction(forward) {
+                    continue;
+                }
                 let offset = stop_offset_for_direction(toll.at_mi, leg.miles, forward);
                 // A sentence of its own after the point's name, so it starts
                 // like one: "...ticket entry. Estimated toll 18 dollars..."

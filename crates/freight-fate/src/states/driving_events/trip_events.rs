@@ -38,6 +38,20 @@ fn hazard_lead_speed(event: &TripEvent) -> Option<f64> {
 impl DrivingState {
     /// `_handle_trip_event(event)`: everything the road just said, delivered.
     pub fn handle_trip_event(&mut self, ctx: &mut GameContext, event: &TripEvent) {
+        // A scheduled tunnel hold is work time, not rest.  The trip model
+        // advances the shared game clock at the physical gate; this is where
+        // the career-owned hours-of-service ledger receives the same minutes.
+        // A closure for the night is logged as sleeper time instead.
+        let tunnel_closed = event.data.context.as_deref() == Some("tunnel_closed");
+        if tunnel_closed || event.data.context.as_deref() == Some("tunnel_wait") {
+            if let Some(minutes) = event.data.amount {
+                ff_core::sim::tunnel::log_wait_to_hos(
+                    hos_mut_of(ctx),
+                    minutes.round() as i64,
+                    tunnel_closed,
+                );
+            }
+        }
         if self.should_ignore_destination_exit_gps_cue(ctx, event) {
             return;
         }

@@ -541,6 +541,17 @@ pub struct TruckState {
     pub odometer_mi: f64,
     /// Payload aboard; default = full reference load.
     pub cargo_kg: f64,
+    /// The dispatched cargo identity, retained by the driving model for road
+    /// access rules that distinguish hazardous freight.
+    pub cargo_key: String,
+    /// A placard is a property of the dispatched load, not of the endorsement.
+    pub placarded_hazmat: bool,
+    /// Overall dimensions of the actual combination.  The stock values are
+    /// the game's WB-67 combination; tests and future oversize permits may
+    /// supply a different measured rig.
+    pub rig_length_ft: f64,
+    pub rig_width_ft: f64,
+    pub rig_height_ft: f64,
     /// False = true bobtail: the tractor alone, nothing on the fifth wheel.
     /// Deadheading with an empty box keeps this True; the difference is the
     /// trailer's tare, its air line, and how a light box gets shifted.
@@ -683,6 +694,11 @@ impl TruckState {
             chains_just_snapped: false,
             odometer_mi: 0.0,
             cargo_kg: REFERENCE_CARGO_KG,
+            cargo_key: String::new(),
+            placarded_hazmat: false,
+            rig_length_ft: crate::sim::cross_traffic::COMBINATION_LENGTH_FT,
+            rig_width_ft: 8.5,
+            rig_height_ft: 13.5,
             trailer_attached: true,
             trailer_set: TrailerSet::default(),
             grade: 0.0,

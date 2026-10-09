@@ -2873,10 +2873,34 @@ branch. The older Phase A/B plan checklists are not a live completion list.
       rather than the modeled 8-hour reset.
 - [ ] **Alaska cycle restart.** The 34-hour restart is an assumption; verify
       its applicability under Alaska's rules.
+- [x] **Whittier tunnel.** Whittier is connected through the Anton Anderson
+      Memorial Tunnel, including its published alternating vehicle gates and
+      Bear Valley round-trip toll.
+- [ ] **Ferries of any kind.** A verified freight need is required before a
+      ferry becomes a driveable route.
+- [ ] **Whittier–Valdez ferry.** No service or verified freight slice is modeled.
+- [ ] **Whittier tunnel special movements.** Permits for 10–11 foot loads and
+      special Class E openings remain open.
+- [ ] **Whittier overnight parking.** Needs a real, verified facility. Until
+      then a truck that arrives after the tunnel closes is logged as
+      sleeper-berth time (a wait of ten hours or more as a full reset), even
+      though overnight staging parking is unverified.
+- [ ] **Tunnel gate cues.** After a refusal the truck still hears the toll cue
+      and "Merge onto the tunnel" while it sits at the gate, and no cue is
+      spoken when the gate opens after a wait. The HOS logging for waits has
+      unit tests in the tunnel module but no driving-state test yet.
+- [ ] **Tunnel combination length.** The 73.5 ft combination convention should
+      be revisited if tractor lengths vary: a long-sleeper tractor with a
+      53 ft trailer can exceed the 75 ft tunnel limit.
+- [ ] **Alaska Railroad alternative for placarded hazardous materials.**
+      Placarded loads are refused at the tunnel; train carriage is not modeled.
+- [ ] **Whittier freight facilities.** Await a verified freight address and coordinates.
+- [ ] **Whittier tunnel cold-weather and train disruption rules.** The
+      sub-freezing five-minute opening rule and unscheduled-train delays are
+      not modeled.
 - [ ] **Remaining corridor data work.** Refine the auto-profile
       Blaine–Surrey geometry for trucks; verify remaining Parks and Mat-Su
-      fuel lots and any truck-parking capacity; and add the Whittier tunnel
-      and Haines/Skagway ferry routes in a later slice. Exact Deadhorse
+      fuel lots and any truck-parking capacity. Exact Deadhorse
       Carlile, Valdez/Deadhorse diesel, and Soldotna receive-only retail pins
       remain unsupported; Fort St. John–Fort Nelson still has placeholder
       speed profiles; Yukon River Camp truck-parking capacity is unverified,

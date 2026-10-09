@@ -4,6 +4,7 @@
 use std::collections::HashMap;
 
 use crate::sim_support::*;
+use chrono::NaiveDate;
 use ff_core::data::state_welcome::welcome_sign;
 use ff_core::data::world_models::Route;
 use ff_core::pyrandom::PyRandom;
@@ -26,6 +27,83 @@ fn pool(
     eligible_hazards(region, weather, terrain, hour)
         .into_iter()
         .collect()
+}
+
+#[test]
+fn whittier_tunnel_gate_runs_in_the_trip_and_toll_is_one_way() {
+    let world = world();
+    let leg = world
+        .legs
+        .iter()
+        .find(|leg| leg.a == "bear_valley_ak_us" && leg.b == "whittier_ak_us")
+        .expect("Whittier tunnel leg")
+        .as_ref()
+        .clone();
+    let route = Route::from_legs(
+        vec!["bear_valley_ak_us".into(), "whittier_ak_us".into()],
+        vec![leg.clone()],
+    );
+    let mut truck = TruckState::default();
+    truck.start_engine();
+    truck.velocity_mps = 25.0 * 1609.344 / 3600.0;
+    let may = ff_core::sim::season::real_clock_game_hours(Some(
+        NaiveDate::from_ymd_opt(2026, 5, 1)
+            .unwrap()
+            .and_hms_opt(5, 35, 0)
+            .unwrap(),
+    ));
+    let mut trip = Trip::new(
+        route,
+        truck,
+        default_weather(),
+        TripOptions {
+            world: Some(world),
+            career_hours: Some(may),
+            start_hour: 5.0 + 35.0 / 60.0,
+            ..TripOptions::seeded(91)
+        },
+    );
+    let events = trip.update(1.0);
+    assert!(events.iter().any(|event| event.text() == "Anton Anderson Memorial Tunnel. One lane shared with the railroad. Gates run on a published schedule."));
+    assert!(
+        trip.game_minutes > 0.0,
+        "the physical tunnel drive advances game time"
+    );
+    trip.position_mi = trip.total_miles();
+    trip.check_tolls();
+    assert_eq!(trip.toll_charges.len(), 1);
+    let return_route = Route::from_legs(
+        vec!["whittier_ak_us".into(), "bear_valley_ak_us".into()],
+        vec![leg],
+    );
+    let mut return_trip = Trip::new(
+        return_route,
+        TruckState::default(),
+        default_weather(),
+        TripOptions {
+            world: Some(world),
+            ..TripOptions::seeded(92)
+        },
+    );
+    return_trip.position_mi = return_trip.total_miles();
+    return_trip.check_tolls();
+    assert!(return_trip.toll_charges.is_empty(), "return is toll-free");
+    let spoken_tolls = |trip: &Trip| {
+        trip.build_navigation_cues()
+            .iter()
+            .filter(|cue| cue.kind == "toll")
+            .count()
+    };
+    assert_eq!(
+        spoken_tolls(&return_trip),
+        0,
+        "no toll cue where none is charged"
+    );
+    assert_eq!(
+        spoken_tolls(&trip),
+        1,
+        "the toll cue is spoken toward Whittier"
+    );
 }
 
 #[test]
