@@ -309,3 +309,52 @@ fn test_the_interstate_has_distant_traffic_under_the_sounds() {
     drive.reset_traffic_sounds(&mut app.ctx);
     assert!(sound_on(&log, CH_TRAFFIC_BED).is_none());
 }
+
+#[test]
+fn test_a_car_one_lane_over_is_on_its_side_well_before_it_draws_level() {
+    // The true angle put a car one lane over and 100 feet up the road 10
+    // percent off centre: the owner heard traffic as mono (2026-10-09).
+    let mut app = TestApp::new();
+    let (mut drive, log) = a_freeway_drive(&mut app);
+    drive.trip.traffic_manager.vehicles = vec![car("probe:ahead", 100.0, 70.0, 1, "car", &drive)];
+    drive.update_traffic_sounds(&mut app.ctx, FRAME);
+    let ahead = sounds(&log);
+    assert!(ahead[0].pan < -0.3, "{ahead:?}");
+    // The same car the same distance behind is on the same side, quieter:
+    // stereo alone cannot say which end of the truck it is at.
+    drive.trip.traffic_manager.vehicles = vec![car("probe:behind", -100.0, 70.0, 1, "car", &drive)];
+    drive.update_traffic_sounds(&mut app.ctx, FRAME);
+    let behind = sounds(&log);
+    assert!(behind[0].pan < -0.3, "{behind:?}");
+    assert!(
+        behind[0].volume < ahead[0].volume * 0.8,
+        "{ahead:?} {behind:?}"
+    );
+}
+
+#[test]
+fn test_the_car_the_game_calls_out_ahead_takes_a_sound_first() {
+    // With the lane beside full, nearer cars took all three sounds and the
+    // car the game had just named stayed silent (owner drive, 2026-10-09).
+    let mut app = TestApp::new();
+    let (mut drive, log) = a_freeway_drive(&mut app);
+    drive.trip.traffic_manager.vehicles = vec![
+        car("probe:beside0", 100.0, 70.0, 1, "car", &drive),
+        car("probe:beside1", 200.0, 70.0, 1, "car", &drive),
+        car("probe:beside2", -150.0, 70.0, 1, "car", &drive),
+        car("probe:lead", 2000.0, 45.0, 0, "box truck", &drive),
+    ];
+    drive.update_traffic_sounds(&mut app.ctx, FRAME);
+    let followed: Vec<String> = drive.traffic_sounds.iter().flatten().cloned().collect();
+    assert!(
+        followed.iter().any(|id| id == "main:probe:lead"),
+        "{followed:?}"
+    );
+    assert!(
+        sounds(&log)
+            .iter()
+            .any(|s| s.key == "traffic/box_truck_loop"),
+        "{:?}",
+        sounds(&log)
+    );
+}

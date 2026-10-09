@@ -1806,3 +1806,26 @@ fn test_the_worst_band_reached_survives_a_shoulder_repair() {
 
 #[path = "states_driving_road/quiet_speech.rs"]
 mod quiet_speech;
+
+#[test]
+fn test_a_car_passing_the_truck_is_not_a_lane_opening() {
+    // Passers come up the lane beside now. One going by the truck is not
+    // one the truck overtook, and "Left lane open" for every one of them
+    // was four lines in three minutes (owner drive, 2026-10-09).
+    let mut app = TestApp::new();
+    let mut drive = a_gap_drive(&mut app);
+    rolling(&mut drive, 60.0);
+    app.clear_speech();
+    drive.lane.lane = 1;
+    drive.update_lane_gap(&mut app.ctx, 0.1); // settled in the left lane
+    drive.lane.lane = 0; // and back right: the left lane is watched
+    let alongside = npc(drive.trip.position_mi, 1, 70.0, "car", "passer");
+    drive.trip.traffic_manager.vehicles = vec![alongside];
+    drive.update_lane_gap(&mut app.ctx, 0.1);
+    drive.trip.traffic_manager.vehicles =
+        vec![npc(drive.trip.position_mi + 0.9, 1, 70.0, "car", "passer")];
+    for _ in 0..20 {
+        drive.update_lane_gap(&mut app.ctx, 0.1);
+    }
+    assert!(openings(&app).is_empty(), "{:?}", openings(&app));
+}

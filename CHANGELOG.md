@@ -6,6 +6,8 @@
 
 - **Interstates now have the sound of distant traffic, louder on busier stretches.**
 
+- **On busy freeways, traffic now comes up beside you and passes.**
+
 - **The radio status screen says where your own playlist files go until you have one on the dial.**
 
 - **A fuel range warning speaks when your fuel will not reach the next fuel stop.** It names your range and how far the stop is.
@@ -18,9 +20,19 @@
 
 - **The Engine voice and Engine brake voice settings are now called Engine sound and Engine brake sound.**
 
+- **The distant interstate traffic is now a steady roar.**
+
+- **A slow vehicle ahead in your lane can now be heard from half a mile away.**
+
+- **A slower vehicle ahead now plays the slowing-traffic sound, not a passing sound.**
+
 ### Fixed
 
-- **The agent server now quits when the tool that started it closes.** A new server waits out a leftover one, or names its process.
+- **Traffic is now loud enough to hear over the engine, from about a quarter mile away.**
+
+- **Passing traffic now sounds where the vehicle really is.** It comes up on its own side, then fades as it pulls ahead.
+
+- **Traffic sounds on exit ramps now match the cars.** The freeway fades off to your left, and cross traffic at the ramp end sweeps across in front of you.
 
 - **Bobtail to a nearby city is refused while your CDL is suspended or disqualified.** You hear when the suspension ends instead.
 
@@ -30,17 +42,13 @@
 
 - **Weigh stations and truck stops around West Memphis are now where they really are.** The scale that was never there is gone, and the Marion and Lehi scales are added.
 
-- **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now says it waits until you stop.
+- **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now waits until you stop, and says so.
 
 - **The weigh station bypass charge now applies only when you really skip an open scale.** A hazard near the scale no longer costs you; slowing, then speeding past, still does.
 
 - **A closed weigh station says it is closed, once, and nothing more.** It no longer chimes, saves, or counts as an inspection.
 
 - **The state line on the St. Louis to Memphis drive now says I-40, over the Hernando de Soto Bridge.**
-
-- **Passing traffic now sounds where the vehicle really is.** You hear it come up beside you, then fade as it pulls ahead.
-
-- **Traffic sounds on exit ramps now match the cars.** The freeway fades off to your left, and cross traffic at the ramp end sweeps across in front of you.
 
 - **The update check no longer offers a preview snapshot that is the same as your copy.**
 

@@ -52,9 +52,31 @@ bookmarks usable.
       divided multi-lane highways carry a distant-traffic bed at the road's
       real presence, and the road bed is 6 dB louder. Loops rendered with
       genny (`sound-test/traffic_sounds.json`); levels in `docs/audio-levels.md`.
-- [ ] (Found along the way) Owner listening pass on the traffic sounds and
-      the freeway bed: `TRAFFIC_SOUND_PEAK`, `TRAFFIC_BED_PEAK` and the
-      per-class loudness are first guesses, set without ears.
+- [x] Owner listening pass on the traffic sounds (2026-10-09, four drives on
+      I-65): no single vehicle could be heard, the bed "sounds like an
+      ocean", and the slow-vehicle callout still played a pass whoosh. Loops
+      now carry 1,500 feet at 3 dB a doubling, lifted out of the engine's
+      band; the bed is steady shaped noise (`sound-test/highway_bed.py`); the
+      callout plays the slowing-traffic earcon. Owner: "way better, still not
+      perfect" (see the next two items).
+- [x] Busy freeways carry company in the lanes beside the truck: each new
+      freeway cell gives every lane left of the right lane a chance (30
+      percent of the road's density) at a passer placed 0.6 to 0.9 miles
+      behind the truck, past the no-spawn clear air (`traffic_manager/beside.rs`).
+      Cells are drawn three miles ahead, so a truck at road speed only ever
+      met slower traffic: two vehicles heard through the I-65 rush zone.
+      The vehicle ahead in the truck's lane, the one callouts name, is heard
+      to half a mile and always takes a sound first.
+- [ ] (Found along the way) Callouts name a slow vehicle up to 2.2 miles
+      ahead, beyond any hearing; whether the warning should wait until it is
+      audible is a design call for the owner.
+- [ ] (Found along the way) A second owner listening pass on traffic after
+      the denser freeways: per-class loudness, `TRAFFIC_BED_PEAK`, and
+      whether the right lane needs company too (it is left empty because a
+      vehicle there is a slowdown the driver must answer).
+- [ ] (Found along the way) Bubble vehicles in one lane pass through each
+      other: there is no NPC-to-NPC following, which more vehicles per mile
+      make more likely to be heard as two sounds in one place.
 - [x] The radio status screen names the Playlists folder's full location
       while no personal playlist is on the dial and streamer-safe mode is
       off (issue #289: a player saw the shuffle setting and could not find
