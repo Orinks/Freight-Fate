@@ -32,6 +32,8 @@
 
 ### Fixed
 
+- **Menus accept Enter, Space, and letters from braille notetakers and automation tools.** Like the BrailleNote Evolve, they could arrow but not select.
+
 - **Traffic is now loud enough to hear over the engine, from about a quarter mile away.**
 
 - **Passing traffic now sounds where the vehicle really is.** It comes up on its own side, then fades as it pulls ahead.
