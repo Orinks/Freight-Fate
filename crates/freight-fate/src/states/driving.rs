@@ -825,9 +825,10 @@ pub struct DrivingState {
     // ---- driving.py: air, brakes, engine (driving_updates / driving_controls) ----------
     pub air_ready_said: bool,
     pub low_air_said: bool,
-    /// Once-per-threshold low-fuel cue (see `LOW_FUEL_WARN_FRACTION`). Latched
-    /// until the tank climbs back above the line after a refill.
+    /// Once-per-threshold low-fuel cue, latched until a refill (`LOW_FUEL_WARN_FRACTION`).
     pub low_fuel_said: bool,
+    /// The fuel range fell short of the next fuel stop; latched until it clears.
+    pub fuel_range_short_said: bool,
     pub spring_brake_said: bool,
     pub brake_lockout_cue_timer: f64,
     pub brake_air_hissed: bool, // rising-edge guard for the brake-apply hiss

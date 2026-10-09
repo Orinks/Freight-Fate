@@ -12,6 +12,7 @@ use crate::states::base::{Label, Menu, MenuCore, MenuItem};
 use crate::touch::Gesture;
 
 use super::settings::save_settings;
+use super::TouchPracticeState;
 
 const GESTURES_HELP: &str = "Up and down pick a gesture, Enter chooses the command it runs \
                              while driving, Escape goes back.";
@@ -43,6 +44,17 @@ impl TouchGesturesState {
         ctx.bindings.store(&mut ctx.settings);
         save_settings(&ctx.settings);
         ctx.say("Every touch gesture is back to its default.");
+    }
+
+    fn toggle_haptics(&mut self, ctx: &mut GameContext) {
+        ctx.settings.touch_haptics = !ctx.settings.touch_haptics;
+        crate::app::sdl_shell::set_touch_haptics(ctx.settings.touch_haptics);
+        save_settings(&ctx.settings);
+        ctx.say(if ctx.settings.touch_haptics {
+            "Touch haptics enabled."
+        } else {
+            "Touch haptics disabled."
+        });
     }
 }
 
@@ -76,6 +88,28 @@ impl Menu for TouchGesturesState {
                 .help("Enter, then choose the command this gesture runs while driving.")
             })
             .collect();
+        items.push(
+            MenuItem::new("Practice gestures", |_s: &mut Self, ctx| {
+                ctx.push_state(TouchPracticeState::new());
+            })
+            .help("Names each gesture and its current command without controlling the truck."),
+        );
+        items.push(
+            MenuItem::new(
+                Label::dynamic(|_s: &Self, ctx| {
+                    format!(
+                        "Touch haptics: {}",
+                        if ctx.settings.touch_haptics {
+                            "enabled"
+                        } else {
+                            "disabled"
+                        }
+                    )
+                }),
+                |s: &mut Self, ctx| s.toggle_haptics(ctx),
+            )
+            .help("Light feedback confirms pedals and commands. Emergency braking warns."),
+        );
         items.push(
             MenuItem::new(
                 "Reset every touch gesture to its default",

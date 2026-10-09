@@ -52,9 +52,31 @@ bookmarks usable.
       divided multi-lane highways carry a distant-traffic bed at the road's
       real presence, and the road bed is 6 dB louder. Loops rendered with
       genny (`sound-test/traffic_sounds.json`); levels in `docs/audio-levels.md`.
-- [ ] (Found along the way) Owner listening pass on the traffic sounds and
-      the freeway bed: `TRAFFIC_SOUND_PEAK`, `TRAFFIC_BED_PEAK` and the
-      per-class loudness are first guesses, set without ears.
+- [x] Owner listening pass on the traffic sounds (2026-10-09, four drives on
+      I-65): no single vehicle could be heard, the bed "sounds like an
+      ocean", and the slow-vehicle callout still played a pass whoosh. Loops
+      now carry 1,500 feet at 3 dB a doubling, lifted out of the engine's
+      band; the bed is steady shaped noise (`sound-test/highway_bed.py`); the
+      callout plays the slowing-traffic earcon. Owner: "way better, still not
+      perfect" (see the next two items).
+- [x] Busy freeways carry company in the lanes beside the truck: each new
+      freeway cell gives every lane left of the right lane a chance (30
+      percent of the road's density) at a passer placed 0.6 to 0.9 miles
+      behind the truck, past the no-spawn clear air (`traffic_manager/beside.rs`).
+      Cells are drawn three miles ahead, so a truck at road speed only ever
+      met slower traffic: two vehicles heard through the I-65 rush zone.
+      The vehicle ahead in the truck's lane, the one callouts name, is heard
+      to half a mile and always takes a sound first.
+- [ ] (Found along the way) Callouts name a slow vehicle up to 2.2 miles
+      ahead, beyond any hearing; whether the warning should wait until it is
+      audible is a design call for the owner.
+- [ ] (Found along the way) A second owner listening pass on traffic after
+      the denser freeways: per-class loudness, `TRAFFIC_BED_PEAK`, and
+      whether the right lane needs company too (it is left empty because a
+      vehicle there is a slowdown the driver must answer).
+- [ ] (Found along the way) Bubble vehicles in one lane pass through each
+      other: there is no NPC-to-NPC following, which more vehicles per mile
+      make more likely to be heard as two sounds in one place.
 - [x] The radio status screen names the Playlists folder's full location
       while no personal playlist is on the dial and streamer-safe mode is
       off (issue #289: a player saw the shuffle setting and could not find
@@ -427,10 +449,14 @@ Everything found before 2026-09-25 moved to
       alone on x86_64 and in its module; the source of the nondeterminism is
       not found yet.
 
-- [ ] Low fuel warning could also fire when remaining range is shorter than
+- [x] Low fuel warning could also fire when remaining range is shorter than
       the distance to the next fuel-capable stop (issue #272 shipped the
-      once-per-threshold 15 percent cue first; honest loaded range for the
-      range-based alternate is still open).
+      once-per-threshold 15 percent cue first). Shipped for 1.9.4
+      (2026-10-08): the range is the run's own miles per gallon (DERIVED:
+      miles driven over gallons burned, once 15 miles and 2 gallons are in,
+      held to 3 to 10; ASSUMED 6 before that), F speaks it, and a fuel range
+      warning speaks once when it falls short of the next fuel stop this rig
+      can use, or of the destination when none comes first.
 
 - [x] More music on the Terrestrial dial (owner, 2026-10-03, from player
       feedback): 156 commercial music stations in 35 states, each heard
@@ -509,6 +535,14 @@ Everything found before 2026-09-25 moved to
       CDL, from the terminal and from an open bobtail menu, with the date
       the suspension ends. Ported from 2.0's PR #259 for 1.9.4
       (2026-10-08).
+- [ ] Scale reminder state is one key and one age for the whole drive. Two
+      open scales under about a mile apart would let the second reminder
+      overwrite the first, and the first could be charged without its
+      real-seconds grace. No leg has such a pair today (scan, 2026-10-08);
+      keep the age per scale if one is ever added.
+- [ ] A scale crossed during a frame the cab is busy (hazard, microsleep)
+      is never judged at all: the check returns early and its previous
+      position covers one frame. Lenient, not a charge (review, 2026-10-08).
 - [ ] Placed attraction billboards speak in one direction only since
       2026-09-30; the other side hears the random pool. Signs standing at
       their attraction could be marked `both`, and the rest need copy

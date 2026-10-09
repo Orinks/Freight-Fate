@@ -78,7 +78,7 @@ visual display mirrors all speech for sighted players and helpers.
 
 ## Download and play
 
-1. Open [Freight Fate releases](https://github.com/Orinks/Freight-fate/releases).
+1. Open [Freight Fate releases](https://github.com/orinks-games/Freight-Fate/releases).
 2. Choose the latest numbered stable release. Stable is recommended for most
    players. If you want to test Career 1.9, choose the newest prerelease build.
    Its dated tag looks like `1.9-tester-20260829`, spoken as "1 point 9 tester,
@@ -121,7 +121,7 @@ Install these prerequisites first:
 Then clone Career 1.9 and run the game:
 
 ```powershell
-git clone https://github.com/Orinks/Freight-Fate.git
+git clone https://github.com/orinks-games/Freight-Fate.git
 cd Freight-Fate
 uv sync --group dev
 uv run python tools/fetch_bass.py

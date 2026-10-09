@@ -136,8 +136,9 @@ impl DrivingState {
     /// the driver's to use. The reminder's age only counts seconds the cab
     /// was free, so the excuse lasts exactly as long as the driver is owed.
     /// One the driver's own crawl or signal made late
-    /// (`scale_reminder_late_by_driver`) stays theirs: a hazard after it
-    /// does not reopen the crawl-then-speed dodge.
+    /// (`scale_reminder_late_by_driver`) stays theirs: a hazard after it,
+    /// whether before or after the reminder finally speaks, does not reopen
+    /// the crawl-then-speed dodge.
     pub fn note_scale_reminders_held_by_game(&mut self) {
         let window = self.scale_reminder_mi();
         let held: Vec<String> = self
@@ -152,8 +153,7 @@ impl DrivingState {
             .map(|stop| self.weigh_station_key(stop))
             .filter(|key| {
                 self.weigh_station_noticed.contains(key)
-                    && (*key != self.weigh_station_reminder_key
-                        || !self.scale_reminder_late_by_driver.contains(key))
+                    && !self.scale_reminder_late_by_driver.contains(key)
                     && self
                         .weigh_station_transponder_verdict
                         .get(key)

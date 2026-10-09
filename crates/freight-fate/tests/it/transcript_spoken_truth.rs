@@ -21,7 +21,10 @@ use ff_core::sim::weather::{WeatherKind, WeatherSystem};
 use freight_fate::playtest::harness::{PlaytestHarness, StartDelivery};
 use freight_fate::states::base::{InputEvent, Key, Mods};
 use freight_fate::states::driving::DrivingState;
-use freight_fate::states::driving_core::hos_of;
+use freight_fate::states::driving_core::{
+    hos_of, ASSUMED_RANGE_MPG, RANGE_MEASURE_MIN_GAL, RANGE_MEASURE_MIN_MI, RANGE_MPG_CEILING,
+    RANGE_MPG_FLOOR,
+};
 use regex::Regex;
 
 const MPS_PER_MPH: f64 = 1.0 / 2.23694;
@@ -737,9 +740,10 @@ fn test_the_readouts_stay_true_while_the_speed_keeper_has_the_truck() {
 
 #[test]
 fn test_the_fuel_key_promises_a_range_the_truck_can_actually_drive() {
-    // F answers "Range about N miles" from a flat 6 miles per gallon. That is
-    // a claim about THIS truck under THIS load, so it is worth measuring: a
-    // range a loaded rig cannot reach is a fuel stop a driver skips.
+    // F answers "Range about N miles" from 6 miles per gallon until the run
+    // has burned enough to measure its own. That is a claim about THIS truck
+    // under THIS load, so it is worth measuring: a range a loaded rig cannot
+    // reach is a fuel stop a driver skips.
     let mut harness = a_drive(65.0, 0.0, 1.0);
     harness.press_key(Key::E, None);
     harness.with_drive(|d, _| {
@@ -766,6 +770,20 @@ fn test_the_fuel_key_promises_a_range_the_truck_can_actually_drive() {
         measured_mpg >= 6.0 * 0.85,
         "F promises 6.0 miles per gallon; this truck returned {measured_mpg:.2} \
          over {miles:.1} level miles at cruise ({burned:.2} gallons)"
+    );
+    // Once measured, the promise is the run's own average; before that, the
+    // assumed figure. How far this run gets depends on the frame pacing, so
+    // check whichever rule applies to the distance it actually covered.
+    let (promised, driven, used) =
+        harness.read_drive(|d| (d.range_mpg(), d.trip.position_mi, d.trip.fuel_used_gal));
+    let expected = if used >= RANGE_MEASURE_MIN_GAL && driven >= RANGE_MEASURE_MIN_MI {
+        (driven / used).clamp(RANGE_MPG_FLOOR, RANGE_MPG_CEILING)
+    } else {
+        ASSUMED_RANGE_MPG
+    };
+    assert!(
+        (promised - expected).abs() < 1e-9,
+        "F promises {promised:.2}, expected {expected:.2} after {driven:.1} miles on {used:.2} gallons"
     );
 }
 

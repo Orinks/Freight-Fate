@@ -365,6 +365,8 @@ from the words, and synonyms cost them a re-read.
 | The carrier taking a company tractor off the road | dispatch grounds it, grounded | benched, red-tagged, impounded | `_carrier_grounds_the_tractor` |
 | The tractor a grounded company driver is moved into | yard spare | loaner, replacement truck, backup rig | `_draw_yard_spare` |
 | The emergency call-out that gets an out-of-service truck moving | roadside repair | roadside rescue (that is the fuel one), tow | `_roadside_repair_out_of_pocket` |
+| Miles the fuel in the tank reaches at this drive's own miles per gallon | fuel range, range | mileage left, distance to empty, endurance | `DrivingState::fuel_range_mi` |
+| The once-per-shortfall cue when the fuel range will not reach the next fuel stop | fuel range warning | low fuel warning (that is the fifteen percent one), range alert | `DrivingState::check_fuel_range_warning` |
 | The emergency call-out for an empty tank | roadside rescue | roadside repair (that is the damage one) | `_handle_out_of_fuel` |
 | Losing the truck to speed, usually out of gear on a grade | runaway | overspeed (that is the posted-limit one) | `RUNAWAY_SPEED_MPH` |
 | Backing along a travelled lane, away from the destination | driving the wrong way; backing | reversing (that is the gear), wrong-way driver, going backwards | `WRONG_WAY_WARN_MI` |

@@ -36,13 +36,23 @@ use crate::app::GameContext;
 use crate::audio::{CH_TRAFFIC_BED, CH_TRAFFIC_SOUNDS};
 use crate::states::driving::DrivingState;
 
-/// Beyond this a vehicle is part of the bed, not a sound of its own.
-pub const TRAFFIC_SOUND_HEAR_FT: f64 = 450.0;
-/// Closest a sound is treated as: one lane over, alongside.
-pub const TRAFFIC_SOUND_REF_FT: f64 = 12.0;
-/// A sound's level at [`TRAFFIC_SOUND_REF_FT`]. It falls with distance, so a
-/// car a hundred feet back is about a tenth of this.
-pub const TRAFFIC_SOUND_PEAK: f64 = 0.45;
+/// Beyond this a vehicle is part of the bed, not a sound of its own. The
+/// bubble keeps vehicles a tenth of a mile apart or more, so a 450-foot edge
+/// left most of a busy interstate silent (owner drive, 2026-10-09).
+pub const TRAFFIC_SOUND_HEAR_FT: f64 = 1500.0;
+/// The vehicle ahead in the truck's own lane, the one the game calls out and
+/// the cruise follows, is heard this far and always takes a sound first: with
+/// the lanes beside filled, nearer cars took all three and the car the game
+/// had just named stayed silent (owner drive, 2026-10-09).
+pub const TRAFFIC_LEAD_HEAR_FT: f64 = 2640.0;
+/// Inside this a sound is at full level: alongside, or a few car lengths off.
+pub const TRAFFIC_SOUND_REF_FT: f64 = 60.0;
+/// A sound's level at [`TRAFFIC_SOUND_REF_FT`]. It drops 3 dB with each
+/// doubling of distance past that, so a car 500 feet up the road is still
+/// about a third of this. The first cut peaked at 0.45 from 12 feet and fell
+/// 6 dB a doubling, which put a car a hundred feet off at 0.05: under the
+/// engine, and the owner heard traffic only as it passed (2026-10-09).
+pub const TRAFFIC_SOUND_PEAK: f64 = 0.8;
 /// Lane width, for how far over the next lane is.
 pub const LANE_WIDTH_FT: f64 = 12.0;
 /// Where an exit ramp leaves the mainline: the gore, a lane's width past the
@@ -88,28 +98,46 @@ pub fn traffic_sound_key(vehicle_class: &str) -> &'static str {
     }
 }
 
-/// Level for a vehicle `distance_ft` away: falling as one over the distance,
-/// and eased to nothing over the last stretch before the hearing edge so a
+/// Level for a vehicle `distance_ft` away: falling as one over the square
+/// root of the distance, gentler than open air, because the cab mix has to
+/// carry a car the player cannot see; and eased to nothing over the last stretch before the hearing edge so a
 /// sound never appears or vanishes with a step.
 pub fn traffic_sound_volume(distance_ft: f64) -> f64 {
-    if distance_ft >= TRAFFIC_SOUND_HEAR_FT {
+    traffic_sound_volume_within(distance_ft, TRAFFIC_SOUND_HEAR_FT)
+}
+
+/// [`traffic_sound_volume`] with its own hearing edge.
+fn traffic_sound_volume_within(distance_ft: f64, hear_ft: f64) -> f64 {
+    if distance_ft >= hear_ft {
         return 0.0;
     }
-    let near = TRAFFIC_SOUND_PEAK * TRAFFIC_SOUND_REF_FT / distance_ft.max(TRAFFIC_SOUND_REF_FT);
-    let edge =
-        ((TRAFFIC_SOUND_HEAR_FT - distance_ft) / (TRAFFIC_SOUND_HEAR_FT * 0.3)).clamp(0.0, 1.0);
+    let near =
+        TRAFFIC_SOUND_PEAK * (TRAFFIC_SOUND_REF_FT / distance_ft.max(TRAFFIC_SOUND_REF_FT)).sqrt();
+    let edge = ((hear_ft - distance_ft) / (hear_ft * 0.3)).clamp(0.0, 1.0);
     near * edge
 }
 
+/// How much of the road's length counts against a vehicle's side when it is
+/// panned. The true angle put a car one lane over and a hundred feet ahead
+/// 10 percent off centre, so most traffic sounded mono and a pass swept only
+/// in its last second (owner drive, 2026-10-09); at this share that car is
+/// well over on its side and the sweep starts a few hundred feet out.
+const PAN_ALONG_SHARE: f64 = 0.15;
+/// A vehicle behind the cab is this much quieter than one the same distance
+/// ahead: stereo cannot tell front from back, and the trailer stands
+/// between the cab and the road behind it.
+pub const TRAFFIC_BEHIND_SHARE: f64 = 0.75;
+
 /// Pan for a vehicle `across_ft` to the side (negative left) and `along_ft`
-/// ahead or behind: hard to its side when alongside, toward the middle when
-/// it is far up or down the road, as a real one sounds.
+/// ahead or behind: hard to its side when alongside, easing toward the
+/// middle as it gets far up or down the road. A vehicle in the truck's own
+/// lane stays centred.
 pub fn traffic_sound_pan(across_ft: f64, along_ft: f64) -> f64 {
-    let distance = across_ft.hypot(along_ft);
-    if distance <= 0.0 {
+    let spread = across_ft.abs() + along_ft.abs() * PAN_ALONG_SHARE;
+    if spread <= 0.0 {
         return 0.0;
     }
-    (0.85 * across_ft / distance).clamp(-0.85, 0.85)
+    (0.85 * across_ft / spread).clamp(-0.85, 0.85)
 }
 
 /// Playback rate: a slower vehicle sounds lower, and one closing on the cab
@@ -120,6 +148,13 @@ pub fn traffic_sound_rate(vehicle_mph: f64, approach_mph: f64) -> f64 {
     let doppler =
         (1.0 + approach_mph / SPEED_OF_SOUND_MPH).clamp(1.0 - DOPPLER_LIMIT, 1.0 + DOPPLER_LIMIT);
     pace * doppler
+}
+
+/// [`TRAFFIC_BEHIND_SHARE`] for a vehicle behind the cab, eased in over the
+/// truck's own length so a pass does not step down as it clears the bumper.
+fn behind_share(along_ft: f64) -> f64 {
+    let behind = (-along_ft / 70.0).clamp(0.0, 1.0);
+    1.0 - (1.0 - TRAFFIC_BEHIND_SHARE) * behind
 }
 
 /// A standing vehicle has no tire roar: an idling queue is quieter than one
@@ -142,29 +177,48 @@ impl DrivingState {
         self.traffic_ramp_rolled_ft = 0.0;
     }
 
-    /// Every vehicle near enough to hear, nearest first.
+    /// Every vehicle near enough to hear: the lead in the truck's lane first,
+    /// then nearest first.
     pub fn heard_traffic(&self) -> Vec<HeardVehicle> {
         let mut heard = Vec::new();
         let truck_mph = self.trip.truck.speed_mph();
         let on_ramp = self.ramp_mi.is_some();
         let player_lane = self.trip.traffic_manager.player_lane;
+        let lead_key = if on_ramp {
+            None
+        } else {
+            self.trip
+                .traffic_manager
+                .lead_vehicle(self.trip.position_mi, truck_mph)
+                .map(|context| context.lead.key)
+        };
         for vehicle in &self.trip.traffic_manager.vehicles {
             let along = (vehicle.position_mi - self.trip.position_mi) * 5280.0;
+            let is_lead = lead_key.as_deref() == Some(vehicle.key.as_str());
+            let hear_ft = if is_lead {
+                TRAFFIC_LEAD_HEAR_FT
+            } else {
+                TRAFFIC_SOUND_HEAR_FT
+            };
             // Lane indices count leftward, so a higher lane is to the left.
+            // On a ramp, how much farther off the divergence alone has put
+            // it: the freeway falls away faster than the gentle in-traffic
+            // law, as a road the cab is leaving does.
+            let mut diverged = 1.0;
             let (across, closing_mph) = if on_ramp {
                 // The odometer holds on the ramp: the mainline streams past a
                 // standing point at its own speed, off to the left and
                 // farther each foot the truck rolls down the ramp.
-                let over = (vehicle.lane.max(0) as f64 + 0.5) * LANE_WIDTH_FT
-                    + RAMP_SPLIT_FT
-                    + self.traffic_ramp_rolled_ft * RAMP_DIVERGENCE;
+                let at_gore = (vehicle.lane.max(0) as f64 + 0.5) * LANE_WIDTH_FT + RAMP_SPLIT_FT;
+                let over = at_gore + self.traffic_ramp_rolled_ft * RAMP_DIVERGENCE;
+                diverged = (at_gore.hypot(along) / over.hypot(along)).sqrt();
                 (-over, vehicle.speed_mph)
             } else {
                 let lanes = (vehicle.lane - player_lane) as f64;
                 (-lanes * LANE_WIDTH_FT, vehicle.speed_mph - truck_mph)
             };
             let distance = along.hypot(across);
-            if distance >= TRAFFIC_SOUND_HEAR_FT {
+            if distance >= hear_ft {
                 continue;
             }
             // d(distance)/dt along the road: a vehicle ahead moving away, or
@@ -180,7 +234,10 @@ impl DrivingState {
                 id: format!("main:{}", vehicle.key),
                 key: traffic_sound_key(&vehicle.vehicle_class),
                 distance_ft: distance,
-                volume: traffic_sound_volume(distance) * rolling_share(vehicle.speed_mph),
+                volume: traffic_sound_volume_within(distance, hear_ft)
+                    * diverged
+                    * behind_share(along)
+                    * rolling_share(vehicle.speed_mph),
                 pan: traffic_sound_pan(across, along),
                 rate: traffic_sound_rate(vehicle.speed_mph, approach),
             });
@@ -215,7 +272,14 @@ impl DrivingState {
             }
         }
         heard.retain(|v| v.volume > 0.0);
-        heard.sort_by(|a, b| a.distance_ft.total_cmp(&b.distance_ft));
+        let lead_id = lead_key.map(|key| format!("main:{key}"));
+        heard.sort_by(|a, b| {
+            let a_lead = lead_id.as_deref() == Some(a.id.as_str());
+            let b_lead = lead_id.as_deref() == Some(b.id.as_str());
+            b_lead
+                .cmp(&a_lead)
+                .then(a.distance_ft.total_cmp(&b.distance_ft))
+        });
         heard
     }
 

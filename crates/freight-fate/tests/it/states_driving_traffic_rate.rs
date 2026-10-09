@@ -336,7 +336,12 @@ impl Run {
 /// `SPAWN_CELL_MI` slice of road, so the key says where the vehicle came
 /// into being -- which is where its speed was drawn from the posted number.
 pub fn spawn_cell_mi(key: &str) -> Option<f64> {
-    let cell: i64 = key.strip_prefix("bubble:")?.parse().ok()?;
+    let cell: i64 = key
+        .strip_prefix("bubble:")?
+        .split(':')
+        .next()?
+        .parse()
+        .ok()?;
     Some(cell as f64 * ff_core::sim::traffic_manager::SPAWN_CELL_MI)
 }
 

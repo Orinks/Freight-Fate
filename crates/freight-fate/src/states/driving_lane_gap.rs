@@ -159,7 +159,20 @@ impl DrivingState {
         }
         // Marked spoken either way. A cue held back by the spacing and let out
         // later would be describing a gap that has moved on since.
-        self.lane_gap_said_keys.insert(key);
+        self.lane_gap_said_keys.insert(key.clone());
+        let went_ahead = self
+            .trip
+            .traffic_manager
+            .vehicles
+            .iter()
+            .any(|v| v.key == key && v.position_mi > self.trip.position_mi);
+        if went_ahead {
+            // It passed the truck, not the other way round: nobody was
+            // overtaken, so there is nothing to be clear of. With passers
+            // coming up the lanes beside, this said "Left lane open" for
+            // every car that went by (owner drive, 2026-10-09).
+            return;
+        }
         if self.lane_gap_cue_s > 0.0 || self.passing.is_some() {
             // Spaced out, or lane keeping is passing and takes the lane back
             // itself: "In the right lane." is the line for that.

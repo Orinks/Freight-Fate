@@ -355,7 +355,17 @@ impl SdlShell {
 extern "C" {
     fn ff_touch_install(window: *mut std::ffi::c_void) -> i32;
     fn ff_touch_next() -> i32;
+    fn ff_touch_set_haptics(enabled: i32);
 }
+
+#[cfg(target_os = "ios")]
+pub(crate) fn set_touch_haptics(enabled: bool) {
+    // SAFETY: the UIKit shim accepts an integer flag on the app thread.
+    unsafe { ff_touch_set_haptics(i32::from(enabled)) };
+}
+
+#[cfg(not(target_os = "ios"))]
+pub(crate) fn set_touch_haptics(_enabled: bool) {}
 
 /// Lay the gesture surface (`ios/ff_touch.m`) over SDL's view.
 #[cfg(target_os = "ios")]

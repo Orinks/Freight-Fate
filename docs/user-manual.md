@@ -11,7 +11,7 @@ returning from an earlier version, read What Changed Recently first.
 ## Quick start
 
 1. Download the newest stable build from the
-   [Freight Fate releases page](https://github.com/Orinks/Freight-Fate/releases).
+   [Freight Fate releases page](https://github.com/orinks-games/Freight-Fate/releases).
 2. On Windows or Linux, extract the archive into a folder you control, open
    the extracted `FreightFate` folder, and run `FreightFate.exe` on Windows or
    `FreightFate` on Linux.
@@ -692,7 +692,7 @@ wherever the pad has one.
 | I | Turn the lane locator on or off: a soft tock, once a beat, panned to where the truck sits inside its lane. It keeps ticking until you turn it off. Needs lane keeping on partial or off. |
 | Enter | Arrive: accept a facility arrival once you are fully stopped. |
 | Tab | Open the driving status menu. |
-| F | Report fuel level and estimated range. |
+| F | Report fuel level and estimated range, worked out from this drive's own miles per gallon once it has driven far enough to measure them. |
 | C | Report clock, deadline, estimated arrival, and the one hours-of-service limit that comes first. For the first few presses it also names the three keys below, then stops. |
 | Alt+A | Report time at the wheel so far this shift, and time on duty. |
 | Alt+S | Report when your 30 minute break is due, or that a break will not help. |
@@ -2103,7 +2103,7 @@ T opens its menu when the stop supports one.
 ## Release notes and more data
 
 Stable and snapshot release notes are on the
-[Freight Fate releases page](https://github.com/Orinks/Freight-Fate/releases).
+[Freight Fate releases page](https://github.com/orinks-games/Freight-Fate/releases).
 The in-game What's new reader can also review notes for an available update.
 
 For deeper data reference, see:

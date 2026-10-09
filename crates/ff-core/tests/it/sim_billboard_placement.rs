@@ -402,6 +402,7 @@ fn test_a_named_city_is_always_still_ahead_when_its_sign_is_read() {
 }
 
 #[test]
+#[cfg_attr(ci_quick, ignore = "sweep: 288 seeded billboard runs")]
 fn test_no_billboard_names_a_place_the_truck_is_not_near() {
     let (shown, built) = sweep();
     assert!(built >= 200, "only {built} seeded runs built");
