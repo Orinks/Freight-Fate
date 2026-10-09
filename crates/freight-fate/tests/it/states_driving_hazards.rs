@@ -218,9 +218,9 @@ fn test_trip_event_sounds_use_contextual_cues() {
 
     let traffic_cue = NavigationCue::new("traffic:test", "traffic", 1.0, "traffic ahead", "");
     for (vehicle_class, sound) in [
-        ("car", "traffic/car_pass"),
-        ("box truck", "traffic/box_truck_pass"),
-        ("semi", "traffic/semi_pass"),
+        ("car", "events/traffic_slowing"),
+        ("box truck", "events/traffic_slowing"),
+        ("semi", "events/traffic_slowing"),
         ("state trooper", "traffic/trooper_pass"),
     ] {
         let event = TripEvent {
