@@ -14,7 +14,7 @@
 
 - **The Radio app can suggest a station that is missing from the dial.** Accepted stations join every driver's dial without a game update.
 
-- **Text fields now paste with Control V.**
+- **Text fields now paste with Control V, and name punctuation as you type it.** A colon or slash is spoken as a word instead of a silent click.
 
 ### Changed
 

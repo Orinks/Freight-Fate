@@ -180,6 +180,25 @@ fn a_stream_address_that_is_not_a_web_address_is_turned_down_at_once() {
 }
 
 #[test]
+fn an_address_typed_by_hand_names_its_punctuation() {
+    let mut app = TestApp::new();
+    let (send, _) = sender(vec![]);
+    start(&mut app, send, "Online only");
+    answer(&mut app, "Night Owl Radio");
+    let mut heard = Vec::new();
+    for ch in "http://a.b".chars() {
+        app.handle_event(&InputEvent::typed(ch));
+        heard.push(last(&app));
+    }
+    assert_eq!(
+        heard,
+        ["h", "t", "t", "p", "colon", "slash", "slash", "a", "dot", "b"]
+    );
+    app.handle_event(&InputEvent::key(Key::Return));
+    assert!(last(&app).starts_with("Format. Optional"), "{}", last(&app));
+}
+
+#[test]
 fn a_turned_down_answer_goes_back_to_its_question_with_the_rest_kept() {
     let mut app = TestApp::new();
     let (send, sent) = sender(vec![
