@@ -443,6 +443,9 @@ Everything found before 2026-09-25 moved to
       out makes no sound, and quiet says cruise, keeper and work zone
       updates short. Urgent only now says when a work zone turns cruise off.
 - [ ] A listening pass by the owner at quiet and urgent only, at the wheel.
+- [ ] Research transmitters for accepted AM and FM station suggestions, and
+      fold accepted stations into the catalog at release
+      ([October 9](#october-9-player-suggested-stations)).
 - [ ] The exit-call truth test (`test_the_exit_calls_name_the_road_that_is_really_left`)
       failed once on the Linux ARM runner in the v1.9.1 tag build, hearing
       only the two-mile call, and passed on re-run. It passed 80 of 80 runs
@@ -2667,6 +2670,28 @@ on the season or the date found more.
       July (northern DOTs build April to November); deer strikes have no
       November peak (IIHS: twice the yearly average); holiday billboards use
       loose windows ("Happy Thanksgiving" any day Nov 22-28).
+
+### October 9 player-suggested stations
+
+Owner, from a player asking to add stations: suggestions with automatic
+vetting, and a station list that updates without a game release. The Radio
+app's Suggest a station (and orinks.net/freight-fate/suggest-a-station)
+sends a name and stream address, plus call sign, state, city and frequency
+for an AM or FM station. orinks.net plays the stream's first seconds,
+checks it against the shipped dial and earlier suggestions, and puts what
+passes in the owner's daily station digest. Accepted stations are the
+community station list the game downloads at launch and keeps in the saves
+folder; a drive adds them after the shipped dial, which wins every
+collision.
+
+- [x] Suggest a station in the Radio app; community stations on the dial.
+- [x] Control V pastes into every text field.
+- [ ] (Found along the way) An accepted AM or FM station plays everywhere,
+      on the web band, until its transmitter (lat, lon, rangeMiles) is
+      added to its row by hand. Look up FCC transmitter data for each one.
+- [ ] (Found along the way) Fold accepted community stations into
+      `radio_catalog.json` at each release, so the downloaded list stays
+      small; the dial already drops a community row the catalog names.
 
 ## 2.0 planned -- the working week and home
 

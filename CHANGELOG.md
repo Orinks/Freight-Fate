@@ -12,6 +12,10 @@
 
 - **A fuel range warning speaks when your fuel will not reach the next fuel stop.** It names your range and how far the stop is.
 
+- **The Radio app can suggest a station that is missing from the dial.** Accepted stations join every driver's dial without a game update.
+
+- **Text fields now paste with Control V.**
+
 ### Changed
 
 - **Update checks, the bug report page and the manual download link now go to the game's new GitHub home, orinks-games.**
