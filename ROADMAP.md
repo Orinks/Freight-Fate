@@ -52,9 +52,24 @@ bookmarks usable.
       divided multi-lane highways carry a distant-traffic bed at the road's
       real presence, and the road bed is 6 dB louder. Loops rendered with
       genny (`sound-test/traffic_sounds.json`); levels in `docs/audio-levels.md`.
-- [ ] (Found along the way) Owner listening pass on the traffic sounds and
-      the freeway bed: `TRAFFIC_SOUND_PEAK`, `TRAFFIC_BED_PEAK` and the
-      per-class loudness are first guesses, set without ears.
+- [x] Owner listening pass on the traffic sounds (2026-10-09, four drives on
+      I-65): no single vehicle could be heard, the bed "sounds like an
+      ocean", and the slow-vehicle callout still played a pass whoosh. Loops
+      now carry 1,500 feet at 3 dB a doubling, lifted out of the engine's
+      band; the bed is steady shaped noise (`sound-test/highway_bed.py`); the
+      callout plays the slowing-traffic earcon. Owner: "way better, still not
+      perfect" (see the next two items).
+- [x] Busy freeways carry company in the lanes beside the truck: a freeway
+      cell that drew a vehicle draws one per other left lane at the same
+      density (`traffic_manager/beside.rs`). The bubble's one-per-cell rule
+      left an interstate a tenth as full as its own count says.
+- [ ] (Found along the way) A second owner listening pass on traffic after
+      the denser freeways: per-class loudness, `TRAFFIC_BED_PEAK`, and
+      whether the right lane needs company too (it is left empty because a
+      vehicle there is a slowdown the driver must answer).
+- [ ] (Found along the way) Bubble vehicles in one lane pass through each
+      other: there is no NPC-to-NPC following, which more vehicles per mile
+      make more likely to be heard as two sounds in one place.
 - [x] The radio status screen names the Playlists folder's full location
       while no personal playlist is on the dial and streamer-safe mode is
       off (issue #289: a player saw the shuffle setting and could not find

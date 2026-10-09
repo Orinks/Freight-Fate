@@ -26,6 +26,7 @@ use crate::sim::vehicle::{AIR_DENSITY, G as GRAVITY_MPS2, MPS_TO_MPH};
 use crate::sim::weather::{effects, WeatherEffects, WeatherKind};
 use crate::speech_text::{brake_lights_cue, merging_traffic_cue, slow_lead_cue};
 
+mod beside;
 mod vehicle;
 pub use vehicle::{
     braking_cause_line, BrakingZone, TrafficSituation, TrafficVehicle, BRAKING_CAUSE_LINES,
@@ -38,8 +39,9 @@ pub const BUBBLE_BEHIND_MI: f64 = 2.4;
 /// A little past TRAFFIC_LOOKAHEAD_MI so a lead is in place before it is
 /// announced.
 pub const BUBBLE_AHEAD_MI: f64 = 3.2;
-/// Ceiling on the live population.
-pub const MAX_BUBBLE_VEHICLES: usize = 28;
+/// Ceiling on the live population: room for a busy freeway's other lanes
+/// (see `beside.rs`) on top of one vehicle a cell.
+pub const MAX_BUBBLE_VEHICLES: usize = 44;
 /// Clear air around the truck where nothing is created: a vehicle drawn
 /// into being a few hundred feet ahead appeared out of nowhere.
 pub const NO_SPAWN_AHEAD_MI: f64 = 1.1;
@@ -1035,7 +1037,8 @@ impl TrafficManager {
             };
             // Density is a share of road, so it reads directly as the chance
             // this cell of it is carrying somebody.
-            if rng.random() > self.leg_density(leg, night, Some(mile)) {
+            let density = self.leg_density(leg, night, Some(mile));
+            if rng.random() > density {
                 continue;
             }
             let behind = mile < position_mi;
@@ -1098,6 +1101,12 @@ impl TrafficManager {
                 .with_exit_at(Some(exit_at))
                 .with_speed_draw(limit_offset, governor, rush_slowdown),
             );
+            for vehicle in self.lanes_beside(cell, density, lane, position_mi, &mut rng) {
+                if self.vehicles.len() >= MAX_BUBBLE_VEHICLES {
+                    break;
+                }
+                self.vehicles.push(vehicle);
+            }
         }
     }
 

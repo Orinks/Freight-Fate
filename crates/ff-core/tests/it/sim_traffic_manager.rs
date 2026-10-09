@@ -8,10 +8,11 @@ use ff_core::pyrandom::PyRandom;
 use ff_core::sim::traffic_manager::{
     climb_speed_mph, governed_band, BrakingZone, TrafficManager, TrafficVehicle,
     CLIMB_MIN_GRADE_PCT, GOVERNED_BOX_TRUCK_BAND_MPH, GOVERNED_CLASSES, GOVERNED_TRUCK_BAND_MPH,
-    MERGE_FREE_START_MI, MERGE_WINDOW_MI, NO_SPAWN_AHEAD_MI, NO_SPAWN_BEHIND_MI, SPAWN_CELL_MI,
+    MAX_BUBBLE_VEHICLES, MERGE_FREE_START_MI, MERGE_WINDOW_MI, NO_SPAWN_AHEAD_MI,
+    NO_SPAWN_BEHIND_MI, SPAWN_CELL_MI,
 };
 use ff_core::sim::trip::{Trip, TripOptions};
-use ff_core::sim::trip_models::{hourly_volume_fraction, DIRECTIONAL_SPLIT};
+use ff_core::sim::trip_models::{hourly_volume_fraction, leg_lane_count, DIRECTIONAL_SPLIT};
 use ff_core::sim::vehicle::TruckState;
 use ff_core::sim::weather::{effects, WeatherKind};
 
@@ -1107,4 +1108,51 @@ fn test_only_a_freeway_has_distant_traffic_to_hear() {
     let mut street = (**interstate).clone();
     street.local_cue = "Turn right onto Main Street".to_string();
     assert_eq!(presence_on(&std::sync::Arc::new(street)), 0.0);
+}
+
+#[test]
+fn test_a_busy_freeway_carries_company_in_the_lanes_beside_the_truck() {
+    // One vehicle a cell left a busy interstate a tenth as full as its own
+    // count, and the cab heard nobody (owner drive, 2026-10-09). The other
+    // lanes now draw their own; the truck's right lane never does.
+    let w = world();
+    let bubble_on = |leg: &std::sync::Arc<Leg>| {
+        let route = Route::new(vec![leg.a.clone(), leg.b.clone()], vec![leg.clone()]);
+        let mut manager = TrafficManager::bare(&route, &[0.0]);
+        manager.rolling_bubble = true;
+        manager.replenish(leg.miles / 2.0);
+        manager.vehicles
+    };
+    let interstate = w
+        .legs
+        .iter()
+        .find(|leg| {
+            leg.highway.starts_with("I-")
+                && leg.miles > 50.0
+                && leg.local_cue.is_empty()
+                && leg_lane_count(Some(leg)) >= 2
+        })
+        .expect("a multi-lane interstate leg");
+    let vehicles = bubble_on(interstate);
+    let beside: Vec<_> = vehicles
+        .iter()
+        .filter(|v| v.key.matches(':').count() == 2)
+        .collect();
+    assert!(!beside.is_empty(), "{vehicles:?}");
+    assert!(beside.iter().all(|v| v.lane >= 1), "{beside:?}");
+    assert!(vehicles.len() <= MAX_BUBBLE_VEHICLES);
+
+    let two_lane = w
+        .legs
+        .iter()
+        .find(|leg| {
+            !leg.highway.starts_with("I-")
+                && leg.divided == Some(false)
+                && leg.local_cue.is_empty()
+                && leg.miles > 20.0
+        })
+        .expect("an undivided highway leg");
+    assert!(bubble_on(two_lane)
+        .iter()
+        .all(|v| v.key.matches(':').count() == 1));
 }

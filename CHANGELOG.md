@@ -20,6 +20,10 @@
 
 - **The distant interstate traffic is a steady roar now, not a swell like waves.**
 
+- **Busy freeways now have traffic in the lanes beside you, not only far ahead.**
+
+- **Traffic now sounds clearly on its own side as it comes up, and quieter once it is behind you.**
+
 - **A slower vehicle ahead now plays the slowing-traffic sound.** It no longer plays a passing sound before anything has passed.
 
 ### Fixed
