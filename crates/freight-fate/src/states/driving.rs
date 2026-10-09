@@ -81,6 +81,23 @@ pub struct PlaylistShuffleLap {
     pub lap: u64,
 }
 
+/// What the driver has done at the stop the truck is parked at. It lives on
+/// the drive, not the stop's menu, because leaving the menu and opening it
+/// again with T is the same visit: the fuel still pays for the shower, the
+/// scale check-in is still done, the CAT ticket still prices a reweigh.
+#[derive(Debug, Clone, Default, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
+pub struct StopVisit {
+    /// `RoadStop::key` of the stop; any other stop starts a fresh visit.
+    pub key: String,
+    pub fueled: bool,
+    /// A loyalty shower credit or points redeemed here: the shower is free.
+    pub free_shower: bool,
+    pub inspected: bool,
+    /// Game hour of this visit's full-price CAT Scale ticket.
+    pub full_weigh_h: Option<f64>,
+}
+
 pub struct DrivingState {
     // ---- driving.py: identity -----------------------------------------------------------
     pub job: Job,
@@ -107,6 +124,11 @@ pub struct DrivingState {
     // Rig-care buffs (quick lube, tire rotation) hold for the rest of
     // the trip and die with it -- keyed by buff group, see data/buffs.py.
     pub rig_buffs: RigBuffs,
+    /// See [`StopVisit`]; read and written through `stop_visit`.
+    pub stop_visit: StopVisit,
+    /// The truck moved in automatic at some point on this run, so the gate
+    /// pays no manual-spec differential however the run ends.
+    pub drove_automatic: bool,
     pub weather_source_real: bool,
     /// The route mile the cab next asks the Weather Service for warnings at.
     pub alerts_next_poll_mi: f64,
@@ -129,6 +151,9 @@ pub struct DrivingState {
     // (host/id/ad) every few songs on the stations that have a live host.
     pub radio_station_id: String,
     pub radio_playlist: Vec<String>,
+    /// The playlist entry now playing, as resolved (a synthesized piece's
+    /// classic stand-in while it renders); empty when nothing was resolved.
+    pub radio_playing_key: String,
     pub radio_track_index: usize,
     pub radio_elapsed_s: f64,
     pub radio_break_queue: Vec<String>,
@@ -143,6 +168,10 @@ pub struct DrivingState {
     // one (or to nothing at all), so tuning back in has to land where it got
     // to rather than restarting its running order.
     pub radio_airtime_s: f64,
+    // Channel 3000's running order (None when the build has no schedule for
+    // it), and the clip of it the cab last started.
+    pub channel3000: Option<ff_core::channel3000::Schedule>,
+    pub channel3000_serial: u64,
     // Personal playlist stations: where each playlist left off this drive,
     // and a hold between entries so neither a fade-in nor a stream still
     // connecting ever reads as a finished track.
@@ -249,6 +278,10 @@ pub struct DrivingState {
     // Congestion badges: both kinds of slow inside one trip earns a nod.
     pub construction_seen: bool,
     pub traffic_seen: bool,
+    // Billboards that notice the drive: the record at the last pool sign,
+    // and how many pool signs this trip has read.
+    pub billboard_watch: crate::states::driving_events::billboard_moment::BillboardWatch,
+    pub pool_billboards_heard: usize,
     pub brake_squeal_cooldown_s: f64, // hot-brake squeal cue spacing
     pub hydro_active: bool,           // spoken hydroplane warning edge tracking
     pub jake_slip_active: bool,       // spoken jake-slip warning edge tracking
@@ -309,10 +342,30 @@ pub struct DrivingState {
     // on a road the player has already left.
     pub record_events: Vec<String>,
     pub fatigue_events: i64, // run-off-road microsleeps this trip
-    pub weigh_station_notice_key: String,
+    // Every open scale whose notice has been spoken this trip, by key.
+    pub weigh_station_noticed: HashSet<String>,
     // The half-mile "slow for the scale" nudge, latched separately so it
     // speaks once per announced scale and never re-fires on a re-approach.
     pub weigh_station_reminder_key: String,
+    // Real driving seconds since that reminder was spoken, counting only
+    // frames the cab was free (no hazard, pull-over, ramp or menu). A
+    // crossing before SCALE_REMINDER_REAL_LEAD_S of them is not judged a
+    // bypass, but only when the game itself held that reminder back.
+    pub weigh_station_reminder_age_s: f64,
+    // Open scales whose last reminder the game held back: the notice only
+    // latched inside the reminder window, or the cab was taken (a stop, a
+    // ramp, a hazard, a departure lane) while the truck was inside it,
+    // before or after the reminder spoke. A reminder made late by the
+    // driver's own crawl or signal is not here.
+    pub scale_reminder_held_by_game: HashSet<String>,
+    // Open scales whose reminder the driver held quiet inside its window,
+    // under the bypass speed or signalled for the ramp. A cab taken after
+    // such a reminder finally speaks does not excuse the crossing.
+    pub scale_reminder_late_by_driver: HashSet<String>,
+    // A stop or a pause just ended: re-announce the open scale still ahead
+    // once the cab is free. Holds the name of a scale just checked in at,
+    // or an empty string when there is none.
+    pub scale_reannounce: Option<String>,
     // A scale crossed with its own exit armed: judged after the exit watch
     // runs, later in the same frame, never on ramp speed alone.
     pub weigh_station_pending: Option<RoadStop>,
@@ -780,6 +833,9 @@ pub struct DrivingState {
     // ---- driving.py: air, brakes, engine (driving_updates / driving_controls) ----------
     pub air_ready_said: bool,
     pub low_air_said: bool,
+    /// Once-per-threshold low-fuel cue (see `LOW_FUEL_WARN_FRACTION`). Latched
+    /// until the tank climbs back above the line after a refill.
+    pub low_fuel_said: bool,
     pub spring_brake_said: bool,
     pub brake_lockout_cue_timer: f64,
     pub brake_air_hissed: bool, // rising-edge guard for the brake-apply hiss
@@ -794,6 +850,12 @@ pub struct DrivingState {
     pub lane_change_target: Option<i64>,
     pub lane_change_timer: f64,
     pub lane_signal_timer: f64,
+    /// Lane keeping on full is passing a slow vehicle: (the lane to come
+    /// back to, the lane it passed into). See `pass_for_hazard`.
+    pub passing: Option<(i64, i64)>,
+    /// Lane keeping is moving back after a pass: the landing line is the
+    /// tail of going around traffic, not a lane change the driver made.
+    pub pass_returning: bool,
     pub merge_deadline: Option<f64>,
     // Miles of acceleration lane still ahead after pulling out of a
     // facility. None once the lane is behind the truck (or when the run
@@ -812,6 +874,9 @@ pub struct DrivingState {
     // than the traffic it joined. Keep the low-speed merge handoff on the
     // real-time clock until it can safely become ordinary highway driving.
     pub departure_merge_recovery: bool,
+    /// A waiting pace change, the merge handoff's bound and the clock
+    /// trace (`driving_updates::pacing`).
+    pub clock_pacing: crate::states::driving_updates::pacing::ClockPacing,
     // Lanes on our side last tick, so a road that narrows under the truck
     // can be told apart from a driver who steered into the cones.
     pub lane_count_seen: Option<i64>,

@@ -23,10 +23,10 @@ use super::grades::screen_grade_segments;
 use super::world_constants::LIMIT_EXPLAINING_CATEGORIES;
 use super::world_models::{CorridorDetail, DataError, TunnelData};
 use super::world_parsing::{
-    list_field, parse_checkpoint, parse_elevation_sample, parse_grade_segment, parse_hpms_terrain,
-    parse_interchange, parse_landmarks, parse_lane_segments, parse_restrictions, parse_route_point,
-    parse_speed_limits, parse_state_crossing, parse_state_mileage, parse_toll_event,
-    parse_traffic_volumes, py_truthy,
+    list_field, parse_billboard_bans, parse_checkpoint, parse_elevation_sample,
+    parse_grade_segment, parse_hpms_terrain, parse_interchange, parse_landmarks,
+    parse_lane_segments, parse_restrictions, parse_route_point, parse_speed_limits,
+    parse_state_crossing, parse_state_mileage, parse_toll_event, parse_traffic_volumes, py_truthy,
 };
 
 static EMPTY: once_cell::sync::Lazy<Map<String, Value>> = once_cell::sync::Lazy::new(Map::new);
@@ -185,6 +185,12 @@ pub fn build_leg_corridor(
             Ok::<TunnelData, DataError>(tunnel)
         })
         .transpose()?;
+    let billboard_bans = parse_billboard_bans(
+        list_field(corridor, "billboard_bans"),
+        miles,
+        leg_from,
+        leg_to,
+    )?;
     Ok(CorridorDetail {
         route_points,
         elevation_samples,
@@ -201,5 +207,6 @@ pub fn build_leg_corridor(
         restrictions,
         lane_segments,
         tunnel,
+        billboard_bans,
     })
 }

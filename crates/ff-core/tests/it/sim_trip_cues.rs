@@ -363,24 +363,24 @@ fn test_gps_state_crossing_and_rest_stop_cues_deduplicate() {
     trip.traffic_manager.rolling_bubble = false;
     trip.traffic_manager.vehicles = Vec::new();
 
-    // State crossings speak once, at the line -- the old 10-mile advance
-    // warning was cut in the reduce-repeated-alerts player-feedback round.
-    trip.position_mi = 23.0;
-    let advance = trip.update(0.0);
-    let repeat = trip.update(0.0);
-    assert!(gps_events(&advance).is_empty());
-    assert!(gps_events(&repeat).is_empty());
-
-    trip.position_mi = 31.5;
-    let near = trip.update(0.0);
-    assert!(gps_events(&near).is_empty());
-
     // Read the line's position rather than pinning a number to it. Correcting
     // Chicago-Indianapolis from 183 to the 185 miles its baked route runs moved
     // every along-route position, and a hardcoded probe then lands somewhere
     // else entirely -- next to an interchange, in one case, whose exit cue
     // joined the assertion.
+    // State crossings speak once, at the line -- the old 10-mile advance
+    // warning was cut in the reduce-repeated-alerts player-feedback round.
     let line_mi = trip.route.legs[0].state_crossings()[0].at_mi;
+    trip.position_mi = (line_mi - 10.0).max(0.0);
+    let advance = trip.update(0.0);
+    let repeat = trip.update(0.0);
+    assert!(gps_events(&advance).is_empty());
+    assert!(gps_events(&repeat).is_empty());
+
+    trip.position_mi = (line_mi - 1.0).max(0.0);
+    let near = trip.update(0.0);
+    assert!(gps_events(&near).is_empty());
+
     trip.position_mi = line_mi;
     let crossing = trip.update(0.0);
     assert_eq!(
@@ -553,10 +553,12 @@ fn test_traffic_context_and_warning_are_grounded_in_lead_vehicle() {
     // Pinned whole, call included: this stretch of I-65 out of Chicago has
     // three lanes and no closure, so the lane change is a move the driver can
     // actually make and the dodge call is the right one. A bare "Brake!" here
-    // would mean the open-lane test had stopped seeing the road.
+    // would mean the open-lane test had stopped seeing the road. From the
+    // right lane of three, the lane a tap lands in is the middle lane, and
+    // the call names it the way the L key does.
     assert_eq!(
         hazards[0].text(),
-        "Change lanes or brake! Brake lights right ahead. Left lane open."
+        "Change lanes or brake! Brake lights right ahead. Middle lane open."
     );
     assert_eq!(hazards[0].data.dodgeable, Some(true));
     assert!(hazards[0].data.traffic.is_some());
@@ -844,6 +846,23 @@ fn test_brake_lights_name_the_cause_when_the_road_knows_it() {
     assert_eq!(mgr.braking_reason_at(12.0), "construction");
     assert_eq!(mgr.braking_reason_at(22.0), "heavy traffic");
     assert_eq!(mgr.braking_reason_at(50.0), "");
+}
+
+/// Rush hour is a local thing. Denver is two hours behind the trip's Eastern
+/// clock, so 10 AM Eastern is 8 AM there, the middle of the morning rush. The
+/// traffic manager already reads the local hour; the trip's own rush-hour
+/// judgements read the Eastern one, and so put Denver's rush at 4:30 AM.
+#[test]
+fn test_rush_hour_follows_the_local_clock() {
+    let opts = TripOptions {
+        start_hour: 10.0,
+        ..TripOptions::seeded(7)
+    };
+    let trip = make_trip_with(world(), "Denver", "Cheyenne", opts);
+    assert!((trip.local_hour() - 8.0).abs() < 1e-9);
+    assert_eq!(trip.congestion_phrase(), "rush hour congestion");
+    let leg = trip.route.legs[0].clone();
+    assert!(trip.rush_hour_traffic_bias(&leg) > 0.0);
 }
 
 #[test]

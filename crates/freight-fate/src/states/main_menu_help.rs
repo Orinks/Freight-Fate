@@ -48,7 +48,11 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
     (
         "Settings",
         &[
-            "Settings are grouped into categories: Gameplay, Audio, Speech, Updates, and Problem reports, plus a row that opens the Online menu. Open a category to see its settings.",
+            if cfg!(target_os = "ios") {
+                "Settings are grouped into categories: Gameplay, Audio, and Speech, plus a row that opens the Online menu. Open a category to see its settings."
+            } else {
+                "Settings are grouped into categories: Gameplay, Audio, Speech, Updates, and Problem reports, plus a row that opens the Online menu. Open a category to see its settings."
+            },
             "Gameplay has four screens: Driving assistance, Difficulty and hours of service, World and traffic, and Controls.",
             "Driving assistance holds lane keeping and every driving assist. World and traffic holds the weather, traffic, and parking sources. Audio holds the lane and edge cue volume. Problem reports says where the game log is saved.",
             "Up and Down pick a setting. Right arrow or Enter changes it forward, Left arrow backward. Changes save as you make them.",
@@ -104,13 +108,13 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
     (
         "Driving information keys",
         &[
-            "{{speed}} speaks your speed, gear, RPM, active speed-control mode, open-road target, air pressure, and brake state, then, with the signal on, how far to the exit.",
+            "{{speed}} speaks your speed, gear, RPM, active speed-control mode, open-road target, air pressure, and brake state, then, with the signal set, how far to the exit.",
             "{{speed_limit}} speaks the posted speed limit here, the zone if any, and how far over you are.",
-            "{{safe_speed}} speaks one safe-speed number for right now, with weather grip and an armed exit ramp already in it.",
+            "{{safe_speed}} speaks one safe-speed number for right now, with weather grip, a steep downgrade and the next bend already in it; on an exit ramp it is the exit speed.",
             "{{grade}} speaks the grade under the wheels, how far it runs, whether the truck is holding, pulling, or losing it, and the next grade ahead.",
             "Steep grades of three percent or more announce themselves ahead, except on quiet or urgent only speech, where {{grade}} answers on demand.",
             "{{status}} opens a driving status menu for route, driver, map, and the Driver apps tablet: Navigation, Weather, Traffic, Truck stops, Road chatter, and ELD, each read line by line.",
-            "{{fuel}} speaks fuel level and range.",
+            "{{fuel}} speaks fuel level and range. A low fuel warning also speaks once when the tank crosses about fifteen percent.",
             "{{clock}} speaks the clock, your deadline, and the one hours limit that comes first.",
             "Three keys answer one hours question each.",
             "{{hos_wheel}} speaks time at the wheel so far and time on duty this shift.",
@@ -171,7 +175,7 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
             "Highway stops use clear place names and list the actions available there: fuel, eat, rest, save, inspect, or call for help, depending on the stop.",
             "Toll roads, plazas, and electronic gantries are announced. Tolls and approved company charges are paid or reimbursed at settlement, listed separately from fines an earlier load could not cover. Service plazas on toll roads work like stops.",
             "Brake now means slow below twenty five miles per hour quickly to avoid a collision.",
-            "Change lanes or brake means a fixed object in your lane. The call ends by naming the open lane: left lane open, right lane open, or either lane open. With lane keeping on partial or off, steer across the lane line; on full, tap {{steer_left}} or {{steer_right}}. Braking works too, but takes nearly a full stop before you can ease around.",
+            "Change lanes or brake means a fixed object in your lane. The call ends by naming the open lane: left lane open, right lane open, or either lane open. With lane keeping on partial or off, steer across the lane line; on full, tap {{steer_left}} or {{steer_right}}. Braking works too, but takes nearly a full stop before you can ease around. On full, a slow vehicle ahead is passed for you: the call says Passing on the left, and the truck moves back right once it is behind you.",
             "Brake with no lane open means nowhere to go around: brake, and do not reach for a lane change.",
             "Lane counts come from real map data, from one lane your side up to several. The drive says when the road widens or narrows, and {{lane}} speaks which lane you are in. Exits leave from the right lane. Keep right except to pass.",
             "Construction sometimes closes a lane, never where the road runs one lane your side. The lane closure callout names the closed side; driving through the barrels means truck damage, a citation, and a serious violation.",
@@ -187,6 +191,7 @@ pub static HELP_PAGES: &[(&str, &[&str])] = &[
             "Miss a stop and {{rest}} plans the next sleep-capable one. Already safely stopped at the missed route point, {{rest}} opens its menu.",
             "Fuel prices vary by region. Company drivers fuel on the carrier card; owner-operators pay their own diesel.",
             "Running out of fuel means a roadside rescue: owner-operators pay, company drivers take a service-record hit.",
+            "Fuel dropping to about fifteen percent speaks a low fuel warning once, until you refill above that line.",
             "A badly damaged truck: the pause menu calls a roadside mechanic for a pricey field repair.",
         ],
     ),

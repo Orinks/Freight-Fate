@@ -412,7 +412,13 @@ settings_fields! {
     /// Partial steers for the error while leaving the driver something to
     /// feel and to fight, where full holds the lane outright and hands over a
     /// job a new driver never gets to learn.
-    lane_keeping: String = "partial" => str_checked,
+    ///
+    /// Ships on FULL (owner, 2026-09-30), making a fresh install the All
+    /// assists preset: too many first drives went wrong at the wheel, street
+    /// corners above all. The truck drives while the engine lean still plays,
+    /// so a new driver hears the cue before being asked to steer by it, and
+    /// steps down to Balanced when ready. Saved settings keep their value.
+    lane_keeping: String = "full" => str_checked,
     /// How many more times the Lane keeping row explains that it used to be
     /// called Lane drift. Zero by default: a fresh install has nothing to
     /// explain, and only a load that actually found the old key on disk
@@ -446,18 +452,19 @@ settings_fields! {
     /// -- lane keeping was the only one that did not, and it is the default
     /// the row has been claiming since before it could see that field.
     /// Moved from "realistic" to "balanced" on 2026-09-18 with `lane_keeping`,
-    /// so the row a fresh install shows is still the truth about the ruleset
-    /// it is running -- the whole point of the 2026-08-09 ruling.
-    driving_assistance_preset: String = "balanced" => str_checked,
+    /// and to "all" on 2026-09-30, so the row a fresh install shows is still
+    /// the truth about the ruleset it is running -- the whole point of the
+    /// 2026-08-09 ruling.
+    driving_assistance_preset: String = "all" => str_checked,
     automatic_emergency_braking: bool = true => bool_strict,
     lane_departure_warning: bool = true => bool_strict,
     stop_and_go_assist: bool = true => bool_strict,
-    /// Balanced's value: a fresh install is the Balanced preset from
-    /// 2026-09-18, and every field it names has to agree or the row reads
+    /// All assists' value: a fresh install is the All assists preset from
+    /// 2026-09-30, and every field it names has to agree or the row reads
     /// "custom".
-    descent_speed_control: String = "balanced" => str_checked,
+    descent_speed_control: String = "interactive" => str_checked,
     exit_speed_assist: bool = true => bool_strict,
-    /// Balanced's value; see `descent_speed_control` above.
+    /// On in Balanced and All assists; see `descent_speed_control` above.
     destination_approach_assist: bool = true => bool_strict,
     /// An explicit-plan accessibility aid, separate from the realism
     /// presets: T plans a sleep stop, X signals for it, and only then may
@@ -653,9 +660,17 @@ settings_fields! {
     key_bindings: String = "" => str_plain,
     /// The same for pad buttons (`engine=mod+a;horn=paddle_1`).
     pad_bindings: String = "" => str_plain,
+    /// The same for the iPhone and iPad driving gestures
+    /// (`tap=fuel;magic_tap=none`).
+    touch_bindings: String = "" => str_plain,
     /// Steer AWAY from the engine's lean instead of toward it, for
     /// drivers who learned that habit in audio racing games.
     steering_guide_inverted: bool = false => bool_strict,
+    /// Whether the player has answered the one-time Driving assistance
+    /// picker that opens a launch. False on a fresh install and on every
+    /// file written before it existed, so everyone answers it once
+    /// (owner, 2026-09-30).
+    assist_preset_chosen: bool = false => bool_strict,
 }
 
 impl Settings {
@@ -695,8 +710,9 @@ impl Settings {
     /// follows the road's curve without the driver steering it: curve
     /// assistance, or partial lane keeping, which steers through the road's
     /// curve the same way while lane changes and speed stay the driver's
-    /// (owner ruling, 2026-09-24). Lane keeping off leaves the bend to the
-    /// driver's own wheel; full holds the lane outright.
+    /// (owner ruling, 2026-09-24). Lane keeping off adds nothing, so with
+    /// curve assistance off too the bend is the driver's own wheel; full
+    /// holds the lane outright.
     pub fn road_steers_the_bend(&self) -> bool {
         self.curve_speed_assist || self.lane_keeping == "partial"
     }
@@ -785,10 +801,7 @@ impl Settings {
 
     /// Whether this category reaches the voice at all on this rung.
     pub fn speaks(&self, category: Option<SpeechCategory>) -> bool {
-        !matches!(
-            self.speech_disposition(category),
-            Disposition::Earcon | Disposition::Silent
-        )
+        self.speech_disposition(category) != Disposition::Silent
     }
 
     /// Whether spoken lines take their terse rendering on this rung.

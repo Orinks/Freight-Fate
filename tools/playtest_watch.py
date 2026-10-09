@@ -357,13 +357,15 @@ class Watcher:
 
 # What ``freight_fate::playtest::sandbox`` counts as the driver identity and
 # as the settings that publish. Mirrored here, not imported: the watcher is a
-# plain script and the sandbox is Rust. Change one, change both.
+# plain script and the sandbox is Rust. Change one, change both -- except
+# meaningful_play.json: the sandbox strips it at start, but the game itself
+# rewrites it during any drive (a pending-intent ledger, nothing uploadable with
+# cloud_saves off), so a closing audit that names it is a false alarm.
 IDENTITY_NAMES = frozenset(
     {
         "online.json",
         "online.token",
         "cloud_saves.json",
-        "meaningful_play.json",
         "online-outbox.json",
         "online-mastodon-outbox.json",
     }

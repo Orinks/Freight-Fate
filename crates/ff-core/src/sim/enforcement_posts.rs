@@ -553,7 +553,9 @@ impl Trip {
         posts.extend(self.work_zone_posts());
         posts.extend(self.scale_posts());
         posts.extend(self.urban_posts());
-        posts.extend(self.chain_posts());
+        if self.chain_law_level() > 0 {
+            posts.extend(self.chain_posts());
+        }
         // A stable sort, as Python's is.
         posts.sort_by(|a, b| a.at_mi.partial_cmp(&b.at_mi).expect("finite mileposts"));
         for post in posts.iter_mut() {
@@ -675,6 +677,30 @@ impl Trip {
             ));
         }
         posts
+    }
+
+    /// A chain control is set up when the law is posted and packed away when
+    /// it lifts (Caltrans: controls go up "when conditions require"), so its
+    /// post is on the route only while `chain_law_level` says the law is in
+    /// effect. It used to stand at every chain-up area all year: a CB call
+    /// about the chain control checking rigs, and its trooper watching for
+    /// anything else, on dry October pavement (owner, 2026-10-01). Re-placed
+    /// from the seed, so a post that comes back is the same post, and one the
+    /// CB already called is not called again.
+    pub fn sync_chain_posts(&mut self) {
+        let in_effect = self.chain_law_level() > 0;
+        let placed = self.posts.iter().any(|post| post.kind == KIND_CHAIN);
+        if in_effect && !placed {
+            let chain = self.chain_posts();
+            if chain.is_empty() {
+                return;
+            }
+            self.posts.extend(chain);
+            self.posts
+                .sort_by(|a, b| a.at_mi.partial_cmp(&b.at_mi).expect("finite mileposts"));
+        } else if !in_effect && placed {
+            self.posts.retain(|post| post.kind != KIND_CHAIN);
+        }
     }
 
     // -- lookup ----------------------------------------------------------------

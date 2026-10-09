@@ -271,6 +271,17 @@ fn test_resume_refuses_without_a_remembered_speed_or_an_engine() {
 }
 
 #[test]
+fn resume_refusal_names_a_moved_cruise_key() {
+    let mut app = TestApp::new();
+    app.ctx.settings.key_bindings = "cruise=f7".into();
+    app.ctx.apply_bindings();
+    let mut d = a_drive(&mut app);
+    app.clear_speech();
+    d.handle_key_event(&mut app.ctx, &InputEvent::key_mods(Key::K, Mods::SHIFT));
+    assert_eq!(last(&app), "No remembered cruise speed yet. F7 sets one.");
+}
+
+#[test]
 fn test_a_transit_pause_lifts_itself_once_the_bar_is_honored() {
     let mut app = TestApp::new();
     let mut d = a_drive(&mut app);

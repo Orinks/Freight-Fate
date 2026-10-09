@@ -132,7 +132,7 @@ impl DrivingState {
             return false;
         };
         let local_state = self.city_state(ctx, &self.job.destination.clone());
-        let first_corner = self.enter_streets(ctx, &route, local_state, false);
+        let first_corner = self.enter_streets(ctx, &route, local_state, false, announce);
         self.surface_chain = true;
         if announce {
             let street = Self::start_street_text(&route);
@@ -174,12 +174,20 @@ impl DrivingState {
     /// terminal released the truck to facility stopping assistance. Returns
     /// the first corner's call, " Then ...", when the chain starts inside its
     /// window, for the caller's off-the-ramp line; empty otherwise.
+    ///
+    /// `live` is false when a save is being rebuilt: the truck is parked with
+    /// its engine off and the restored position is not set yet, so both
+    /// handoffs are left to the per-frame paths -- the keeper resumes once the
+    /// truck rolls, and the first corner is called from where the truck
+    /// really is. Latched here, a resumed drive never heard that corner's
+    /// approach call, and the keeper refused a parked truck as it loaded.
     fn enter_streets(
         &mut self,
         ctx: &mut GameContext,
         route: &Route,
         local_state: String,
         road_stop: bool,
+        live: bool,
     ) -> String {
         let options = TripOptions {
             time_scale: self.trip.time_scale,
@@ -246,6 +254,9 @@ impl DrivingState {
         // later: a free-flowing ramp hands over at the ramp's own speed, and
         // for that frame nothing held the truck to the street's number.
         let pull_ahead = std::mem::take(&mut self.approach_pull_ahead);
+        if !live {
+            return String::new();
+        }
         if (pull_ahead || self.speed_control_armed) && ctx.settings.speed_keeper {
             let (limit, zone_reason) = self.trip.speed_limit_at(self.trip.position_mi);
             if let Some(zone_reason) = zone_reason {
@@ -314,7 +325,7 @@ impl DrivingState {
         };
         let city = route.cities.first().cloned().unwrap_or_default();
         let local_state = self.city_state(ctx, &city);
-        let first_corner = self.enter_streets(ctx, &route, local_state, true);
+        let first_corner = self.enter_streets(ctx, &route, local_state, true, true);
         self.stop_chain = Some(stop.clone());
         self.stop_chain_end_said = false;
         let street = Self::start_street_text(&route);
@@ -526,6 +537,7 @@ impl DrivingState {
         self.departure_cruise_handoff_mph =
             (capability_mph + 0.5 >= merge_target_mph).then_some(merge_target_mph);
         self.departure_merge_recovery = false;
+        self.clock_pacing.reset_merge_recovery();
         // A real length of road is only room to build speed on if it is spent
         // at the rate a truck really covers it. The exit watch pins the lane
         // to the real clock every frame, but it has already run for this one,
@@ -585,7 +597,7 @@ impl DrivingState {
                     self.trip.speed_limit_at(self.trip.position_mi).0
                 };
                 if self.trip.truck.speed_mph() + 0.5 >= merge_traffic_target_mph(limit) {
-                    self.departure_merge_recovery = false;
+                    self.end_departure_merge_recovery("merge speed reached");
                 }
             }
             return;
@@ -623,7 +635,7 @@ impl DrivingState {
             // on the real clock until it is close to traffic speed prevents
             // time compression from turning a slow, loaded join into a
             // sudden highway-speed transition.
-            self.departure_merge_recovery = true;
+            self.start_departure_merge_recovery(speed, limit);
             format!(
                 "Lane ending at {}, under the {} traffic is running. Take a big gap.",
                 ctx.settings.speed_text(speed),

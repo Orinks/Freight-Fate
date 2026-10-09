@@ -170,11 +170,15 @@ RURAL_LIMITS: dict[str, dict[str, Any]] = {
         "state routes are 55, not told apart.",
     ),
     "Montana": _row(
-        70,
-        70,
-        "Mont. Code Ann. Sec. 61-8-303(1)",
+        65,
+        65,
+        "Mont. Code Ann. Sec. 61-8-312(1)",
         "absolute",
-        "70 mph by day and 65 by night on any other public highway; the day figure.",
+        "65 mph for a truck or truck tractor over 1 ton on any public highway other than "
+        "an interstate, day or night -- the TRUCK figure, which 61-8-303 defers to; its 70 "
+        "by day and 65 by night are for other vehicles. The game drives a truck, so it "
+        "applies. Read 2026-09-28.",
+        url="https://mca.legmt.gov/bills/mca/title_0610/chapter_0080/part_0030/section_0120/0610-0080-0030-0120.html",
     ),
     "Nebraska": _row(
         65,
@@ -269,10 +273,15 @@ RURAL_LIMITS: dict[str, dict[str, Any]] = {
     ),
     "Virginia": _row(
         55,
-        55,
+        45,
         "Va. Code Ann. Sec. 46.2-870",
         "absolute",
-        "The general 55 mph maximum unless otherwise posted.",
+        "55 mph on interstates, limited-access and four-or-more-lane highways and state "
+        "primaries; 'on all other highways' 55 for a car but 45 for a truck, tractor truck "
+        "or combination designed to transport property -- the TRUCK figure, and the game "
+        "drives a truck. OSM trunk, primary and secondary stand in for the primaries, so a "
+        "secondary route OSM tags secondary reads 55 (not told apart). Read 2026-09-28.",
+        url="https://law.lis.virginia.gov/vacode/title46.2/chapter8/section46.2-870/",
     ),
     "Washington": _row(
         60,

@@ -27,20 +27,21 @@
 use std::collections::HashSet;
 
 use crate::data::world::World;
-use crate::data::world_models::{Leg, Route};
+use crate::data::world_models::Route;
 use crate::models::jobs::route_drive_hours;
 use crate::pyfmt::fmt_f;
 use crate::settings::Settings;
+use crate::sim::real_traffic::caltrans::construction_feed_keys;
 use crate::sim::real_weather_alerts::{
     scan_route_weather, weather_brief, RouteWeather, WeatherAlertsProvider,
 };
 use crate::sim::trip::Trip;
 use crate::sim::trip_models::ZONE_MIN_GAP_MI;
-use crate::sim::trip_route_helpers::nearest_mile_on_leg;
+use crate::sim::trip_route_helpers::{leg_states, leg_track, runs_against_travel, snap_to_leg};
 use crate::sim::trip_traffic::TrafficProvider;
 
-/// How far from a route point a 511 event still counts as being on the
-/// road, the same radius the trip uses when it places its zones.
+/// How far from the road a 511 event still counts as being on it, the same
+/// radius the trip uses when it places its zones.
 const NEAR_ROUTE_MI: f64 = 3.0;
 
 /// A second route that is quicker by less than this is a coin toss, and the
@@ -145,40 +146,21 @@ impl DispatchRouting {
     }
 }
 
-/// The 511 state key a leg is looked up under: the state it runs in, as the
-/// bake recorded it, lower-cased the way the provider keys its cache. Empty
-/// where the bake is silent.
-fn leg_state(leg: &Leg, forward: bool) -> String {
-    let mut state = String::new();
-    for sc in leg.state_crossings() {
-        state = if forward {
-            sc.from_state.clone()
-        } else {
-            sc.state.clone()
-        };
-    }
-    let state_miles = leg.state_miles();
-    if state.is_empty() && !state_miles.is_empty() {
-        let first = if forward {
-            &state_miles[0]
-        } else {
-            &state_miles[state_miles.len() - 1]
-        };
-        state = first.state.clone();
-    }
-    state.trim().to_lowercase()
-}
-
-/// The 511 state keys a route touches, for warming the provider's cache
-/// before dispatch needs an answer.
+/// The 511 feed keys a route's construction is read from, in road order,
+/// for warming the provider's cache before dispatch needs an answer: each
+/// state it runs in, and in California the districts its legs pass through.
 pub fn route_state_keys(route: &Route) -> Vec<String> {
     let mut seen: HashSet<String> = HashSet::new();
     let mut keys = Vec::new();
     for (i, leg) in route.legs.iter().enumerate() {
         let forward = route.cities[i] == leg.a;
-        let state = leg_state(leg, forward);
-        if !state.is_empty() && seen.insert(state.clone()) {
-            keys.push(state);
+        let track = leg_track(leg);
+        for state in leg_states(leg, forward) {
+            for key in construction_feed_keys(&state, &track, NEAR_ROUTE_MI) {
+                if seen.insert(key.clone()) {
+                    keys.push(key);
+                }
+            }
         }
     }
     keys
@@ -205,32 +187,40 @@ pub fn scan_route_construction(
     let mut leg_start = 0.0;
     for (i, leg) in route.legs.iter().enumerate() {
         let forward = route.cities[i] == leg.a;
-        let state = leg_state(leg, forward);
-        let points: Vec<(f64, f64)> = leg
-            .route_points()
-            .iter()
-            .map(|rp| (rp.lat, rp.lon))
-            .collect();
-        if state.is_empty() || points.is_empty() {
+        let track = leg_track(leg);
+        if track.is_empty() {
             leg_start += leg.miles;
             continue;
         }
-        let events = provider.get_construction_near_route(
-            &state,
-            &points,
-            Some(&leg.highway),
-            NEAR_ROUTE_MI,
-        );
+        // Every state the leg runs in: a leg into California reads Caltrans
+        // for its California miles.
+        let events: Vec<_> = leg_states(leg, forward)
+            .iter()
+            .flat_map(|state| {
+                provider.get_construction_near_route(
+                    state,
+                    &track,
+                    Some(&leg.highway),
+                    NEAR_ROUTE_MI,
+                )
+            })
+            .collect();
         for event in events {
-            if !seen_ids.insert(event.id.clone()) {
+            if seen_ids.contains(&event.id) {
                 continue;
             }
             let (Some(lat), Some(lon)) = (event.latitude, event.longitude) else {
                 continue;
             };
-            let Some(route_mile) = nearest_mile_on_leg(lat, lon, leg, forward, leg_start) else {
+            // Off this leg (the next one may still hold it), or on the far
+            // carriageway from the truck.
+            let Some(route_mile) = snap_to_leg(lat, lon, leg, forward, leg_start)
+                .filter(|snap| !runs_against_travel(&event.direction, snap.bearing_deg))
+                .map(|snap| snap.mile)
+            else {
                 continue;
             };
+            seen_ids.insert(event.id.clone());
             let length_mi = Trip::construction_zone_length(&event);
             let start_mi = (route_mile - length_mi / 2.0).max(0.0);
             let end_mi = miles.min(start_mi + length_mi);
@@ -844,5 +834,57 @@ mod tests {
             .expect("routes");
         assert_eq!(route_state_keys(&routes[1]), vec!["illinois", "indiana"]);
         assert_eq!(route_state_keys(&ohio_routes()[1]), vec!["ohio"]);
+    }
+
+    fn route(cities: &[&str]) -> Route {
+        get_world()
+            .route_from_cities(cities)
+            .unwrap_or_else(|| panic!("{cities:?} is on the map"))
+    }
+
+    #[test]
+    fn test_route_state_keys_warm_california_by_district() {
+        // The bare state key fetches nothing in California: the warm-up has
+        // to name the district feeds dispatch will read.
+        assert_eq!(
+            route_state_keys(&route(&["las_vegas_nv_us", "los_angeles_ca_us"])),
+            vec!["nevada", "california/d7", "california/d8"]
+        );
+    }
+
+    /// District 7's closures from the parser fixture, read at its own hour.
+    fn district_7() -> RealTrafficProvider {
+        let events = crate::sim::real_traffic_parsers::parse_lcs_csv(
+            include_bytes!("real_traffic_parsers/fixtures/lcs_sample.csv"),
+            1_790_272_983.0,
+        );
+        seeded("california/d7", events)
+    }
+
+    #[test]
+    fn test_a_closure_between_route_points_is_found_where_it_lies() {
+        // I-5 north from Los Angeles has route points 28 miles apart. The
+        // Castaic lane closure lies 10 miles from the nearest of them and
+        // under half a mile off the road between, 38.5 miles out.
+        let world = get_world();
+        let north = route(&["los_angeles_ca_us", "bakersfield_ca_us"]);
+        let report = scan_route_construction(&north, &district_7(), world);
+        assert_eq!(report.spots.len(), 1, "{:?}", report.spots);
+        assert_eq!(report.spots[0].road, "I-5");
+        assert!(
+            (report.spots[0].route_mile - 38.5).abs() < 1.0,
+            "{:?}",
+            report.spots
+        );
+    }
+
+    #[test]
+    fn test_a_closure_on_the_far_carriageway_is_not_on_the_route() {
+        // The Castaic closure holds I-5 North; a truck headed south to Los
+        // Angeles drives the other side of the median.
+        let world = get_world();
+        let south = route(&["bakersfield_ca_us", "los_angeles_ca_us"]);
+        let report = scan_route_construction(&south, &district_7(), world);
+        assert!(report.spots.is_empty(), "{:?}", report.spots);
     }
 }

@@ -10,6 +10,7 @@ use ff_core::speech_pacing::{EventPriority, SpeechCategory};
 
 use crate::app::{GameContext, SayEvent};
 use crate::discord_presence::{driving_presence, PresenceState};
+use crate::online_presence::RADIO_CLAUSE;
 use crate::states::base::TimedMessageState;
 use crate::states::driving::DrivingState;
 use crate::states::driving_core::*;
@@ -17,6 +18,36 @@ use crate::states::driving_menu_states::{replace_drive_with, DriveRef, FacilityA
 use crate::states::driving_updates::live;
 
 impl DrivingState {
+    /// Once-per-threshold low-fuel cue at about 15 percent remaining.
+    ///
+    /// Speaks on the Safety channel (heard at quiet and urgent_only), plays
+    /// the same short UI warning other mid-drive safety cues use, and latches
+    /// until a refill climbs the tank back above the line. Empty-tank rescue
+    /// keeps its own path; this cue stays silent once the tank is dry.
+    pub fn check_low_fuel_warning(&mut self, ctx: &mut GameContext) {
+        let fraction = self.trip.truck.fuel_fraction();
+        if self.trip.truck.fuel_gal <= 0.0 {
+            // Empty tank is the rescue line, not a second low-fuel cue.
+            return;
+        }
+        if fraction > LOW_FUEL_WARN_FRACTION {
+            self.low_fuel_said = false;
+            return;
+        }
+        if self.low_fuel_said {
+            return;
+        }
+        self.low_fuel_said = true;
+        let pct = fraction * 100.0;
+        let message = if self.terse_speech(ctx) {
+            format!("Fuel low: {pct:.0} percent.")
+        } else {
+            format!("Low fuel warning, {pct:.0} percent. Find a fuel stop soon.")
+        };
+        ctx.audio.play("ui/warning");
+        ctx.say_event_with(message, SayEvent::new().category(SpeechCategory::Safety));
+    }
+
     /// `_handle_out_of_fuel()`.
     pub fn handle_out_of_fuel(&mut self, ctx: &mut GameContext) {
         if self.rescue_offered {
@@ -68,6 +99,10 @@ impl DrivingState {
         self.exit_stop = None;
         self.exit_signal_on = false;
         self.exit_signal_canceled = false;
+        // A cancel belongs to the approach it was made on. Left standing, the
+        // rebuilt exit carries the same key, the scanner skips it, and lane
+        // keeping never takes the exit this loop-back says it will.
+        self.canceled_exit_key = None;
         self.cancel_cruise(ctx, false);
         let exit_at = match exit_details {
             Some(details) => details.0,
@@ -176,7 +211,14 @@ impl DrivingState {
         if self.arrival_menu_open {
             return true;
         }
-        self.cancel_cruise(ctx, false);
+        // An arrival pause, held until the departure resumes it. Ending the
+        // session here lost the driver's set speed at every assisted pickup
+        // (tester report, 2026-09-28).
+        if self.speed_control_armed {
+            self.pause_speed_control(ctx, false);
+        } else {
+            self.cancel_cruise(ctx, false);
+        }
         self.trip.truck.throttle = 0.0;
         self.trip.truck.brake = 1.0;
         if self.trip.truck.speed_mph() <= 0.5 && !self.arrival_full_stop_said {
@@ -557,7 +599,7 @@ impl DrivingState {
             .station_by_id(&self.radio_station_id)
             .cloned()
             .unwrap_or_else(|| self.radio.tuned_station());
-        let mut clause = format!("listening to {}", station.display_name());
+        let mut clause = format!("{RADIO_CLAUSE}{}", station.display_name());
         // And the song, when the stream says: broadcast metadata the station
         // itself publishes to every listener, so no more private than the
         // station name. The tick's copy, not a fresh read -- presence is

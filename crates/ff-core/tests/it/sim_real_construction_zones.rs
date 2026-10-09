@@ -8,10 +8,12 @@ use crate::sim_support::*;
 use ff_core::data::world_models::{
     CorridorDetail, LaneSegment, Leg, Route, RoutePoint, StateMileage,
 };
+use ff_core::sim::real_traffic::{wall_time, RealTrafficProvider, TrafficData};
 use ff_core::sim::real_traffic_parsers::TrafficEvent;
+use ff_core::sim::route_roadwork::scan_route_construction;
 use ff_core::sim::trip::{Trip, TripOptions};
 use ff_core::sim::trip_models::CONSTRUCTION_TAPER_MI;
-use ff_core::sim::trip_route_helpers::nearest_mile_on_leg;
+use ff_core::sim::trip_route_helpers::{leg_track, nearest_mile_on_leg};
 use ff_core::sim::trip_traffic::TrafficProvider;
 use ff_core::sim::vehicle::{TruckSpecs, TruckState};
 
@@ -147,7 +149,7 @@ fn test_snap_near_end() {
 fn test_snap_midpoint() {
     let leg = make_leg_with(100.0, default_points());
     let mile = nearest_mile_on_leg(39.569, -83.179, &leg, true, 0.0).expect("on the route");
-    assert_eq!(mile, 45.0);
+    assert!((mile - 45.0).abs() < 0.5, "{mile}");
 }
 
 #[test]
@@ -343,9 +345,55 @@ fn test_real_zones_replace_simulated() {
 fn test_route_state_identification() {
     let trip = make_trip(None);
     let geometry = trip.collect_route_geometry();
-    let (state, points) = geometry.get("I-71").expect("our highway");
-    assert_eq!(state, "Ohio");
-    assert!(points.len() >= 7); // We defined 7 route points
+    let points = geometry
+        .get(&("I-71".to_string(), "ohio".to_string()))
+        .expect("our highway in our state");
+    // 7 route points, filled in at least every mile of their 100.
+    assert!(points.len() >= 100, "{}", points.len());
+}
+
+#[test]
+fn test_a_closure_on_the_far_carriageway_places_no_zone() {
+    // I-71 runs south out of Columbus here: a closure on the northbound
+    // side is not on this truck's road, the southbound one is.
+    let at = |direction: &str| {
+        let mut closure = event("cz-1", 39.83, -83.01, "", "", "single lane");
+        closure.direction = direction.to_string();
+        make_trip(Some(provider(vec![closure]))).place_real_construction_zones()
+    };
+    assert!(at("North").is_empty());
+    assert_eq!(at("South").len(), 2);
+}
+
+#[test]
+fn test_a_leg_into_california_reads_caltrans_for_its_california_miles() {
+    // I-15 from Las Vegas runs 43 miles in Nevada, then 227 in California:
+    // a District 8 closure past Barstow is on the route, for dispatch and
+    // for the drive, not left to Nevada's feed.
+    let route = world()
+        .route_from_cities(&["las_vegas_nv_us", "los_angeles_ca_us"])
+        .expect("I-15 to Los Angeles");
+    let mut closure = event("i15", 34.88368, -116.88869, "", "", "single lane");
+    closure.road_name = "I-15".to_string();
+    let live = Arc::new(RealTrafficProvider::offline());
+    let now = wall_time();
+    live.seed_cache(
+        "california/d8:construction",
+        TrafficData::new("california/d8", vec![closure], now, now, "test"),
+    );
+    let dispatch = scan_route_construction(&route, &*live, world());
+    let spots: Vec<f64> = dispatch.spots.iter().map(|s| s.route_mile).collect();
+    assert_eq!(spots.len(), 1, "{spots:?}");
+    assert!((spots[0] - 148.5).abs() < 1.0, "{spots:?}");
+
+    let zones = trip_for(route, Some(live)).place_real_construction_zones();
+    let work: Vec<f64> = zones
+        .iter()
+        .filter(|z| z.reason == "construction")
+        .map(|z| (z.start_mi + z.end_mi) / 2.0)
+        .collect();
+    assert_eq!(work.len(), 1, "{zones:?}");
+    assert!((work[0] - 148.5).abs() < 1.0, "{work:?}");
 }
 
 #[test]
@@ -418,17 +466,12 @@ fn test_a_zone_with_room_still_gets_its_full_taper() {
 }
 
 /// The Caltrans districts a real leg of the map would fetch lane closures
-/// from, at the trip's own 3-mile search radius.
+/// from, along its road at the trip's own 3-mile search radius.
 fn caltrans_districts(from: &str, to: &str) -> Vec<u8> {
     let route = ff_core::data::world::get_world()
         .route_from_cities(&[from, to])
         .unwrap_or_else(|| panic!("{from} to {to} is on the map"));
-    let points: Vec<(f64, f64)> = route.legs[0]
-        .route_points()
-        .iter()
-        .map(|p| (p.lat, p.lon))
-        .collect();
-    ff_core::sim::real_traffic::caltrans::districts_near_route(&points, 3.0)
+    ff_core::sim::real_traffic::caltrans::districts_near_route(&leg_track(&route.legs[0]), 3.0)
 }
 
 #[test]

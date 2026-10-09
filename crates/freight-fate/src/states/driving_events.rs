@@ -36,6 +36,7 @@
 
 pub mod ambient;
 pub mod arrival;
+pub mod billboard_moment;
 pub mod chains;
 pub mod cruise;
 pub mod cruise_loop;

@@ -1481,11 +1481,8 @@ fn test_trip_uses_only_curated_pois_at_runtime() {
     assert!(route.raw_stop_details().iter().all(|s| s.curated()));
     assert!(!route.stop_details().is_empty());
     assert!(!trip.stops.is_empty());
-    let curated: HashSet<&str> = route
-        .stop_details()
-        .iter()
-        .map(|s| s.name.as_str())
-        .collect();
+    let route_stops = route.stop_details();
+    let curated: HashSet<&str> = route_stops.iter().map(|s| s.name.as_str()).collect();
     assert!(trip.stops.iter().all(|s| curated.contains(s.name.as_str())));
 }
 
@@ -2919,21 +2916,17 @@ fn test_gps_state_crossing_and_rest_stop_cues_deduplicate() {
     trip.traffic_manager.rolling_bubble = false;
     trip.traffic_manager.vehicles = Vec::new();
 
-    trip.position_mi = 23.0;
+    let line_mi = trip.route.legs[0].state_crossings()[0].at_mi;
+    trip.position_mi = (line_mi - 10.0).max(0.0);
     let advance = trip.update(0.0);
     let repeat = trip.update(0.0);
     assert!(gps_events(&advance).is_empty());
     assert!(gps_events(&repeat).is_empty());
 
-    trip.position_mi = 31.5;
+    trip.position_mi = (line_mi - 1.0).max(0.0);
     assert!(gps_events(&trip.update(0.0)).is_empty());
 
-    // Read the line's position rather than pinning a number to it. Correcting
-    // Chicago-Indianapolis from 183 to the 185 miles its baked route runs moved
-    // every along-route position, and a hardcoded probe then lands somewhere
-    // else entirely -- next to an interchange, in one case, whose exit cue
-    // joined the assertion.
-    let line_mi = trip.route.legs[0].state_crossings()[0].at_mi;
+    // Keep the probe tied to the archived route's state-boundary crossing.
     trip.position_mi = line_mi;
     let crossing = trip.update(0.0);
     assert_eq!(

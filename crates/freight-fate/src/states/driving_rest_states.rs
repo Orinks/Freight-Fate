@@ -29,7 +29,9 @@ pub use fuel_pump::{refuel_engine_gate_message, FuelPump};
 pub use loyalty::LoyaltyRewardsState;
 pub use parking_full::ParkingFullState;
 pub use rest_stop::{walk_around_minutes, RestFocus, RestStopState};
-pub use roadside::{EnforcementStopState, FelonyStopState, RoadsideExit, TrafficStopState};
+pub use roadside::{
+    EnforcementStopState, FelonyStopState, LicencePulledState, RoadsideExit, TrafficStopState,
+};
 pub use shoulder::ShoulderSleepConfirmationState;
 
 use ff_core::models::enforcement;
@@ -41,6 +43,20 @@ use crate::states::driving::DrivingState;
 use crate::states::driving_core::{profile_mut_of, profile_of};
 use crate::states::driving_menu_states::{push_over_drive, DriveRef};
 use crate::states::driving_updates::pending::EnforcementStopParams;
+
+/// Leaving a stop menu. The engine is whatever it already was: "starts the
+/// engine" over a running one sent the driver's press to shut it down.
+pub fn back_on_the_road_line(ctx: &GameContext, engine_on: bool) -> String {
+    let brake = ctx.control_hint("parking_brake");
+    if engine_on {
+        return format!("Back on the road. Parking brake set. {brake} releases the brake.");
+    }
+    let engine = ctx.control_hint("engine");
+    format!(
+        "Back on the road. Parking brake set. {engine} starts the engine, {brake} releases the \
+         brake."
+    )
+}
 
 /// Where the career clock stands right now, mid-trip included.
 pub fn record_hours(ctx: &GameContext, driving: &DrivingState) -> f64 {
@@ -54,8 +70,7 @@ pub fn suspension_text(ctx: &GameContext, hours: f64, verb: &str) -> String {
     let left = enforcement::days_text(profile.driving_record.days_left(hours));
     format!(
         "Your CDL is {verb} for {left}. Driving jobs are off the dispatch board until it clears, \
-         {}. Your money and your truck are safe; rest, repairs, the garage, and the truck dealer \
-         are still open.",
+         {}. Your money and your truck are safe; rest, repairs, and the garage are still open.",
         enforcement::clears_text(profile)
     )
 }
@@ -88,7 +103,7 @@ pub fn major_offense_text(ctx: &GameContext, kind: &str, hours: f64) -> String {
              disqualifies a commercial licence for life, so this driver will not drive \
              commercially again. Nothing is taken away: {name} keeps every dollar, the truck, \
              and the whole record, and you can open this career any time to look back over it. \
-             Rest, repairs, the garage, and the truck dealer still work here, and the dispatch \
+             Rest, repairs, and the garage still work here, and the dispatch \
              board can still be read, but there is no driving work and no date this clears. When \
              you want the road again, start a new career from the title menu. Everything you \
              learned still applies."
@@ -279,6 +294,29 @@ impl DrivingState {
         stop: EnforcementStopParams,
     ) {
         let state = EnforcementStopState::new(ctx, self, stop);
+        ctx.push_state(state);
+    }
+
+    /// End the drive when the CDL was just pulled with no officer present.
+    ///
+    /// For the record events that happen at speed (a run off the road
+    /// asleep, the barrels): driving on with a suspended or disqualified CDL
+    /// is exactly what the suspension forbids, so the truck stops on the
+    /// shoulder and the roadside exit closes out the run. The debug hours
+    /// modes, which freeze the ladder, never end a run.
+    pub fn end_drive_if_licence_pulled(&mut self, ctx: &mut GameContext) {
+        let pulled = ctx
+            .profile
+            .as_ref()
+            .is_some_and(|p| p.driving_record.suspended(record_hours(ctx, self)));
+        if !pulled || self.enforcement_bypassed(ctx) {
+            return;
+        }
+        self.trip.truck.velocity_mps = 0.0;
+        self.trip.truck.throttle = 0.0;
+        self.trip.truck.brake = 1.0;
+        self.trip.truck.set_parking_brake();
+        let state = LicencePulledState::new(ctx, self);
         ctx.push_state(state);
     }
 

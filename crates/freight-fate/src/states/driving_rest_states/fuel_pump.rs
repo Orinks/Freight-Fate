@@ -27,9 +27,6 @@ use crate::states::driving_menu_states::DriveRef;
 pub trait FuelPump: Menu {
     fn drive(&self) -> &DriveRef;
     fn stop(&self) -> &RoadStop;
-    /// A fuel purchase this visit (free showers).
-    fn fueled_here(&self) -> bool;
-    fn set_fueled_here(&mut self, fueled: bool);
 
     fn weight_margin_text(label: &str, margin_kg: f64) -> String {
         let pounds = fmt_grouped((margin_kg.abs() / KG_PER_LB).round(), 0);
@@ -103,7 +100,7 @@ pub trait FuelPump: Menu {
             ctx.say("The tank is already full.");
             return;
         }
-        let stop_name = self.stop().name.clone();
+        let stop = self.stop().clone();
         let carrier_card = !player_pays_operating_costs(&profile_of(ctx).business_status);
         let mut cost = 0.0;
         if !carrier_card {
@@ -124,22 +121,24 @@ pub trait FuelPump: Menu {
         }
         let margin_kg = self.drive().clone().with(ctx, |d, ctx| {
             d.trip.truck.refuel(Some(need));
+            // free showers with fuel
+            d.stop_visit(&stop).fueled = true;
             advance_rest_clock(d, ctx, FUEL_STOP_MIN, None, "");
             hos_mut_of(ctx).on_duty(FUEL_STOP_MIN);
             d.trip.truck.gross_weight_margin_kg()
         });
         let margin = Self::weight_margin_text("Gross weight", margin_kg.unwrap_or(0.0));
-        self.set_fueled_here(true);
-        self.save_here(ctx, true);
         ctx.audio.play("vehicle/fuel_pump");
 
-        // Award loyalty points for fueling
+        // Award loyalty points for fueling, then save: saved first, the
+        // points and shower credit were lost to a quit before the next save.
         let loyalty_text = {
             let result = profile_mut_of(ctx)
                 .loyalty
-                .add_fueling(need, None, &stop_name, &region);
+                .add_fueling(need, None, &stop.name, &region);
             loyalty_earnings_text(need, result.points_earned, &result.rewards)
         };
+        self.save_here(ctx, true);
 
         if carrier_card {
             // the carrier fuel card covers road fuel for company drivers

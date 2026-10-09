@@ -6,9 +6,13 @@ use std::f64::consts::PI;
 use regex::Regex;
 
 use crate::data::world::World;
-use crate::data::world_models::{Interchange, Leg, Stop};
+use crate::data::world_models::{Interchange, Leg, RoutePoint, Stop};
 use crate::pyfmt::fmt_f;
 use crate::sim::trip_models::Zone;
+
+/// Miles per degree of latitude on the 3,956-mile sphere
+/// [`haversine_distance_mi`] measures.
+const MILES_PER_DEGREE: f64 = 3956.0 * PI / 180.0;
 
 /// A leg-native (A-to-B) milepost as an offset in the direction of travel.
 pub fn stop_offset_for_direction(at_mi: f64, leg_miles: f64, forward: bool) -> f64 {
@@ -135,10 +139,111 @@ pub fn fallback_grade(terrain: &str, mile: f64, highway: &str) -> f64 {
     amplitude * (2.0 * PI * mile / wavelength + phase).sin()
 }
 
-/// Snap a (lat, lon) coordinate to the nearest route point on a leg,
-/// returning the trip-absolute milepost, or None when the leg has no route
-/// points or the coordinate is more than 2 miles from any of them (the
-/// construction event is on a cross street, not the highway itself).
+/// Every 511 state key a leg is looked up under, in the order the truck
+/// drives through them: a leg that crosses a state line runs in both
+/// states, and each state's feed carries only its own roadwork. Lower-cased
+/// the way the provider keys its cache; empty where the bake is silent.
+pub fn leg_states(leg: &Leg, forward: bool) -> Vec<String> {
+    let crossings = leg.state_crossings();
+    let mut states: Vec<&str> = match crossings.first() {
+        Some(first) => std::iter::once(first.from_state.as_str())
+            .chain(crossings.iter().map(|c| c.state.as_str()))
+            .collect(),
+        None => leg.state_miles().iter().map(|m| m.state.as_str()).collect(),
+    };
+    if !forward {
+        states.reverse();
+    }
+    let mut keys: Vec<String> = Vec::new();
+    for state in states {
+        let key = state.trim().to_lowercase();
+        if !key.is_empty() && !keys.contains(&key) {
+            keys.push(key);
+        }
+    }
+    keys
+}
+
+/// A leg's road as (lat, lon) points no more than a mile apart: its route
+/// points with each chord between two of them filled in, the straight line
+/// `Trip::leg_latlon_at` puts the truck on. The baked points run about 25
+/// miles apart (the median gap in California), so a search around them
+/// alone misses most of the road between.
+pub fn leg_track(leg: &Leg) -> Vec<(f64, f64)> {
+    let points = leg.route_points();
+    let mut track = Vec::new();
+    for pair in points.windows(2) {
+        let (a, b) = (&pair[0], &pair[1]);
+        let steps = haversine_distance_mi(a.lat, a.lon, b.lat, b.lon)
+            .ceil()
+            .max(1.0) as usize;
+        for k in 0..steps {
+            let t = k as f64 / steps as f64;
+            track.push((a.lat + t * (b.lat - a.lat), a.lon + t * (b.lon - a.lon)));
+        }
+    }
+    track.extend(points.last().map(|p| (p.lat, p.lon)));
+    track
+}
+
+/// Where a coordinate meets a leg's road, from [`snap_to_leg`].
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct LegSnap {
+    /// The trip-absolute milepost.
+    pub mile: f64,
+    /// How far off the road the coordinate lies, in miles.
+    pub off_road_mi: f64,
+    /// The road's compass bearing there in the direction of travel, degrees
+    /// clockwise from north; NaN on a leg of one point, which has none.
+    pub bearing_deg: f64,
+}
+
+/// Snap a (lat, lon) coordinate onto the nearest point of the line through
+/// a leg's route points. None when the leg has no route points or the
+/// coordinate is more than 2 miles off that line (the construction event is
+/// on a cross street, not the highway itself).
+pub fn snap_to_leg(
+    lat: f64,
+    lon: f64,
+    leg: &Leg,
+    forward: bool,
+    leg_start_mi: f64,
+) -> Option<LegSnap> {
+    let points = leg.route_points();
+    // Flat-earth about the coordinate, the way `caltrans` measures a county
+    // edge: a few feet out at the 2-mile reach that counts.
+    let kx = lat.to_radians().cos() * MILES_PER_DEGREE;
+    let local = |p: &RoutePoint| ((p.lon - lon) * kx, (p.lat - lat) * MILES_PER_DEGREE);
+    let lone = points.first().filter(|_| points.len() == 1).map(|p| (p, p));
+    // (leg-native mile, miles off the road, native bearing)
+    let mut best: Option<(f64, f64, f64)> = None;
+    for (a, b) in points.windows(2).map(|w| (&w[0], &w[1])).chain(lone) {
+        let ((ax, ay), (bx, by)) = (local(a), local(b));
+        let (dx, dy) = (bx - ax, by - ay);
+        let length = dx * dx + dy * dy;
+        let (t, bearing) = if length > 0.0 {
+            (
+                (-(ax * dx + ay * dy) / length).clamp(0.0, 1.0),
+                dx.atan2(dy).to_degrees(),
+            )
+        } else {
+            (0.0, f64::NAN)
+        };
+        let off = (ax + t * dx).hypot(ay + t * dy);
+        if off < best.map_or(f64::INFINITY, |(_, d, _)| d) {
+            best = Some((a.at_mi + t * (b.at_mi - a.at_mi), off, bearing));
+        }
+    }
+    let (native_mi, off_road_mi, bearing) = best?;
+    (off_road_mi <= 2.0).then(|| LegSnap {
+        mile: leg_start_mi + stop_offset_for_direction(native_mi, leg.miles, forward),
+        off_road_mi,
+        bearing_deg: (bearing + if forward { 0.0 } else { 180.0 }).rem_euclid(360.0),
+    })
+}
+
+/// The trip-absolute milepost where a coordinate meets a leg's road (see
+/// [`snap_to_leg`]).
 pub fn nearest_mile_on_leg(
     lat: f64,
     lon: f64,
@@ -146,25 +251,25 @@ pub fn nearest_mile_on_leg(
     forward: bool,
     leg_start_mi: f64,
 ) -> Option<f64> {
-    let points = leg.route_points();
-    if points.is_empty() {
-        return None;
-    }
-    let mut best = None;
-    let mut best_dist_mi = f64::INFINITY;
-    for rp in points {
-        let d = haversine_distance_mi(lat, lon, rp.lat, rp.lon);
-        if d < best_dist_mi {
-            best_dist_mi = d;
-            best = Some(rp);
-        }
-    }
-    let best = best?;
-    if best_dist_mi > 2.0 {
-        return None;
-    }
-    let offset = stop_offset_for_direction(best.at_mi, leg.miles, forward);
-    Some(leg_start_mi + offset)
+    snap_to_leg(lat, lon, leg, forward, leg_start_mi).map(|snap| snap.mile)
+}
+
+/// Whether a closure signed for one direction of travel ("North") lies on
+/// the other carriageway from a truck heading `bearing_deg`. A signed
+/// direction is the route's, not the compass's (US-101 "North" runs due
+/// west through Santa Barbara), so only a heading more than 120 degrees from
+/// it, 30 past that worst case, reads as the other side. A closure signed
+/// both ways, or not at all, is on every carriageway.
+pub fn runs_against_travel(direction: &str, bearing_deg: f64) -> bool {
+    let signed = match direction {
+        "North" => 0.0,
+        "East" => 90.0,
+        "South" => 180.0,
+        "West" => 270.0,
+        _ => return false,
+    };
+    let apart = (bearing_deg - signed).rem_euclid(360.0);
+    apart.min(360.0 - apart) > 120.0
 }
 
 /// Great-circle distance in miles between two coordinates.

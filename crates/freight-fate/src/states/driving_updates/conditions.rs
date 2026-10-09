@@ -432,6 +432,10 @@ impl DrivingState {
         if self.trip.truck.brake > 0.0 || self.trip.truck.parking_brake {
             return;
         }
+        let tr = &self.trip.truck.transmission;
+        if !tr.automatic && (tr.clutch > 0.5 || tr.shifting() || tr.in_neutral()) {
+            return; // the driver is shifting; throttle would only rev the engine
+        }
         let pedal = self.trip.truck.hold_throttle() + ARRIVAL_CREEP_THROTTLE_GAIN * (creep - v);
         self.trip.truck.throttle = self
             .trip

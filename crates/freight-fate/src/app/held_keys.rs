@@ -82,6 +82,19 @@ pub const SYNTHETIC_FRAME_MAX_MS: u64 = 40;
 /// of the same key and earns a fresh full pulse.
 pub const REPEAT_EARLY_TOLERANCE_MS: u64 = 60;
 
+/// How long another key's press keeps an arrow held that JAWS was
+/// re-sending, and the most an arrow stays held past its own last pair.
+///
+/// The keyboard repeats only the LAST key pressed. Hold Up, tap Space for the
+/// speed, and Windows stops repeating Up for good; JAWS never sends the
+/// release, so the game cannot tell that from a lifted finger, and the truck
+/// stopped accelerating under a finger still on the key. With a JAWS
+/// running, an established hold rides through such a press. The total cap is
+/// the price: a finger that lifted at the same moment keeps the pedal that
+/// long, so it stays short.
+pub const BRIDGE_MS: u64 = 1500;
+pub const BRIDGE_TOTAL_MS: u64 = 4000;
+
 /// The learned repeat spacing is the largest of this many recent spacings,
 /// so one slow script run widens the window at once and a run of quick ones
 /// narrows it again only once it has aged out.
@@ -161,6 +174,9 @@ pub struct HeldKeys {
     pair_frame: HashMap<Key, u64>,
     last_pair_synthetic: HashSet<Key>,
     spacings: Vec<u64>,
+    /// A screen reader that re-sends the arrows (JAWS) is the voice: another
+    /// key's press then keeps an established arrow hold alive.
+    bridge: bool,
 }
 
 impl Default for HeldKeys {
@@ -189,7 +205,13 @@ impl HeldKeys {
             pair_frame: HashMap::new(),
             last_pair_synthetic: HashSet::new(),
             spacings: Vec::new(),
+            bridge: false,
         }
+    }
+
+    /// Whether the voice is a screen reader that re-sends the arrow keys.
+    pub fn set_bridge(&mut self, on: bool) {
+        self.bridge = on;
     }
 
     // -- reading ------------------------------------------------------------------
@@ -206,8 +228,27 @@ impl HeldKeys {
             .is_some_and(|&until| until > self.now_ms)
     }
 
+    /// Down in the keyboard's own key state, pulses ignored.
+    pub fn physically_down(&self, key: Key) -> bool {
+        self.held.contains(&key)
+    }
+
     pub fn mods(&self) -> Mods {
         self.mods
+    }
+
+    /// The tracker's clock: frames clocked, milliseconds elapsed, and the
+    /// length of the current frame. The key probe reads these.
+    pub fn frame_number(&self) -> u64 {
+        self.frame
+    }
+
+    pub fn clock_ms(&self) -> u64 {
+        self.now_ms
+    }
+
+    pub fn frame_ms(&self) -> u64 {
+        self.frame_span_ms
     }
 
     // -- timing -------------------------------------------------------------------
@@ -266,7 +307,41 @@ impl HeldKeys {
         let was_held = !self.held.insert(key);
         self.mods = mods;
         if self.frame > 0 {
+            if self.bridge && !was_held {
+                self.bridge_interrupted_holds(key);
+            }
             self.pulse_press(key, was_held);
+        }
+    }
+
+    /// `key` was just pressed: any other arrow whose re-sent hold is
+    /// established has lost its repeats to it, not to a lifted finger, so its
+    /// pulse is carried on. The opposite pedal is left out: pressing the
+    /// brake is a decision to stop, and the throttle must not come back the
+    /// moment it lets go.
+    fn bridge_interrupted_holds(&mut self, key: Key) {
+        let now = self.now_ms;
+        for held in [Key::Up, Key::Down, Key::Left, Key::Right] {
+            let opposite_pedal = matches!((held, key), (Key::Up, Key::Down) | (Key::Down, Key::Up));
+            if held == key || opposite_pedal {
+                continue;
+            }
+            let alive = self
+                .pulse_until
+                .get(&held)
+                .is_some_and(|&until| until > now);
+            let established = self.train_repeats.get(&held).copied().unwrap_or(0) >= 1;
+            if !(alive && established) {
+                continue;
+            }
+            let cap = self
+                .pressed_at
+                .get(&held)
+                .map_or(now, |&pressed| pressed + BRIDGE_TOTAL_MS);
+            let until = (now + BRIDGE_MS).min(cap);
+            if let Some(slot) = self.pulse_until.get_mut(&held) {
+                *slot = (*slot).max(until);
+            }
         }
     }
 
@@ -639,6 +714,73 @@ mod tests {
         assert!(!sim.keys.is_pressed(Key::Up));
         assert!(!sim.keys.is_pressed(Key::B));
         assert_eq!(sim.keys.mods(), Mods::NONE);
+    }
+
+    /// Hold Up under JAWS for `seconds`, then tap Space the way a driver
+    /// asks for the speed: the keyboard repeats only the last key pressed, so
+    /// Up's pairs never come back.
+    fn hold_up_then_tap_space(sim: &mut Sim, seconds: f64) {
+        sim.screen_reader_hold(Key::Up, seconds, JAWS_FIRST_REPEAT_MS, &JAWS_SPACINGS_MS);
+        sim.keys.press(Key::Space, Mods::NONE);
+        for _ in 0..6 {
+            sim.frame();
+        }
+        sim.keys.release(Key::Space, Mods::NONE);
+    }
+
+    #[test]
+    fn under_jaws_a_tap_on_another_key_does_not_end_a_held_arrow() {
+        let mut sim = Sim::new();
+        sim.keys.set_bridge(true);
+        hold_up_then_tap_space(&mut sim, 3.0);
+        for _ in 0..60 {
+            sim.frame();
+            assert!(sim.keys.is_pressed(Key::Up), "the hold died at the tap");
+        }
+        // It still lets go: nothing keeps the pedal past the bridge.
+        assert!(sim.ms_until_released(Key::Up) <= BRIDGE_MS);
+    }
+
+    #[test]
+    fn without_jaws_a_tap_on_another_key_changes_nothing() {
+        let mut sim = Sim::new();
+        hold_up_then_tap_space(&mut sim, 3.0);
+        for _ in 0..20 {
+            sim.frame();
+        }
+        assert!(!sim.keys.is_pressed(Key::Up));
+    }
+
+    #[test]
+    fn the_brake_never_bridges_the_throttle() {
+        let mut sim = Sim::new();
+        sim.keys.set_bridge(true);
+        sim.screen_reader_hold(Key::Up, 3.0, JAWS_FIRST_REPEAT_MS, &JAWS_SPACINGS_MS);
+        sim.pair(Key::Down);
+        for _ in 0..20 {
+            sim.frame();
+        }
+        assert!(!sim.keys.is_pressed(Key::Up));
+    }
+
+    #[test]
+    fn a_bridged_hold_ends_within_the_cap_however_many_keys_are_tapped() {
+        let mut sim = Sim::new();
+        sim.keys.set_bridge(true);
+        sim.screen_reader_hold(Key::Up, 3.0, JAWS_FIRST_REPEAT_MS, &JAWS_SPACINGS_MS);
+        let start = sim.now_ms;
+        while sim.now_ms - start < BRIDGE_TOTAL_MS + 500 {
+            sim.keys.press(Key::Space, Mods::NONE);
+            sim.frame();
+            sim.keys.release(Key::Space, Mods::NONE);
+            for _ in 0..20 {
+                sim.frame();
+            }
+        }
+        assert!(
+            !sim.keys.is_pressed(Key::Up),
+            "taps kept the pedal past the cap"
+        );
     }
 
     #[test]

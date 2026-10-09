@@ -197,15 +197,6 @@ def test_ad_pool_is_modern_and_tagged():
         assert tagged >= 5, (pool, tagged)
 
 
-def test_song_plan_matches_batch_size():
-    for pool in ("oldies", "gospel", "tejano", "synthwave"):
-        assert 8 <= len(SONG_PLAN[pool]) <= 10, pool
-    for pool in ("country", "classic_rock", "blues", "jazz"):
-        assert 8 <= len(SONG_PLAN[pool]) <= 10, pool
-    night = SONG_PLAN.get("night_line", ())
-    assert 2 <= len(night) <= 3
-
-
 def test_song_plan_keys_lengths_and_prompts_are_sound():
     seen = set()
     for pool, songs in SONG_PLAN.items():

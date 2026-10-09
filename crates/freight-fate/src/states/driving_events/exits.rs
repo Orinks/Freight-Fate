@@ -128,9 +128,15 @@ impl DrivingState {
                 );
                 return;
             }
+            let was_blinking = self.exit_blinker_on();
             self.exit_signal_on = false;
             ctx.audio.release_cue("vehicle/turn_signal");
             ctx.audio.release_cue(STEER_CUE_HOLD);
+            if was_blinking {
+                // The stalk clicking back, as when the steering cue ends.
+                let volume = 1.0f64.min(STEER_CUE_CANCEL_VOL * self.cue_loudness(ctx));
+                ctx.audio.play_with("vehicle/turn_signal_off", volume, 0.0);
+            }
             self.steer_cue_active = false;
             self.steer_cue_hold_s = 0.0;
             self.exit_cancel_armed = false;
@@ -221,7 +227,8 @@ impl DrivingState {
         let mut message = if ctx.settings.lane_is_automated() {
             self.exit_lane_entered = true;
             ctx.audio.play_with("ui/notify", 0.6, 0.0);
-            let lane_hint = if in_right_lane { "" } else { " Right lane." };
+            // No lane hint: lane keeping moves to the right lane itself
+            // (`keep_right_for_exit`).
             // The first granted lane of the run says who granted it. A driver
             // who never asked for this needs one chance to notice the truck
             // is doing it, and where to change that.
@@ -232,7 +239,7 @@ impl DrivingState {
                 self.lane_keeping_grant_said = true;
                 "Lane keeping takes the exit lane for you."
             };
-            format!("{head} {ahead_text} ahead. {granted}{lane_hint}{ending}{cap}")
+            format!("{head} {ahead_text} ahead. {granted}{ending}{cap}")
         } else {
             // The right lane now; the exit lane itself where it opens, which
             // the cab calls at the taper. Nothing at all when the truck is
@@ -614,11 +621,7 @@ impl DrivingState {
         // The right lane, and only while the truck is not in it. The exit lane
         // itself is asked for where it opens, at the taper.
         if !self.in_right_lane_for_exit() {
-            owed.push_str(if ctx.settings.lane_is_automated() {
-                " Tap Right to the right lane."
-            } else {
-                " Move to the right lane."
-            });
+            owed.push_str(&right_lane_request(ctx));
             if self
                 .active_exit_pressure(stop)
                 .is_some_and(|p| p.intensity >= 0.35)
@@ -671,6 +674,7 @@ impl DrivingState {
             self.update_exit_speed_assist(ctx, &stop);
         }
         if automated {
+            self.keep_right_for_exit(ctx, &stop);
             return;
         }
         if !self.exit_signal_on {
@@ -714,10 +718,11 @@ impl DrivingState {
         }
         if self.exit_right_taps >= 2 && self.lane.exit_lane_open && !self.exit_tap_hint_said {
             self.exit_tap_hint_said = true;
-            self.say_plain(
-                ctx,
-                "Taps only nudge the wheel. Hold Right to steer into the exit lane.",
+            let text = format!(
+                "Taps only nudge the wheel. Hold {} to steer into the exit lane.",
+                ctx.control_name(Action::SteerRight)
             );
+            self.say_plain(ctx, text);
         }
         // No "Exit lane set" or "lost": crossing into the lane is the truck
         // taking the exit, and "You take" says so. No line at the gore. It used to say "Stay under" the ramp's number,
@@ -803,11 +808,9 @@ impl DrivingState {
         // drift off a tap changes lanes, and holding Right does nothing.
         // And only a lane the truck is not already in.
         let lane_text = if self.in_right_lane_for_exit() {
-            ""
-        } else if ctx.settings.lane_is_automated() {
-            " Tap Right to the right lane."
+            String::new()
         } else {
-            " Move to the right lane."
+            right_lane_request(ctx)
         };
         // Never "confirm": there is no confirm action, and an X pressed to
         // obey it cancels the signal instead.
@@ -825,15 +828,25 @@ impl DrivingState {
     /// end. The floor is [`Self::exit_approach_floor_mph`], at most ten under
     /// road speed: holding the RAMP's number here is what left trucks
     /// crawling down the through lane.
+    /// Never above the posted limit where the truck is: the floor reads the
+    /// gore's number, and a work zone that ends before the gore still binds.
     /// Says nothing: the slowing line already named who has the pedal, and
     /// holding the speed it announced is the same assist finishing its job.
     pub fn hold_exit_approach_speed(&mut self) {
-        let target = self.exit_approach_floor_mph(None);
+        let position = self.trip.position_mi;
+        let (here, _) = self.trip.speed_limit_at(position);
+        let target = self.exit_approach_floor_mph(None).min(here);
         let t = &mut self.trip.truck;
         if !t.engine_on || t.stalled || t.air_brakes_holding() {
             return;
         }
         if t.brake > 0.01 || t.emergency_brake || t.transmission.in_reverse() {
+            return;
+        }
+        // Clutch in or out of gear on a manual: throttle only revs the
+        // engine, and it held the revs up through the driver's downshift.
+        let tr = &t.transmission;
+        if !tr.automatic && (tr.clutch > 0.5 || tr.shifting() || tr.in_neutral()) {
             return;
         }
         let short_by = target - t.speed_mph();
@@ -931,5 +944,16 @@ impl DrivingState {
             return true;
         }
         stop.stop_type == "delivery_destination" && ctx.settings.lane_is_automated()
+    }
+}
+
+/// Ask for the right lane, when the move is the driver's. Lane keeping on
+/// full makes it itself (`keep_right_for_exit`), so it is not asked for: a
+/// tap into a lane lane keeping is waiting on is a sideswipe.
+fn right_lane_request(ctx: &GameContext) -> String {
+    if ctx.settings.lane_is_automated() {
+        String::new()
+    } else {
+        " Move to the right lane.".to_string()
     }
 }

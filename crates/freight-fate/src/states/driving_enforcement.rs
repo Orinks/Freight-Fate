@@ -110,7 +110,29 @@ pub const TABLEAU_INTRO_REASONS: [&str; 3] =
 /// still over the bypass speed with no scale exit armed. The full notice can
 /// land miles out; nothing else spoke between it and the bypass point, and a
 /// tester who mis-followed it heard silence all the way to the lights.
+///
+/// The floor of the window, not the whole of it: see
+/// [`SCALE_REMINDER_REAL_LEAD_S`] and `scale_reminder_mi`.
 pub const WEIGH_STATION_REMINDER_MI: f64 = 0.5;
+
+/// The ceiling of the reminder window. The window only grows past half a
+/// mile for a truck too fast for half a mile at the real clock to hold
+/// [`SCALE_REMINDER_REAL_LEAD_S`]; this keeps that a short call, not a
+/// second notice.
+pub const WEIGH_STATION_REMINDER_MAX_MI: f64 = 1.0;
+
+/// Real seconds the reminder must leave the driver before the scale can be
+/// judged bypassed: hear "Signal for the scale exit", press the key, and let
+/// the exit assist take the lane.
+///
+/// The window used to be a fixed half mile on the compressed clock, which at
+/// ten times real speed and 61 mph is three real seconds -- a tester heard
+/// the reminder and the bypass lights three seconds apart (log, 2026-10-07).
+/// Now the reminder holds the clock to real time from where it speaks to the
+/// gore, the way a signalled exit already does, and a crossing that comes
+/// sooner than this after the reminder (a late notice, a busy cab) is not
+/// charged at all.
+pub const SCALE_REMINDER_REAL_LEAD_S: f64 = 15.0;
 
 /// The sentence the open-scale lead distance is sized from. It must pace the
 /// real announcement's longest realistic rendering -- a long stop name and the

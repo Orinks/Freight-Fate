@@ -125,9 +125,11 @@ impl DrivingState {
         // waiting on, and until now only the countdown anchors said it (owner,
         // driving, 2026-09-24: "I should be able to see how far away from the
         // exit I am"). Asked for, never volunteered.
+        // "set" until the blinker runs, "on" once it clicks, as the X line.
         let armed = match self.armed_exit() {
             Some(stop) => format!(
-                " Signal on for {}, {}.",
+                " Signal {} for {}, {}.",
+                self.signal_verb(),
                 self.armed_exit_name(ctx, &stop),
                 ctx.settings
                     .distance_text(stop.at_mi - self.trip.position_mi, true)
@@ -148,6 +150,14 @@ impl DrivingState {
         self.exit_stop
             .clone()
             .filter(|stop| stop.at_mi > self.trip.position_mi)
+    }
+
+    fn signal_verb(&self) -> &'static str {
+        if self.exit_blinker_on() {
+            "on"
+        } else {
+            "set"
+        }
     }
 
     /// The armed exit as Space and U name it, in the signal-on line's shapes:
@@ -281,8 +291,9 @@ impl DrivingState {
     /// here, right now.
     ///
     /// Sits next to S on purpose: S answers "what is posted", D answers "what
-    /// should I actually be doing". Weather grip, an armed exit, and an
-    /// approaching curve are baked into the math, never into the sentence, so
+    /// should I actually be doing". Weather grip, a steep downgrade, an
+    /// approaching curve and, once on the ramp, the exit speed are baked into
+    /// the math, never into the sentence, so
     /// the answer survives being heard exactly once at speed. Repeatable free.
     pub fn speak_safe_speed(&mut self, ctx: &mut GameContext) {
         let position = self.trip.position_mi;
@@ -465,7 +476,7 @@ impl DrivingState {
                     } else if truck.throttle <= 0.05 {
                         parts.push("Speed is building; set the jake before it runs.".to_string());
                     }
-                } else if stage > 0 {
+                } else if stage > 0 && truck.jake_brake_force() > 0.0 {
                     parts.push(format!("Jake stage {stage} has it."));
                 } else {
                     parts.push("Speed in hand.".to_string());
@@ -608,7 +619,8 @@ impl DrivingState {
         if let Some(stop) = armed.as_ref() {
             let name = self.armed_exit_name(ctx, stop);
             parts.push(format!(
-                "signal on for {name}, in {}{}",
+                "signal {} for {name}, in {}{}",
+                self.signal_verb(),
                 ctx.settings.distance_text(stop.at_mi - pos, true),
                 Self::ramp_ending_clause(&self.ramp_control_for(ctx, stop, None))
             ));

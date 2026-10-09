@@ -10,15 +10,6 @@ os.environ["SDL_AUDIODRIVER"] = "dummy"
 os.environ["FREIGHT_FATE_NO_SPEECH"] = "1"
 
 import pytest
-from hypothesis import HealthCheck, settings
-
-settings.register_profile(
-    "default",
-    max_examples=50,
-    deadline=None,
-    suppress_health_check=[HealthCheck.function_scoped_fixture],
-)
-settings.load_profile(os.environ.get("HYPOTHESIS_PROFILE", "default"))
 
 # Ceiling on what ``-n auto`` may spawn. Measured when the suite still built
 # whole game instances, on the 28-core developer machine, 140 driving tests:
@@ -50,10 +41,3 @@ def isolated_data_dir(tmp_path, monkeypatch):
     """Keep saves and settings out of the real user data directory."""
     monkeypatch.setenv("FREIGHT_FATE_DATA_DIR", str(tmp_path / "data"))
     yield
-
-
-@pytest.fixture(scope="session")
-def world():
-    from ffworld import get_world
-
-    return get_world()

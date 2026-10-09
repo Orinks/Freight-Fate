@@ -206,6 +206,40 @@ impl DiscordRpcClient {
     }
 }
 
+impl DiscordRpcClient {
+    /// Read Discord's answer to the command just sent.
+    ///
+    /// The IPC crate writes SET_ACTIVITY and never reads the reply Discord
+    /// sends back for every command, so a long session piled one unread
+    /// reply per update into the pipe, and a command Discord refused (a
+    /// rate limit, a payload it would not take) failed silently while the
+    /// presence it was meant to change stayed up (2026-10-03: a driver shown
+    /// at 0% for seven hours). Reading it keeps the pipe drained and turns a
+    /// refusal into an error, which tears the client down and reconnects.
+    /// This runs on the presence worker, never the game loop; nothing waits
+    /// on a worker mid-command at quit (see `wait_for_worker`).
+    fn await_reply(&mut self) -> Result<(), String> {
+        let (op, reply) = self.client.recv().map_err(|e| e.to_string())?;
+        check_reply(op, &reply)
+    }
+}
+
+/// Judge one IPC reply frame: a CLOSE frame (opcode 2) or an `ERROR` event is
+/// Discord refusing the command; anything else is its acknowledgement.
+pub fn check_reply(op: u32, reply: &serde_json::Value) -> Result<(), String> {
+    if op == 2 {
+        return Err(format!("Discord closed the connection: {reply}"));
+    }
+    if reply.get("evt").and_then(|e| e.as_str()) == Some("ERROR") {
+        let message = reply
+            .pointer("/data/message")
+            .and_then(|m| m.as_str())
+            .unwrap_or("no message");
+        return Err(format!("Discord refused the command: {message}"));
+    }
+    Ok(())
+}
+
 impl RpcClient for DiscordRpcClient {
     fn connect(&mut self) -> Result<(), String> {
         self.client.connect().map_err(|e| e.to_string())
@@ -221,11 +255,13 @@ impl RpcClient for DiscordRpcClient {
         }
         self.client
             .set_activity(activity)
-            .map_err(|e| e.to_string())
+            .map_err(|e| e.to_string())?;
+        self.await_reply()
     }
 
     fn clear(&mut self) -> Result<(), String> {
-        self.client.clear_activity().map_err(|e| e.to_string())
+        self.client.clear_activity().map_err(|e| e.to_string())?;
+        self.await_reply()
     }
 
     fn close(&mut self) -> Result<(), String> {

@@ -56,7 +56,15 @@ impl DrivingState {
         let visibility = self.trip.weather.effects().visibility_mi;
         let visibility = if visibility == 0.0 { 10.0 } else { visibility };
         let gap_s = self.trip.traffic_context().map(|c| c.gap_seconds());
-        let chain_level = self.trip.chain_law_level();
+        // The law binds on the posted grade and nowhere else: the same test
+        // the entry citation makes (`update_chain_law`). Snow anywhere used
+        // to let a scale or a patrol in Chicago write "running the chain
+        // control without chains" (seasonal audit, 2026-10-01).
+        let chain_level = if self.trip.chain_law_area_at(position).is_some() {
+            self.trip.chain_law_level()
+        } else {
+            0
+        };
         let night = is_night(self.trip.local_hour());
         let pack_neighbours = self.trip.traffic_manager.pack_neighbours(
             position,

@@ -132,6 +132,10 @@ pub struct Transmission {
     pub shift_timer: f64,
     /// Seconds since the last gear change (the automatic's comfort hold).
     pub gear_hold_timer: f64,
+    /// A manual downshift with the clutch still held: the engine matches the
+    /// new gear's road speed, as the automatic's shift does, until the clutch
+    /// comes back out.
+    pub rev_match: bool,
 }
 
 impl Default for Transmission {
@@ -142,6 +146,7 @@ impl Default for Transmission {
             clutch: 0.0,
             shift_timer: 0.0,
             gear_hold_timer: 999.0,
+            rev_match: false,
         }
     }
 }
@@ -205,6 +210,7 @@ impl Transmission {
                 grind: true,
             };
         }
+        self.rev_match = target >= 1 && target < self.gear;
         self.gear = target;
         self.shift_timer = MANUAL_LEVER_TIME;
         ShiftResult {
@@ -365,10 +371,14 @@ impl Transmission {
         if self.shift_timer > 0.0 {
             self.shift_timer = (self.shift_timer - dt).max(0.0);
         }
+        if self.clutch <= 0.5 && self.shift_timer <= 0.0 {
+            self.rev_match = false;
+        }
     }
 
     /// Clear a stopped recovery's drive state without a simulated shift.
     pub fn reset_to_neutral(&mut self) {
+        self.rev_match = false;
         self.gear = NEUTRAL;
         self.shift_timer = 0.0;
         self.gear_hold_timer = 0.0;

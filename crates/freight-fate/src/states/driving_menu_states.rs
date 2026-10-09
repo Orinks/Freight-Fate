@@ -26,12 +26,14 @@
 mod apps;
 mod arrival;
 mod badges;
+mod commands;
 mod drive_ref;
 mod facility_arrival;
 mod status;
 
 pub use apps::{DriverAppScreenState, DriverAppsState};
 pub use arrival::{settlement_hours, ArrivalState};
+pub use commands::DrivingCommandsState;
 pub use drive_ref::{keep_rows, push_over_drive, replace_drive_with, DriveRef};
 pub use facility_arrival::FacilityArrivalState;
 pub use status::{DrivingStatusScreenState, DrivingStatusState};
@@ -92,6 +94,14 @@ pub fn simple_arrival_badge(city_key: &str) -> Option<&'static str> {
 // `drive_ref`).
 
 impl DrivingState {
+    /// The driving command list: F2, and three-finger tap on a touch screen.
+    pub fn push_driving_commands(&mut self, ctx: &mut GameContext) {
+        // Its rows come from the key table, not the drive, so the ordinary
+        // push works from inside the drive's handler.
+        let state = DrivingCommandsState::new(ctx);
+        ctx.push_state(state);
+    }
+
     /// `ctx.push_state(DrivingStatusState(ctx, self))`: Tab, and the pad's
     /// modifier plus Start.
     pub fn push_driving_status(&mut self, ctx: &mut GameContext) {

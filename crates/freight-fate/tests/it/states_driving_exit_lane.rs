@@ -212,6 +212,78 @@ fn out_of_the_right_lane_is_asked_to_move_right_until_it_is_there() {
 }
 
 #[test]
+fn full_lane_keeping_moves_right_for_the_exit_itself() {
+    // Owner's drive, I-94 into Chicago, 2026-10-01: lane keeping on full,
+    // pulled out to the middle lane around truck traffic three miles out,
+    // and lane keeping held the middle lane through the gore -- twice, each
+    // loop-back promising "lane keeping will take it". The exit lane opens
+    // only beside the right lane, so taking the exit means getting there.
+    let (mut harness, _stop) = rig("full", 1, 2.3);
+    harness.press_key(Key::X, None);
+    let arming = heard(&harness)
+        .into_iter()
+        .find(|l| l.contains("Signal set"))
+        .expect("the signal line");
+    // Nothing to tap: lane keeping makes the move.
+    assert!(!arming.contains("right lane"), "{arming}");
+
+    drive_until(&mut harness, "took the exit", |h| {
+        h.read_drive(|d| d.ramp_mi.is_some())
+    });
+    // Once, though the pacer may hand the line back after a cut.
+    let phrase = "Changing to the right lane for the exit.";
+    assert_eq!(
+        count(&harness, phrase).saturating_sub(harness.app.ctx.handed_back_count(phrase)),
+        1,
+        "{:?}",
+        heard(&harness)
+    );
+    assert!(heard(&harness)
+        .iter()
+        .any(|l| l.contains("You take exit 42")));
+    assert_eq!(count(&harness, "missed"), 0, "{:?}", heard(&harness));
+    assert_eq!(count(&harness, "sideswiped"), 0, "{:?}", heard(&harness));
+}
+
+#[test]
+fn full_lane_keeping_waits_for_the_right_lane_to_open() {
+    let (mut harness, stop) = rig("full", 1, 2.3);
+    harness.press_key(Key::X, None);
+    // A semi riding beside the cab in the right lane, at the truck's speed.
+    let pace = |d: &mut freight_fate::states::driving::DrivingState| {
+        let at = d.trip.position_mi;
+        let mph = d.truck().speed_mph();
+        d.trip.set_npc_vehicles(vec![TrafficVehicle::new(
+            "npc:beside",
+            at,
+            mph,
+            mph,
+            0,
+            "cruising",
+            "semi",
+        )
+        .with_lane(0)]);
+    };
+    // Past the two-mile mark with the lane held: lane keeping stays put.
+    while harness.read_drive(|d| d.trip.position_mi < stop.at_mi - 1.5) {
+        harness.with_drive(|d, _| pace(d));
+        frame(&mut harness);
+        assert!(
+            harness.read_drive(|d| d.lane.lane == 1 && d.lane_change_target.is_none()),
+            "moved into a held lane\n{}",
+            harness.transcript_text()
+        );
+    }
+
+    // The semi drops back out of sight: in it goes, and the exit is taken.
+    harness.with_drive(|d, _| d.trip.set_npc_vehicles(Vec::new()));
+    drive_until(&mut harness, "took the exit", |h| {
+        h.read_drive(|d| d.ramp_mi.is_some())
+    });
+    assert_eq!(count(&harness, "sideswiped"), 0, "{:?}", heard(&harness));
+}
+
+#[test]
 fn right_lane_traffic_is_never_in_the_exit_lane() {
     // The mirror check calls any vehicle within a third of a mile of a lane
     // change a sideswipe. The exit lane is an auxiliary lane with no through

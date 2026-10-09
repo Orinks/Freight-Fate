@@ -34,9 +34,9 @@ use crate::states::city::weather::time_and_weather_lines;
 use crate::states::city::{
     base_menu_enter, board_candidates, first_day_guidance_active, first_day_orientation_lines,
     open_freight_market, parked_at, profile, profile_mut, record_city_duty,
-    terminal_objective_clause, ApplyToCarrierState, BobtailDestState, BusinessStatusState,
-    EndorsementCourseState, GarageState, PayDebtState, TruckShopState, BACKUP_RESULT_WAIT_S,
-    BOBTAIL_RANGE_MI, DRIVING_SCHOOL_ENABLED,
+    terminal_objective_clause, warm_dispatch_board, ApplyToCarrierState, BobtailDestState,
+    BusinessStatusState, EndorsementCourseState, GarageState, PayDebtState, TruckShopState,
+    BACKUP_RESULT_WAIT_S, BOBTAIL_RANGE_MI, DRIVING_SCHOOL_ENABLED,
 };
 use crate::states::driving_school::DrivingSchoolState;
 use crate::states::logbook::LogbookState;
@@ -72,7 +72,8 @@ pub fn no_truck_location_line(city_name: &str, city_state: &str) -> String {
     }
 }
 
-fn local_zone(ctx: &GameContext) -> TimeZone {
+/// The wall-clock zone of the city the driver is standing in.
+pub(crate) fn local_zone(ctx: &GameContext) -> TimeZone {
     ctx.world
         .city(&profile(ctx).current_city)
         .map(|city| city_zone(city))
@@ -696,6 +697,7 @@ impl Menu for CityMenuState {
         // "loading" (the provider shares observations per station).
         let city = profile(ctx).current_city.clone();
         ctx.warm_real_weather(&city);
+        warm_dispatch_board(ctx.world, &city);
         base_menu_enter(self, ctx);
     }
 
@@ -865,12 +867,15 @@ impl Menu for CityMenuState {
                 ),
             ]
         };
-        items.push(
-            MenuItem::new("Truck dealer", |s: &mut Self, ctx| s.truck_dealer(ctx)).help(
-                "Tractors at the local dealer. Owner-operators buy and switch here, company \
-                 drivers can look.",
-            ),
-        );
+        // Owner-operator business stays off a company driver's menus (owner,
+        // 2026-09-28): the carrier assigns the tractor, and the buy-in lives
+        // under Business status.
+        if is_owner_operator(status) {
+            items.push(
+                MenuItem::new("Truck dealer", |s: &mut Self, ctx| s.truck_dealer(ctx))
+                    .help("Tractors at the local dealer. Buy a truck or switch between yours."),
+            );
+        }
         // Owner-operators only (owner ruling, 2026-08-20): a company
         // driver's tractor goes where dispatch sends it -- repositioning
         // on a whim is the owner's privilege because it is the owner's

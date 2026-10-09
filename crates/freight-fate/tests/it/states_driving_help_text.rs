@@ -65,7 +65,9 @@ fn test_driving_help_explains_selected_automatic_direction_style() {
         "{said}"
     );
     assert!(
-        said.contains("T plans the recommended break or sleep stop when HOS planning hints are on"),
+        said.contains(
+            "T plans the recommended break or sleep stop when hours of service planning hints are on"
+        ),
         "{said}"
     );
     assert!(
@@ -93,7 +95,9 @@ fn test_driving_help_explains_selected_automatic_direction_style() {
         "{said}"
     );
     assert!(
-        said.contains("plans a recommended break or sleep stop when HOS planning hints are on"),
+        said.contains(
+            "plans a recommended break or sleep stop when hours of service planning hints are on"
+        ),
         "{said}"
     );
     assert!(

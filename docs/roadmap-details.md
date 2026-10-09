@@ -394,7 +394,7 @@ repository root; Markdown links are relative to this document.
       voice. A probe that fails arms the silence notice, which the main
       menu now also speaks from `update` when it lands late.
 - [x] **Rust port: drive-time frame cost is measured, and one bug found by
-      measuring it (2026-08-24).** `crates/freight-fate/tests/it/frame_time.rs`
+      measuring it (2026-08-24).** `crates/freight-fate/tests/frame_time/`
       drives a seeded, weather-pinned I-70 run out of Denver through the whole
       per-frame path the shipped loop runs (`App::tick` plus the line build)
       and reports mean/median/p95/p99/max, the split between the sim step, the
@@ -6017,16 +6017,18 @@ repository root; Markdown links are relative to this document.
       NVDA and SAPI voice combination and collect the next session log; the
       deterministic recovery tests cannot reproduce his native stall or prove
       the reported wider computer lockup is resolved.
-- [ ] **The frame-time p99 budget test is load-sensitive (found
-      2026-08-30, pre-existing).** `frame_time::a_driven_frame_stays_
-      well_inside_the_sixty_hertz_budget` fails inside a full
+- [x] **The frame-time p99 budget test is no longer load-sensitive
+      (found 2026-08-30, fixed 2026-10-02).** `a_driven_frame_stays_
+      well_inside_the_sixty_hertz_budget` failed inside a full
       `cargo test -p freight-fate --test it` run on the dev machine
-      (p99 6.7-9.6 ms against the 4.2 ms debug ceiling, median a
-      healthy 107 us) and passes comfortably run solo (0.72 s).
-      Verified on the untouched branch too -- identical failure -- so
-      it is the parallel test binary's load, not a regression. Either
-      isolate the bench from sibling test threads or gate the p99
-      assertion on an idle-machine check; do NOT loosen the budget.
+      (p99 6.7-9.6 ms against the 4.2 ms ceiling, median a healthy
+      107 us) and passed solo. Reproduced on Linux by oversubscribing
+      the `it` binary (`--test-threads 16` and 32 on four cores: p99
+      7.4 and 10.1 ms, median 65 us); the scheduler's per-thread stats
+      put almost all of each slow frame in waiting for a CPU, not in
+      the frame. The file is now its own test binary, which cargo runs
+      after `it` rather than alongside it, and its gates hold a lock so
+      they never time over each other. The budget is unchanged.
 - [ ] **Jail for a pursuit, not a three-hour "processing" fee.** Owner
       question 2026-08-10, roadmapped rather than built. Speeding is a
       citation even at the extreme end, so no change there -- but fleeing

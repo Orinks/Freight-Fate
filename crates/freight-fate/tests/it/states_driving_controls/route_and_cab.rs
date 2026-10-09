@@ -244,12 +244,18 @@ fn test_route_key_names_the_street_under_the_wheels() {
         .map(|leg| (leg.miles, leg.highway.clone()))
         .collect();
     assert!(legs.len() >= 2);
+    // Street and city read as written: capitalising the line's first word
+    // once lowercased the rest, and "US 83" was read as the word "us".
+    let city = app
+        .ctx
+        .world
+        .spoken_city(&d.trip.route.cities[0], Some(true));
     app.clear_speech();
 
     d.trip.position_mi = legs[0].0 * 0.5;
     d.handle_key_event(&mut app.ctx, &key(Key::R));
     assert!(
-        last(&app).contains(&format!("On city streets, {},", legs[0].1.to_lowercase())),
+        last(&app).contains(&format!("On city streets, {}, in {city}.", legs[0].1)),
         "{}",
         last(&app)
     );
@@ -257,7 +263,7 @@ fn test_route_key_names_the_street_under_the_wheels() {
     d.trip.position_mi = legs[0].0 + legs[1].0 * 0.5;
     d.handle_key_event(&mut app.ctx, &key(Key::R));
     assert!(
-        last(&app).contains(&format!("On city streets, {},", legs[1].1.to_lowercase())),
+        last(&app).contains(&format!("On city streets, {}, in {city}.", legs[1].1)),
         "{}",
         last(&app)
     );

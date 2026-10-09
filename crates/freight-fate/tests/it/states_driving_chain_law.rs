@@ -328,3 +328,22 @@ fn test_compliance_ends_the_matter() {
         spoken(&app)
     );
 }
+
+#[test]
+fn test_no_post_sees_a_chain_law_off_the_posted_grade() {
+    // Snow anywhere used to let a scale or a patrol write "running the chain
+    // control without chains" -- on I-94 in Chicago as readily as on the pass
+    // (seasonal audit, 2026-10-01). The law binds on its grade only.
+    use ff_core::sim::enforcement_posts::{build_post, KIND_CMV};
+    let mut app = TestApp::new();
+    let drive = law_drive(&mut app, Law::default());
+    let sample_at = |at: f64| {
+        with_drive(&drive, |d| {
+            d.trip.position_mi = at;
+            let post = build_post(at, KIND_CMV, 0, None, 1.0, "", Some(true), 1.0);
+            d.road_sample(&post).chains_required
+        })
+    };
+    assert!(sample_at(6.0), "on the posted grade the law applies");
+    assert!(!sample_at(20.0), "ten miles past the grade it does not");
+}

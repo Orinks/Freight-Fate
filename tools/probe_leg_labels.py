@@ -161,7 +161,11 @@ def main() -> int:
     for n, (leg, baked_share) in enumerate(suspects, 1):
         leg_id = f"{leg['from']}:{leg['to']}"
         highway = str(leg.get("highway") or "")
-        fetched = rr.fetch_route(cities[leg["from"]], cities[leg["to"]])
+        fetched = rr.fetch_route(
+            cities[leg["from"]],
+            cities[leg["to"]],
+            via=rr.route_via_points(leg),
+        )
         if fetched is None:
             print(f"  [{n}/{len(suspects)}] {leg_id}: the router returned no route")
             continue

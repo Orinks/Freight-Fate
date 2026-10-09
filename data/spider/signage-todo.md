@@ -12,6 +12,8 @@ need BUILT legs, so this list trails the map build.
   countdown billboards ("You never sausage a place!"), Pedro, the sombrero
   tower, fireworks, a huge diesel stop. A whole billboard *series* on its own —
   the parody register is basically pre-written by the real thing. Prime.
+  **Done 2026-09-30:** a three-sign countdown each way
+  (`signsheets/countdowns-2026-09-30.md`).
 - **Pedro's countdown billboards** — the miles-out teasers are the exact
   short-hook `spoken:` shape; a natural multi-sign run down the SC stretch.
 - **Walterboro, SC** ("front porch of the Lowcountry") + the Point South /

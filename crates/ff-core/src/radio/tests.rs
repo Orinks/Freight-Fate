@@ -308,7 +308,11 @@ fn test_ff_music_stations_share_the_ff_dial_group() {
         .iter()
         .filter(|s| !s.playlist.is_empty() && !s.real_stream && s.id != SAFE_ROUTE_PLAYLIST)
         .collect();
-    assert_eq!(playlist_backed.len(), 18);
+    // 19 since 2026-10-06: Channel 3000 (87.7) joined the Freight Fate
+    // stations. Its "playlist" names its own schedule rather than a music
+    // pool, but it is ours, plays no stream, and leaves the dial with the
+    // others in Synthesized music mode.
+    assert_eq!(playlist_backed.len(), 19);
     assert!(playlist_backed.iter().all(|s| dial_group(s) == 1));
     assert!(playlist_backed.iter().all(|s| s.always_available));
 }
@@ -491,8 +495,13 @@ fn test_catalog_entries_have_spoken_identity() {
             problems.push(format!("{where_}: no name"));
         }
         // Web stations are named, not lettered; everything else leads with a
-        // call sign, and display_name copes with either shape.
-        if station.call_sign.is_empty() && station.source_type != "web" {
+        // call sign, and display_name copes with either shape. Channel 3000
+        // is named too: it is a television channel heard on the radio, and
+        // a made-up call sign would squat a real FCC one.
+        if station.call_sign.is_empty()
+            && station.source_type != "web"
+            && station.id != crate::channel3000::CHANNEL_3000_ID
+        {
             problems.push(format!("{where_}: no call sign and not a web station"));
         }
         let display = station.display_name();
@@ -1263,6 +1272,15 @@ fn test_normalize_strips_scheme_and_trailing_slash_and_folds_host_case() {
         "example.com/Live"
     );
     assert_eq!(normalize_stream_url("http://example.com"), "example.com");
+    // The Shoutcast mount is the same stream as the root a player is served.
+    assert_eq!(
+        normalize_stream_url("http://example.com:8000/;"),
+        normalize_stream_url("http://example.com:8000/")
+    );
+    assert_eq!(
+        normalize_stream_url("http://example.com/stream/;"),
+        "example.com/stream"
+    );
     assert_eq!(
         normalize_stream_url("  http://example.com/a/b  "),
         "example.com/a/b"
@@ -1417,6 +1435,45 @@ fn test_a_name_that_repeats_the_call_sign_speaks_once() {
 }
 
 #[test]
+fn test_a_name_that_says_its_call_sign_is_spoken_as_named() {
+    let named = |call: &str, name: &str| RadioStation::new("x", name, call, "news", "test");
+    assert_eq!(named("KXLU", "KXLU 88.9").display_name(), "KXLU 88.9");
+    assert_eq!(
+        named("KING-FM", "Classical KING FM 98.1").display_name(),
+        "Classical KING FM 98.1"
+    );
+    assert_eq!(named("AFN", "AFN Tokyo").display_name(), "AFN Tokyo");
+    assert_eq!(
+        named("KAAY AM", "AM 1090 KAAY").display_name(),
+        "AM 1090 KAAY"
+    );
+    // A call sign inside a longer word is not the call sign.
+    assert_eq!(
+        named("SAT", "Safe Satellite Fallback").display_name(),
+        "SAT, Safe Satellite Fallback"
+    );
+    assert_eq!(
+        named("SDPB", "Sioux Falls").display_name(),
+        "SDPB, Sioux Falls"
+    );
+    for station in default_radio_catalog() {
+        let display = station.display_name();
+        let base = station
+            .call_sign
+            .split(|c: char| !c.is_alphanumeric())
+            .next()
+            .unwrap_or_default();
+        if let Some(rest) = display.strip_prefix(base).filter(|_| !base.is_empty()) {
+            assert!(
+                !(rest.starts_with(", ") && rest.contains(base)),
+                "{}: the call sign is spoken twice in {display:?}",
+                station.id
+            );
+        }
+    }
+}
+
+#[test]
 fn test_web_station_names_carry_no_stream_jargon() {
     let jargon = regex::Regex::new(r"(?i)\b(?:kbps|kbit|aac|mp3|\d{2,3}\s?kb?)\b").unwrap();
     for station in web() {
@@ -1549,7 +1606,7 @@ fn test_station_list_lines_speak_distance_and_source() {
     let lines = radio.station_list_lines(12, None);
     assert_eq!(
         lines,
-        vec!["current, WZZZ, WZZZ FM: country, strong signal, 0 miles away. Source: reception fixture."]
+        vec!["current, WZZZ FM: country, strong signal, 0 miles away. Source: reception fixture."]
     );
     let spoken = radio.station_list_lines(12, Some(&|miles: f64| format!("{miles:.1} mi")));
     assert!(spoken[0].contains(", 0.0 mi away"));

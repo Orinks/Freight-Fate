@@ -18,6 +18,17 @@ fn respond_raw(out: &mut dyn Write, value: &Value) {
     let _ = out.flush();
 }
 
+/// The `lockstep` tool's reply.
+pub(super) fn lockstep_reply(on: bool) -> String {
+    if on {
+        "Lockstep is on: the world waits between tool calls. Time passes only inside \
+         wait, pedal, wait_for, and the frames a call scripts."
+    } else {
+        "Lockstep is off: the road runs on the wall clock again."
+    }
+    .to_string()
+}
+
 fn tool_text(text: String) -> Value {
     json!({"content": [{"type": "text", "text": text}]})
 }
@@ -272,6 +283,21 @@ fn tools_list() -> Value {
                 "live": {"type": "boolean", "description": "true to let the operator's keyboard in, false to shut it out again"},
             }),
             &["live"],
+        ),
+        tool(
+            "key_probe",
+            "Measure what the operator's keyboard delivers to the game, screen reader and \
+             all -- for a JAWS machine, where held arrows arrive as instant press-and-\
+             release pairs. Needs operator_keys live true. Call with action start, ask \
+             the operator to hold each arrow key for several seconds, then call with \
+             action report: it says how the keys arrived, how long the game read each \
+             one held against how long the keyboard did, and how many re-sent pairs the \
+             held-key tracker missed and why (a slow frame, or a pair split across two \
+             frames).",
+            json!({
+                "action": {"type": "string", "enum": ["start", "report"]},
+            }),
+            &["action"],
         ),
         tool(
             "lockstep",
@@ -569,6 +595,11 @@ pub fn build_command(name: &str, args: &Map<String, Value>) -> Result<Command, S
         "operator_keys" => match args.get("live").and_then(Value::as_bool) {
             Some(live) => Ok(Command::OperatorKeys { live }),
             None => Err("operator_keys needs live: true or false".to_string()),
+        },
+        "key_probe" => match args.get("action").and_then(Value::as_str) {
+            Some("start") => Ok(Command::KeyProbe { start: true }),
+            Some("report") => Ok(Command::KeyProbe { start: false }),
+            _ => Err("key_probe needs action: \"start\" or \"report\"".to_string()),
         },
         "lockstep" => match args.get("on").and_then(Value::as_bool) {
             Some(on) => Ok(Command::Lockstep { on }),

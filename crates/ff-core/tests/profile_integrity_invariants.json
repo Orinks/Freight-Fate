@@ -58,6 +58,10 @@
       "category": "places",
       "description": "You delivered into Appalachian coal-and-ridge country, where the roads bend like fiddle tunes. The hills watched you come in, and the dock was glad you did."
     },
+    "appreciation_week": {
+      "category": "hidden",
+      "description": "A load delivered during Truck Driver Appreciation Week. There were doughnuts at the receiving window, and a dispatcher said thanks without being asked. Next week it goes back to being the job."
+    },
     "april_first": {
       "category": "hidden",
       "description": "A delivery settled on the first day of April. Dispatch swore the load was real, and for once the joke was on nobody -- paperwork clean, payment posted."
@@ -763,6 +767,7 @@
     "all_upgrades",
     "amarillo_arrival",
     "appalachia_delivery",
+    "appreciation_week",
     "april_first",
     "authority_active",
     "bakersfield_arrival",
@@ -946,6 +951,7 @@
     "all_upgrades": "Every Box on the Order Sheet",
     "amarillo_arrival": "Amarillo by Daybreak",
     "appalachia_delivery": "Freight Up the Holler",
+    "appreciation_week": "Somebody Said Thank You",
     "april_first": "Nobody's Fool on the First",
     "authority_active": "Running Under Your Own Numbers",
     "bakersfield_arrival": "The Bakersfield Sound",
@@ -1193,6 +1199,328 @@
     "sunpine_freight": "Sunpine Freight Lines",
     "tehachapi_motor_lines": "Tehachapi Motor Lines",
     "verdigris_transport": "Verdigris Transport"
+  },
+  "carriers": {
+    "alapaha_regional": {
+      "description": "A regional company-driver start in Georgia and Alabama, between the Port of Savannah, Atlanta, and Birmingham. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Alapaha Regional",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Atlanta"
+    },
+    "androscoggin_freight": {
+      "description": "A regional company-driver start in New England and the upper Hudson. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Androscoggin Freight",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Boston"
+    },
+    "barataria_carriers": {
+      "description": "A regional company-driver start in the central Gulf Coast. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Barataria Carriers",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "New Orleans"
+    },
+    "basin_harbor_drayage": {
+      "description": "A local company-driver start in the Los Angeles basin and the Inland Empire. Dispatch offers loads of up to 150 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more appointment slack",
+      "favoredFreight": [],
+      "name": "Basin Harbor Drayage",
+      "pay": {
+        "minPerMile": 1.05,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.3,
+        "stopPay": 210
+      },
+      "suggestedHomeTerminal": "Los Angeles"
+    },
+    "chatanika_freight": {
+      "description": "A regional company-driver start in Alaska, between Anchorage, the Mat-Su valley, the Kenai Peninsula, Valdez, Fairbanks, Tok, and Deadhorse on the Dalton Highway. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Chatanika Freight Lines",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Anchorage"
+    },
+    "chehalis_freight": {
+      "description": "A regional company-driver start in the Pacific Northwest. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Chehalis Freight Lines",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Seattle"
+    },
+    "des_plaines_cartage": {
+      "description": "A local company-driver start in Chicagoland. Dispatch offers loads of up to 150 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more appointment slack",
+      "favoredFreight": [],
+      "name": "Des Plaines River Cartage",
+      "pay": {
+        "minPerMile": 1.05,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.3,
+        "stopPay": 210
+      },
+      "suggestedHomeTerminal": "Chicago"
+    },
+    "great_lakes_training": {
+      "description": "A practical training-fleet start. Stop pay is better on short loads, and dispatch leans toward shorter training work with a little more deadline room. Equipment and routine costs stay carrier-paid.",
+      "dispatch": "more short training loads, more appointment slack",
+      "favoredFreight": [],
+      "name": "Great Lakes Training Transport",
+      "pay": {
+        "minPerMile": 0.74,
+        "onTimeBonusShare": 0.02,
+        "payShare": 0.33,
+        "stopPay": 225
+      },
+      "suggestedHomeTerminal": "Milwaukee"
+    },
+    "kittatinny_crossroads": {
+      "description": "A regional company-driver start in the Mid-Atlantic, from the New Jersey ports across Pennsylvania to the Chesapeake. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Kittatinny Crossroads Freight",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Harrisburg"
+    },
+    "knik_arm_cartage": {
+      "description": "A local company-driver start in Anchorage, the Mat-Su valley, and Seward. Dispatch offers loads of up to 150 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more appointment slack",
+      "favoredFreight": [],
+      "name": "Knik Arm Cartage",
+      "pay": {
+        "minPerMile": 1.05,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.3,
+        "stopPay": 210
+      },
+      "suggestedHomeTerminal": "Anchorage"
+    },
+    "lone_mesa_freight": {
+      "description": "A regional company-driver start in the Texas Triangle and the Rio Grande Valley. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Lone Mesa Freight",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Dallas"
+    },
+    "loonwater_regional": {
+      "description": "A regional company-driver start in the Upper Midwest, from the Dakotas across Minnesota and Wisconsin to the Upper Peninsula. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Loonwater Regional",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Minneapolis"
+    },
+    "meherrin_transport": {
+      "description": "A regional company-driver start in the Carolinas and Virginia. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Meherrin Transport",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Charlotte"
+    },
+    "musselshell_freight": {
+      "description": "A regional company-driver start in the Front Range and the high plains, from Colorado to Montana. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Musselshell Freight Lines",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Denver"
+    },
+    "northstar": {
+      "description": "A balanced company-driver path. The carrier assigns and maintains the tractor, pays fuel and routine repairs, and offers steady wage math without a sharp specialty.",
+      "dispatch": "balanced dispatch",
+      "favoredFreight": [],
+      "name": "Northstar Freight Lines",
+      "pay": {
+        "minPerMile": 0.82,
+        "onTimeBonusShare": 0.04,
+        "payShare": 0.36,
+        "stopPay": 175
+      },
+      "suggestedHomeTerminal": "Chicago"
+    },
+    "olentangy_valley": {
+      "description": "A regional company-driver start in the Ohio Valley and the lower Great Lakes. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Olentangy Valley Freight",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Columbus"
+    },
+    "pinyon_basin": {
+      "description": "A regional company-driver start in the Great Basin, between Salt Lake City, Boise, and Las Vegas. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Pinyon Basin Transport",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Salt Lake City"
+    },
+    "prairie_link": {
+      "description": "A mile-focused company start. The per-mile wage floor is higher, but stop pay is lower, so it favors steady regional mileage over very short hops. Dispatch leans toward same-region grain and bulk work. The carrier still assigns and maintains the tractor.",
+      "dispatch": "more same-region lanes, more longer lanes",
+      "favoredFreight": [
+        "grain",
+        "farm inputs",
+        "bulk materials"
+      ],
+      "name": "Prairie Link Regional",
+      "pay": {
+        "minPerMile": 0.95,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 130
+      },
+      "suggestedHomeTerminal": "Kansas City"
+    },
+    "saint_francis_river": {
+      "description": "A regional company-driver start in the Mid-South around Memphis, Little Rock, and Nashville. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Saint Francis River Lines",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Memphis"
+    },
+    "san_simon_freight": {
+      "description": "A regional company-driver start in the desert Southwest. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "San Simon Freight",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Phoenix"
+    },
+    "summit_value": {
+      "description": "A performance-sensitive company start. Good on-time runs pay better, but the guaranteed floor is smaller. Dispatch leans toward longer and higher-value lanes. The carrier still supplies equipment, authority, insurance, fuel, and repairs.",
+      "dispatch": "more longer lanes",
+      "favoredFreight": [
+        "electronics",
+        "automotive parts",
+        "parcel freight"
+      ],
+      "name": "Summit Value Logistics",
+      "pay": {
+        "minPerMile": 0.78,
+        "onTimeBonusShare": 0.06,
+        "payShare": 0.38,
+        "stopPay": 150
+      },
+      "suggestedHomeTerminal": "Denver"
+    },
+    "sunpine_freight": {
+      "description": "A regional company-driver start in the Florida peninsula and south Georgia. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Sunpine Freight Lines",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Jacksonville"
+    },
+    "tehachapi_motor_lines": {
+      "description": "A regional company-driver start in California, from the Los Angeles basin through the Central Valley to Reno. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Tehachapi Motor Lines",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Los Angeles"
+    },
+    "verdigris_transport": {
+      "description": "A regional company-driver start in the southern plains of Oklahoma and the Texas Panhandle. Dispatch offers loads of up to 600 miles. The carrier assigns and maintains the tractor and pays fuel and routine repairs.",
+      "dispatch": "more same-region lanes",
+      "favoredFreight": [],
+      "name": "Verdigris Transport",
+      "pay": {
+        "minPerMile": 0.93,
+        "onTimeBonusShare": 0.03,
+        "payShare": 0.34,
+        "stopPay": 135
+      },
+      "suggestedHomeTerminal": "Oklahoma City"
+    }
   },
   "cityLabels": {
     "aberdeen_sd_us": "Aberdeen, South Dakota",
@@ -1878,6 +2206,10 @@
     "Company Career Veteran",
     "Freight Fate Company Driver"
   ],
+  "companyPay": {
+    "assignedRepositionPayFraction": 0.6,
+    "reputationBonusMaxShare": 0.06
+  },
   "companyRankForkLevel": 18,
   "endorsements": {
     "doubles_triples": {

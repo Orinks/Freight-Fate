@@ -22,48 +22,70 @@ const RAW_MARKERS: [&str; 7] = [
     "source_ref",
 ];
 
+/// Alaska Phase B3 markets whose endpoints landed after the last approach
+/// bake; their chains wait on an Alaska re-route (ROADMAP).
+const APPROACH_BAKE_PENDING_CITIES: [&str; 8] = [
+    "coldfoot_ak_us",
+    "deadhorse_ak_us",
+    "delta_junction_ak_us",
+    "homer_ak_us",
+    "kenai_ak_us",
+    "seward_ak_us",
+    "soldotna_ak_us",
+    "valdez_ak_us",
+];
+
 #[test]
 fn test_facility_approach_data_covers_full_facility_set() {
     let w = world();
     let data = read_json("facility_approaches.json");
     let coverage = &data["coverage"];
 
-    // The 2026-09-20 sweep moved every count here: a stand-in market now
-    // holds one yard instead of four (766 generated facilities retired), and
-    // drive-throughs, parking aisles, fire lanes and permit-only ways left
-    // the road graph, so the chains were rebuilt on real streets. Corner
-    // angles came with that rebuild: 8,454 of 10,900 are READ from OSM
-    // geometry now, against 5 before.
-    assert_eq!(coverage["facilities"], 4271);
-    // Synced with facility_endpoints after far-pin regeocode (419 estimated)
-    // and the 2026-09-17 endpoint re-sweep, which replaced 1,224 endpoints and
-    // had every chain to one of them rebuilt toward the new endpoint.
-    // The 2026-09-17 yard-road rule then gave 89 facilities the public roads
-    // do not reach a chain over the facility's own private road (52 new chains,
-    // 37 stale ones rebuilt).
-    // 2026-09-20: the four families that had no matcher rule -- grain
-    // elevators, quarries, construction materials yards, lumber and paper --
-    // gained one, and the six sibling types the builder still skipped are in.
-    // Chains 2,314 to 2,456. The public road search also honours gates and
-    // ways signed against trucks now, which the yard-road fallback had read
-    // since it was written; NOT ONE of the 2,314 existing chains needed a
-    // truck-signed way, so nothing was demoted (`chain_dropped_truck_banned`
-    // is absent from the merge summary). A gate refuses a new chain and never
-    // takes an existing one away -- an untagged one is a guess, and at a yard
-    // it is usually the facility's own gate.
-    assert_eq!(coverage["source_backed_endpoints"], 2874);
-    assert_eq!(coverage["road_snapped"], 2490);
-    assert_eq!(coverage["turn_level"], 2456);
-    assert_eq!(coverage["nearest_road_fallback"], 384);
-    // Sourced endpoints with no chain whose own OSM object is not a freight site
-    // (a railway line, a substation, a shop): the 2026-09-17 endpoint screen.
-    assert_eq!(coverage["endpoint_screen_refused"], 344);
-    // Chains that still lead to a replaced endpoint because no public-road
-    // path reaches the new one, not even over its own private road; kept until
-    // a chain replaces them, and labelled. 2026-09-24's national re-route
-    // (street detail) found a path to Knoxville's new endpoint: 42 to 41.
-    assert_eq!(coverage["stale_chain_kept"], 41);
-    assert_eq!(coverage["representative_fallback"], 1397);
+    // The counts move with every sweep (ROADMAP keeps their history), so what
+    // is checked is that they add up and stay in step with the endpoint layer
+    // they were built from.
+    let n = |v: &serde_json::Value| v.as_u64().unwrap();
+    let endpoints = read_json("facility_endpoints.json");
+    let endpoint_coverage = &endpoints["coverage"];
+    // Endpoints swept after the last approach bake have no chain yet. Only
+    // the Alaska Phase B3 markets may be waiting (ROADMAP debt); any other
+    // gap means the two layers drifted.
+    let approaches = data["approaches"].as_object().expect("approaches");
+    let (mut pending_sourced, mut pending_fallback) = (0u64, 0u64);
+    for (id, row) in endpoints["endpoints"].as_object().expect("endpoints") {
+        if approaches.contains_key(id) {
+            continue;
+        }
+        let city = row["city"].as_str().unwrap_or_default();
+        assert!(
+            APPROACH_BAKE_PENDING_CITIES.contains(&city),
+            "{id} has an endpoint but no approach record"
+        );
+        if row["source_backed"].as_bool().unwrap_or(false) {
+            pending_sourced += 1;
+        } else {
+            pending_fallback += 1;
+        }
+    }
+    assert_eq!(
+        n(&coverage["facilities"]) + pending_sourced + pending_fallback,
+        n(&endpoint_coverage["facilities"])
+    );
+    assert_eq!(
+        n(&coverage["source_backed_endpoints"]) + pending_sourced,
+        n(&endpoint_coverage["source_backed"])
+    );
+    assert_eq!(
+        n(&coverage["representative_fallback"]) + pending_fallback,
+        n(&endpoint_coverage["fallback"])
+    );
+    // Every sourced endpoint snapped to a road or fell back to the nearest
+    // one, and a turn-by-turn chain needs a snapped road.
+    assert_eq!(
+        n(&coverage["road_snapped"]) + n(&coverage["nearest_road_fallback"]),
+        n(&coverage["source_backed_endpoints"])
+    );
+    assert!(n(&coverage["turn_level"]) <= n(&coverage["road_snapped"]));
     assert_eq!(coverage["gate_yard_dock_hints"], 0);
 
     // The 2026-07-14 regen keys records by current slug facility ids and

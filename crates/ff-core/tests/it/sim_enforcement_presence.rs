@@ -552,7 +552,10 @@ fn test_cb_chatter_varies_by_what_the_post_actually_is() {
         (&cmv_line, &cmv),
         (&chain_line, &chain),
     ] {
-        assert!(line.contains("3.0") || line.contains("miles") || line.starts_with("CB chatter:"));
+        assert!(line.contains("3.0") || line.contains("miles") || line.starts_with("Somebody"));
+        // The squelch marks it as the CB; the words carry no "CB chatter"
+        // opener (owner, 2026-10-01).
+        assert!(!line.contains("CB chatter"), "{line}");
         assert!(line.contains(Trip::cb_side(post)));
     }
 
@@ -601,7 +604,7 @@ fn test_cb_tableau_line_reports_a_bear_with_a_customer() {
     let post = post_kind(20.0, KIND_MEDIAN);
     let line = trip.cb_tableau_message(&post, 3.0);
     assert!(line.to_lowercase().contains("bear"));
-    assert!(line.contains("CB chatter"));
+    assert!(!line.contains("CB chatter"), "{line}");
     assert!(line.to_lowercase().contains("somebody stopped"));
     assert!(line.contains(Trip::cb_side(&post)));
     assert!(line.contains("3.0") || line.contains("miles"));

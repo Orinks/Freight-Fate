@@ -234,6 +234,8 @@ impl DrivingState {
             json!(self.maintenance_levels),
         );
         out.insert("rig_buffs".to_string(), json!(self.rig_buffs));
+        out.insert("stop_visit".to_string(), json!(self.stop_visit));
+        out.insert("drove_automatic".to_string(), json!(self.drove_automatic));
         out.insert(
             "speed_control_armed".to_string(),
             json!(self.speed_control_armed),
@@ -450,6 +452,13 @@ impl DrivingState {
             .cloned()
             .and_then(|value| serde_json::from_value::<RigBuffs>(value).ok())
             .unwrap_or_default();
+        // Parked at a stop through a save: the fuel still pays for the shower.
+        state.stop_visit = data
+            .get("stop_visit")
+            .cloned()
+            .and_then(|value| serde_json::from_value(value).ok())
+            .unwrap_or_default();
+        state.drove_automatic = b(data, "drove_automatic", false);
         // "speeding_strikes" was a required snapshot field until the silent
         // at-delivery speeding charge was removed. Snapshots written before
         // that still carry it; the key is simply no longer consulted.
@@ -541,6 +550,9 @@ impl DrivingState {
             && state.trip.truck.cargo_kg > 0.0;
         state.air_ready_said = state.trip.truck.air_ready();
         state.low_air_said = state.trip.truck.air_low_warning();
+        // Already under the line on resume: do not re-announce a cue the
+        // driver heard before the save. Above the line clears the latch.
+        state.low_fuel_said = state.trip.truck.fuel_fraction() <= LOW_FUEL_WARN_FRACTION;
         state.spring_brake_said = state.trip.truck.spring_brakes_active();
         // HOS and fatigue: absent in pre-1.5 snapshots, defaulting to a
         // fresh clock and a rested driver.

@@ -21,6 +21,16 @@
         ],
         "landmarks": [
           {
+            "name": "Extraterrestrial Highway (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.1,
+            "spoken": "Billboard: The Extraterrestrial Highway turns off ahead at Crystal Springs. Ninety-eight miles past Area Fifty-One, about two hundred cars a day. Nobody counts the saucers.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Crystal Springs",
             "at_mi": 13.1,
             "off_mi": 0.11,
@@ -30,13 +40,6 @@
             "spoken": "Entering Crystal Springs"
           },
           {
-            "name": "White River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 14.3,
-            "spoken": "Crossing the White River"
-          },
-          {
             "name": "Logan City",
             "at_mi": 18.3,
             "off_mi": 9.04,
@@ -44,6 +47,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 3814805134, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Logan City"
+          },
+          {
+            "name": "White River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 24.7,
+            "spoken": "Crossing the White River",
+            "lat": 37.68998,
+            "lon": -115.18436,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1456230393 (White River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Basin and Range National Monument",
@@ -1346,8 +1359,11 @@
             "name": "Reese River",
             "category": "river",
             "kind": "point",
-            "at_mi": 13.6,
-            "spoken": "Crossing the Reese River"
+            "at_mi": 7.8,
+            "spoken": "Crossing the Reese River",
+            "lat": 39.48889,
+            "lon": -117.21073,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 359966642 (Reese River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Mount Airy Summit",
@@ -1362,6 +1378,36 @@
             "kind": "point",
             "at_mi": 24.0,
             "spoken": "Approaching New Pass Summit"
+          },
+          {
+            "name": "Sand Mountain (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.8,
+            "spoken": "Billboard: Sand Mountain, ahead. Six hundred feet of sand left by an ancient lake. When the sand slides, the dune sings. It only knows one note.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Sand Mountain (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 93.8,
+            "spoken": "Billboard: Sand Mountain, ahead. Six hundred feet of sand left by an ancient lake. When the sand slides, the dune sings. It only knows one note.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Topgun (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.0,
+            "spoken": "Billboard: Fallon is the Oasis of Nevada and home to the Navy's Top Gun fighter school. If a jet just shook your windows, that is the sound of freedom practicing.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Fallon Station",
@@ -2477,18 +2523,24 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
-            "name": "Humboldt River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 8.6,
-            "spoken": "Crossing the Humboldt River"
-          },
-          {
             "name": "Reese River",
             "category": "river",
             "kind": "point",
-            "at_mi": 8.6,
-            "spoken": "Crossing the Reese River"
+            "at_mi": 1.0,
+            "spoken": "Crossing the Reese River",
+            "lat": 40.63073,
+            "lon": -116.92243,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 752828429 (Reese River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Humboldt River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 25.3,
+            "spoken": "Crossing the Humboldt River",
+            "lat": 40.69588,
+            "lon": -116.50525,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 633167194 (Humboldt River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Emigrant Pass",
@@ -2496,6 +2548,26 @@
             "kind": "point",
             "at_mi": 38.7,
             "spoken": "Approaching Emigrant Pass"
+          },
+          {
+            "name": "California Trail Interpretive Center (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 59.1,
+            "spoken": "Billboard: The California Trail Interpretive Center, next exit. Wagon trains walked this way to the gold fields. Admission is free. Walking is optional.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "California Trail Interpretive Center (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.1,
+            "spoken": "Billboard: The California Trail Interpretive Center, next exit. Wagon trains walked this way to the gold fields. Admission is free. Walking is optional.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Spring Creek",
@@ -4706,6 +4778,16 @@
             "spoken": "Entering Indian Hills"
           },
           {
+            "name": "Carson River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 8.1,
+            "spoken": "Crossing the Carson River",
+            "lat": 39.04771,
+            "lon": -119.77994,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 71498710 (Carson River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Johnson Lane",
             "at_mi": 8.6,
             "off_mi": 2.71,
@@ -4713,6 +4795,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150959159, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Johnson Lane"
+          },
+          {
+            "name": "Nevada State Railroad Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.9,
+            "spoken": "Billboard: The Nevada State Railroad Museum, ahead in Carson City. Virginia and Truckee engines, several of them retired movie stars. They still give rides.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Zephyr Cove",
@@ -4758,13 +4850,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150960614, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing South Lake Tahoe"
-          },
-          {
-            "name": "Carson River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 14.6,
-            "spoken": "Crossing the Carson River"
           },
           {
             "name": "Minden",
@@ -4824,8 +4909,11 @@
             "name": "West Fork Walker River",
             "category": "river",
             "kind": "point",
-            "at_mi": 44.1,
-            "spoken": "Crossing the West Fork Walker River"
+            "at_mi": 61.8,
+            "spoken": "Crossing the West Fork Walker River",
+            "lat": 38.37995,
+            "lon": -119.45029,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 571814242 (West Fork Walker River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Devil's Gate Pass",
@@ -9116,15 +9204,21 @@
             "name": "Marys River",
             "category": "river",
             "kind": "point",
-            "at_mi": 45.0,
-            "spoken": "Crossing the Marys River"
+            "at_mi": 34.0,
+            "spoken": "Crossing the Marys River",
+            "lat": 41.08598,
+            "lon": -115.25573,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 442883756 (Marys River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
-            "name": "Snake River",
-            "category": "river",
+            "name": "Shoshone Falls (westbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 159.6,
-            "spoken": "Crossing the Snake River"
+            "at_mi": 157.3,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Buhl",
@@ -9161,11 +9255,24 @@
             "spoken": "Passing Hansen"
           },
           {
-            "name": "Malad River",
+            "name": "Snake River",
             "category": "river",
             "kind": "point",
-            "at_mi": 186.5,
-            "spoken": "Crossing the Malad River"
+            "at_mi": 167.7,
+            "spoken": "Crossing the Snake River",
+            "lat": 42.60081,
+            "lon": -114.45355,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1420014007 (Snake River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Shoshone Falls (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 177.0,
+            "spoken": "Billboard: Shoshone Falls, ahead at Twin Falls. Forty-five feet taller than Niagara. Come in spring; by fall the farms have borrowed most of the water.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Wendell",
@@ -9175,6 +9282,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150970161, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wendell"
+          },
+          {
+            "name": "Hagerman Fossil Beds (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 194.3,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Gooding",
@@ -9195,6 +9312,46 @@
             "spoken": "Passing Hagerman"
           },
           {
+            "name": "Malad River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 197.8,
+            "spoken": "Crossing the Malad River",
+            "lat": 42.86777,
+            "lon": -114.85326,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 215082120 (Malad River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Hagerman Fossil Beds (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 212.3,
+            "spoken": "Billboard: Hagerman Fossil Beds, ahead. The world's biggest pile of ancient horses, three million years old. The Hagerman horse is the state fossil. No saddles.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Three Island Crossing (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 221.3,
+            "spoken": "Billboard: Three Island Crossing State Park, next exit at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Three Island Crossing (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 224.3,
+            "spoken": "Billboard: Three Island Crossing State Park, next exit at Glenns Ferry. Oregon Trail wagons forded the Snake River here on the islands. The bridge is easier.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Morley Nelson Snake River Birds of Prey National Conservation Area",
             "category": "protected_area",
             "kind": "zone",
@@ -9209,6 +9366,26 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150963420, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hammett"
+          },
+          {
+            "name": "World Center for Birds of Prey (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 278.6,
+            "spoken": "Billboard: The World Center for Birds of Prey, ahead at Boise. Live falcons, eagles and owls, from the people who saved the peregrine. Keep your sandwich covered.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Old Idaho Penitentiary (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 280.9,
+            "spoken": "Billboard: The Old Idaho Penitentiary, ahead in Boise. A working prison for a hundred and one years, now a museum. Visitors leave the same day.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Robie Creek",
@@ -9518,13 +9695,6 @@
             "spoken": "Passing Spring Creek"
           },
           {
-            "name": "Humboldt River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 6.3,
-            "spoken": "Crossing the Humboldt River"
-          },
-          {
             "name": "Ryndon",
             "at_mi": 12.8,
             "off_mi": 0.05,
@@ -9537,15 +9707,31 @@
             "name": "North Fork Humboldt River",
             "category": "river",
             "kind": "point",
-            "at_mi": 18.8,
-            "spoken": "Crossing the North Fork Humboldt River"
+            "at_mi": 16.0,
+            "spoken": "Crossing the North Fork Humboldt River",
+            "lat": 40.94928,
+            "lon": -115.53388,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 321520031 (North Fork Humboldt River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Marys River",
             "category": "river",
             "kind": "point",
-            "at_mi": 31.3,
-            "spoken": "Crossing the Marys River"
+            "at_mi": 33.5,
+            "spoken": "Crossing the Marys River",
+            "lat": 41.08487,
+            "lon": -115.26545,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 442881548 (Marys River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Humboldt River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 35.3,
+            "spoken": "Crossing the Humboldt River",
+            "lat": 41.08579,
+            "lon": -115.23104,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1112196212 (Humboldt River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "tollway_detected": false,
@@ -10265,6 +10451,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150948702, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ruth"
+          },
+          {
+            "name": "The Nevada Northern Railway (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Ely is ahead, where the old Nevada Northern Railway still fires up its steam locomotives. This copper-country railroad is frozen in time and will even let you drive the train.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Robinson Summit",
@@ -11167,6 +11363,26 @@
             "spoken": "Passing Ruth"
           },
           {
+            "name": "The Nevada Northern Railway (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Ely is ahead, where the old Nevada Northern Railway still fires up its steam locomotives. This copper-country railroad is frozen in time and will even let you drive the train.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "White River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 29.3,
+            "spoken": "Crossing the White River",
+            "lat": 38.92801,
+            "lon": -115.17418,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 150264124 (White River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Lund",
             "at_mi": 30.9,
             "off_mi": 9.98,
@@ -11174,13 +11390,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150947814, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Lund"
-          },
-          {
-            "name": "White River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 42.1,
-            "spoken": "Crossing the White River"
           },
           {
             "name": "Blackrock Summit",
@@ -11195,6 +11404,16 @@
             "kind": "zone",
             "at_mi": 139.4,
             "spoken": "Entering Humboldt\u2013Toiyabe National Forest"
+          },
+          {
+            "name": "The Clown Motel (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 159.0,
+            "spoken": "Billboard: The Clown Motel, ahead in Tonopah, next to the old cemetery. More than four thousand clowns inside. Sleep well.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "tollway_detected": false,
@@ -12345,6 +12564,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150948702, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Ruth"
+          },
+          {
+            "name": "The Nevada Northern Railway (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Ely is ahead, where the old Nevada Northern Railway still fires up its steam locomotives. This copper-country railroad is frozen in time and will even let you drive the train.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "tollway_detected": false,
@@ -13694,8 +13923,21 @@
             "name": "Carson River",
             "category": "river",
             "kind": "point",
-            "at_mi": 3.5,
-            "spoken": "Crossing the Carson River"
+            "at_mi": 2.2,
+            "spoken": "Crossing the Carson River",
+            "lat": 39.48001,
+            "lon": -118.81519,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 125815625 (Carson River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Topgun (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: Fallon is the Oasis of Nevada and home to the Navy's Top Gun fighter school. If a jet just shook your windows, that is the sound of freedom practicing.",
+            "directions": [
+              "reverse"
+            ]
           }
         ],
         "tollway_detected": false,
@@ -14660,11 +14902,34 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Lovers Lock Plaza (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.3,
+            "spoken": "Billboard: Lovelock is ahead, where couples hang padlocks on an endless chain behind the round courthouse. The town had the name first.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Humboldt River",
             "category": "river",
             "kind": "point",
-            "at_mi": 66.6,
-            "spoken": "Crossing the Humboldt River"
+            "at_mi": 60.5,
+            "spoken": "Crossing the Humboldt River",
+            "lat": 40.19085,
+            "lon": -118.4566,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 737368914 (Humboldt River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Lovers Lock Plaza (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.9,
+            "spoken": "Billboard: Lovelock is ahead, where couples hang padlocks on an endless chain behind the round courthouse. The town had the name first.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Humboldt River Ranch",
@@ -15497,6 +15762,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 13148502466, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Nellis Air Force Base"
+          },
+          {
+            "name": "The Neon Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 10.6,
+            "spoken": "Billboard: The Neon Museum, ahead in Las Vegas. Old casino signs come here to retire in the boneyard. Some of them still light up.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Apex Summit",
@@ -16852,11 +17127,11 @@
         ],
         "state_crossings": [
           {
-            "at_mi": 43.0,
+            "at_mi": 44.4,
             "from_state": "Nevada",
             "state": "California",
             "place": "California-Nevada line near Primm",
-            "source": "Curated from I-15 corridor state sequence and checked route geometry."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "checkpoints": [
@@ -16884,11 +17159,13 @@
         "state_miles": [
           {
             "state": "Nevada",
-            "miles": 43.0
+            "miles": 44.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "California",
-            "miles": 227.0
+            "miles": 225.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "interchanges": [
@@ -18541,11 +18818,31 @@
             "spoken": "Passing Enterprise"
           },
           {
+            "name": "The Neon Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.6,
+            "spoken": "Billboard: The Neon Museum, ahead in Las Vegas. Old casino signs come here to retire in the boneyard. Some of them still light up.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Seven Magic Mountains",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 20.0,
             "spoken": "Billboard: Seven Magic Mountains is ahead, where fluorescent boulders are stacked into towers in the desert. Las Vegas apparently ran out of indoor places to put bright colors."
+          },
+          {
+            "name": "Seven Magic Mountains (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 34.6,
+            "spoken": "Billboard: Seven Magic Mountains is ahead, where fluorescent boulders are stacked into towers in the desert. Las Vegas apparently ran out of indoor places to put bright colors.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Primm",
@@ -18560,15 +18857,11 @@
             "name": "World's Tallest Thermometer",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 50.0,
-            "spoken": "Billboard: The world's tallest thermometer is ahead in Baker. More than a hundred feet of neon will tell you exactly how hot the Mojave is, and the answer is always too hot."
-          },
-          {
-            "name": "Alien Fresh Jerky",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 70.0,
-            "spoken": "Billboard: Alien Fresh Jerky is at the next exit in Baker. They will not say who the jerky is made from, and the little green fellow on the sign is not talking."
+            "at_mi": 80.0,
+            "spoken": "Billboard: The world's tallest thermometer is ahead in Baker. More than a hundred and thirty feet of lights will tell you exactly how hot the Mojave is, and the answer is always too hot.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "The Mad Greek",
@@ -18578,11 +18871,84 @@
             "spoken": "Billboard: The Mad Greek is ahead in Baker, serving gyros and baklava in the middle of the desert. Trust the Mojave; it has surprised you before."
           },
           {
+            "name": "Alien Fresh Jerky",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 90.2,
+            "spoken": "Billboard: Alien Fresh Jerky is at the next exit in Baker. They will not say who the jerky is made from, and the little green fellow on the sign is not talking.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Alien Fresh Jerky (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 95.2,
+            "spoken": "Billboard: Alien jerky, next exit. They won't say who the jerky's made from.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "The Mad Greek (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 97.5,
+            "spoken": "Billboard: The Mad Greek is ahead in Baker, serving gyros and baklava in the middle of the desert. Trust the Mojave; it has surprised you before.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Zzyzx Road",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 100.0,
-            "spoken": "Billboard: The exit for Zzyzx Road is coming up, with the last word in the dictionary sitting out here in the sand. A strange story and a lake you would never expect wait behind that name."
+            "at_mi": 98.6,
+            "spoken": "Billboard: The exit for Zzyzx Road is coming up, with the last word in the dictionary sitting out here in the sand. A strange story and a lake you would never expect wait behind that name.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "World's Tallest Thermometer (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 101.5,
+            "spoken": "Billboard: The world's tallest thermometer is ahead in Baker. More than a hundred and thirty feet of lights will tell you exactly how hot the Mojave is, and the answer is always too hot.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Zzyzx Road (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 104.4,
+            "spoken": "Billboard: The exit for Zzyzx Road is coming up, with the last word in the dictionary sitting out here in the sand. A strange story and a lake you would never expect wait behind that name.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Calico Ghost Town",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 139.7,
+            "spoken": "Billboard: Calico Ghost Town is ahead near Barstow. It is a real silver boomtown, half restored and half falling down, and, they will tell you, thoroughly haunted.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Peggy Sue's Fifties Diner",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 142.0,
+            "spoken": "Billboard: Peggy Sue's Fifties Diner is ahead near Yermo. It has chrome, a jukebox, a diner cat, and a park full of metal dinosaurs out back. Rock and roll never checked out.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "EddieWorld",
@@ -18601,18 +18967,44 @@
             "spoken": "Passing Daggett"
           },
           {
+            "name": "EddieWorld (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 151.9,
+            "spoken": "Billboard: EddieWorld is ahead near Yermo. It offers fuel, pizza, candy, ice cream, and a giant sundae declaring that this is no ordinary gas stop.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Mojave River",
             "category": "river",
             "kind": "point",
-            "at_mi": 154.2,
-            "spoken": "Crossing the Mojave River"
+            "at_mi": 154.6,
+            "spoken": "Crossing the Mojave River",
+            "lat": 34.89646,
+            "lon": -116.9943,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 109438128 (Mojave River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
-            "name": "Peggy Sue's Fifties Diner",
+            "name": "Calico Ghost Town (northbound)",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 155.0,
-            "spoken": "Billboard: Peggy Sue's Fifties Diner is ahead near Yermo. It has chrome, a jukebox, a diner cat, and a pond full of concrete dinosaurs out back. Rock and roll never checked out."
+            "at_mi": 156.8,
+            "spoken": "Billboard: Calico Ghost Town is ahead near Barstow. It is a real silver boomtown, half restored and half falling down, and, they will tell you, thoroughly haunted.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Peggy Sue's Fifties Diner (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 159.1,
+            "spoken": "Billboard: Peggy Sue's Fifties Diner is ahead near Yermo. It has chrome, a jukebox, a diner cat, and a park full of metal dinosaurs out back. Rock and roll never checked out.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Lenwood",
@@ -18631,11 +19023,24 @@
             "spoken": "Museum ahead: Desert Discovery Center"
           },
           {
-            "name": "Calico Ghost Town",
+            "name": "Elmer's Bottle Tree Ranch (southbound)",
             "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 165.0,
-            "spoken": "Billboard: Calico Ghost Town is ahead near Barstow. It is a real silver boomtown, half restored and half falling down, and, they will tell you, thoroughly haunted."
+            "at_mi": 172.8,
+            "spoken": "Billboard: Elmer's Bottle Tree Ranch, ahead on old Route Sixty-Six in Oro Grande. Two hundred trees grown from pipe and bottles. Free, and no watering needed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Elmer's Bottle Tree Ranch (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 192.8,
+            "spoken": "Billboard: Elmer's Bottle Tree Ranch, ahead on old Route Sixty-Six in Oro Grande. Two hundred trees grown from pipe and bottles. Free, and no watering needed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Oak Hills",
@@ -18799,15 +19204,11 @@
             "name": "San Gabriel River",
             "category": "river",
             "kind": "point",
-            "at_mi": 257.5,
-            "spoken": "Crossing the San Gabriel River"
-          },
-          {
-            "name": "Los Angeles River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 257.5,
-            "spoken": "Crossing the Los Angeles River"
+            "at_mi": 255.4,
+            "spoken": "Crossing the San Gabriel River",
+            "lat": 34.06462,
+            "lon": -118.0045,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1044128330 (San Gabriel River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "South El Monte",
@@ -18880,6 +19281,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 1783696512, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing South Pasadena"
+          },
+          {
+            "name": "Los Angeles River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 268.7,
+            "spoken": "Crossing the Los Angeles River",
+            "lat": 34.0531,
+            "lon": -118.2286,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 787842211 (Los Angeles River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "restrictions": [],
@@ -21871,20 +22282,22 @@
         "state_miles": [
           {
             "state": "Nevada",
-            "miles": 41.23
+            "miles": 36.6,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           },
           {
             "state": "Arizona",
-            "miles": 259.77
+            "miles": 264.4,
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "state_crossings": [
           {
-            "at_mi": 41.23,
+            "at_mi": 36.6,
             "from_state": "Nevada",
             "state": "Arizona",
             "place": "Nevada-Arizona line on US-93",
-            "source": "Computed from OSRM route geometry and public U.S. state boundary GeoJSON."
+            "source": "derived 2026-10-01: the leg's archived dense route geometry intersected with OpenStreetMap U.S. state boundary relations (boundary=administrative, admin_level=4); at_mi = cumulative geometry distance at each boundary crossing, rescaled to leg miles; state miles = differences of those boundaries. OpenStreetMap, Geofabrik us-latest extract 2026-09-29: https://www.openstreetmap.org/."
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
@@ -22235,6 +22648,16 @@
             "spoken": "Passing Whitney"
           },
           {
+            "name": "The Neon Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: The Neon Museum, ahead in Las Vegas. Old casino signs come here to retire in the boneyard. Some of them still light up.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Railroad Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -22261,8 +22684,11 @@
             "name": "Colorado River",
             "category": "river",
             "kind": "point",
-            "at_mi": 40.0,
-            "spoken": "Crossing the Colorado River"
+            "at_mi": 36.6,
+            "spoken": "Crossing the Colorado River",
+            "lat": 36.0124,
+            "lon": -114.74142,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1421140839 (Colorado River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "White Hills",
@@ -22331,15 +22757,11 @@
             "name": "Big Sandy River",
             "category": "river",
             "kind": "point",
-            "at_mi": 157.1,
-            "spoken": "Crossing the Big Sandy River"
-          },
-          {
-            "name": "Santa Maria River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 189.36,
-            "spoken": "Crossing the Santa Maria River"
+            "at_mi": 164.6,
+            "spoken": "Crossing the Big Sandy River",
+            "lat": 34.66285,
+            "lon": -113.58203,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 74850731 (Big Sandy River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Bagdad",
@@ -22351,6 +22773,16 @@
             "spoken": "Passing Bagdad"
           },
           {
+            "name": "Santa Maria River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 196.5,
+            "spoken": "Crossing the Santa Maria River",
+            "lat": 34.3694,
+            "lon": -113.18578,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1460171928 (Santa Maria River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Congress",
             "at_mi": 228.12,
             "off_mi": 5.75,
@@ -22360,6 +22792,16 @@
             "spoken": "Passing Congress"
           },
           {
+            "name": "Hassayampa River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 235.5,
+            "spoken": "Crossing the Hassayampa River",
+            "lat": 33.97123,
+            "lon": -112.72667,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 194580840 (Hassayampa River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Morristown",
             "at_mi": 253.79,
             "off_mi": 0.11,
@@ -22367,13 +22809,6 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150971715, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Morristown"
-          },
-          {
-            "name": "Hassayampa River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 254.72,
-            "spoken": "Crossing the Hassayampa River"
           },
           {
             "name": "Wittmann",
@@ -22439,18 +22874,14 @@
             "spoken": "Passing Sun City"
           },
           {
-            "name": "New River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 286.16,
-            "spoken": "Crossing the New River"
-          },
-          {
             "name": "Agua Fria River",
             "category": "river",
             "kind": "point",
-            "at_mi": 286.16,
-            "spoken": "Crossing the Agua Fria River"
+            "at_mi": 284.1,
+            "spoken": "Crossing the Agua Fria River",
+            "lat": 33.45764,
+            "lon": -112.33346,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 102864452 (Agua Fria River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Tolleson",
@@ -23566,6 +23997,16 @@
             "spoken": "Passing Lemmon Valley"
           },
           {
+            "name": "Virginia City (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 1.2,
+            "spoken": "Billboard: Virginia City, ahead up the Geiger Grade. Mark Twain first signed his pen name here in eighteen sixty-three. The saloons have kept the story going.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Sun Valley",
             "at_mi": 1.6,
             "off_mi": 3.9,
@@ -23587,8 +24028,11 @@
             "name": "Truckee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 3.5,
-            "spoken": "Crossing the Truckee River"
+            "at_mi": 2.1,
+            "spoken": "Crossing the Truckee River",
+            "lat": 39.53111,
+            "lon": -119.78604,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 32045853 (Truckee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Lockwood",
@@ -23600,6 +24044,16 @@
             "spoken": "Passing Lockwood"
           },
           {
+            "name": "National Automobile Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The National Automobile Museum, ahead in Reno. More than two hundred cars from Bill Harrah's collection. Look all you like. The keys stay in the office.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Virginia City",
             "at_mi": 14.4,
             "off_mi": 7.05,
@@ -23607,6 +24061,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150960509, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Virginia City"
+          },
+          {
+            "name": "Virginia City (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.2,
+            "spoken": "Billboard: Virginia City, ahead up the Geiger Grade. Mark Twain first signed his pen name here in eighteen sixty-three. The saloons have kept the story going.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "New Washoe City",
@@ -23625,6 +24089,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150974118, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Incline Village"
+          },
+          {
+            "name": "Nevada State Railroad Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 24.0,
+            "spoken": "Billboard: The Nevada State Railroad Museum, ahead in Carson City. Virginia and Truckee engines, several of them retired movie stars. They still give rides.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Kings Beach",
@@ -24303,13 +24777,6 @@
             "spoken": "Passing Sun Valley"
           },
           {
-            "name": "Truckee River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 4.3,
-            "spoken": "Crossing the Truckee River"
-          },
-          {
             "name": "Spanish Springs",
             "at_mi": 4.4,
             "off_mi": 7.46,
@@ -24319,6 +24786,16 @@
             "spoken": "Passing Spanish Springs"
           },
           {
+            "name": "National Automobile Museum (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.4,
+            "spoken": "Billboard: The National Automobile Museum, ahead in Reno. More than two hundred cars from Bill Harrah's collection. Look all you like. The keys stay in the office.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lockwood",
             "at_mi": 9.7,
             "off_mi": 0.35,
@@ -24326,6 +24803,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150962841, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Lockwood"
+          },
+          {
+            "name": "Truckee River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 31.4,
+            "spoken": "Crossing the Truckee River",
+            "lat": 39.61757,
+            "lon": -119.29375,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 90091906 (Truckee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           }
         ],
         "speed_limits": [
@@ -27906,6 +28393,16 @@
             "spoken": "Passing Spanish Springs"
           },
           {
+            "name": "National Automobile Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.5,
+            "spoken": "Billboard: The National Automobile Museum, ahead in Reno. More than two hundred cars from Bill Harrah's collection. Look all you like. The keys stay in the office.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lockwood",
             "at_mi": 9.8,
             "off_mi": 0.35,
@@ -27918,8 +28415,11 @@
             "name": "Truckee River",
             "category": "river",
             "kind": "point",
-            "at_mi": 13.2,
-            "spoken": "Crossing the Truckee River"
+            "at_mi": 19.8,
+            "spoken": "Crossing the Truckee River",
+            "lat": 39.56536,
+            "lon": -119.48609,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 90091906 (Truckee River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Stagecoach",
@@ -27934,15 +28434,11 @@
             "name": "Carson River",
             "category": "river",
             "kind": "point",
-            "at_mi": 39.9,
-            "spoken": "Crossing the Carson River"
-          },
-          {
-            "name": "Walker River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 65.0,
-            "spoken": "Crossing the Walker River"
+            "at_mi": 50.1,
+            "spoken": "Crossing the Carson River",
+            "lat": 39.29332,
+            "lon": -119.25083,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1013700240 (Carson River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Mason",
@@ -27952,6 +28448,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150934612, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mason"
+          },
+          {
+            "name": "Walker River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 72.1,
+            "spoken": "Crossing the Walker River",
+            "lat": 38.99396,
+            "lon": -119.17884,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 71762450 (Walker River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Walker Lake",
@@ -27972,11 +28478,34 @@
             "spoken": "Entering Mina"
           },
           {
-            "name": "Amargosa River",
-            "category": "river",
+            "name": "The Clown Motel (southbound)",
+            "category": "billboard_sign",
             "kind": "point",
-            "at_mi": 303.8,
-            "spoken": "Crossing the Amargosa River"
+            "at_mi": 223.7,
+            "spoken": "Billboard: The Clown Motel, ahead in Tonopah, next to the old cemetery. More than four thousand clowns inside. Sleep well.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "The Clown Motel (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 241.7,
+            "spoken": "Billboard: The Clown Motel, ahead in Tonopah, next to the old cemetery. More than four thousand clowns inside. Sleep well.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Rhyolite (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 315.7,
+            "spoken": "Billboard: Rhyolite ghost town, ahead at Beatty. It had an opera house in nineteen oh-seven and fourteen people by nineteen twenty. The bottle house stayed.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Beatty Museum & Historical Society",
@@ -27986,11 +28515,31 @@
             "spoken": "Beatty Museum & Historical Society ahead"
           },
           {
+            "name": "Amargosa River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 320.7,
+            "spoken": "Crossing the Amargosa River",
+            "lat": 36.97646,
+            "lon": -116.72377,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 353969984 (Amargosa River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
             "name": "Secret Pass",
             "category": "mountain_pass",
             "kind": "point",
             "at_mi": 324.1,
             "spoken": "Approaching Secret Pass"
+          },
+          {
+            "name": "Rhyolite (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 335.4,
+            "spoken": "Billboard: Rhyolite ghost town, ahead at Beatty. It had an opera house in nineteen oh-seven and fourteen people by nineteen twenty. The bottle house stayed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Amargosa Valley",
@@ -28000,6 +28549,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 1396600295, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Amargosa Valley"
+          },
+          {
+            "name": "The Neon Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 433.5,
+            "spoken": "Billboard: The Neon Museum, ahead in Las Vegas. Old casino signs come here to retire in the boneyard. Some of them still light up.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Summerlin South",
@@ -30340,6 +30899,16 @@
             "spoken": "Passing Spanish Springs"
           },
           {
+            "name": "National Automobile Museum (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.5,
+            "spoken": "Billboard: The National Automobile Museum, ahead in Reno. More than two hundred cars from Bill Harrah's collection. Look all you like. The keys stay in the office.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Lockwood",
             "at_mi": 9.8,
             "off_mi": 0.35,
@@ -30370,8 +30939,11 @@
             "name": "Walker River",
             "category": "river",
             "kind": "point",
-            "at_mi": 79.2,
-            "spoken": "Crossing the Walker River"
+            "at_mi": 72.2,
+            "spoken": "Crossing the Walker River",
+            "lat": 38.99396,
+            "lon": -119.17884,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 71762450 (Walker River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Walker Lake",
@@ -30390,6 +30962,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150939239, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Mina"
+          },
+          {
+            "name": "The Clown Motel (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 223.8,
+            "spoken": "Billboard: The Clown Motel, ahead in Tonopah, next to the old cemetery. More than four thousand clowns inside. Sleep well.",
+            "directions": [
+              "forward"
+            ]
           }
         ],
         "speed_limits": [
@@ -31860,6 +32442,16 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "The Clown Motel (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 9.0,
+            "spoken": "Billboard: The Clown Motel, ahead in Tonopah, next to the old cemetery. More than four thousand clowns inside. Sleep well.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Stonewall Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -31867,11 +32459,34 @@
             "spoken": "Approaching Stonewall Pass"
           },
           {
+            "name": "Rhyolite (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 84.6,
+            "spoken": "Billboard: Rhyolite ghost town, ahead at Beatty. It had an opera house in nineteen oh-seven and fourteen people by nineteen twenty. The bottle house stayed.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
             "name": "Amargosa River",
             "category": "river",
             "kind": "point",
-            "at_mi": 95.5,
-            "spoken": "Crossing the Amargosa River"
+            "at_mi": 95.7,
+            "spoken": "Crossing the Amargosa River",
+            "lat": 36.88059,
+            "lon": -116.75278,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 125523016 (Amargosa River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
+          },
+          {
+            "name": "Rhyolite (northbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 102.6,
+            "spoken": "Billboard: Rhyolite ghost town, ahead at Beatty. It had an opera house in nineteen oh-seven and fourteen people by nineteen twenty. The bottle house stayed.",
+            "directions": [
+              "reverse"
+            ]
           },
           {
             "name": "Amargosa Valley",
@@ -31888,6 +32503,16 @@
             "kind": "point",
             "at_mi": 167.6,
             "spoken": "Approaching Indian Springs Pass"
+          },
+          {
+            "name": "The Neon Museum (southbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 200.6,
+            "spoken": "Billboard: The Neon Museum, ahead in Las Vegas. Old casino signs come here to retire in the boneyard. Some of them still light up.",
+            "directions": [
+              "forward"
+            ]
           },
           {
             "name": "Summerlin South",
@@ -34512,6 +35137,56 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Bonneville Salt Flats (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Billboard: The Bonneville Salt Flats, next exit. A wheel-driven car hit four hundred forty-nine miles an hour out there. Dispatch would still call you late.",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Wendover Will (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "Billboard: Wendover Will welcomes you ahead. This giant neon cowboy waves from the desert with the confidence of a man who has never paid an electric bill.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Bonneville Salt Flats (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 7.4,
+            "spoken": "Billboard: The Bonneville Salt Flats, next exit. A wheel-driven car hit four hundred forty-nine miles an hour out there. Dispatch would still call you late.",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
+            "name": "Tree of Utah (eastbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 19.2,
+            "spoken": "Billboard: The Tree of Utah stands ahead on the salt flats, an eighty-seven-foot concrete tree sprouting from the middle of nowhere. How do you suppose this happened?",
+            "directions": [
+              "forward"
+            ]
+          },
+          {
+            "name": "Tree of Utah (westbound)",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 37.2,
+            "spoken": "Billboard: The Tree of Utah stands ahead on the salt flats, an eighty-seven-foot concrete tree sprouting from the middle of nowhere. How do you suppose this happened?",
+            "directions": [
+              "reverse"
+            ]
+          },
+          {
             "name": "Grantsville",
             "at_mi": 90.3,
             "off_mi": 5.91,
@@ -34557,13 +35232,6 @@
             "spoken": "Passing Lake Point"
           },
           {
-            "name": "Jordan River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 111.5,
-            "spoken": "Crossing the Jordan River"
-          },
-          {
             "name": "Magna",
             "at_mi": 112.2,
             "off_mi": 4.67,
@@ -34580,6 +35248,16 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150968936, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Kearns"
+          },
+          {
+            "name": "Jordan River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 120.5,
+            "spoken": "Crossing the Jordan River",
+            "lat": 40.76453,
+            "lon": -111.92618,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 1422328000 (Jordan River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "North Salt Lake",
@@ -36528,15 +37206,11 @@
             "name": "Humboldt River",
             "category": "river",
             "kind": "point",
-            "at_mi": 63.5,
-            "spoken": "Crossing the Humboldt River"
-          },
-          {
-            "name": "Carson River",
-            "category": "river",
-            "kind": "point",
-            "at_mi": 114.9,
-            "spoken": "Crossing the Carson River"
+            "at_mi": 70.8,
+            "spoken": "Crossing the Humboldt River",
+            "lat": 40.19098,
+            "lon": -118.45677,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 737368914 (Humboldt River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Topgun",
@@ -36544,6 +37218,16 @@
             "kind": "point",
             "at_mi": 122.0,
             "spoken": "Billboard: Fallon is the Oasis of Nevada and home to the Navy's Top Gun fighter school. If a jet just shook your windows, that is the sound of freedom practicing."
+          },
+          {
+            "name": "Carson River",
+            "category": "river",
+            "kind": "point",
+            "at_mi": 126.6,
+            "spoken": "Crossing the Carson River",
+            "lat": 39.49347,
+            "lon": -118.77225,
+            "source": "derived 2026-10-01: placed by tools/place_river_crossings.py at the crossing of OSM waterway way 125815625 (Carson River) with the leg's archived dense route geometry; at_mi = cum[i-1] + t*(cum[i]-cum[i-1]) rescaled to leg miles, taking the crossing nearest the previous at_mi when the river crosses more than once. OpenStreetMap, Geofabrik us-latest extract 2026-09-30: https://www.openstreetmap.org/."
           },
           {
             "name": "Fallon Station",

@@ -16,6 +16,7 @@ use super::settings::{save_settings, SettingsCategoryState};
 use super::settings_items::assist_flag;
 use crate::app::{version, GameContext, Say};
 use crate::audio::VolumeUpdate;
+use crate::bindings::Action;
 use crate::states::text_entry::TextEntryState;
 use crate::updater;
 
@@ -174,9 +175,17 @@ impl SettingsCategoryState {
         ctx.settings.apply_driving_assistance_preset(presets[next]);
         self.announce(ctx);
         if ctx.settings.lane_keeping != lane_before {
-            let note = if ctx.settings.lane_is_automated() {
-                "Lane keeping full: the truck holds the lane, tap Left or Right to change lanes."
+            let note = if ctx.settings.lane_is_automated()
+                && ctx.controller.device() == ff_core::input_hints::TOUCH
+            {
+                "Lane keeping full: the truck holds the lane, swipe left or right to change lanes."
                     .to_string()
+            } else if ctx.settings.lane_is_automated() {
+                format!(
+                    "Lane keeping full: the truck holds the lane, tap {} or {} to change lanes.",
+                    ctx.control_name(Action::SteerLeft),
+                    ctx.control_name(Action::SteerRight)
+                )
             } else {
                 format!(
                     "Lane keeping back to {}.",
@@ -573,6 +582,13 @@ impl SettingsCategoryState {
                 Say::queued(),
             );
         }
+    }
+
+    /// Faster or default JAWS arrow keys. The work runs on its own thread and
+    /// the app loop speaks the result, so this row says nothing itself.
+    pub(super) fn toggle_jaws_arrow_script(&mut self, ctx: &mut GameContext, _d: i64) {
+        let install = !ctx.services.jaws_script.installed();
+        ctx.services.jaws_script.request(install);
     }
 
     pub(super) fn adjust_speech(&mut self, ctx: &mut GameContext, attr: &str, delta: f64) {

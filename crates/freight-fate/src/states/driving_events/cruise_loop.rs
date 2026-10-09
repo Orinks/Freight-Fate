@@ -4,6 +4,7 @@
 use ff_core::sim::transmission::JAKE_MAX_RPM;
 use ff_core::sim::trip::LIMIT_WARNING_MAX_LEAD_MI;
 use ff_core::speech_pacing::{EventPriority, SpeechCategory};
+use ff_core::speech_text::SpokenMessage;
 
 use crate::app::{GameContext, SayEvent};
 use crate::states::driving::DrivingState;
@@ -43,14 +44,20 @@ impl DrivingState {
         6.0f64.min(chosen.max(gap))
     }
 
-    /// `_acc_weather_gap_text()`.
-    pub fn acc_weather_gap_text(&self) -> Option<&'static str> {
+    /// `_acc_weather_gap_text()`, with the quiet rungs' short form.
+    pub fn acc_weather_gap_text(&self) -> Option<SpokenMessage> {
         let effects = self.trip.weather.effects();
         if effects.grip < 0.9 {
-            return Some("Wet roads, adaptive cruise increasing following gap.");
+            return Some(SpokenMessage::with_terse(
+                "Wet roads, adaptive cruise increasing following gap.",
+                "Wet roads, longer gap.",
+            ));
         }
         if effects.visibility_mi < 3.0 {
-            return Some("Low visibility, adaptive cruise increasing following gap.");
+            return Some(SpokenMessage::with_terse(
+                "Low visibility, adaptive cruise increasing following gap.",
+                "Low visibility, longer gap.",
+            ));
         }
         None
     }
@@ -426,7 +433,11 @@ impl DrivingState {
                     ),
                     _ => super::cruise::keeper_holding_line(&held, &zone_reason),
                 };
-                self.say_route_confirmation(ctx, &message);
+                let terse = format!(
+                    "Speed keeper holding {}.",
+                    ctx.settings.speed_value(self.keeper_mph.unwrap_or(0.0))
+                );
+                self.say_route_confirmation(ctx, SpokenMessage::with_terse(message, terse));
                 return;
             }
         }
@@ -444,6 +455,20 @@ impl DrivingState {
             // second the box takes to find a gear, a truck on a steep grade
             // gained two or three miles an hour a shift and landed the lower
             // gear past its governor (bench, twelve percent, 2026-09-24).
+            // On a manual it lets go on the same edge it would in gear: the
+            // clutch or neutral lasts as long as the driver holds it, and the
+            // snub rode it down to a stop. An automatic's shift is a second,
+            // and its snub may be guarding revs rather than speed, so it rides
+            // the shift out.
+            let held = self
+                .cruise_held_mph
+                .or(self.cruise_mph)
+                .unwrap_or(CRUISE_MIN_MPH);
+            if !self.trip.truck.transmission.automatic
+                && self.trip.truck.speed_mph() <= held - CRUISE_SNUB_UNDER_MPH
+            {
+                self.cruise_snubbing = false;
+            }
             if self.cruise_snubbing {
                 let weather_brake: f64 = if self.trip.weather.effects().grip < 0.7 {
                     0.45
@@ -579,7 +604,10 @@ impl DrivingState {
                 let eased = ctx.settings.speed_text(cap_mph);
                 self.say_route_confirmation(
                     ctx,
-                    &format!("{reason}; adaptive cruise easing to {eased}."),
+                    SpokenMessage::with_terse(
+                        format!("{reason}; adaptive cruise easing to {eased}."),
+                        format!("Cruise easing to {}.", ctx.settings.speed_value(cap_mph)),
+                    ),
                 );
                 // This line already named the number for a plain posted-limit
                 // drop; the arrival "Speed limit reduced to X" would otherwise
@@ -622,9 +650,16 @@ impl DrivingState {
                 let eased = ctx.settings.speed_text(safe_mph);
                 self.say_route_confirmation(
                     ctx,
-                    &format!(
-                        "{}; adaptive cruise easing to {eased}.",
-                        capitalize_first(kind)
+                    SpokenMessage::with_terse(
+                        format!(
+                            "{}; adaptive cruise easing to {eased}.",
+                            capitalize_first(kind)
+                        ),
+                        format!(
+                            "{}, cruise easing to {}.",
+                            capitalize_first(kind),
+                            ctx.settings.speed_value(safe_mph)
+                        ),
                     ),
                 );
             }
@@ -692,8 +727,14 @@ impl DrivingState {
         }
         if following && !self.acc_following && self.acc_follow_cue_s <= 0.0 {
             self.acc_follow_cue_s = ACC_FOLLOW_CUE_COOLDOWN_S;
-            ctx.audio.play_with("ui/notify", 0.55, 0.0);
-            self.say_route_confirmation(ctx, "Traffic ahead, adaptive cruise reducing speed.");
+            ctx.play_event_cue(Some(SpeechCategory::Traffic), "ui/notify", 0.55, 0.0);
+            // Settling in behind a slower vehicle is the assist doing its
+            // job, and the notify tone marks it: words at standard only.
+            self.say_route_line(
+                ctx,
+                "Traffic ahead, adaptive cruise reducing speed.",
+                SpeechCategory::Traffic,
+            );
         }
         self.acc_following = following;
         // Publish what cruise is really holding, for the status keys. The
