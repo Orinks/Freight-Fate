@@ -254,8 +254,9 @@ cleanup](https://doc.rust-lang.org/book/ch21-03-graceful-shutdown-and-cleanup.ht
   services. Codex's restricted shell can block initialization even when the
   same check passes with normal Windows access. Use the authorized elevated
   tool path for that verification; keep the game's save sandbox enabled.
-- Rust CI (`.github/workflows/rust.yml`) is **Windows only**, deliberately:
-  SDL2 is vendored for `windows-x86_64` alone. macOS and Linux build from
+- Rust CI (`.github/workflows/rust.yml`) tests the game on **Windows only**,
+  deliberately (ff-core, which is headless, runs its tests on Linux in
+  parallel): SDL2 is vendored for `windows-x86_64` alone. macOS and Linux build from
   source (BASS is fetched for both, Prism is vendored, and SDL2 is compiled
   in statically via the crate's `bundled` + `static-link` features -- NEVER
   Homebrew's sdl2, which is sdl2-compat and loads SDL3 at runtime, dying on

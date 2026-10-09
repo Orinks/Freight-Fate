@@ -12,6 +12,10 @@
 #
 # Not a required check. It is path filtered, and a required check that is
 # path filtered waits forever on a PR that skips it (see rust.yml).
+#
+# Not on pull requests (owner, 2026-10-09: PR checks are quick checks, not
+# builds). It runs on the push that lands an iOS change on dev, and on a
+# manual dispatch for a branch that wants the check before merging.
 
 name: iOS build
 
@@ -19,21 +23,8 @@ permissions:
   contents: read
 
 on:
-  pull_request:
-    branches: [main, dev]
-    paths:
-      - "crates/freight-fate/ios/**"
-      - "crates/freight-fate/build.rs"
-      - "crates/freight-fate/src/touch.rs"
-      - "crates/freight-fate/src/app/sdl_shell.rs"
-      - "crates/freight-fate/Cargo.toml"
-      - "Cargo.toml"
-      - "Cargo.lock"
-      - "rust-toolchain.toml"
-      - ".github/workflows/ios-build.yml"
   push:
     branches: [dev]
-    # Keep in step with the pull_request list above.
     paths:
       - "crates/freight-fate/ios/**"
       - "crates/freight-fate/build.rs"

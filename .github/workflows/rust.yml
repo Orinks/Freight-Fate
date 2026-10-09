@@ -39,6 +39,12 @@
 #     of a few thousand object files is a known multiple on a Windows runner.
 #   * BASS is restored from the Actions cache instead of un4seen's site.
 #
+#   * ff-core's tests run on Linux, in parallel with the game crate's on
+#     Windows (2026-10-09). ff-core is headless with no native dependency,
+#     so the cheap runner proves it as well as Windows does, and its test
+#     binaries no longer queue behind the game's on the slow Windows
+#     compile. The nightly still runs the whole workspace on Windows.
+#
 # The build's own timing report is uploaded as an artifact on every run, so
 # the next person who asks "where do the minutes go" can open
 # cargo-timing.html instead of guessing.
@@ -122,6 +128,48 @@ jobs:
 
       - name: cargo fmt --check
         run: cargo fmt --all --check
+
+  test-core:
+    # ff-core is everything headless: no window, audio device, screen
+    # reader or network, and Cargo enforces that, so nothing in it needs
+    # Windows. On Linux it skips the Defender, BASS and SDL2 setup, and its
+    # two big test binaries compile off the Windows job's critical path.
+    name: Test ff-core (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: "1"
+      # The same quick-set switch as the Windows test job below.
+      RUSTFLAGS: ${{ (github.event_name == 'push' || github.event_name == 'pull_request') && '--cfg ci_quick' || '' }}
+      RUSTC_WRAPPER: sccache
+      SCCACHE_GHA_ENABLED: "true"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          lfs: false
+
+      - name: Install the pinned toolchain
+        run: rustup show
+
+      - name: Install sccache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
+      - name: Cache cargo registry and target directory
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-linux-core
+          cache-on-failure: true
+
+      - name: Build the test binaries
+        run: cargo test -p ff-core --no-run --locked
+
+      - name: cargo test
+        run: cargo test -p ff-core --locked
+
+      - name: Compiler cache statistics
+        if: always()
+        run: sccache --show-stats
 
   clippy:
     # Windows, like the tests, so the `#[cfg(windows)]` half of the game
@@ -297,11 +345,11 @@ jobs:
       - name: Build the test binaries
         # The build on its own so the timing report below covers exactly the
         # compile, and so a compile failure reads as one. `--locked`: see the
-        # clippy job. ONE invocation for both crates, not one per crate:
-        # split, cargo compiled ff-core twice (once as its own test target,
-        # once as freight-fate's dependency) in two sequential builds with
-        # separate link phases (2026-08-29).
-        run: cargo test -p ff-core -p freight-fate --no-run --locked --timings
+        # clippy job. The game crate only: ff-core's own tests are the
+        # test-core job's, on Linux. ff-core is still compiled here as the
+        # game's dependency, which is the library alone, not its test
+        # binaries, and sccache usually has it.
+        run: cargo test -p freight-fate --no-run --locked --timings
 
       - name: Show the staged native libraries
         # The build scripts (crates/bass-sys/build.rs,
@@ -323,9 +371,7 @@ jobs:
 
       - name: cargo test
         # Everything is fresh from the step above, so this is the run alone.
-        # Each test binary still reports separately, so a failure names which
-        # crate it came from.
-        run: cargo test -p ff-core -p freight-fate --locked
+        run: cargo test -p freight-fate --locked
 
       - name: cargo test (agent server)
         # Agent tooling, not the game: `test = false` keeps it out of the run
