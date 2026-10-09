@@ -2011,8 +2011,9 @@ also needs its call sign and state, and can have its city and frequency.
 orinks.net plays the first seconds of the stream and tells you straight
 away if it will not play or is already on the dial; otherwise it waits for
 review. Accepted stations join every driver's dial at their next launch,
-with no game update, on the web radio band until their transmitter is
-known. Suggesting needs this computer set up with orinks.net and Online
+with no game update. An AM or FM station plays near its real transmitter,
+like the other stations on that band; one whose licence cannot be found
+plays everywhere, on the web radio band. Suggesting needs this computer set up with orinks.net and Online
 services on. You can also suggest one at
 orinks.net/freight-fate/suggest-a-station.
 

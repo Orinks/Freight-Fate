@@ -443,9 +443,6 @@ Everything found before 2026-09-25 moved to
       out makes no sound, and quiet says cruise, keeper and work zone
       updates short. Urgent only now says when a work zone turns cruise off.
 - [ ] A listening pass by the owner at quiet and urgent only, at the wheel.
-- [ ] Research transmitters for accepted AM and FM station suggestions, and
-      fold accepted stations into the catalog at release
-      ([October 9](#october-9-player-suggested-stations)).
 - [ ] The exit-call truth test (`test_the_exit_calls_name_the_road_that_is_really_left`)
       failed once on the Linux ARM runner in the v1.9.1 tag build, hearing
       only the two-mile call, and passed on re-run. It passed 80 of 80 runs
@@ -2686,12 +2683,13 @@ collision.
 
 - [x] Suggest a station in the Radio app; community stations on the dial.
 - [x] Control V pastes into every text field.
-- [ ] (Found along the way) An accepted AM or FM station plays everywhere,
-      on the web band, until its transmitter (lat, lon, rangeMiles) is
-      added to its row by hand. Look up FCC transmitter data for each one.
-- [ ] (Found along the way) Fold accepted community stations into
-      `radio_catalog.json` at each release, so the downloaded list stays
-      small; the dial already drops a community row the catalog names.
+- [x] An accepted AM or FM station is placed at its licensed transmitter
+      from the FCC's records when it is accepted, and plays on the AM and
+      FM band near home; one the FCC does not list stays on the web band
+      and is asked about again weekly.
+- [x] Accepted stations ship in every build (`data/radio_community.json`),
+      copied from the site before each nightly, so a first or offline launch
+      has them too.
 
 ## 2.0 planned -- the working week and home
 

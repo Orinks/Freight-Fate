@@ -12,7 +12,7 @@
 
 - **A fuel range warning speaks when your fuel will not reach the next fuel stop.** It names your range and how far the stop is.
 
-- **The Radio app can suggest a station that is missing from the dial.** Accepted stations join every driver's dial without a game update.
+- **The Radio app can suggest a station that is missing from the dial.** Accepted stations join every driver's dial, and AM and FM ones play near home.
 
 - **Text fields now paste with Control V, and name punctuation as you type it.** A colon or slash is spoken as a word instead of a silent click.
 
