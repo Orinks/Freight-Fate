@@ -14,6 +14,8 @@
 
 ### Changed
 
+- **Update checks, the bug report page and the manual download link now go to the game's new GitHub home, orinks-games.**
+
 - **A slow vehicle ahead in your lane is now called at half a mile, when you start to hear it.**
 
 - **Tire noise on the road is louder at highway speed.**
