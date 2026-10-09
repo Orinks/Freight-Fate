@@ -73,6 +73,9 @@ at 60 feet, and the hearing edge from 450 to 1,500 feet, since the bubble
 keeps vehicles a tenth of a mile apart or more. Past 60 feet a sound now drops
 3 dB per doubling of distance, not 6: at 6 dB the owner still heard a vehicle
 only as it passed. On an exit ramp the divergence alone takes the other 3 dB,
-so the freeway still falls away as the ramp leaves it. The bed was re-made steady (`sound-test/highway_bed.py`)
-and stays at -22 LUFS.
+so the freeway still falls away as the ramp leaves it. The loops were then
+lifted 12 dB around 1.2 kHz and cut 3 dB around 300 Hz, restored to their own
+loudness: as rendered, over 90 percent of a car's energy sat under 500 Hz with
+the engine, which masked it. The bed was re-made steady
+(`sound-test/highway_bed.py`) and stays at -22 LUFS.
 
