@@ -28,6 +28,8 @@
 
 ### Fixed
 
+- **Less memory and smoother speech**: music now streams from disk instead of taking about 380 MB of memory, and speech no longer rebuilds its voice every three seconds.
+
 - **Traffic is now loud enough to hear over the engine, from about a quarter mile away.**
 
 - **Passing traffic now sounds where the vehicle really is.** It comes up on its own side, then fades as it pulls ahead.

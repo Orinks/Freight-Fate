@@ -75,8 +75,8 @@ pub use ff_core::speech_pacing::{EventPriority, EventSpeechPacer};
 
 pub use backend::{
     narrator_running, pick_backend, pick_backend_gated, pick_event_backend,
-    preserve_backend_default_pitch, usable, BackendId, PrismRegistry, PrismVoice, VoiceBackend,
-    VoiceFeatures, VoiceRegistry,
+    preserve_backend_default_pitch, repick_backend_gated, usable, BackendId, PrismRegistry,
+    PrismVoice, Repick, VoiceBackend, VoiceFeatures, VoiceRegistry,
 };
 pub use capture::{
     CaptureProfile, CaptureSpeech, ConfigureCall, NullSpeech, SpeechChannel, SpokenEntry,

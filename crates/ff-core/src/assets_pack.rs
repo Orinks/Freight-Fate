@@ -235,19 +235,47 @@ pub fn write_pack(
     Ok(output.to_path_buf())
 }
 
-/// Read-only view of a masked sound pack, held in memory.
+/// Where a pack's bytes live: the whole file unmasked into memory, or the
+/// file itself read entry by entry.
+///
+/// The small `sounds.pak` stays in memory -- its one-shots need lookup
+/// latency, and a few MB is cheap. The several-hundred-MB `music.pak`
+/// streams ([`SoundPack::open_streamed`]): holding it cost more resident
+/// memory than everything else in the game combined, for music that plays
+/// one track at a time.
+enum PackBacking {
+    InMemory(Mutex<ZipArchive<Cursor<Vec<u8>>>>),
+    Streamed(StreamedPack),
+}
+
+/// Read-only view of a masked sound pack.
 pub struct SoundPack {
-    archive: Mutex<ZipArchive<Cursor<Vec<u8>>>>,
+    backing: PackBacking,
     names: Vec<String>,
     name_set: HashSet<String>,
 }
 
 impl SoundPack {
+    /// A pack read fully into memory and unmasked.
     pub fn open(path: &Path) -> Result<Self, PackError> {
         let raw = std::fs::read(path)?;
         Self::from_bytes(raw).map_err(|err| match err {
             PackError::NotAPack(_) => PackError::NotAPack(path.to_path_buf()),
             other => other,
+        })
+    }
+
+    /// A pack read entry by entry from its file, like [`open`] but without
+    /// the up-front read and unmask: only the zip directory is read at open,
+    /// and each entry's bytes come off disk when asked for.
+    pub fn open_streamed(path: &Path) -> Result<Self, PackError> {
+        let pack = StreamedPack::open(path)?;
+        let names = pack.names();
+        let name_set = names.iter().cloned().collect();
+        Ok(Self {
+            backing: PackBacking::Streamed(pack),
+            names,
+            name_set,
         })
     }
 
@@ -263,7 +291,7 @@ impl SoundPack {
         let names: Vec<String> = archive.file_names().map(str::to_string).collect();
         let name_set = names.iter().cloned().collect();
         Ok(Self {
-            archive: Mutex::new(archive),
+            backing: PackBacking::InMemory(Mutex::new(archive)),
             names,
             name_set,
         })
@@ -287,7 +315,11 @@ impl SoundPack {
         if !self.has(name) {
             return None;
         }
-        let mut archive = self.archive.lock().unwrap_or_else(|e| e.into_inner());
+        let archive = match &self.backing {
+            PackBacking::InMemory(archive) => archive,
+            PackBacking::Streamed(pack) => return pack.read(name),
+        };
+        let mut archive = archive.lock().unwrap_or_else(|e| e.into_inner());
         let result = archive
             .by_name(name)
             .map_err(PackError::from)
@@ -377,7 +409,9 @@ impl CombinedPack {
 }
 
 /// Read-and-unmask one pack file, or None when it is absent/unreadable.
-fn load_one_pack(path: &Path, label: &str) -> Option<Arc<SoundPack>> {
+/// `streamed` opens the pack entry-by-entry instead of whole into memory
+/// (see [`SoundPack::open_streamed`]).
+fn load_one_pack(path: &Path, label: &str, streamed: bool) -> Option<Arc<SoundPack>> {
     if !path.exists() {
         // Once per process: the loader reads the packs a single time. A
         // source run without music.pak (it is builder-local) says so here.
@@ -387,7 +421,12 @@ fn load_one_pack(path: &Path, label: &str) -> Option<Arc<SoundPack>> {
         );
         return None;
     }
-    match SoundPack::open(path) {
+    let opened = if streamed {
+        SoundPack::open_streamed(path)
+    } else {
+        SoundPack::open(path)
+    };
+    match opened {
         Ok(pack) => {
             log::info!(
                 "{} pack loaded: {} ({} entries)",
@@ -472,8 +511,8 @@ impl PackLoader {
             return; // someone else finished this while we waited for the lock
         }
         self.loads.fetch_add(1, Ordering::SeqCst);
-        let sounds = load_one_pack(&self.sounds_path, "sound");
-        let music = load_one_pack(&self.music_path, "music");
+        let sounds = load_one_pack(&self.sounds_path, "sound", false);
+        let music = load_one_pack(&self.music_path, "music", true);
         let channel3000 = self
             .channel3000
             .as_ref()
@@ -1307,5 +1346,51 @@ mod tests {
         assert!(generated_sound_version("test_registry/alpha") > before);
         // Only the registered key moves; a cache of any other stays valid.
         assert_eq!(generated_sound_version("test_registry/untouched"), other);
+    }
+
+    // -- the streamed backing: same pack surface, without the whole file in RAM --
+
+    /// The fixture sounds, written as one pack and opened both ways.
+    fn open_both(tmp: &tempfile::TempDir) -> (SoundPack, SoundPack) {
+        let sounds = write_fixture_sounds(tmp.path());
+        let path = write_pack(&sounds, &tmp.path().join("music.pak"), None, None).unwrap();
+        let in_memory = SoundPack::open(&path).unwrap();
+        let streamed = SoundPack::open_streamed(&path).unwrap();
+        (in_memory, streamed)
+    }
+
+    #[test]
+    fn test_open_streamed_lists_the_same_names() {
+        let tmp = tempfile::tempdir().unwrap();
+        let (in_memory, streamed) = open_both(&tmp);
+        assert_eq!(streamed.names(), in_memory.names());
+        for name in in_memory.names() {
+            assert!(streamed.has(&name), "streamed pack is missing {name}");
+        }
+    }
+
+    #[test]
+    fn test_open_streamed_reads_byte_identical_entries() {
+        let tmp = tempfile::tempdir().unwrap();
+        let (in_memory, streamed) = open_both(&tmp);
+        for name in in_memory.names() {
+            assert_eq!(
+                streamed.read(&name).unwrap(),
+                in_memory.read(&name).unwrap(),
+                "{name} differs"
+            );
+        }
+        assert!(streamed.read("no/such/file.wav").is_none());
+    }
+
+    #[test]
+    fn test_open_streamed_rejects_a_non_pack_with_the_path() {
+        let tmp = tempfile::tempdir().unwrap();
+        let not_a_pack = tmp.path().join("garbage.pak");
+        std::fs::write(&not_a_pack, b"this is not a pack").unwrap();
+        match SoundPack::open_streamed(&not_a_pack) {
+            Err(PackError::NotAPack(path)) => assert_eq!(path, not_a_pack),
+            _ => panic!("expected NotAPack with the path"),
+        }
     }
 }
