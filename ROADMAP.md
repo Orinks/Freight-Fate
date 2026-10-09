@@ -61,8 +61,8 @@ bookmarks usable.
       perfect" (see the next two items).
 - [x] Busy freeways carry company in the lanes beside the truck: each new
       freeway cell gives every lane left of the right lane a chance (30
-      percent of the road's density) at a passer placed 0.3 to 0.6 miles
-      behind the truck, just out of earshot (`traffic_manager/beside.rs`).
+      percent of the road's density) at a passer placed 0.6 to 0.9 miles
+      behind the truck, past the no-spawn clear air (`traffic_manager/beside.rs`).
       Cells are drawn three miles ahead, so a truck at road speed only ever
       met slower traffic: two vehicles heard through the I-65 rush zone.
       The vehicle ahead in the truck's lane, the one callouts name, is heard

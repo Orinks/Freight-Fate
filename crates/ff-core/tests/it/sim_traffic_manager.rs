@@ -1144,9 +1144,8 @@ fn test_a_busy_freeway_carries_company_in_the_lanes_beside_the_truck() {
     assert!(!beside.is_empty(), "{vehicles:?}");
     assert!(beside.iter().all(|v| v.lane >= 1), "{beside:?}");
     assert!(
-        beside
-            .iter()
-            .all(|v| v.intent == "passing" && (0.3..=0.6).contains(&(middle - v.position_mi))),
+        beside.iter().all(|v| v.intent == "passing"
+            && (NO_SPAWN_BEHIND_MI..=NO_SPAWN_BEHIND_MI + 0.3).contains(&(middle - v.position_mi))),
         "{beside:?}"
     );
     assert!(vehicles.len() <= MAX_BUBBLE_VEHICLES);
