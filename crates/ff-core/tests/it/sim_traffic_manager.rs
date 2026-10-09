@@ -1112,9 +1112,11 @@ fn test_only_a_freeway_has_distant_traffic_to_hear() {
 
 #[test]
 fn test_a_busy_freeway_carries_company_in_the_lanes_beside_the_truck() {
-    // One vehicle a cell left a busy interstate a tenth as full as its own
-    // count, and the cab heard nobody (owner drive, 2026-10-09). The other
-    // lanes now draw their own; the truck's right lane never does.
+    // Every cell is drawn three miles ahead, so a truck at road speed only
+    // ever met traffic slower than it, and the cab heard nobody (owner
+    // drive, 2026-10-09). New freeway cells now send passers up the lanes
+    // beside the truck from just out of earshot behind it; the truck's own
+    // right lane never gets one.
     let w = world();
     let bubble_on = |leg: &std::sync::Arc<Leg>| {
         let route = Route::new(vec![leg.a.clone(), leg.b.clone()], vec![leg.clone()]);
@@ -1133,6 +1135,7 @@ fn test_a_busy_freeway_carries_company_in_the_lanes_beside_the_truck() {
                 && leg_lane_count(Some(leg)) >= 2
         })
         .expect("a multi-lane interstate leg");
+    let middle = interstate.miles / 2.0;
     let vehicles = bubble_on(interstate);
     let beside: Vec<_> = vehicles
         .iter()
@@ -1140,6 +1143,12 @@ fn test_a_busy_freeway_carries_company_in_the_lanes_beside_the_truck() {
         .collect();
     assert!(!beside.is_empty(), "{vehicles:?}");
     assert!(beside.iter().all(|v| v.lane >= 1), "{beside:?}");
+    assert!(
+        beside
+            .iter()
+            .all(|v| v.intent == "passing" && (0.3..=0.6).contains(&(middle - v.position_mi))),
+        "{beside:?}"
+    );
     assert!(vehicles.len() <= MAX_BUBBLE_VEHICLES);
 
     let two_lane = w

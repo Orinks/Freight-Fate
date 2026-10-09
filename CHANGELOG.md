@@ -20,7 +20,9 @@
 
 - **The distant interstate traffic is a steady roar now, not a swell like waves.**
 
-- **Busy freeways now have traffic in the lanes beside you, not only far ahead.**
+- **On busy freeways, traffic now comes up beside you and passes.**
+
+- **A slow vehicle ahead in your lane can now be heard from half a mile away.**
 
 - **Traffic now sounds clearly on its own side as it comes up, and quieter once it is behind you.**
 

@@ -331,3 +331,30 @@ fn test_a_car_one_lane_over_is_on_its_side_well_before_it_draws_level() {
         "{ahead:?} {behind:?}"
     );
 }
+
+#[test]
+fn test_the_car_the_game_calls_out_ahead_takes_a_sound_first() {
+    // With the lane beside full, nearer cars took all three sounds and the
+    // car the game had just named stayed silent (owner drive, 2026-10-09).
+    let mut app = TestApp::new();
+    let (mut drive, log) = a_freeway_drive(&mut app);
+    drive.trip.traffic_manager.vehicles = vec![
+        car("probe:beside0", 100.0, 70.0, 1, "car", &drive),
+        car("probe:beside1", 200.0, 70.0, 1, "car", &drive),
+        car("probe:beside2", -150.0, 70.0, 1, "car", &drive),
+        car("probe:lead", 2000.0, 45.0, 0, "box truck", &drive),
+    ];
+    drive.update_traffic_sounds(&mut app.ctx, FRAME);
+    let followed: Vec<String> = drive.traffic_sounds.iter().flatten().cloned().collect();
+    assert!(
+        followed.iter().any(|id| id == "main:probe:lead"),
+        "{followed:?}"
+    );
+    assert!(
+        sounds(&log)
+            .iter()
+            .any(|s| s.key == "traffic/box_truck_loop"),
+        "{:?}",
+        sounds(&log)
+    );
+}

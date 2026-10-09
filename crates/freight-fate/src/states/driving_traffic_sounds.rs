@@ -40,6 +40,11 @@ use crate::states::driving::DrivingState;
 /// bubble keeps vehicles a tenth of a mile apart or more, so a 450-foot edge
 /// left most of a busy interstate silent (owner drive, 2026-10-09).
 pub const TRAFFIC_SOUND_HEAR_FT: f64 = 1500.0;
+/// The vehicle ahead in the truck's own lane, the one the game calls out and
+/// the cruise follows, is heard this far and always takes a sound first: with
+/// the lanes beside filled, nearer cars took all three and the car the game
+/// had just named stayed silent (owner drive, 2026-10-09).
+pub const TRAFFIC_LEAD_HEAR_FT: f64 = 2640.0;
 /// Inside this a sound is at full level: alongside, or a few car lengths off.
 pub const TRAFFIC_SOUND_REF_FT: f64 = 60.0;
 /// A sound's level at [`TRAFFIC_SOUND_REF_FT`]. It drops 3 dB with each
@@ -98,13 +103,17 @@ pub fn traffic_sound_key(vehicle_class: &str) -> &'static str {
 /// carry a car the player cannot see; and eased to nothing over the last stretch before the hearing edge so a
 /// sound never appears or vanishes with a step.
 pub fn traffic_sound_volume(distance_ft: f64) -> f64 {
-    if distance_ft >= TRAFFIC_SOUND_HEAR_FT {
+    traffic_sound_volume_within(distance_ft, TRAFFIC_SOUND_HEAR_FT)
+}
+
+/// [`traffic_sound_volume`] with its own hearing edge.
+fn traffic_sound_volume_within(distance_ft: f64, hear_ft: f64) -> f64 {
+    if distance_ft >= hear_ft {
         return 0.0;
     }
     let near =
         TRAFFIC_SOUND_PEAK * (TRAFFIC_SOUND_REF_FT / distance_ft.max(TRAFFIC_SOUND_REF_FT)).sqrt();
-    let edge =
-        ((TRAFFIC_SOUND_HEAR_FT - distance_ft) / (TRAFFIC_SOUND_HEAR_FT * 0.3)).clamp(0.0, 1.0);
+    let edge = ((hear_ft - distance_ft) / (hear_ft * 0.3)).clamp(0.0, 1.0);
     near * edge
 }
 
@@ -168,14 +177,29 @@ impl DrivingState {
         self.traffic_ramp_rolled_ft = 0.0;
     }
 
-    /// Every vehicle near enough to hear, nearest first.
+    /// Every vehicle near enough to hear: the lead in the truck's lane first,
+    /// then nearest first.
     pub fn heard_traffic(&self) -> Vec<HeardVehicle> {
         let mut heard = Vec::new();
         let truck_mph = self.trip.truck.speed_mph();
         let on_ramp = self.ramp_mi.is_some();
         let player_lane = self.trip.traffic_manager.player_lane;
+        let lead_key = if on_ramp {
+            None
+        } else {
+            self.trip
+                .traffic_manager
+                .lead_vehicle(self.trip.position_mi, truck_mph)
+                .map(|context| context.lead.key)
+        };
         for vehicle in &self.trip.traffic_manager.vehicles {
             let along = (vehicle.position_mi - self.trip.position_mi) * 5280.0;
+            let is_lead = lead_key.as_deref() == Some(vehicle.key.as_str());
+            let hear_ft = if is_lead {
+                TRAFFIC_LEAD_HEAR_FT
+            } else {
+                TRAFFIC_SOUND_HEAR_FT
+            };
             // Lane indices count leftward, so a higher lane is to the left.
             // On a ramp, how much farther off the divergence alone has put
             // it: the freeway falls away faster than the gentle in-traffic
@@ -194,7 +218,7 @@ impl DrivingState {
                 (-lanes * LANE_WIDTH_FT, vehicle.speed_mph - truck_mph)
             };
             let distance = along.hypot(across);
-            if distance >= TRAFFIC_SOUND_HEAR_FT {
+            if distance >= hear_ft {
                 continue;
             }
             // d(distance)/dt along the road: a vehicle ahead moving away, or
@@ -210,7 +234,7 @@ impl DrivingState {
                 id: format!("main:{}", vehicle.key),
                 key: traffic_sound_key(&vehicle.vehicle_class),
                 distance_ft: distance,
-                volume: traffic_sound_volume(distance)
+                volume: traffic_sound_volume_within(distance, hear_ft)
                     * diverged
                     * behind_share(along)
                     * rolling_share(vehicle.speed_mph),
@@ -248,7 +272,14 @@ impl DrivingState {
             }
         }
         heard.retain(|v| v.volume > 0.0);
-        heard.sort_by(|a, b| a.distance_ft.total_cmp(&b.distance_ft));
+        let lead_id = lead_key.map(|key| format!("main:{key}"));
+        heard.sort_by(|a, b| {
+            let a_lead = lead_id.as_deref() == Some(a.id.as_str());
+            let b_lead = lead_id.as_deref() == Some(b.id.as_str());
+            b_lead
+                .cmp(&a_lead)
+                .then(a.distance_ft.total_cmp(&b.distance_ft))
+        });
         heard
     }
 

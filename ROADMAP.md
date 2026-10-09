@@ -59,10 +59,17 @@ bookmarks usable.
       band; the bed is steady shaped noise (`sound-test/highway_bed.py`); the
       callout plays the slowing-traffic earcon. Owner: "way better, still not
       perfect" (see the next two items).
-- [x] Busy freeways carry company in the lanes beside the truck: a freeway
-      cell that drew a vehicle draws one per other left lane at the same
-      density (`traffic_manager/beside.rs`). The bubble's one-per-cell rule
-      left an interstate a tenth as full as its own count says.
+- [x] Busy freeways carry company in the lanes beside the truck: each new
+      freeway cell gives every lane left of the right lane a chance (30
+      percent of the road's density) at a passer placed 0.3 to 0.6 miles
+      behind the truck, just out of earshot (`traffic_manager/beside.rs`).
+      Cells are drawn three miles ahead, so a truck at road speed only ever
+      met slower traffic: two vehicles heard through the I-65 rush zone.
+      The vehicle ahead in the truck's lane, the one callouts name, is heard
+      to half a mile and always takes a sound first.
+- [ ] (Found along the way) Callouts name a slow vehicle up to 2.2 miles
+      ahead, beyond any hearing; whether the warning should wait until it is
+      audible is a design call for the owner.
 - [ ] (Found along the way) A second owner listening pass on traffic after
       the denser freeways: per-class loudness, `TRAFFIC_BED_PEAK`, and
       whether the right lane needs company too (it is left empty because a
