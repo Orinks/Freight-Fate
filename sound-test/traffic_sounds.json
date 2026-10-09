@@ -1,5 +1,5 @@
 {
-  "_about": "Traffic sounds (2026-10-08): one steady loop per traffic class, the sound of that vehicle holding its distance at highway speed. The game runs one per nearby NPC vehicle and sets its level, pan and pitch every frame from where the vehicle really is, so the sound moves with the car instead of being a one-shot fired when it crosses the bumper. Mono on purpose: the game pans. Render with the genny CLI (github.com/ogomez92/genny): genny render sound-test/traffic_sounds.json, then encode each WAV to Ogg Vorbis (ffmpeg -c:a libvorbis -q:a 5). Tires and wind lead and the engine sits under them, as at 60 mph from the next lane; a heavy vehicle is lower and rougher, a motorcycle is mostly engine.",
+  "_about": "Traffic sounds (2026-10-08): one steady loop per traffic class, the sound of that vehicle holding its distance at highway speed. The game runs one per nearby NPC vehicle and sets its level, pan and pitch every frame from where the vehicle really is, so the sound moves with the car instead of being a one-shot fired when it crosses the bumper. Mono on purpose: the game pans. Render with the genny CLI (github.com/ogomez92/genny): genny render sound-test/traffic_sounds.json, then encode each WAV to Ogg Vorbis (ffmpeg -c:a libvorbis -q:a 5). Tires and wind lead and the engine sits under them, as at 60 mph from the next lane; a heavy vehicle is lower and rougher, a motorcycle is mostly engine. Shipped files are then given ffmpeg equalizer=f=1200:t=o:w=2:g=12,equalizer=f=300:t=o:w=1.5:g=-3 and restored to their own loudness (2026-10-09): rendered, nearly all the energy sat under 500 Hz with the engine, which masked them.",
   "out_dir": "build/sound-test/traffic_sounds",
   "normalize": -3,
   "loop": 0.4,
@@ -464,92 +464,6 @@
         },
         {
           "type": "mono"
-        }
-      ]
-    },
-    {
-      "out": "highway_bed.wav",
-      "duration": 12.0,
-      "loop": 1.5,
-      "layers": [
-        {
-          "type": "sfx",
-          "kind": "noise",
-          "gain": 0.8,
-          "params": {
-            "dur": 14,
-            "color": "brown",
-            "attack": 0.5
-          },
-          "fx": [
-            {
-              "type": "lowpass",
-              "cutoff": 380
-            },
-            {
-              "type": "tremolo",
-              "rate": 0.11,
-              "depth": 0.35
-            }
-          ]
-        },
-        {
-          "type": "sfx",
-          "kind": "noise",
-          "gain": 0.45,
-          "params": {
-            "dur": 14,
-            "color": "pink",
-            "attack": 0.5
-          },
-          "fx": [
-            {
-              "type": "bandpass",
-              "center": 402,
-              "q": 0.56
-            },
-            {
-              "type": "tremolo",
-              "rate": 0.07,
-              "depth": 0.5
-            }
-          ]
-        },
-        {
-          "type": "sfx",
-          "kind": "whoosh",
-          "at": 2.1,
-          "gain": 0.25,
-          "params": {
-            "dur": 2.6,
-            "low": 150,
-            "high": 700,
-            "direction": "up"
-          }
-        },
-        {
-          "type": "sfx",
-          "kind": "whoosh",
-          "at": 7.3,
-          "gain": 0.2,
-          "params": {
-            "dur": 3.2,
-            "low": 120,
-            "high": 600,
-            "direction": "down"
-          }
-        }
-      ],
-      "fx": [
-        {
-          "type": "lowpass",
-          "cutoff": 1400
-        },
-        {
-          "type": "reverb",
-          "mix": 0.25,
-          "size": 0.9,
-          "width": 1.0
         }
       ]
     }

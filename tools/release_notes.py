@@ -18,30 +18,26 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CHANGELOG_PATH = Path("CHANGELOG.md")
 NIGHTLY_HEADER = (
-    "Preview snapshot for players who want the newest features before the next "
-    "stable release. Expect rough edges; your save files stay compatible "
-    "whenever possible, but back them up first."
+    "A preview of the next release, with the newest features and some rough "
+    "edges. Back up your saves before you install it."
 )
 GITHUB_RELEASE_NOTES_SAFE_CHARACTERS = 120_000
 FIRST_SNAPSHOT_COMPLETE_LIST = (
     "## Complete change list\n\n"
-    "This first snapshot contains more player-facing changes than fit on the "
-    "GitHub release page. Read `CHANGELOG.md` in the download for the complete "
-    "curated list."
+    "There are more changes than fit on this page. The full list is "
+    "CHANGELOG.md in your game folder."
 )
 # A later snapshot can overflow too: a busy stretch, or a rewrite of the
 # curated entries, which makes every bullet read as new to the previous tag.
 SNAPSHOT_COMPLETE_LIST = (
     "## Complete change list\n\n"
-    "This snapshot carries more player-facing changes than fit on the GitHub "
-    "release page. Read `CHANGELOG.md` in the download for the complete "
-    "curated list."
+    "There are more changes than fit on this page. The full list is "
+    "CHANGELOG.md in your game folder."
 )
 STABLE_COMPLETE_LIST = (
     "## Complete change list\n\n"
-    "This release carries more player-facing changes than fit on the GitHub "
-    "release page. Read `CHANGELOG.md` in the download for the complete "
-    "curated list."
+    "There are more changes than fit on this page. The full list is "
+    "CHANGELOG.md in your game folder."
 )
 # A stable release can open with a hand-written summary of everything since
 # the last stable: these headings, under the version's own `## X.Y.Z - date`

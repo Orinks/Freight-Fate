@@ -6,6 +6,8 @@
 
 - **Interstates now have the sound of distant traffic, louder on busier stretches.**
 
+- **On busy freeways, traffic now comes up beside you and passes.**
+
 - **The radio status screen says where your own playlist files go until you have one on the dial.**
 
 - **A fuel range warning speaks when your fuel will not reach the next fuel stop.** It names your range and how far the stop is.
@@ -18,9 +20,21 @@
 
 - **The Engine voice and Engine brake voice settings are now called Engine sound and Engine brake sound.**
 
+- **The distant interstate traffic is now a steady roar.**
+
+- **A slow vehicle ahead in your lane can now be heard from half a mile away.**
+
+- **A slower vehicle ahead now plays the slowing-traffic sound, not a passing sound.**
+
 ### Fixed
 
 - **Less memory and smoother speech**: music now streams from disk instead of taking about 380 MB of memory, and speech no longer rebuilds its voice every three seconds.
+
+- **Traffic is now loud enough to hear over the engine, from about a quarter mile away.**
+
+- **Passing traffic now sounds where the vehicle really is.** It comes up on its own side, then fades as it pulls ahead.
+
+- **Traffic sounds on exit ramps now match the cars.** The freeway fades off to your left, and cross traffic at the ramp end sweeps across in front of you.
 
 - **The agent server now quits when the tool that started it closes.** A new server waits out a leftover one, or names its process.
 - **Bobtail to a nearby city is refused while your CDL is suspended or disqualified.** You hear when the suspension ends instead.
@@ -29,31 +43,19 @@
 
 - **The last weigh station warning names its scale and leaves time to take the exit in every driving mode.** Closed scales say so.
 
-- **Driving into Memphis from St. Louis no longer passes a weigh station that is not there.** The West Memphis scale is westbound I-40 only.
+- **Weigh stations and truck stops around West Memphis are now where they really are.** The scale that was never there is gone, and the Marion and Lehi scales are added.
 
-- **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now says it waits until you stop.
+- **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now waits until you stop, and says so.
 
-- **West Memphis stops sit where they really are.** The Riverside scale is past the bridge, and the Petro and Love's are at exit 280.
+- **The weigh station bypass charge now applies only when you really skip an open scale.** A hazard near the scale no longer costs you; slowing, then speeding past, still does.
 
-- **Creeping up to an open scale, then speeding past, no longer dodges the bypass charge.** Only a warning the game delayed excuses you.
-
-- **A closed weigh station's check-in just says it is closed.** It no longer chimes, saves, or counts as an inspection.
-
-- **Arriving at a closed weigh station says its name once.**
+- **A closed weigh station says it is closed, once, and nothing more.** It no longer chimes, saves, or counts as an inspection.
 
 - **The state line on the St. Louis to Memphis drive now says I-40, over the Hernando de Soto Bridge.**
 
-- **Two real Arkansas weigh stations near West Memphis are on the map.** Marion screens southbound I-55, Lehi eastbound I-40.
+- **The update check no longer offers a preview snapshot that is the same as your copy.**
 
-- **A hazard after the last weigh station warning no longer costs you the bypass charge.** Time spent on the hazard does not count against you.
-
-- **Passing traffic now sounds where the vehicle really is.** You hear it come up beside you, then fade as it pulls ahead.
-
-- **Traffic sounds on exit ramps now match the cars.** The freeway fades off to your left, and cross traffic at the ramp end sweeps across in front of you.
-
-- **The update check skips a preview snapshot that changes nothing you would notice.** A snapshot that only repeats your version is no longer offered.
-
-- **What's new for an update from an older preview snapshot lists what you are really getting.** It reads the notes of each release since your copy.
+- **What's new, when updating from an older preview snapshot, now lists every change since your copy.**
 
 ## 1.9.3 - 2026-10-06
 
