@@ -7,10 +7,22 @@ pull request starts it, and it makes no tag and no release.
 
 ## Run it
 
-Dispatch it from dev, after the changes you want testers to get have merged
-(for the touch gesture redesign, after that pull request is in dev):
+Dispatch it from dev. The upload input decides what the run does:
+
+- upload off (the default): a verification run. It checks the key, makes the
+  temporary certificate and profile, builds and signs the app, then deletes the
+  certificate and profile. It uploads nothing to TestFlight, creates nothing
+  else in App Store Connect, and the run summary says so. The signed ipa is kept
+  as a workflow artifact for one day. It holds no key or password.
+- upload=true: the same, then the signed build goes to TestFlight.
+
+Recommended first run, verification only:
 
     gh workflow run ios-testflight.yml -R orinks-games/Freight-Fate --ref dev
+
+Then, after the touch gesture redesign (#340) is merged into dev, a real upload:
+
+    gh workflow run ios-testflight.yml -R orinks-games/Freight-Fate --ref dev -f upload=true
 
 GitHub can only dispatch a workflow whose file is on the default branch, so the
 workflow file has to reach main once before the first run. Watch a run with:
@@ -64,7 +76,7 @@ ASC_KEY_P8_BASE64 are used as they are. No other secret is needed.
 4. Checks that the app record exists and finds the next build number.
 5. Runs tools/build_ios.py --device --ipa, which builds with Rust, signs and
    packages FreightFate.ipa.
-6. Uploads it to TestFlight with the export compliance answer "no non-exempt
+6. Only when upload is true, uploads it to TestFlight with the export compliance answer "no non-exempt
    encryption", matching ITSAppUsesNonExemptEncryption in Info.plist, and waits
    for Apple to finish processing.
 7. Always, even after a failure: deletes the temporary profile and certificate

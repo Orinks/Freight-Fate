@@ -5,6 +5,10 @@
 #
 #     gh workflow run ios-testflight.yml -R orinks-games/Freight-Fate --ref dev
 #
+# By default a run is a verification run: it proves the key, certificate,
+# bundle id, profile, build and signing, and uploads nothing to TestFlight.
+# Add -f upload=true for a real upload.
+#
 # The log and the TestFlight build notes show the exact commit that was built.
 # Any other branch needs allow_other_ref set, so a build from unmerged work is
 # always deliberate.
@@ -45,6 +49,11 @@ on:
         required: false
         type: boolean
         default: false
+      upload:
+        description: "Upload the signed build to TestFlight. Leave off for a verification run that builds and signs only."
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: ios-testflight
@@ -55,7 +64,7 @@ env:
 
 jobs:
   testflight:
-    name: Build and upload to TestFlight
+    name: Build, sign and (optionally) upload to TestFlight
     runs-on: macos-26
     timeout-minutes: 90
     env:
@@ -225,7 +234,32 @@ jobs:
             --provisioning-profile "$SIGNING_DIR/profile.mobileprovision"
           test -f build/ios/FreightFate.ipa
 
+      - name: Keep the signed build for one day (verification run)
+        # The ipa holds the open-source game binary and the public profile, no
+        # key or password, so a one-day artifact is safe for a public repo.
+        if: ${{ inputs.upload != true }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: FreightFate-verification-ipa
+          path: build/ios/FreightFate.ipa
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Say whether anything was uploaded
+        if: always()
+        shell: bash
+        env:
+          UPLOAD: ${{ inputs.upload }}
+        run: |
+          if [ "$UPLOAD" = "true" ]; then
+            echo "### Upload requested: the signed build is sent to TestFlight by the next step. If this run failed before then, nothing was uploaded." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### Verification run: nothing was uploaded to TestFlight." >> "$GITHUB_STEP_SUMMARY"
+            echo "Key, certificate, bundle id, profile, build and signing were checked. The signed ipa is kept as a workflow artifact for one day." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Upload to TestFlight
+        if: ${{ inputs.upload == true }}
         uses: apple-actions/upload-testflight-build@155ea93be9ee6d5186c71f660a612f5eddb14510 # v5
         with:
           app-path: build/ios/FreightFate.ipa
