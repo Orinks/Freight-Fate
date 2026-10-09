@@ -10,7 +10,7 @@ use freight_fate::online_presence::OnlineIdentity;
 use freight_fate::states::base::{InputEvent, Key, Mods, State};
 use freight_fate::states::driving_radio_suggest::{
     open_station_suggestion, Question, StationSuggestionEntryState, SuggestKindState,
-    SUGGEST_NEEDS_ONLINE, SUGGEST_NEEDS_SETUP,
+    NOT_A_STREAM_ADDRESS, SUGGEST_NEEDS_ONLINE, SUGGEST_NEEDS_SETUP,
 };
 use serde_json::{json, Value};
 
@@ -154,6 +154,29 @@ fn a_required_answer_cannot_be_skipped() {
     app.handle_event(&InputEvent::key(Key::Return));
     assert_eq!(last(&app), "Station name is needed.");
     assert_eq!(with_entry(&mut app, |e| e.question()), Question::Name);
+}
+
+#[test]
+fn a_stream_address_that_is_not_a_web_address_is_turned_down_at_once() {
+    let mut app = TestApp::new();
+    let (send, sent) = sender(vec![Ok(json!({"ok": true, "message": "Thanks."}))]);
+    start(&mut app, send, "Online only");
+    answer(&mut app, "Night Owl Radio");
+    for junk in [
+        "weklsetr",
+        "ftp://s.example/live",
+        "https://user:pw@s.example/",
+    ] {
+        answer(&mut app, junk);
+        assert_eq!(last(&app), NOT_A_STREAM_ADDRESS, "{junk}");
+        assert_eq!(with_entry(&mut app, |e| e.question()), Question::StreamUrl);
+        for _ in 0..junk.len() {
+            app.handle_event(&InputEvent::key(Key::Backspace));
+        }
+    }
+    answer(&mut app, "http://s.example:8000/live");
+    assert!(last(&app).starts_with("Format. Optional"), "{}", last(&app));
+    assert!(sent.lock().unwrap().is_empty());
 }
 
 #[test]

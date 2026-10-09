@@ -103,6 +103,22 @@ impl_state_for_menu!(SuggestKindState);
 
 // -- the questions ----------------------------------------------------------------------------
 
+/// Said when the stream address is not a web address at all. The same
+/// sentence the site gives, so a player hears it at the question rather than
+/// after the last one; the site still checks that the address plays.
+pub const NOT_A_STREAM_ADDRESS: &str = "The stream address should start with http or https.";
+
+/// The site's own test of the address's shape: an http or https address
+/// with a host and no sign-in part. Anything else could never play.
+pub fn is_stream_address(text: &str) -> bool {
+    url::Url::parse(text).is_ok_and(|url| {
+        matches!(url.scheme(), "http" | "https")
+            && url.host_str().is_some_and(|host| !host.is_empty())
+            && url.username().is_empty()
+            && url.password().is_none()
+    })
+}
+
 /// One question in the walk.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Question {
@@ -389,6 +405,11 @@ impl TextEntry for StationSuggestionEntryState {
                 format!("{} is needed.", question.heading()),
                 Say::new().review(false),
             );
+            return;
+        }
+        if question == Question::StreamUrl && !is_stream_address(&typed) {
+            ctx.audio.play("ui/error");
+            ctx.say_with(NOT_A_STREAM_ADDRESS, Say::new().review(false));
             return;
         }
         *question.answer(&mut self.suggestion) = typed;
