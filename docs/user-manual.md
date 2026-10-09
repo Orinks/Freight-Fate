@@ -11,7 +11,7 @@ returning from an earlier version, read What Changed Recently first.
 ## Quick start
 
 1. Download the newest stable build from the
-   [Freight Fate releases page](https://github.com/Orinks/Freight-Fate/releases).
+   [Freight Fate releases page](https://github.com/orinks-games/Freight-Fate/releases).
 2. On Windows or Linux, extract the archive into a folder you control, open
    the extracted `FreightFate` folder, and run `FreightFate.exe` on Windows or
    `FreightFate` on Linux.
@@ -2103,7 +2103,7 @@ T opens its menu when the stop supports one.
 ## Release notes and more data
 
 Stable and snapshot release notes are on the
-[Freight Fate releases page](https://github.com/Orinks/Freight-Fate/releases).
+[Freight Fate releases page](https://github.com/orinks-games/Freight-Fate/releases).
 The in-game What's new reader can also review notes for an available update.
 
 For deeper data reference, see:
