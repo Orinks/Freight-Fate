@@ -14,6 +14,8 @@
 
 ### Changed
 
+- **A slow vehicle ahead in your lane is now called at half a mile, when you start to hear it.**
+
 - **Tire noise on the road is louder at highway speed.**
 
 - **The fuel range now comes from your truck's own mileage on this drive, load and hills included.**
