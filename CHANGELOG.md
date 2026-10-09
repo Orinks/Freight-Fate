@@ -28,6 +28,8 @@
 
 ### Fixed
 
+- **Resume speed control now brings back the speed keeper's speed after you brake out of it.**
+
 - **Traffic is now loud enough to hear over the engine, from about a quarter mile away.**
 
 - **Passing traffic now sounds where the vehicle really is.** It comes up on its own side, then fades as it pulls ahead.
