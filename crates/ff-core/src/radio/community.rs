@@ -12,6 +12,14 @@
 //! names a station the dial already has (same id, same stream, same call
 //! sign) is dropped, so folding accepted stations into a release never puts
 //! one on the dial twice.
+//!
+//! Accepted stations also ship: `tools/fold_community_stations.py` copies the
+//! site's list into `data/radio_community.json` before each nightly, so a
+//! first launch, an offline one, or a copy with the orinks.net services off
+//! still has every station accepted up to its build. That file is the third
+//! tier of the shipped catalog, under the curated and imported ones
+//! ([`load_shipped_community_stations`]), and goes through the same checks
+//! as the download: it is the site's data, copied.
 
 use std::collections::HashSet;
 use std::path::Path;
@@ -19,6 +27,9 @@ use std::path::Path;
 use serde_json::Value;
 
 use super::{call_sign_base, station_from_dict, station_identity, RadioStation};
+
+/// The shipped copy of the accepted list, under the data root.
+pub const RADIO_COMMUNITY_RESOURCE: &str = "radio_community.json";
 
 /// The downloaded list's file name in the saves folder.
 pub const COMMUNITY_STATIONS_FILE: &str = "community_stations.json";
@@ -93,6 +104,27 @@ pub fn load_community_stations(path: &Path) -> Vec<RadioStation> {
         );
         Vec::new()
     })
+}
+
+/// The shipped tier: the accepted stations this build carries that are not
+/// already on `dial` (the curated and imported tiers). A build without the
+/// file has none; a broken one is logged and skipped, since the dial works
+/// without it.
+pub fn load_shipped_community_stations(
+    data_root: &Path,
+    dial: &[RadioStation],
+) -> Vec<RadioStation> {
+    let path = data_root.join(RADIO_COMMUNITY_RESOURCE);
+    let Some(text) = crate::data::data_resources::read_text_at(&path) else {
+        return Vec::new();
+    };
+    match parse_community_stations(&text) {
+        Some(stations) => new_community_stations(dial, stations),
+        None => {
+            log::warn!("{} is unreadable; skipping it", path.display());
+            Vec::new()
+        }
+    }
 }
 
 /// The community stations that are not already on `dial`, nor repeats of
@@ -221,6 +253,30 @@ mod tests {
         let kept = new_community_stations(&dial, community);
         let names: Vec<&str> = kept.iter().map(|s| s.name.as_str()).collect();
         assert_eq!(names, vec!["Fresh"]);
+    }
+
+    #[test]
+    fn the_shipped_tier_reads_like_the_download() {
+        let dir = tempfile::tempdir().unwrap();
+        assert!(load_shipped_community_stations(dir.path(), &[]).is_empty());
+        let mut sneaky = row("community-s", "Shipped", "https://s.example/shipped");
+        sneaky["safe_for_streaming"] = json!(true);
+        std::fs::write(
+            dir.path().join(RADIO_COMMUNITY_RESOURCE),
+            list(vec![
+                sneaky,
+                row("community-d", "Dial Twin", "https://s.example/dial"),
+            ]),
+        )
+        .unwrap();
+        let dial = vec![RadioStation {
+            stream_url: "https://s.example/dial".to_string(),
+            ..RadioStation::new("rb-1", "Directory Copy", "", "", "")
+        }];
+        let shipped = load_shipped_community_stations(dir.path(), &dial);
+        assert_eq!(shipped.len(), 1);
+        assert_eq!(shipped[0].name, "Shipped");
+        assert!(!shipped[0].safe_for_streaming);
     }
 
     #[test]

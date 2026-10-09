@@ -576,12 +576,15 @@ pub fn load_imported_stations(
         .collect())
 }
 
-/// Curated plus imported (`DEFAULT_RADIO_CATALOG` in Python).
+/// Curated plus imported (`DEFAULT_RADIO_CATALOG` in Python), plus the
+/// accepted community stations this build ships.
 pub fn load_full_catalog(data_root: &Path) -> Result<Vec<RadioStation>, CatalogError> {
     let curated = load_radio_catalog(data_root)?;
     let imported = load_imported_stations(data_root, &curated)?;
     let mut stations = curated;
     stations.extend(imported);
+    let community = community::load_shipped_community_stations(data_root, &stations);
+    stations.extend(community);
     if !ids_unique(&stations) {
         return Err(CatalogError::ImportedCollision);
     }
