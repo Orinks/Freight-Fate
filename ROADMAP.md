@@ -443,6 +443,8 @@ Everything found before 2026-09-25 moved to
       out makes no sound, and quiet says cruise, keeper and work zone
       updates short. Urgent only now says when a work zone turns cruise off.
 - [ ] A listening pass by the owner at quiet and urgent only, at the wheel.
+- [x] Achievement sweep (owner, 2026-10-09): four badges whose triggers
+      had fallen behind the map or the job board now match them.
 - [ ] The exit-call truth test (`test_the_exit_calls_name_the_road_that_is_really_left`)
       failed once on the Linux ARM runner in the v1.9.1 tag build, hearing
       only the two-mile call, and passed on re-run. It passed 80 of 80 runs
@@ -2690,6 +2692,26 @@ collision.
 - [x] Accepted stations ship in every build (`data/radio_community.json`),
       copied from the site before each nightly, so a first or offline launch
       has them too.
+
+### October 9 achievement sweep
+
+(Found along the way) Owner: "Been Everywhere" fired at fourteen regions while the map has
+sixteen. A sweep of every badge trigger against the map and the job board
+as they stand now found three more stale ones.
+
+- [x] Been Everywhere, For Real counts the map's own region list and needs
+      all of it; a region name a save kept from an older map no longer
+      counts. Its copy says "every region" so it cannot go stale again. The
+      catalog digest and the invariants export moved with the copy.
+- [x] Grossed Out at the Scale House needed 24 tons of cargo, and dispatch
+      clamps every load to what a stock rig carries under 80,000 lb (about
+      21.8), so nobody could earn it. It now needs a load within a ton of
+      that ceiling.
+- [x] The Mother Road counts the twelve Route 66 towns the map gained
+      (Bloomington and Springfield IL, Rolla, Springfield MO, Joplin,
+      Tucumcari, Gallup, Holbrook, Winslow, Kingman, Barstow, Victorville),
+      and Shadow of the Giants counts the redwood towns (Ukiah, Willits,
+      Fortuna, Eureka, Crescent City) alongside Santa Rosa and Chico.
 
 ## 2.0 planned -- the working week and home
 
