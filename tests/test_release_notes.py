@@ -61,7 +61,7 @@ def test_nightly_notes_use_curated_unreleased_entries(tmp_path, monkeypatch):
 
     notes = release_notes.nightly_notes()
 
-    assert "Preview snapshot for players" in notes
+    assert "A preview of the next release" in notes
     assert "## Changes since the previous snapshot" in notes
     assert "## Added" in notes
     assert "- **Dispatch.** New spoken board details." in notes
@@ -150,7 +150,7 @@ def test_later_snapshot_notes_are_bounded_too(tmp_path, monkeypatch):
     assert "**Career improvement 0.**" in notes
     assert "**Career fix 0.**" in notes
     assert "## Complete change list" in notes
-    assert "This snapshot carries" in notes
+    assert "more changes than fit on this page" in notes
     assert "**Old wording.**" not in notes
 
 
