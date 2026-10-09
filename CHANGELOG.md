@@ -22,6 +22,8 @@
 
 - **Resume speed control now brings back the speed keeper's speed after you brake out of it.**
 
+- **The agent server now quits when the tool that started it closes.** A new server waits out a leftover one, or names its process.
+
 - **Bobtail to a nearby city is refused while your CDL is suspended or disqualified.** You hear when the suspension ends instead.
 
 - **Training classes now leave you tired, about half as fast as driving does.** If a class leaves you drowsy, you are told to sleep before you drive.
