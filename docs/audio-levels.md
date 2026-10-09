@@ -69,8 +69,10 @@ them.
 
 2026-10-09, the owner's first listening drive: no single vehicle could be
 heard over the engine. `TRAFFIC_SOUND_PEAK` went from 0.45 at 12 feet to 0.8
-at 60 feet, still halving with each doubling of distance past that, and the
-hearing edge from 450 to 900 feet, since the bubble keeps vehicles a tenth of
-a mile apart or more. The bed was re-made steady (`sound-test/highway_bed.py`)
+at 60 feet, and the hearing edge from 450 to 1,500 feet, since the bubble
+keeps vehicles a tenth of a mile apart or more. Past 60 feet a sound now drops
+3 dB per doubling of distance, not 6: at 6 dB the owner still heard a vehicle
+only as it passed. On an exit ramp the divergence alone takes the other 3 dB,
+so the freeway still falls away as the ramp leaves it. The bed was re-made steady (`sound-test/highway_bed.py`)
 and stays at -22 LUFS.
 

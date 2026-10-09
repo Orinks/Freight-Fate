@@ -39,13 +39,14 @@ use crate::states::driving::DrivingState;
 /// Beyond this a vehicle is part of the bed, not a sound of its own. The
 /// bubble keeps vehicles a tenth of a mile apart or more, so a 450-foot edge
 /// left most of a busy interstate silent (owner drive, 2026-10-09).
-pub const TRAFFIC_SOUND_HEAR_FT: f64 = 900.0;
+pub const TRAFFIC_SOUND_HEAR_FT: f64 = 1500.0;
 /// Inside this a sound is at full level: alongside, or a few car lengths off.
 pub const TRAFFIC_SOUND_REF_FT: f64 = 60.0;
-/// A sound's level at [`TRAFFIC_SOUND_REF_FT`]. It halves with each doubling
-/// of distance past that, so a car 240 feet back is a quarter of this. The
-/// first cut peaked at 0.45 from 12 feet, which put a car a hundred feet off
-/// at 0.05: under the engine, inaudible.
+/// A sound's level at [`TRAFFIC_SOUND_REF_FT`]. It drops 3 dB with each
+/// doubling of distance past that, so a car 500 feet up the road is still
+/// about a third of this. The first cut peaked at 0.45 from 12 feet and fell
+/// 6 dB a doubling, which put a car a hundred feet off at 0.05: under the
+/// engine, and the owner heard traffic only as it passed (2026-10-09).
 pub const TRAFFIC_SOUND_PEAK: f64 = 0.8;
 /// Lane width, for how far over the next lane is.
 pub const LANE_WIDTH_FT: f64 = 12.0;
@@ -92,14 +93,16 @@ pub fn traffic_sound_key(vehicle_class: &str) -> &'static str {
     }
 }
 
-/// Level for a vehicle `distance_ft` away: falling as one over the distance,
-/// and eased to nothing over the last stretch before the hearing edge so a
+/// Level for a vehicle `distance_ft` away: falling as one over the square
+/// root of the distance, gentler than open air, because the cab mix has to
+/// carry a car the player cannot see; and eased to nothing over the last stretch before the hearing edge so a
 /// sound never appears or vanishes with a step.
 pub fn traffic_sound_volume(distance_ft: f64) -> f64 {
     if distance_ft >= TRAFFIC_SOUND_HEAR_FT {
         return 0.0;
     }
-    let near = TRAFFIC_SOUND_PEAK * TRAFFIC_SOUND_REF_FT / distance_ft.max(TRAFFIC_SOUND_REF_FT);
+    let near =
+        TRAFFIC_SOUND_PEAK * (TRAFFIC_SOUND_REF_FT / distance_ft.max(TRAFFIC_SOUND_REF_FT)).sqrt();
     let edge =
         ((TRAFFIC_SOUND_HEAR_FT - distance_ft) / (TRAFFIC_SOUND_HEAR_FT * 0.3)).clamp(0.0, 1.0);
     near * edge
@@ -155,13 +158,17 @@ impl DrivingState {
         for vehicle in &self.trip.traffic_manager.vehicles {
             let along = (vehicle.position_mi - self.trip.position_mi) * 5280.0;
             // Lane indices count leftward, so a higher lane is to the left.
+            // On a ramp, how much farther off the divergence alone has put
+            // it: the freeway falls away faster than the gentle in-traffic
+            // law, as a road the cab is leaving does.
+            let mut diverged = 1.0;
             let (across, closing_mph) = if on_ramp {
                 // The odometer holds on the ramp: the mainline streams past a
                 // standing point at its own speed, off to the left and
                 // farther each foot the truck rolls down the ramp.
-                let over = (vehicle.lane.max(0) as f64 + 0.5) * LANE_WIDTH_FT
-                    + RAMP_SPLIT_FT
-                    + self.traffic_ramp_rolled_ft * RAMP_DIVERGENCE;
+                let at_gore = (vehicle.lane.max(0) as f64 + 0.5) * LANE_WIDTH_FT + RAMP_SPLIT_FT;
+                let over = at_gore + self.traffic_ramp_rolled_ft * RAMP_DIVERGENCE;
+                diverged = (at_gore.hypot(along) / over.hypot(along)).sqrt();
                 (-over, vehicle.speed_mph)
             } else {
                 let lanes = (vehicle.lane - player_lane) as f64;
@@ -184,7 +191,9 @@ impl DrivingState {
                 id: format!("main:{}", vehicle.key),
                 key: traffic_sound_key(&vehicle.vehicle_class),
                 distance_ft: distance,
-                volume: traffic_sound_volume(distance) * rolling_share(vehicle.speed_mph),
+                volume: traffic_sound_volume(distance)
+                    * diverged
+                    * rolling_share(vehicle.speed_mph),
                 pan: traffic_sound_pan(across, along),
                 rate: traffic_sound_rate(vehicle.speed_mph, approach),
             });

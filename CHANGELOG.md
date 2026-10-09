@@ -24,7 +24,7 @@
 
 ### Fixed
 
-- **Nearby traffic is now loud enough to hear over the engine, from a few hundred feet away.**
+- **Traffic is now loud enough to hear over the engine, from about a quarter mile away.**
 
 - **Bobtail to a nearby city is refused while your CDL is suspended or disqualified.** You hear when the suspension ends instead.
 
