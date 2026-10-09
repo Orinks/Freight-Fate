@@ -14,6 +14,7 @@
 //! favourites arrive as a plain list of ids, and the Playlists directory is
 //! a parameter -- the game crate wires all three.
 
+pub mod community;
 pub mod playlists;
 pub mod state;
 mod synth_dial;
@@ -346,7 +347,7 @@ fn optional_float(row: &Value, key: &str) -> Option<f64> {
     }
 }
 
-fn station_from_dict(row: &Value) -> RadioStation {
+pub(crate) fn station_from_dict(row: &Value) -> RadioStation {
     RadioStation {
         id: py_str(row.get("id")),
         name: py_str(row.get("name")),

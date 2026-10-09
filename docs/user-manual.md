@@ -2004,6 +2004,18 @@ drive. When the BASS audio backend is available, those stations play from
 their public stream URLs. If a selected station cannot play, the radio falls
 back safely instead of blocking the drive.
 
+Missing a station? Choose Suggest a station in the Radio app, on the driver
+tablet. Say whether it broadcasts on AM or FM or only online, then give its
+name and stream address; Control V pastes the address. An AM or FM station
+also needs its call sign and state, and can have its city and frequency.
+orinks.net plays the first seconds of the stream and tells you straight
+away if it will not play or is already on the dial; otherwise it waits for
+review. Accepted stations join every driver's dial at their next launch,
+with no game update, on the web radio band until their transmitter is
+known. Suggesting needs this computer set up with orinks.net and Online
+services on. You can also suggest one at
+orinks.net/freight-fate/suggest-a-station.
+
 You can put your own music on the dial. Drop M3U, M3U8, or PLS playlist files
 into the Playlists folder next to your saves (the game creates it on first run)
 and each file becomes a station under Your playlists, named from the playlist.
