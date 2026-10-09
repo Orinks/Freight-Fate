@@ -6,6 +6,8 @@
 
 - **Interstates now have the sound of distant traffic, louder on busier stretches.**
 
+- **On busy freeways, traffic now comes up beside you and passes.**
+
 - **The radio status screen says where your own playlist files go until you have one on the dial.**
 
 - **A fuel range warning speaks when your fuel will not reach the next fuel stop.** It names your range and how far the stop is.
@@ -18,19 +20,19 @@
 
 - **The Engine voice and Engine brake voice settings are now called Engine sound and Engine brake sound.**
 
-- **The distant interstate traffic is a steady roar now, not a swell like waves.**
-
-- **On busy freeways, traffic now comes up beside you and passes.**
+- **The distant interstate traffic is now a steady roar.**
 
 - **A slow vehicle ahead in your lane can now be heard from half a mile away.**
 
-- **Traffic now sounds clearly on its own side as it comes up, and quieter once it is behind you.**
-
-- **A slower vehicle ahead now plays the slowing-traffic sound.** It no longer plays a passing sound before anything has passed.
+- **A slower vehicle ahead now plays the slowing-traffic sound, not a passing sound.**
 
 ### Fixed
 
 - **Traffic is now loud enough to hear over the engine, from about a quarter mile away.**
+
+- **Passing traffic now sounds where the vehicle really is.** It comes up on its own side, then fades as it pulls ahead.
+
+- **Traffic sounds on exit ramps now match the cars.** The freeway fades off to your left, and cross traffic at the ramp end sweeps across in front of you.
 
 - **Bobtail to a nearby city is refused while your CDL is suspended or disqualified.** You hear when the suspension ends instead.
 
@@ -40,11 +42,11 @@
 
 - **Driving into Memphis from St. Louis no longer passes a weigh station that is not there.** The West Memphis scale is westbound I-40 only.
 
-- **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now says it waits until you stop.
+- **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now waits until you stop, and says so.
 
 - **West Memphis stops sit where they really are.** The Riverside scale is past the bridge, and the Petro and Love's are at exit 280.
 
-- **Creeping up to an open scale, then speeding past, no longer dodges the bypass charge.** Only a warning the game delayed excuses you.
+- **Creeping up to an open scale, then speeding past, no longer dodges the bypass charge.**
 
 - **A closed weigh station's check-in just says it is closed.** It no longer chimes, saves, or counts as an inspection.
 
@@ -54,15 +56,11 @@
 
 - **Two real Arkansas weigh stations near West Memphis are on the map.** Marion screens southbound I-55, Lehi eastbound I-40.
 
-- **A hazard after the last weigh station warning no longer costs you the bypass charge.** Time spent on the hazard does not count against you.
+- **A hazard after the last weigh station warning no longer costs you the bypass charge.**
 
-- **Passing traffic now sounds where the vehicle really is.** You hear it come up beside you, then fade as it pulls ahead.
+- **The update check no longer offers a preview snapshot that only repeats your version.**
 
-- **Traffic sounds on exit ramps now match the cars.** The freeway fades off to your left, and cross traffic at the ramp end sweeps across in front of you.
-
-- **The update check skips a preview snapshot that changes nothing you would notice.** A snapshot that only repeats your version is no longer offered.
-
-- **What's new for an update from an older preview snapshot lists what you are really getting.** It reads the notes of each release since your copy.
+- **Updating from an older preview snapshot now lists every change since your copy.**
 
 ## 1.9.3 - 2026-10-06
 
