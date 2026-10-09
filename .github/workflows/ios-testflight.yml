@@ -1,8 +1,13 @@
 # Build, sign and upload Freight Fate to TestFlight (internal testers).
 #
-# Manual only: run it with
+# Manual only. Dispatch it from dev, after the changes you want to test have
+# merged, with
 #
-#     gh workflow run ios-testflight.yml -R orinks-games/Freight-Fate
+#     gh workflow run ios-testflight.yml -R orinks-games/Freight-Fate --ref dev
+#
+# The log and the TestFlight build notes show the exact commit that was built.
+# Any other branch needs allow_other_ref set, so a build from unmerged work is
+# always deliberate.
 #
 # It never runs from a push, a tag or a pull request, and it makes no tag and
 # no release. One-time setup and failure messages: docs/ios-testflight.md.
@@ -14,10 +19,11 @@
 # the profile and the certificate when it ends, so runs never use up Apple's
 # certificate cap.
 #
-# Build number: github.run_number, which rises with every dispatch. A re-run
-# of the same run keeps its number and Apple refuses a repeat, so start a new
-# dispatch instead of using "Re-run jobs". The optional build_number input
-# overrides it.
+# Build number: continues the number sequence already in TestFlight. The run
+# asks App Store Connect for the highest build number it has for this app and
+# uses max(that, run number) + 1. The optional build_number input overrides it.
+# A re-run of the same run would ask again and get the next number, but a
+# fresh dispatch is cleaner.
 #
 # Standard macos-26 runner only: this repo is public, so it costs nothing,
 # and a larger runner would be billed.
@@ -31,9 +37,14 @@ on:
   workflow_dispatch:
     inputs:
       build_number:
-        description: "Build number (default: the run number); must be higher than every earlier upload"
+        description: "Build number override (default: one more than the highest already in TestFlight)"
         required: false
         type: string
+      allow_other_ref:
+        description: "Allow a branch other than dev (a build from unmerged work)"
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: ios-testflight
@@ -41,7 +52,6 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.12"
-  BUNDLE_ID: net.orinks.freightfate
 
 jobs:
   testflight:
@@ -58,6 +68,23 @@ jobs:
       CMAKE_POLICY_VERSION_MINIMUM: "3.5"
     steps:
       - uses: actions/checkout@v6
+
+      - name: Show and guard the commit being built
+        shell: bash
+        env:
+          ALLOW_OTHER_REF: ${{ inputs.allow_other_ref }}
+        run: |
+          set -euo pipefail
+          echo "Building ${GITHUB_REF_NAME} at ${GITHUB_SHA}"
+          echo "### Building ${GITHUB_REF_NAME} at \`${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$GITHUB_REF_NAME" != "dev" ] && [ "$ALLOW_OTHER_REF" != "true" ]; then
+            echo "::error::This run is on '${GITHUB_REF_NAME}', not dev. Dispatch it from dev once the changes are merged, or set allow_other_ref to build this branch on purpose."
+            exit 1
+          fi
+          # The bundle id every step uses is the one tools/build_ios.py stamps.
+          bundle_id="$(python3 -c "import sys; sys.path.insert(0, 'tools'); import ios_signing; print(ios_signing.BUNDLE_ID)")"
+          echo "BUNDLE_ID=$bundle_id" >> "$GITHUB_ENV"
+          echo "Bundle id: $bundle_id"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v8.2.0
@@ -167,21 +194,31 @@ jobs:
           cp "$SIGNING_DIR/profile.mobileprovision" \
             "$HOME/Library/MobileDevice/Provisioning Profiles/$profile_uuid.mobileprovision"
 
-      - name: Check the App Store Connect app record exists
+      - name: Find the app record and the next build number
         shell: bash
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-        run: python3 tools/ios_signing.py check-app --bundle-id "$BUNDLE_ID"
-
-      - name: Build, sign and package the iOS app
-        shell: bash
-        env:
           BUILD_NUMBER_INPUT: ${{ inputs.build_number }}
         run: |
           set -euo pipefail
-          build_number="${BUILD_NUMBER_INPUT:-${{ github.run_number }}}"
+          python3 tools/ios_signing.py check-app --bundle-id "$BUNDLE_ID"
+          if [ -n "$BUILD_NUMBER_INPUT" ]; then
+            build_number="$BUILD_NUMBER_INPUT"
+            echo "Build number set by hand: $build_number"
+          else
+            build_number="$(python3 tools/ios_signing.py next-build --bundle-id "$BUNDLE_ID" \
+              --run-number "${{ github.run_number }}")"
+          fi
           echo "BUILD_NUMBER=$build_number" >> "$GITHUB_ENV"
+          echo "Build number: $build_number"
+          echo "Build number \`$build_number\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build, sign and package the iOS app
+        shell: bash
+        run: |
+          set -euo pipefail
+          build_number="$BUILD_NUMBER"
           uv run python tools/build_ios.py --device --ipa \
             --build-number "$build_number" \
             --sign-identity "$SIGN_IDENTITY" \
@@ -199,6 +236,8 @@ jobs:
           # Matches ITSAppUsesNonExemptEncryption in the app's Info.plist.
           uses-non-exempt-encryption: "false"
           wait-for-processing: "true"
+          # Shown to testers as "What to Test".
+          release-notes: "Built from ${{ github.ref_name }} at ${{ github.sha }}"
 
       - name: Remove the signing material
         # Runs even after a failure: revoke the temporary certificate and

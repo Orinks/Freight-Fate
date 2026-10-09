@@ -7,35 +7,49 @@ pull request starts it, and it makes no tag and no release.
 
 ## Run it
 
-    gh workflow run ios-testflight.yml -R orinks-games/Freight-Fate
+Dispatch it from dev, after the changes you want testers to get have merged
+(for the touch gesture redesign, after that pull request is in dev):
 
-Add --ref some-branch to build a branch other than the default. Watch it with:
+    gh workflow run ios-testflight.yml -R orinks-games/Freight-Fate --ref dev
+
+GitHub can only dispatch a workflow whose file is on the default branch, so the
+workflow file has to reach main once before the first run. Watch a run with:
 
     gh run list --workflow ios-testflight.yml -R orinks-games/Freight-Fate
     gh run watch -R orinks-games/Freight-Fate
 
-The build number is the run number, so it rises with every dispatch. Start a
-new dispatch instead of using Re-run jobs: a re-run keeps its old number, and
-Apple refuses an upload whose number it has already seen. To choose the number
-yourself, pass it with: gh workflow run ios-testflight.yml -f build_number=40
-It must be higher than every earlier upload.
+Any ref other than dev stops at the first step unless you pass
+-f allow_other_ref=true, so a build from unmerged work is always on purpose.
+Every run prints the branch and commit SHA it built, writes them to the run
+summary, and sends them to TestFlight as the build's release notes.
 
-The device family is whatever the app's Info.plist says (iPhone and iPad). It
-uses a standard macos-26 runner, which is free for this public repository.
+## Identity: where the numbers come from
+
+- Bundle id: net.orinks.freightfate, set only in tools/build_ios.py (BUNDLE_ID).
+  The workflow and tools/ios_signing.py read it from there. The app record must
+  use the same bundle id.
+- Version (CFBundleShortVersionString): the project version in pyproject.toml
+  cut to three numbers, so 1.9.0.dev0 is 1.9.0. To ship a new version, change
+  pyproject.toml; the run refuses a version lower than one TestFlight already has.
+- Build number (CFBundleVersion): the run asks App Store Connect for the highest
+  number it has for the app and uses max(that, run number) + 1, so it continues
+  the earlier builds. To choose it yourself pass -f build_number=40; it must be
+  higher than every earlier upload of the same version.
+- Device family: whatever the app's Info.plist says (iPhone and iPad).
+
+It uses a standard macos-26 runner, which is free for this public repository.
 
 ## What you do once
 
-1. In App Store Connect (appstoreconnect.apple.com), open Apps, choose the plus
-   button, then New App. Platform iOS, name Freight Fate, a primary language,
-   bundle id net.orinks.freightfate, any SKU. The API cannot create this record.
-   If the bundle id is not in the list yet, run the workflow once: it registers
-   the bundle id, stops at the app record check, and tells you what is missing.
-2. Check the API key access. In Users and Access, Integrations, App Store
+The app record already exists in App Store Connect. If the run cannot find it,
+it stops before building and says so.
+
+1. Check the API key access. In Users and Access, Integrations, App Store
    Connect API, the key named by the ASC_KEY_ID secret must have App Manager or
    Admin access. Admin is simplest. A Developer key cannot make certificates.
-3. Add yourself as an internal tester: App Store Connect, the app, TestFlight,
-   Internal Testing, make a group and add your Apple ID. Then install the
-   TestFlight app on the iPhone and sign in with the same Apple ID.
+2. Make sure you are an internal tester: App Store Connect, the app, TestFlight,
+   Internal Testing, a group with your Apple ID. Install the TestFlight app on
+   the iPhone and sign in with the same Apple ID.
 
 The repository secrets APPLE_TEAM_ID, ASC_ISSUER_ID, ASC_KEY_ID and
 ASC_KEY_P8_BASE64 are used as they are. No other secret is needed.
@@ -47,7 +61,7 @@ ASC_KEY_P8_BASE64 are used as they are. No other secret is needed.
    the bundle id if it is new, creates a temporary iOS distribution certificate
    and an App Store provisioning profile that names it.
 3. Imports the certificate into a throwaway keychain and installs the profile.
-4. Checks that the app record exists.
+4. Checks that the app record exists and finds the next build number.
 5. Runs tools/build_ios.py --device --ipa, which builds with Rust, signs and
    packages FreightFate.ipa.
 6. Uploads it to TestFlight with the export compliance answer "no non-exempt
@@ -62,7 +76,9 @@ ASC_KEY_P8_BASE64 are used as they are. No other secret is needed.
 Each failure prints one plain error line naming the fix.
 
 - App record missing: "There is no App Store Connect app record for bundle id
-  net.orinks.freightfate" with the New App steps above. Nothing was built.
+  net.orinks.freightfate". Its bundle id must match the one in
+  tools/build_ios.py. Nothing was built.
+- Version too low: TestFlight has a higher version than pyproject.toml; raise it.
 - Key without permission (HTTP 403): "The App Store Connect API key is not
   allowed to do this". Give the key App Manager or Admin access.
 - Key rejected (HTTP 401): the three ASC secrets do not belong to one live key.

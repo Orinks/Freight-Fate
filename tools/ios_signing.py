@@ -29,6 +29,7 @@ import base64
 import json
 import os
 import subprocess
+import sys
 import time
 import urllib.error
 import urllib.parse
@@ -36,7 +37,24 @@ import urllib.request
 from pathlib import Path
 
 API = "https://api.appstoreconnect.apple.com"
-BUNDLE_ID = "net.orinks.freightfate"
+
+
+def _load_build_ios():
+    """tools/build_ios.py by path: the one place the bundle id and version are set."""
+    import importlib.util
+    import sys
+
+    path = Path(__file__).resolve().parent / "build_ios.py"
+    sys.path.insert(0, str(path.parent))
+    spec = importlib.util.spec_from_file_location("build_ios_for_signing", path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+_BUILD_IOS = _load_build_ios()
+BUNDLE_ID = _BUILD_IOS.BUNDLE_ID
 APP_NAME = "Freight Fate"
 CERTIFICATE_TYPE = "IOS_DISTRIBUTION"
 PROFILE_TYPE = "IOS_APP_STORE"
@@ -265,17 +283,76 @@ def create_profile(token: str, name: str, bundle_id: str, certificate_id: str) -
     return api_request(token, "POST", "/v1/profiles", body)["data"]
 
 
-def app_record_exists(token: str, identifier: str) -> bool:
+def find_app_id(token: str, identifier: str) -> str | None:
     query = urllib.parse.urlencode({"filter[bundleId]": identifier})
-    return bool(api_request(token, "GET", f"/v1/apps?{query}").get("data"))
+    for app in api_request(token, "GET", f"/v1/apps?{query}").get("data", []):
+        if app.get("attributes", {}).get("bundleId", identifier) == identifier:
+            return app["id"]
+    return None
+
+
+def app_record_exists(token: str, identifier: str) -> bool:
+    return find_app_id(token, identifier) is not None
+
+
+def _version_key(text: str) -> tuple[int, ...] | None:
+    try:
+        return tuple(int(part) for part in text.split("."))
+    except ValueError:
+        return None
+
+
+def uploaded_builds(token: str, app_id: str) -> list[tuple[str, str]]:
+    """(short version, build number) of every build App Store Connect lists."""
+    query = urllib.parse.urlencode(
+        {
+            "filter[app]": app_id,
+            "include": "preReleaseVersion",
+            "fields[builds]": "version,preReleaseVersion",
+            "fields[preReleaseVersions]": "version",
+            "sort": "-uploadedDate",
+            "limit": "200",
+        }
+    )
+    reply = api_request(token, "GET", f"/v1/builds?{query}")
+    short = {
+        item["id"]: item.get("attributes", {}).get("version", "")
+        for item in reply.get("included", [])
+        if item.get("type") == "preReleaseVersions"
+    }
+    found = []
+    for build in reply.get("data", []):
+        related = build.get("relationships", {}).get("preReleaseVersion", {}).get("data") or {}
+        found.append(
+            (short.get(related.get("id"), ""), build.get("attributes", {}).get("version", ""))
+        )
+    return found
+
+
+def next_build_number(
+    builds: list[tuple[str, str]], short_version: str, run_number: int
+) -> tuple[int, int]:
+    """(next number, highest number seen). Counts only plain integer build numbers
+    and refuses a short version lower than one already uploaded."""
+    wanted = _version_key(short_version)
+    highest = 0
+    for short, number in builds:
+        seen = _version_key(short)
+        if wanted is not None and seen is not None and seen > wanted:
+            raise SigningError(
+                f"TestFlight already has version {short}, which is higher than this build's "
+                f"{short_version}. Apple refuses an upload to a closed version. Raise the "
+                "version in pyproject.toml first (see docs/ios-testflight.md)."
+            )
+        if number.isdigit():
+            highest = max(highest, int(number))
+    return max(highest, run_number) + 1, highest
 
 
 MISSING_APP_HELP = (
-    "There is no App Store Connect app record for bundle id {bundle}. The API cannot make "
-    "one. Do this once: sign in at appstoreconnect.apple.com, open Apps, choose the plus "
-    "button, then New App. Pick platform iOS, enter the name Freight Fate, choose a primary "
-    "language, pick bundle id {bundle} from the list, enter any SKU, and save. Then run the "
-    "workflow again."
+    "There is no App Store Connect app record for bundle id {bundle}, the id "
+    "tools/build_ios.py stamps into the app. The bundle id in App Store Connect must match "
+    "it exactly (App Store Connect, the app, App Information). Nothing was built."
 )
 
 
@@ -349,6 +426,26 @@ def cmd_check_app(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_next_build(args: argparse.Namespace) -> int:
+    token = _token()
+    short_version = _BUILD_IOS.store_version(_BUILD_IOS.load_build_release().project_version())
+    try:
+        app_id = find_app_id(token, args.bundle_id)
+        if app_id is None:
+            raise SigningError(MISSING_APP_HELP.format(bundle=args.bundle_id))
+        builds = uploaded_builds(token, app_id)
+    except ApiError as error:
+        raise explain(error) from None
+    number, highest = next_build_number(builds, short_version, args.run_number)
+    print(
+        f"Version {short_version}: {len(builds)} earlier builds, highest build number "
+        f"{highest}; this build will be {number}.",
+        file=sys.stderr,
+    )
+    print(number)
+    return 0
+
+
 def cmd_cleanup(args: argparse.Namespace) -> int:
     out = Path(args.out)
     state_path = out / STATE_FILE
@@ -391,12 +488,14 @@ def main(argv: list[str] | None = None) -> int:
     for name, func in (
         ("prepare", cmd_prepare),
         ("check-app", cmd_check_app),
+        ("next-build", cmd_next_build),
         ("cleanup", cmd_cleanup),
     ):
         p = sub.add_parser(name)
         p.add_argument("--bundle-id", default=BUNDLE_ID)
         p.add_argument("--out", default="build/ios-signing")
         p.add_argument("--label", default="manual", help="run label for names (no secrets)")
+        p.add_argument("--run-number", type=int, default=0, help="lowest build number to allow")
         p.set_defaults(func=func)
     args = parser.parse_args(argv)
     try:

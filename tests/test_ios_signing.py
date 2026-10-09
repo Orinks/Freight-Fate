@@ -175,7 +175,7 @@ def test_certificate_limit_message(api, tmp_path, capsys) -> None:
 def test_missing_app_record_says_what_to_do(api, capsys) -> None:
     assert ios_signing.main(["check-app"]) == 1
     out = capsys.readouterr().out
-    assert "New App" in out and "net.orinks.freightfate" in out
+    assert "net.orinks.freightfate" in out and "must match" in out
 
 
 def test_app_record_present(api, capsys) -> None:
@@ -207,3 +207,22 @@ def test_cleanup_failure_warns_and_still_removes_files(api, tmp_path, capsys) ->
 
 def test_cleanup_with_no_state_is_quiet(tmp_path) -> None:
     assert ios_signing.main(["cleanup", "--out", str(tmp_path)]) == 0
+
+
+def test_bundle_id_comes_from_build_ios() -> None:
+    assert ios_signing.BUNDLE_ID == ios_signing._BUILD_IOS.BUNDLE_ID
+
+
+def test_next_build_continues_after_highest() -> None:
+    builds = [("1.9.0", "7"), ("1.9.0", "12"), ("1.8.0", "1.9.0.dev0")]
+    assert ios_signing.next_build_number(builds, "1.9.0", 3) == (13, 12)
+
+
+def test_next_build_never_below_run_number() -> None:
+    assert ios_signing.next_build_number([("1.9.0", "4")], "1.9.0", 30) == (31, 4)
+    assert ios_signing.next_build_number([], "1.9.0", 0) == (1, 0)
+
+
+def test_next_build_refuses_lower_version() -> None:
+    with pytest.raises(ios_signing.SigningError, match="higher than this build"):
+        ios_signing.next_build_number([("1.9.1", "2")], "1.9.0", 1)
