@@ -108,15 +108,27 @@ pub fn traffic_sound_volume(distance_ft: f64) -> f64 {
     near * edge
 }
 
+/// How much of the road's length counts against a vehicle's side when it is
+/// panned. The true angle put a car one lane over and a hundred feet ahead
+/// 10 percent off centre, so most traffic sounded mono and a pass swept only
+/// in its last second (owner drive, 2026-10-09); at this share that car is
+/// well over on its side and the sweep starts a few hundred feet out.
+const PAN_ALONG_SHARE: f64 = 0.15;
+/// A vehicle behind the cab is this much quieter than one the same distance
+/// ahead: stereo cannot tell front from back, and the trailer stands
+/// between the cab and the road behind it.
+pub const TRAFFIC_BEHIND_SHARE: f64 = 0.75;
+
 /// Pan for a vehicle `across_ft` to the side (negative left) and `along_ft`
-/// ahead or behind: hard to its side when alongside, toward the middle when
-/// it is far up or down the road, as a real one sounds.
+/// ahead or behind: hard to its side when alongside, easing toward the
+/// middle as it gets far up or down the road. A vehicle in the truck's own
+/// lane stays centred.
 pub fn traffic_sound_pan(across_ft: f64, along_ft: f64) -> f64 {
-    let distance = across_ft.hypot(along_ft);
-    if distance <= 0.0 {
+    let spread = across_ft.abs() + along_ft.abs() * PAN_ALONG_SHARE;
+    if spread <= 0.0 {
         return 0.0;
     }
-    (0.85 * across_ft / distance).clamp(-0.85, 0.85)
+    (0.85 * across_ft / spread).clamp(-0.85, 0.85)
 }
 
 /// Playback rate: a slower vehicle sounds lower, and one closing on the cab
@@ -127,6 +139,13 @@ pub fn traffic_sound_rate(vehicle_mph: f64, approach_mph: f64) -> f64 {
     let doppler =
         (1.0 + approach_mph / SPEED_OF_SOUND_MPH).clamp(1.0 - DOPPLER_LIMIT, 1.0 + DOPPLER_LIMIT);
     pace * doppler
+}
+
+/// [`TRAFFIC_BEHIND_SHARE`] for a vehicle behind the cab, eased in over the
+/// truck's own length so a pass does not step down as it clears the bumper.
+fn behind_share(along_ft: f64) -> f64 {
+    let behind = (-along_ft / 70.0).clamp(0.0, 1.0);
+    1.0 - (1.0 - TRAFFIC_BEHIND_SHARE) * behind
 }
 
 /// A standing vehicle has no tire roar: an idling queue is quieter than one
@@ -193,6 +212,7 @@ impl DrivingState {
                 distance_ft: distance,
                 volume: traffic_sound_volume(distance)
                     * diverged
+                    * behind_share(along)
                     * rolling_share(vehicle.speed_mph),
                 pan: traffic_sound_pan(across, along),
                 rate: traffic_sound_rate(vehicle.speed_mph, approach),

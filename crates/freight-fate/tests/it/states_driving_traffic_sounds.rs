@@ -309,3 +309,25 @@ fn test_the_interstate_has_distant_traffic_under_the_sounds() {
     drive.reset_traffic_sounds(&mut app.ctx);
     assert!(sound_on(&log, CH_TRAFFIC_BED).is_none());
 }
+
+#[test]
+fn test_a_car_one_lane_over_is_on_its_side_well_before_it_draws_level() {
+    // The true angle put a car one lane over and 100 feet up the road 10
+    // percent off centre: the owner heard traffic as mono (2026-10-09).
+    let mut app = TestApp::new();
+    let (mut drive, log) = a_freeway_drive(&mut app);
+    drive.trip.traffic_manager.vehicles = vec![car("probe:ahead", 100.0, 70.0, 1, "car", &drive)];
+    drive.update_traffic_sounds(&mut app.ctx, FRAME);
+    let ahead = sounds(&log);
+    assert!(ahead[0].pan < -0.3, "{ahead:?}");
+    // The same car the same distance behind is on the same side, quieter:
+    // stereo alone cannot say which end of the truck it is at.
+    drive.trip.traffic_manager.vehicles = vec![car("probe:behind", -100.0, 70.0, 1, "car", &drive)];
+    drive.update_traffic_sounds(&mut app.ctx, FRAME);
+    let behind = sounds(&log);
+    assert!(behind[0].pan < -0.3, "{behind:?}");
+    assert!(
+        behind[0].volume < ahead[0].volume * 0.8,
+        "{ahead:?} {behind:?}"
+    );
+}
