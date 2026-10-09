@@ -12,8 +12,8 @@ use std::io::Cursor;
 use std::sync::mpsc;
 
 use freight_fate::agent_server::{
-    await_play_request, build_command, install_ears, policy, serve_lines, Command, CruiseTarget,
-    Ears,
+    await_play_request, await_play_request_for, build_command, install_ears, policy, serve_lines,
+    Command, CruiseTarget, Ears,
 };
 use freight_fate::app::testing::TestApp;
 use freight_fate::states::base::Key;
@@ -136,6 +136,15 @@ fn a_client_that_hangs_up_before_playing_ends_the_wait() {
     assert!(
         await_play_request(&rx).is_none(),
         "stdin closing with no play request means no game, ever"
+    );
+}
+
+#[test]
+fn an_idle_server_ends_instead_of_holding_the_executable() {
+    let (_tx, rx) = mpsc::channel::<freight_fate::agent_server::Request>();
+    assert!(
+        await_play_request_for(&rx, std::time::Duration::from_millis(20)).is_none(),
+        "a session that never plays lets its server go, though stdin stays open"
     );
 }
 

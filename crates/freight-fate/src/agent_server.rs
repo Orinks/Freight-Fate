@@ -253,7 +253,24 @@ impl Request {
 /// release executable open, so a quit ends the process either way and the
 /// next build is not refused "access denied" (owner, 2026-09-22).
 pub fn await_play_request(requests: &mpsc::Receiver<Request>) -> Option<Request> {
-    let request = requests.recv().ok()?;
+    await_play_request_for(requests, IDLE_SERVER_EXIT)
+}
+
+/// How long a server with no game waits for its first play request before
+/// it ends. Every open agent session spawns its servers at startup and keeps
+/// stdin open for as long as the session lives, so without a bound an idle
+/// session anywhere on the machine holds the release executable and the
+/// next build fails "access denied" (owner, 2026-10-08: "we always have this
+/// issue"). The client spawns a fresh server at the next tool call.
+pub const IDLE_SERVER_EXIT: std::time::Duration = std::time::Duration::from_secs(10 * 60);
+
+/// [`await_play_request`] with the idle bound given: `None` as well when
+/// `idle` passes with no request at all.
+pub fn await_play_request_for(
+    requests: &mpsc::Receiver<Request>,
+    idle: std::time::Duration,
+) -> Option<Request> {
+    let request = requests.recv_timeout(idle).ok()?;
     if matches!(request.command, Command::Quit) {
         request.answer(Ok(
             "No game was running; the server has ended. The next tool call starts a fresh one."
