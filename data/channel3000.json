@@ -36,7 +36,7 @@
       "source_lufs": -19.68,
       "gain_db": 1.68,
       "peak_limited": false,
-      "lufs": -17.99,
+      "lufs": -17.98,
       "true_peak": -2.14,
       "levelled": true
     },
@@ -1278,7 +1278,7 @@
       "source_lufs": -20.84,
       "gain_db": 2.84,
       "peak_limited": false,
-      "lufs": -17.9,
+      "lufs": -17.91,
       "true_peak": -3.52,
       "levelled": true
     },
