@@ -11,7 +11,7 @@ returning from an earlier version, read What Changed Recently first.
 ## Quick start
 
 1. Download the newest stable build from the
-   [Freight Fate releases page](https://github.com/Orinks/Freight-Fate/releases).
+   [Freight Fate releases page](https://github.com/orinks-games/Freight-Fate/releases).
 2. On Windows or Linux, extract the archive into a folder you control, open
    the extracted `FreightFate` folder, and run `FreightFate.exe` on Windows or
    `FreightFate` on Linux.
@@ -1633,6 +1633,7 @@ Escape opens the pause menu during a drive. Public pause choices include:
 | --- | --- |
 | Resume driving | Return to the active drive. |
 | Trip status | A screen of lines: the load, where it is going, how far along you are, the hours used, and the air. |
+| Call dispatch | While stopped: report a delay, or ask about hours, the road ahead, truck trouble or the load. Dispatch can send the roadside mechanic. |
 | Controls and help | Open the how-to-play reference at the driving keys, page by page, without leaving the drive. |
 | Learn game sounds | Hear any sound the road uses and what it means. |
 
@@ -2004,6 +2005,20 @@ drive. When the BASS audio backend is available, those stations play from
 their public stream URLs. If a selected station cannot play, the radio falls
 back safely instead of blocking the drive.
 
+Missing a station? Choose Suggest a station in the Radio app, on the driver
+tablet. Say whether it broadcasts on AM or FM or only online, then give its
+name and stream address; Control V pastes the address, and streamurl.link
+finds a station's stream address if you do not have it. An AM or FM station
+also needs its call sign and state, and can have its city and frequency.
+orinks.net plays the first seconds of the stream and tells you straight
+away if it will not play or is already on the dial; otherwise it waits for
+review. Accepted stations join every driver's dial at their next launch,
+with no game update. An AM or FM station plays near its real transmitter,
+like the other stations on that band; one whose licence cannot be found
+plays everywhere, on the web radio band. Suggesting needs this computer set up with orinks.net and Online
+services on. You can also suggest one at
+orinks.net/freight-fate/suggest-a-station.
+
 You can put your own music on the dial. Drop M3U, M3U8, or PLS playlist files
 into the Playlists folder next to your saves (the game creates it on first run)
 and each file becomes a station under Your playlists, named from the playlist.
@@ -2103,7 +2118,7 @@ T opens its menu when the stop supports one.
 ## Release notes and more data
 
 Stable and snapshot release notes are on the
-[Freight Fate releases page](https://github.com/Orinks/Freight-Fate/releases).
+[Freight Fate releases page](https://github.com/orinks-games/Freight-Fate/releases).
 The in-game What's new reader can also review notes for an available update.
 
 For deeper data reference, see:

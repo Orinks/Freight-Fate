@@ -634,6 +634,7 @@ RUST_BAKED_SOURCE_FILES = (
     "local_approaches.json",
     "local_geometry.json",
     "radio_catalog.json",
+    "radio_community.json",
     "radio_imported.json",
     "street_limits.json",
     "world_data/index.json",

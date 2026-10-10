@@ -44,6 +44,8 @@ pub mod sdl_shell;
 pub mod speech_delivery;
 pub mod synth_music;
 pub mod testing;
+#[cfg(any(windows, test))]
+mod win_keys;
 
 pub use context::{
     share, Clipboard, ContextParts, GameContext, MemoryClipboard, Services, SharedState,
@@ -441,6 +443,12 @@ impl App {
         let settings = Settings::load();
         sdl_shell::set_touch_haptics(settings.touch_haptics);
         boot_timing::mark("settings");
+        // Stations players suggested and the owner accepted; the first drive
+        // reads whatever copy is saved, so this never holds up launch. A
+        // windowless run (the smoke check, the tools) has no dial to fill.
+        if shell.is_some() {
+            crate::community_stations::refresh_in_background(&settings);
+        }
         let message_log = MessageLog::new();
         let world = get_world();
         boot_timing::mark("world");
