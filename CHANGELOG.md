@@ -60,6 +60,8 @@
 
 - **The clock no longer sticks at real time after a slow merge.** Changing Driving mode while moving now waits until you stop, and says so.
 
+- **A pickup dispatched from another city now calls each street turn by its real direction.** It no longer says keep right at every street.
+
 - **The weigh station bypass charge now applies only when you really skip an open scale.** A hazard near the scale no longer costs you; slowing, then speeding past, still does.
 
 - **A closed weigh station says it is closed, once, and nothing more.** It no longer chimes, saves, or counts as an inspection.

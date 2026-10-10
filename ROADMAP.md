@@ -450,6 +450,16 @@ Everything found before 2026-09-25 moved to
       only the two-mile call, and passed on re-run. It passed 80 of 80 runs
       alone on x86_64 and in its module; the source of the nondeterminism is
       not found yet.
+- [x] A relayed pickup (corridor joined to the shipper's street chain)
+      called every street of the chain "Keep right for ... toward" the city
+      it was already in, left turns included (owner drive into Indianapolis
+      Dry Warehouse, 2026-10-10). The chain's streets now get their baked
+      turn cues, the join is "Continue onto" the first street, and the
+      city passage line no longer fires at the join.
+- [ ] A relayed pickup still posts the corridor's "destination approach"
+      and "facility gate" zones over the chain, not each street's own limit
+      and the yard: the street-detail zones, and the other layers gated on
+      a pure facility route, do not yet look at a joined route's streets.
 
 - [x] Low fuel warning could also fire when remaining range is shorter than
       the distance to the next fuel-capable stop (issue #272 shipped the
