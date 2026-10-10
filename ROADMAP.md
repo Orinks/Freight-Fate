@@ -92,6 +92,14 @@ bookmarks usable.
       a daypart schedule by the truck's local hour, from its own
       `channel3000.pak`, opened on first tune-in; off the dial without the
       pack, and in no changelog or manual (`ff_core::channel3000`).
+- [x] Channel 3000 levelled to the other stations (owner, 2026-10-09, a
+      player found it hard to hear): its shows had one static gain to -18
+      LUFS integrated, which the loud themes and stings set, so the talk
+      sat 2 to 4 dB under every other station (median 3 s short-term -19 to
+      -25 LUFS against about -18 for music.pak's songs, hosts and ads). Every
+      clip but the Grimatonics songs now goes through a slow leveller and a
+      true-peak limiter (`tools/level_channel3000.py`); the talk's median
+      is -18 like the rest of the radio.
 
 - [x] Billboards that notice the drive (owner, 2026-09-30): when an
       everyday pool sign comes up, Big Jim answers a collision, a citation

@@ -38,6 +38,7 @@
 
 ### Fixed
 
+- **Channel 3000's shows are now as loud as the other stations, and their theme music no longer jumps out over the talk.**
 - **Been Everywhere, For Real now needs all sixteen regions on the map, not fourteen.**
 
 - **Grossed Out at the Scale House can now be earned.** It needs a load within a ton of the legal limit; dispatch never offered the old 24 tons.
