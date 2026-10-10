@@ -20,6 +20,10 @@
 
 ### Changed
 
+- **The player manual and How to play now explain menus, driving, rest, radio, and career choices more clearly.**
+
+- **How to play announces controller controls, including how to stop speech.**
+
 - **Update checks, the bug report page and the manual download link now go to the game's new GitHub home, orinks-games.**
 
 - **A slow vehicle ahead in your lane is now called at half a mile, when you start to hear it.**

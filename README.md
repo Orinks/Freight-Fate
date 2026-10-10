@@ -92,14 +92,14 @@ visual display mirrors all speech for sighted players and helpers.
    tarball and an AppImage each for PCs (`-linux-x64.tar.gz`,
    `-linux-x86_64.AppImage`) and for ARM64 machines such as the Blazie BT
    Speak and BT Braille or a Raspberry Pi (`-linux-arm64.tar.gz`,
-   `-linux-aarch64.AppImage`); the player manual says how to tell which
-   you need.
+   `-linux-aarch64.AppImage`). Choose the archive for your machine's
+   processor. AppImages run directly; tarballs need extracting.
 4. Extract the zip file. On Windows, open the extracted `FreightFate` folder
    and run `FreightFate.exe`. On an Apple Silicon Mac, move `FreightFate.app`
-   to Applications and follow the first-launch instructions in the player
-   manual.
+   to Applications. If macOS blocks the first launch, open System Settings,
+   choose Privacy & Security, and allow Freight Fate to open.
 
-For a complete player-facing guide to installing, careers, dispatch, driving,
+For a complete player-facing guide to careers, dispatch, driving,
 route stops, saves, settings, audio, speech, and troubleshooting, see the
 [Freight Fate Player Manual](docs/user-manual.md).
 
