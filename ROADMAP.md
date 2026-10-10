@@ -41,6 +41,12 @@ bookmarks usable.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Call dispatch, a 2.0 teaser for 1.9.4 (owner, 2026-10-10): the pause
+      menu offers Call dispatch while the truck is stopped, with local answers
+      about the delivery window, hours, the road ahead, truck trouble (which
+      can authorize the roadside mechanic) and load trouble. Ported unchanged
+      from `feat/career-2.0` (`7da21287`); routing calls to a remote
+      dispatcher stays 2.0 work.
 - [x] Traffic sounds (owner, 2026-10-08: "the sounds aren't synced with the
       NPC traffic"): the three nearest NPC vehicles each run a steady class
       loop whose level, pan and pitch are set every frame from where the
